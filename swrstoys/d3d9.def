@@ -1,0 +1,16 @@
+LIBRARY d3d9.dll
+EXPORTS
+	Direct3DShaderValidatorCreate9=d_Direct3DShaderValidatorCreate9 @ 1
+	PSGPError=d_PSGPError @ 2
+	PSGPSampleTexture=d_PSGPSampleTexture @ 3
+	D3DPERF_BeginEvent=d_D3DPERF_BeginEvent @ 4
+	D3DPERF_EndEvent=d_D3DPERF_EndEvent @ 5
+	D3DPERF_GetStatus=d_D3DPERF_GetStatus @ 6
+	D3DPERF_QueryRepeatFrame=d_D3DPERF_QueryRepeatFrame @ 7
+	D3DPERF_SetMarker=d_D3DPERF_SetMarker @ 8
+	D3DPERF_SetOptions=d_D3DPERF_SetOptions @ 9
+	D3DPERF_SetRegion=d_D3DPERF_SetRegion @ 10
+	DebugSetLevel=d_DebugSetLevel @ 11
+	DebugSetMute=d_DebugSetMute @ 12
+	Direct3DCreate9=d_Direct3DCreate9 @ 13
+	Direct3DCreate9Ex=d_Direct3DCreate9Ex @ 14

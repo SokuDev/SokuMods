@@ -1,0 +1,30 @@
+image: archlinux
+packages:
+  - curl
+  - unzip
+  - msitools
+  - zip
+  - cmake
+  - clang
+  - llvm
+  - lld
+sources:
+  - git@github.com:delthas/SWRSToys.git
+secrets:
+  - 63d7a0ac-2635-4d42-9709-efcd2cf74858
+tasks:
+  - setup: |
+      cd SWRSToys
+      sh setup.sh
+      curl -s -O 'https://raw.githubusercontent.com/llvm-mirror/llvm/master/cmake/platforms/WinMsvc.cmake'
+      curl -s -O 'https://raw.githubusercontent.com/llvm-mirror/llvm/master/cmake/platforms/ClangClCMakeCompileRules.cmake'
+  - build: |
+      cd SWRSToys
+      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=WinMsvc.cmake -DHOST_ARCH=x86 -DLLVM_NATIVE_TOOLCHAIN=/usr -DMSVC_BASE=$PWD/msvc -DWINSDK_BASE=$PWD/winsdk -DWINSDK_VER=10.0.17763.0 .
+      cmake --build .
+      cmake --install .
+      cd install
+      zip -r9 ../swrstoys.zip *
+  - deploy: |
+      cd SWRSToys
+      scp -P 2222 -o StrictHostKeyChecking=no -q swrstoys.zip user@delthas.fr:/srv/http/blog/swrstoys.zip
