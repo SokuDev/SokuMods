@@ -8,6 +8,13 @@ This repository was originally created from the original SWRSToys release by *An
 - have up-to-date headers of the latest reverse-engineered addresses from the game, updated as new people find more addresses
 - set up a CI for easy, reproducible builds and deployment of the latest release of SWRSToys.
 
+Most of the code was not written by delthas:
+- this repository (and most of this code) is forked off a source archive of SWRSToys, made by *Anonymous Coward*
+- *Shinki* and *PC_volt* made ReplayInputView+
+- delthas made all the plumbing: adding CMake, CI, formatting, ...
+
+If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits! 
+
 ## Using
 
 **Due to an issue with CI, the file `d3d9.dll` in the release ZIP doesn't work with Soku. The modules files do work, but use the original `d3d9.dll` file instead.**
@@ -80,11 +87,6 @@ Install Visual Studio (or CMake and the Visual C++ Build Tools). Import the dire
 MinGW and Cygwin are not supported (`__thiscall` is needed in order to be compatible with the base game).
 
 After building, run the install target, which will create an `install` folder with all the built files.
-
-## Credits
-
-- *Anonymous Coward* for most of SWRSToys (most of the code here was originally written by him)
-- *Shinki* and *PC_volt* for ReplayInputView+
 
 ## License
 
