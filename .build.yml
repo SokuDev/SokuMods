@@ -21,6 +21,10 @@ tasks:
   - build: |
       cd SWRSToys
       cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=WinMsvc.cmake -DHOST_ARCH=x86 -DLLVM_NATIVE_TOOLCHAIN=/usr -DMSVC_BASE=$PWD/msvc -DWINSDK_BASE=$PWD/winsdk -DWINSDK_VER=10.0.17763.0 .
+      # workaround for cmake bug: https://gitlab.kitware.com/cmake/cmake/-/issues/20529
+      cmake --build . || true
+      cp modules/ReplayInputView/ReplayInputView.png CMakeFiles/ReplayInputView.dir/modules/ReplayInputView/
+      cp modules/ReplayInputView+/ReplayInputView.png CMakeFiles/ReplayInputView+.dir/modules/ReplayInputView+/
       cmake --build .
       cmake --install .
       cd install
