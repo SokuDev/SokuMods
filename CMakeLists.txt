@@ -58,6 +58,12 @@ target_sources(ReplayInputView PRIVATE
         modules/ReplayInputView/ReplayInputView.cpp
         modules/ReplayInputView/ReplayInputView.rc)
 
+module(ReplayInputView+)
+target_sources(ReplayInputView+ PRIVATE
+        modules/ReplayInputView+/ReplayInputView.cpp
+        modules/ReplayInputView+/Text.cpp
+        modules/ReplayInputView+/ReplayInputView.rc)
+
 module(WindowResizer)
 target_sources(WindowResizer PRIVATE
         modules/WindowResizer/APIHook.cpp
