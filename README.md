@@ -13,11 +13,11 @@ Most of the code was not written by delthas:
 - *Shinki* and *PC_volt* made ReplayInputView+
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
-If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits! 
+If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
+
+*Due to a subtle issue with the CI, the ZIP packages the original SWRSToys DLL file (which is in `bin/`) rather than the one compiled during the CI build. All other modules in the ZIP are the ones compiled from the CI though.*
 
 ## Using
-
-**Due to an issue with CI, the file `d3d9.dll` in the release ZIP doesn't work with Soku. The modules files do work, but use the original `d3d9.dll` file instead.**
 
 - Download the **[latest release](https://delthas.fr/swrstoys.zip)** and extract it in your game folder.
 - Open SWRSToys.ini in Notepad and enable some modules by deleting their `;`, then save the file.
