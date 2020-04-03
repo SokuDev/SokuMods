@@ -64,6 +64,10 @@ target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/Text.cpp
         modules/ReplayInputView+/ReplayInputView.rc)
 
+module(UPnPNat)
+target_sources(UPnPNat PRIVATE modules/UPnPNat/UPnPNat.cpp)
+target_link_libraries(UPnPNat iphlpapi ole32 oleaut32)
+
 module(WindowResizer)
 target_sources(WindowResizer PRIVATE
         modules/WindowResizer/APIHook.cpp

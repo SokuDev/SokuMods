@@ -11,6 +11,7 @@ This repository was originally created from the original SWRSToys release by *An
 Most of the code was not written by delthas:
 - this repository (and most of this code) is forked off a source archive of SWRSToys, made by *Anonymous Coward*
 - *Shinki* and *PC_volt* made ReplayInputView+
+- *DPhoenix* made UPnPNat
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -69,6 +70,12 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 **Display keystrokes in game replays in real time, as well as hitboxes, ...**
 
 *The replay speed can also be changed with configurable hotkeys: by default F10 speeds up; F9 slows down; F11 pauses and unpauses the game; F12 steps a single frame forward; F4 toggles hitboxes display; F6 displays additional debug information; F7 cycles through different game inputs display.*
+
+### UPnPNat
+
+**Automatically forward your ports every time the game runs.**
+
+*This mod uses the UPnP NAT technology, which lets applications automatically request a port forwarding without user intervention. This technology is known to be disabled by default on most routers and might therefore not work for everyone.*
 
 ### WindowResizer
 

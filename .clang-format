@@ -35,9 +35,12 @@ IncludeCategories:
   - Regex:           '^<windows\.h>'
     Priority:        1
     SortPriority:    1
-  - Regex:           '.*'
+  - Regex:           '^<winsock2\.h>'
     Priority:        1
     SortPriority:    2
+  - Regex:           '.*'
+    Priority:        1
+    SortPriority:    3
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth: 2
