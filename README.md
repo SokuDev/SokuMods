@@ -12,6 +12,7 @@ Most of the code was not written by delthas:
 - this repository (and most of this code) is forked off a source archive of SWRSToys, made by *Anonymous Coward*
 - *Shinki* and *PC_volt* made ReplayInputView+
 - *DPhoenix* made UPnPNat
+- *fishshapedfish* made DPadFix
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -32,6 +33,10 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 **Replace some of the game BGMs.**
 
 *The only supported format is OGG Vorbis.*
+
+### DPadFix
+
+**Map the joystick DPad and trigger buttons to game inputs.**
 
 ### MemoryPatch
 
@@ -98,5 +103,5 @@ After building, run the install target, which will create an `install` folder wi
 ## License
 
 - Files in `include/directx/` are licensed according to their license header
+- `lib/dinput8.dll` is a pre-compiled archive copyrighted by Microsoft
 - All other files are licensed according to the `LICENSE` file
-

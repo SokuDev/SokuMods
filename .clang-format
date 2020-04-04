@@ -38,9 +38,12 @@ IncludeCategories:
   - Regex:           '^<winsock2\.h>'
     Priority:        1
     SortPriority:    2
-  - Regex:           '.*'
+  - Regex:           '^<initguid\.h>'
     Priority:        1
     SortPriority:    3
+  - Regex:           '.*'
+    Priority:        1
+    SortPriority:    4
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth: 2

@@ -23,11 +23,28 @@ set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
 install(TARGETS swrstoys LIBRARY DESTINATION ".")
 
+# detours
+
+add_library(detours
+        detours/src/creatwth.cpp
+        detours/src/detours.cpp
+        detours/src/disasm.cpp
+        detours/src/disolarm.cpp
+        detours/src/disolarm64.cpp
+        detours/src/disolia64.cpp
+        detours/src/disolx86.cpp
+        detours/src/disolx64.cpp
+        detours/src/image.cpp
+        detours/src/modules.cpp)
+target_include_directories(detours PUBLIC detours/src)
+
 # modules
 
 function(module name)
     add_library("${name}" MODULE)
+    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800)
     target_include_directories("${name}" PRIVATE include include/directx "modules/${name}/")
+    target_link_directories("${name}" PRIVATE lib)
     target_link_libraries("${name}" shlwapi user32 advapi32)
     install(TARGETS "${name}" LIBRARY DESTINATION "modules/${name}/")
     set(MODULE_PATHS "${MODULE_PATHS}; ${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
@@ -35,6 +52,10 @@ endfunction()
 
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
+
+module(DPadFix)
+target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
+target_link_libraries(DPadFix dinput8 detours)
 
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)
