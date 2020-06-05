@@ -46,8 +46,13 @@
 #define CF_TIME_STOP 0x4A8 // short
 #define CF_UNTECH 0x4BA // short
 #define CF_DAMAGE_LIMIT 0x4BE // short
+#define CF_DECK_INFO 0x5B4 // short** ([8][8])
+#define CF_DECK_UNKNOWN 0x5B8 // int (maybe matrix size)
+#define CF_DECK_NEXTINDEX 0x5BC // int
+#define CF_DECK_REMAINING 0x5C0 // int
 #define CF_CARD_SLOTS 0x5E6 // char
-#define CF_CARDS_ARRAY 0x5E8 // ptr
+#define CF_CARD_MAXSLOTS 0x5E7 // char
+#define CF_CARDS_ARRAY 0x5EC // ptr
 #define CF_SKILL_LEVELS_1 0x6A4 // char[32]
 #define CF_SKILL_LEVELS_2 0x6C4 // char[32]
 #define CF_OBJ_LIST_MGR 0x6F8 // ptr
