@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "APIHook.hpp"
+#include <detours.h>
 #include <shlwapi.h>
 
 static char s_profilePath[1024 + MAX_PATH];
@@ -15,6 +15,15 @@ static int s_posX;
 static int s_posY;
 static WNDPROC s_origWndProc;
 
+void(WINAPI *oldExitProcess)(UINT uExitCode) = ExitProcess;
+ATOM(WINAPI *oldRegisterClassExA)(const WNDCLASSEXA *pWcex) = RegisterClassExA;
+HWND(WINAPI *oldCreateWindowExA)
+(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu,
+	HINSTANCE hInstance, LPVOID lpParam)
+	= CreateWindowExA;
+BOOL(WINAPI *oldSetWindowPos)(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags) = SetWindowPos;
+BOOL(WINAPI *oldGetWindowInfo)(HWND hwnd, PWINDOWINFO pwi) = GetWindowInfo;
+
 void ClientToScreen(HWND hWnd, LPRECT lpRect) {
 	POINT point;
 	point.x = lpRect->left;
@@ -29,7 +38,7 @@ void ClientToScreen(HWND hWnd, LPRECT lpRect) {
 	lpRect->bottom = point.y;
 }
 
-LRESULT CALLBACK OnWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if (s_sizeEnabled && uMsg == WM_SIZING) {
 		RECT &rct = *(RECT *)lParam;
 
@@ -90,9 +99,7 @@ LRESULT CALLBACK OnWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	return s_origWndProc(hWnd, uMsg, wParam, lParam);
 }
 
-BOOL(__stdcall *s_SetWindowPos)(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
-
-BOOL __stdcall OnSetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags) {
+BOOL __stdcall mySetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags) {
 	if (hWndInsertAfter != HWND_TOP) {
 		if (s_sizeEnabled) {
 			uFlags &= ~SWP_NOSIZE;
@@ -106,14 +113,10 @@ BOOL __stdcall OnSetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int
 				Y = s_posY;
 		}
 	}
-	return ::SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	return oldSetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
-HWND(__stdcall *s_CreateWindowExA)
-(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu,
-	HINSTANCE hInstance, LPVOID lpParam);
-
-HWND __stdcall OnCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight,
+HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight,
 	HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
 	if (s_sizeEnabled) {
 		dwStyle = WS_OVERLAPPED | WS_GROUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
@@ -128,23 +131,23 @@ HWND __stdcall OnCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpW
 		y = s_posY;
 	}
 
-	return ::CreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+	return oldCreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 }
 
-ATOM __stdcall OnRegisterClassExA(WNDCLASSEXA *pWcex) {
+ATOM __stdcall myRegisterClassExA(WNDCLASSEXA *pWcex) {
 	s_origWndProc = pWcex->lpfnWndProc;
-	pWcex->lpfnWndProc = OnWindowProc;
-	return ::RegisterClassExA(pWcex);
+	pWcex->lpfnWndProc = myWindowProc;
+	return oldRegisterClassExA(pWcex);
 }
 
-BOOL __stdcall OnGetWindowInfo(HWND hwnd, PWINDOWINFO pwi) {
+BOOL __stdcall myGetWindowInfo(HWND hwnd, PWINDOWINFO pwi) {
 	pwi->rcClient.left = pwi->rcClient.top = 0;
 	pwi->rcClient.right = 640;
 	pwi->rcClient.bottom = 480;
 	return TRUE;
 }
 
-void __stdcall OnExitProcess(UINT uExitCode) {
+void __stdcall myExitProcess(UINT uExitCode) {
 	if (s_sizeEnabled) {
 		char buff[16];
 		::wsprintf(buff, "%d", s_sizeWidth);
@@ -159,7 +162,7 @@ void __stdcall OnExitProcess(UINT uExitCode) {
 		::wsprintf(buff, "%d", s_posY);
 		::WritePrivateProfileString("Position", "Y", buff, s_profilePath);
 	}
-	return ::ExitProcess(uExitCode);
+	return oldExitProcess(uExitCode);
 }
 
 void LoadSettings(LPCSTR profilePath) {
@@ -185,13 +188,16 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	::PathAppend(s_profilePath, "WindowResizer.ini");
 	::LoadSettings(s_profilePath);
 
-	HMODULE swrsModule = GetModuleHandle(NULL);
-	::HookAPICall(swrsModule, "KERNEL32.DLL", "ExitProcess", (FARPROC)OnExitProcess);
-	::HookAPICall(swrsModule, "USER32.DLL", "RegisterClassExA", (FARPROC)OnRegisterClassExA);
-	::HookAPICall(swrsModule, "USER32.DLL", "CreateWindowExA", (FARPROC)OnCreateWindowExA);
-	::HookAPICall(swrsModule, "USER32.DLL", "SetWindowPos", (FARPROC)OnSetWindowPos);
-	::HookAPICall(swrsModule, "USER32.DLL", "GetWindowInfo", (FARPROC)OnGetWindowInfo);
+	DetourRestoreAfterWith();
 
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&(PVOID &)oldExitProcess, myExitProcess);
+	DetourAttach(&(PVOID &)oldRegisterClassExA, myRegisterClassExA);
+	DetourAttach(&(PVOID &)oldCreateWindowExA, myCreateWindowExA);
+	DetourAttach(&(PVOID &)oldSetWindowPos, mySetWindowPos);
+	DetourAttach(&(PVOID &)oldGetWindowInfo, myGetWindowInfo);
+	DetourTransactionCommit();
 	return TRUE;
 }
 

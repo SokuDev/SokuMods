@@ -13,6 +13,7 @@ Most of the code was not written by delthas:
 - *Shinki* and *PC_volt* made ReplayInputView+
 - *DPhoenix* made UPnPNat
 - *fishshapedfish* made DPadFix
+- *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -41,6 +42,18 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 ### MemoryPatch
 
 **Do some misceallenous patches to the game, such as disallowing spectating by default.**
+
+Edit MemoryPatch.ini to enable/disable options.
+
+Available patches:
+- 16bitsColor: reduce rendering color depth from 32 bits to 16 bits
+- InputFreedom: accept gamepad input even when the device is inactive
+- DefaultDenyWatch: disallow spectating by default
+- DefaultDenyBattle: spectate by default
+- AllowMultiInstance: allow running multiple instances of the game at once
+- DisableWeatherEffect: disable all weather effects
+- AlwaysRandomMusic: always play random stage music regardless of in-game choice
+- NativeDPadFix: use the gamepad DPad rather than the circle pad (use only if DPadFix does not work)
 
 ### NetBattleCounter
 
@@ -82,6 +95,12 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 
 *This mod uses the UPnP NAT technology, which lets applications automatically request a port forwarding without user intervention. This technology is known to be disabled by default on most routers and might therefore not work for everyone.*
 
+### WindowedFullscreen
+
+**Make the game window fullscreen, but without stretching, and with fast Alt+Tab.**
+
+*This module does not have a configuration file, and is not compatible with SokuEngine.*
+
 ### WindowResizer
 
 **Make the game window resizable.**
@@ -94,14 +113,30 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 
 ## Building
 
-Install Visual Studio (or CMake and the Visual C++ Build Tools). Import the directory into Visual Studio, it will be recognized automatically.
+Clone the project, including its submodules:
+```
+git clone --recursive git@github.com:delthas/SWRSToys.git
+```
+Or, if you have already cloned without pulling the submodules, download them:
+```
+git submodule update --init --recursive
+```
 
-MinGW and Cygwin are not supported (`__thiscall` is needed in order to be compatible with the base game).
+Install Visual Studio (or CMake and the Visual C++ Build Tools).
+
+If you're running Visual Studio 2017 or newer: import the directory in Visual Studio, the project will be recognized automatically.
+
+If you're running Visual Studio 2015 or older: you will need to install CMake and run:
+```
+cmake .
+```
+
+MinGW and Cygwin are not supported (`__thiscall` is needed in order to be compatible with the base game, which only the Visual C++ Build Tools supports).
 
 After building, run the install target, which will create an `install` folder with all the built files.
 
 ## License
 
 - Files in `include/directx/` are licensed according to their license header
-- `lib/dinput8.dll` is a pre-compiled archive copyrighted by Microsoft
+- Files in `lib/` are pre-compiled archives copyrighted by Microsoft
 - All other files are licensed according to the `LICENSE` file
