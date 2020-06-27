@@ -14,6 +14,7 @@ Most of the code was not written by delthas:
 - *DPhoenix* made UPnPNat
 - *fishshapedfish* made DPadFix
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
+- *Ichirin* made SWRSokuRoll *(SokuRoll was made by FireSeal)*
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -88,6 +89,12 @@ Available patches:
 **Display keystrokes in game replays in real time, as well as hitboxes, ...**
 
 *The replay speed can also be changed with configurable hotkeys: by default F10 speeds up; F9 slows down; F11 pauses and unpauses the game; F12 steps a single frame forward; F4 toggles hitboxes display; F6 displays additional debug information; F7 cycles through different game inputs display.*
+
+### SWRSokuRoll
+
+**Load SokuRoll automatically.**
+
+*This mod uses a configuration file in its module directory, not the `SWRSToys.ini` in the main game folder. This mod does not require installing SokuRoll (does not require `SokuRoll.dll` and `SokuRoll.ini`).*
 
 ### UPnPNat
 

@@ -1,3 +1,6 @@
 [submodule "detours"]
 	path = detours
 	url = git@github.com:microsoft/Detours.git
+[submodule "MemoryModule"]
+	path = MemoryModule
+	url = git@github.com:fancycode/MemoryModule.git

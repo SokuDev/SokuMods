@@ -38,6 +38,12 @@ add_library(detours
         detours/src/modules.cpp)
 target_include_directories(detours PUBLIC detours/src)
 
+# MemoryModule
+
+add_library(MemoryModule
+        MemoryModule/MemoryModule.c)
+target_include_directories(MemoryModule PUBLIC MemoryModule)
+
 # modules
 
 function(module name)
@@ -84,6 +90,10 @@ target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/ReplayInputView.cpp
         modules/ReplayInputView+/Text.cpp
         modules/ReplayInputView+/ReplayInputView.rc)
+
+module(SWRSokuRoll)
+target_sources(SWRSokuRoll PRIVATE modules/SWRSokuRoll/SWRSokuRoll.cpp)
+target_link_libraries(SWRSokuRoll MemoryModule)
 
 module(UPnPNat)
 target_sources(UPnPNat PRIVATE modules/UPnPNat/UPnPNat.cpp)
