@@ -27,8 +27,6 @@ tasks:
       cp modules/ReplayInputView+/ReplayInputView.png CMakeFiles/ReplayInputView+.dir/modules/ReplayInputView+/
       cmake --build .
       cmake --install .
-      # workaround for CI d3d9.dll crashing the game
-      cp bin/d3d9.dll install/
       cd install
       zip -r9 ../swrstoys.zip *
   - deploy: |

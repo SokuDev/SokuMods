@@ -10,7 +10,7 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install")
 set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing -Wno-microsoft-cast")
 endif ()
 
 add_library(swrstoys MODULE
@@ -18,6 +18,8 @@ add_library(swrstoys MODULE
         swrstoys/d3d9_dummy.cpp
         swrstoys/dummy.cpp
         swrstoys/SWRSToys.cpp)
+target_compile_definitions(swrstoys PRIVATE _CRT_SECURE_NO_WARNINGS)
+target_include_directories(swrstoys PRIVATE include)
 target_link_libraries(swrstoys shlwapi user32 advapi32)
 set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
@@ -48,7 +50,7 @@ target_include_directories(MemoryModule PUBLIC MemoryModule)
 
 function(module name)
     add_library("${name}" MODULE)
-    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800)
+    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
     target_include_directories("${name}" PRIVATE include include/directx "modules/${name}/")
     target_link_directories("${name}" PRIVATE lib)
     target_link_libraries("${name}" shlwapi user32 advapi32)
@@ -58,6 +60,9 @@ endfunction()
 
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
+
+module(CharactersInForeground)
+target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/CharactersInForeground.cpp)
 
 module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)

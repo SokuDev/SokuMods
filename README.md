@@ -15,11 +15,10 @@ Most of the code was not written by delthas:
 - *fishshapedfish* made DPadFix
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Ichirin* made SWRSokuRoll *(SokuRoll was made by FireSeal)*
+- *Ichirin* made CharactersInForeground
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
-
-*Due to a subtle issue with the CI, the ZIP packages the original SWRSToys DLL file (which is in `bin/`) rather than the one compiled during the CI build. All other modules in the ZIP are the ones compiled from the CI though.*
 
 ## Using
 
@@ -35,6 +34,12 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 **Replace some of the game BGMs.**
 
 *The only supported format is OGG Vorbis.*
+
+### CharactersInForeground
+
+**Draw characters over HP bars, for better clarity.**
+
+*This module does not have a configuration file.*
 
 ### DPadFix
 

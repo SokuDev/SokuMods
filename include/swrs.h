@@ -132,6 +132,7 @@ struct SWRFONTDESC {
 	DWORD CharSpaceX;
 	DWORD CharSpaceY;
 };
+#pragma pack(pop)
 
 // std::string ?
 struct VC9STRING {
