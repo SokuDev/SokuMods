@@ -98,6 +98,10 @@ target_sources(ReplayInputView+ PRIVATE
 
 module(SWRSokuRoll)
 target_sources(SWRSokuRoll PRIVATE modules/SWRSokuRoll/SWRSokuRoll.cpp)
+file(READ "${CMAKE_SOURCE_DIR}/bin/SokuRoll.dll" SokuRollData HEX)
+string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," SokuRollData ${SokuRollData})
+file(WRITE "${CMAKE_BINARY_DIR}/SokuRoll.inl" "const unsigned char sokuroll_data[] = {${SokuRollData}};\nconst unsigned sokuroll_size = sizeof(sokuroll_data);\n")
+target_include_directories(SWRSokuRoll PRIVATE "${CMAKE_BINARY_DIR}")
 target_link_libraries(SWRSokuRoll MemoryModule)
 
 module(UPnPNat)
