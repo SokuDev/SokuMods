@@ -99,7 +99,7 @@ Available patches:
 
 **Load SokuRoll automatically.**
 
-*This mod uses a configuration file in its module directory, not the `SWRSToys.ini` in the main game folder. This mod does not require installing SokuRoll (does not require `SokuRoll.dll` and `SokuRoll.ini`).*
+*This mod uses a configuration file in its module directory, not the `SokuRoll.ini` in the main game folder. This mod does not require installing SokuRoll (does not require `SokuRoll.dll` and `SokuRoll.ini`).*
 
 ### UPnPNat
 
