@@ -9,7 +9,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
 	endif (CMAKE_COMPILER_IS_GNUCC)
 endif ()
 
-include_directories(src/DiscordSDK)
+include_directories(src/DiscordSDK include)
 
 add_library(
 	DiscordSDK

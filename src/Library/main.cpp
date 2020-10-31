@@ -4,6 +4,7 @@
 
 #include <discord.h>
 #include <iostream>
+#include <swrs.h>
 
 int main()
 {
