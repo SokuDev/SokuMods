@@ -38,6 +38,9 @@ enum Character {
 };
 
 bool enabled;
+static bool showWR = false;
+static std::pair<bool, bool> won;
+static std::pair<unsigned, unsigned> score;
 static time_t gameTimestamp;
 static time_t totalTimestamp;
 static discord::Core *core;
@@ -167,6 +170,7 @@ void genericScreen()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 
+	score = {0, 0};
 	totalTimestamp = time(nullptr);
 	activity.SetState(sceneNames[g_sceneId].c_str());
 	assets.SetLargeImage("cover");
@@ -213,7 +217,25 @@ void localBattle()
 			logMessagef("Error: %u\n");
 	});
 }
+/*
+int CBattleSV_OnProcess(void *This, void *other)
+{
+	logMessage("Yes !\n");
+	int ret = CBattleSV_Process(This, other);
+	logMessagef("Returned %i\n", ret);
 
+	return ret;
+}
+
+int CBattleCL_OnProcess(void *This, void *other)
+{
+	logMessage("Ouah !\n");
+	int ret = CBattleCL_Process(This, other);
+	logMessagef("Returned %i\n", ret);
+
+	return ret;
+}
+*/
 void loadMatch()
 {
 	unsigned stage = getStageId();
@@ -280,15 +302,22 @@ void onlineBattle()
 	char opChar;
 	char *opName;
 	OnlineInfo *infos = *reinterpret_cast<OnlineInfo **>(ADDR_ONLINE_INFOS_PTR);
+	char *battle_manager = *(char**)ADDR_BATTLE_MANAGER;
+	char *server_manager = *(char**)(battle_manager + 0x0C);
+	char *client_manager = *(char**)(battle_manager + 0x10);
 
 	if (g_mainMode == SWRSMODE_VSCLIENT) {
 		opName = infos->profile2name;
 		myChar = g_leftCharID;
 		opChar = g_rightCharID;
+		won.first = *(server_manager + 0x573);
+		won.second = *(client_manager + 0x573);
 	} else {
 		opName = infos->profile1name;
 		myChar = g_rightCharID;
 		opChar = g_leftCharID;
+		won.second = *(server_manager + 0x573);
+		won.first = *(client_manager + 0x573);
 	}
 
 	timeStamp.SetStart(gameTimestamp);
@@ -361,6 +390,9 @@ void onlineCharSelect()
 		opChar = g_leftCharID;
 	}
 
+	won = {0, 0};
+	score.first += won.first;
+	score.second += won.second;
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(charactersImg[opChar].c_str());
 	assets.SetSmallText(charactersName[opChar].c_str());
@@ -368,7 +400,16 @@ void onlineCharSelect()
 	assets.SetLargeText(charactersName[myChar].c_str());
 
 	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
-	activity.SetState(("Character select... (vs " + std::string(opName) + ")").c_str());
+	if (showWR)
+		activity.SetState((
+			"Character select... (vs " + std::string(opName) + " " +
+			std::to_string(score.first) + "w " +
+			std::to_string(score.second) + "l " +
+			(score.first + score.second ? std::to_string(score.first * 100 / (score.first + score.second)) : "N/A") +
+			"% wr)"
+		).c_str());
+	else
+		activity.SetState(("Character select... (vs " + std::string(opName) + ")").c_str());
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -421,6 +462,10 @@ public:
 			logMessage("Connecting to discord client...\n");
 			discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
 			logMessage("Connected !\n");
+			core->ActivityManager().OnActivityJoin.Connect([](const char *secret){
+				logMessagef("You joined %s\n", secret);
+				//TODO: Join the game for real
+			});
 			while (!this->isDone()) {
 				if (g_sceneId >= 0 && g_sceneId < sceneCallbacks.size())
 					sceneCallbacks[g_sceneId]();
@@ -459,8 +504,10 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	FILE *_;
 
 	initLogger();
+#ifdef _DEBUG
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
+#endif
 	logMessage("Initializing...\n");
 
 	GetModuleFileName(hMyModule, profilePath, 1024);
@@ -472,6 +519,8 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
 	//s_origCLogo_OnProcess   = TamperDword(vtbl_CLogo   + 4, (DWORD)CLogo_OnProcess);
 	//s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
+	//s_origCBattleSV_OnProcess = TamperDword(vtbl_CBattleSV + 4, (DWORD)CBattleSV_OnProcess);
+	//s_origCBattleCL_OnProcess = TamperDword(vtbl_CBattleCL + 4, (DWORD)CBattleCL_OnProcess);
 	//s_origCTitle_OnProcess  = TamperDword(vtbl_CTitle  + 4, (DWORD)CTitle_OnProcess);
 	//s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
 	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);

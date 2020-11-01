@@ -4,8 +4,9 @@ project(TouhouUNLDiscordIntegration)
 set(CMAKE_CXX_STANDARD 14)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
+	add_compile_definitions(_DEBUG=1)
 	if (CMAKE_COMPILER_IS_GNUCC)
-		add_compile_options(-Wall -Wextra -W -g -D_DEBUG)
+		add_compile_options(-Wall -Wextra -W -g)
 	endif (CMAKE_COMPILER_IS_GNUCC)
 endif ()
 

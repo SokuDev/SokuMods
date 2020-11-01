@@ -568,6 +568,9 @@ Thunk_CHandleManager_Deallocate(void *p, int id) {
 #define vtbl_CSelectScenario      0x00846DD0
 
 #define vtbl_CBattle              ADDR_VTBL_BATTLE
+#define vtbl_CBattleCL           (0x00846560 + ADDR_VTBL_SELECT_CL - 0x00846524)
+#define vtbl_CBattleSV           (0x00846508 + ADDR_VTBL_SELECT_SV - 0x008464CC)
+
 /*
 #define vtbl_Ending               0x0084660C
 */
