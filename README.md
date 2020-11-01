@@ -1,2 +1,2 @@
-# TouhouUNLDiscordIntegration
-Discord integration for Touhou 12.3: Unthinkable Natural Law (Hisoutensoku)
+# HisoutensokuDiscordIntegration
+Discord integration for Touhou 12.3: Hisoutensoku
