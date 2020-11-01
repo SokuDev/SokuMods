@@ -120,7 +120,7 @@ std::vector<std::array<std::string, 3>> modeNames{
 	{"Playing in Arcade mode",   "1.1",                          "1.2"},
 	{"2.0",                      "Playing against computer",     "2.2"},
 	{"3.0",                      "Playing multiplayer (Offline)","Watching a replay"},
-	{"4.0",                      "4.1",                          "4.2"},
+	{"4.0",                      "Playing multiplayer (Online)", "4.2"},
 	{"5.0",                      "Playing multiplayer (Online)", "Spectating game"},
 	{"6.0",                      "6.1",                          "Watching something"},
 	{"7.0",                      "7.1",                          "7.2"},
@@ -240,7 +240,6 @@ void charSelect()
 	auto &timeStamp = activity.GetTimestamps();
 	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
 
-	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(charactersImg[g_rightCharID].c_str());
 	assets.SetSmallText(charactersName[g_rightCharID].c_str());
@@ -249,6 +248,114 @@ void charSelect()
 
 	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
 	activity.SetState("Character select...");
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
+void onlineBattle()
+{
+	unsigned stage = getStageId();
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	char myChar;
+	char opChar;
+	char *opName;
+	OnlineInfo *infos = *reinterpret_cast<OnlineInfo **>(ADDR_ONLINE_INFOS_PTR);
+
+	if (g_mainMode == SWRSMODE_VSCLIENT) {
+		opName = infos->profile2name;
+		myChar = g_leftCharID;
+		opChar = g_rightCharID;
+	} else {
+		opName = infos->profile1name;
+		myChar = g_rightCharID;
+		opChar = g_leftCharID;
+	}
+
+	timeStamp.SetStart(gameTimestamp);
+	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
+	assets.SetSmallText(stagesName[stage].c_str());
+	assets.SetLargeImage(charactersImg[myChar].c_str());
+	assets.SetLargeText(charactersName[myChar].c_str());
+
+	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetState((std::string("Against ") + opName + " as " + charactersName[opChar]).c_str());
+
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
+void loadOnlineMatch()
+{
+	unsigned stage = getStageId();
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	char myChar;
+
+	if (g_mainMode == SWRSMODE_VSCLIENT)
+		myChar = g_leftCharID;
+	else
+		myChar = g_rightCharID;
+
+	gameTimestamp = time(nullptr);
+	timeStamp.SetStart(totalTimestamp);
+	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
+	assets.SetSmallText(stagesName[stage].c_str());
+	assets.SetLargeImage(charactersImg[myChar].c_str());
+	assets.SetLargeText(charactersName[myChar].c_str());
+
+	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetState("Loading...");
+
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
+void onlineCharSelect()
+{
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	char myChar;
+	char opChar;
+	char *opName;
+	OnlineInfo *infos = *reinterpret_cast<OnlineInfo **>(ADDR_ONLINE_INFOS_PTR);
+
+	if (g_mainMode == SWRSMODE_VSCLIENT) {
+		opName = infos->profile2name;
+		myChar = g_leftCharID;
+		opChar = g_rightCharID;
+	} else {
+		opName = infos->profile1name;
+		myChar = g_rightCharID;
+		opChar = g_leftCharID;
+	}
+
+	timeStamp.SetStart(totalTimestamp);
+	assets.SetSmallImage(charactersImg[opChar].c_str());
+	assets.SetSmallText(charactersName[opChar].c_str());
+	assets.SetLargeImage(charactersImg[myChar].c_str());
+	assets.SetLargeText(charactersName[myChar].c_str());
+
+	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetState(("Character select... (vs " + std::string(opName) + ")").c_str());
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -267,13 +374,13 @@ std::vector<std::function<void()>> sceneCallbacks{
 	localBattle,      //SWRSSCENE_BATTLE       = 5,
 	loadMatch,        //SWRSSCENE_LOADING      = 6,
 	genericScreen,    //???                    = 7,
-	genericScreen,    //SWRSSCENE_SELECTSV     = 8,
-	charSelect,       //SWRSSCENE_SELECTCL     = 9,
-	genericScreen,    //SWRSSCENE_LOADINGSV    = 10,
-	loadMatch,        //SWRSSCENE_LOADINGCL    = 11,
+	onlineCharSelect, //SWRSSCENE_SELECTSV     = 8,
+	onlineCharSelect, //SWRSSCENE_SELECTCL     = 9,
+	loadOnlineMatch,  //SWRSSCENE_LOADINGSV    = 10,
+	loadOnlineMatch,  //SWRSSCENE_LOADINGCL    = 11,
 	genericScreen,    //SWRSSCENE_LOADINGWATCH = 12,
-	genericScreen,    //SWRSSCENE_BATTLESV     = 13,
-	localBattle,      //SWRSSCENE_BATTLECL     = 14,
+	onlineBattle,     //SWRSSCENE_BATTLESV     = 13,
+	onlineBattle,     //SWRSSCENE_BATTLECL     = 14,
 	genericScreen,    //SWRSSCENE_BATTLEWATCH  = 15,
 	genericScreen,    //SWRSSCENE_SELECTSENARIO= 16,
 	genericScreen,    //???                    = 17,
@@ -298,14 +405,15 @@ public:
 
 	void start() {
 		std::thread::operator=(std::thread([this] {
-			logMessage("Loopy !\n");
+			logMessage("Connecting to discord client...\n");
+			discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
+			logMessage("Connected !\n");
 			while (!this->isDone()) {
 				if (g_sceneId >= 0 && g_sceneId < sceneCallbacks.size())
 					sceneCallbacks[g_sceneId]();
 				core->RunCallbacks();
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
-			logMessage("Disabled ;(\n");
 		}));
 	}
 };
@@ -357,9 +465,10 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
-	discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
 	if (enabled)
 		updateThread.start();
+	else
+		logMessage("Disabled ;(\n");
 	logMessage("Done...\n");
 	return true;
 }

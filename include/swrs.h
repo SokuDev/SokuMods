@@ -65,6 +65,7 @@
 #define ADDR_GET_PACKAGED_BGM_CALLER      0x00418BE1
 #define ADDR_GET_PACKAGED_SFL_CALLER      0x00418F41
 #define ADDR_LOADED_STAGE_ID              0x008971CE
+#define ADDR_ONLINE_INFOS_PTR             0x008986A0
 
 #else
 
@@ -199,6 +200,12 @@ struct SWRFONTDESC {
 	DWORD OffsetY;
 	DWORD CharSpaceX;
 	DWORD CharSpaceY;
+};
+
+struct OnlineInfo {
+	char unknown[4];
+	char profile1name[32];
+	char profile2name[32];
 };
 
 // std::string ?
