@@ -13,6 +13,7 @@
 #include <swrs.h>
 #include "offsetsAndAddresses.hpp"
 #include "logger.hpp"
+#include "SokuCMC.h"
 
 enum Character {
 	CHARACTER_REIMU,
@@ -443,6 +444,22 @@ std::vector<std::function<void()>> sceneCallbacks{
 	genericScreen,    //SWRSSCENE_ENDING       = 20,
 };
 
+enum MenuEnum {
+	MENU_NONE,
+	MENU_CONNECT,
+	MENU_REPLAY,
+	MENU_MUSICROOM,
+	MENU_RESULT,
+	MENU_PROFILE,
+	MENU_CONFIG,
+	MENU_COUNT
+};
+
+HANDLE* LGThread = (HANDLE*)0x089fff4;
+auto LoadGraphicsFun = (void (*)())0x408410;
+
+typedef void* (__thiscall* Init_fun)(void*);
+
 class MyThread : public std::thread {
 private:
 	bool _done;
@@ -462,9 +479,22 @@ public:
 			logMessage("Connecting to discord client...\n");
 			discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
 			logMessage("Connected !\n");
-			core->ActivityManager().OnActivityJoin.Connect([](const char *secret){
-				logMessagef("You joined %s\n", secret);
-				//TODO: Join the game for real
+			core->ActivityManager().OnActivityJoin.Connect([](const char *sec){
+				auto New = (void* (__cdecl*)(DWORD))0x81fbdc;
+				std::string secret = sec;
+
+				if (g_sceneId != SWRSSCENE_TITLE) {
+					g_sceneIdNew = SWRSSCENE_TITLE;
+					*LGThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)LoadGraphicsFun, nullptr, 0, (LPDWORD)0x089fff8);
+					while (g_sceneId != SWRSSCENE_TITLE)
+						std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+				}
+				((void (*)(void*))0x43e130)(((Init_fun)0x0448760)(New(0x118C)));
+				SokuCMC::JoinHost(
+					secret.substr(4, secret.find_last_of(':') - 4).c_str(),
+					std::stol(secret.substr(secret.find_last_of(':') + 1)),
+					secret.substr(0, 4) == "spec"
+				);
 			});
 			while (!this->isDone()) {
 				if (g_sceneId >= 0 && g_sceneId < sceneCallbacks.size())

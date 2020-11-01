@@ -57,6 +57,7 @@ endif ()
 add_library(
 	DiscordIntegration MODULE
 	include/swrs.h
+	src/Library/SokuCMC.h
 	src/Library/main.cpp
 	src/Library/offsetsAndAddresses.hpp
 	src/Library/globals.cpp
