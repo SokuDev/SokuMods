@@ -51,6 +51,8 @@
 #define ADDR_PROFILENAME_PRINT_CODE1_END  0x0047D9EE
 #define ADDR_PROFILENAME_PRINT_CODE2      0x0047D9FE
 #define ADDR_PROFILENAME_PRINT_CODE2_END  0x0047DB95
+#define ADDR_PLAYER1_PROFILE_STR         (0x00898920 - sizeof(void *))
+#define ADDR_PLAYER2_PROFILE_STR         (0x0089910C - sizeof(void *))
 #define ADDR_RENDERER                     0x00896B4C
 #define ADDR_RENDERER_BEGIN               0x00401000
 #define ADDR_RENDERER_END                 0x00401040
@@ -302,7 +304,9 @@ enum SWRSSUBMODE {
 template<typename TDest, typename TSrc>
 __forceinline 	
 TDest union_cast(TSrc src) {
+#ifndef __GNUC__
 	static_assert(sizeof(TDest) == sizeof(TSrc), "size_mismatch");
+#endif
 	union {  TDest dst; TSrc src; } c;
 	c.src = src;
 	return c.dst;
@@ -311,6 +315,7 @@ TDest union_cast(TSrc src) {
 // thiscall
 class C {};
 #define Ccall(p,f,r,T) (((C*)p)->*union_cast<r(C::*)T>(f))
+
 // �t�H���g�I�u�W�F�N�g���\�b�h
 #define SWRFont_Create(p) \
 	Ccall(p,ADDR_SWR_FONT_CREATE,void,())()
@@ -550,7 +555,7 @@ Thunk_CHandleManager_Deallocate(void *p, int id) {
 
 #define vtbl_Opening              0x008467D4
 #define vtbl_CLoading             0x0084665C
-#define vtbl_CTitle               0x00846FA4
+#define vtbl_CTitle               0x00846FA
 #define vtbl_CSelect              0x00846D18
 #define vtbl_CSelectScenario      0x00846DD0
 

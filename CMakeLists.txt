@@ -53,19 +53,36 @@ if (NOT DEFINED CLIENT_ID)
 	message(FATAL_ERROR "CLIENT_ID is not set")
 endif ()
 
-add_executable(
-	DiscordIntegration
+add_library(
+	DiscordIntegration MODULE
+	include/swrs.h
 	src/Library/main.cpp
+	src/Library/offsetsAndAddresses.hpp
+	src/Library/globals.cpp
+	src/Library/globals.hpp
+	src/Library/logger.cpp
+	src/Library/logger.hpp
 )
 
-target_compile_definitions(
-	DiscordIntegration PRIVATE
-	ClientID=${CLIENT_ID}
-	ClientSecret=${CLIENT_SECRET}
-)
+if (DEFINED VERSION_110a)
+	target_compile_definitions(
+		DiscordIntegration PRIVATE
+		ClientID="${CLIENT_ID}"
+		ClientSecret="${CLIENT_SECRET}"
+		SOKU_VER_110a=${VERSION_110a}
+	)
+else ()
+	target_compile_definitions(
+		DiscordIntegration PRIVATE
+		ClientID=${CLIENT_ID}
+		ClientSecret="${CLIENT_SECRET}"
+	)
+endif ()
 
 target_link_libraries(
 	DiscordIntegration
 	DiscordSDK
+	ws2_32
+	shlwapi
 	${DiscordGameSDK_LIBRARIES}
 )

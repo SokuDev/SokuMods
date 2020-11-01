@@ -9,7 +9,7 @@
 IF (NOT DiscordGameSDK_LIBRARIES)
     IF (MSVC)      # Visual Studio
         SET(CMAKE_FIND_LIBRARY_PREFIXES ";lib")
-        SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll.a;.dll;.a")
+        SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll.lib;.dll.a;.a")
     ELSEIF (MINGW) # Windows
         SET(CMAKE_FIND_LIBRARY_PREFIXES ";lib")
         SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a;.dll;.a;.lib")
