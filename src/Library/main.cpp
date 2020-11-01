@@ -2,6 +2,7 @@
 // Created by Gegel85 on 31/10/2020
 //
 
+#include <thread>
 #include <ctime>
 #include <string>
 #include <array>
@@ -12,11 +13,6 @@
 #include <swrs.h>
 #include "offsetsAndAddresses.hpp"
 #include "logger.hpp"
-
-static time_t timestamp;
-static discord::Core *core;
-static bool enabled;
-static unsigned long long clientId;
 
 enum Character {
 	CHARACTER_REIMU,
@@ -40,6 +36,11 @@ enum Character {
 	CHARACTER_UTSUHO,
 	CHARACTER_SUWAKO,
 };
+
+bool enabled;
+static time_t timestamp;
+static discord::Core *core;
+static unsigned long long clientId;
 
 std::vector<std::string> charactersName{
 	"Reimu Hakurei",
@@ -112,24 +113,48 @@ std::vector<std::string> charactersImg{
 
 // 0:1 = story, 1:0 = arcade, 2:1 = vscom, 3:1 = vsplayer, 5:1=Player 6:2=Watch  8:0 = practice, 0-3:2 = Replay
 std::vector<std::array<std::string, 3>> modeNames{
-	{"...",                      "Playing Story mode",           "..."},
-	{"Playing in Arcade mode",   "...",                          "..."},
-	{"...",                      "Playing against computer",     "..."},
-	{"...",                      "Playing multiplayer (Local)",  "Watching a replay"},
-	{"...",                      "Playing multiplayer (Online)", "Spectating game"},
-	{"...",                      "...",                          "..."},
-	{"...",                      "...",                          "Watching something"},
-	{"...",                      "...",                          "..."},
-	{"Playing in practice mode", "...",                          "..."}
+	{"0.0",                      "Playing Story mode",           "0.2"},
+	{"Playing in Arcade mode",   "1.1",                          "1.2"},
+	{"2.0",                      "Playing against computer",     "2.2"},
+	{"3.0",                      "Playing multiplayer (Offline)","Watching a replay"},
+	{"4.0",                      "4.1",                          "4.2"},
+	{"5.0",                      "Playing multiplayer (Online)", "Spectating game"},
+	{"6.0",                      "6.1",                          "Watching something"},
+	{"7.0",                      "7.1",                          "7.2"},
+	{"Playing in practice mode", "8.1",                          "8.2"}
 };
 
-int __fastcall CLogo_OnProcess(void *This)
+std::vector<std::string> sceneNames{
+	"Watching opening scene",//SWRSSCENE_LOGO         = 0,
+	"Watching opening scene",//SWRSSCENE_OPENING      = 1,
+	"Title screen",          //SWRSSCENE_TITLE        = 2,
+	"SELECT",                //SWRSSCENE_SELECT       = 3,
+	"Scene 4",               //???                    = 4,
+	"BATTLE",                //SWRSSCENE_BATTLE       = 5,
+	"Loading...",            //SWRSSCENE_LOADING      = 6,
+	"Scene 7",               //???                    = 7,
+	"SELECTSV",              //SWRSSCENE_SELECTSV     = 8,
+	"SELECTCL",              //SWRSSCENE_SELECTCL     = 9,
+	"Loading...",            //SWRSSCENE_LOADINGSV    = 10,
+	"Loading...",            //SWRSSCENE_LOADINGCL    = 11,
+	"Loading...",            //SWRSSCENE_LOADINGWATCH = 12,
+	"BATTLESV",              //SWRSSCENE_BATTLESV     = 13,
+	"BATTLECL",              //SWRSSCENE_BATTLECL     = 14,
+	"Watching battle",       //SWRSSCENE_BATTLEWATCH  = 15,
+	"Selecting scenario",    //SWRSSCENE_SELECTSENARIO= 16,
+	"Scene 17",              //???                    = 17,
+	"Scene 18",              //???                    = 18,
+	"Scene 19",              //???                    = 19,
+	"Watching credits",      //SWRSSCENE_ENDING       = 20,
+};
+
+void genericScreen()
 {
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 
 	timestamp = time(nullptr);
-	activity.SetState("Title screen");
+	activity.SetState(sceneNames[g_sceneId].c_str());
 	assets.SetLargeImage("cover");
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -137,26 +162,9 @@ int __fastcall CLogo_OnProcess(void *This)
 		if (code)
 			logMessagef("Error: %u\n");
 	});
-	core->RunCallbacks();
-	return CLogo_Process(This);
 }
 
-int __fastcall CTitle_OnProcess(void *This)
-{
-	logMessage("CTitle...\n");
-	timestamp = time(nullptr);
-	core->RunCallbacks();
-	return CTitle_Process(This);
-}
-
-int __fastcall CSelect_OnProcess(void *This)
-{
-	logMessage("CSelect...\n");
-	core->RunCallbacks();
-	return CSelect_Process(This);
-}
-
-int __fastcall CBattle_OnProcess(void *This)
+void localBattle()
 {
 	unsigned chr = g_leftCharID;
 	unsigned stage = 13; //TODO: Add real stage
@@ -185,8 +193,60 @@ int __fastcall CBattle_OnProcess(void *This)
 			logMessagef("Error: %u\n");
 	});
 	core->RunCallbacks();
-	return CBattle_Process(This);
 }
+
+std::vector<std::function<void()>> sceneCallbacks{
+	genericScreen,    //SWRSSCENE_LOGO         = 0,
+	genericScreen,    //SWRSSCENE_OPENING      = 1,
+	genericScreen,    //SWRSSCENE_TITLE        = 2,
+	genericScreen,    //SWRSSCENE_SELECT       = 3,
+	genericScreen,    //???                    = 4,
+	localBattle,      //SWRSSCENE_BATTLE       = 5,
+	genericScreen,    //SWRSSCENE_LOADING      = 6,
+	genericScreen,    //???                    = 7,
+	genericScreen,    //SWRSSCENE_SELECTSV     = 8,
+	genericScreen,    //SWRSSCENE_SELECTCL     = 9,
+	genericScreen,    //SWRSSCENE_LOADINGSV    = 10,
+	genericScreen,    //SWRSSCENE_LOADINGCL    = 11,
+	genericScreen,    //SWRSSCENE_LOADINGWATCH = 12,
+	genericScreen,    //SWRSSCENE_BATTLESV     = 13,
+	localBattle,      //SWRSSCENE_BATTLECL     = 14,
+	genericScreen,    //SWRSSCENE_BATTLEWATCH  = 15,
+	genericScreen,    //SWRSSCENE_SELECTSENARIO= 16,
+	genericScreen,    //???                    = 17,
+	genericScreen,    //???                    = 18,
+	genericScreen,    //???                    = 19,
+	genericScreen,    //SWRSSCENE_ENDING       = 20,
+};
+
+class MyThread : public std::thread {
+private:
+	bool _done;
+
+public:
+	bool isDone() const { return this->_done; }
+	template<typename ...Args>
+	MyThread() : std::thread() {};
+	~MyThread() {
+		this->_done = true;
+		if (this->joinable())
+			this->join();
+	}
+
+	void start() {
+		std::thread::operator=(std::thread([this] {
+			logMessage("Loopy !\n");
+			while (!this->isDone()) {
+				if (g_sceneId >= 0 && g_sceneId < sceneCallbacks.size())
+					sceneCallbacks[g_sceneId]();
+				core->RunCallbacks();
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+			logMessage("Disabled ;(\n");
+		}));
+	}
+};
+static MyThread updateThread;
 
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath)
@@ -210,6 +270,7 @@ __declspec(dllexport) bool CheckVersion(const BYTE hash[16])
 extern "C"
 __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 {
+	bool &_en = enabled;
 	char profilePath[1024 + MAX_PATH];
 	FILE *_;
 
@@ -223,17 +284,19 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	PathAppend(profilePath, "DiscordIntegration.ini");
 	LoadSettings(profilePath);
 
-	DWORD old;
-	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCLogo_OnProcess   = TamperDword(vtbl_CLogo   + 4, (DWORD)CLogo_OnProcess);
-	s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
+	//DWORD old;
+	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
+	//s_origCLogo_OnProcess   = TamperDword(vtbl_CLogo   + 4, (DWORD)CLogo_OnProcess);
+	//s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
 	//s_origCTitle_OnProcess  = TamperDword(vtbl_CTitle  + 4, (DWORD)CTitle_OnProcess);
 	//s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
-	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
+	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
-	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
 	discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
+	if (enabled)
+		updateThread.start();
 	logMessage("Done...\n");
 	return true;
 }
