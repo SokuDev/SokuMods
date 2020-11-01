@@ -64,6 +64,7 @@ std::vector<std::string> charactersName{
 	"Hong Meiling",
 	"Utsuho Reiuji",
 	"Suwako Moriya",
+	"Random Select",
 };
 
 std::vector<std::string> stagesName{
@@ -108,8 +109,9 @@ std::vector<std::string> charactersImg{
 	"sanae",
 	"cirno",
 	"meiling",
-	"utsuho",
+	"okuu",
 	"suwako",
+	"random_select"
 };
 
 // 0:1 = story, 1:0 = arcade, 2:1 = vscom, 3:1 = vsplayer, 5:1=Player 6:2=Watch  8:0 = practice, 0-3:2 = Replay
@@ -178,7 +180,6 @@ void genericScreen()
 
 void localBattle()
 {
-	unsigned chr = g_leftCharID;
 	unsigned stage = getStageId();
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
@@ -189,8 +190,8 @@ void localBattle()
 	timeStamp.SetStart(gameTimestamp);
 	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
 	assets.SetSmallText(stagesName[stage].c_str());
-	assets.SetLargeImage(charactersImg[chr].c_str());
-	assets.SetLargeText(charactersName[chr].c_str());
+	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
+	assets.SetLargeText(charactersName[g_leftCharID].c_str());
 
 	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
 	if (g_mainMode != SWRSMODE_PRACTICE)
@@ -208,7 +209,6 @@ void localBattle()
 
 void loadMatch()
 {
-	unsigned chr = g_leftCharID;
 	unsigned stage = getStageId();
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
@@ -219,11 +219,36 @@ void loadMatch()
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
 	assets.SetSmallText(stagesName[stage].c_str());
-	assets.SetLargeImage(charactersImg[chr].c_str());
-	assets.SetLargeText(charactersName[chr].c_str());
+	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
+	assets.SetLargeText(charactersName[g_leftCharID].c_str());
 
 	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
 	activity.SetState("Loading...");
+
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
+void charSelect()
+{
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+
+	gameTimestamp = time(nullptr);
+	timeStamp.SetStart(totalTimestamp);
+	assets.SetSmallImage(charactersImg[g_rightCharID].c_str());
+	assets.SetSmallText(charactersName[g_rightCharID].c_str());
+	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
+	assets.SetLargeText(charactersName[g_leftCharID].c_str());
+
+	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetState("Character select...");
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -237,15 +262,15 @@ std::vector<std::function<void()>> sceneCallbacks{
 	genericScreen,    //SWRSSCENE_LOGO         = 0,
 	genericScreen,    //SWRSSCENE_OPENING      = 1,
 	genericScreen,    //SWRSSCENE_TITLE        = 2,
-	genericScreen,    //SWRSSCENE_SELECT       = 3,
+	charSelect,       //SWRSSCENE_SELECT       = 3,
 	genericScreen,    //???                    = 4,
 	localBattle,      //SWRSSCENE_BATTLE       = 5,
 	loadMatch,        //SWRSSCENE_LOADING      = 6,
 	genericScreen,    //???                    = 7,
 	genericScreen,    //SWRSSCENE_SELECTSV     = 8,
-	genericScreen,    //SWRSSCENE_SELECTCL     = 9,
+	charSelect,       //SWRSSCENE_SELECTCL     = 9,
 	genericScreen,    //SWRSSCENE_LOADINGSV    = 10,
-	genericScreen,    //SWRSSCENE_LOADINGCL    = 11,
+	loadMatch,        //SWRSSCENE_LOADINGCL    = 11,
 	genericScreen,    //SWRSSCENE_LOADINGWATCH = 12,
 	genericScreen,    //SWRSSCENE_BATTLESV     = 13,
 	localBattle,      //SWRSSCENE_BATTLECL     = 14,
