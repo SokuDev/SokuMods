@@ -116,14 +116,14 @@ std::vector<std::string> charactersImg{
 
 // 0:1 = story, 1:0 = arcade, 2:1 = vscom, 3:1 = vsplayer, 5:1=Player 6:2=Watch  8:0 = practice, 0-3:2 = Replay
 std::vector<std::array<std::string, 3>> modeNames{
-	{"0.0",                      "Playing Story mode",           "0.2"},
+	{"0.0",                      "Playing story mode",           "Watching a story mode replay"},
 	{"Playing in Arcade mode",   "1.1",                          "1.2"},
 	{"2.0",                      "Playing against computer",     "2.2"},
 	{"3.0",                      "Playing multiplayer (Offline)","Watching a replay"},
 	{"4.0",                      "Playing multiplayer (Online)", "4.2"},
 	{"5.0",                      "Playing multiplayer (Online)", "Spectating game"},
-	{"6.0",                      "6.1",                          "Watching something"},
-	{"7.0",                      "7.1",                          "7.2"},
+	{"6.0",                      "6.1",                          "6.2"},
+	{"7.0",                      "Playing time trial",           "Watching a time trial replay"},
 	{"Playing in practice mode", "8.1",                          "8.2"}
 };
 
@@ -188,16 +188,23 @@ void localBattle()
 	const char *profile2 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER2_PROFILE_STR);
 
 	timeStamp.SetStart(gameTimestamp);
-	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetSmallText(stagesName[stage].c_str());
-	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
-	assets.SetLargeText(charactersName[g_leftCharID].c_str());
 
-	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
-	if (g_mainMode != SWRSMODE_PRACTICE)
-		activity.SetState((std::string("Against ") + profile2 + " as " + charactersName[g_rightCharID]).c_str());
-	else
-		activity.SetState(std::string("Against " + charactersName[g_rightCharID]).c_str());
+	if (g_subMode == SWRSSUBMODE_REPLAY) {
+		assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
+		assets.SetLargeText(stagesName[stage].c_str());
+		activity.SetDetails(modeNames[g_mainMode][g_subMode].c_str());
+		activity.SetState(std::string(charactersName[g_leftCharID] + " vs " + charactersName[g_rightCharID]).c_str());
+	} else {
+		assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
+		assets.SetLargeText(charactersName[g_leftCharID].c_str());
+		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
+		assets.SetSmallText(stagesName[stage].c_str());
+		activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+		if (g_mainMode == SWRSMODE_VSPLAYER)
+			activity.SetState((std::string("Against ") + profile2 + " as " + charactersName[g_rightCharID]).c_str());
+		else
+			activity.SetState(("Against " + charactersName[g_rightCharID]).c_str());
+	}
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -217,12 +224,18 @@ void loadMatch()
 
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
-	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetSmallText(stagesName[stage].c_str());
 	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
 	assets.SetLargeText(charactersName[g_leftCharID].c_str());
 
-	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	if (g_subMode == SWRSSUBMODE_REPLAY) {
+		assets.SetSmallImage(charactersImg[g_rightCharID].c_str());
+		assets.SetSmallText(charactersName[g_rightCharID].c_str());
+		activity.SetDetails(modeNames[g_mainMode][g_subMode].c_str());
+	} else {
+		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
+		assets.SetSmallText(stagesName[stage].c_str());
+		activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	}
 	activity.SetState("Loading...");
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
