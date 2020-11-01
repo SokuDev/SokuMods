@@ -148,6 +148,15 @@ std::vector<std::string> sceneNames{
 	"Watching credits",      //SWRSSCENE_ENDING       = 20,
 };
 
+unsigned char getStageId()
+{
+	unsigned char stage = *reinterpret_cast<unsigned char *>(ADDR_LOADED_STAGE_ID);
+
+	if (stage >= 10)
+		stage -= 4;
+	return stage;
+}
+
 void genericScreen()
 {
 	discord::Activity activity{};
@@ -167,24 +176,24 @@ void genericScreen()
 void localBattle()
 {
 	unsigned chr = g_leftCharID;
-	unsigned stage = 13; //TODO: Add real stage
+	unsigned stage = getStageId(); //TODO: Add real stage
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
-	auto timeStamp = activity.GetTimestamps();
+	auto &timeStamp = activity.GetTimestamps();
 	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
 	const char *profile2 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER2_PROFILE_STR);
 
 	timeStamp.SetStart(timestamp);
-	assets.SetLargeImage(("stage_" + std::to_string(stage)).c_str());
-	assets.SetLargeText(stagesName[stage - 1].c_str());
-	assets.SetSmallImage(charactersImg[chr].c_str());
-	assets.SetSmallText(charactersName[chr].c_str());
+	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
+	assets.SetSmallText(stagesName[stage].c_str());
+	assets.SetLargeImage(charactersImg[chr].c_str());
+	assets.SetLargeText(charactersName[chr].c_str());
 
 	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
 	if (g_mainMode != SWRSMODE_PRACTICE)
-		activity.SetState((
-			std::string("Against ") + profile2 + " as " + charactersName[g_rightCharID]
-		).c_str());
+		activity.SetState((std::string("Against ") + profile2 + " as " + charactersName[g_rightCharID]).c_str());
+	else
+		activity.SetState((std::string("Against " + charactersName[g_rightCharID]).c_str());
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
