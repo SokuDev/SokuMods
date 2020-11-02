@@ -63,7 +63,10 @@ add_library(
 	src/Library/globals.cpp
 	src/Library/globals.hpp
 	src/Library/logger.cpp
-	src/Library/logger.hpp
+        src/Library/logger.hpp
+        src/Library/Socket.cpp
+        src/Library/Socket.hpp
+        src/Library/Exceptions.hpp
 )
 
 if (DEFINED VERSION_110a)

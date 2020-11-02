@@ -14,6 +14,14 @@
 #include "offsetsAndAddresses.hpp"
 #include "logger.hpp"
 #include "SokuCMC.h"
+#include "Socket.hpp"
+#include "Exceptions.hpp"
+
+HANDLE* LGThread = (HANDLE*)0x089fff4;
+auto LoadGraphicsFun = (void (*)())0x408410;
+auto New = (void* (__cdecl*)(DWORD))0x81fbdc;
+
+typedef void* (__thiscall* Init_fun)(void*);
 
 enum Character {
 	CHARACTER_REIMU,
@@ -39,10 +47,12 @@ enum Character {
 };
 
 bool enabled;
+static char smallImg[32];
 static bool showWR = false;
 static std::pair<bool, bool> won;
 static std::pair<unsigned, unsigned> score;
 static time_t gameTimestamp;
+static time_t hostTimestamp;
 static time_t totalTimestamp;
 static discord::Core *core;
 static unsigned long long clientId;
@@ -155,6 +165,49 @@ std::vector<std::string> sceneNames{
 	"Watching credits",      //SWRSSCENE_ENDING       = 20,
 };
 
+char *myIp = nullptr;
+
+void moveToConnectScreen()
+{
+	if (g_sceneId != SWRSSCENE_TITLE) {
+		g_sceneIdNew = SWRSSCENE_TITLE;
+		*LGThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)LoadGraphicsFun, nullptr, 0, (LPDWORD)0x089fff8);
+		while (g_sceneId != SWRSSCENE_TITLE)
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));;
+	}
+
+	((void (*)(void*))0x43e130)(((Init_fun)0x0448760)(New(0x118C)));
+}
+
+char *getMyIp()
+{
+	if (myIp)
+		return myIp;
+	logMessage("Fetching public IP\n");
+
+	try {
+		Socket sock;
+		Socket::HttpRequest request{
+			/*.body  */  "",
+			/*.method*/  "GET",
+			/*.host  */  "www.sfml-dev.org",
+			/*.portno*/  80,
+			/*.header*/  {},
+			/*.path  */  "/ip-provider.php",
+		};
+		auto response = sock.makeHttpRequest(request);
+
+		if (response.returnCode != 200)
+			throw HTTPErrorException(response);
+		myIp = strdup(response.body.c_str());
+		logMessagef("My ip is %s\n", myIp);
+		return myIp;
+	} catch (NetworkException &e) {
+		logMessagef("Error: %s\n", e.what());
+		throw;
+	}
+}
+
 unsigned char getStageId()
 {
 	unsigned char stage = *reinterpret_cast<unsigned char *>(ADDR_LOADED_STAGE_ID);
@@ -166,13 +219,21 @@ unsigned char getStageId()
 	return stage;
 }
 
+std::string roomIp = "";
+bool read = false;
+void *garbagePtr;
+
 void genericScreen()
 {
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 
+	if (!roomIp.empty())
+		logMessage("No longer hosting/connecting.\n");
+	roomIp = "";
 	score = {0, 0};
 	totalTimestamp = time(nullptr);
+	hostTimestamp = time(nullptr);
 	activity.SetState(sceneNames[g_sceneId].c_str());
 	assets.SetLargeImage("cover");
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
@@ -181,6 +242,82 @@ void genericScreen()
 		if (code)
 			logMessagef("Error: %u\n");
 	});
+}
+
+void showHost()
+{
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto *menuObj = SokuCMC::GetMenuObj();
+	auto &timeStamp = activity.GetTimestamps();
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+
+	if (roomIp.empty()) {
+		try {
+			roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->Port);
+			logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", roomIp.c_str(), menuObj->Spectate ? "" : "not ");
+			party.SetId(roomIp.c_str());
+			secrets.SetJoin(("join" + roomIp).c_str());
+			if (menuObj->Spectate)
+				secrets.SetSpectate(("spec" + roomIp).c_str());
+		} catch (...) {}
+	} else {
+		party.SetId(roomIp.c_str());
+		secrets.SetJoin(("join" + roomIp).c_str());
+		if (menuObj->Spectate)
+			secrets.SetSpectate(("spec" + roomIp).c_str());
+	}
+	party.GetSize().SetCurrentSize(1);
+	party.GetSize().SetMaxSize(2);
+	timeStamp.SetStart(hostTimestamp);
+	activity.SetDetails(sceneNames[g_sceneId].c_str());
+	activity.SetState("Hosting...");
+	assets.SetLargeImage("cover");
+	assets.SetSmallImage(smallImg);
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
+void titleScreen()
+{
+	auto *menuObj = SokuCMC::GetMenuObj();
+
+	if (!read) {
+		garbagePtr = menuObj;
+		read = true;
+	}
+
+	if (menuObj == garbagePtr || *reinterpret_cast<char *>(menuObj))
+		return genericScreen();
+
+	if (menuObj->Choice >= CHOICE_ASSIGN_IP_CONNECT && menuObj->Choice < CHOICE_SELECT_PROFILE && menuObj->Subchoice == 3) {
+		discord::Activity activity{};
+		auto &assets = activity.GetAssets();
+		auto &party = activity.GetParty();
+		auto &secrets = activity.GetSecrets();
+
+		roomIp = menuObj->IPString + (":" + std::to_string(menuObj->Port));
+		totalTimestamp = time(nullptr);
+
+		assets.SetLargeImage("cover");
+
+		activity.SetState("Joining room...");
+		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+			auto code = static_cast<unsigned>(result);
+
+			if (code)
+				logMessagef("Error: %u\n");
+		});
+	} else if (menuObj->Choice == CHOICE_HOST && menuObj->Subchoice == 2)
+		showHost();
+	else
+		genericScreen();
+
 }
 
 void localBattle()
@@ -307,6 +444,9 @@ void onlineBattle()
 	char *server_manager = *(char**)(battle_manager + 0x0C);
 	char *client_manager = *(char**)(battle_manager + 0x10);
 
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+
 	if (g_mainMode == SWRSMODE_VSCLIENT) {
 		opName = infos->profile2name;
 		myChar = g_leftCharID;
@@ -321,6 +461,10 @@ void onlineBattle()
 		won.first = *(client_manager + 0x573);
 	}
 
+	party.SetId(roomIp.c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
 	timeStamp.SetStart(gameTimestamp);
 	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
 	assets.SetSmallText(stagesName[stage].c_str());
@@ -347,11 +491,18 @@ void loadOnlineMatch()
 	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
 	char myChar;
 
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+
 	if (g_mainMode == SWRSMODE_VSCLIENT)
 		myChar = g_leftCharID;
 	else
 		myChar = g_rightCharID;
 
+	party.SetId(roomIp.c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
@@ -380,6 +531,8 @@ void onlineCharSelect()
 	char opChar;
 	char *opName;
 	OnlineInfo *infos = *reinterpret_cast<OnlineInfo **>(ADDR_ONLINE_INFOS_PTR);
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
 
 	if (g_mainMode == SWRSMODE_VSCLIENT) {
 		opName = infos->profile2name;
@@ -391,6 +544,10 @@ void onlineCharSelect()
 		opChar = g_leftCharID;
 	}
 
+	party.SetId(roomIp.c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
 	won = {0, 0};
 	score.first += won.first;
 	score.second += won.second;
@@ -423,7 +580,7 @@ void onlineCharSelect()
 std::vector<std::function<void()>> sceneCallbacks{
 	genericScreen,    //SWRSSCENE_LOGO         = 0,
 	genericScreen,    //SWRSSCENE_OPENING      = 1,
-	genericScreen,    //SWRSSCENE_TITLE        = 2,
+	titleScreen,      //SWRSSCENE_TITLE        = 2,
 	charSelect,       //SWRSSCENE_SELECT       = 3,
 	genericScreen,    //???                    = 4,
 	localBattle,      //SWRSSCENE_BATTLE       = 5,
@@ -455,11 +612,6 @@ enum MenuEnum {
 	MENU_COUNT
 };
 
-HANDLE* LGThread = (HANDLE*)0x089fff4;
-auto LoadGraphicsFun = (void (*)())0x408410;
-
-typedef void* (__thiscall* Init_fun)(void*);
-
 class MyThread : public std::thread {
 private:
 	bool _done;
@@ -480,20 +632,21 @@ public:
 			discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
 			logMessage("Connected !\n");
 			core->ActivityManager().OnActivityJoin.Connect([](const char *sec){
-				auto New = (void* (__cdecl*)(DWORD))0x81fbdc;
-				std::string secret = sec;
+				logMessagef("Got activity join with payload %s\n", sec);
 
-				if (g_sceneId != SWRSSCENE_TITLE) {
-					g_sceneIdNew = SWRSSCENE_TITLE;
-					*LGThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)LoadGraphicsFun, nullptr, 0, (LPDWORD)0x089fff8);
-					while (g_sceneId != SWRSSCENE_TITLE)
-						std::this_thread::sleep_for(std::chrono::milliseconds(1));;
-				}
-				((void (*)(void*))0x43e130)(((Init_fun)0x0448760)(New(0x118C)));
+				std::string secret = sec;
+				auto ip = secret.substr(4, secret.find_last_of(':') - 4);
+				unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
+				bool isSpec = secret.substr(0, 4) == "spec";
+
+				logMessage("Warping to connect screen.\n");
+				moveToConnectScreen();
+				logMessage("Done.\n");
+				logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
 				SokuCMC::JoinHost(
-					secret.substr(4, secret.find_last_of(':') - 4).c_str(),
-					std::stol(secret.substr(secret.find_last_of(':') + 1)),
-					secret.substr(0, 4) == "spec"
+					ip.c_str(),
+					port,
+					isSpec
 				);
 			});
 			while (!this->isDone()) {
@@ -515,9 +668,11 @@ void LoadSettings(LPCSTR profilePath)
 	logMessage("Loading settings...\n");
 	// �����V���b�g�_�E��
 	enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;
+	showWR = GetPrivateProfileInt("DiscordIntegration", "ShowWR", 0, profilePath) != 0;
+	GetPrivateProfileString("DiscordIntegration", "HostImg", "", smallImg, sizeof(smallImg), profilePath);
 	GetPrivateProfileString("DiscordIntegration", "ClientID", ClientID, buffer, sizeof(buffer), profilePath);
 	clientId = atoll(buffer);
-	logMessagef("Enabled: %s, ClientID: %llu\n", enabled ? "true" : "false", clientId);
+	logMessagef("Enabled: %s\nClientID: %llu\nShowWR: %s\nHostImg: %s\n", enabled ? "true" : "false", clientId, showWR ? "true" : "false", smallImg);
 }
 
 extern "C"

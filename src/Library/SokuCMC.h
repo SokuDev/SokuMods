@@ -43,6 +43,16 @@ typedef struct {
     byte UNKNOWN_12[835];
 } CMenuConnect;
 
+enum Choice {
+	CHOICE_NOTHING,
+	CHOICE_HOST,
+	CHOICE_ASSIGN_IP_CONNECT,
+	CHOICE_IP_LIST_CONNECT,
+	CHOICE_HISTORY_LIST_CONNECT,
+	CHOICE_CLIPBOARD_CONNECT,
+	CHOICE_SELECT_PROFILE,
+};
+
 namespace SokuCMC {
     CMenuConnect* GetMenuObj() {
         return (CMenuConnect*)CMENU_OBJ;
@@ -55,7 +65,7 @@ namespace SokuCMC {
         CMenuConnect *menu = GetMenuObj();
         menu->Port = port;
         menu->Spectate = spectate;
-        menu->Choice = 1;
+        menu->Choice = CHOICE_HOST;
         menu->Subchoice = 2;
 
         HostFun(menu);
@@ -71,7 +81,7 @@ namespace SokuCMC {
             strcpy(menu->IPString, ip);
             menu->Port = port;
         }
-        menu->Choice = 2;
+        menu->Choice = CHOICE_ASSIGN_IP_CONNECT;
         menu->Subchoice = (spectate? 6 : 3);
         menu->UnknownJoinFlag = 1;
         menu->NotSpectateFlag = (byte)!spectate;
