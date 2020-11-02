@@ -7,7 +7,7 @@ To install this module, you will need Touhou 12.3 and SWRSToys.
 (If you don't have SWRSToys.ini in your hisoutensoku folder, you probably don't have it)
 
 ### Installing
-- Download the module [here](https://github.com/Gegel85/HisoutensokuDiscordIntegration/releases/download/v1.0/SokuDiscordIntegrationVersion1.0.zip).
+- Download the module [here](https://github.com/Gegel85/HisoutensokuDiscordIntegration/releases/latest).
 - Make a Modules folder inside your hisoutensoku directory (If you don't already have one).
 - Create a DiscordIntegration folder inside the Modules folder.
 - Copy DiscordIntegration.ini and DiscordIntegration.dll inside the DiscordIntegration you created. (If you can't find DiscordIntegration.ini inside the zip, copy the file called DiscordIntegration with the dll)
