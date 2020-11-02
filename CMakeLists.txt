@@ -51,7 +51,8 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 find_package(DiscordGameSDK REQUIRED)
 
 if (NOT DEFINED CLIENT_ID)
-	message(FATAL_ERROR "CLIENT_ID is not set")
+	set(CLIENT_ID 771968286199382056)
+	message(WARNING "CLIENT_ID is not set")
 endif ()
 
 add_library(
