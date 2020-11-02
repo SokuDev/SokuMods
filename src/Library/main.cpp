@@ -283,6 +283,61 @@ void showHost()
 	});
 }
 
+void connectingToRemote()
+{
+	auto *menuObj = SokuCMC::GetMenuObj();
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+
+	roomIp = menuObj->IPString + (":" + std::to_string(menuObj->Port));
+	totalTimestamp = time(nullptr);
+
+	assets.SetLargeImage("cover");
+
+	activity.SetDetails("Joining room...");
+	activity.SetState("Playing multiplayer (Online)");
+	party.SetId(roomIp.c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
+	secrets.SetJoin(("join" + roomIp).c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
+void connectedToRemoteLoadingCharSelect()
+{
+	auto *menuObj = SokuCMC::GetMenuObj();
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+
+	totalTimestamp = time(nullptr);
+
+	assets.SetLargeImage("cover");
+
+	activity.SetDetails("Loading character select...");
+	activity.SetState("Playing multiplayer (Online)");
+	party.SetId(roomIp.c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
+	secrets.SetJoin(("join" + roomIp).c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error: %u\n");
+	});
+}
+
 void titleScreen()
 {
 	auto *menuObj = SokuCMC::GetMenuObj();
@@ -295,25 +350,11 @@ void titleScreen()
 	if (menuObj == garbagePtr || *reinterpret_cast<char *>(menuObj))
 		return genericScreen();
 
-	if (menuObj->Choice >= CHOICE_ASSIGN_IP_CONNECT && menuObj->Choice < CHOICE_SELECT_PROFILE && menuObj->Subchoice == 3) {
-		discord::Activity activity{};
-		auto &assets = activity.GetAssets();
-		auto &party = activity.GetParty();
-		auto &secrets = activity.GetSecrets();
-
-		roomIp = menuObj->IPString + (":" + std::to_string(menuObj->Port));
-		totalTimestamp = time(nullptr);
-
-		assets.SetLargeImage("cover");
-
-		activity.SetState("Joining room...");
-		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-			auto code = static_cast<unsigned>(result);
-
-			if (code)
-				logMessagef("Error: %u\n");
-		});
-	} else if (menuObj->Choice == CHOICE_HOST && menuObj->Subchoice == 2)
+	if (menuObj->Choice >= CHOICE_ASSIGN_IP_CONNECT && menuObj->Choice < CHOICE_SELECT_PROFILE && menuObj->Subchoice == 3)
+		connectingToRemote();
+	else if (menuObj->Choice >= CHOICE_HOST && menuObj->Choice < CHOICE_SELECT_PROFILE && menuObj->Subchoice == 255)
+		connectedToRemoteLoadingCharSelect();
+	else if (menuObj->Choice == CHOICE_HOST && menuObj->Subchoice == 2)
 		showHost();
 	else
 		genericScreen();
@@ -672,7 +713,10 @@ void LoadSettings(LPCSTR profilePath)
 	GetPrivateProfileString("DiscordIntegration", "HostImg", "", smallImg, sizeof(smallImg), profilePath);
 	GetPrivateProfileString("DiscordIntegration", "ClientID", ClientID, buffer, sizeof(buffer), profilePath);
 	clientId = atoll(buffer);
-	logMessagef("Enabled: %s\nClientID: %llu\nShowWR: %s\nHostImg: %s\n", enabled ? "true" : "false", clientId, showWR ? "true" : "false", smallImg);
+	GetPrivateProfileString("DiscordIntegration", "InviteIp", "", buffer, sizeof(buffer), profilePath);
+	if (inet_addr(buffer) != -1)
+		myIp = strdup(buffer);
+	logMessagef("Enabled: %s\nClientID: %llu\nShowWR: %s\nHostImg: %s\nInviteIp: %s\n", enabled ? "true" : "false", clientId, showWR ? "true" : "false", smallImg, myIp);
 }
 
 extern "C"
