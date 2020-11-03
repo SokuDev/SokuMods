@@ -5,32 +5,36 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdarg>
+#include <shlwapi.h>
 #include "logger.hpp"
+
+static FILE *logFile;
 
 void initLogger()
 {
-	fclose(fopen(LOG_FILE, "w"));
+	FILE *_;
+
+#ifdef _DEBUG
+	AllocConsole();
+	freopen_s(&_, "CONOUT$", "w", stdout);
+#endif
+	logFile = fopen(LOG_FILE, "w");
 }
 
 void logMessage(const char *msg)
 {
-	FILE *fp = fopen(LOG_FILE, "a+");
-
 	fwrite(msg, 1, strlen(msg), stdout);
-	fwrite(msg, 1, strlen(msg), fp);
-	fclose(fp);
+	fwrite(msg, 1, strlen(msg), logFile);
 }
 
 void logMessagef(const char *format, ...)
 {
-	FILE *fp = fopen(LOG_FILE, "a+");
 	va_list list;
 
 	va_start(list, format);
 	vfprintf(stdout, format, list);
 	va_end(list);
 	va_start(list, format);
-	vfprintf(fp, format, list);
+	vfprintf(logFile, format, list);
 	va_end(list);
-	fclose(fp);
 }
