@@ -37,7 +37,7 @@ To build the project you will need, the MSVC compiler, [discord_game_sdk](https:
 - Make a build folder inside
 - Open a powershell window inside the build folder
 - `cmake .. -DCMAKE_BUILD_TYPE=Release -DDiscordSDK_DIR=C:/path_to_the_game_sdk/lib/x86`
-- `cmake --build . DiscordIntegration`   
+- `cmake --build . --target DiscordIntegration`   
 Warning: If you plan to use the dll you built yourself,
 take the discord_game_sdk.dll provided in the game sdk library you downloaded (C:/path_to_the_game_sdk/lib/x86/discord_game_sdk.dll)
 
