@@ -3,7 +3,7 @@
 
 
 #include <string>
-#include "./Socket.hpp"
+#include "Network/Socket.hpp"
 
 //! @brief Define the BaseException. All exceptions must be inherited from here.
 class BaseException : public std::exception {

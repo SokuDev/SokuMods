@@ -10,7 +10,9 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
 	endif (CMAKE_COMPILER_IS_GNUCC)
 endif ()
 
-include_directories(src/DiscordSDK include)
+include_directories(src/DiscordSDK include SokuLib/src)
+
+add_subdirectory(SokuLib)
 
 add_library(
 	DiscordSDK
@@ -57,16 +59,15 @@ endif ()
 
 add_library(
 	DiscordIntegration MODULE
-	include/swrs.h
-	src/Library/SokuCMC.h
+	src/Library/Network/getPublicIp.cpp
+	src/Library/Network/getPublicIp.hpp
 	src/Library/main.cpp
-	src/Library/offsetsAndAddresses.hpp
-	src/Library/globals.cpp
-	src/Library/globals.hpp
+	src/Library/SokuUtils/SokuState.cpp
+	src/Library/SokuUtils/SokuState.hpp
 	src/Library/logger.cpp
         src/Library/logger.hpp
-        src/Library/Socket.cpp
-        src/Library/Socket.hpp
+	src/Library/Network/Socket.cpp
+	src/Library/Network/Socket.hpp
         src/Library/Exceptions.hpp
 )
 
@@ -80,7 +81,7 @@ if (DEFINED VERSION_110a)
 else ()
 	target_compile_definitions(
 		DiscordIntegration PRIVATE
-		ClientID=${CLIENT_ID}
+		ClientID="${CLIENT_ID}"
 		ClientSecret="${CLIENT_SECRET}"
 	)
 endif ()
@@ -88,6 +89,7 @@ endif ()
 target_link_libraries(
 	DiscordIntegration
 	DiscordSDK
+	SokuLib
 	ws2_32
 	shlwapi
 	${DiscordGameSDK_LIBRARIES}

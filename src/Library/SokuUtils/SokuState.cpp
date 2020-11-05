@@ -2,7 +2,7 @@
 // Created by Gegel85 on 31/10/2020.
 //
 
-#include "globals.hpp"
+#include "SokuState.hpp"
 
 int s_origCLogo_OnProcess;
 int s_origCBattle_OnProcess;

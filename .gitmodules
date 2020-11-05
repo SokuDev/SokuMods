@@ -1,0 +1,3 @@
+[submodule "SokuLib"]
+	path = SokuLib
+	url = https://github.com/Gegel85/SokuLib

@@ -5,7 +5,7 @@
 #include <cstring>
 #include <sstream>
 #include "Socket.hpp"
-#include "Exceptions.hpp"
+#include "../Exceptions.hpp"
 
 #ifndef _WIN32
 #include <unistd.h>

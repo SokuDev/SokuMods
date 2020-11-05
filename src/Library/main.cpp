@@ -9,44 +9,13 @@
 #include <discord.h>
 #include <shlwapi.h>
 #include <fstream>
-// #define SWRS_USES_HASH
-#include <swrs.h>
-#include "offsetsAndAddresses.hpp"
+#include <SokuLib.hpp>
 #include "logger.hpp"
-#include "SokuCMC.h"
-#include "Socket.hpp"
 #include "Exceptions.hpp"
+#include "Network/Socket.hpp"
+#include "Network/getPublicIp.hpp"
 
-HANDLE* LGThread = (HANDLE*)0x089fff4;
-auto LoadGraphicsFun = (void (*)())0x408410;
-auto New = (void* (__cdecl*)(DWORD))0x81fbdc;
-
-typedef void* (__thiscall* Init_fun)(void*);
-
-enum Character {
-	CHARACTER_REIMU,
-	CHARACTER_MARISA,
-	CHARACTER_SAKUYA,
-	CHARACTER_ALICE,
-	CHARACTER_PATCHOULI,
-	CHARACTER_YOUMU,
-	CHARACTER_REMILIA,
-	CHARACTER_YUYUKO,
-	CHARACTER_YUKARI,
-	CHARACTER_SUIKA,
-	CHARACTER_REISEN,
-	CHARACTER_AYA,
-	CHARACTER_KOMACHI,
-	CHARACTER_IKU,
-	CHARACTER_TENSHI,
-	CHARACTER_SANAE,
-	CHARACTER_CIRNO,
-	CHARACTER_MEILING,
-	CHARACTER_UTSUHO,
-	CHARACTER_SUWAKO,
-};
-
-bool enabled;
+static bool enabled;
 static char smallImg[32];
 static bool showWR = false;
 static std::pair<unsigned, unsigned> won;
@@ -57,53 +26,10 @@ static time_t totalTimestamp;
 static time_t refreshRate;
 static discord::Core *core;
 static unsigned long long clientId;
-
-std::vector<std::string> charactersName{
-	"Reimu Hakurei",
-	"Marisa Kirisame",
-	"Sakuya Izayoi",
-	"Alice Margatroid",
-	"Patchouli Knowledge",
-	"Youmu Konpaku",
-	"Remilia Scarlet",
-	"Yuyuko Saigyouji",
-	"Yukari Yakumo",
-	"Suika Ibuki",
-	"Reisen Undongein Inaba",
-	"Aya Shameimaru",
-	"Komachi Onozuka",
-	"Iku Nagae",
-	"Tenshi Hinanawi",
-	"Sanae Kochiya",
-	"Cirno",
-	"Hong Meiling",
-	"Utsuho Reiuji",
-	"Suwako Moriya",
-	"Random Select",
-};
-
-std::vector<std::string> stagesName{
-	"Hakurei Shrine",
-	"Forest of Magic",
-	"Creek of Genbu",
-	"Youkai Mountain",
-	"Mysterious Sea of Cloud",
-	"Bhava-Agra",
-	"Hakurei Shrine",
-	"Kirisame Magic Shop",
-	"Scarlet Devil Mansion Clock Tower",
-	"Forest of Dolls",
-	"Scarlet Devil Mansion Library",
-	"Netherworld",
-	"Scarlet Devil Mansion Foyer",
-	"Hakugyokurou Snowy Garden",
-	"Bamboo Forest of the Lost",
-	"Shore of Misty Lake",
-	"Moriya Shrine",
-	"Mouth of Geyser",
-	"Catwalk of Geyser",
-	"Fusion Reactor Core",
-};
+static int currentScene;
+static std::string roomIp = "";
+static bool read = false;
+static void *garbagePtr;
 
 std::vector<std::string> charactersImg{
 	"reimu",
@@ -129,107 +55,6 @@ std::vector<std::string> charactersImg{
 	"random_select"
 };
 
-// 0:1 = story, 1:0 = arcade, 2:1 = vscom, 3:1 = vsplayer, 5:1=Player 6:2=Watch  8:0 = practice, 0-3:2 = Replay
-std::vector<std::array<std::string, 3>> modeNames{
-	{"0.0",                      "Playing story mode",           "Watching a story mode replay"},
-	{"Playing in Arcade mode",   "1.1",                          "1.2"},
-	{"2.0",                      "Playing against computer",     "2.2"},
-	{"3.0",                      "Playing multiplayer (Offline)","Watching a replay"},
-	{"4.0",                      "Playing multiplayer (Online)", "4.2"},
-	{"5.0",                      "Playing multiplayer (Online)", "Spectating game"},
-	{"6.0",                      "6.1",                          "6.2"},
-	{"7.0",                      "Playing time trial",           "Watching a time trial replay"},
-	{"Playing in practice mode", "8.1",                          "8.2"}
-};
-
-std::vector<std::string> sceneNames{
-	"Watching opening scene",//SWRSSCENE_LOGO         = 0,
-	"Watching opening scene",//SWRSSCENE_OPENING      = 1,
-	"Title screen",          //SWRSSCENE_TITLE        = 2,
-	"SELECT",                //SWRSSCENE_SELECT       = 3,
-	"Scene 4",               //???                    = 4,
-	"BATTLE",                //SWRSSCENE_BATTLE       = 5,
-	"Loading...",            //SWRSSCENE_LOADING      = 6,
-	"Scene 7",               //???                    = 7,
-	"SELECTSV",              //SWRSSCENE_SELECTSV     = 8,
-	"SELECTCL",              //SWRSSCENE_SELECTCL     = 9,
-	"Loading...",            //SWRSSCENE_LOADINGSV    = 10,
-	"Loading...",            //SWRSSCENE_LOADINGCL    = 11,
-	"Loading...",            //SWRSSCENE_LOADINGWATCH = 12,
-	"BATTLESV",              //SWRSSCENE_BATTLESV     = 13,
-	"BATTLECL",              //SWRSSCENE_BATTLECL     = 14,
-	"Watching battle",       //SWRSSCENE_BATTLEWATCH  = 15,
-	"Selecting scenario",    //SWRSSCENE_SELECTSENARIO= 16,
-	"Scene 17",              //???                    = 17,
-	"Scene 18",              //???                    = 18,
-	"Scene 19",              //???                    = 19,
-	"Watching credits",      //SWRSSCENE_ENDING       = 20,
-};
-int currentScene;
-
-char *myIp = nullptr;
-
-void moveToConnectScreen()
-{
-	if (g_sceneId != SWRSSCENE_TITLE) {
-		logMessage("Warping to title screen.\n");
-		g_sceneIdNew = SWRSSCENE_TITLE;
-		*LGThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)LoadGraphicsFun, nullptr, 0, (LPDWORD)0x089fff8);
-		while (g_sceneId != SWRSSCENE_TITLE)
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		logMessage("On title screen.\n");
-	} else
-		logMessage("Already on title screen.\n");
-
-	logMessage("Warping to network screen.\n");
-	((void (*)(void*))0x43e130)(((Init_fun)0x0448760)(New(0x118C)));
-	logMessage("On network screen.\n");
-}
-
-char *getMyIp()
-{
-	if (myIp)
-		return myIp;
-	logMessage("Fetching public IP\n");
-
-	try {
-		Socket sock;
-		Socket::HttpRequest request{
-			/*.body  */  "",
-			/*.method*/  "GET",
-			/*.host  */  "www.sfml-dev.org",
-			/*.portno*/  80,
-			/*.header*/  {},
-			/*.path  */  "/ip-provider.php",
-		};
-		auto response = sock.makeHttpRequest(request);
-
-		if (response.returnCode != 200)
-			throw HTTPErrorException(response);
-		myIp = strdup(response.body.c_str());
-		logMessagef("My ip is %s\n", myIp);
-		return myIp;
-	} catch (NetworkException &e) {
-		logMessagef("Error: %s\n", e.what());
-		throw;
-	}
-}
-
-unsigned char getStageId()
-{
-	unsigned char stage = *reinterpret_cast<unsigned char *>(ADDR_LOADED_STAGE_ID);
-
-	if (stage >= 30)
-		stage -= 11;
-	if (stage >= 10)
-		stage -= 4;
-	return stage;
-}
-
-std::string roomIp = "";
-bool read = false;
-void *garbagePtr;
-
 void genericScreen()
 {
 	logMessagef("Generic menu on scene %i\n", currentScene);
@@ -243,7 +68,7 @@ void genericScreen()
 	totalTimestamp = time(nullptr);
 	hostTimestamp = time(nullptr);
 	logMessage("Get scene name\n");
-	activity.SetState(sceneNames[currentScene].c_str());
+	activity.SetState(SokuLib::sceneNames[currentScene].c_str());
 	logMessage("Done\n");
 	assets.SetLargeImage("cover");
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
@@ -260,30 +85,30 @@ void showHost()
 	logMessagef("Showing host... Internal ip is %s\n", roomIp.c_str());
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
-	auto *menuObj = SokuCMC::GetMenuObj();
+	auto *menuObj = SokuLib::getMenuObj();
 	auto &timeStamp = activity.GetTimestamps();
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
 	if (roomIp.empty()) {
 		try {
-			roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->Port);
-			logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", roomIp.c_str(), menuObj->Spectate ? "" : "not ");
+			roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
+			logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", roomIp.c_str(), menuObj->spectate ? "" : "not ");
 			party.SetId(roomIp.c_str());
 			secrets.SetJoin(("join" + roomIp).c_str());
-			if (menuObj->Spectate)
+			if (menuObj->spectate)
 				secrets.SetSpectate(("spec" + roomIp).c_str());
 		} catch (...) {}
 	} else {
 		party.SetId(roomIp.c_str());
 		secrets.SetJoin(("join" + roomIp).c_str());
-		if (menuObj->Spectate)
+		if (menuObj->spectate)
 			secrets.SetSpectate(("spec" + roomIp).c_str());
 	}
 	party.GetSize().SetCurrentSize(1);
 	party.GetSize().SetMaxSize(2);
 	timeStamp.SetStart(hostTimestamp);
-	activity.SetDetails(sceneNames[currentScene].c_str());
+	activity.SetDetails(SokuLib::sceneNames[currentScene].c_str());
 	activity.SetState("Hosting...");
 	assets.SetLargeImage("cover");
 	assets.SetSmallImage(smallImg);
@@ -299,14 +124,14 @@ void showHost()
 void connectingToRemote()
 {
 	logMessage("Connecting to remote\n");
-	auto *menuObj = SokuCMC::GetMenuObj();
+	auto *menuObj = SokuLib::getMenuObj();
 	logMessagef("Menu object is at %#X\n", menuObj);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	roomIp = menuObj->IPString + (":" + std::to_string(menuObj->Port));
+	roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
 	logMessagef("The new room ip is %s\n", roomIp.c_str());
 	totalTimestamp = time(nullptr);
 
@@ -360,7 +185,7 @@ void connectedToRemoteLoadingCharSelect()
 void titleScreen()
 {
 	logMessage("On title screen\n");
-	auto *menuObj = SokuCMC::GetMenuObj();
+	auto *menuObj = SokuLib::getMenuObj();
 	logMessagef("Menu object is at %#X\n", menuObj);
 
 	if (!read) {
@@ -374,11 +199,22 @@ void titleScreen()
 		return genericScreen();
 	}
 
-	if (menuObj->Choice >= CHOICE_ASSIGN_IP_CONNECT && menuObj->Choice < CHOICE_SELECT_PROFILE && menuObj->Subchoice == 3)
+	if (
+		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
+		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+		menuObj->subchoice == 3
+	)
 		connectingToRemote();
-	else if (menuObj->Choice >= CHOICE_HOST && menuObj->Choice < CHOICE_SELECT_PROFILE && menuObj->Subchoice == 255)
+	else if (
+		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
+		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+		menuObj->subchoice == 255
+	)
 		connectedToRemoteLoadingCharSelect();
-	else if (menuObj->Choice == CHOICE_HOST && menuObj->Subchoice == 2)
+	else if (
+		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
+		menuObj->subchoice == 2
+	)
 		showHost();
 	else
 		genericScreen();
@@ -389,35 +225,42 @@ void localBattle()
 {
 	logMessage("Playing a local game\n");
 
-	unsigned stage = getStageId();
+	SokuLib::Stage stage = SokuLib::getStageId();
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
-	const char *profile2 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER2_PROFILE_STR);
+	const char *profile1 = SokuLib::player1Profile();
+	const char *profile2 = SokuLib::player2Profile();
 
 	logMessagef("The 2 profiles addresses are %#x %#x\n", profile1, profile2);
 	logMessagef("The 2 profiles are %s %s\n", profile1, profile2);
 	timeStamp.SetStart(gameTimestamp);
 
-	if (g_subMode == SWRSSUBMODE_REPLAY) {
+	if (SokuLib::getSubMode() == SokuLib::BATTLE_SUBMODE_REPLAY) {
 		logMessage("This is a replay\n");
 		assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
-		assets.SetLargeText(stagesName[stage].c_str());
-		activity.SetDetails(modeNames[g_mainMode][g_subMode].c_str());
-		activity.SetState(std::string(charactersName[g_leftCharID] + " vs " + charactersName[g_rightCharID]).c_str());
+		assets.SetLargeText(SokuLib::stagesName[stage].c_str());
+		activity.SetDetails(SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()].c_str());
+		activity.SetState(std::string(SokuLib::charactersName[SokuLib::getLeftChar()] + " vs " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
 	} else {
 		logMessage("This is not a replay\n");
-		assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
-		assets.SetLargeText(charactersName[g_leftCharID].c_str());
+		logMessagef("%i\n", sizeof(SokuLib::Stage));
+		logMessagef("Stage: %i, Main: %i, Sub: %i, Left: %i, Right: %i\n", stage, SokuLib::getMainMode(), SokuLib::getSubMode(), SokuLib::getLeftChar(), SokuLib::getRightChar());
+		assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
+		logMessage("Left\n");
+		assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
+		logMessage("Left\n");
 		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-		assets.SetSmallText(stagesName[stage].c_str());
-		activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
-		if (g_mainMode == SWRSMODE_VSPLAYER)
-			activity.SetState((std::string("Against ") + profile2 + " as " + charactersName[g_rightCharID]).c_str());
+		assets.SetSmallText(SokuLib::stagesName[stage].c_str());
+		logMessage("Stage\n");
+		activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+		logMessage("Modes\n");
+		if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSPLAYER)
+			activity.SetState((std::string("Against ") + profile2 + " as " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
 		else
-			activity.SetState(("Against " + charactersName[g_rightCharID]).c_str());
+			activity.SetState(("Against " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
+		logMessage("Right\n");
 	}
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
@@ -450,27 +293,27 @@ int CBattleCL_OnProcess(void *This, void *other)
 void loadMatch()
 {
 	logMessage("Loading local match\n");
-	unsigned stage = getStageId();
+	unsigned stage = SokuLib::getStageId();
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	const char *profile1 = SokuLib::player1Profile();
 
 	logMessagef("profile address is %#X\n", profile1);
 	logMessagef("profile is %s\n", profile1);
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
-	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
-	assets.SetLargeText(charactersName[g_leftCharID].c_str());
+	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
 
-	if (g_subMode == SWRSSUBMODE_REPLAY) {
-		assets.SetSmallImage(charactersImg[g_rightCharID].c_str());
-		assets.SetSmallText(charactersName[g_rightCharID].c_str());
-		activity.SetDetails(modeNames[g_mainMode][g_subMode].c_str());
+	if (SokuLib::getSubMode() == SokuLib::BATTLE_SUBMODE_REPLAY) {
+		assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
+		assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
+		activity.SetDetails(SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()].c_str());
 	} else {
 		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-		assets.SetSmallText(stagesName[stage].c_str());
-		activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+		assets.SetSmallText(SokuLib::stagesName[stage].c_str());
+		activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
 	}
 	activity.SetState("Loading...");
 
@@ -489,17 +332,17 @@ void charSelect()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	const char *profile1 = SokuLib::player1Profile();
 
 	logMessagef("Profile address is %#x\n", profile1);
 	logMessagef("Profile name is %s\n", profile1);
 	timeStamp.SetStart(totalTimestamp);
-	assets.SetSmallImage(charactersImg[g_rightCharID].c_str());
-	assets.SetSmallText(charactersName[g_rightCharID].c_str());
-	assets.SetLargeImage(charactersImg[g_leftCharID].c_str());
-	assets.SetLargeText(charactersName[g_leftCharID].c_str());
+	assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
+	assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
+	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
 
-	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
 	activity.SetState("Character select...");
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -513,18 +356,18 @@ void charSelect()
 void onlineBattle()
 {
 	logMessage("In online battle\n");
-	unsigned stage = getStageId();
+	unsigned stage = SokuLib::getStageId();
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	const char *profile1 = SokuLib::player1Profile();
 	char myChar;
 	char opChar;
 	char *opName;
-	OnlineInfo *infos = *reinterpret_cast<OnlineInfo **>(ADDR_ONLINE_INFOS_PTR);
+	SokuLib::NetObject *infos = SokuLib::getNetObject();
 	logMessagef("Infos ptr is %#X\n", infos);
-	char *battle_manager = *(char**)ADDR_BATTLE_MANAGER;
+	char *battle_manager = reinterpret_cast<char *>(SokuLib::getBattleMgr());
 	logMessagef("BattleMgr is at %#X\n", battle_manager);
 	char *server_manager = *(char**)(battle_manager + 0x0C);
 	logMessagef("Server manager is at %#X\n", server_manager);
@@ -534,18 +377,18 @@ void onlineBattle()
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	if (g_mainMode == SWRSMODE_VSCLIENT) {
+	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT) {
 		opName = infos->profile2name;
-		myChar = g_leftCharID;
-		opChar = g_rightCharID;
+		myChar = SokuLib::getLeftChar();
+		opChar = SokuLib::getRightChar();
 		logMessagef("Won serv is %u\n", *(server_manager + 0x573));
 		logMessagef("Won client is %u\n", *(client_manager + 0x573));
 		won.first = *(server_manager + 0x573);
 		won.second = *(client_manager + 0x573);
 	} else {
 		opName = infos->profile1name;
-		myChar = g_rightCharID;
-		opChar = g_leftCharID;
+		myChar = SokuLib::getRightChar();
+		opChar = SokuLib::getLeftChar();
 		logMessagef("Won client is %u\n", *(client_manager + 0x573));
 		logMessagef("Won serv is %u\n", *(server_manager + 0x573));
 		won.first = *(client_manager + 0x573);
@@ -562,18 +405,18 @@ void onlineBattle()
 	party.GetSize().SetMaxSize(2);
 	timeStamp.SetStart(gameTimestamp);
 	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetSmallText(stagesName[stage].c_str());
+	assets.SetSmallText(SokuLib::stagesName[stage].c_str());
 	assets.SetLargeImage(charactersImg[myChar].c_str());
-	assets.SetLargeText(charactersName[myChar].c_str());
+	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
-	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
 	if (showWR)
 		activity.SetState((
-			std::string("Against ") + opName + " as " + charactersName[opChar] +
+			std::string("Against ") + opName + " as " + SokuLib::charactersName[opChar] +
 			" (" + std::to_string(won.first) + " - " + std::to_string(won.second) + ")"
 		).c_str());
 	else
-		activity.SetState((std::string("Against ") + opName + " as " + charactersName[opChar]).c_str());
+		activity.SetState((std::string("Against ") + opName + " as " + SokuLib::charactersName[opChar]).c_str());
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -587,11 +430,11 @@ void onlineBattle()
 void loadOnlineMatch()
 {
 	logMessage("Loading online match\n");
-	unsigned stage = getStageId();
+	unsigned stage = SokuLib::getStageId();
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	const char *profile1 = SokuLib::player1Profile();
 	char myChar;
 
 	logMessagef("profile is at %#X\n", profile1);
@@ -599,10 +442,10 @@ void loadOnlineMatch()
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	if (g_mainMode == SWRSMODE_VSCLIENT)
-		myChar = g_leftCharID;
+	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT)
+		myChar = SokuLib::getLeftChar();
 	else
-		myChar = g_rightCharID;
+		myChar = SokuLib::getRightChar();
 	logMessagef("My character is %u\n", myChar);
 
 	party.SetId(roomIp.c_str());
@@ -612,11 +455,11 @@ void loadOnlineMatch()
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetSmallText(stagesName[stage].c_str());
+	assets.SetSmallText(SokuLib::stagesName[stage].c_str());
 	assets.SetLargeImage(charactersImg[myChar].c_str());
-	assets.SetLargeText(charactersName[myChar].c_str());
+	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
-	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
 	activity.SetState("Loading...");
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
@@ -631,12 +474,12 @@ void loadOnlineMatch()
 void onlineCharSelect()
 {
 	logMessage("Online character select\n");
-	OnlineInfo *infos = *reinterpret_cast<OnlineInfo **>(ADDR_ONLINE_INFOS_PTR);
+	SokuLib::NetObject *infos = SokuLib::getNetObject();
 	logMessagef("Infos ptr is %#X\n", infos);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = *reinterpret_cast<VC9STRING *>(ADDR_PLAYER1_PROFILE_STR);
+	const char *profile1 = SokuLib::player1Profile();
 	char myChar;
 	char opChar;
 	char *opName;
@@ -645,14 +488,14 @@ void onlineCharSelect()
 
 	logMessagef("profile addr is %#x\n", profile1);
 	logMessagef("profile is %s\n", profile1);
-	if (g_mainMode == SWRSMODE_VSCLIENT) {
+	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT) {
 		opName = infos->profile2name;
-		myChar = g_leftCharID;
-		opChar = g_rightCharID;
+		myChar = SokuLib::getLeftChar();
+		opChar = SokuLib::getRightChar();
 	} else {
 		opName = infos->profile1name;
-		myChar = g_rightCharID;
-		opChar = g_leftCharID;
+		myChar = SokuLib::getRightChar();
+		opChar = SokuLib::getLeftChar();
 	}
 	logMessagef("Opponent name is at %#X\n", opName);
 	logMessagef("Opponent name is %s\n", opName);
@@ -669,11 +512,11 @@ void onlineCharSelect()
 	won = {0, 0};
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(charactersImg[opChar].c_str());
-	assets.SetSmallText(charactersName[opChar].c_str());
+	assets.SetSmallText(SokuLib::charactersName[opChar].c_str());
 	assets.SetLargeImage(charactersImg[myChar].c_str());
-	assets.SetLargeText(charactersName[myChar].c_str());
+	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
-	activity.SetDetails((modeNames[g_mainMode][g_subMode] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
 	if (showWR)
 		activity.SetState((
 			"Character select... (vs " + std::string(opName) + " " +
@@ -756,26 +599,26 @@ public:
 				bool isSpec = secret.substr(0, 4) == "spec";
 
 				logMessage("Warping to connect screen.\n");
-				moveToConnectScreen();
+				SokuLib::moveToConnectScreen();
 				logMessage("Done.\n");
 				logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-				SokuCMC::JoinHost(
+				SokuLib::joinHost(
 					ip.c_str(),
 					port,
 					isSpec
 				);
 			});
 			while (!this->isDone()) {
-				currentScene = g_sceneId;
+				currentScene = SokuLib::sceneId();
 
-				auto newScene = g_sceneIdNew;
+				auto newScene = SokuLib::sceneIdNew();
 
 				logMessagef("Current scene is %i vs new scene %i\n", currentScene, newScene);
 				if (currentScene >= 0 && currentScene < sceneCallbacks.size() && currentScene == newScene) {
 					logMessagef("Calling callback %u\n", currentScene);
 					sceneCallbacks[currentScene]();
 					logMessage("Callback returned\n");
-				} else if (currentScene == SWRSSCENE_TITLE && (newScene == SWRSSCENE_SELECTSV || newScene == SWRSSCENE_SELECTCL))
+				} else if (currentScene == SokuLib::SCENE_TITLE && (newScene == SokuLib::SCENE_SELECTSV || newScene == SokuLib::SCENE_SELECTCL))
 					connectedToRemoteLoadingCharSelect();
 				else
 					logMessage("No callback call\n");
@@ -795,6 +638,8 @@ void LoadSettings(LPCSTR profilePath)
 {
 	char buffer[64];
 
+	logMessagef("%i\n", sizeof(SokuLib::Stage));
+	logMessagef("%i\n", sizeof(SokuLib::Character));
 	logMessage("Loading settings...\n");
 	// �����V���b�g�_�E��
 	enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;

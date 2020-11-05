@@ -14,17 +14,20 @@ void initLogger()
 {
 	FILE *_;
 
+	logFile = fopen(LOG_FILE, "w");
+	fclose(logFile);
 #ifdef _DEBUG
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
 #endif
-	logFile = fopen(LOG_FILE, "w");
 }
 
 void logMessage(const char *msg)
 {
 	fwrite(msg, 1, strlen(msg), stdout);
+	logFile = fopen(LOG_FILE, "a");
 	fwrite(msg, 1, strlen(msg), logFile);
+	fclose(logFile);
 }
 
 void logMessagef(const char *format, ...)
@@ -35,6 +38,8 @@ void logMessagef(const char *format, ...)
 	vfprintf(stdout, format, list);
 	va_end(list);
 	va_start(list, format);
+	logFile = fopen(LOG_FILE, "a");
 	vfprintf(logFile, format, list);
+	fclose(logFile);
 	va_end(list);
 }

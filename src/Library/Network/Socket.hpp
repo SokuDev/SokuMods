@@ -19,7 +19,6 @@
 //! @brief Define a Socket
 class Socket {
 public:
-
 	//! @brief Define a http request payload.
 	struct HttpRequest {
 		std::string body; //!< The body of the request
