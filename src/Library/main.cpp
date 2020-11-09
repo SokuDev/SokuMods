@@ -8,11 +8,9 @@
 #include <array>
 #include <discord.h>
 #include <shlwapi.h>
-#include <fstream>
 #include <SokuLib.hpp>
 #include "logger.hpp"
 #include "Exceptions.hpp"
-#include "Network/Socket.hpp"
 #include "Network/getPublicIp.hpp"
 
 static bool enabled;
@@ -28,8 +26,53 @@ static discord::Core *core;
 static unsigned long long clientId;
 static int currentScene;
 static std::string roomIp = "";
-static bool read = false;
-static void *garbagePtr;
+
+const std::vector<const char *> discordResultToString{
+	"Ok",
+	"ServiceUnavailable",
+	"InvalidVersion",
+	"LockFailed",
+	"InternalError",
+	"InvalidPayload",
+	"InvalidCommand",
+	"InvalidPermissions",
+	"NotFetched",
+	"NotFound",
+	"Conflict",
+	"InvalidSecret",
+	"InvalidJoinSecret",
+	"NoEligibleActivity",
+	"InvalidInvite",
+	"NotAuthenticated",
+	"InvalidAccessToken",
+	"ApplicationMismatch",
+	"InvalidDataUrl",
+	"InvalidBase64",
+	"NotFiltered",
+	"LobbyFull",
+	"InvalidLobbySecret",
+	"InvalidFilename",
+	"InvalidFileSize",
+	"InvalidEntitlement",
+	"NotInstalled",
+	"NotRunning",
+	"InsufficientBuffer",
+	"PurchaseCanceled",
+	"InvalidGuild",
+	"InvalidEvent",
+	"InvalidChannel",
+	"InvalidOrigin",
+	"RateLimited",
+	"OAuth2Error",
+	"SelectChannelTimeout",
+	"GetGuildTimeout",
+	"SelectVoiceForceRequired",
+	"CaptureShortcutAlreadyListening",
+	"UnauthorizedForAchievement",
+	"InvalidGiftCode",
+	"PurchaseError",
+	"TransactionAborted",
+};
 
 std::vector<std::string> charactersImg{
 	"reimu",
@@ -75,7 +118,7 @@ void genericScreen()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
@@ -116,7 +159,7 @@ void showHost()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
@@ -131,7 +174,8 @@ void connectingToRemote()
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
+	if (roomIp.empty())
+		roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
 	logMessagef("The new room ip is %s\n", roomIp.c_str());
 	totalTimestamp = time(nullptr);
 
@@ -148,14 +192,14 @@ void connectingToRemote()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
 
 void connectedToRemoteLoadingCharSelect()
 {
-	logMessage("Connected and waiting to load\n");
+	logMessagef("Connected and waiting to load. Internal ip is %s\n", roomIp.c_str());
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &party = activity.GetParty();
@@ -177,7 +221,7 @@ void connectedToRemoteLoadingCharSelect()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
@@ -186,18 +230,14 @@ void titleScreen()
 {
 	logMessage("On title screen\n");
 	auto *menuObj = SokuLib::getMenuObj();
-	logMessagef("Menu object is at %#X\n", menuObj);
 
-	if (!read) {
-		logMessage("This was a garbage pointer, remembering it so we don't use it\n");
-		garbagePtr = menuObj;
-		read = true;
-	}
 
-	if (menuObj == garbagePtr || *reinterpret_cast<char *>(menuObj)) {
+	if (!IN_MENU || *reinterpret_cast<char *>(menuObj)) {
 		logMessage("We are not in a proper submenu, falling back to generic screen\n");
 		return genericScreen();
 	}
+
+	logMessagef("Menu object is at %#X\n", menuObj);
 
 	if (
 		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
@@ -224,8 +264,7 @@ void titleScreen()
 void localBattle()
 {
 	logMessage("Playing a local game\n");
-
-	SokuLib::Stage stage = SokuLib::getStageId();
+	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
@@ -245,7 +284,6 @@ void localBattle()
 		activity.SetState(std::string(SokuLib::charactersName[SokuLib::getLeftChar()] + " vs " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
 	} else {
 		logMessage("This is not a replay\n");
-		logMessagef("%i\n", sizeof(SokuLib::Stage));
 		logMessagef("Stage: %i, Main: %i, Sub: %i, Left: %i, Right: %i\n", stage, SokuLib::getMainMode(), SokuLib::getSubMode(), SokuLib::getLeftChar(), SokuLib::getRightChar());
 		assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
 		logMessage("Left\n");
@@ -267,7 +305,7 @@ void localBattle()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
@@ -293,7 +331,7 @@ int CBattleCL_OnProcess(void *This, void *other)
 void loadMatch()
 {
 	logMessage("Loading local match\n");
-	unsigned stage = SokuLib::getStageId();
+	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
@@ -321,7 +359,7 @@ void loadMatch()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
@@ -348,15 +386,15 @@ void charSelect()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
 
 void onlineBattle()
 {
-	logMessage("In online battle\n");
-	unsigned stage = SokuLib::getStageId();
+	logMessagef("In online battle. Internal ip is %s\n", roomIp.c_str());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
@@ -422,15 +460,15 @@ void onlineBattle()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
 
 void loadOnlineMatch()
 {
-	logMessage("Loading online match\n");
-	unsigned stage = SokuLib::getStageId();
+	logMessagef("Loading online match. Internal ip is %s\n", roomIp.c_str());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
@@ -466,14 +504,14 @@ void loadOnlineMatch()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 	logMessage("Callback end\n");
 }
 
 void onlineCharSelect()
 {
-	logMessage("Online character select\n");
+	logMessagef("Online character select. Internal ip is %s\n", roomIp.c_str());
 	SokuLib::NetObject *infos = SokuLib::getNetObject();
 	logMessagef("Infos ptr is %#X\n", infos);
 	discord::Activity activity{};
@@ -532,7 +570,7 @@ void onlineCharSelect()
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
-			logMessagef("Error: %u\n", code);
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
 }
 
@@ -571,9 +609,55 @@ enum MenuEnum {
 	MENU_COUNT
 };
 
+void onActivityJoin(const char *sec)
+{
+	logMessagef("Got activity join with payload %s\n", sec);
+
+	auto menuObj = SokuLib::getMenuObj();
+	std::string secret = sec;
+	auto ip = secret.substr(4, secret.find_last_of(':') - 4);
+	unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
+	bool isSpec = secret.substr(0, 4) == "spec";
+
+	if (!IN_MENU || *reinterpret_cast<char *>(menuObj)) {
+		logMessage("Warping to connect screen.\n");
+		SokuLib::moveToConnectScreen();
+		menuObj = SokuLib::getMenuObj();
+		logMessage("Done.\n");
+	} else
+		logMessage("Already in connect screen\n");
+
+	if (
+		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
+		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+		menuObj->subchoice == 3
+	)
+		return;
+	if (
+		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
+		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+		menuObj->subchoice == 255
+	)
+		return;
+	if (
+		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
+		menuObj->subchoice == 2
+	)
+		return;
+
+	logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
+	SokuLib::joinHost(
+		ip.c_str(),
+		port,
+		isSpec
+	);
+	roomIp = ip + ":" + std::to_string(port);
+}
+
 class MyThread : public std::thread {
 private:
 	bool _done;
+	int _connectTimeout = 1;
 
 public:
 	bool isDone() const { return this->_done; }
@@ -588,26 +672,22 @@ public:
 	void start() {
 		std::thread::operator=(std::thread([this] {
 			logMessage("Connecting to discord client...\n");
-			discord::Core::Create(clientId, DiscordCreateFlags_Default, &core);
+			discord::Result result;
+
+			do {
+				result = discord::Core::Create(clientId, DiscordCreateFlags_NoRequireDiscord, &core);
+
+				if (result != discord::Result::Ok) {
+					logMessagef("Error connecting to discord: %s\n", discordResultToString[static_cast<unsigned>(result)]);
+					logMessagef("Retrying in %i seconds\n", this->_connectTimeout);
+					std::this_thread::sleep_for(std::chrono::seconds(this->_connectTimeout));
+					if (this->_connectTimeout < 64)
+						this->_connectTimeout *= 2;
+				}
+			} while (result != discord::Result::Ok);
 			logMessage("Connected !\n");
-			core->ActivityManager().OnActivityJoin.Connect([](const char *sec){
-				logMessagef("Got activity join with payload %s\n", sec);
-
-				std::string secret = sec;
-				auto ip = secret.substr(4, secret.find_last_of(':') - 4);
-				unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
-				bool isSpec = secret.substr(0, 4) == "spec";
-
-				logMessage("Warping to connect screen.\n");
-				SokuLib::moveToConnectScreen();
-				logMessage("Done.\n");
-				logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-				SokuLib::joinHost(
-					ip.c_str(),
-					port,
-					isSpec
-				);
-			});
+			core->ActivityManager().OnActivityJoin.Connect(onActivityJoin);
+			logMessage("Entering loop\n");
 			while (!this->isDone()) {
 				currentScene = SokuLib::sceneId();
 
@@ -638,8 +718,6 @@ void LoadSettings(LPCSTR profilePath)
 {
 	char buffer[64];
 
-	logMessagef("%i\n", sizeof(SokuLib::Stage));
-	logMessagef("%i\n", sizeof(SokuLib::Character));
 	logMessage("Loading settings...\n");
 	// �����V���b�g�_�E��
 	enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;
