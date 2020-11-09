@@ -31,6 +31,14 @@ If you don't, invited people will fail to connect.
 - ![](https://imgur.com/v1tk4pP.png)
 - ![](https://imgur.com/PzxfOVd.png)
 
+## Known bugs
+- Using a discord invite while the game is on the logo screen will teleport successfully to the connect screen and, on successful connection, will crash the game.
+- Using a discord invite while the game before the title screen button appears (So just before and and during the introduction) will teleport successfully to the connect screen and, on successful connection, will crash the game.  
+
+If you are annoyed by the above 2 issues, you can install the IntroSkip mod.
+
+- A rare bug with DPadFix can cause the controllers to because unresponsive with both characters doing the same input in netplay, requiring a restart of the game to fix (Under investigation).
+
 ## Build
 To build the project you will need, the MSVC compiler, [discord_game_sdk](https://discord.com/developers/docs/game-sdk/sdk-starter-guide#step-1-get-the-thing) library and cmake.
 - Clone the repository
