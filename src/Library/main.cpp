@@ -309,25 +309,7 @@ void localBattle()
 	});
 	logMessage("Callback end\n");
 }
-/*
-int CBattleSV_OnProcess(void *This, void *other)
-{
-	logMessage("Yes !\n");
-	int ret = CBattleSV_Process(This, other);
-	logMessagef("Returned %i\n", ret);
 
-	return ret;
-}
-
-int CBattleCL_OnProcess(void *This, void *other)
-{
-	logMessage("Ouah !\n");
-	int ret = CBattleCL_Process(This, other);
-	logMessagef("Returned %i\n", ret);
-
-	return ret;
-}
-*/
 void loadMatch()
 {
 	logMessage("Loading local match\n");
@@ -342,7 +324,7 @@ void loadMatch()
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
 
 	if (SokuLib::getSubMode() == SokuLib::BATTLE_SUBMODE_REPLAY) {
 		assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
@@ -465,6 +447,55 @@ void onlineBattle()
 	logMessage("Callback end\n");
 }
 
+void onlineBattleSpec()
+{
+	logMessagef("Watching online game. Internal ip is %s\n", roomIp.c_str());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	logMessagef("We are on stage %u\n", stage);
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+	SokuLib::NetObject *infos = SokuLib::getNetObject();
+	logMessagef("Infos ptr is %#X\n", infos);
+	char *battle_manager = reinterpret_cast<char *>(SokuLib::getBattleMgr());
+	logMessagef("BattleMgr is at %#X\n", battle_manager);
+	char *server_manager = *(char**)(battle_manager + 0x0C);
+	logMessagef("Server manager is at %#X\n", server_manager);
+	char *client_manager = *(char**)(battle_manager + 0x10);
+	logMessagef("Client manager is at %#X\n", client_manager);
+
+	timeStamp.SetStart(gameTimestamp);
+
+	won.first = *(server_manager + 0x573);
+	won.second = *(client_manager + 0x573);
+	party.SetId(roomIp.c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
+	assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
+	assets.SetLargeText(SokuLib::stagesName[stage].c_str());
+	activity.SetDetails((
+		SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" +
+		std::string(infos->profile1name) + " vs " +
+		infos->profile2name + ")"
+	).c_str());
+	activity.SetState((
+		SokuLib::charactersName[SokuLib::getLeftChar()] + " vs " +
+		SokuLib::charactersName[SokuLib::getRightChar()] +
+		" (" + std::to_string(won.first) + " - " + std::to_string(won.second) + ")"
+	).c_str());
+
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
+	});
+	logMessage("Callback end\n");
+}
+
 void loadOnlineMatch()
 {
 	logMessagef("Loading online match. Internal ip is %s\n", roomIp.c_str());
@@ -498,6 +529,45 @@ void loadOnlineMatch()
 	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
 	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+	activity.SetState("Loading...");
+
+	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+		auto code = static_cast<unsigned>(result);
+
+		if (code)
+			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
+	});
+	logMessage("Callback end\n");
+}
+
+void loadOnlineMatchSpec()
+{
+	logMessagef("Loading online match as spectator. Internal ip is %s\n", roomIp.c_str());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	discord::Activity activity{};
+	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	SokuLib::NetObject *infos = SokuLib::getNetObject();
+	auto &party = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+
+	party.SetId(roomIp.c_str());
+	secrets.SetSpectate(("spec" + roomIp).c_str());
+	party.GetSize().SetCurrentSize(2);
+	party.GetSize().SetMaxSize(2);
+	logMessagef("Infos ptr is %#X\n", infos);
+	gameTimestamp = time(nullptr);
+	timeStamp.SetStart(totalTimestamp);
+	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
+
+	assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
+	assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
+	activity.SetDetails((
+		SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" +
+		std::string(infos->profile1name) + " vs " +
+		infos->profile2name + ")"
+	).c_str());
 	activity.SetState("Loading...");
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
@@ -575,27 +645,27 @@ void onlineCharSelect()
 }
 
 std::vector<std::function<void()>> sceneCallbacks{
-	genericScreen,    //SWRSSCENE_LOGO         = 0,
-	genericScreen,    //SWRSSCENE_OPENING      = 1,
-	titleScreen,      //SWRSSCENE_TITLE        = 2,
-	charSelect,       //SWRSSCENE_SELECT       = 3,
-	genericScreen,    //???                    = 4,
-	localBattle,      //SWRSSCENE_BATTLE       = 5,
-	loadMatch,        //SWRSSCENE_LOADING      = 6,
-	genericScreen,    //???                    = 7,
-	onlineCharSelect, //SWRSSCENE_SELECTSV     = 8,
-	onlineCharSelect, //SWRSSCENE_SELECTCL     = 9,
-	loadOnlineMatch,  //SWRSSCENE_LOADINGSV    = 10,
-	loadOnlineMatch,  //SWRSSCENE_LOADINGCL    = 11,
-	genericScreen,    //SWRSSCENE_LOADINGWATCH = 12,
-	onlineBattle,     //SWRSSCENE_BATTLESV     = 13,
-	onlineBattle,     //SWRSSCENE_BATTLECL     = 14,
-	genericScreen,    //SWRSSCENE_BATTLEWATCH  = 15,
-	genericScreen,    //SWRSSCENE_SELECTSENARIO= 16,
-	genericScreen,    //???                    = 17,
-	genericScreen,    //???                    = 18,
-	genericScreen,    //???                    = 19,
-	genericScreen,    //SWRSSCENE_ENDING       = 20,
+	genericScreen,       //SWRSSCENE_LOGO         = 0,
+	genericScreen,       //SWRSSCENE_OPENING      = 1,
+	titleScreen,         //SWRSSCENE_TITLE        = 2,
+	charSelect,          //SWRSSCENE_SELECT       = 3,
+	genericScreen,       //???                    = 4,
+	localBattle,         //SWRSSCENE_BATTLE       = 5,
+	loadMatch,           //SWRSSCENE_LOADING      = 6,
+	genericScreen,       //???                    = 7,
+	onlineCharSelect,    //SWRSSCENE_SELECTSV     = 8,
+	onlineCharSelect,    //SWRSSCENE_SELECTCL     = 9,
+	loadOnlineMatch,     //SWRSSCENE_LOADINGSV    = 10,
+	loadOnlineMatch,     //SWRSSCENE_LOADINGCL    = 11,
+	loadOnlineMatchSpec, //SWRSSCENE_LOADINGWATCH = 12,
+	onlineBattle,        //SWRSSCENE_BATTLESV     = 13,
+	onlineBattle,        //SWRSSCENE_BATTLECL     = 14,
+	onlineBattleSpec,    //SWRSSCENE_BATTLEWATCH  = 15,
+	genericScreen,       //SWRSSCENE_SELECTSENARIO= 16,
+	genericScreen,       //???                    = 17,
+	genericScreen,       //???                    = 18,
+	genericScreen,       //???                    = 19,
+	genericScreen,       //SWRSSCENE_ENDING       = 20,
 };
 
 enum MenuEnum {
