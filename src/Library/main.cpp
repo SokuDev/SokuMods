@@ -12,6 +12,7 @@
 #include "logger.hpp"
 #include "Exceptions.hpp"
 #include "Network/getPublicIp.hpp"
+#include "ShiftJISDecoder.hpp"
 
 static bool enabled;
 static char smallImg[32];
@@ -269,11 +270,10 @@ void localBattle()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = SokuLib::player1Profile();
-	const char *profile2 = SokuLib::player2Profile();
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
+	std::string profile2 = convertShiftJisToUTF8(SokuLib::player2Profile());
 
-	logMessagef("The 2 profiles addresses are %#x %#x\n", profile1, profile2);
-	logMessagef("The 2 profiles are %s %s\n", profile1, profile2);
+	logMessagef("The 2 profiles are %s %s\n", profile1.c_str(), profile2.c_str());
 	timeStamp.SetStart(gameTimestamp);
 
 	if (SokuLib::getSubMode() == SokuLib::BATTLE_SUBMODE_REPLAY) {
@@ -317,10 +317,9 @@ void loadMatch()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = SokuLib::player1Profile();
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
 
-	logMessagef("profile address is %#X\n", profile1);
-	logMessagef("profile is %s\n", profile1);
+	logMessagef("profile is %s\n", profile1.c_str());
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
@@ -352,10 +351,9 @@ void charSelect()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = SokuLib::player1Profile();
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
 
-	logMessagef("Profile address is %#x\n", profile1);
-	logMessagef("Profile name is %s\n", profile1);
+	logMessagef("Profile name is %s\n", profile1.c_str());
 	timeStamp.SetStart(totalTimestamp);
 	assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
 	assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
@@ -381,10 +379,10 @@ void onlineBattle()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = SokuLib::player1Profile();
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
 	char myChar;
 	char opChar;
-	char *opName;
+	std::string opName;
 	SokuLib::NetObject *infos = SokuLib::getNetObject();
 	logMessagef("Infos ptr is %#X\n", infos);
 	char *battle_manager = reinterpret_cast<char *>(SokuLib::getBattleMgr());
@@ -398,7 +396,7 @@ void onlineBattle()
 	auto &secrets = activity.GetSecrets();
 
 	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT) {
-		opName = infos->profile2name;
+		opName = convertShiftJisToUTF8(infos->profile2name);
 		myChar = SokuLib::getLeftChar();
 		opChar = SokuLib::getRightChar();
 		logMessagef("Won serv is %u\n", *(server_manager + 0x573));
@@ -406,7 +404,7 @@ void onlineBattle()
 		won.first = *(server_manager + 0x573);
 		won.second = *(client_manager + 0x573);
 	} else {
-		opName = infos->profile1name;
+		opName = convertShiftJisToUTF8(infos->profile1name);
 		myChar = SokuLib::getRightChar();
 		opChar = SokuLib::getLeftChar();
 		logMessagef("Won client is %u\n", *(client_manager + 0x573));
@@ -414,8 +412,7 @@ void onlineBattle()
 		won.first = *(client_manager + 0x573);
 		won.second = *(server_manager + 0x573);
 	}
-	logMessagef("Opponent name is at %#X\n", opName);
-	logMessagef("Opponent name is %s\n", opName);
+	logMessagef("Opponent name is %s\n", opName.c_str());
 	logMessagef("My character is %u\n", myChar);
 	logMessagef("Opponent character is %u\n", opChar);
 
@@ -478,8 +475,8 @@ void onlineBattleSpec()
 	assets.SetLargeText(SokuLib::stagesName[stage].c_str());
 	activity.SetDetails((
 		SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" +
-		std::string(infos->profile1name) + " vs " +
-		infos->profile2name + ")"
+		convertShiftJisToUTF8(infos->profile1name) + " vs " +
+		convertShiftJisToUTF8(infos->profile2name) + ")"
 	).c_str());
 	activity.SetState((
 		SokuLib::charactersName[SokuLib::getLeftChar()] + " vs " +
@@ -503,11 +500,10 @@ void loadOnlineMatch()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = SokuLib::player1Profile();
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
 	char myChar;
 
-	logMessagef("profile is at %#X\n", profile1);
-	logMessagef("profile is %s\n", profile1);
+	logMessagef("profile is %s\n", profile1.c_str());
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
@@ -565,8 +561,8 @@ void loadOnlineMatchSpec()
 	assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
 	activity.SetDetails((
 		SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" +
-		std::string(infos->profile1name) + " vs " +
-		infos->profile2name + ")"
+		convertShiftJisToUTF8(infos->profile1name) + " vs " +
+		convertShiftJisToUTF8(infos->profile2name) + ")"
 	).c_str());
 	activity.SetState("Loading...");
 
@@ -587,26 +583,24 @@ void onlineCharSelect()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	const char *profile1 = SokuLib::player1Profile();
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
 	char myChar;
 	char opChar;
-	char *opName;
+	std::string opName;
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	logMessagef("profile addr is %#x\n", profile1);
-	logMessagef("profile is %s\n", profile1);
+	logMessagef("profile is %s\n", profile1.c_str());
 	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT) {
-		opName = infos->profile2name;
+		opName = convertShiftJisToUTF8(infos->profile2name);
 		myChar = SokuLib::getLeftChar();
 		opChar = SokuLib::getRightChar();
 	} else {
-		opName = infos->profile1name;
+		opName = convertShiftJisToUTF8(infos->profile1name);
 		myChar = SokuLib::getRightChar();
 		opChar = SokuLib::getLeftChar();
 	}
-	logMessagef("Opponent name is at %#X\n", opName);
-	logMessagef("Opponent name is %s\n", opName);
+	logMessagef("Opponent name is %s\n", opName.c_str());
 	logMessagef("My character is %u\n", myChar);
 	logMessagef("Opponent character is %u\n", opChar);
 

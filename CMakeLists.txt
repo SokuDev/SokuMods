@@ -69,7 +69,7 @@ add_library(
 	src/Library/Network/Socket.cpp
 	src/Library/Network/Socket.hpp
         src/Library/Exceptions.hpp
-)
+        src/Library/ShiftJISDecoder.cpp src/Library/ShiftJISDecoder.hpp)
 
 if (DEFINED VERSION_110a)
 	target_compile_definitions(
