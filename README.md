@@ -16,6 +16,7 @@ Most of the code was not written by delthas:
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Ichirin* made SWRSokuRoll *(SokuRoll was made by FireSeal)*
 - *Ichirin* made CharactersInForeground
+- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro)
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -94,6 +95,10 @@ Available patches:
 **Display keystrokes in game replays in real time, as well as hitboxes, ...**
 
 *The replay speed can also be changed with configurable hotkeys: by default F10 speeds up; F9 slows down; F11 pauses and unpauses the game; F12 steps a single frame forward; F4 toggles hitboxes display; F6 displays additional debug information; F7 cycles through different game inputs display.*
+
+### SkipIntro
+
+**Skip the game intro screen, automatically enter a menu or a custom practice preset on start.**
 
 ### SWRSokuRoll
 

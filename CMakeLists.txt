@@ -96,6 +96,10 @@ target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/Text.cpp
         modules/ReplayInputView+/ReplayInputView.rc)
 
+module(SkipIntro)
+target_sources(SkipIntro PRIVATE
+        modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
+
 module(SWRSokuRoll)
 target_sources(SWRSokuRoll PRIVATE modules/SWRSokuRoll/SWRSokuRoll.cpp)
 file(READ "${CMAKE_SOURCE_DIR}/bin/SokuRoll.dll" SokuRollData HEX)
@@ -122,7 +126,9 @@ target_link_libraries(WindowResizer detours)
 configure_file("swrstoys/SWRSToys.ini.in" "SWRSToys.ini" @ONLY NEWLINE_STYLE CRLF)
 
 install(DIRECTORY modules/ DESTINATION "modules"
-        FILES_MATCHING PATTERN "*.ini")
+        FILES_MATCHING
+        PATTERN "*/Soku-SkipIntro*" EXCLUDE
+        PATTERN "*.ini")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SWRSToys.ini" DESTINATION ".")
 install(FILES README.md DESTINATION "."
         RENAME "SWRSToys.txt")
