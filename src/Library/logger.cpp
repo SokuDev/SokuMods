@@ -24,7 +24,9 @@ void initLogger()
 
 void logMessage(const char *msg)
 {
+#ifdef _DEBUG
 	fwrite(msg, 1, strlen(msg), stdout);
+#endif
 	logFile = fopen(LOG_FILE, "a");
 	fwrite(msg, 1, strlen(msg), logFile);
 	fclose(logFile);
@@ -34,9 +36,11 @@ void logMessagef(const char *format, ...)
 {
 	va_list list;
 
+#ifdef _DEBUG
 	va_start(list, format);
 	vfprintf(stdout, format, list);
 	va_end(list);
+#endif
 	va_start(list, format);
 	logFile = fopen(LOG_FILE, "a");
 	vfprintf(logFile, format, list);

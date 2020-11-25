@@ -17,6 +17,7 @@
 static bool enabled;
 static char smallImg[32];
 static bool showWR = false;
+static bool experimentalSpec;
 static std::pair<unsigned, unsigned> won;
 static std::pair<unsigned, unsigned> score;
 static time_t gameTimestamp;
@@ -538,6 +539,9 @@ void loadOnlineMatch()
 
 void loadOnlineMatchSpec()
 {
+	if (!experimentalSpec)
+		return genericScreen();
+
 	logMessagef("Loading online match as spectator. Internal ip is %s\n", roomIp.c_str());
 	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
 	discord::Activity activity{};
@@ -786,6 +790,7 @@ void LoadSettings(LPCSTR profilePath)
 	// �����V���b�g�_�E��
 	enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;
 	showWR = GetPrivateProfileInt("DiscordIntegration", "ShowWR", 0, profilePath) != 0;
+	experimentalSpec = GetPrivateProfileInt("DiscordIntegration", "ExperimentalSpectator", 0, profilePath) != 0;
 	refreshRate = GetPrivateProfileInt("DiscordIntegration", "RefreshTime", 1000, profilePath);
 	GetPrivateProfileString("DiscordIntegration", "HostImg", "", smallImg, sizeof(smallImg), profilePath);
 	GetPrivateProfileString("DiscordIntegration", "ClientID", ClientID, buffer, sizeof(buffer), profilePath);
