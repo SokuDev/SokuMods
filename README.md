@@ -15,6 +15,11 @@ To install this module, you will need Touhou 12.3 and SWRSToys.
 - Copy discord_game_sdk.dll in your soku folder (Right next to th123.exe)
 - Launch the game and share your activity on Discord !
 
+## Using with wine
+If you are running your game through wine, the game will crash on startup if you enable the mod.
+To get it to work, you will need [this](https://github.com/koukuno/wine-discord-ipc-bridge). 
+It will enable any program that uses the discord-rpc to work with wine and should fix the mod crashing.
+
 ## Features
 - Full support for the rich presence (So the screenshots sections for examples)
 - Invite and join games. You will however still need to portforward or use autopunch.
@@ -38,6 +43,7 @@ If you don't, invited people will fail to connect.
 If you are annoyed by the above 2 issues, you can install the IntroSkip mod.
 
 - A rare bug with DPadFix can cause the controllers to because unresponsive with both characters doing the same input in netplay, requiring a restart of the game to fix (Under investigation).
+- A bug can occur causing the profiles in the network screen to because invisible and crash the game if selected (Under investigation).
 
 ## Build
 To build the project you will need, the MSVC compiler, [discord_game_sdk](https://discord.com/developers/docs/game-sdk/sdk-starter-guide#step-1-get-the-thing) library and cmake.
