@@ -346,7 +346,7 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	s_hDllModule = hMyModule;
 
-	HMODULE d3dx = LoadLibrary("D3DX9_33.DLL");
+	HMODULE d3dx = LoadLibraryExW(L"D3DX9_33.DLL", NULL, 0);
 	if (d3dx == NULL)
 		return false;
 	*(FARPROC *)&s_D3DXCreateTextureFromResource = GetProcAddress(d3dx, "D3DXCreateTextureFromResourceA");

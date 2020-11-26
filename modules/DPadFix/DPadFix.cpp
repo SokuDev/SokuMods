@@ -120,7 +120,7 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) 
 	gTriggersThreshold = ::GetPrivateProfileInt("TriggersToButtons", "Threshold", 200, s_profilePath);
 
 	// load DirectInput library since it won't be otherwise loaded yet
-	if (!LoadLibrary("dinput8.dll")) {
+	if (!LoadLibraryExW(L"dinput8.dll", NULL, 0)) {
 		return true;
 	}
 
