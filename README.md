@@ -17,6 +17,7 @@ Most of the code was not written by delthas:
 - *Ichirin* made SWRSokuRoll *(SokuRoll was made by FireSeal)*
 - *Ichirin* made CharactersInForeground
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro)
+- *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -41,6 +42,12 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 **Draw characters over HP bars, for better clarity.**
 
 *This module does not have a configuration file.*
+
+### DiscordIntegration
+
+**Automatically show your game status in Discord, send Soku invites and join games with one click on Discord.**
+
+See [here](modules/DiscordIntegration/README.md) for details. (Needs an update.)
 
 ### DPadFix
 
@@ -155,5 +162,7 @@ After building, run the install target, which will create an `install` folder wi
 ## License
 
 - Files in `include/directx/` are licensed according to their license header
+- Files named `bin/discord_*` are libraries copyrighted by Discord
 - Files in `lib/` are pre-compiled archives copyrighted by Microsoft
+- Files in `modules/DiscordIntegration/` are licensed according to `modules/DiscordIntegration/LICENSE`
 - All other files are licensed according to the `LICENSE` file

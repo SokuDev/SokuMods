@@ -40,17 +40,44 @@ add_library(detours
         detours/src/modules.cpp)
 target_include_directories(detours PUBLIC detours/src)
 
+# DiscordSDK
+
+add_library(DiscordSDK
+        DiscordSDK/achievement_manager.cpp
+        DiscordSDK/activity_manager.cpp
+        DiscordSDK/application_manager.cpp
+        DiscordSDK/core.cpp
+        DiscordSDK/image_manager.cpp
+        DiscordSDK/lobby_manager.cpp
+        DiscordSDK/network_manager.cpp
+        DiscordSDK/overlay_manager.cpp
+        DiscordSDK/relationship_manager.cpp
+        DiscordSDK/storage_manager.cpp
+        DiscordSDK/store_manager.cpp
+        DiscordSDK/types.cpp
+        DiscordSDK/user_manager.cpp
+        DiscordSDK/voice_manager.cpp
+)
+target_include_directories(DiscordSDK INTERFACE DiscordSDK)
+target_link_libraries(DiscordSDK INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/bin/discord_game_sdk.dll.lib)
+
 # MemoryModule
 
 add_library(MemoryModule
         MemoryModule/MemoryModule.c)
 target_include_directories(MemoryModule PUBLIC MemoryModule)
 
+# SokuLib
+
+set(VERSION_110a "1")
+add_subdirectory(SokuLib)
+
 # modules
 
 function(module name)
     add_library("${name}" MODULE)
-    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+    target_compile_options("${name}" PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
     target_include_directories("${name}" PRIVATE include include/directx "modules/${name}/")
     target_link_directories("${name}" PRIVATE lib)
     target_link_libraries("${name}" shlwapi user32 advapi32)
@@ -63,6 +90,18 @@ target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
 
 module(CharactersInForeground)
 target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/CharactersInForeground.cpp)
+
+set(DISCORD_CLIENT_ID "771968286199382056" CACHE STRING "DiscordIntegration mod Discord client ID")
+module(DiscordIntegration)
+target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}" SOKU_VER_110a)
+target_sources(DiscordIntegration PRIVATE
+        modules/DiscordIntegration/Network/getPublicIp.cpp
+        modules/DiscordIntegration/Network/Socket.cpp
+        modules/DiscordIntegration/SokuUtils/SokuState.cpp
+        modules/DiscordIntegration/logger.cpp
+        modules/DiscordIntegration/main.cpp
+        modules/DiscordIntegration/ShiftJISDecoder.cpp)
+target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
 
 module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
@@ -127,7 +166,7 @@ configure_file("swrstoys/SWRSToys.ini.in" "SWRSToys.ini" @ONLY NEWLINE_STYLE CRL
 
 install(DIRECTORY modules/ DESTINATION "modules"
         FILES_MATCHING
-        PATTERN "*/Soku-SkipIntro*" EXCLUDE
+        REGEX "modules/[^/]+/[^/.]+(/|$)" EXCLUDE
         PATTERN "*.ini")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SWRSToys.ini" DESTINATION ".")
 install(FILES README.md DESTINATION "."
