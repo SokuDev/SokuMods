@@ -18,6 +18,7 @@ Most of the code was not written by delthas:
 - *Ichirin* made CharactersInForeground
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro)
 - *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton
+- delthas made Autopunch
 - delthas made all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
@@ -30,6 +31,12 @@ If you have made an SWRSToys module, do contact me either on GitHub or with a PM
 - Run the game as usual.
 
 ## Modules
+
+### Autopunch
+
+**Automatically host without forwarding your ports, with any other Autopunch user.**
+
+*This module does not have a configuration file.*
 
 ### BGMChanger
 

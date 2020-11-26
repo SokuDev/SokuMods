@@ -25,6 +25,26 @@ set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
 install(TARGETS swrstoys LIBRARY DESTINATION ".")
 
+# cURL
+
+option(BUILD_CURL_EXE "" OFF)
+option(BUILD_SHARED_LIBS "" OFF)
+option(BUILD_TESTING "" OFF)
+option(CURL_STATIC_CRT "" ON)
+option(ENABLE_INET_PTON "" OFF)
+option(HTTP_ONLY "" ON)
+option(CURL_DISABLE_CRYPTO_AUTH "" ON)
+option(ENABLE_MANUAL "" OFF)
+option(CMAKE_USE_OPENSSL "" OFF)
+option(CURL_DISABLE_LDAP "" ON)
+option(CURL_ZLIB "" OFF)
+option(CMAKE_USE_LIBSSH2 "" OFF)
+option(ENABLE_UNIX_SOCKETS "" OFF)
+option(CURL_CA_BUNDLE "" none)
+option(CURL_CA_PATH "" none)
+option(CURL_WINDOWS_SSPI "" OFF)
+add_subdirectory(curl)
+
 # detours
 
 add_library(detours
@@ -76,7 +96,7 @@ add_subdirectory(SokuLib)
 
 function(module name)
     add_library("${name}" MODULE)
-    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
     target_compile_options("${name}" PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
     target_include_directories("${name}" PRIVATE include include/directx "modules/${name}/")
     target_link_directories("${name}" PRIVATE lib)
@@ -84,6 +104,10 @@ function(module name)
     install(TARGETS "${name}" LIBRARY DESTINATION "modules/${name}/")
     set(MODULE_PATHS "${MODULE_PATHS}; ${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
 endfunction()
+
+module(Autopunch)
+target_sources(Autopunch PRIVATE modules/Autopunch/Autopunch.c)
+target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
 
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
