@@ -32,6 +32,7 @@ For now **it is recommended you use the SWRSToys pack**.
 
 ### SokuEngine
 
+- Download and install the [Visual C++ 2019 x86 redistribuable](https://aka.ms/vs/16/release/vc_redist.x86.exe)
 - Download the **[latest SokuEngine release](https://delthas.fr/sokuengine.zip)** and extract it to your game folder.
 - Run the game as usual.
 - To enable and disable mods, enter the *ModConfig* menu at the bottom of the main menu screen.
@@ -39,7 +40,7 @@ For now **it is recommended you use the SWRSToys pack**.
 
 *Any change made to a .ini file will require a restart.*
 
-### SWRSToys
+### SWRSToys (recommended)
 
 - Download the **[latest SWRSToys release](https://delthas.fr/swrstoys.zip)** and extract it to your game folder.
 - Open SWRSToys.ini in Notepad and enable some modules by deleting their `;`, then save the file.
