@@ -11,6 +11,9 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing -Wno-microsoft-cast")
+    # libcurl uses a copyright symbol escape in its file description string for its resource control file
+    # work around this undefined behaviour by setting a global codepage for all RC files
+    SET(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} /C 1252")
 endif ()
 
 add_library(swrstoys MODULE
