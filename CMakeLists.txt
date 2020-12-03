@@ -82,7 +82,7 @@ add_library(DiscordSDK
         DiscordSDK/voice_manager.cpp
 )
 target_include_directories(DiscordSDK INTERFACE DiscordSDK)
-target_link_libraries(DiscordSDK INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/bin/discord_game_sdk.dll.lib)
+target_link_libraries(DiscordSDK INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.dll.lib)
 
 # MemoryModule
 
