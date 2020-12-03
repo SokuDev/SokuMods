@@ -26,7 +26,8 @@ target_include_directories(swrstoys PRIVATE include)
 target_link_libraries(swrstoys shlwapi user32 advapi32)
 set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
-install(TARGETS swrstoys LIBRARY DESTINATION ".")
+install(TARGETS swrstoys LIBRARY DESTINATION "SWRSToys/")
+install(TARGETS swrstoys LIBRARY DESTINATION "SokuEngine/")
 
 # cURL
 
@@ -98,17 +99,53 @@ add_subdirectory(SokuLib)
 # modules
 
 function(module name)
-    add_library("${name}" MODULE)
-    target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-    target_compile_options("${name}" PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
-    target_include_directories("${name}" PRIVATE include include/directx "modules/${name}/")
-    target_link_directories("${name}" PRIVATE lib)
-    target_link_libraries("${name}" shlwapi user32 advapi32)
-    install(TARGETS "${name}" LIBRARY DESTINATION "modules/${name}/")
-    set(MODULE_PATHS "${MODULE_PATHS}; ${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
+    set(SWRSToys 1)
+    set(Default 0)
+    set(Target 1)
+    foreach(arg IN LISTS ARGN)
+        if(arg STREQUAL "SokuEngine")
+            set(SWRSToys 0)
+        elseif(arg STREQUAL "Default")
+            set(Default 1)
+        elseif(arg STREQUAL "Binary")
+            set(Target 0)
+        endif()
+    endforeach()
+    if(Target)
+        add_library("${name}" MODULE)
+        target_compile_definitions("${name}" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+        target_include_directories("${name}" PRIVATE include include/directx "modules/${name}/")
+        target_link_directories("${name}" PRIVATE lib)
+        target_link_libraries("${name}" shlwapi user32 advapi32)
+        if(SWRSToys)
+            install(TARGETS "${name}" LIBRARY DESTINATION "SWRSToys/modules/${name}/")
+        endif()
+        install(TARGETS "${name}" LIBRARY DESTINATION "SokuEngine/modules/${name}/")
+    else()
+        if(SWRSToys)
+            install(FILES "bin/${name}.dll" DESTINATION "SWRSToys/modules/${name}")
+        endif()
+        install(FILES "bin/${name}.dll" DESTINATION "SokuEngine/modules/${name}")
+    endif()
+    if(SWRSToys)
+        install(DIRECTORY "modules/${name}" DESTINATION "SWRSToys/modules"
+                FILES_MATCHING
+                REGEX "modules/${name}/[^/.]+(/|$)" EXCLUDE
+                PATTERN "*.ini")
+        if(Default)
+            set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
+        else()
+            set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; ${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
+        endif()
+    endif()
+    install(DIRECTORY "modules/${name}" DESTINATION "SokuEngine/modules"
+            FILES_MATCHING
+            REGEX "modules/${name}/[^/.]+(/|$)" EXCLUDE
+            PATTERN "*.ini")
+    set(SOKUENGINE_MODULE_PATHS "${SOKUENGINE_MODULE_PATHS}${name} = ${Default}\n" PARENT_SCOPE)
 endfunction()
 
-module(Autopunch)
+module(Autopunch Default)
 target_sources(Autopunch PRIVATE modules/Autopunch/Autopunch.c)
 target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
 
@@ -165,11 +202,11 @@ target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/Text.cpp
         modules/ReplayInputView+/ReplayInputView.rc)
 
-module(SkipIntro)
+module(SkipIntro Default)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
-module(SWRSokuRoll)
+module(SWRSokuRoll Default)
 target_sources(SWRSokuRoll PRIVATE modules/SWRSokuRoll/SWRSokuRoll.cpp)
 file(READ "${CMAKE_SOURCE_DIR}/bin/SokuRoll.dll" SokuRollData HEX)
 string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," SokuRollData ${SokuRollData})
@@ -192,12 +229,23 @@ target_sources(WindowResizer PRIVATE
         modules/WindowResizer/WindowResizer.cpp)
 target_link_libraries(WindowResizer detours)
 
-configure_file("swrstoys/SWRSToys.ini.in" "SWRSToys.ini" @ONLY NEWLINE_STYLE CRLF)
+# binary SokuEngine modules
 
-install(DIRECTORY modules/ DESTINATION "modules"
-        FILES_MATCHING
-        REGEX "modules/[^/]+/[^/.]+(/|$)" EXCLUDE
-        PATTERN "*.ini")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SWRSToys.ini" DESTINATION ".")
-install(FILES README.md DESTINATION "."
-        RENAME "SWRSToys.txt")
+module(GetIP Binary SokuEngine)
+module(NetGameScore Binary SokuEngine)
+module(PracticeEx Binary SokuEngine)
+module(shady-loader Binary SokuEngine)
+module(shady-lua Binary SokuEngine)
+module(SokuEngine Binary Default SokuEngine)
+
+configure_file("swrstoys/SWRSToys.ini.in" "SWRSToys.ini" @ONLY NEWLINE_STYLE CRLF)
+configure_file("modules/SokuEngine/SokuEngine.ini.in" "SokuEngine.ini" @ONLY NEWLINE_STYLE CRLF)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SWRSToys.ini" DESTINATION "SWRSToys")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SokuEngine.ini" DESTINATION "SokuEngine/modules/SokuEngine")
+install(FILES "swrstoys/SWRSToys_SokuEngine.ini" DESTINATION "SokuEngine"
+        RENAME "SWRSToys.ini")
+install(FILES README.md DESTINATION "SWRSToys"
+        RENAME "SokuMods.txt")
+install(FILES README.md DESTINATION "SokuEngine"
+        RENAME "SokuMods.txt")

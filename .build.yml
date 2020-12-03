@@ -4,31 +4,28 @@ packages:
   - unzip
   - msitools
   - zip
-  - cmake
+  - cmake-git
   - clang
   - llvm
   - lld
 sources:
-  - git@github.com:delthas/SWRSToys.git
+  - https://github.com/SokuDev/SokuMods.git
 secrets:
   - 63d7a0ac-2635-4d42-9709-efcd2cf74858
 tasks:
   - setup: |
-      cd SWRSToys
+      cd SokuMods
       sh setup.sh
       curl -s -O 'https://raw.githubusercontent.com/delthas/llvm-project/fix-winmsvc-rc/llvm/cmake/platforms/WinMsvc.cmake'
       curl -s -O 'https://raw.githubusercontent.com/delthas/llvm-project/fix-winmsvc-rc/llvm/cmake/platforms/ClangClCMakeCompileRules.cmake'
   - build: |
-      cd SWRSToys
+      cd SokuMods
       cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=WinMsvc.cmake -DHOST_ARCH=x86 -DLLVM_NATIVE_TOOLCHAIN=/usr -DMSVC_BASE=$PWD/msvc -DWINSDK_BASE=$PWD/winsdk -DWINSDK_VER=10.0.17763.0 .
-      # workaround for cmake bug: https://gitlab.kitware.com/cmake/cmake/-/issues/20529
-      cmake --build . || true
-      cp modules/ReplayInputView/ReplayInputView.png CMakeFiles/ReplayInputView.dir/modules/ReplayInputView/
-      cp modules/ReplayInputView+/ReplayInputView.png CMakeFiles/ReplayInputView+.dir/modules/ReplayInputView+/
       cmake --build .
       cmake --install .
-      cd install
-      zip -r9 ../swrstoys.zip *
+      (cd install/SWRSToys && zip -r9 ../../swrstoys.zip *)
+      (cd install/SokuEngine && zip -r9 ../../sokuengine.zip *)
   - deploy: |
-      cd SWRSToys
+      cd SokuMods
       scp -P 2222 -o StrictHostKeyChecking=no -q swrstoys.zip user@delthas.fr:/srv/http/blog/swrstoys.zip
+      scp -P 2222 -o StrictHostKeyChecking=no -q sokuengine.zip user@delthas.fr:/srv/http/blog/sokuengine.zip

@@ -1,0 +1,17 @@
+[Main]
+LowMode = 0
+NoApiMode = 0
+FastMode = 0
+MouseInMainMenu = 1
+KeepWindowNameDefault = 0
+ScrollBarInModuleList = 0
+Port = 108000
+ModulesJsonUrl = https://drive.google.com/uc?id=14PkGOTc-UkLNj-n9PNuPSFkHPZs0zQTd
+EngineMenuName = ModConfig
+WindowName = Touhou Hisoutensoku ver1.10a - SokuEngine
+ModuleDirectory = modules
+MainMenuFont =
+
+[Modules]
+d3d9 = 1
+@SOKUENGINE_MODULE_PATHS@

@@ -1,6 +1,6 @@
-# SWRSToys [![builds.sr.ht status](https://builds.sr.ht/~delthas/SWRStoys.svg)](https://builds.sr.ht/~delthas/SWRStoys?)
+# SokuMods [![builds.sr.ht status](https://builds.sr.ht/~delthas/SokuMods.svg)](https://builds.sr.ht/~delthas/SokuMods?)
 
-A modding framework for Touhou Hisoutensoku (12.3).
+A repository of all known SWRSToys and SokuEngine mods and their frameworks for Touhou Hisoutensoku (12.3).
 
 This repository was originally created from the original SWRSToys release by *Anonymous Coward* with the following goals:
 - make sure the source code for SWRSToys is easy to find
@@ -8,29 +8,47 @@ This repository was originally created from the original SWRSToys release by *An
 - have up-to-date headers of the latest reverse-engineered addresses from the game, updated as new people find more addresses
 - set up a CI for easy, reproducible builds and deployment of the latest release of SWRSToys.
 
-Most of the code was not written by delthas:
-- this repository (and most of this code) is forked off a source archive of SWRSToys, made by *Anonymous Coward*
-- *Shinki* and *PC_volt* made ReplayInputView+
-- *DPhoenix* made UPnPNat
+The code in this repository comes from various contributors:
+- this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
+- *DPhoenix* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
+- *FireSeal* made SokuRoll
 - *fishshapedfish* made DPadFix
-- *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
-- *Ichirin* made SWRSokuRoll *(SokuRoll was made by FireSeal)*
-- *Ichirin* made CharactersInForeground
-- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro)
 - *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton
-- delthas made Autopunch
-- delthas made all the plumbing: adding CMake, CI, formatting, ...
+- *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
+- *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
+- *Shinki* and *PC_volt* made ReplayInputView+
+- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro)
+- delthas made Autopunch, as well as all the plumbing: adding CMake, CI, formatting, ...
 
-If you have made an SWRSToys module, do contact me either on GitHub or with a PM on Discord (`cc#6439`) so we can add it here, with proper credits!
+If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
 
 ## Using
 
-- Download the **[latest release](https://delthas.fr/swrstoys.zip)** and extract it in your game folder.
+There are two mod packs:
+- the SokuEngine pack includes all mods, a simple in-game UI to enable and disable mods
+- the SWRSToys pack includes only SWRSToys mods, and is only configurable from a text file outside of the game
+
+For now **it is recommended you use the SWRSToys pack**.
+
+### SokuEngine
+
+- Download the **[latest SokuEngine release](https://delthas.fr/sokuengine.zip)** and extract it to your game folder.
+- Run the game as usual.
+- To enable and disable mods, enter the *ModConfig* menu at the bottom of the main menu screen.
+- To change the configuration of modules you enabled, modify their `.ini` configuration files (in the `modules/` folder) while the game is turned off, then restart the game.
+
+*Any change made to a .ini file will require a restart.*
+
+### SWRSToys
+
+- Download the **[latest SWRSToys release](https://delthas.fr/swrstoys.zip)** and extract it to your game folder.
 - Open SWRSToys.ini in Notepad and enable some modules by deleting their `;`, then save the file.
-- Modify the `.ini` configuration files of modules you enabled (in the `modules/` folder)
+- Modify the `.ini` configuration files of modules you enabled (in the `modules/` folder) while the game is turned off.
 - Run the game as usual.
 
-## Modules
+*Any change made to a .ini file will require a restart.*
+
+## SWRSToys/Common modules
 
 ### Autopunch
 
@@ -130,11 +148,35 @@ Available patches:
 
 **Make the game window fullscreen, but without stretching, and with fast Alt+Tab.**
 
-*This module does not have a configuration file, and is not compatible with SokuEngine.*
+*This module does not have a configuration file.*
 
 ### WindowResizer
 
 **Make the game window resizable.**
+
+## SokuEngine-exclusive mods
+
+### GetIP
+
+**Automatically copy a host message to your clipboard when hosting.**
+
+### NetGameScore
+
+**Display the current score (in won games) in network play.**
+
+*This module is configured in-game in the ModConfig menu.*
+
+### PracticeEx
+
+**Greatly improve Practice mode by adding several game options and support for macros.**
+
+*This module is configured in-game in Practice mode.*
+
+### shady-loader - shady-lua
+
+**Simply load custom game resources (sprites, images, sounds, music, ...) to the game.**
+
+*This module is configured in-game in the ModConfig menu.*
 
 ## Making a module
 
@@ -146,7 +188,7 @@ Available patches:
 
 Clone the project, including its submodules:
 ```
-git clone --recursive git@github.com:delthas/SWRSToys.git
+git clone --recursive https://github.com/SokuDev/SokuMods.git
 ```
 Or, if you have already cloned without pulling the submodules, download them:
 ```
@@ -169,6 +211,6 @@ After building, run the install target, which will create an `install` folder wi
 ## License
 
 - Files in `include/directx/` are licensed according to their license header
-- Files named `bin/discord_*` are libraries copyrighted by Discord
-- Files in `lib/` are pre-compiled archives copyrighted by Microsoft
+- Files named `bin/discord_*`, `lib/discord_*` and those in `DiscordSDK/` are copyrighted by Discord
+- Other files in `lib/` are pre-compiled archives copyrighted by Microsoft
 - All other files are licensed according to the `LICENSE` file
