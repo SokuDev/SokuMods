@@ -46,7 +46,7 @@ option(ENABLE_UNIX_SOCKETS "" OFF)
 option(CURL_CA_BUNDLE "" none)
 option(CURL_CA_PATH "" none)
 option(CURL_WINDOWS_SSPI "" OFF)
-add_subdirectory(curl)
+add_subdirectory(curl EXCLUDE_FROM_ALL)
 
 # detours
 
