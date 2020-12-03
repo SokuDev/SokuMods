@@ -171,5 +171,4 @@ After building, run the install target, which will create an `install` folder wi
 - Files in `include/directx/` are licensed according to their license header
 - Files named `bin/discord_*` are libraries copyrighted by Discord
 - Files in `lib/` are pre-compiled archives copyrighted by Microsoft
-- Files in `modules/DiscordIntegration/` are licensed according to `modules/DiscordIntegration/LICENSE`
 - All other files are licensed according to the `LICENSE` file
