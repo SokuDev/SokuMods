@@ -130,7 +130,7 @@ void showHost()
 	logMessagef("Showing host... Internal ip is %s\n", roomIp.c_str());
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
-	auto *menuObj = SokuLib::getMenuObj();
+	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 	auto &timeStamp = activity.GetTimestamps();
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
@@ -169,7 +169,7 @@ void showHost()
 void connectingToRemote()
 {
 	logMessage("Connecting to remote\n");
-	auto *menuObj = SokuLib::getMenuObj();
+	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 	logMessagef("Menu object is at %#X\n", menuObj);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
@@ -228,18 +228,31 @@ void connectedToRemoteLoadingCharSelect()
 	logMessage("Callback end\n");
 }
 
+#define UNKNOWN_GLOBAL 0x0089a888
+
+#define PART1 (*(void****)UNKNOWN_GLOBAL)
+#define PART2 (*(PART1+1))
+#define PART3 (*(PART2+2))
+#define CMENU_OBJ ( \
+	*(                 \
+		*( \
+			( \
+				*(void****)UNKNOWN_GLOBAL \
+			)+1\
+		)+2               \
+	)                   \
+)
+#define IN_MENU *(char*)(0x089a888 + 4)
+
 void titleScreen()
 {
 	logMessage("On title screen\n");
-	auto *menuObj = SokuLib::getMenuObj();
+	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
-
-	if (!IN_MENU || *reinterpret_cast<char *>(menuObj)) {
+	if (!SokuLib::isInNetworkMenu()) {
 		logMessage("We are not in a proper submenu, falling back to generic screen\n");
 		return genericScreen();
 	}
-
-	logMessagef("Menu object is at %#X\n", menuObj);
 
 	if (
 		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
@@ -266,39 +279,39 @@ void titleScreen()
 void localBattle()
 {
 	logMessage("Playing a local game\n");
-	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
-	std::string profile2 = convertShiftJisToUTF8(SokuLib::player2Profile());
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
+	std::string profile2 = convertShiftJisToUTF8(SokuLib::player2Profile);
 
 	logMessagef("The 2 profiles are %s %s\n", profile1.c_str(), profile2.c_str());
 	timeStamp.SetStart(gameTimestamp);
 
-	if (SokuLib::getSubMode() == SokuLib::BATTLE_SUBMODE_REPLAY) {
+	if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY) {
 		logMessage("This is a replay\n");
 		assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
 		assets.SetLargeText(SokuLib::stagesName[stage].c_str());
-		activity.SetDetails(SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()].c_str());
-		activity.SetState(std::string(SokuLib::charactersName[SokuLib::getLeftChar()] + " vs " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
+		activity.SetDetails(SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode].c_str());
+		activity.SetState(std::string(SokuLib::charactersName[SokuLib::leftChar] + " vs " + SokuLib::charactersName[SokuLib::rightChar]).c_str());
 	} else {
 		logMessage("This is not a replay\n");
-		logMessagef("Stage: %i, Main: %i, Sub: %i, Left: %i, Right: %i\n", stage, SokuLib::getMainMode(), SokuLib::getSubMode(), SokuLib::getLeftChar(), SokuLib::getRightChar());
-		assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
+		logMessagef("Stage: %i, Main: %i, Sub: %i, Left: %i, Right: %i\n", stage, SokuLib::mainMode, SokuLib::subMode, SokuLib::leftChar, SokuLib::rightChar);
+		assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
 		logMessage("Left\n");
-		assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
+		assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
 		logMessage("Left\n");
 		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
 		assets.SetSmallText(SokuLib::stagesName[stage].c_str());
 		logMessage("Stage\n");
-		activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+		activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
 		logMessage("Modes\n");
-		if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSPLAYER)
-			activity.SetState((std::string("Against ") + profile2 + " as " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSPLAYER)
+			activity.SetState((std::string("Against ") + profile2 + " as " + SokuLib::charactersName[SokuLib::rightChar]).c_str());
 		else
-			activity.SetState(("Against " + SokuLib::charactersName[SokuLib::getRightChar()]).c_str());
+			activity.SetState(("Against " + SokuLib::charactersName[SokuLib::rightChar]).c_str());
 		logMessage("Right\n");
 	}
 
@@ -314,26 +327,26 @@ void localBattle()
 void loadMatch()
 {
 	logMessage("Loading local match\n");
-	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
 
 	logMessagef("profile is %s\n", profile1.c_str());
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
-	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
+	assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
 
-	if (SokuLib::getSubMode() == SokuLib::BATTLE_SUBMODE_REPLAY) {
-		assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
-		assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
-		activity.SetDetails(SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()].c_str());
+	if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY) {
+		assets.SetSmallImage(charactersImg[SokuLib::rightChar].c_str());
+		assets.SetSmallText(SokuLib::charactersName[SokuLib::rightChar].c_str());
+		activity.SetDetails(SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode].c_str());
 	} else {
 		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
 		assets.SetSmallText(SokuLib::stagesName[stage].c_str());
-		activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+		activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
 	}
 	activity.SetState("Loading...");
 
@@ -352,16 +365,16 @@ void charSelect()
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
 
 	logMessagef("Profile name is %s\n", profile1.c_str());
 	timeStamp.SetStart(totalTimestamp);
-	assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
-	assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
-	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
+	assets.SetSmallImage(charactersImg[SokuLib::rightChar].c_str());
+	assets.SetSmallText(SokuLib::charactersName[SokuLib::rightChar].c_str());
+	assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
 
-	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
 	activity.SetState("Character select...");
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
@@ -375,43 +388,33 @@ void charSelect()
 void onlineBattle()
 {
 	logMessagef("In online battle. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
 	char myChar;
 	char opChar;
 	std::string opName;
-	SokuLib::NetObject *infos = SokuLib::getNetObject();
-	logMessagef("Infos ptr is %#X\n", infos);
-	char *battle_manager = reinterpret_cast<char *>(SokuLib::getBattleMgr());
-	logMessagef("BattleMgr is at %#X\n", battle_manager);
-	char *server_manager = *(char**)(battle_manager + 0x0C);
-	logMessagef("Server manager is at %#X\n", server_manager);
-	char *client_manager = *(char**)(battle_manager + 0x10);
-	logMessagef("Client manager is at %#X\n", client_manager);
+	SokuLib::NetObject &infos = SokuLib::getNetObject();
+	auto &battle_manager = SokuLib::getBattleMgr();
 
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT) {
-		opName = convertShiftJisToUTF8(infos->profile2name);
-		myChar = SokuLib::getLeftChar();
-		opChar = SokuLib::getRightChar();
-		logMessagef("Won serv is %u\n", *(server_manager + 0x573));
-		logMessagef("Won client is %u\n", *(client_manager + 0x573));
-		won.first = *(server_manager + 0x573);
-		won.second = *(client_manager + 0x573);
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) {
+		opName = convertShiftJisToUTF8(infos.profile2name);
+		myChar = SokuLib::leftChar;
+		opChar = SokuLib::rightChar;
+		won.first = battle_manager.leftCharacterManager->score;
+		won.second = battle_manager.rightCharacterManager->score;
 	} else {
-		opName = convertShiftJisToUTF8(infos->profile1name);
-		myChar = SokuLib::getRightChar();
-		opChar = SokuLib::getLeftChar();
-		logMessagef("Won client is %u\n", *(client_manager + 0x573));
-		logMessagef("Won serv is %u\n", *(server_manager + 0x573));
-		won.first = *(client_manager + 0x573);
-		won.second = *(server_manager + 0x573);
+		opName = convertShiftJisToUTF8(infos.profile1name);
+		myChar = SokuLib::rightChar;
+		opChar = SokuLib::leftChar;
+		won.first = battle_manager.rightCharacterManager->score;
+		won.second = battle_manager.leftCharacterManager->score;
 	}
 	logMessagef("Opponent name is %s\n", opName.c_str());
 	logMessagef("My character is %u\n", myChar);
@@ -427,7 +430,7 @@ void onlineBattle()
 	assets.SetLargeImage(charactersImg[myChar].c_str());
 	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
-	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
 	if (showWR)
 		activity.SetState((
 			std::string("Against ") + opName + " as " + SokuLib::charactersName[opChar] +
@@ -448,26 +451,20 @@ void onlineBattle()
 void onlineBattleSpec()
 {
 	logMessagef("Watching online game. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
 	logMessagef("We are on stage %u\n", stage);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
-	SokuLib::NetObject *infos = SokuLib::getNetObject();
-	logMessagef("Infos ptr is %#X\n", infos);
-	char *battle_manager = reinterpret_cast<char *>(SokuLib::getBattleMgr());
-	logMessagef("BattleMgr is at %#X\n", battle_manager);
-	char *server_manager = *(char**)(battle_manager + 0x0C);
-	logMessagef("Server manager is at %#X\n", server_manager);
-	char *client_manager = *(char**)(battle_manager + 0x10);
-	logMessagef("Client manager is at %#X\n", client_manager);
+	SokuLib::NetObject &infos = SokuLib::getNetObject();
+	auto &battle_manager = SokuLib::getBattleMgr();
 
 	timeStamp.SetStart(gameTimestamp);
 
-	won.first = *(server_manager + 0x573);
-	won.second = *(client_manager + 0x573);
+	won.first = battle_manager.leftCharacterManager->score;
+	won.second = battle_manager.rightCharacterManager->score;
 	party.SetId(roomIp.c_str());
 	secrets.SetSpectate(("spec" + roomIp).c_str());
 	party.GetSize().SetCurrentSize(2);
@@ -475,13 +472,13 @@ void onlineBattleSpec()
 	assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
 	assets.SetLargeText(SokuLib::stagesName[stage].c_str());
 	activity.SetDetails((
-		SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" +
-		convertShiftJisToUTF8(infos->profile1name) + " vs " +
-		convertShiftJisToUTF8(infos->profile2name) + ")"
+		SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" +
+		convertShiftJisToUTF8(infos.profile1name) + " vs " +
+		convertShiftJisToUTF8(infos.profile2name) + ")"
 	).c_str());
 	activity.SetState((
-		SokuLib::charactersName[SokuLib::getLeftChar()] + " vs " +
-		SokuLib::charactersName[SokuLib::getRightChar()] +
+		SokuLib::charactersName[SokuLib::leftChar] + " vs " +
+		SokuLib::charactersName[SokuLib::rightChar] +
 		" (" + std::to_string(won.first) + " - " + std::to_string(won.second) + ")"
 	).c_str());
 
@@ -497,21 +494,21 @@ void onlineBattleSpec()
 void loadOnlineMatch()
 {
 	logMessagef("Loading online match. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
 	char myChar;
 
 	logMessagef("profile is %s\n", profile1.c_str());
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
-	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT)
-		myChar = SokuLib::getLeftChar();
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
+		myChar = SokuLib::leftChar;
 	else
-		myChar = SokuLib::getRightChar();
+		myChar = SokuLib::rightChar;
 	logMessagef("My character is %u\n", myChar);
 
 	party.SetId(roomIp.c_str());
@@ -525,7 +522,7 @@ void loadOnlineMatch()
 	assets.SetLargeImage(charactersImg[myChar].c_str());
 	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
-	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
 	activity.SetState("Loading...");
 
 	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
@@ -543,11 +540,11 @@ void loadOnlineMatchSpec()
 		return genericScreen();
 
 	logMessagef("Loading online match as spectator. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::getStageId());
+	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	SokuLib::NetObject *infos = SokuLib::getNetObject();
+	SokuLib::NetObject &infos = SokuLib::getNetObject();
 	auto &party = activity.GetParty();
 	auto &secrets = activity.GetSecrets();
 
@@ -555,18 +552,17 @@ void loadOnlineMatchSpec()
 	secrets.SetSpectate(("spec" + roomIp).c_str());
 	party.GetSize().SetCurrentSize(2);
 	party.GetSize().SetMaxSize(2);
-	logMessagef("Infos ptr is %#X\n", infos);
 	gameTimestamp = time(nullptr);
 	timeStamp.SetStart(totalTimestamp);
-	assets.SetLargeImage(charactersImg[SokuLib::getLeftChar()].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::getLeftChar()].c_str());
+	assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
+	assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
 
-	assets.SetSmallImage(charactersImg[SokuLib::getRightChar()].c_str());
-	assets.SetSmallText(SokuLib::charactersName[SokuLib::getRightChar()].c_str());
+	assets.SetSmallImage(charactersImg[SokuLib::rightChar].c_str());
+	assets.SetSmallText(SokuLib::charactersName[SokuLib::rightChar].c_str());
 	activity.SetDetails((
-		SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" +
-		convertShiftJisToUTF8(infos->profile1name) + " vs " +
-		convertShiftJisToUTF8(infos->profile2name) + ")"
+		SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" +
+		convertShiftJisToUTF8(infos.profile1name) + " vs " +
+		convertShiftJisToUTF8(infos.profile2name) + ")"
 	).c_str());
 	activity.SetState("Loading...");
 
@@ -582,12 +578,11 @@ void loadOnlineMatchSpec()
 void onlineCharSelect()
 {
 	logMessagef("Online character select. Internal ip is %s\n", roomIp.c_str());
-	SokuLib::NetObject *infos = SokuLib::getNetObject();
-	logMessagef("Infos ptr is %#X\n", infos);
+	SokuLib::NetObject &infos = SokuLib::getNetObject();
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
 	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile());
+	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
 	char myChar;
 	char opChar;
 	std::string opName;
@@ -595,14 +590,14 @@ void onlineCharSelect()
 	auto &secrets = activity.GetSecrets();
 
 	logMessagef("profile is %s\n", profile1.c_str());
-	if (SokuLib::getMainMode() == SokuLib::BATTLE_MODE_VSCLIENT) {
-		opName = convertShiftJisToUTF8(infos->profile2name);
-		myChar = SokuLib::getLeftChar();
-		opChar = SokuLib::getRightChar();
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) {
+		opName = convertShiftJisToUTF8(infos.profile2name);
+		myChar = SokuLib::leftChar;
+		opChar = SokuLib::rightChar;
 	} else {
-		opName = convertShiftJisToUTF8(infos->profile1name);
-		myChar = SokuLib::getRightChar();
-		opChar = SokuLib::getLeftChar();
+		opName = convertShiftJisToUTF8(infos.profile1name);
+		myChar = SokuLib::rightChar;
+		opChar = SokuLib::leftChar;
 	}
 	logMessagef("Opponent name is %s\n", opName.c_str());
 	logMessagef("My character is %u\n", myChar);
@@ -622,7 +617,7 @@ void onlineCharSelect()
 	assets.SetLargeImage(charactersImg[myChar].c_str());
 	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
 
-	activity.SetDetails((SokuLib::modeNames[SokuLib::getMainMode()][SokuLib::getSubMode()] + " (" + profile1 + ")").c_str());
+	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
 	if (showWR)
 		activity.SetState((
 			"Character select... (vs " + std::string(opName) + " " +
@@ -681,16 +676,16 @@ void onActivityJoin(const char *sec)
 {
 	logMessagef("Got activity join with payload %s\n", sec);
 
-	auto menuObj = SokuLib::getMenuObj();
+	auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 	std::string secret = sec;
 	auto ip = secret.substr(4, secret.find_last_of(':') - 4);
 	unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
 	bool isSpec = secret.substr(0, 4) == "spec";
 
-	if (!IN_MENU || *reinterpret_cast<char *>(menuObj)) {
+	if (!SokuLib::isInNetworkMenu()) {
 		logMessage("Warping to connect screen.\n");
-		SokuLib::moveToConnectScreen();
-		menuObj = SokuLib::getMenuObj();
+		SokuLib::moveToConnectMenu();
+		menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 		logMessage("Done.\n");
 	} else
 		logMessage("Already in connect screen\n");
@@ -757,9 +752,9 @@ public:
 			core->ActivityManager().OnActivityJoin.Connect(onActivityJoin);
 			logMessage("Entering loop\n");
 			while (!this->isDone()) {
-				currentScene = SokuLib::sceneId();
+				currentScene = SokuLib::sceneId;
 
-				auto newScene = SokuLib::sceneIdNew();
+				auto newScene = SokuLib::newSceneId;
 
 				logMessagef("Current scene is %i vs new scene %i\n", currentScene, newScene);
 				if (currentScene >= 0 && currentScene < sceneCallbacks.size() && currentScene == newScene) {
