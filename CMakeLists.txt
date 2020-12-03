@@ -121,6 +121,9 @@ target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/Cha
 set(DISCORD_CLIENT_ID "771968286199382056" CACHE STRING "DiscordIntegration mod Discord client ID")
 module(DiscordIntegration)
 target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}" SOKU_VER_110a)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+    target_compile_options(DiscordIntegration PRIVATE /EHsc)
+endif ()
 target_sources(DiscordIntegration PRIVATE
         modules/DiscordIntegration/Network/getPublicIp.cpp
         modules/DiscordIntegration/Network/Socket.cpp
