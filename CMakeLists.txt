@@ -170,6 +170,9 @@ target_sources(DiscordIntegration PRIVATE
         modules/DiscordIntegration/ShiftJISDecoder.cpp)
 target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
 
+install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys")
+install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine")
+
 module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
