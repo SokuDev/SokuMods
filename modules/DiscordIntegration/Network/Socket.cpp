@@ -6,6 +6,7 @@
 #include <sstream>
 #include "Socket.hpp"
 #include "../Exceptions.hpp"
+#include "../../SokuStreaming/Network/Socket.hpp"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -71,7 +72,7 @@ void Socket::connect(unsigned int ip, unsigned short portno)
 	this->_opened = true;
 }
 
-Socket::HttpResponse Socket::_parseHttpResponse(const std::string &respon)
+Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon)
 {
 	std::stringstream	response(respon);
 	HttpResponse		request;
@@ -115,7 +116,7 @@ Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request)
 
 	std::string requestString = this->generateHttpRequest(request);
 	std::string response = this->makeRawRequest(request.host, request.portno, requestString);
-	auto answer = this->_parseHttpResponse(response);
+	auto answer = this->parseHttpResponse(response);
 
 	answer.request = request;
 

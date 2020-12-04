@@ -21,6 +21,7 @@ class Socket {
 public:
 	//! @brief Define a http request payload.
 	struct HttpRequest {
+		std::string httpVer; //!< The http version
 		std::string body; //!< The body of the request
 		std::string method; //!< The method of the request (put, get, etc.)
 		std::string host; //!< The host to contact
@@ -38,6 +39,9 @@ public:
 		std::string httpVer; //!< The http version
 		std::string body; //!< The body of the response
 	};
+
+	//! @brief Construct a Socket.
+	Socket(SOCKET sockfd, struct sockaddr_in addr);
 
 	//! @brief Construct a Socket.
 	Socket();
@@ -64,7 +68,7 @@ public:
 
 	//! @brief Send a message
 	//! @param msg The message to send.
-	virtual void		send(const std::string &msg);
+	virtual void send(const std::string &msg);
 
 	//! @brief Read the Socket buffer.
 	//! @param size How much must be read.
@@ -80,6 +84,11 @@ public:
 	//! @return std::string
 	static std::string generateHttpRequest(const HttpRequest &request);
 
+	//! @brief Generate a http payload from a HttpRequest
+	//! @param request The request to generate
+	//! @return std::string
+	static std::string generateHttpResponse(const HttpResponse &response);
+
 	//! @brief Create a http response from a HttpRequest
 	//! @param request The request to generate
 	//! @return HttpResponse
@@ -92,18 +101,30 @@ public:
 	//! @return std::string
 	std::string makeRawRequest(const std::string &host, unsigned short portno, const std::string &content);
 
+	//! @brief Parse the response.
+	//! @param respon The string to parse
+	//! @return HttpResponse
+	static HttpResponse parseHttpResponse(const std::string &respon);
+
+	//! @brief Parse the request.
+	//! @param respon The string to parse
+	//! @return HttpRequest
+	static HttpRequest parseHttpRequest(const std::string &requ);
+
+	void bind(unsigned short port);
+
+	Socket accept();
+
 	//! @brief Return the socket value.
 	//! @return SOCKET
 	SOCKET getSockFd() { return this->_sockfd; };
 
+	const sockaddr_in &getRemote() const;
+
 protected:
 	SOCKET _sockfd = INVALID_SOCKET; //!< The socket
 	bool _opened = false; //!< The status of the socket.
-
-	//! @brief Parse the response.
-	//! @param respon The string to parse
-	//! @return HttpResponse
-	HttpResponse parseHttpResponse(const std::string &respon);
+	struct sockaddr_in _remote;
 };
 
 #endif //DISC_ORD_SOCKET_HPP

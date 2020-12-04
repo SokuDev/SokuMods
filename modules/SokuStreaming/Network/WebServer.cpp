@@ -1,0 +1,249 @@
+//
+// Created by PinkySmile on 04/12/2020.
+//
+
+#include <csignal>
+#include <iostream>
+#include <fstream>
+#include "WebServer.hpp"
+#include "../Exceptions.hpp"
+
+const std::map<std::string, std::string> WebServer::types{
+	{"txt", "text/plain"},
+	{"js", "text/javascript"},
+	{"css", "text/css"},
+	{"html", "text/html"},
+	{"png", "image/png"},
+	{"apng", "image/apng"},
+	{"bmp", "image/bmp"},
+	{"gif", "image/gif"},
+	{"ico", "image/x-icon"},
+	{"cur", "image/x-icon"},
+	{"jpeg", "image/jpeg"},
+	{"jpg", "image/jpeg"},
+	{"jfif", "image/jpeg"},
+	{"pjpeg", "image/jpeg"},
+	{"pjg", "image/jpeg"},
+	{"tif", "image/tiff"},
+	{"tiff", "image/tiff"},
+	{"svg", "image/svg+xml"},
+	{"webp", "image/webp"},
+};
+
+const std::map<unsigned short, std::string> WebServer::codes{
+	{ 100, "Continue"},
+	{ 101, "Switching Protocols" },
+	{ 102, "Processing" },
+	{ 103, "Early Hints" },
+	{ 200, "OK" },
+	{ 201, "Created" },
+	{ 202, "Accepted" },
+	{ 203, "Non-Authoritative Information" },
+	{ 204, "No Content" },
+	{ 205, "Reset Content" },
+	{ 206, "Partial Content" },
+	{ 207, "Multi-Status" },
+	{ 208, "Already Reported" },
+	{ 210, "Content Different" },
+	{ 226, "IM Used" },
+	{ 300, "Multiple Choices" },
+	{ 301, "Moved Permanently" },
+	{ 302, "Found" },
+	{ 303, "See Other" },
+	{ 304, "Not Modified" },
+	{ 305, "Use Proxy" },
+	{ 306, "Switch Proxy" },
+	{ 307, "Temporary Redirect" },
+	{ 308, "Permanent Redirect" },
+	{ 310, "Too many Redirects" },
+	{ 400, "Bad Request" },
+	{ 401, "Unauthorized" },
+	{ 402, "Payment Required" },
+	{ 403, "Forbidden" },
+	{ 404, "Not Found" },
+	{ 405, "Method Not Allowed" },
+	{ 406, "Not Acceptable" },
+	{ 407, "Proxy Authentication Required" },
+	{ 408, "Request Time-out" },
+	{ 409, "Conflict" },
+	{ 410, "Gone" },
+	{ 411, "Length Required" },
+	{ 412, "Precondition Failed" },
+	{ 413, "Request Entity Too Large" },
+	{ 414, "Request-URI Too Long" },
+	{ 415, "Unsupported Media Type" },
+	{ 416, "Requested range unsatisfiable" },
+	{ 417, "Expectation failed" },
+	{ 418, "I’m a teapot" },
+	{ 421, "Misdirected Request" },
+	{ 425, "Too Early" },
+	{ 426, "Upgrade Required" },
+	{ 428, "Precondition Required" },
+	{ 429, "Too Many Requests" },
+	{ 431, "Request Header Fields Too Large" },
+	{ 451, "Unavailable For Legal Reasons" },
+	{ 500, "Internal Server Error" },
+	{ 501, "Not Implemented" },
+	{ 502, "Bad Gateway" },
+	{ 503, "Service Unavailable" },
+	{ 504, "Gateway Time-out" },
+	{ 505, "HTTP Version not supported" },
+	{ 506, "Variant Also Negotiates" },
+	{ 509, "Bandwidth Limit Exceeded" },
+	{ 510, "Not extended" },
+	{ 511, "Network authentication required" },
+};
+
+void WebServer::addRoute(const std::string &&route, std::function<Socket::HttpResponse(const Socket::HttpRequest &)> &&fct)
+{
+	this->_routes[route] = fct;
+}
+
+void WebServer::addStaticFolder(const std::string &&route, const std::string &&path)
+{
+	this->_folders[route] = path;
+}
+
+void WebServer::start(unsigned short port)
+{
+	this->_sock.bind(port);
+	this->_thread = std::thread([this]{
+		while (!this->_closed)
+			this->_serverLoop();
+	});
+}
+
+void ___(int){}
+
+void WebServer::stop()
+{
+	this->_closed = true;
+	auto old = signal(SIGINT, ___);
+	raise(SIGINT); //Interrupt accept
+	signal(SIGINT, old);
+	if (this->_thread.joinable())
+		this->_thread.join();
+}
+
+WebServer::~WebServer()
+{
+	this->stop();
+}
+
+void WebServer::_serverLoop()
+{
+	Socket newConnection = this->_sock.accept();
+	Socket::HttpResponse response;
+
+	try {
+		try {
+			auto s = newConnection.readUntilEOF();
+			auto requ = Socket::parseHttpRequest(s);
+			auto it = this->_routes.find(requ.path);
+
+			response.request = requ;
+			if (it != this->_routes.end())
+				response = it->second(requ);
+			else
+				response = this->_checkFolders(requ);
+		} catch (InvalidHTTPAnswerException &) {
+			response = WebServer::_makeGenericPage(400);
+		} catch (NotImplementedException &) {
+			response = WebServer::_makeGenericPage(501);
+		} catch (AbortConnectionException &e) {
+			response = WebServer::_makeGenericPage(e.getCode());
+		}
+		response.codeName = WebServer::codes.at(response.returnCode);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		response = WebServer::_makeGenericPage(500, e.what());
+	}
+	response.httpVer = "HTTP/1.1";
+	response.header["content-length"] = std::to_string(response.body.length());
+	std::cout << inet_ntoa(newConnection.getRemote())
+	newConnection.send(Socket::generateHttpResponse(response));
+	newConnection.disconnect();
+}
+
+Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code)
+{
+	Socket::HttpResponse response;
+
+	response.returnCode = code;
+	response.codeName = WebServer::codes.at(response.returnCode);
+	response.header["content-type"] = "text/html";
+	response.body = "<html>"
+		"<head>"
+			"<title>" + response.codeName + "</title>"
+		"</head>"
+		"<body>"
+			"<h1>" +
+				std::to_string(response.returnCode) + ": " + response.codeName +
+			"</h1>"
+		"</body>"
+	"</html>";
+	return response;
+}
+
+Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code, const std::string &extra)
+{
+	Socket::HttpResponse response;
+
+	response.returnCode = code;
+	response.codeName = WebServer::codes.at(response.returnCode);
+	response.header["content-type"] = "text/html";
+	response.body = "<html>"
+		"<head>"
+			"<title>" + response.codeName + "</title>"
+		"</head>"
+		"<body>"
+			"<h1>" +
+				std::to_string(response.returnCode) + ": " + response.codeName + " (" + extra + ")"
+			"</h1>"
+		"</body>"
+	"</html>";
+	return response;
+}
+
+Socket::HttpResponse WebServer::_checkFolders(const Socket::HttpRequest &request)
+{
+	Socket::HttpResponse response;
+
+	//TODO: Fix vulnerability if using .. in URL
+	for (auto &folder : this->_folders) {
+		if (request.path.substr(0, folder.first.length()) == folder.first) {
+			std::string realPath = folder.second + request.path.substr(folder.first.length());
+			std::string type = WebServer::_getContentType(request.path);
+			int i = std::ifstream::in;
+
+			if (type.substr(0, 5) != "text/")
+				i |= std::ifstream::binary;
+
+			std::ifstream stream{realPath, i};
+
+			if (stream.fail())
+				throw AbortConnectionException(404);
+			response.returnCode = 200;
+			response.header["content-byte"] = type;
+			response.body = {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+			return response;
+		}
+	}
+	throw AbortConnectionException(404);
+}
+
+std::string WebServer::_getContentType(const std::string &path)
+{
+	//TODO: Fix bug if URL contains a .
+	size_t pos = path.find('.');
+
+	if (pos == std::string::npos)
+		return "application/octet-stream";
+
+	auto it = WebServer::types.find(path.substr(pos + 1));
+
+	if (it == WebServer::types.end())
+		return "application/" + path.substr(pos + 1);
+	return it->second;
+}
+
