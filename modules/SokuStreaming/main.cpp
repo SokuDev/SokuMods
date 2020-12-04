@@ -5,24 +5,68 @@
 #include <SokuLib.hpp>
 #include <Windows.h>
 #include <Shlwapi.h>
+#include "ShiftJISDecoder.hpp"
 #include "Network/WebServer.hpp"
 
 static bool enabled;
 static unsigned short port;
 static WebServer webServer;
-struct CachedMatchData {
+static struct CachedMatchData {
 	SokuLib::Character left;
 	SokuLib::Character right;
-	std::vector<>
+	std::vector<unsigned short> leftCards;
+	std::vector<unsigned short> rightCards;
 	std::string leftName;
 	std::string rightName;
 	unsigned int leftScore;
 	unsigned int rightScore;
 } cache;
-struct SelectSV{};
-struct SelectCL{};
-static __thiscall int (SelectSV::*s_origCSelectSV_Render)();
-static __thiscall int (SelectCL::*s_origCSelectCL_Render)();
+struct BattleWatch{};
+static int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
+
+/*static int (__thiscall C::*array[16])();
+
+#define TEST(i)int __fastcall fun##i(C *This)\
+{                                            \
+        printf(#i "\n");                  \
+	return (This->*array[i])();\
+}                                            \
+
+TEST(0)
+TEST(1)
+TEST(2)
+TEST(3)
+TEST(4)
+TEST(5)
+TEST(6)
+TEST(7)
+TEST(8)
+TEST(9)
+TEST(10)
+TEST(11)
+TEST(12)
+TEST(13)
+TEST(14)
+TEST(15)
+
+int (__fastcall *funs[16])(C *This) = {
+	fun0,
+	fun1,
+	fun2,
+	fun3,
+	fun4,
+	fun5,
+	fun6,
+	fun7,
+	fun8,
+	fun9,
+	fun10,
+	fun11,
+	fun12,
+	fun13,
+	fun14,
+	fun15,
+};*/
 
 Socket::HttpResponse root(const Socket::HttpRequest &requ)
 {
@@ -33,27 +77,76 @@ Socket::HttpResponse root(const Socket::HttpRequest &requ)
 	return response;
 }
 
+Socket::HttpResponse state(const Socket::HttpRequest &requ)
+{
+	Socket::HttpResponse response;
+	std::string sanitizedLeftName;
+	std::string sanitizedRightName;
+	std::string leftDeck;
+	std::string rightDeck;
+
+	sanitizedLeftName.reserve(cache.leftName.size() * 3);
+	for (char c : convertShiftJisToUTF8(cache.leftName.c_str()))
+		switch (c) {
+		case '"':
+		case '\\':
+			sanitizedLeftName.push_back('\\');
+		default:
+			sanitizedLeftName.push_back(c);
+		}
+
+	sanitizedRightName.reserve(cache.rightName.size() * 3);
+	for (char c : convertShiftJisToUTF8(cache.rightName.c_str()))
+		switch (c) {
+		case '"':
+		case '\\':
+			sanitizedRightName.push_back('\\');
+		default:
+			sanitizedRightName.push_back(c);
+		}
+
+	leftDeck.reserve(2 + 20 * 3 + 19);
+	leftDeck += "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]";
+	rightDeck.reserve(2 + 20 * 3 + 19);
+	rightDeck += "[100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119]";
+
+	response.returnCode = 200;
+	response.header["content-type"] = "application/json";
+	response.body = "{"
+		 "\"left\":{"
+			"\"character\":" + std::to_string(cache.left) + ","
+			"\"score\":" + std::to_string(cache.leftScore) + ","
+			R"("name":")" + sanitizedLeftName + "\","
+			"\"deck\":" + leftDeck +
+		"},"
+		"\"right\":{"
+			"\"character\":" + std::to_string(cache.right) + ","
+			"\"score\":" + std::to_string(cache.rightScore) + ","
+			R"("name":")" + sanitizedRightName + "\","
+			"\"deck\":" + rightDeck +
+		"}"
+	"}";
+	return response;
+}
+
 void updateCache(int ret)
 {
-	auto battleMgr = SokuLib::getBattleMgr();
+	auto &battleMgr = SokuLib::getBattleMgr();
+	auto &netObj = SokuLib::getNetObject();
 
 	if (ret != SokuLib::SCENE_BATTLECL && ret != SokuLib::SCENE_BATTLESV) {
 		cache.leftScore += battleMgr.leftCharacterManager->score == 2;
 		cache.rightScore += battleMgr.rightCharacterManager->score == 2;
 	}
+	cache.left = SokuLib::leftChar;
+	cache.right = SokuLib::rightChar;
+	cache.leftName = netObj.profile1name;
+	cache.rightName = netObj.profile2name;
 }
 
-int __fastcall CSelectSV_OnRender(SelectSV *This) {
+int __fastcall CBattleWatch_OnRender(BattleWatch *This) {
 	// super
-	int ret = (This->*s_origCSelectSV_Render)();
-
-	updateCache(ret);
-	return ret;
-}
-
-int __fastcall CSelectCL_OnRender(SelectCL *This) {
-	// super
-	int ret = (This->*s_origCSelectCL_Render)();
+	int ret = (This->*s_origCBattleWatch_Render)();
 
 	updateCache(ret);
 	return ret;
@@ -66,6 +159,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	enabled = GetPrivateProfileInt("SokuStreaming", "Enabled", 1, profilePath) != 0;
 	port = GetPrivateProfileInt("Server", "Enabled", 80, profilePath);
 	webServer.addRoute("/", root);
+	webServer.addRoute("/state", state);
 	webServer.addStaticFolder("/static", std::string(parentPath) + "/static");
 	webServer.start(port);
 }
@@ -89,9 +183,15 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	LoadSettings(profilePath, profileParent);
 	DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCSelectSV_Render = SokuLib::union_cast<int (SelectSV::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CSelectSV + 0x08, reinterpret_cast<DWORD>(CSelectSV_OnRender)));
-	s_origCSelectCL_Render = SokuLib::union_cast<int (SelectCL::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CSelectCL + 0x08, reinterpret_cast<DWORD>(CSelectCL_OnRender)));
+	s_origCBattleWatch_Render = SokuLib::union_cast<int (BattleWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + 0x08, reinterpret_cast<DWORD>(CBattleWatch_OnRender)));
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
+
+	/*for (int i = 0; i < 16; i++) {
+		DWORD addr = SokuLib::ADDR_VTBL_BATTLE_CL + 0x08 + 60 + 4 * i + 0x40 * 3;
+
+		printf("%i: 0x%X\n", i, addr);
+		array[i] = SokuLib::union_cast<int (C::*)()>(SokuLib::TamperDword(addr, reinterpret_cast<DWORD>(funs[i])));
+	}*/
 
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 
