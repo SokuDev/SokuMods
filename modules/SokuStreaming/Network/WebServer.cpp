@@ -134,11 +134,14 @@ void WebServer::_serverLoop()
 {
 	Socket newConnection = this->_sock.accept();
 	Socket::HttpResponse response;
+	Socket::HttpRequest requ;
 
 	try {
 		try {
 			auto s = newConnection.readUntilEOF();
-			auto requ = Socket::parseHttpRequest(s);
+
+			requ = Socket::parseHttpRequest(s);
+
 			auto it = this->_routes.find(requ.path);
 
 			response.request = requ;
@@ -160,7 +163,10 @@ void WebServer::_serverLoop()
 	}
 	response.httpVer = "HTTP/1.1";
 	response.header["content-length"] = std::to_string(response.body.length());
-	std::cout << inet_ntoa(newConnection.getRemote())
+	if (!requ.httpVer.empty())
+		std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << " " + requ.path + ": " << response.returnCode << std::endl;
+	else
+		std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << " Malformed HTTP request: " << response.returnCode << std::endl;
 	newConnection.send(Socket::generateHttpResponse(response));
 	newConnection.disconnect();
 }

@@ -1,0 +1,31 @@
+div.leftChr{
+    position: absolute;
+    width: 12.5%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+}
+
+div.rightChr{
+    position: absolute;
+    width: 12.5%;
+    height: 100%;
+    left: 87.5%;
+    top: 0;
+    overflow: hidden;
+}
+
+img.rightChr {
+    transform: scale(-1, 1);
+}
+
+img.centered {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    right: -9999px;
+    bottom: -9999px;
+    height: 100.7%;
+    margin: auto;
+}

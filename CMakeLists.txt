@@ -263,21 +263,14 @@ add_library("SokuStreaming" MODULE
         modules/SokuStreaming/Network/Socket.hpp
         modules/SokuStreaming/Exceptions.hpp
         modules/SokuStreaming/Network/WebServer.cpp
-        modules/SokuStreaming/Network/WebServer.hpp)
-add_executable("WebSock"
-        modules/SokuStreaming/Network/Socket.cpp
-        modules/SokuStreaming/Network/Socket.hpp
-        modules/SokuStreaming/Exceptions.hpp
-        modules/SokuStreaming/Network/WebServer.cpp
         modules/SokuStreaming/Network/WebServer.hpp
-        modules/SokuStreaming/Network/main.cpp
+        modules/SokuStreaming/main.cpp
 )
-target_link_libraries(WebSock ws2_32 user32)
 target_compile_definitions(SokuStreaming PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_compile_options(SokuStreaming PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
 target_include_directories(SokuStreaming PRIVATE include include/directx "modules/SokuStreaming/")
 target_link_directories(SokuStreaming PRIVATE lib)
-target_link_libraries(SokuStreaming shlwapi ws2_32 user32 advapi32)
+target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32)
 install(TARGETS "SokuStreaming" LIBRARY DESTINATION "SWRSToys/modules/SokuStreaming/")
 install(TARGETS "SokuStreaming" LIBRARY DESTINATION "SokuEngine/modules/SokuStreaming/")
 set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; SokuStreaming=modules/SokuStreaming/SokuStreaming.dll\n")
