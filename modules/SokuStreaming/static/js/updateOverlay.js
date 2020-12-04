@@ -49,13 +49,30 @@ function getCardImage(charId, cardId)
     return "/static/img/cards/" + chr.name + "/" + chr.skillPrefix + cardType + ".png"
 }
 
-function update()
+function update(e)
 {
-    let lchr = Math.floor(Math.random() * 20);
-    let rchr = Math.floor(Math.random() * 20);
+    console.log(e.target.response);
+    let json = JSON.parse(e.target.response);
+    let lchr = json.left.character;
+    let rchr = json.right.character;
 
+    console.log(json);
     document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
     document.getElementById("rChr").setAttribute("src", getCharacterImage(rchr));
+    document.getElementById("leftName").textContent = json.left.name;
+    document.getElementById("rightName").textContent = json.right.name;
+    document.getElementById("leftScore").textContent = json.left.score + "";
+    document.getElementById("rightScore").textContent = json.right.score + "";
 }
 
-setInterval(update, 5000);
+function initiateUpdate() {
+    const Http = new XMLHttpRequest();
+    const url = '/state';
+
+    Http.open("GET", url);
+    Http.send();
+    Http.onreadystatechange = update
+}
+
+initiateUpdate()
+setInterval(initiateUpdate, 5000);
