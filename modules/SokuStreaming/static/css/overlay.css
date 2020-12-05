@@ -21,6 +21,7 @@ img.rightChr {
 }
 
 img.centered {
+    z-index: -1;
     position: absolute;
     top: -9999px;
     left: -9999px;
@@ -28,4 +29,55 @@ img.centered {
     bottom: -9999px;
     height: 100.7%;
     margin: auto;
+}
+
+div.container {
+    overflow: hidden;
+    width: 100%;
+}
+
+div.inner {
+    overflow: hidden;
+    width: 100%;
+}
+
+div.leftOverlay {
+    margin-left: 20%;
+    margin-right: 0;
+}
+
+div.rightOverlay {
+    margin-left: 0;
+    margin-right: 20%;
+}
+
+div.topOverlay {
+    width:30%;
+    float: left;
+}
+
+div.leftOverlayElement {
+    float: left;
+    margin-left: 10%;
+    background-color: gray;
+}
+
+div.rightOverlayElement {
+    float: right;
+    background-color: gray;
+    margin-right: 10%;
+}
+
+div.score {
+    width: 47px;
+    font-size: 40px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+div.name {
+    width: 75%;
+    font-size: 40px;
+    text-align: center;
+    vertical-align: middle;
 }

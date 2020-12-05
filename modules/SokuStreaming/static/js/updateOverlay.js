@@ -71,7 +71,7 @@ function initiateUpdate() {
 
     Http.open("GET", url);
     Http.send();
-    Http.onreadystatechange = update
+    Http.onload = update
 }
 
 initiateUpdate()
