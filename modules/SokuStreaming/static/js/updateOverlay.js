@@ -1,5 +1,5 @@
 let sokuCharacters = [
-    {"name": 'reimu',     "skillPrefix": "Re", "skills": [236, 214, 421, 623]},
+    {"name": 'reimu',     "skillPrefix": "Ha", "skills": [236, 214, 421, 623]},
     {"name": 'marisa',    "skillPrefix": "Ma", "skills": [214, 623, 22,  236]},
     {"name": 'sakuya',    "skillPrefix": "Iz", "skills": [623, 214, 236, 22 ]},
     {"name": 'alice',     "skillPrefix": "Al", "skills": [236, 623, 214, 22 ]},
@@ -35,10 +35,10 @@ function getCharacterImage(id)
 function getCardImage(charId, cardId)
 {
     if (cardId < 100)
-        return "/static/img/cards/system/Soku_common_card" + pad(cardId, 3);
+        return "/static/img/cards/system/Soku_common_card" + pad(cardId, 3) + ".png";
 
     let cardType;
-    let chr = sokuCharacters[id];
+    let chr = sokuCharacters[charId];
 
     if (cardId < 200) {
         let id = cardId - 100;
@@ -55,6 +55,8 @@ function update(e)
     let json = JSON.parse(e.target.response);
     let lchr = json.left.character;
     let rchr = json.right.character;
+    let ldeck = json.left.deck;
+    let rdeck = json.right.deck;
 
     console.log(json);
     document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
@@ -63,6 +65,10 @@ function update(e)
     document.getElementById("rightName").textContent = json.right.name;
     document.getElementById("leftScore").textContent = json.left.score + "";
     document.getElementById("rightScore").textContent = json.right.score + "";
+    for (let i = 0; i < 20 && i < ldeck.length; i++)
+        document.getElementById("lCard" + i).setAttribute("src", getCardImage(lchr, ldeck[i]));
+    for (let i = 0; i < 20 && i < rdeck.length; i++)
+        document.getElementById("rCard" + i).setAttribute("src", getCardImage(rchr, rdeck[i]));
 }
 
 function initiateUpdate() {
