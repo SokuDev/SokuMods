@@ -12,12 +12,18 @@
     <div class="rightChr">
         <img class="centered rightChr" id="rChr" src="/static/img" alt="Right">
     </div>
-    <img class="leftTopOverlay" src="/static/img/topOverlay.png">
-    <img class="rightTopOverlay" src="/static/img/topOverlay.png">
-    <span id="leftName" class="leftName"></span>
-    <span id="rightName" class="rightName"></span>
-    <span id="leftScore" class="leftScore"></span>
-    <span id="rightScore" class="rightScore"></span>
+    <div class="container">
+        <div class="inner">
+            <div class="topOverlay leftOverlay">
+                <div id="leftName" class="leftOverlayElement name"></div>
+                <div id="leftScore" class="rightOverlayElement score"></div>
+            </div>
+            <div class="topOverlay rightOverlay">
+                <div id="rightName" class="rightOverlayElement name"></div>
+                <div id="rightScore" class="leftOverlayElement score"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

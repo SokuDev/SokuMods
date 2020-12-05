@@ -18,11 +18,20 @@ static struct CachedMatchData {
 	std::vector<unsigned short> rightCards;
 	std::string leftName;
 	std::string rightName;
+	unsigned int oldLeftScore;
+	unsigned int oldRightScore;
 	unsigned int leftScore;
 	unsigned int rightScore;
 } cache;
+struct Title{};
+struct BattleCL{};
+struct BattleSV{};
 struct BattleWatch{};
+static bool needReset;
 static int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
+static int (__thiscall BattleCL::*s_origCBattleCL_Render)();
+static int (__thiscall BattleSV::*s_origCBattleSV_Render)();
+static int (__thiscall Title::*s_origCTitle_Render)();
 
 /*static int (__thiscall C::*array[16])();
 
@@ -129,24 +138,59 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 	return response;
 }
 
-void updateCache(int ret)
+void updateCache(int)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 	auto &netObj = SokuLib::getNetObject();
 
-	if (ret != SokuLib::SCENE_BATTLECL && ret != SokuLib::SCENE_BATTLESV) {
+	if (needReset) {
+		cache.leftScore = 0;
+		cache.rightScore = 0;
+		needReset = false;
+	}
+
+	if (
+		cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
+		cache.oldRightScore != battleMgr.rightCharacterManager->score
+	) {
 		cache.leftScore += battleMgr.leftCharacterManager->score == 2;
 		cache.rightScore += battleMgr.rightCharacterManager->score == 2;
 	}
+	cache.oldLeftScore = battleMgr.leftCharacterManager->score;
+	cache.oldRightScore = battleMgr.rightCharacterManager->score;
 	cache.left = SokuLib::leftChar;
 	cache.right = SokuLib::rightChar;
 	cache.leftName = netObj.profile1name;
 	cache.rightName = netObj.profile2name;
 }
 
+int __fastcall CTitle_OnRender(Title *This) {
+	// super
+	int ret = (This->*s_origCTitle_Render)();
+
+	needReset = true;
+	return ret;
+}
+
 int __fastcall CBattleWatch_OnRender(BattleWatch *This) {
 	// super
 	int ret = (This->*s_origCBattleWatch_Render)();
+
+	updateCache(ret);
+	return ret;
+}
+
+int __fastcall CBattleSV_OnRender(BattleSV *This) {
+	// super
+	int ret = (This->*s_origCBattleSV_Render)();
+
+	updateCache(ret);
+	return ret;
+}
+
+int __fastcall CBattleCL_OnRender(BattleCL *This) {
+	// super
+	int ret = (This->*s_origCBattleCL_Render)();
 
 	updateCache(ret);
 	return ret;
@@ -183,6 +227,9 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	LoadSettings(profilePath, profileParent);
 	DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+	s_origCTitle_Render = SokuLib::union_cast<int (Title::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CTitle + 8, reinterpret_cast<DWORD>(CTitle_OnRender)));
+	s_origCBattleCL_Render = SokuLib::union_cast<int (BattleCL::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleCL + 0x08, reinterpret_cast<DWORD>(CBattleCL_OnRender)));
+	s_origCBattleSV_Render = SokuLib::union_cast<int (BattleSV::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleSV + 0x08, reinterpret_cast<DWORD>(CBattleSV_OnRender)));
 	s_origCBattleWatch_Render = SokuLib::union_cast<int (BattleWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + 0x08, reinterpret_cast<DWORD>(CBattleWatch_OnRender)));
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
