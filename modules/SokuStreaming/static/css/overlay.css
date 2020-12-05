@@ -20,8 +20,17 @@ img.rightChr {
     transform: scale(-1, 1);
 }
 
-img.centered {
+.background {
+    width: 100%;
+    height: 100%;
+}
+
+.behind {
     z-index: -1;
+}
+
+img.centered {
+    z-index: -2;
     position: absolute;
     top: -9999px;
     left: -9999px;
@@ -31,53 +40,93 @@ img.centered {
     margin: auto;
 }
 
+div.deck {
+    height: 50%;
+    position: absolute;
+    bottom: 0;
+}
+
+div.cards {
+    font-size: 0;
+    height: 20%;
+}
+
+img.card {
+    width: 25%;
+    height: 100%;
+}
+
 div.container {
     overflow: hidden;
     width: 100%;
 }
 
+div.topOverlayContainer {
+    height: 70px;
+}
+
 div.inner {
     overflow: hidden;
+}
+
+div.topOverlayInner {
     width: 100%;
+    height: 100%;
 }
 
 div.leftOverlay {
-    margin-left: 20%;
+    margin-left: 5%;
+    height: 100%;
     margin-right: 0;
 }
 
 div.rightOverlay {
-    margin-left: 0;
-    margin-right: 20%;
+    margin-left: 10%;
+    height: 100%;
 }
 
 div.topOverlay {
-    width:30%;
+    width:40%;
     float: left;
+}
+
+.flipped {
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
 }
 
 div.leftOverlayElement {
     float: left;
-    margin-left: 10%;
-    background-color: gray;
+    top: -100%;
+    position: relative;
+    margin-left: 5%;
+    color: white;
 }
 
 div.rightOverlayElement {
     float: right;
-    background-color: gray;
-    margin-right: 10%;
+    top: -100%;
+    position: relative;
+    margin-right: 5%;
+    color: white;
 }
 
 div.score {
     width: 47px;
+    height: 100%;
     font-size: 40px;
     text-align: center;
     vertical-align: middle;
 }
 
 div.name {
-    width: 75%;
-    font-size: 40px;
+    width: 80%;
+    height: 100%;
+    font-size: 35px;
     text-align: center;
     vertical-align: middle;
 }

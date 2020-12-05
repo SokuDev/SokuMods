@@ -117,7 +117,7 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 	leftDeck.reserve(2 + 20 * 3 + 19);
 	leftDeck += "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]";
 	rightDeck.reserve(2 + 20 * 3 + 19);
-	rightDeck += "[100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119]";
+	rightDeck += "[100,101,102,103,104,105,106,107,108,109,110,111,20,200,201,202,203,204,205,206,207,208]";
 
 	response.returnCode = 200;
 	response.header["content-type"] = "application/json";
