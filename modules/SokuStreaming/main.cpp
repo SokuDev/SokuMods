@@ -33,6 +33,7 @@ struct BattleCL{};
 struct BattleSV{};
 struct BattleWatch{};
 static bool needReset;
+static bool needDeckRefresh;
 static int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
 static int (__thiscall BattleCL::*s_origCBattleCL_Render)();
 static int (__thiscall BattleSV::*s_origCBattleSV_Render)();
@@ -142,19 +143,23 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 			"\"character\":" + std::to_string(cache.left) + ","
 			"\"score\":" + std::to_string(cache.leftScore) + ","
 			R"("name":")" + sanitizedLeftName + "\","
-			"\"deck\":" + serializeUShortArray(cache.leftCards, 2 + 20 * 3 + 19) +
+			"\"deck\":" + serializeUShortArray(cache.leftCards, 2 + 20 * 3 + 19) + ","
+			"\"used\":" + serializeUShortArray(cache.leftUsed, 2 + 20 * 3 + 19) + ","
+			"\"hand\":" + serializeUShortArray(cache.leftHand, 2 + 20 * 3 + 19) +
 		"},"
 		"\"right\":{"
 			"\"character\":" + std::to_string(cache.right) + ","
 			"\"score\":" + std::to_string(cache.rightScore) + ","
 			R"("name":")" + sanitizedRightName + "\","
-			"\"deck\":" + serializeUShortArray(cache.rightCards, 2 + 20 * 3 + 19) +
+			"\"deck\":" + serializeUShortArray(cache.rightCards, 2 + 20 * 3 + 19) + ","
+			"\"used\":" + serializeUShortArray(cache.rightUsed, 2 + 20 * 3 + 19) + ","
+			"\"hand\":" + serializeUShortArray(cache.rightHand, 2 + 20 * 3 + 19) +
 		"}"
 	"}";
 	return response;
 }
 
-void updateCache(int)
+void updateCache(int ret)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 	auto &netObj = SokuLib::getNetObject();
@@ -162,31 +167,56 @@ void updateCache(int)
 	if (needReset) {
 		cache.leftScore = 0;
 		cache.rightScore = 0;
-		cache.leftCards.clear();
-		cache.rightCards.clear();
-		cache.leftHand.clear();
-		cache.rightHand.clear();
-		cache.leftUsed.clear();
-		cache.rightUsed.clear();
 		needReset = false;
-
-		int CardsLeftOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
-		int UCCOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
-		for (int i = 0; i < 20; i++)
-			cache.leftCards.push_back(SokuLib::getCard(&battleMgr.leftCharacterManager->mDeckInfo2Obj));
-		battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
-		battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
-		std::sort(cache.leftCards.begin(), cache.leftCards.end());
-
-		CardsLeftOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
-		UCCOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
-		for (int i = 0; i < 20; i++)
-			cache.rightCards.push_back(SokuLib::getCard(&battleMgr.rightCharacterManager->mDeckInfo2Obj));
-		battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
-		battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
-		std::sort(cache.rightCards.begin(), cache.rightCards.end());
 	}
 
+	auto oldLeftCards = cache.leftCards;
+	auto oldRightCards = cache.rightCards;
+
+	cache.leftCards.clear();
+	cache.rightCards.clear();
+	cache.leftHand.clear();
+	cache.rightHand.clear();
+
+	int CardsLeftOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
+	int UCCOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
+	if (CardsLeftOld == 20)
+		cache.leftUsed.clear();
+	for (int i = 0; i < CardsLeftOld; i++)
+		cache.leftCards.push_back(SokuLib::getCard(&battleMgr.leftCharacterManager->mDeckInfo2Obj));
+	battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
+	battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
+	std::sort(cache.leftCards.begin(), cache.leftCards.end());
+
+	CardsLeftOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
+	UCCOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
+	if (CardsLeftOld == 20)
+		cache.rightUsed.clear();
+	for (int i = 0; i < CardsLeftOld; i++)
+		cache.rightCards.push_back(SokuLib::getCard(&battleMgr.rightCharacterManager->mDeckInfo2Obj));
+	battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
+	battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
+	std::sort(cache.rightCards.begin(), cache.rightCards.end());
+
+	for (auto id : cache.leftCards) {
+		auto it = std::find(oldLeftCards.begin(), oldLeftCards.end(), id);
+
+		if (it != oldLeftCards.end())
+			oldLeftCards.erase(it);
+	}
+	for (auto id : cache.rightCards) {
+		auto it = std::find(oldRightCards.begin(), oldRightCards.end(), id);
+
+		if (it != oldRightCards.end())
+			oldRightCards.erase(it);
+	}
+	for (auto id : oldLeftCards)
+		cache.leftUsed.push_back(id);
+	for (auto id : oldRightCards)
+		cache.rightUsed.push_back(id);
+
+	std::sort(cache.leftUsed.begin(), cache.leftUsed.end());
+	std::sort(cache.rightUsed.begin(), cache.rightUsed.end());
 	if (
 		cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
 		cache.oldRightScore != battleMgr.rightCharacterManager->score
@@ -207,6 +237,7 @@ int __fastcall CTitle_OnRender(Title *This) {
 	int ret = (This->*s_origCTitle_Render)();
 
 	needReset = true;
+	needDeckRefresh = true;
 	return ret;
 }
 

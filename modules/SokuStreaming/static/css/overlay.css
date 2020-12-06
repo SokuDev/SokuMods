@@ -49,11 +49,29 @@ div.deck {
 div.cards {
     font-size: 0;
     height: 20%;
+    background-color: black;
+}
+
+div.hand {
+    font-size: 0;
+    height: 20%;
 }
 
 img.card {
-    width: 25%;
+    width: 20%;
     height: 100%;
+}
+
+img.used_card {
+    width: 20%;
+    height: 100%;
+    opacity: 0.6;
+}
+
+img.unused_card {
+    width: 20%;
+    height: 100%;
+    opacity: 0;
 }
 
 div.container {
