@@ -19,7 +19,8 @@ let sokuCharacters = [
     {"name": 'meiling',   "skillPrefix": "Me", "skills": [214, 623, 22,  236]},
     {"name": 'utsuho',    "skillPrefix": "Ut", "skills": [623, 236, 22,  214]},
     {"name": 'suwako',    "skillPrefix": "Sw", "skills": [214, 623, 236, 22 ]},
-]
+];
+let json = {};
 
 function pad(n, width, z) {
     z = z || '0';
@@ -49,11 +50,18 @@ function getCardImage(charId, cardId)
     return "/static/img/cards/" + chr.name + "/" + chr.skillPrefix + cardType + ".png"
 }
 
-let json = {}
-
 function displayDeck(id, used, hand, deck, chr)
 {
     let i = 0;
+
+    for (let g = 0; i < 20 && g < hand.length; i++) {
+        let img = document.getElementById(id + i);
+        let src = getCardImage(chr, hand[g]);
+
+        img.setAttribute("src", src);
+        img.className = "hand_card";
+        g++;
+    }
     for (let g = 0; i < 20 && g < deck.length; i++) {
         let img = document.getElementById(id + i);
         let src = getCardImage(chr, deck[g]);
@@ -117,4 +125,4 @@ function initiateUpdate() {
 }
 
 initiateUpdate()
-setInterval(initiateUpdate, 5000);
+setInterval(initiateUpdate, 500);

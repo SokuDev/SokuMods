@@ -13,6 +13,7 @@ static bool enabled;
 static unsigned short port;
 static WebServer webServer;
 static struct CachedMatchData {
+	SokuLib::Weather weather;
 	SokuLib::Character left;
 	SokuLib::Character right;
 	std::vector<unsigned short> leftCards;
@@ -27,7 +28,7 @@ static struct CachedMatchData {
 	unsigned int oldRightScore;
 	unsigned int leftScore;
 	unsigned int rightScore;
-} cache;
+} _cache;
 struct Title{};
 struct BattleCL{};
 struct BattleSV{};
@@ -35,8 +36,6 @@ struct BattleWatch{};
 static bool needReset;
 static bool needDeckRefresh;
 static int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
-static int (__thiscall BattleCL::*s_origCBattleCL_Render)();
-static int (__thiscall BattleSV::*s_origCBattleSV_Render)();
 static int (__thiscall Title::*s_origCTitle_Render)();
 
 /*static int (__thiscall C::*array[16])();
@@ -108,13 +107,30 @@ std::string serializeUShortArray(const std::vector<unsigned short> &arr, int max
 	return result;
 }
 
+std::string generateMtVpDeck(size_t size)
+{
+	std::string result;
+
+	result.reserve(2 + size * 2 + size - 1);
+	result += "[";
+	if (size)
+		result += "21";
+	for (size_t i = 1; i < size; i++)
+		result += ",21";
+	result += "]";
+	return result;
+}
+
 Socket::HttpResponse state(const Socket::HttpRequest &requ)
 {
+	CachedMatchData cache = _cache;
 	Socket::HttpResponse response;
 	std::string sanitizedLeftName;
 	std::string sanitizedRightName;
 	std::string leftDeck;
 	std::string rightDeck;
+	std::string leftHand;
+	std::string rightHand;
 
 	sanitizedLeftName.reserve(cache.leftName.size() * 3);
 	for (char c : convertShiftJisToUTF8(cache.leftName.c_str()))
@@ -136,6 +152,18 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 			sanitizedRightName.push_back(c);
 		}
 
+	if (cache.weather == SokuLib::WEATHER_MOUNTAIN_VAPOR) {
+		leftDeck = generateMtVpDeck(cache.leftCards.size() + cache.leftHand.size());
+		rightDeck = generateMtVpDeck(cache.rightCards.size() + cache.rightHand.size());
+		leftHand = "[]";
+		rightHand = "[]";
+	} else {
+		leftDeck = serializeUShortArray(cache.leftCards, 2 + 20 * 3 + 19);
+		rightDeck = serializeUShortArray(cache.rightCards, 2 + 20 * 3 + 19);
+		leftHand = serializeUShortArray(cache.leftHand, 2 + 20 * 3 + 19);
+		rightHand = serializeUShortArray(cache.rightHand, 2 + 20 * 3 + 19);
+	}
+
 	response.returnCode = 200;
 	response.header["content-type"] = "application/json";
 	response.body = "{"
@@ -143,17 +171,17 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 			"\"character\":" + std::to_string(cache.left) + ","
 			"\"score\":" + std::to_string(cache.leftScore) + ","
 			R"("name":")" + sanitizedLeftName + "\","
-			"\"deck\":" + serializeUShortArray(cache.leftCards, 2 + 20 * 3 + 19) + ","
+			"\"deck\":" + leftDeck + ","
 			"\"used\":" + serializeUShortArray(cache.leftUsed, 2 + 20 * 3 + 19) + ","
-			"\"hand\":" + serializeUShortArray(cache.leftHand, 2 + 20 * 3 + 19) +
+			"\"hand\":" + leftHand +
 		"},"
 		"\"right\":{"
 			"\"character\":" + std::to_string(cache.right) + ","
 			"\"score\":" + std::to_string(cache.rightScore) + ","
 			R"("name":")" + sanitizedRightName + "\","
-			"\"deck\":" + serializeUShortArray(cache.rightCards, 2 + 20 * 3 + 19) + ","
+			"\"deck\":" + rightDeck + ","
 			"\"used\":" + serializeUShortArray(cache.rightUsed, 2 + 20 * 3 + 19) + ","
-			"\"hand\":" + serializeUShortArray(cache.rightHand, 2 + 20 * 3 + 19) +
+			"\"hand\":" + rightHand +
 		"}"
 	"}";
 	return response;
@@ -165,71 +193,89 @@ void updateCache(int ret)
 	auto &netObj = SokuLib::getNetObject();
 
 	if (needReset) {
-		cache.leftScore = 0;
-		cache.rightScore = 0;
+		_cache.leftScore = 0;
+		_cache.rightScore = 0;
 		needReset = false;
 	}
 
-	auto oldLeftCards = cache.leftCards;
-	auto oldRightCards = cache.rightCards;
+	auto oldLeftHand = _cache.leftHand;
+	auto oldRightHand = _cache.rightHand;
 
-	cache.leftCards.clear();
-	cache.rightCards.clear();
-	cache.leftHand.clear();
-	cache.rightHand.clear();
+	_cache.leftCards.clear();
+	_cache.rightCards.clear();
+	_cache.leftHand.clear();
+	_cache.rightHand.clear();
 
-	int CardsLeftOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
-	int UCCOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
-	if (CardsLeftOld == 20)
-		cache.leftUsed.clear();
-	for (int i = 0; i < CardsLeftOld; i++)
-		cache.leftCards.push_back(SokuLib::getCard(&battleMgr.leftCharacterManager->mDeckInfo2Obj));
-	battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
-	battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
-	std::sort(cache.leftCards.begin(), cache.leftCards.end());
+	auto &leftDeck = battleMgr.leftCharacterManager->mDeckInfo2Obj;
+	auto &rightDeck = battleMgr.rightCharacterManager->mDeckInfo2Obj;
 
-	CardsLeftOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
-	UCCOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
-	if (CardsLeftOld == 20)
-		cache.rightUsed.clear();
-	for (int i = 0; i < CardsLeftOld; i++)
-		cache.rightCards.push_back(SokuLib::getCard(&battleMgr.rightCharacterManager->mDeckInfo2Obj));
-	battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
-	battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
-	std::sort(cache.rightCards.begin(), cache.rightCards.end());
+	// Left remaining cards
+	if (leftDeck.deck.size == 20)
+		_cache.leftUsed.clear();
+	if (leftDeck.deck.size <= 20)
+		for (int i = 0; i < leftDeck.deck.size; i++) {
+			auto card = leftDeck.deck[i];
 
-	for (auto id : cache.leftCards) {
-		auto it = std::find(oldLeftCards.begin(), oldLeftCards.end(), id);
+			_cache.leftCards.push_back(*card);
+		}
+	std::sort(_cache.leftCards.begin(), _cache.leftCards.end());
+	//Right remaining cards
+	if (rightDeck.deck.size == 20)
+		_cache.rightUsed.clear();
+	if (rightDeck.deck.size <= 20)
+		for (int i = 0; i < rightDeck.deck.size; i++) {
+			auto card = rightDeck.deck[i];
 
-		if (it != oldLeftCards.end())
-			oldLeftCards.erase(it);
+			_cache.rightCards.push_back(*card);
+		}
+	std::sort(_cache.rightCards.begin(), _cache.rightCards.end());
+
+	//Hands
+	for (int i = 0; i < leftDeck.cardCount; i++)
+		_cache.leftHand.push_back(leftDeck.handCardBase[(i + leftDeck.selectedCard) % leftDeck.handCardMax]->id);
+	for (int i = 0; i < rightDeck.cardCount; i++)
+		_cache.rightHand.push_back(rightDeck.handCardBase[(i + rightDeck.selectedCard) % rightDeck.handCardMax]->id);
+	std::sort(_cache.leftHand.begin(), _cache.leftHand.end());
+	std::sort(_cache.rightHand.begin(), _cache.rightHand.end());
+
+	//Used cards
+	if (oldLeftHand.size() < _cache.leftHand.size())
+		oldLeftHand.clear();
+	if (oldRightHand.size() < _cache.rightHand.size())
+		oldRightHand.clear();
+	for (auto id : _cache.leftHand) {
+		auto it = std::find(oldLeftHand.begin(), oldLeftHand.end(), id);
+
+		if (it != oldLeftHand.end())
+			oldLeftHand.erase(it);
 	}
-	for (auto id : cache.rightCards) {
-		auto it = std::find(oldRightCards.begin(), oldRightCards.end(), id);
+	for (auto id : _cache.rightHand) {
+		auto it = std::find(oldRightHand.begin(), oldRightHand.end(), id);
 
-		if (it != oldRightCards.end())
-			oldRightCards.erase(it);
+		if (it != oldRightHand.end())
+			oldRightHand.erase(it);
 	}
-	for (auto id : oldLeftCards)
-		cache.leftUsed.push_back(id);
-	for (auto id : oldRightCards)
-		cache.rightUsed.push_back(id);
+	for (auto id : oldLeftHand)
+		_cache.leftUsed.push_back(id);
+	for (auto id : oldRightHand)
+		_cache.rightUsed.push_back(id);
+	std::sort(_cache.leftUsed.begin(), _cache.leftUsed.end());
+	std::sort(_cache.rightUsed.begin(), _cache.rightUsed.end());
 
-	std::sort(cache.leftUsed.begin(), cache.leftUsed.end());
-	std::sort(cache.rightUsed.begin(), cache.rightUsed.end());
 	if (
-		cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
-		cache.oldRightScore != battleMgr.rightCharacterManager->score
+		_cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
+		_cache.oldRightScore != battleMgr.rightCharacterManager->score
 	) {
-		cache.leftScore += battleMgr.leftCharacterManager->score == 2;
-		cache.rightScore += battleMgr.rightCharacterManager->score == 2;
+		_cache.leftScore += battleMgr.leftCharacterManager->score == 2;
+		_cache.rightScore += battleMgr.rightCharacterManager->score == 2;
 	}
-	cache.oldLeftScore = battleMgr.leftCharacterManager->score;
-	cache.oldRightScore = battleMgr.rightCharacterManager->score;
-	cache.left = SokuLib::leftChar;
-	cache.right = SokuLib::rightChar;
-	cache.leftName = netObj.profile1name;
-	cache.rightName = netObj.profile2name;
+	_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
+	_cache.oldRightScore = battleMgr.rightCharacterManager->score;
+	_cache.left = SokuLib::leftChar;
+	_cache.right = SokuLib::rightChar;
+	_cache.leftName = netObj.profile1name;
+	_cache.rightName = netObj.profile2name;
+	_cache.weather = SokuLib::activeWeather;
 }
 
 int __fastcall CTitle_OnRender(Title *This) {
@@ -244,22 +290,6 @@ int __fastcall CTitle_OnRender(Title *This) {
 int __fastcall CBattleWatch_OnRender(BattleWatch *This) {
 	// super
 	int ret = (This->*s_origCBattleWatch_Render)();
-
-	updateCache(ret);
-	return ret;
-}
-
-int __fastcall CBattleSV_OnRender(BattleSV *This) {
-	// super
-	int ret = (This->*s_origCBattleSV_Render)();
-
-	updateCache(ret);
-	return ret;
-}
-
-int __fastcall CBattleCL_OnRender(BattleCL *This) {
-	// super
-	int ret = (This->*s_origCBattleCL_Render)();
 
 	updateCache(ret);
 	return ret;
@@ -297,8 +327,6 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origCTitle_Render = SokuLib::union_cast<int (Title::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CTitle + 8, reinterpret_cast<DWORD>(CTitle_OnRender)));
-	s_origCBattleCL_Render = SokuLib::union_cast<int (BattleCL::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleCL + 0x08, reinterpret_cast<DWORD>(CBattleCL_OnRender)));
-	s_origCBattleSV_Render = SokuLib::union_cast<int (BattleSV::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleSV + 0x08, reinterpret_cast<DWORD>(CBattleSV_OnRender)));
 	s_origCBattleWatch_Render = SokuLib::union_cast<int (BattleWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + 0x08, reinterpret_cast<DWORD>(CBattleWatch_OnRender)));
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
