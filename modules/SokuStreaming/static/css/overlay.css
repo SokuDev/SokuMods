@@ -62,10 +62,17 @@ img.card {
     height: 100%;
 }
 
+img.hand_card {
+    margin: 2% 2% 2% 2%;
+    width: 16%;
+    height: 90%;
+    box-shadow: 0 0 3px 5px #FFFF00; ;
+}
+
 img.used_card {
     width: 20%;
     height: 100%;
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 img.unused_card {
