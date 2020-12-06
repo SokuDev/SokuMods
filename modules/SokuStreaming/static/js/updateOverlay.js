@@ -49,10 +49,13 @@ function getCardImage(charId, cardId)
     return "/static/img/cards/" + chr.name + "/" + chr.skillPrefix + cardType + ".png"
 }
 
-function update(e)
+let json = {}
+
+function realUpdate(e)
 {
     console.log(e.target.response);
-    let json = JSON.parse(e.target.response);
+
+    let j = JSON.parse(e.target.response);
     let lchr = json.left.character;
     let rchr = json.right.character;
     let ldeck = json.left.deck;
@@ -61,14 +64,27 @@ function update(e)
     console.log(json);
     document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
     document.getElementById("rChr").setAttribute("src", getCharacterImage(rchr));
-    document.getElementById("leftName").textContent = json.left.name;
-    document.getElementById("rightName").textContent = json.right.name;
-    document.getElementById("leftScore").textContent = json.left.score + "";
-    document.getElementById("rightScore").textContent = json.right.score + "";
+    document.getElementById("leftName").textContent = j.ln || json.left.name;
+    document.getElementById("rightName").textContent = j.rn || json.right.name;
+    document.getElementById("leftScore").textContent = j.ls + json.left.score + "";
+    document.getElementById("rightScore").textContent = j.rs +json.right.score + "";
     for (let i = 0; i < 20 && i < ldeck.length; i++)
         document.getElementById("lCard" + i).setAttribute("src", getCardImage(lchr, ldeck[i]));
     for (let i = 0; i < 20 && i < rdeck.length; i++)
         document.getElementById("rCard" + i).setAttribute("src", getCardImage(rchr, rdeck[i]));
+}
+
+function update(e)
+{
+    console.log(e.target.response);
+    json = JSON.parse(e.target.response);
+
+    const Http = new XMLHttpRequest();
+    const url = '/static/override.json';
+
+    Http.open("GET", url);
+    Http.send();
+    Http.onload = realUpdate
 }
 
 function initiateUpdate() {
