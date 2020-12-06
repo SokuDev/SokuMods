@@ -2,6 +2,7 @@
 // Created by Gegel85 on 04/12/2020
 //
 
+#include <algorithm>
 #include <SokuLib.hpp>
 #include <Windows.h>
 #include <Shlwapi.h>
@@ -16,6 +17,10 @@ static struct CachedMatchData {
 	SokuLib::Character right;
 	std::vector<unsigned short> leftCards;
 	std::vector<unsigned short> rightCards;
+	std::vector<unsigned short> leftHand;
+	std::vector<unsigned short> rightHand;
+	std::vector<unsigned short> leftUsed;
+	std::vector<unsigned short> rightUsed;
 	std::string leftName;
 	std::string rightName;
 	unsigned int oldLeftScore;
@@ -86,6 +91,22 @@ Socket::HttpResponse root(const Socket::HttpRequest &requ)
 	return response;
 }
 
+std::string serializeUShortArray(const std::vector<unsigned short> &arr, int maxSize)
+{
+	std::string result;
+
+	result.reserve(maxSize);
+	result += "[";
+	if (!arr.empty())
+		result += std::to_string(arr[0]);
+	for (size_t i = 1; i < arr.size(); i++) {
+		result += ",";
+		result += std::to_string(arr[i]);
+	}
+	result += "]";
+	return result;
+}
+
 Socket::HttpResponse state(const Socket::HttpRequest &requ)
 {
 	Socket::HttpResponse response;
@@ -114,11 +135,6 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 			sanitizedRightName.push_back(c);
 		}
 
-	leftDeck.reserve(2 + 20 * 3 + 19);
-	leftDeck += "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]";
-	rightDeck.reserve(2 + 20 * 3 + 19);
-	rightDeck += "[100,101,102,103,104,105,106,107,108,109,110,111,20,200,201,202,203,204,205,206,207,208]";
-
 	response.returnCode = 200;
 	response.header["content-type"] = "application/json";
 	response.body = "{"
@@ -126,13 +142,13 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 			"\"character\":" + std::to_string(cache.left) + ","
 			"\"score\":" + std::to_string(cache.leftScore) + ","
 			R"("name":")" + sanitizedLeftName + "\","
-			"\"deck\":" + leftDeck +
+			"\"deck\":" + serializeUShortArray(cache.leftCards, 2 + 20 * 3 + 19) +
 		"},"
 		"\"right\":{"
 			"\"character\":" + std::to_string(cache.right) + ","
 			"\"score\":" + std::to_string(cache.rightScore) + ","
 			R"("name":")" + sanitizedRightName + "\","
-			"\"deck\":" + rightDeck +
+			"\"deck\":" + serializeUShortArray(cache.rightCards, 2 + 20 * 3 + 19) +
 		"}"
 	"}";
 	return response;
@@ -146,7 +162,29 @@ void updateCache(int)
 	if (needReset) {
 		cache.leftScore = 0;
 		cache.rightScore = 0;
+		cache.leftCards.clear();
+		cache.rightCards.clear();
+		cache.leftHand.clear();
+		cache.rightHand.clear();
+		cache.leftUsed.clear();
+		cache.rightUsed.clear();
 		needReset = false;
+
+		int CardsLeftOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
+		int UCCOld = battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
+		for (int i = 0; i < 20; i++)
+			cache.leftCards.push_back(SokuLib::getCard(&battleMgr.leftCharacterManager->mDeckInfo2Obj));
+		battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
+		battleMgr.leftCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
+		std::sort(cache.leftCards.begin(), cache.leftCards.end());
+
+		CardsLeftOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft;
+		UCCOld = battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter;
+		for (int i = 0; i < 20; i++)
+			cache.rightCards.push_back(SokuLib::getCard(&battleMgr.rightCharacterManager->mDeckInfo2Obj));
+		battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.CardsLeft = CardsLeftOld;
+		battleMgr.rightCharacterManager->mDeckInfo2Obj.UnknownSubStructure.UnknownCardCounter = UCCOld;
+		std::sort(cache.rightCards.begin(), cache.rightCards.end());
 	}
 
 	if (
