@@ -51,15 +51,37 @@ function getCardImage(charId, cardId)
 
 let json = {}
 
+function displayDeck(id, used, hand, deck, chr)
+{
+    let i = 0;
+    for (let g = 0; i < 20 && g < deck.length; i++) {
+        let img = document.getElementById(id + i);
+        let src = getCardImage(chr, deck[g]);
+
+        img.setAttribute("src", src);
+        img.className = "card";
+        g++;
+    }
+    for (let g = 0; i < 20 && g < used.length; i++) {
+        let img = document.getElementById(id + i);
+        let src = getCardImage(chr, used[g]);
+
+        img.setAttribute("src", src);
+        img.className = "used_card";
+        g++;
+    }
+    for (; i < 20; i++) {
+        let img = document.getElementById(id + i);
+
+        img.className = "unused_card";
+    }
+}
+
 function realUpdate(e)
 {
-    console.log(e.target.response);
-
     let j = JSON.parse(e.target.response);
     let lchr = json.left.character;
     let rchr = json.right.character;
-    let ldeck = json.left.deck;
-    let rdeck = json.right.deck;
 
     console.log(json);
     document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
@@ -68,15 +90,13 @@ function realUpdate(e)
     document.getElementById("rightName").textContent = j.rn || json.right.name;
     document.getElementById("leftScore").textContent = j.ls + json.left.score + "";
     document.getElementById("rightScore").textContent = j.rs +json.right.score + "";
-    for (let i = 0; i < 20 && i < ldeck.length; i++)
-        document.getElementById("lCard" + i).setAttribute("src", getCardImage(lchr, ldeck[i]));
-    for (let i = 0; i < 20 && i < rdeck.length; i++)
-        document.getElementById("rCard" + i).setAttribute("src", getCardImage(rchr, rdeck[i]));
+
+    displayDeck("lCard", json.left.used, json.left.hand, json.left.deck, lchr);
+    displayDeck("rCard", json.right.used, json.right.hand, json.right.deck, rchr);
 }
 
 function update(e)
 {
-    console.log(e.target.response);
     json = JSON.parse(e.target.response);
 
     const Http = new XMLHttpRequest();
