@@ -46,12 +46,12 @@ public:
 	//! @brief Construct a Socket.
 	Socket();
 
-	//! @brief Socket Desctructor.
+	//! @brief Socket Destructor.
 	~Socket();
 
 	//! @brief Get the status of the Socket.
 	//! @return The status of the Socket.
-	bool isOpen();
+	bool isOpen() const;
 
 	//! @brief Connect the Socket to a host.
 	//! @param host The host to connect to.
@@ -117,13 +117,18 @@ public:
 
 	//! @brief Return the socket value.
 	//! @return SOCKET
-	SOCKET getSockFd() { return this->_sockfd; };
+	SOCKET getSockFd() const { return this->_sockfd; };
 
 	const sockaddr_in &getRemote() const;
 
+	void setNoDestroy(bool noDestroy) const;
+
+	bool isDisconnected() const;
+
 protected:
+	mutable bool _noDestroy = false;
 	SOCKET _sockfd = INVALID_SOCKET; //!< The socket
-	bool _opened = false; //!< The status of the socket.
+	mutable bool _opened = false; //!< The status of the socket.
 	struct sockaddr_in _remote;
 };
 

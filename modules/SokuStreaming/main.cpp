@@ -8,6 +8,7 @@
 #include <Shlwapi.h>
 #include "ShiftJISDecoder.hpp"
 #include "Network/WebServer.hpp"
+#include "Exceptions.hpp"
 
 static bool enabled;
 static unsigned short port;
@@ -82,10 +83,17 @@ int (__fastcall *funs[16])(C *This) = {
 	fun15,
 };*/
 
+void onNewWebSocket(WebSocket &s)
+{
+	s.send("Hello my friend. I hope you enjoy your stay here.");
+}
+
 Socket::HttpResponse root(const Socket::HttpRequest &requ)
 {
 	Socket::HttpResponse response;
 
+	if (requ.method != "GET")
+		throw AbortConnectionException(405);
 	response.header["Location"] = "http://" + requ.host + "/static/html/overlay.html";
 	response.returnCode = 301;
 	return response;
@@ -132,6 +140,8 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 	std::string leftHand;
 	std::string rightHand;
 
+	if (requ.method != "GET")
+		throw AbortConnectionException(405);
 	sanitizedLeftName.reserve(cache.leftName.size() * 3);
 	for (char c : convertShiftJisToUTF8(cache.leftName.c_str()))
 		switch (c) {
@@ -305,6 +315,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	webServer.addRoute("/state", state);
 	webServer.addStaticFolder("/static", std::string(parentPath) + "/static");
 	webServer.start(port);
+	webServer.onWebSocketConnect(onNewWebSocket);
 }
 
 extern "C"

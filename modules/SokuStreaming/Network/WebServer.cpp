@@ -119,8 +119,11 @@ void WebServer::stop()
 {
 	this->_closed = true;
 	auto old = signal(SIGINT, ___);
+
+	std::for_each(this->_webSocks.begin(), this->_webSocks.end(), [](WebSocket &s) { s.disconnect(); });
 	raise(SIGINT); //Interrupt accept
 	signal(SIGINT, old);
+	std::for_each(this->_webSocksThreads.begin(), this->_webSocksThreads.end(), [](std::thread &s) { if (s.joinable()) s.join(); });
 	if (this->_thread.joinable())
 		this->_thread.join();
 }
@@ -142,13 +145,17 @@ void WebServer::_serverLoop()
 
 			requ = Socket::parseHttpRequest(s);
 
-			auto it = this->_routes.find(requ.path);
+			if (requ.path == "/chat")
+				return this->_addWebSocket(newConnection, requ);
+			else {
+				auto it = this->_routes.find(requ.path);
 
-			response.request = requ;
-			if (it != this->_routes.end())
-				response = it->second(requ);
-			else
-				response = this->_checkFolders(requ);
+				response.request = requ;
+				if (it != this->_routes.end())
+					response = it->second(requ);
+				else
+					response = this->_checkFolders(requ);
+			}
 		} catch (InvalidHTTPAnswerException &) {
 			response = WebServer::_makeGenericPage(400);
 		} catch (NotImplementedException &) {
@@ -215,6 +222,8 @@ Socket::HttpResponse WebServer::_checkFolders(const Socket::HttpRequest &request
 {
 	Socket::HttpResponse response;
 
+	if (request.method != "GET")
+		throw AbortConnectionException(405);
 	//TODO: Fix vulnerability if using .. in URL
 	for (auto &folder : this->_folders) {
 		if (request.path.substr(0, folder.first.length()) == folder.first) {
@@ -241,7 +250,11 @@ Socket::HttpResponse WebServer::_checkFolders(const Socket::HttpRequest &request
 std::string WebServer::_getContentType(const std::string &path)
 {
 	//TODO: Fix bug if URL contains a .
-	size_t pos = path.find('.');
+	size_t pos = path.find_last_of('.');
+	size_t pos2 = path.find_last_of('/');
+
+	if (pos2 != std::string::npos && path.substr(0, pos2).find('.') != std::string::npos)
+		throw AbortConnectionException(401);
 
 	if (pos == std::string::npos)
 		return "application/octet-stream";
@@ -251,5 +264,66 @@ std::string WebServer::_getContentType(const std::string &path)
 	if (it == WebServer::types.end())
 		return "application/" + path.substr(pos + 1);
 	return it->second;
+}
+
+void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ)
+{
+	auto response = WebSocket::solveHandshake(requ);
+	auto &wsock = this->_webSocks.emplace_back(sock);
+
+	wsock.needsMask(false);
+	response.httpVer = "HTTP/1.1";
+	response.codeName = WebServer::codes.at(response.returnCode);
+	sock.send(Socket::generateHttpResponse(response));
+	if (this->_onConnect)
+		this->_onConnect(wsock);
+	this->_webSocksThreads.emplace_back([this, &wsock]{
+		try {
+			while (wsock.isOpen()) {
+				std::string msg = wsock.getAnswer();
+
+				if (this->_onMessage)
+					this->_onMessage(wsock, msg);
+			}
+		} catch (const std::exception &e) {
+			wsock.disconnect();
+			if (this->_onError)
+				this->_onError(wsock, e);
+		}
+	});
+	std::cout << inet_ntoa(sock.getRemote().sin_addr) << " " + requ.path + ": " << response.returnCode << std::endl;
+}
+
+void WebServer::broadcast(const std::string &msg)
+{
+	this->_webSocks.erase(
+		std::remove_if(
+			this->_webSocks.begin(),
+			this->_webSocks.end(),
+			[](WebSocket &s) { return !s.isOpen(); }
+		),
+		this->_webSocks.end()
+	);
+	for (auto &wsock : this->_webSocks)
+		try {
+			wsock.send(msg);
+		} catch (...) {
+			wsock.disconnect();
+		}
+}
+
+void WebServer::onWebSocketConnect(const std::function<void(WebSocket &)> & fct)
+{
+	this->_onConnect = fct;
+}
+
+void WebServer::onWebSocketMessage(const std::function<void(WebSocket &, const std::string &)> & fct)
+{
+	this->_onMessage = fct;
+}
+
+void WebServer::onWebSocketError(const std::function<void(WebSocket &, const std::exception &)> & fct)
+{
+	this->_onError = fct;
 }
 

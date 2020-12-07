@@ -3,7 +3,7 @@ cmake_policy(SET CMP0091 NEW)
 project(swrstoys C CXX)
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install")
 
@@ -264,6 +264,8 @@ add_library("SokuStreaming" MODULE
         modules/SokuStreaming/Exceptions.hpp
         modules/SokuStreaming/Network/WebServer.cpp
         modules/SokuStreaming/Network/WebServer.hpp
+        modules/SokuStreaming/Network/WebSocket.cpp
+        modules/SokuStreaming/Network/WebSocket.hpp
         modules/SokuStreaming/ShiftJISDecoder.cpp
         modules/SokuStreaming/ShiftJISDecoder.hpp
         modules/SokuStreaming/main.cpp
@@ -272,7 +274,7 @@ target_compile_definitions(SokuStreaming PRIVATE DIRECTINPUT_VERSION=0x0800 CURL
 target_compile_options(SokuStreaming PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
 target_include_directories(SokuStreaming PRIVATE include include/directx "modules/SokuStreaming/")
 target_link_directories(SokuStreaming PRIVATE lib)
-target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32)
+target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32 crypt32)
 install(TARGETS "SokuStreaming" LIBRARY DESTINATION "SWRSToys/modules/SokuStreaming/")
 install(TARGETS "SokuStreaming" LIBRARY DESTINATION "SokuEngine/modules/SokuStreaming/")
 set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; SokuStreaming=modules/SokuStreaming/SokuStreaming.dll\n")
