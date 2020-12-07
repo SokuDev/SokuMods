@@ -252,7 +252,7 @@ add_library("SokuStreaming" MODULE
         modules/SokuStreaming/ShiftJISDecoder.cpp
         modules/SokuStreaming/ShiftJISDecoder.hpp
         modules/SokuStreaming/main.cpp
-)
+        modules/SokuStreaming/State.cpp modules/SokuStreaming/State.hpp modules/SokuStreaming/Network/Handlers.cpp modules/SokuStreaming/Network/Handlers.hpp)
 target_compile_definitions(SokuStreaming PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_compile_options(SokuStreaming PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
 target_include_directories(SokuStreaming PRIVATE include include/directx "modules/SokuStreaming/")
