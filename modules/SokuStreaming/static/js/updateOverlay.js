@@ -125,4 +125,10 @@ function initiateUpdate() {
 }
 
 initiateUpdate()
-setInterval(initiateUpdate, 500);
+//setInterval(initiateUpdate, 500);
+
+let sock = new WebSocket("ws://" + window.location.href.split('/')[2] + "/chat");
+
+sock.onmessage = console.log;
+sock.onclose = console.warn;
+sock.onerror = console.error;

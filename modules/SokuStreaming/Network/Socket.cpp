@@ -59,7 +59,8 @@ Socket::Socket()
 
 Socket::~Socket()
 {
-	close(this->_sockfd);
+	if (!this->_noDestroy)
+		close(this->_sockfd);
 }
 
 void Socket::connect(const std::string &host, unsigned short portno)
@@ -118,7 +119,7 @@ Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request)
 void Socket::disconnect()
 {
 	if (!this->isOpen())
-		throw NotConnectedException("This socket is not opened");
+		return;
 	close(this->_sockfd);
 	this->_opened = false;
 }
@@ -195,7 +196,7 @@ std::string Socket::readUntilEOF()
 	}
 }
 
-bool	Socket::isOpen()
+bool	Socket::isOpen() const
 {
 	FD_SET	set;
 	timeval time = {0, 0};
@@ -248,7 +249,7 @@ Socket Socket::accept()
 
 	if (fd == INVALID_SOCKET)
 		throw AcceptFailedException(getLastSocketError());
-	return Socket(fd, serv_addr);
+	return {fd, serv_addr};
 }
 
 std::string Socket::generateHttpResponse(const Socket::HttpResponse &response)
@@ -302,6 +303,16 @@ Socket::HttpRequest Socket::parseHttpRequest(const std::string &requ)
 	}
 	request.body = requ.substr(response.tellg());
 	return request;
+}
+
+void Socket::setNoDestroy(bool noDestroy) const
+{
+	this->_noDestroy = noDestroy;
+}
+
+bool Socket::isDisconnected() const
+{
+	return !this->isOpen();
 }
 
 Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon)

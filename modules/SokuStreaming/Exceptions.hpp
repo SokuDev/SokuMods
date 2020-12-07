@@ -133,6 +133,34 @@ public:
 	explicit InvalidHTTPAnswerException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
 };
 
+class InvalidHandshakeException : public NetworkException {
+public:
+	//! @param msg The error message.
+	explicit InvalidHandshakeException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+};
+
+class InvalidPongException : public NetworkException {
+public:
+	//! @param msg The error message.
+	explicit InvalidPongException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+};
+
+class CryptFailedException : public NetworkException {
+public:
+	//! @param msg The error message.
+	explicit CryptFailedException(const std::string &&msg) : NetworkException(msg + ": " + std::to_string(GetLastError())) {};
+};
+
+class ConnectionTerminatedException : public NetworkException {
+private:
+	unsigned _code;
+
+public:
+	//! @param msg The error message.
+	ConnectionTerminatedException(const std::string &&msg, unsigned code) : NetworkException(static_cast<const std::string &&>(msg)), _code(code) {};
+	unsigned getCode() const { return this->_code; };
+};
+
 //! @brief Define a HTTPErrorException.
 class HTTPErrorException : public NetworkException {
 private:
