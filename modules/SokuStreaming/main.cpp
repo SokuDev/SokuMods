@@ -31,11 +31,8 @@ static struct CachedMatchData {
 	unsigned int rightScore;
 } _cache;
 struct Title{};
-struct BattleCL{};
-struct BattleSV{};
 struct BattleWatch{};
 static bool needReset;
-static bool needDeckRefresh;
 static int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
 static int (__thiscall Title::*s_origCTitle_Render)();
 
@@ -249,7 +246,6 @@ int __fastcall CTitle_OnRender(Title *This) {
 	int ret = (This->*s_origCTitle_Render)();
 
 	needReset = true;
-	needDeckRefresh = true;
 	return ret;
 }
 
