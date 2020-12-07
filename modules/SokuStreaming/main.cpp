@@ -39,50 +39,6 @@ static bool needDeckRefresh;
 static int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
 static int (__thiscall Title::*s_origCTitle_Render)();
 
-/*static int (__thiscall C::*array[16])();
-
-#define TEST(i)int __fastcall fun##i(C *This)\
-{                                            \
-        printf(#i "\n");                  \
-	return (This->*array[i])();\
-}                                            \
-
-TEST(0)
-TEST(1)
-TEST(2)
-TEST(3)
-TEST(4)
-TEST(5)
-TEST(6)
-TEST(7)
-TEST(8)
-TEST(9)
-TEST(10)
-TEST(11)
-TEST(12)
-TEST(13)
-TEST(14)
-TEST(15)
-
-int (__fastcall *funs[16])(C *This) = {
-	fun0,
-	fun1,
-	fun2,
-	fun3,
-	fun4,
-	fun5,
-	fun6,
-	fun7,
-	fun8,
-	fun9,
-	fun10,
-	fun11,
-	fun12,
-	fun13,
-	fun14,
-	fun15,
-};*/
-
 void onNewWebSocket(WebSocket &s)
 {
 	s.send("Hello my friend. I hope you enjoy your stay here.");
@@ -340,14 +296,6 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	s_origCTitle_Render = SokuLib::union_cast<int (Title::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CTitle + 8, reinterpret_cast<DWORD>(CTitle_OnRender)));
 	s_origCBattleWatch_Render = SokuLib::union_cast<int (BattleWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + 0x08, reinterpret_cast<DWORD>(CBattleWatch_OnRender)));
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
-
-	/*for (int i = 0; i < 16; i++) {
-		DWORD addr = SokuLib::ADDR_VTBL_BATTLE_CL + 0x08 + 60 + 4 * i + 0x40 * 3;
-
-		printf("%i: 0x%X\n", i, addr);
-		array[i] = SokuLib::union_cast<int (C::*)()>(SokuLib::TamperDword(addr, reinterpret_cast<DWORD>(funs[i])));
-	}*/
-
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 
 	return true;
