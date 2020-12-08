@@ -106,7 +106,7 @@ void *__fastcall CSelectCL_OnCreate(void *This) {
 	return CSelectCommon_OnCreate(This);
 }
 
-void __fastcall CSelectCommon_OnRender(void *This) {
+void __fastcall CSelectCommon_OnProcess(void *This) {
 	int &m_texID = *(int *)((char *)This + s_origCSelect_Size + 0x00);
 
 	if (CRenderer_Begin(g_renderer)) {
@@ -134,17 +134,17 @@ void __fastcall CSelectCommon_OnRender(void *This) {
 	}
 }
 
-int __fastcall CSelectSV_OnRender(void *This) {
+int __fastcall CSelectSV_OnProcess(void *This) {
 	// super
 	int ret = CSelectSV_Render(This);
-	CSelectCommon_OnRender(This);
+	CSelectCommon_OnProcess(This);
 	return ret;
 }
 
-int __fastcall CSelectCL_OnRender(void *This) {
+int __fastcall CSelectCL_OnProcess(void *This) {
 	// super
 	int ret = CSelectCL_Render(This);
-	CSelectCommon_OnRender(This);
+	CSelectCommon_OnProcess(This);
 	return ret;
 }
 
@@ -185,9 +185,9 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origCSelectSV_Destruct = TamperDword(vtbl_CSelectSV + 0x00, union_cast<DWORD>(CSelectSV_OnDestruct));
-	s_origCSelectSV_Render = TamperDword(vtbl_CSelectSV + 0x08, union_cast<DWORD>(CSelectSV_OnRender));
+	s_origCSelectSV_Render = TamperDword(vtbl_CSelectSV + 0x08, union_cast<DWORD>(CSelectSV_OnProcess));
 	s_origCSelectCL_Destruct = TamperDword(vtbl_CSelectCL + 0x00, union_cast<DWORD>(CSelectCL_OnDestruct));
-	s_origCSelectCL_Render = TamperDword(vtbl_CSelectCL + 0x08, union_cast<DWORD>(CSelectCL_OnRender));
+	s_origCSelectCL_Render = TamperDword(vtbl_CSelectCL + 0x08, union_cast<DWORD>(CSelectCL_OnProcess));
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);

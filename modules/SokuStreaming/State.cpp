@@ -3,6 +3,7 @@
 //
 
 #include <SokuLib.hpp>
+#include "Network/Handlers.hpp"
 #include "nlohmann/json.hpp"
 #include "ShiftJISDecoder.hpp"
 #include "State.hpp"
@@ -12,6 +13,8 @@ unsigned short port;
 WebServer webServer;
 struct CachedMatchData _cache;
 bool needReset;
+bool needRefresh;
+int (__thiscall LoadingWatch::*s_origCLoadingWatch_Render)();
 int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
 int (__thiscall Title::*s_origCTitle_Render)();
 
@@ -25,6 +28,8 @@ void updateCache()
 			_cache.leftScore = 0;
 			_cache.rightScore = 0;
 		}
+		_cache.leftName = netObj.profile1name;
+		_cache.rightName = netObj.profile2name;
 		needReset = false;
 	}
 
@@ -68,6 +73,9 @@ void updateCache()
 	std::sort(_cache.leftHand.begin(), _cache.leftHand.end());
 	std::sort(_cache.rightHand.begin(), _cache.rightHand.end());
 
+	auto leftOldSize = oldLeftHand.size();
+	auto rightOldSize = oldRightHand.size();
+
 	//Used cards
 	if (oldLeftHand.size() < _cache.leftHand.size())
 		oldLeftHand.clear();
@@ -92,20 +100,36 @@ void updateCache()
 	std::sort(_cache.leftUsed.begin(), _cache.leftUsed.end());
 	std::sort(_cache.rightUsed.begin(), _cache.rightUsed.end());
 
+	if (_cache.leftHand.size() != leftOldSize)
+		broadcastOpcode(L_CARDS_UPDATE, generateLeftCardsJson(_cache));
+	if (_cache.rightHand.size() != rightOldSize)
+		broadcastOpcode(R_CARDS_UPDATE, generateRightCardsJson(_cache));
+
 	if (
 		_cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
 		_cache.oldRightScore != battleMgr.rightCharacterManager->score
-		) {
-		_cache.leftScore += battleMgr.leftCharacterManager->score == 2;
-		_cache.rightScore += battleMgr.rightCharacterManager->score == 2;
+	) {
+		if (battleMgr.leftCharacterManager->score == 2) {
+			_cache.leftScore++;
+			broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
+		} else if (battleMgr.rightCharacterManager->score == 2) {
+			_cache.rightScore++;
+			broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+		}
+		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
+		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
 	}
-	_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
-	_cache.oldRightScore = battleMgr.rightCharacterManager->score;
-	_cache.left = SokuLib::leftChar;
-	_cache.right = SokuLib::rightChar;
-	_cache.leftName = netObj.profile1name;
-	_cache.rightName = netObj.profile2name;
-	_cache.weather = SokuLib::activeWeather;
+	if (_cache.weather != SokuLib::activeWeather) {
+		if (_cache.weather == SokuLib::WEATHER_MOUNTAIN_VAPOR || SokuLib::activeWeather == SokuLib::WEATHER_MOUNTAIN_VAPOR)
+			broadcastOpcode(CARDS_UPDATE, generateCardsJson(_cache));
+		_cache.weather = SokuLib::activeWeather;
+	}
+	if (needRefresh) {
+		_cache.left = SokuLib::leftChar;
+		_cache.right = SokuLib::rightChar;
+		broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
+		needRefresh = false;
+	}
 }
 
 std::string cacheToJson(CachedMatchData cache)
@@ -141,6 +165,79 @@ std::string cacheToJson(CachedMatchData cache)
 		{ "used", cache.rightUsed },
 		{ "deck", rightDeck },
 		{ "hand", rightHand },
+	};
+	return result.dump(-1, ' ', true);
+}
+
+std::string generateCardsJson(CachedMatchData cache)
+{
+	nlohmann::json result;
+	std::vector<unsigned short> leftDeck;
+	std::vector<unsigned short> rightDeck;
+	std::vector<unsigned short> leftHand;
+	std::vector<unsigned short> rightHand;
+
+	if (cache.weather == SokuLib::WEATHER_MOUNTAIN_VAPOR) {
+		leftDeck.resize(cache.leftCards.size() + cache.leftHand.size(), 21);
+		rightDeck.resize(cache.rightCards.size() + cache.rightHand.size(), 21);
+	} else {
+		leftDeck = cache.leftCards;
+		rightDeck = cache.rightCards;
+		leftHand = cache.leftHand;
+		rightHand = cache.rightHand;
+	}
+
+	result["left"] = {
+		{ "used", cache.leftUsed },
+		{ "deck", leftDeck },
+		{ "hand", leftHand },
+	};
+	result["right"] = {
+		{ "used", cache.rightUsed },
+		{ "deck", rightDeck },
+		{ "hand", rightHand },
+	};
+	return result.dump(-1, ' ', true);
+}
+
+std::string generateRightCardsJson(CachedMatchData cache)
+{
+	nlohmann::json result;
+	std::vector<unsigned short> rightDeck;
+	std::vector<unsigned short> rightHand;
+
+	if (cache.weather == SokuLib::WEATHER_MOUNTAIN_VAPOR)
+		rightDeck.resize(cache.rightCards.size() + cache.rightHand.size(), 21);
+	else {
+		rightDeck = cache.rightCards;
+		rightHand = cache.rightHand;
+	}
+
+	result = {
+		{ "used", cache.rightUsed },
+		{ "deck", rightDeck },
+		{ "hand", rightHand },
+	};
+	return result.dump(-1, ' ', true);
+}
+
+std::string generateLeftCardsJson(CachedMatchData cache)
+{
+	nlohmann::json result;
+	std::vector<unsigned short> leftDeck;
+	std::vector<unsigned short> leftHand;
+
+	if (cache.weather == SokuLib::WEATHER_MOUNTAIN_VAPOR)
+		leftDeck.resize(cache.leftCards.size() + cache.leftHand.size(), 21);
+	else {
+		leftDeck = cache.leftCards;
+		leftHand = cache.leftHand;
+	}
+
+	result = {
+		{ "used", cache.leftUsed },
+		{ "deck", leftDeck },
+		{ "hand", leftHand },
 	};
 	return result.dump(-1, ' ', true);
 }

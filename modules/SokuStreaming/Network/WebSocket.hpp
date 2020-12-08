@@ -25,7 +25,7 @@ public:
 	explicit WebSocket(const Socket &);
 	explicit WebSocket(const Socket &&);
 	WebSocket() = default;
-	~WebSocket() = default;
+	~WebSocket() override = default;
 
 	void needsMask(bool masks);
 
