@@ -194,19 +194,13 @@ void WebSocket::connect(const std::string &host, unsigned short portno)
 }
 
 WebSocket::WebSocket(const Socket &sock) :
-	Socket()
+	Socket(sock)
 {
-	this->_sockfd = sock.getSockFd();
-	this->_remote = sock.getRemote();
-	sock.setNoDestroy(true);
 }
 
 WebSocket::WebSocket(const Socket &&sock) :
-	Socket()
+	Socket(sock)
 {
-	this->_sockfd = sock.getSockFd();
-	this->_remote = sock.getRemote();
-	sock.setNoDestroy(true);
 }
 
 Socket::HttpResponse WebSocket::solveHandshake(const Socket::HttpRequest &request)
@@ -280,6 +274,7 @@ WebSocket &WebSocket::operator=(const WebSocket &s)
 WebSocket::WebSocket(const WebSocket &s) :
 	WebSocket(static_cast<Socket>(s))
 {
+	this->_masks = s._masks;
 }
 
 void WebSocket::needsMask(bool masks)

@@ -162,7 +162,7 @@ public:
 		_text.ClearTextures();
 		SWRFont_Destruct(_fontData);
 	}
-	void OnRender(void *_this) {
+	void OnProcess(void *_this) {
 		_text.Draw(_font);
 	}
 
@@ -204,8 +204,8 @@ void OnCreate(void *_this) {
 	self.OnCreate(_this);
 }
 
-void OnRender(void *_this) {
-	self.OnRender(_this);
+void OnProcess(void *_this) {
+	self.OnProcess(_this);
 }
 
 void OnDestruct(void *_this, int _, int dyn) {

@@ -20,7 +20,18 @@ let sokuCharacters = [
     {"name": 'utsuho',    "skillPrefix": "Ut", "skills": [623, 236, 22,  214]},
     {"name": 'suwako',    "skillPrefix": "Sw", "skills": [214, 623, 236, 22 ]},
 ];
+let global_state = null;
 let json = {};
+let Opcodes = {
+    "STATE_UPDATE": 0,
+    "CARDS_UPDATE": 1,
+    "L_SCORE_UPDATE": 2,
+    "R_SCORE_UPDATE": 3,
+    "L_CARDS_UPDATE": 4,
+    "R_CARDS_UPDATE": 5,
+    "L_NAME_UPDATE": 6,
+    "R_NAME_UPDATE": 7,
+}
 
 function pad(n, width, z) {
     z = z || '0';
@@ -85,50 +96,145 @@ function displayDeck(id, used, hand, deck, chr)
     }
 }
 
-function realUpdate(e)
+function checkState()
 {
-    let j = JSON.parse(e.target.response);
-    let lchr = json.left.character;
-    let rchr = json.right.character;
+    if (global_state)
+        return true;
 
-    console.log(json);
-    document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
-    document.getElementById("rChr").setAttribute("src", getCharacterImage(rchr));
-    document.getElementById("leftName").textContent = j.ln || json.left.name;
-    document.getElementById("rightName").textContent = j.rn || json.right.name;
-    document.getElementById("leftScore").textContent = j.ls + json.left.score + "";
-    document.getElementById("rightScore").textContent = j.rs +json.right.score + "";
-
-    displayDeck("lCard", json.left.used, json.left.hand, json.left.deck, lchr);
-    displayDeck("rCard", json.right.used, json.right.hand, json.right.deck, rchr);
-}
-
-function update(e)
-{
-    json = JSON.parse(e.target.response);
-
-    const Http = new XMLHttpRequest();
-    const url = '/static/override.json';
-
-    Http.open("GET", url);
-    Http.send();
-    Http.onload = realUpdate
-}
-
-function initiateUpdate() {
     const Http = new XMLHttpRequest();
     const url = '/state';
 
+    console.warn("State is not initialized...");
     Http.open("GET", url);
     Http.send();
     Http.onload = update
+    return false;
 }
 
-initiateUpdate()
-//setInterval(initiateUpdate, 500);
+function update(state)
+{
+    global_state = state;
 
-let sock = new WebSocket("ws://" + window.location.href.split('/')[2] + "/chat");
+    let lchr = state.left.character;
+    let rchr = state.right.character;
 
-sock.onmessage = console.log;
-sock.onclose = console.warn;
-sock.onerror = console.error;
+    document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
+    document.getElementById("rChr").setAttribute("src", getCharacterImage(rchr));
+    document.getElementById("leftName").textContent = state.left.name;
+    document.getElementById("rightName").textContent = state.right.name;
+    document.getElementById("leftScore").textContent = state.left.score + "";
+    document.getElementById("rightScore").textContent = state.right.score + "";
+
+    displayDeck("lCard", state.left.used,  state.left.hand,  state.left.deck,  lchr);
+    displayDeck("rCard", state.right.used, state.right.hand, state.right.deck, rchr);
+}
+
+function updateDecks(decks)
+{
+    if (!checkState())
+        return;
+
+    displayDeck("lCard", decks.left.used,  decks.left.hand,  decks.left.deck,  global_state.left.character);
+    displayDeck("rCard", decks.right.used, decks.right.hand, decks.right.deck, global_state.right.character);
+
+    global_state.left.deck  = decks.left.deck;
+    global_state.left.used  = decks.left.used;
+    global_state.left.hand  = decks.left.hand;
+    global_state.right.deck = decks.right.deck;
+    global_state.right.used = decks.right.used;
+    global_state.right.hand = decks.right.hand;
+}
+
+function updateLeftScore(newScore) {
+    if (!checkState())
+        return;
+    document.getElementById("leftScore").textContent = newScore + "";
+    global_state.left.score = newScore;
+}
+
+function updateRightScore(newScore)
+{
+    if (!checkState())
+        return;
+    document.getElementById("rightScore").textContent = newScore + "";
+    global_state.right.score = newScore;
+}
+
+function updateLeftDeck(deck)
+{
+    if (!checkState())
+        return;
+    displayDeck("lCard", deck.used,  deck.hand,  deck.deck,  global_state.left.character);
+    global_state.left.deck  = deck.deck;
+    global_state.left.used  = deck.used;
+    global_state.left.hand  = deck.hand;
+}
+
+function updateRightDeck(deck)
+{
+    if (!checkState())
+        return;
+    displayDeck("rCard", deck.used, deck.hand, deck.deck, global_state.right.character);
+    global_state.right.deck = deck.deck;
+    global_state.right.used = deck.used;
+    global_state.right.hand = deck.hand;
+}
+
+function updateLeftName(newName)
+{
+    if (!checkState())
+        return;
+    document.getElementById("leftName").textContent = newName;
+    global_state.left.name = newName;
+}
+
+function updateRightName(newName)
+{
+    if (!checkState())
+        return;
+    document.getElementById("rightName").textContent = newName;
+    global_state.right.name = newName;
+}
+
+function handleWebSocketMsg(event)
+{
+    let json = JSON.parse(event.data);
+    let data = json.d;
+
+    console.log(json);
+    switch (json.o) {
+    case Opcodes.STATE_UPDATE:
+        return update(data);
+    case Opcodes.CARDS_UPDATE:
+        return updateDecks(data);
+    case Opcodes.L_SCORE_UPDATE:
+        return updateLeftScore(data);
+    case Opcodes.R_SCORE_UPDATE:
+        return updateRightScore(data);
+    case Opcodes.L_CARDS_UPDATE:
+        return updateLeftDeck(data);
+    case Opcodes.R_CARDS_UPDATE:
+        return updateRightDeck(data);
+    case Opcodes.L_NAME_UPDATE:
+        return updateLeftName(data);
+    case Opcodes.R_NAME_UPDATE:
+        return updateRightName(data);
+    }
+}
+
+function initWebSocket() {
+    let url = "ws://" + window.location.href.split('/')[2] + "/chat";
+
+    console.log("Connecting to " + url);
+
+    let sock = new WebSocket(url);
+
+    sock.onmessage = handleWebSocketMsg;
+    sock.onclose = (e) => {
+        console.warn(e);
+        global_state = null;
+        setTimeout(initWebSocket, 10000);
+    };
+    sock.onerror = console.error;
+}
+initWebSocket();

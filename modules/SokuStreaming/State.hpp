@@ -11,6 +11,7 @@
 
 struct Title{};
 struct BattleWatch{};
+struct LoadingWatch{};
 
 extern bool enabled;
 extern unsigned short port;
@@ -33,10 +34,15 @@ extern struct CachedMatchData {
 	unsigned int rightScore;
 } _cache;
 extern bool needReset;
+extern bool needRefresh;
+extern int (__thiscall LoadingWatch::*s_origCLoadingWatch_Render)();
 extern int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
 extern int (__thiscall Title::*s_origCTitle_Render)();
 
 void updateCache();
+std::string generateLeftCardsJson(CachedMatchData cache);
+std::string generateRightCardsJson(CachedMatchData cache);
+std::string generateCardsJson(CachedMatchData cache);
 std::string cacheToJson(CachedMatchData cache);
 
 

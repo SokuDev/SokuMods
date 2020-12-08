@@ -33,5 +33,25 @@ Socket::HttpResponse state(const Socket::HttpRequest &requ)
 
 void onNewWebSocket(WebSocket &s)
 {
-	s.send("Hello my friend. I hope you enjoy your stay here.");
+	sendOpcode(s, STATE_UPDATE, cacheToJson(_cache));
+}
+
+void sendOpcode(WebSocket &s, Opcodes op, const std::string &data)
+{
+	std::string json = "{"
+		"\"o\": " + std::to_string(op) + ","
+		"\"d\": " + data +
+	"}";
+
+	s.send(json);
+}
+
+void broadcastOpcode(Opcodes op, const std::string &data)
+{
+	std::string json = "{"
+		"\"o\": " + std::to_string(op) + ","
+		"\"d\": " + data +
+	"}";
+
+	webServer.broadcast(json);
 }

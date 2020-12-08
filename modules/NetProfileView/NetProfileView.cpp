@@ -43,13 +43,13 @@ struct CBattleManager_MyMember {
 
 // バトルマネージャ
 #define CBattleManager_Create(p) Ccall(p, s_origCBattleManager_OnCreate, void, ())()
-#define CBattleManager_Render(p) Ccall(p, s_origCBattleManager_OnRender, bool, ())()
+#define CBattleManager_Render(p) Ccall(p, s_origCBattleManager_OnProcess, bool, ())()
 #define CBattleManager_Destruct(p, dyn) Ccall(p, s_origCBattleManager_OnDestruct, void *, (int))(dyn)
 
 // オリジナルの CBattleManager 情報
 static DWORD s_origCBattleManager_OnCreate;
 static DWORD s_origCBattleManager_OnDestruct;
-static DWORD s_origCBattleManager_OnRender;
+static DWORD s_origCBattleManager_OnProcess;
 static DWORD s_origCBattleManager_Size;
 
 // 1P/2P プロファイル名ユニットインスタンス
@@ -116,7 +116,7 @@ void *__fastcall CBattleManager_OnCreate(void *This) {
 
 // CBattleManager レンダリングハンドラ
 // 上位層でBegin/Endされるのでここでは不必要
-int __fastcall CBattleManager_OnRender(void *This) {
+int __fastcall CBattleManager_OnProcess(void *This) {
 	int &m_mode = *(int *)((char *)This + 0x88);
 	CBattleManager_MyMember &my = *(CBattleManager_MyMember *)((char *)This + s_origCBattleManager_Size);
 	// super
@@ -209,7 +209,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
 	// CBattleManager vtbl を書き換え
 	s_origCBattleManager_OnDestruct = TamperDword(vtbl_CBattleManager + 0x00, union_cast<DWORD>(CBattleManager_OnDestruct));
-	s_origCBattleManager_OnRender = TamperDword(vtbl_CBattleManager + 0x38, union_cast<DWORD>(CBattleManager_OnRender));
+	s_origCBattleManager_OnProcess = TamperDword(vtbl_CBattleManager + 0x38, union_cast<DWORD>(CBattleManager_OnProcess));
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
 	// 書き換えをflush

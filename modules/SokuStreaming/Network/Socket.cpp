@@ -59,8 +59,7 @@ Socket::Socket()
 
 Socket::~Socket()
 {
-	if (!this->_noDestroy)
-		close(this->_sockfd);
+	Socket::disconnect();
 }
 
 void Socket::connect(const std::string &host, unsigned short portno)
@@ -120,7 +119,8 @@ void Socket::disconnect()
 {
 	if (!this->isOpen())
 		return;
-	close(this->_sockfd);
+	if (!this->_noDestroy)
+		close(this->_sockfd);
 	this->_opened = false;
 }
 
@@ -313,6 +313,25 @@ void Socket::setNoDestroy(bool noDestroy) const
 bool Socket::isDisconnected() const
 {
 	return !this->isOpen();
+}
+
+Socket::Socket(const Socket &socket) :
+	_opened(socket.isOpen()),
+	_sockfd(socket.getSockFd()),
+	_remote(socket.getRemote())
+{
+	socket.setNoDestroy(true);
+}
+
+Socket &Socket::operator=(const Socket &socket)
+{
+	if (this->isOpen() && !this->_noDestroy)
+		this->disconnect();
+	this->_opened = socket.isOpen();
+	this->_sockfd = socket.getSockFd();
+	this->_remote = socket.getRemote();
+	socket.setNoDestroy(true);
+	return *this;
 }
 
 Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon)

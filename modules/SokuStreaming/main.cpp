@@ -10,19 +10,28 @@
 #include "Network/Handlers.hpp."
 #include "State.hpp"
 
-int __fastcall CTitle_OnRender(Title *This) {
+int __fastcall CTitle_OnProcess(Title *This) {
 	// super
 	int ret = (This->*s_origCTitle_Render)();
 
 	needReset = true;
+	needRefresh = true;
 	return ret;
 }
 
-int __fastcall CBattleWatch_OnRender(BattleWatch *This) {
+int __fastcall CBattleWatch_OnProcess(BattleWatch *This) {
 	// super
 	int ret = (This->*s_origCBattleWatch_Render)();
 
 	updateCache();
+	return ret;
+}
+
+int __fastcall CLoadingWatch_OnProcess(LoadingWatch *This) {
+	// super
+	int ret = (This->*s_origCLoadingWatch_Render)();
+
+	needRefresh = true;
 	return ret;
 }
 
@@ -58,8 +67,9 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	LoadSettings(profilePath, profileParent);
 	DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCTitle_Render = SokuLib::union_cast<int (Title::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CTitle + 8, reinterpret_cast<DWORD>(CTitle_OnRender)));
-	s_origCBattleWatch_Render = SokuLib::union_cast<int (BattleWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + 0x08, reinterpret_cast<DWORD>(CBattleWatch_OnRender)));
+	s_origCTitle_Render = SokuLib::union_cast<int (Title::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CTitle + 4, reinterpret_cast<DWORD>(CTitle_OnProcess)));
+	s_origCBattleWatch_Render = SokuLib::union_cast<int (BattleWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + 4, reinterpret_cast<DWORD>(CBattleWatch_OnProcess)));
+	s_origCLoadingWatch_Render = SokuLib::union_cast<int (LoadingWatch::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CLoadingWatch + 4, reinterpret_cast<DWORD>(CLoadingWatch_OnProcess)));
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 

@@ -45,9 +45,11 @@ public:
 
 	//! @brief Construct a Socket.
 	Socket();
+	Socket(const Socket &socket);
+	Socket &operator=(const Socket &socket);
 
 	//! @brief Socket Destructor.
-	~Socket();
+	virtual ~Socket();
 
 	//! @brief Get the status of the Socket.
 	//! @return The status of the Socket.
