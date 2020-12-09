@@ -9,14 +9,14 @@
 #include "WebServer.hpp"
 
 enum Opcodes {
-	STATE_UPDATE,
-	CARDS_UPDATE,
-	L_SCORE_UPDATE,
-	R_SCORE_UPDATE,
-	L_CARDS_UPDATE,
-	R_CARDS_UPDATE,
-	L_NAME_UPDATE,
-	R_NAME_UPDATE,
+	STATE_UPDATE,   // 0
+	CARDS_UPDATE,   // 1
+	L_SCORE_UPDATE, // 2
+	R_SCORE_UPDATE, // 3
+	L_CARDS_UPDATE, // 4
+	R_CARDS_UPDATE, // 5
+	L_NAME_UPDATE,  // 6
+	R_NAME_UPDATE,  // 7
 };
 
 Socket::HttpResponse root(const Socket::HttpRequest &requ);

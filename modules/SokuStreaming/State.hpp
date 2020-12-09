@@ -10,11 +10,24 @@
 #include "Network/WebServer.hpp"
 
 struct Title{};
+struct Battle{};
+struct Loading{};
 struct BattleWatch{};
 struct LoadingWatch{};
 
+enum Keys {
+	KEY_DECREASE_L_SCORE,
+	KEY_DECREASE_R_SCORE,
+	KEY_INCREASE_L_SCORE,
+	KEY_INCREASE_R_SCORE,
+	KEY_CHANGE_L_NAME,
+	KEY_CHANGE_R_NAME,
+	TOTAL_NB_OF_KEYS
+};
+
 extern bool enabled;
 extern unsigned short port;
+extern std::vector<unsigned> keys;
 extern std::unique_ptr<WebServer> webServer;
 extern struct CachedMatchData {
 	SokuLib::Weather weather;
@@ -35,11 +48,13 @@ extern struct CachedMatchData {
 } _cache;
 extern bool needReset;
 extern bool needRefresh;
-extern int (__thiscall LoadingWatch::*s_origCLoadingWatch_Render)();
-extern int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
-extern int (__thiscall Title::*s_origCTitle_Render)();
+extern int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
+extern int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
+extern int (__thiscall Loading::*s_origCLoading_Process)();
+extern int (__thiscall Battle::*s_origCBattle_Process)();
+extern int (__thiscall Title::*s_origCTitle_Process)();
 
-void updateCache();
+void updateCache(bool isMultiplayer);
 std::string generateLeftCardsJson(CachedMatchData cache);
 std::string generateRightCardsJson(CachedMatchData cache);
 std::string generateCardsJson(CachedMatchData cache);

@@ -174,7 +174,9 @@ void WebServer::_serverLoop()
 		std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << " " + requ.path + ": " << response.returnCode << std::endl;
 	else
 		std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << " Malformed HTTP request: " << response.returnCode << std::endl;
-	newConnection.send(Socket::generateHttpResponse(response));
+	try {
+		newConnection.send(Socket::generateHttpResponse(response));
+	} catch (...) {}
 	newConnection.disconnect();
 }
 
