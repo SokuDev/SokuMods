@@ -5,31 +5,76 @@
 #include <SokuLib.hpp>
 #include "Network/Handlers.hpp"
 #include "nlohmann/json.hpp"
-#include "ShiftJISDecoder.hpp"
+#include "Utils/ShiftJISDecoder.hpp"
+#include "Utils/InputBox.hpp"
 #include "State.hpp"
 
 bool enabled;
 unsigned short port;
+std::vector<unsigned> keys(TOTAL_NB_OF_KEYS);
 std::unique_ptr<WebServer> webServer;
 struct CachedMatchData _cache;
 bool needReset;
 bool needRefresh;
-int (__thiscall LoadingWatch::*s_origCLoadingWatch_Render)();
-int (__thiscall BattleWatch::*s_origCBattleWatch_Render)();
-int (__thiscall Title::*s_origCTitle_Render)();
+int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
+int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
+int (__thiscall Loading::*s_origCLoading_Process)();
+int (__thiscall Battle::*s_origCBattle_Process)();
+int (__thiscall Title::*s_origCTitle_Process)();
 
-void updateCache()
+bool threadUsed = false;
+std::thread thread;
+static std::vector<bool> keysState(TOTAL_NB_OF_KEYS);
+
+static void checkKeyInputs()
+{
+	std::vector<bool> isPressed(TOTAL_NB_OF_KEYS);
+
+	for (size_t i = 0; i < keys.size(); i++) {
+		auto val = SokuLib::checkKeyOneshot(keys[i], 0, 0, 0);
+
+		//printf("%i (%i): %s ", i, keys[i], val ? "pressed" : "not pressed");
+		if (val && !keysState[i])
+			puts("Pressed !");
+		isPressed[i] = val && !keysState[i];
+		keysState[i] = val;
+	}
+	//printf("\n");
+
+	if (isPressed[KEY_CHANGE_L_NAME]) {
+		if (!threadUsed) {
+			threadUsed = true;
+			if (thread.joinable())
+				thread.join();
+			thread = std::thread{[]{
+				auto answer = InputBox("Answer", "Are you ok ?", "Yes");
+
+				if (answer.empty())
+					return;
+				SokuLib::player1Profile = answer;
+			}};
+		}
+	}
+}
+
+void updateCache(bool isMultiplayer)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
-	auto &netObj = SokuLib::getNetObject();
 
 	if (needReset) {
-		if (_cache.leftName != netObj.profile1name || _cache.rightName != netObj.profile2name) {
-			_cache.leftScore = 0;
-			_cache.rightScore = 0;
+		if (isMultiplayer) {
+			auto &netObj = SokuLib::getNetObject();
+
+			if (_cache.leftName != netObj.profile1name || _cache.rightName != netObj.profile2name) {
+				_cache.leftScore = 0;
+				_cache.rightScore = 0;
+			}
+			_cache.leftName = netObj.profile1name;
+			_cache.rightName = netObj.profile2name;
+		} else {
+			_cache.leftName = SokuLib::player1Profile;
+			_cache.rightName = SokuLib::player2Profile;
 		}
-		_cache.leftName = netObj.profile1name;
-		_cache.rightName = netObj.profile2name;
 		needReset = false;
 	}
 
@@ -119,17 +164,22 @@ void updateCache()
 		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
 		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
 	}
+
 	if (_cache.weather != SokuLib::activeWeather) {
-		if (_cache.weather == SokuLib::WEATHER_MOUNTAIN_VAPOR || SokuLib::activeWeather == SokuLib::WEATHER_MOUNTAIN_VAPOR)
-			broadcastOpcode(CARDS_UPDATE, generateCardsJson(_cache));
+		auto old = _cache.weather;
+
 		_cache.weather = SokuLib::activeWeather;
+		if (old == SokuLib::WEATHER_MOUNTAIN_VAPOR || SokuLib::activeWeather == SokuLib::WEATHER_MOUNTAIN_VAPOR)
+			broadcastOpcode(CARDS_UPDATE, generateCardsJson(_cache));
 	}
+
 	if (needRefresh) {
 		_cache.left = SokuLib::leftChar;
 		_cache.right = SokuLib::rightChar;
 		broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
 		needRefresh = false;
 	}
+	checkKeyInputs();
 }
 
 std::string cacheToJson(CachedMatchData cache)
