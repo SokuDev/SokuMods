@@ -37,7 +37,7 @@ class SocketCreationErrorException : public NetworkException {
 public:
 	//! @brief Create a SocketCreationErrorException with a message.
 	//! @param msg The error message.
-	explicit SocketCreationErrorException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+	explicit SocketCreationErrorException(const std::string &&msg) : NetworkException("SocketCreationErrorException: " + static_cast<const std::string &&>(msg)) {};
 };
 
 //! @brief Define a HostNotFoundException.
@@ -77,7 +77,7 @@ class EOFException : public NetworkException {
 public:
 	//! @brief Create a EOFException with a message.
 	//! @param msg The error message.
-	explicit EOFException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+	explicit EOFException(const std::string &&msg) : NetworkException("EOFException: " + static_cast<const std::string &&>(msg)) {};
 };
 
 //! @brief Define a EOFException.
@@ -85,7 +85,7 @@ class BindFailedException : public NetworkException {
 public:
 	//! @brief Create a EOFException with a message.
 	//! @param msg The error message.
-	explicit BindFailedException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+	explicit BindFailedException(const std::string &&msg) : NetworkException("BindFailedException: " + static_cast<const std::string &&>(msg)) {};
 };
 
 //! @brief Define a EOFException.
@@ -93,7 +93,7 @@ class ListenFailedException : public NetworkException {
 public:
 	//! @brief Create a EOFException with a message.
 	//! @param msg The error message.
-	explicit ListenFailedException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+	explicit ListenFailedException(const std::string &&msg) : NetworkException("ListenFailedException: " + static_cast<const std::string &&>(msg)) {};
 };
 
 //! @brief Define a EOFException.
@@ -101,7 +101,15 @@ class AcceptFailedException : public NetworkException {
 public:
 	//! @brief Create a EOFException with a message.
 	//! @param msg The error message.
-	explicit AcceptFailedException(const std::string &&msg) : NetworkException(static_cast<const std::string &&>(msg)) {};
+	explicit AcceptFailedException(const std::string &&msg) : NetworkException("AcceptFailedException: " + static_cast<const std::string &&>(msg)) {};
+};
+
+//! @brief Define a EOFException.
+class WSAStartupFailedException : public NetworkException {
+public:
+	//! @brief Create a EOFException with a message.
+	//! @param msg The error message.
+	explicit WSAStartupFailedException(const std::string &&msg) : NetworkException("WSAStartupFailedException: " + static_cast<const std::string &&>(msg)) {};
 };
 
 //! @brief Define a EOFException.

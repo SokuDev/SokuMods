@@ -10,7 +10,7 @@
 
 bool enabled;
 unsigned short port;
-WebServer webServer;
+std::unique_ptr<WebServer> webServer;
 struct CachedMatchData _cache;
 bool needReset;
 bool needRefresh;

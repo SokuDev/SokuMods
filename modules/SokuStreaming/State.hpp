@@ -15,7 +15,7 @@ struct LoadingWatch{};
 
 extern bool enabled;
 extern unsigned short port;
-extern WebServer webServer;
+extern std::unique_ptr<WebServer> webServer;
 extern struct CachedMatchData {
 	SokuLib::Weather weather;
 	SokuLib::Character left;

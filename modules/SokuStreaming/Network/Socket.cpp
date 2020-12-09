@@ -52,8 +52,9 @@ std::string getLastSocketError()
 Socket::Socket()
 {
 #ifdef _WIN32
-	WSADATA			WSAData;
-	WSAStartup(MAKEWORD(2,0), &WSAData);
+	WSADATA WSAData;
+	if (WSAStartup(MAKEWORD(2,2), &WSAData))
+		throw WSAStartupFailedException(getLastSocketError());
 #endif
 }
 
