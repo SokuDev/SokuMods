@@ -53,5 +53,5 @@ void broadcastOpcode(Opcodes op, const std::string &data)
 		"\"d\": " + data +
 	"}";
 
-	webServer.broadcast(json);
+	webServer->broadcast(json);
 }
