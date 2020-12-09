@@ -201,7 +201,7 @@ HRESULT(__stdcall *s_D3DXCreateTextureFromResource)(LPDIRECT3DDEVICE9 pDevice, H
 
 // バトルマネージャ
 #define CBattleManager_Create(p) Ccall(p, s_origCBattleManager_OnCreate, void *, ())()
-#define CBattleManager_Render(p) Ccall(p, s_origCBattleManager_OnProcess, void, ())()
+#define CBattleManager_Render(p) Ccall(p, s_origCBattleManager_OnRender, void, ())()
 #define CBattleManager_Process(p) Ccall(p, s_origCBattleManager_OnProcess, int, ())()
 #define CBattleManager_Destruct(p, dyn) Ccall(p, s_origCBattleManager_OnDestruct, void *, (int))(dyn)
 // バトルシーン
@@ -210,7 +210,7 @@ HRESULT(__stdcall *s_D3DXCreateTextureFromResource)(LPDIRECT3DDEVICE9 pDevice, H
 
 static DWORD s_origCBattleManager_OnCreate;
 static DWORD s_origCBattleManager_OnDestruct;
-static DWORD s_origCBattleManager_OnProcess;
+static DWORD s_origCBattleManager_OnRender;
 static DWORD s_origCBattleManager_OnProcess;
 static DWORD s_origCBattleManager_Size;
 
@@ -915,10 +915,10 @@ static void draw_debug_info(void *This) {
 		ACCESS_FLOAT(p2, CF_X_SPEED), ACCESS_FLOAT(p2, CF_Y_SPEED), ACCESS_FLOAT(p2, CF_GRAVITY));
 
 	text::SetText(buffer);
-	text::OnProcess(This);
+	text::OnRender(This);
 }
 
-void __fastcall CBattleManager_OnProcess(void *This) {
+void __fastcall CBattleManager_OnRender(void *This) {
 	RivControl &riv = *(RivControl *)((char *)This + s_origCBattleManager_Size);
 
 	CBattleManager_Render(This);
@@ -958,7 +958,7 @@ void *__fastcall CBattleManager_OnDestruct(void *This, int mystery, int dyn) {
  * The module is loaded as follow into the game:
  * 1. CBattleManager_OnCreate (when entering the character select menu)
  * 2. CBattleManager_OnProcess
- * 3. CBattleManager_OnProcess
+ * 3. CBattleManager_OnRender
  * 4. CBattleManager_OnDestruct (when leaving the character select menu)
  */
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
@@ -990,7 +990,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_WRITECOPY, &old);
 	s_origCBattleManager_OnDestruct = TamperDword(vtbl_CBattleManager + 0x00, union_cast<DWORD>(CBattleManager_OnDestruct));
-	s_origCBattleManager_OnProcess = TamperDword(vtbl_CBattleManager + 0x38, union_cast<DWORD>(CBattleManager_OnProcess));
+	s_origCBattleManager_OnRender = TamperDword(vtbl_CBattleManager + 0x38, union_cast<DWORD>(CBattleManager_OnRender));
 	s_origCBattleManager_OnProcess = TamperDword(vtbl_CBattleManager + 0x0c, union_cast<DWORD>(CBattleManager_OnProcess));
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
