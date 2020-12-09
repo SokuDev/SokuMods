@@ -32,7 +32,7 @@ typedef unsigned char uchar;
 namespace text {
 void SetText(const char *newText);
 void OnCreate(void *This);
-void OnProcess(void *This);
+void OnRender(void *This);
 void OnDestruct(void *This, int, int dyn);
 void LoadSettings(LPCSTR profilePath, LPCSTR section);
 }; // namespace text
