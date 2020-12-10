@@ -41,20 +41,15 @@ img.centered {
 }
 
 div.deck {
-    height: 50%;
+    height: 40%;
     position: absolute;
     bottom: 0;
 }
 
 div.cards {
     font-size: 0;
-    height: 20%;
+    height: 25%;
     background-color: black;
-}
-
-div.hand {
-    font-size: 0;
-    height: 20%;
 }
 
 img.card {
@@ -66,7 +61,46 @@ img.hand_card {
     margin: 2% 2% 2% 2%;
     width: 16%;
     height: 90%;
-    box-shadow: 0 0 3px 5px #FFFF00; ;
+    box-shadow: 0 0 3px 5px #FFFF00;
+}
+
+div.stat {
+    background-color: black;
+    opacity: 0.8;
+}
+
+.leftStats .icon {
+    float: left
+}
+
+.leftStats .level {
+    float: left
+}
+
+.rightStats .icon {
+    float: right
+}
+
+.rightStats .level {
+    float: right
+}
+
+div.stats {
+    position: absolute;
+    bottom: 40%;
+}
+
+img.icon {
+    height: 48px;
+    width: 48px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+img.level {
+    height: 32px;
+    width: 128px;
+    margin: 13px 10px 5px;
 }
 
 img.used_card {

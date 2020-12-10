@@ -63,6 +63,54 @@ function getCardImage(charId, cardId)
     return "/static/img/cards/" + chr.name + "/" + chr.skillPrefix + cardType + ".png"
 }
 
+function getStatsImage(charId, statId)
+{
+    let chr = sokuCharacters[charId];
+    let cardType = chr.skills[statId % chr.skills.length] + "bc" + Math.floor(statId / chr.skills.length + 1);
+
+    return "/static/img/stats/" + chr.name + "/" + chr.skillPrefix + cardType + ".png"
+}
+
+function updateStat(charId, id, stats, stat)
+{
+    let nb = stats[stat];
+    let div = document.getElementById(id + stat);
+
+    if (nb === 0) {
+        div.style.height = "0";
+        return;
+    }
+    div.style.height = "";
+    document.getElementById(id + stat + "lvl").setAttribute("src", "/static/img/stats/LEVEL00" + nb + ".png");
+}
+
+function displayStats(charId, id, stats)
+{
+    let chr = sokuCharacters[charId];
+
+    updateStat(charId, id, stats, "rod");
+    updateStat(charId, id, stats, "doll");
+    updateStat(charId, id, stats, "fan");
+    updateStat(charId, id, stats, "grimoire");
+    updateStat(charId, id, stats, "drops");
+    for (let i = chr.skills.length; i < 5; i++) {
+        document.getElementById(id + "skill" + i).style.height = "0";
+    }
+    for (const [key, value] of Object.entries(stats["skills"])) {
+        let div = document.getElementById(id + "skill" + (key % chr.skills.length));
+        let icon = document.getElementById(id + "skill" + (key % chr.skills.length) + "icon");
+        let level = document.getElementById(id + "skill" + (key % chr.skills.length) + "lvl");
+
+        if (value) {
+            div.style.height = "";
+            icon.setAttribute("src", getStatsImage(charId, key));
+            level.setAttribute("src", "/static/img/stats/LEVEL00" + value + ".png");
+        } else {
+            div.style.height = "0";
+        }
+    }
+}
+
 function displayDeck(id, used, hand, deck, chr)
 {
     let i = 0;
@@ -129,6 +177,8 @@ function update(state)
 
     displayDeck("lCard", state.left.used,  state.left.hand,  state.left.deck,  lchr);
     displayDeck("rCard", state.right.used, state.right.hand, state.right.deck, rchr);
+    displayStats(lchr, "l", state.left.stats);
+    displayStats(rchr, "r", state.right.stats);
 }
 
 function updateDecks(decks)
@@ -182,6 +232,22 @@ function updateRightDeck(deck)
     global_state.right.hand = deck.hand;
 }
 
+function updateLeftStats(stats)
+{
+    if (!checkState())
+        return;
+    displayStats(global_state.left.character, "l", stats);
+    global_state.left.stats = stats;
+}
+
+function updateRightStats(stats)
+{
+    if (!checkState())
+        return;
+    displayStats(global_state.right.character, "r", stats);
+    global_state.right.stats = stats;
+}
+
 function updateLeftName(newName)
 {
     if (!checkState())
@@ -221,6 +287,10 @@ function handleWebSocketMsg(event)
         return updateLeftName(data);
     case Opcodes.R_NAME_UPDATE:
         return updateRightName(data);
+    case Opcodes.L_STATS_UPDATE:
+        return updateLeftStats(data);
+    case Opcodes.R_STATS_UPDATE:
+        return updateRightStats(data);
     }
 }
 
