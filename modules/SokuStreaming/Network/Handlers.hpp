@@ -17,6 +17,8 @@ enum Opcodes {
 	R_CARDS_UPDATE, // 5
 	L_NAME_UPDATE,  // 6
 	R_NAME_UPDATE,  // 7
+	L_STATS_UPDATE, // 8
+	R_STATS_UPDATE, // 9
 };
 
 Socket::HttpResponse root(const Socket::HttpRequest &requ);

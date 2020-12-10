@@ -57,6 +57,31 @@ static void checkKeyInputs()
 	}
 }
 
+nlohmann::json statsToJson(const Stats &stats)
+{
+	nlohmann::json result = {
+		{"doll",     stats.doll},
+		{"rod",      stats.rod},
+		{"grimoire", stats.grimoire},
+		{"fan",      stats.fan},
+		{"drops",    stats.drops}
+	};
+	std::map<std::string, unsigned char> skillMap;
+
+	for (int i = 0; i < 16; i++) {
+		if (!stats.skillMap[i].notUsed)
+			skillMap[std::to_string(i)] = stats.skillMap[i].level;
+	}
+
+	result["skills"] = skillMap;
+	return result;
+}
+
+std::string statsToString(const Stats &stats)
+{
+	return statsToJson(stats).dump(-1, ' ', true);
+}
+
 void updateCache(bool isMultiplayer)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
@@ -93,21 +118,16 @@ void updateCache(bool isMultiplayer)
 	if (leftDeck.deck.size == 20)
 		_cache.leftUsed.clear();
 	if (leftDeck.deck.size <= 20)
-		for (int i = 0; i < leftDeck.deck.size; i++) {
-			auto card = leftDeck.deck[i];
-
-			_cache.leftCards.push_back(*card);
-		}
+		for (int i = 0; i < leftDeck.deck.size; i++)
+			_cache.leftCards.push_back(leftDeck.deck[i]);
 	std::sort(_cache.leftCards.begin(), _cache.leftCards.end());
+
 	//Right remaining cards
 	if (rightDeck.deck.size == 20)
 		_cache.rightUsed.clear();
 	if (rightDeck.deck.size <= 20)
-		for (int i = 0; i < rightDeck.deck.size; i++) {
-			auto card = rightDeck.deck[i];
-
-			_cache.rightCards.push_back(*card);
-		}
+		for (int i = 0; i < rightDeck.deck.size; i++)
+			_cache.rightCards.push_back(rightDeck.deck[i]);
 	std::sort(_cache.rightCards.begin(), _cache.rightCards.end());
 
 	//Hands
@@ -145,9 +165,9 @@ void updateCache(bool isMultiplayer)
 	std::sort(_cache.leftUsed.begin(), _cache.leftUsed.end());
 	std::sort(_cache.rightUsed.begin(), _cache.rightUsed.end());
 
-	if (_cache.leftHand.size() != leftOldSize)
+	if (_cache.leftHand.size() != leftOldSize && !needRefresh)
 		broadcastOpcode(L_CARDS_UPDATE, generateLeftCardsJson(_cache));
-	if (_cache.rightHand.size() != rightOldSize)
+	if (_cache.rightHand.size() != rightOldSize && !needRefresh)
 		broadcastOpcode(R_CARDS_UPDATE, generateRightCardsJson(_cache));
 
 	if (
@@ -156,10 +176,12 @@ void updateCache(bool isMultiplayer)
 	) {
 		if (battleMgr.leftCharacterManager->score == 2) {
 			_cache.leftScore++;
-			broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
+			if (!needRefresh)
+				broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
 		} else if (battleMgr.rightCharacterManager->score == 2) {
 			_cache.rightScore++;
-			broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+			if (!needRefresh)
+				broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
 		}
 		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
 		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
@@ -170,14 +192,41 @@ void updateCache(bool isMultiplayer)
 
 		_cache.weather = SokuLib::activeWeather;
 		if (old == SokuLib::WEATHER_MOUNTAIN_VAPOR || SokuLib::activeWeather == SokuLib::WEATHER_MOUNTAIN_VAPOR)
-			broadcastOpcode(CARDS_UPDATE, generateCardsJson(_cache));
+			if (!needRefresh)
+				broadcastOpcode(CARDS_UPDATE, generateCardsJson(_cache));
+	}
+
+	Stats newStats;
+
+	newStats.doll =     battleMgr.leftCharacterManager->sacrificialDolls;
+	newStats.drops =    battleMgr.leftCharacterManager->drops;
+	newStats.rod =      battleMgr.leftCharacterManager->controlRod;
+	newStats.fan =      battleMgr.leftCharacterManager->tenguFans;
+	newStats.grimoire = battleMgr.leftCharacterManager->grimoires;
+	std::memcpy(newStats.skillMap, battleMgr.leftCharacterManager->skillMap, sizeof(newStats.skillMap));
+	if (memcmp(&newStats, &_cache.leftStats, sizeof(newStats)) != 0) {
+		std::memcpy(&_cache.leftStats, &newStats, sizeof(newStats));
+		if (!needRefresh)
+			broadcastOpcode(L_STATS_UPDATE, statsToString(newStats));
+	}
+
+	newStats.doll =     battleMgr.rightCharacterManager->sacrificialDolls;
+	newStats.drops =    battleMgr.rightCharacterManager->drops;
+	newStats.rod =      battleMgr.rightCharacterManager->controlRod;
+	newStats.fan =      battleMgr.rightCharacterManager->tenguFans;
+	newStats.grimoire = battleMgr.rightCharacterManager->grimoires;
+	std::memcpy(newStats.skillMap, battleMgr.rightCharacterManager->skillMap, sizeof(newStats.skillMap));
+	if (memcmp(&newStats, &_cache.rightStats, sizeof(newStats)) != 0) {
+		std::memcpy(&_cache.rightStats, &newStats, sizeof(newStats));
+		if (!needRefresh)
+			broadcastOpcode(R_STATS_UPDATE, statsToString(newStats));
 	}
 
 	if (needRefresh) {
 		_cache.left = SokuLib::leftChar;
 		_cache.right = SokuLib::rightChar;
-		broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
 		needRefresh = false;
+		broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
 	}
 	checkKeyInputs();
 }
@@ -202,19 +251,21 @@ std::string cacheToJson(CachedMatchData cache)
 
 	result["left"] = {
 		{ "character", cache.left },
-		{ "score", cache.leftScore },
-		{ "name", convertShiftJisToUTF8(cache.leftName.c_str()) },
-		{ "used", cache.leftUsed },
-		{ "deck", leftDeck },
-		{ "hand", leftHand },
+		{ "score",     cache.leftScore },
+		{ "name",      convertShiftJisToUTF8(cache.leftName.c_str()) },
+		{ "used",      cache.leftUsed },
+		{ "deck",      leftDeck },
+		{ "hand",      leftHand },
+		{ "stats",     statsToJson(cache.leftStats) }
 	};
 	result["right"] = {
 		{ "character", cache.right },
-		{ "score", cache.rightScore },
-		{ "name", convertShiftJisToUTF8(cache.rightName.c_str()) },
-		{ "used", cache.rightUsed },
-		{ "deck", rightDeck },
-		{ "hand", rightHand },
+		{ "score",     cache.rightScore },
+		{ "name",      convertShiftJisToUTF8(cache.rightName.c_str()) },
+		{ "used",      cache.rightUsed },
+		{ "deck",      rightDeck },
+		{ "hand",      rightHand },
+		{ "stats",     statsToJson(cache.rightStats) }
 	};
 	return result.dump(-1, ' ', true);
 }

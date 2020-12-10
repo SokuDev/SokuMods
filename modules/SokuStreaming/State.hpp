@@ -25,6 +25,15 @@ enum Keys {
 	TOTAL_NB_OF_KEYS
 };
 
+struct Stats {
+	float rod;
+	float doll;
+	unsigned short grimoire;
+	unsigned short fan;
+	unsigned short drops;
+	SokuLib::Skill skillMap[16];
+};
+
 extern bool enabled;
 extern unsigned short port;
 extern std::vector<unsigned> keys;
@@ -45,6 +54,8 @@ extern struct CachedMatchData {
 	unsigned int oldRightScore;
 	unsigned int leftScore;
 	unsigned int rightScore;
+	Stats leftStats;
+	Stats rightStats;
 } _cache;
 extern bool needReset;
 extern bool needRefresh;

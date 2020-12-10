@@ -23,14 +23,16 @@ let sokuCharacters = [
 let global_state = null;
 let json = {};
 let Opcodes = {
-    "STATE_UPDATE": 0,
-    "CARDS_UPDATE": 1,
+    "STATE_UPDATE":   0,
+    "CARDS_UPDATE":   1,
     "L_SCORE_UPDATE": 2,
     "R_SCORE_UPDATE": 3,
     "L_CARDS_UPDATE": 4,
     "R_CARDS_UPDATE": 5,
-    "L_NAME_UPDATE": 6,
-    "R_NAME_UPDATE": 7,
+    "L_NAME_UPDATE":  6,
+    "R_NAME_UPDATE":  7,
+    "L_STATS_UPDATE": 8,
+    "R_STATS_UPDATE": 9,
 }
 
 function pad(n, width, z) {
