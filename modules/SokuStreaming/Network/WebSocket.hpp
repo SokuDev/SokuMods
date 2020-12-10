@@ -35,6 +35,7 @@ public:
 	void sendHttpRequest(const HttpRequest &request);
 	std::string getAnswer();
 	std::string getRawAnswer();
+	std::string strictRead(size_t i);
 	static std::vector<unsigned char> hashString(const std::string &str);
 	static HttpResponse solveHandshake(const HttpRequest &request);
 	WebSocket &operator=(const WebSocket &);

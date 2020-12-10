@@ -99,6 +99,15 @@ void WebSocket::_pong(const std::string &validator)
 	Socket::send(stream.str());
 }
 
+std::string WebSocket::strictRead(size_t i)
+{
+	std::string result = this->read(i);
+
+	if (i != result.size())
+		throw EOFException("EOFException");
+	return result;
+}
+
 std::string WebSocket::getAnswer()
 {
 	std::string	result;
@@ -111,32 +120,32 @@ std::string WebSocket::getAnswer()
 	if (!this->isOpen())
 		throw NotConnectedException("This socket is not connected to a server");
 
-	opcode = this->read(1).at(0);
+	opcode = this->strictRead(1)[0];
 	isEnd = (opcode >> 7U);
 	opcode &= 0xFU;
 
-	length = this->read(1).at(0);
+	length = this->strictRead(1)[0];
 	isMasked = (length >> 7U);
 	length &= 0x7FU;
 
 	if (length == 126)
-		length = (static_cast<unsigned char>(this->read(1).at(0)) << 8U) +
-			static_cast<unsigned char>(this->read(1).at(0));
+		length = (static_cast<unsigned char>(this->strictRead(1)[0]) << 8U) +
+			static_cast<unsigned char>(this->strictRead(1)[0]);
 	else if (length == 127)
-		length = (static_cast<unsigned char>(this->read(1).at(0)) << 24U) +
-			(static_cast<unsigned char>(this->read(1).at(0)) << 16U) +
-			(static_cast<unsigned char>(this->read(1).at(0)) << 8U) +
-			static_cast<unsigned char>(this->read(1).at(0));
+		length = (static_cast<unsigned char>(this->strictRead(1)[0]) << 24U) +
+			(static_cast<unsigned char>(this->strictRead(1)[0]) << 16U) +
+			(static_cast<unsigned char>(this->strictRead(1)[0]) << 8U) +
+			static_cast<unsigned char>(this->strictRead(1)[0]);
 
 	if (isMasked)
-		key = this->read(4);
+		key = this->strictRead(4);
 
 	if (opcode == 0x9) {
 		this->_pong(result);
 		return this->getAnswer();
 	}
 
-	result = this->read(length);
+	result = this->strictRead(length);
 	if (isMasked) {
 		for (unsigned i = 0; i < result.size(); i++)
 			result.at(i) ^= key.at(i % 4);
@@ -144,7 +153,7 @@ std::string WebSocket::getAnswer()
 
 	if (opcode == 0x8) {
 		this->disconnect();
-		int code = (static_cast<unsigned char>(result.at(0)) << 8U) + static_cast<unsigned char>(result[1]);
+		int code = (static_cast<unsigned char>(result[0]) << 8U) + static_cast<unsigned char>(result[1]);
 		throw ConnectionTerminatedException("Server closed connection with code " + std::to_string(code) + " (" + WEBSOCKET_CODE(code) + ")", code);
 	}
 
@@ -212,7 +221,7 @@ Socket::HttpResponse WebSocket::solveHandshake(const Socket::HttpRequest &reques
 		throw AbortConnectionException(405);
 	if (requ.header["Upgrade"] != "websocket")
 		throw AbortConnectionException(400);
-	if (requ.header["Connection"] != "Upgrade")
+	if (requ.header["Connection"].find("Upgrade") == std::string::npos)
 		throw AbortConnectionException(400);
 	response.returnCode = 101;
 	response.header["Upgrade"] = "websocket";
