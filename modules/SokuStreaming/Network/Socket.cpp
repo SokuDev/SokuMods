@@ -145,8 +145,7 @@ std::string Socket::makeRawRequest(const std::string &host, unsigned short portn
 
 std::string Socket::read(int size)
 {
-	size_t totalSize = 0;
-	char *result = nullptr;
+	std::string result;
 	char  buffer[1024];
 
 	while (size != 0) {
@@ -157,12 +156,11 @@ std::string Socket::read(int size)
 				break;
 			throw EOFException(getLastSocketError());
 		}
-		result = reinterpret_cast<char *>(std::realloc(result, totalSize + bytes));
-		std::memcpy(&result[totalSize], buffer, bytes);
-		totalSize += bytes;
+		result.reserve(result.size() + bytes + 1);
+		result.insert(result.end(), buffer, buffer + bytes);
 		size -= bytes;
 	}
-	return {result, totalSize};
+	return result;
 }
 
 void Socket::send(const std::string &msg)
@@ -180,8 +178,7 @@ void Socket::send(const std::string &msg)
 
 std::string Socket::readUntilEOF()
 {
-	size_t totalSize = 0;
-	char *result = nullptr;
+	std::string result;
 	char  buffer[1024];
 
 	while (true) {
@@ -189,11 +186,10 @@ std::string Socket::readUntilEOF()
 
 		if (bytes < 0)
 			throw EOFException(getLastSocketError());
-		result = reinterpret_cast<char *>(std::realloc(result, totalSize + bytes));
-		std::memcpy(&result[totalSize], buffer, bytes);
-		totalSize += bytes;
+		result.reserve(result.size() + bytes + 1);
+		result.insert(result.end(), buffer, buffer + bytes);
 		if (bytes < sizeof(buffer))
-			return {result, totalSize};
+			return result;
 	}
 }
 
