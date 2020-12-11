@@ -67,7 +67,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	if (!enabled)
 		return;
 
-	port = GetPrivateProfileInt("Server", "Enabled", 80, profilePath);
+	port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 	keys[KEY_DECREASE_L_SCORE] = GetPrivateProfileInt("Keys", "DecreaseLeftScore",  DIK_1, profilePath);
 	keys[KEY_DECREASE_R_SCORE] = GetPrivateProfileInt("Keys", "DecreaseRightScore", DIK_2, profilePath);
 	keys[KEY_INCREASE_L_SCORE] = GetPrivateProfileInt("Keys", "IncreaseLeftScore",  DIK_3, profilePath);

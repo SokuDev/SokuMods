@@ -3,6 +3,7 @@
 //
 
 #include <SokuLib.hpp>
+#include <dinput.h>
 #include "Network/Handlers.hpp"
 #include "nlohmann/json.hpp"
 #include "Utils/ShiftJISDecoder.hpp"
@@ -30,8 +31,17 @@ static void checkKeyInputs()
 {
 	std::vector<bool> isPressed(TOTAL_NB_OF_KEYS);
 
+	if (!threadUsed && thread.joinable())
+		thread.join();
+	for (int i = 0; i < 0xED; i++) {
+		auto val = SokuLib::checkKeyOneshot(i, 0, 0, 0);
+
+		if (val)
+			printf("%i pressed\n", i);
+	}
 	for (size_t i = 0; i < keys.size(); i++) {
-		auto val = SokuLib::checkKeyOneshot(keys[i], 0, 0, 0);
+		auto val = SokuLib::checkKeyOneshot(DIK_F9, 0, 0, 0);
+		//auto val = ((int *)0x8998D8)[keys[i]] == 1;
 
 		//printf("%i (%i): %s ", i, keys[i], val ? "pressed" : "not pressed");
 		if (val && !keysState[i])
@@ -49,9 +59,12 @@ static void checkKeyInputs()
 			thread = std::thread{[]{
 				auto answer = InputBox("Answer", "Are you ok ?", "Yes");
 
-				if (answer.empty())
+				if (answer.empty()) {
+					threadUsed = false;
 					return;
+				}
 				SokuLib::player1Profile = answer;
+				threadUsed = false;
 			}};
 		}
 	}
