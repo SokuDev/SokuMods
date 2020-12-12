@@ -2,3 +2,4 @@ cmake-build-*
 build
 .idea
 .vs
+CMakeSettings.json

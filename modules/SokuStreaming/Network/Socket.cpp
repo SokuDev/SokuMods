@@ -318,6 +318,7 @@ Socket::Socket(const Socket &socket) :
 	_remote(socket.getRemote())
 {
 	socket.setNoDestroy(true);
+	this->setNoDestroy(false);
 }
 
 Socket &Socket::operator=(const Socket &socket)
@@ -328,6 +329,7 @@ Socket &Socket::operator=(const Socket &socket)
 	this->_sockfd = socket.getSockFd();
 	this->_remote = socket.getRemote();
 	socket.setNoDestroy(true);
+	this->setNoDestroy(false);
 	return *this;
 }
 

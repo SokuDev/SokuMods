@@ -4,11 +4,14 @@
 
 #include <SokuLib.hpp>
 #include <dinput.h>
+#include <iostream>
 #include "Network/Handlers.hpp"
 #include "nlohmann/json.hpp"
 #include "Utils/ShiftJISDecoder.hpp"
 #include "Utils/InputBox.hpp"
 #include "State.hpp"
+
+#define checkKey(key) SokuLib::checkKeyOneshot(keys[key], 0, 0, 0)
 
 bool enabled;
 unsigned short port;
@@ -25,33 +28,36 @@ int (__thiscall Title::*s_origCTitle_Process)();
 
 bool threadUsed = false;
 std::thread thread;
-static std::vector<bool> keysState(TOTAL_NB_OF_KEYS);
 
 static void checkKeyInputs()
 {
-	std::vector<bool> isPressed(TOTAL_NB_OF_KEYS);
-
 	if (!threadUsed && thread.joinable())
 		thread.join();
-	for (int i = 0; i < 0xED; i++) {
+
+	/*for (int i = 0; i < 0xFF; i++) {
 		auto val = SokuLib::checkKeyOneshot(i, 0, 0, 0);
 
 		if (val)
-			printf("%i pressed\n", i);
-	}
-	for (size_t i = 0; i < keys.size(); i++) {
-		auto val = SokuLib::checkKeyOneshot(DIK_F9, 0, 0, 0);
-		//auto val = ((int *)0x8998D8)[keys[i]] == 1;
+			std::cout << std::hex << i << " pressed !" << std::endl;
+	}*/
 
-		//printf("%i (%i): %s ", i, keys[i], val ? "pressed" : "not pressed");
-		if (val && !keysState[i])
-			puts("Pressed !");
-		isPressed[i] = val && !keysState[i];
-		keysState[i] = val;
+	if (checkKey(KEY_DECREASE_L_SCORE)) {
+		_cache.leftScore--;
+		broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
 	}
-	//printf("\n");
-
-	if (isPressed[KEY_CHANGE_L_NAME]) {
+	if (checkKey(KEY_DECREASE_R_SCORE)) {
+		_cache.rightScore--;
+		broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+	}
+	if (checkKey(KEY_INCREASE_L_SCORE)) {
+		_cache.leftScore++;
+		broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
+	}
+	if (checkKey(KEY_INCREASE_R_SCORE)) {
+		_cache.rightScore++;
+		broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+	}
+	if (checkKey(KEY_CHANGE_L_NAME)) {
 		if (!threadUsed) {
 			threadUsed = true;
 			if (thread.joinable())
