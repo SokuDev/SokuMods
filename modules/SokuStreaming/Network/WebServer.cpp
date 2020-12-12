@@ -107,6 +107,7 @@ void WebServer::addStaticFolder(const std::string &&route, const std::string &&p
 void WebServer::start(unsigned short port)
 {
 	this->_sock.bind(port);
+	std::cout << "Started server on port " << port << std::endl;
 	this->_thread = std::thread([this]{
 		while (!this->_closed)
 			this->_serverLoop();
@@ -120,10 +121,17 @@ void WebServer::stop()
 	this->_closed = true;
 	auto old = signal(SIGINT, ___);
 
-	std::for_each(this->_webSocks.begin(), this->_webSocks.end(), [](WebSocket &s) { s.disconnect(); });
+	std::for_each(
+		this->_webSocks.begin(),
+		this->_webSocks.end(),
+		[](std::shared_ptr<WebSocketConnection> &s) {
+			s->wsock.disconnect();
+			if (s->thread.joinable())
+				s->thread.join();
+		}
+	);
 	raise(SIGINT); //Interrupt accept
 	signal(SIGINT, old);
-	std::for_each(this->_webSocksThreads.begin(), this->_webSocksThreads.end(), [](std::thread &s) { if (s.joinable()) s.join(); });
 	if (this->_thread.joinable())
 		this->_thread.join();
 }
@@ -170,10 +178,12 @@ void WebServer::_serverLoop()
 	}
 	response.httpVer = "HTTP/1.1";
 	response.header["content-length"] = std::to_string(response.body.length());
+	std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << " ";
 	if (!requ.httpVer.empty())
-		std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << " " + requ.path + ": " << response.returnCode << std::endl;
+		std::cout << requ.path;
 	else
-		std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << " Malformed HTTP request: " << response.returnCode << std::endl;
+		std::cout << "<Malformed HTTP request>";
+	std::cout << ": " << response.returnCode << std::endl;
 	try {
 		newConnection.send(Socket::generateHttpResponse(response));
 	} catch (...) {}
@@ -271,29 +281,34 @@ std::string WebServer::_getContentType(const std::string &path)
 void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ)
 {
 	auto response = WebSocket::solveHandshake(requ);
-	auto &wsock = this->_webSocks.emplace_back(sock);
+	std::shared_ptr<WebSocketConnection> wsock;
+	std::weak_ptr<WebSocketConnection> wsock_weak;
 
-	wsock.needsMask(false);
+	this->_webSocks.push_back(std::make_shared<WebSocketConnection>(sock));
+	wsock_weak = wsock = this->_webSocks.back();
+	wsock->wsock.needsMask(false);
 	response.httpVer = "HTTP/1.1";
 	response.codeName = WebServer::codes.at(response.returnCode);
 	sock.send(Socket::generateHttpResponse(response));
 	if (this->_onConnect)
-		this->_onConnect(wsock);
-	this->_webSocksThreads.emplace_back([this, &wsock]{
+		this->_onConnect(wsock->wsock);
+	wsock->isThreadFinished = false;
+	wsock->thread = std::thread([this, wsock_weak]{
 		try {
-			while (wsock.isOpen()) {
-				std::string msg = wsock.getAnswer();
+			while (wsock_weak.lock()->wsock.isOpen()) {
+				std::string msg = wsock_weak.lock()->wsock.getAnswer();
 
 				if (this->_onMessage)
-					this->_onMessage(wsock, msg);
+					this->_onMessage(wsock_weak.lock()->wsock, msg);
 			}
 		} catch (const std::exception &e) {
-			wsock.disconnect();
+			wsock_weak.lock()->wsock.disconnect();
 			if (this->_onError)
-				this->_onError(wsock, e);
+				this->_onError(wsock_weak.lock()->wsock, e);
 		}
+		wsock_weak.lock()->isThreadFinished = true;
 	});
-	std::cout << inet_ntoa(sock.getRemote().sin_addr) << " " + requ.path + ": " << response.returnCode << std::endl;
+	std::cout << inet_ntoa(sock.getRemote().sin_addr) << ":" << sock.getRemote().sin_port << " " << requ.path << ": " << response.returnCode << std::endl;
 }
 
 void WebServer::broadcast(const std::string &msg)
@@ -302,15 +317,22 @@ void WebServer::broadcast(const std::string &msg)
 		std::remove_if(
 			this->_webSocks.begin(),
 			this->_webSocks.end(),
-			[](WebSocket &s) { return !s.isOpen(); }
+			[](std::shared_ptr<WebSocketConnection> &s) {
+				if (s->isThreadFinished) {
+					if (s->thread.joinable())
+						s->thread.join();
+					return true;
+				}
+				return false;
+			}
 		),
 		this->_webSocks.end()
 	);
 	for (auto &wsock : this->_webSocks)
 		try {
-			wsock.send(msg);
+			wsock->wsock.send(msg);
 		} catch (...) {
-			wsock.disconnect();
+			wsock->wsock.disconnect();
 		}
 }
 

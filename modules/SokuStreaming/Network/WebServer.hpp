@@ -9,19 +9,27 @@
 #include <functional>
 #include <thread>
 #include <vector>
+#include <memory>
 #include "Socket.hpp"
 #include "WebSocket.hpp"
 
 class WebServer {
 private:
+	struct WebSocketConnection {
+		WebSocket wsock;
+		std::thread thread;
+		bool isThreadFinished;
+
+		WebSocketConnection(const Socket &sock) : wsock(sock) {};
+	};
+
 	std::function<void (WebSocket &sock)> _onConnect;
 	std::function<void (WebSocket &sock, const std::string &msg)> _onMessage;
 	std::function<void (WebSocket &sock, const std::exception &e)> _onError;
 	bool _closed = false;
 	Socket _sock;
 	std::thread _thread;
-	std::vector<WebSocket> _webSocks;
-	std::vector<std::thread> _webSocksThreads;
+	std::vector<std::shared_ptr<WebSocketConnection>> _webSocks;
 	std::map<std::string, std::string> _folders;
 	std::map<std::string, std::function<Socket::HttpResponse (const Socket::HttpRequest &request)>> _routes;
 
