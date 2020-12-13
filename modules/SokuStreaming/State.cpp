@@ -11,7 +11,7 @@
 #include "Utils/InputBox.hpp"
 #include "State.hpp"
 
-#define checkKey(key) SokuLib::checkKeyOneshot(keys[key], 0, 0, 0)
+#define checkKey(key) SokuLib::checkKeyOneshot(keys[key], true, false, false)
 
 bool enabled;
 unsigned short port;
@@ -130,23 +130,21 @@ void updateCache(bool isMultiplayer)
 	_cache.leftHand.clear();
 	_cache.rightHand.clear();
 
-	auto &leftDeck = battleMgr.leftCharacterManager->mDeckInfo2Obj;
-	auto &rightDeck = battleMgr.rightCharacterManager->mDeckInfo2Obj;
+	auto &leftDeck = battleMgr.leftCharacterManager->deckInfos;
+	auto &rightDeck = battleMgr.rightCharacterManager->deckInfos;
 
 	// Left remaining cards
 	if (leftDeck.deck.size == 20)
 		_cache.leftUsed.clear();
-	if (leftDeck.deck.size <= 20)
-		for (int i = 0; i < leftDeck.deck.size; i++)
-			_cache.leftCards.push_back(leftDeck.deck[i]);
+	for (int i = 0; i < leftDeck.deck.size; i++)
+		_cache.leftCards.push_back(leftDeck.deck[i]);
 	std::sort(_cache.leftCards.begin(), _cache.leftCards.end());
 
 	//Right remaining cards
 	if (rightDeck.deck.size == 20)
 		_cache.rightUsed.clear();
-	if (rightDeck.deck.size <= 20)
-		for (int i = 0; i < rightDeck.deck.size; i++)
-			_cache.rightCards.push_back(rightDeck.deck[i]);
+	for (int i = 0; i < rightDeck.deck.size; i++)
+		_cache.rightCards.push_back(rightDeck.deck[i]);
 	std::sort(_cache.rightCards.begin(), _cache.rightCards.end());
 
 	//Hands
