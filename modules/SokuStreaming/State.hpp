@@ -50,6 +50,8 @@ extern struct CachedMatchData {
 	std::vector<unsigned short> rightUsed;
 	std::string leftName;
 	std::string rightName;
+	std::string realLeftName;
+	std::string realRightName;
 	unsigned int oldLeftScore;
 	unsigned int oldRightScore;
 	unsigned int leftScore;

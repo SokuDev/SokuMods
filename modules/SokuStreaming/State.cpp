@@ -11,7 +11,7 @@
 #include "Utils/InputBox.hpp"
 #include "State.hpp"
 
-#define checkKey(key) SokuLib::checkKeyOneshot(keys[key], true, false, false)
+#define checkKey(key) GetKeyState(keys[key])
 
 bool enabled;
 unsigned short port;
@@ -28,48 +28,72 @@ int (__thiscall Title::*s_origCTitle_Process)();
 
 bool threadUsed = false;
 std::thread thread;
+std::vector<bool> oldState;
 
 static void checkKeyInputs()
 {
+	std::vector<bool> isPressed;
+
 	if (!threadUsed && thread.joinable())
 		thread.join();
 
-	/*for (int i = 0; i < 0xFF; i++) {
-		auto val = SokuLib::checkKeyOneshot(i, 0, 0, 0);
+	isPressed.reserve(TOTAL_NB_OF_KEYS);
+	oldState.resize(TOTAL_NB_OF_KEYS);
+	for (int i = 0; i < TOTAL_NB_OF_KEYS; i++) {
+		auto val = checkKey(i);
 
-		if (val)
-			std::cout << std::hex << i << " pressed !" << std::endl;
-	}*/
+		isPressed.push_back(val && !oldState[i]);
+		oldState[i] = val;
+	}
 
-	if (checkKey(KEY_DECREASE_L_SCORE)) {
+	if (isPressed[KEY_DECREASE_L_SCORE]) {
 		_cache.leftScore--;
 		broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
 	}
-	if (checkKey(KEY_DECREASE_R_SCORE)) {
+	if (isPressed[KEY_DECREASE_R_SCORE]) {
 		_cache.rightScore--;
 		broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
 	}
-	if (checkKey(KEY_INCREASE_L_SCORE)) {
+	if (isPressed[KEY_INCREASE_L_SCORE]) {
 		_cache.leftScore++;
 		broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
 	}
-	if (checkKey(KEY_INCREASE_R_SCORE)) {
+	if (isPressed[KEY_INCREASE_R_SCORE]) {
 		_cache.rightScore++;
 		broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
 	}
-	if (checkKey(KEY_CHANGE_L_NAME)) {
+	if (isPressed[KEY_CHANGE_L_NAME]) {
 		if (!threadUsed) {
 			threadUsed = true;
 			if (thread.joinable())
 				thread.join();
 			thread = std::thread{[]{
-				auto answer = InputBox("Answer", "Are you ok ?", "Yes");
+				auto answer = InputBox("Change left player name", "Left name", _cache.leftName);
 
 				if (answer.empty()) {
 					threadUsed = false;
 					return;
 				}
-				SokuLib::player1Profile = answer;
+				_cache.leftName = answer;
+				broadcastOpcode(L_NAME_UPDATE, "\"" + answer + "\"");
+				threadUsed = false;
+			}};
+		}
+	}
+	if (isPressed[KEY_CHANGE_R_NAME]) {
+		if (!threadUsed) {
+			threadUsed = true;
+			if (thread.joinable())
+				thread.join();
+			thread = std::thread{[]{
+				auto answer = InputBox("Change right player name", "Right name",  _cache.rightName);
+
+				if (answer.empty()) {
+					threadUsed = false;
+					return;
+				}
+				_cache.rightName = answer;
+				broadcastOpcode(R_NAME_UPDATE, "\"" + answer + "\"");
 				threadUsed = false;
 			}};
 		}
@@ -109,15 +133,19 @@ void updateCache(bool isMultiplayer)
 		if (isMultiplayer) {
 			auto &netObj = SokuLib::getNetObject();
 
-			if (_cache.leftName != netObj.profile1name || _cache.rightName != netObj.profile2name) {
+			if (_cache.realLeftName != netObj.profile1name || _cache.realRightName != netObj.profile2name) {
 				_cache.leftScore = 0;
 				_cache.rightScore = 0;
+				_cache.leftName = netObj.profile1name;
+				_cache.rightName = netObj.profile2name;
+				_cache.realLeftName = netObj.profile1name;
+				_cache.realRightName = netObj.profile2name;
 			}
-			_cache.leftName = netObj.profile1name;
-			_cache.rightName = netObj.profile2name;
 		} else {
 			_cache.leftName = SokuLib::player1Profile;
 			_cache.rightName = SokuLib::player2Profile;
+			_cache.realLeftName = SokuLib::player1Profile;
+			_cache.realRightName = SokuLib::player2Profile;
 		}
 		needReset = false;
 	}
