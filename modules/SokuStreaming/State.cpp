@@ -20,6 +20,8 @@ std::unique_ptr<WebServer> webServer;
 struct CachedMatchData _cache;
 bool needReset;
 bool needRefresh;
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
 int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
 int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
 int (__thiscall Loading::*s_origCLoading_Process)();
@@ -29,6 +31,7 @@ int (__thiscall Title::*s_origCTitle_Process)();
 bool threadUsed = false;
 std::thread thread;
 std::vector<bool> oldState;
+bool isPlaying = false;
 
 static void checkKeyInputs()
 {
@@ -127,6 +130,9 @@ std::string statsToString(const Stats &stats)
 
 void updateCache(bool isMultiplayer)
 {
+	if (!isPlaying)
+		return;
+
 	auto &battleMgr = SokuLib::getBattleMgr();
 
 	if (needReset) {
@@ -386,4 +392,14 @@ std::string generateLeftCardsJson(CachedMatchData cache)
 		{ "hand", leftHand },
 	};
 	return result.dump(-1, ' ', true);
+}
+
+void onRoundStart()
+{
+	isPlaying = true;
+}
+
+void onKO()
+{
+	isPlaying = false;
 }

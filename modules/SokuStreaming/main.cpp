@@ -59,6 +59,22 @@ int __fastcall CLoadingWatch_OnProcess(LoadingWatch *This) {
 	return ret;
 }
 
+int __fastcall CBattleManager_KO(SokuLib::BattleManager *This) {
+	// super
+	int ret = (This->*s_origCBattleManager_KO)();
+
+	onKO();
+	return ret;
+}
+
+int __fastcall CBattleManager_Start(SokuLib::BattleManager *This) {
+	// super
+	int ret = (This->*s_origCBattleManager_Start)();
+
+	onRoundStart();
+	return ret;
+}
+
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 {
@@ -120,6 +136,18 @@ void hookFunctions()
 		SokuLib::TamperDword(
 			SokuLib::vtbl_CLoading + SokuLib::OFFSET_ON_PROCESS,
 			reinterpret_cast<DWORD>(CLoading_OnProcess)
+		)
+	);
+	s_origCBattleManager_Start = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_SAY_START,
+			reinterpret_cast<DWORD>(CBattleManager_Start)
+		)
+	);
+	s_origCBattleManager_KO = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_KO,
+			reinterpret_cast<DWORD>(CBattleManager_KO)
 		)
 	);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
