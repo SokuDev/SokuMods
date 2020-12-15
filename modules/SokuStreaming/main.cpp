@@ -75,6 +75,14 @@ int __fastcall CBattleManager_Start(SokuLib::BattleManager *This) {
 	return ret;
 }
 
+int __fastcall CBattleManager_Render(SokuLib::BattleManager *This) {
+	// super
+	int ret = (This->*s_origCBattleManager_Render)();
+
+	checkKeyInputs();
+	return ret;
+}
+
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 {
@@ -83,10 +91,10 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	if (!enabled)
 		return;
 
-	/*FILE *_;
+	FILE *_;
 
 	AllocConsole();
-	freopen_s(&_, "CONOUT$", "w", stdout);*/
+	freopen_s(&_, "CONOUT$", "w", stdout);
 	port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 	keys[KEY_DECREASE_L_SCORE] = GetPrivateProfileInt("Keys", "DecreaseLeftScore",  DIK_1, profilePath);
 	keys[KEY_DECREASE_R_SCORE] = GetPrivateProfileInt("Keys", "DecreaseRightScore", DIK_2, profilePath);
@@ -150,6 +158,12 @@ void hookFunctions()
 			reinterpret_cast<DWORD>(CBattleManager_KO)
 		)
 	);
+	/*s_origCBattleManager_Render = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_RENDER,
+			reinterpret_cast<DWORD>(CBattleManager_Render)
+		)
+	);*/
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 }

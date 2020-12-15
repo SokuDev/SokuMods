@@ -11,7 +11,7 @@
 #include "Utils/InputBox.hpp"
 #include "State.hpp"
 
-#define checkKey(key) GetKeyState(keys[key])
+#define checkKey(key) (GetKeyState(keys[key]) & 0x8000)
 
 bool enabled;
 unsigned short port;
@@ -20,6 +20,7 @@ std::unique_ptr<WebServer> webServer;
 struct CachedMatchData _cache;
 bool needReset;
 bool needRefresh;
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
 int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
 int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
 int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
@@ -27,18 +28,24 @@ int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
 int (__thiscall Loading::*s_origCLoading_Process)();
 int (__thiscall Battle::*s_origCBattle_Process)();
 int (__thiscall Title::*s_origCTitle_Process)();
+HWND myWindow;
+
+const char *jpTitle = "ôîò√ö±æzôVæÑ ü` Æ┤£WïëâMâjâçâïé╠ôΣé≡Æ╟éª Ver1.10a";
 
 bool threadUsed = false;
 std::thread thread;
 std::vector<bool> oldState;
 bool isPlaying = false;
 
-static void checkKeyInputs()
+void checkKeyInputs()
 {
 	std::vector<bool> isPressed;
 
 	if (!threadUsed && thread.joinable())
 		thread.join();
+
+	if (GetForegroundWindow() != SokuLib::window)
+		return;
 
 	isPressed.reserve(TOTAL_NB_OF_KEYS);
 	oldState.resize(TOTAL_NB_OF_KEYS);
@@ -221,23 +228,6 @@ void updateCache(bool isMultiplayer)
 	if (_cache.rightHand.size() != rightOldSize && !needRefresh)
 		broadcastOpcode(R_CARDS_UPDATE, generateRightCardsJson(_cache));
 
-	if (
-		_cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
-		_cache.oldRightScore != battleMgr.rightCharacterManager->score
-	) {
-		if (battleMgr.leftCharacterManager->score == 2) {
-			_cache.leftScore++;
-			if (!needRefresh)
-				broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
-		} else if (battleMgr.rightCharacterManager->score == 2) {
-			_cache.rightScore++;
-			if (!needRefresh)
-				broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
-		}
-		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
-		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
-	}
-
 	if (_cache.weather != SokuLib::activeWeather) {
 		auto old = _cache.weather;
 
@@ -401,5 +391,24 @@ void onRoundStart()
 
 void onKO()
 {
+	auto &battleMgr = SokuLib::getBattleMgr();
+
 	isPlaying = false;
+
+	if (
+		_cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
+		_cache.oldRightScore != battleMgr.rightCharacterManager->score
+	) {
+		if (battleMgr.leftCharacterManager->score == 2) {
+			_cache.leftScore++;
+			if (!needRefresh)
+				broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
+		} else if (battleMgr.rightCharacterManager->score == 2) {
+			_cache.rightScore++;
+			if (!needRefresh)
+				broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+		}
+		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
+		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
+	}
 }

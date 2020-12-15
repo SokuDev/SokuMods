@@ -61,6 +61,7 @@ extern struct CachedMatchData {
 } _cache;
 extern bool needReset;
 extern bool needRefresh;
+extern int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
 extern int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
 extern int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
 extern int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
@@ -74,6 +75,7 @@ std::string generateLeftCardsJson(CachedMatchData cache);
 std::string generateRightCardsJson(CachedMatchData cache);
 std::string generateCardsJson(CachedMatchData cache);
 std::string cacheToJson(CachedMatchData cache);
+void checkKeyInputs();
 void onRoundStart();
 void onKO();
 
