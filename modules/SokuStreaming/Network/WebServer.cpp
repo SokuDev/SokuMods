@@ -146,13 +146,13 @@ void WebServer::_serverLoop()
 	Socket newConnection = this->_sock.accept();
 	Socket::HttpResponse response;
 	Socket::HttpRequest requ;
+	std::string s;
 
+	std::cerr << "New connection from " << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << std::endl;
 	try {
 		try {
-			auto s = newConnection.readUntilEOF();
-
+			s = newConnection.readUntilEOF();
 			requ = Socket::parseHttpRequest(s);
-
 			if (requ.path == "/chat")
 				return this->_addWebSocket(newConnection, requ);
 			else {
@@ -181,8 +181,10 @@ void WebServer::_serverLoop()
 	std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << " ";
 	if (!requ.httpVer.empty())
 		std::cout << requ.path;
-	else
+	else {
 		std::cout << "<Malformed HTTP request>";
+		std::cerr << "Parsing error of request \"" << s << "\"" << std::endl;
+	}
 	std::cout << ": " << response.returnCode << std::endl;
 	try {
 		newConnection.send(Socket::generateHttpResponse(response));

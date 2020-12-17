@@ -91,17 +91,17 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	if (!enabled)
 		return;
 
-	FILE *_;
+	/*FILE *_;
 
 	AllocConsole();
-	freopen_s(&_, "CONOUT$", "w", stdout);
+	freopen_s(&_, "CONOUT$", "w", stdout);*/
 	port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
-	keys[KEY_DECREASE_L_SCORE] = GetPrivateProfileInt("Keys", "DecreaseLeftScore",  DIK_1, profilePath);
-	keys[KEY_DECREASE_R_SCORE] = GetPrivateProfileInt("Keys", "DecreaseRightScore", DIK_2, profilePath);
-	keys[KEY_INCREASE_L_SCORE] = GetPrivateProfileInt("Keys", "IncreaseLeftScore",  DIK_3, profilePath);
-	keys[KEY_INCREASE_R_SCORE] = GetPrivateProfileInt("Keys", "IncreaseRightScore", DIK_4, profilePath);
-	keys[KEY_CHANGE_L_NAME]    = GetPrivateProfileInt("Keys", "ChangeLeftName",     DIK_5, profilePath);
-	keys[KEY_CHANGE_R_NAME]    = GetPrivateProfileInt("Keys", "ChangeRightName",    DIK_6, profilePath);
+	keys[KEY_DECREASE_L_SCORE] = GetPrivateProfileInt("Keys", "DecreaseLeftScore",  '1', profilePath);
+	keys[KEY_INCREASE_L_SCORE] = GetPrivateProfileInt("Keys", "IncreaseLeftScore",  '2', profilePath);
+	keys[KEY_CHANGE_L_NAME]    = GetPrivateProfileInt("Keys", "ChangeLeftName",     '3', profilePath);
+	keys[KEY_DECREASE_R_SCORE] = GetPrivateProfileInt("Keys", "DecreaseRightScore", '8', profilePath);
+	keys[KEY_INCREASE_R_SCORE] = GetPrivateProfileInt("Keys", "IncreaseRightScore", '9', profilePath);
+	keys[KEY_CHANGE_R_NAME]    = GetPrivateProfileInt("Keys", "ChangeRightName",    '0', profilePath);
 
 	webServer = std::make_unique<WebServer>();
 	webServer->addRoute("/", root);
