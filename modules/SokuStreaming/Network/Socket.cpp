@@ -180,12 +180,33 @@ std::string Socket::readUntilEOF()
 {
 	std::string result;
 	char  buffer[1024];
+	timeval timeout{1, 0};
+	FD_SET rd;
+	unsigned time = 11;
 
 	while (true) {
+		FD_ZERO(&rd);
+		FD_SET(this->_sockfd, &rd);
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+		switch (select(FD_SETSIZE, &rd, nullptr, nullptr, &timeout)){
+		case 0:
+			if (result.empty() && (--time))
+				continue;
+			return result;
+		case -1:
+			throw EOFException(getLastSocketError());
+		default:
+			break;
+		}
+
 		int bytes = recv(this->_sockfd, buffer, sizeof(buffer), 0);
 
-		if (bytes < 0)
+		if (bytes < 0) {
+			if (WSAGetLastError() == 10035)
+				return result;
 			throw EOFException(getLastSocketError());
+		}
 		result.reserve(result.size() + bytes + 1);
 		result.insert(result.end(), buffer, buffer + bytes);
 		if (bytes < sizeof(buffer))
