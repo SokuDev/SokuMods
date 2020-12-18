@@ -387,6 +387,8 @@ std::string generateLeftCardsJson(CachedMatchData cache)
 void onRoundStart()
 {
 	isPlaying = true;
+	_cache.oldLeftScore = 0;
+	_cache.oldRightScore = 0;
 }
 
 void onKO()
@@ -401,12 +403,10 @@ void onKO()
 	) {
 		if (battleMgr.leftCharacterManager->score == 2) {
 			_cache.leftScore++;
-			if (!needRefresh)
-				broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
+			broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
 		} else if (battleMgr.rightCharacterManager->score == 2) {
 			_cache.rightScore++;
-			if (!needRefresh)
-				broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+			broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
 		}
 		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
 		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
