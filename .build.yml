@@ -4,7 +4,7 @@ packages:
   - unzip
   - msitools
   - zip
-  - cmake-git
+  - cmake
   - clang
   - llvm
   - lld
