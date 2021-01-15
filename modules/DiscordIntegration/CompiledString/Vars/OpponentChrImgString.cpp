@@ -1,0 +1,17 @@
+//
+// Created by PinkySmile on 15/01/2021.
+//
+
+#include <SokuLib.hpp>
+#include "vars.hpp"
+#include "OpponentChrImgString.hpp"
+
+std::string OpponentChrImgString::getString() const
+{
+	switch (SokuLib::mainMode) {
+	case SokuLib::BATTLE_MODE_VSSERVER:
+		return charactersImg[SokuLib::leftChar];
+	default:
+		return charactersImg[SokuLib::rightChar];
+	}
+}

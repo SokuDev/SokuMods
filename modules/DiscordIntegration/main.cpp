@@ -9,27 +9,113 @@
 #include <discord.h>
 #include <shlwapi.h>
 #include <SokuLib.hpp>
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include "CompiledString/CompiledStringFactory.hpp"
+#include "CompiledString/Vars/vars.hpp"
 #include "logger.hpp"
 #include "Exceptions.hpp"
 #include "Network/getPublicIp.hpp"
-#include "ShiftJISDecoder.hpp"
 
-static bool enabled;
-static char smallImg[32];
-static bool showWR = false;
-static bool experimentalSpec;
-static std::pair<unsigned, unsigned> won;
-static std::pair<unsigned, unsigned> score;
-static time_t gameTimestamp;
-static time_t hostTimestamp;
-static time_t totalTimestamp;
-static time_t refreshRate;
-static discord::Core *core;
-static unsigned long long clientId;
-static int currentScene;
-static std::string roomIp = "";
+enum StringIndex {
+	STRING_INDEX_LOGO,
+	STRING_INDEX_OPENING,
+	STRING_INDEX_TITLE,
+	STRING_INDEX_SELECT_VSCOMPUTER,
+	STRING_INDEX_BATTLE_VSCOMPUTER,
+	STRING_INDEX_LOADING_VSCOMPUTER,
+	STRING_INDEX_SELECT_STORY,
+	STRING_INDEX_BATTLE_STORY,
+	STRING_INDEX_LOADING_STORY,
+	STRING_INDEX_SELECT_ARCADE,
+	STRING_INDEX_BATTLE_ARCADE,
+	STRING_INDEX_LOADING_ARCADE,
+	STRING_INDEX_BATTLE_TIMETRIAL,
+	STRING_INDEX_LOADING_TIMETRIAL,
+	STRING_INDEX_SELECT_VSPLAYER,
+	STRING_INDEX_BATTLE_VSPLAYER,
+	STRING_INDEX_LOADING_VSPLAYER,
+	STRING_INDEX_SELECT_PRACTICE,
+	STRING_INDEX_BATTLE_PRACTICE,
+	STRING_INDEX_LOADING_PRACTICE,
+	STRING_INDEX_SELECT_VSNETWORK,
+	STRING_INDEX_BATTLE_VSNETWORK,
+	STRING_INDEX_LOADING_VSNETWORK,
+	STRING_INDEX_BATTLE_SPECTATOR,
+	STRING_INDEX_LOADING_SPECTATOR,
+	STRING_INDEX_BATTLE_REPLAY,
+	STRING_INDEX_LOADING_REPLAY,
+	STRING_INDEX_BATTLE_STORY_REPLAY,
+	STRING_INDEX_LOADING_STORY_REPLAY,
+	STRING_INDEX_ENDING,
+	STRING_INDEX_HOSTING,
+	STRING_INDEX_CONNECTING,
+	STRING_INDEX_MAX
+};
 
-const std::vector<const char *> discordResultToString{
+static const char *const allElems[]{
+	"logo",
+	"opening",
+	"title",
+	"select_vscomputer",
+	"battle_vscomputer",
+	"loading_vscomputer",
+	"select_story",
+	"battle_story",
+	"loading_story",
+	"select_arcade",
+	"battle_arcade",
+	"loading_arcade",
+	"battle_timetrial",
+	"loading_timetrial",
+	"select_vsplayer",
+	"battle_vsplayer",
+	"loading_vsplayer",
+	"select_practice",
+	"battle_practice",
+	"loading_practice",
+	"select_vsnetwork",
+	"battle_vsnetwork",
+	"loading_vsnetwork",
+	"battle_spectator",
+	"loading_spectator",
+	"battle_replay",
+	"loading_replay",
+	"battle_story_replay",
+	"loading_story_replay",
+	"ending",
+	"hosting",
+	"connecting",
+};
+
+struct StringConfig {
+	bool timestamp;
+	bool set_timestamp;
+	std::shared_ptr<CompiledString> title;
+	std::shared_ptr<CompiledString> description;
+	std::shared_ptr<CompiledString> large_image;
+	std::shared_ptr<CompiledString> large_text;
+	std::shared_ptr<CompiledString> small_image;
+	std::shared_ptr<CompiledString> small_text;
+};
+struct Config {
+	std::vector<StringConfig> strings;
+	bool enabled = false;
+	time_t refreshRate = 0;
+	unsigned long long clientId = 0;
+};
+struct State {
+	time_t gameTimestamp = 0;
+	time_t totalTimestamp = 0;
+	discord::Core *core = nullptr;
+	std::string roomIp;
+	std::pair<unsigned, unsigned> won = {0, 0};
+};
+
+static State state;
+static Config config;
+
+static const std::vector<const char *> discordResultToString{
 	"Ok",
 	"ServiceUnavailable",
 	"InvalidVersion",
@@ -76,645 +162,280 @@ const std::vector<const char *> discordResultToString{
 	"TransactionAborted",
 };
 
-std::vector<std::string> charactersImg{
-	"reimu",
-	"marisa",
-	"sakuya",
-	"alice",
-	"patchouli",
-	"youmu",
-	"remilia",
-	"yuyuko",
-	"yukari",
-	"suika",
-	"reisen",
-	"aya",
-	"komachi",
-	"iku",
-	"tenshi",
-	"sanae",
-	"cirno",
-	"meiling",
-	"okuu",
-	"suwako",
-	"random_select"
-};
-
-void genericScreen()
+void updateActivity(StringIndex index, unsigned party)
 {
-	logMessagef("Generic menu on scene %i\n", currentScene);
+	if (index >= config.strings.size())
+		return;
+
 	discord::Activity activity{};
 	auto &assets = activity.GetAssets();
+	auto &timeStamp = activity.GetTimestamps();
+	auto &partyObj = activity.GetParty();
+	auto &secrets = activity.GetSecrets();
+	auto &elem = config.strings[index];
 
-	if (!roomIp.empty())
-		logMessage("No longer hosting/connecting.\n");
-	roomIp = "";
-	score = {0, 0};
-	totalTimestamp = time(nullptr);
-	hostTimestamp = time(nullptr);
-	logMessage("Get scene name\n");
-	activity.SetState(SokuLib::sceneNames[currentScene].c_str());
-	logMessage("Done\n");
-	assets.SetLargeImage("cover");
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+	if (party) {
+		if (party == 1)
+			secrets.SetJoin(("join" + state.roomIp).c_str());
+		secrets.SetSpectate(("spec" + state.roomIp).c_str());
+
+		partyObj.SetId(state.roomIp.c_str());
+		partyObj.GetSize().SetCurrentSize(party);
+		partyObj.GetSize().SetMaxSize(2);
+	}
+
+	if (elem.timestamp)
+		timeStamp.SetStart(state.totalTimestamp);
+	if (elem.set_timestamp)
+		timeStamp.SetStart(state.gameTimestamp);
+	if (elem.title)
+		activity.SetDetails(elem.title->getString().c_str());
+	if (elem.description)
+		activity.SetState(elem.description->getString().c_str());
+
+	if (elem.large_image)
+		assets.SetLargeImage(elem.large_image->getString().c_str());
+	if (elem.large_text)
+		assets.SetLargeText(elem.large_text->getString().c_str());
+
+	if (elem.small_image)
+		assets.SetSmallImage(elem.small_image->getString().c_str());
+	if (elem.small_text)
+		assets.SetSmallText(elem.small_text->getString().c_str());
+
+	state.core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
 			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
-	logMessage("Callback end\n");
 }
 
-void showHost()
+void getActivityParams(StringIndex &index, unsigned &party)
 {
-	logMessagef("Showing host... Internal ip is %s\n", roomIp.c_str());
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-	auto &timeStamp = activity.GetTimestamps();
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
+	party = 0;
 
-	if (roomIp.empty()) {
+	switch (SokuLib::sceneId) {
+	case SokuLib::SCENE_SELECT:
+		switch (SokuLib::mainMode) {
+		case SokuLib::BATTLE_MODE_PRACTICE:
+			index = STRING_INDEX_SELECT_PRACTICE;
+			return;
+		case SokuLib::BATTLE_MODE_VSPLAYER:
+			index = STRING_INDEX_SELECT_VSPLAYER;
+			return;
+		default:
+			index = STRING_INDEX_SELECT_VSCOMPUTER;
+			return;
+		}
+	case SokuLib::SCENE_SELECTSV:
+	case SokuLib::SCENE_SELECTCL:
+		index = STRING_INDEX_SELECT_VSNETWORK;
+		party = 2;
+		return;
+	case SokuLib::SCENE_LOADING:
+		switch (SokuLib::mainMode) {
+		case SokuLib::BATTLE_MODE_PRACTICE:
+			index = STRING_INDEX_LOADING_PRACTICE;
+			return;
+		case SokuLib::BATTLE_MODE_VSPLAYER:
+			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
+				index = STRING_INDEX_LOADING_REPLAY;
+			else
+				index = STRING_INDEX_LOADING_VSPLAYER;
+			return;
+		case SokuLib::BATTLE_MODE_STORY:
+			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
+				index = STRING_INDEX_LOADING_STORY_REPLAY;
+			else
+				index = STRING_INDEX_LOADING_STORY;
+			return;
+		case SokuLib::BATTLE_MODE_ARCADE:
+			index = STRING_INDEX_LOADING_ARCADE;
+			return;
+		case SokuLib::BATTLE_MODE_TIME_TRIAL:
+			index = STRING_INDEX_LOADING_TIMETRIAL;
+			return;
+		default:
+			index = STRING_INDEX_LOADING_VSCOMPUTER;
+			return;
+		}
+	case SokuLib::SCENE_LOADINGSV:
+	case SokuLib::SCENE_LOADINGCL:
+		index = STRING_INDEX_LOADING_VSNETWORK;
+		party = 2;
+		return;
+	case SokuLib::SCENE_LOADINGWATCH:
+		index = STRING_INDEX_LOADING_SPECTATOR;
+		party = 2;
+		return;
+	case SokuLib::SCENE_BATTLE:
+		switch (SokuLib::mainMode) {
+		case SokuLib::BATTLE_MODE_PRACTICE:
+			index = STRING_INDEX_BATTLE_PRACTICE;
+			return;
+		case SokuLib::BATTLE_MODE_VSPLAYER:
+			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
+				index = STRING_INDEX_BATTLE_REPLAY;
+			else
+				index = STRING_INDEX_BATTLE_VSPLAYER;
+			return;
+		case SokuLib::BATTLE_MODE_STORY:
+			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
+				index = STRING_INDEX_BATTLE_STORY_REPLAY;
+			else
+				index = STRING_INDEX_BATTLE_STORY;
+			return;
+		case SokuLib::BATTLE_MODE_ARCADE:
+			index = STRING_INDEX_BATTLE_ARCADE;
+			return;
+		case SokuLib::BATTLE_MODE_TIME_TRIAL:
+			index = STRING_INDEX_BATTLE_TIMETRIAL;
+			return;
+		default:
+			index = STRING_INDEX_BATTLE_VSCOMPUTER;
+			return;
+		}
+	case SokuLib::SCENE_BATTLEWATCH:
+		index = STRING_INDEX_BATTLE_SPECTATOR;
+		party = 2;
+		return;
+	case SokuLib::SCENE_BATTLESV:
+	case SokuLib::SCENE_BATTLECL:
+		index = STRING_INDEX_BATTLE_VSNETWORK;
+		party = 2;
+		return;
+	case SokuLib::SCENE_SELECTSENARIO:
+		//STRING_INDEX_SELECT_ARCADE;
+		index = STRING_INDEX_SELECT_STORY;
+		return;
+	case SokuLib::SCENE_ENDING:
+		index = STRING_INDEX_ENDING;
+		return;
+	case SokuLib::SCENE_LOGO:
+		index = STRING_INDEX_LOGO;
+		return;
+	case SokuLib::SCENE_OPENING:
+		index = STRING_INDEX_OPENING;
+		return;
+	default:
+		return;
+	case SokuLib::SCENE_TITLE:
+		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+
+		index = STRING_INDEX_TITLE;
+		if (!SokuLib::isInNetworkMenu()) {
+			logMessage("We are not in a proper submenu, falling back to generic screen\n");
+			return;
+		}
+
+		if ((
+			menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
+			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+			menuObj->subchoice == 3
+		) || (
+			menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
+			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+			menuObj->subchoice == 255
+		)) {
+			index = STRING_INDEX_CONNECTING;
+			party = 2;
+		} else if (
+			menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
+			menuObj->subchoice == 2
+		) {
+			index = STRING_INDEX_HOSTING;
+			party = 1;
+		}
+	}
+}
+
+void titleScreenStateUpdate()
+{
+	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+
+	if (!SokuLib::isInNetworkMenu()) {
+		logMessage("We are not in a proper submenu\n");
+		return;
+	}
+
+	if ((
+		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
+		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+		menuObj->subchoice == 3 &&
+		state.roomIp.empty()
+	) || (
+		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
+		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+		menuObj->subchoice == 255 &&
+		state.roomIp.empty()
+	 ))
+		state.roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
+	else if (
+		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
+		menuObj->subchoice == 2 &&
+		state.roomIp.empty()
+	)
 		try {
-			roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
-			logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", roomIp.c_str(), menuObj->spectate ? "" : "not ");
-			party.SetId(roomIp.c_str());
-			secrets.SetJoin(("join" + roomIp).c_str());
-			if (menuObj->spectate)
-				secrets.SetSpectate(("spec" + roomIp).c_str());
+			state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
+			logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", state.roomIp.c_str(), menuObj->spectate ? "" : "not ");
 		} catch (...) {}
-	} else {
-		party.SetId(roomIp.c_str());
-		secrets.SetJoin(("join" + roomIp).c_str());
-		if (menuObj->spectate)
-			secrets.SetSpectate(("spec" + roomIp).c_str());
-	}
-	party.GetSize().SetCurrentSize(1);
-	party.GetSize().SetMaxSize(2);
-	timeStamp.SetStart(hostTimestamp);
-	activity.SetDetails(SokuLib::sceneNames[currentScene].c_str());
-	activity.SetState("Hosting...");
-	assets.SetLargeImage("cover");
-	assets.SetSmallImage(smallImg);
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void connectingToRemote()
-{
-	logMessage("Connecting to remote\n");
-	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-	logMessagef("Menu object is at %#X\n", menuObj);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-
-	if (roomIp.empty())
-		roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
-	logMessagef("The new room ip is %s\n", roomIp.c_str());
-	totalTimestamp = time(nullptr);
-
-	assets.SetLargeImage("cover");
-
-	activity.SetDetails("Joining room...");
-	activity.SetState("Playing multiplayer (Online)");
-	party.SetId(roomIp.c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	secrets.SetJoin(("join" + roomIp).c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void connectedToRemoteLoadingCharSelect()
-{
-	logMessagef("Connected and waiting to load. Internal ip is %s\n", roomIp.c_str());
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-
-	logMessagef("Room ip is %s\n", roomIp.c_str());
-	totalTimestamp = time(nullptr);
-
-	assets.SetLargeImage("cover");
-
-	activity.SetState("Loading character select...");
-	activity.SetDetails("Playing multiplayer (Online)");
-	party.SetId(roomIp.c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	secrets.SetJoin(("join" + roomIp).c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-#define UNKNOWN_GLOBAL 0x0089a888
-
-#define PART1 (*(void****)UNKNOWN_GLOBAL)
-#define PART2 (*(PART1+1))
-#define PART3 (*(PART2+2))
-#define CMENU_OBJ ( \
-	*(                 \
-		*( \
-			( \
-				*(void****)UNKNOWN_GLOBAL \
-			)+1\
-		)+2               \
-	)                   \
-)
-#define IN_MENU *(char*)(0x089a888 + 4)
-
-void titleScreen()
-{
-	logMessage("On title screen\n");
-	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-
-	if (!SokuLib::isInNetworkMenu()) {
-		logMessage("We are not in a proper submenu, falling back to generic screen\n");
-		return genericScreen();
-	}
-
-	if (
-		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
-		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 3
-	)
-		connectingToRemote();
-	else if (
-		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 255
-	)
-		connectedToRemoteLoadingCharSelect();
-	else if (
-		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->subchoice == 2
-	)
-		showHost();
 	else
-		genericScreen();
-	logMessage("Title screen callback end\n");
+		state.roomIp = "";
 }
 
-void localBattle()
+void updateState()
 {
-	logMessage("Playing a local game\n");
-	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
-	logMessagef("We are on stage %u\n", stage);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
-	std::string profile2 = convertShiftJisToUTF8(SokuLib::player2Profile);
+	switch (SokuLib::sceneId) {
+	case SokuLib::SCENE_SELECT:
+	case SokuLib::SCENE_SELECTSV:
+	case SokuLib::SCENE_SELECTCL:
+	case SokuLib::SCENE_LOADING:
+	case SokuLib::SCENE_LOADINGSV:
+	case SokuLib::SCENE_LOADINGCL:
+	case SokuLib::SCENE_LOADINGWATCH:
+		wins.first  += state.won.first  == 2;
+		wins.second += state.won.second == 2;
+		state.won = {0, 0};
+		break;
 
-	logMessagef("The 2 profiles are %s %s\n", profile1.c_str(), profile2.c_str());
-	timeStamp.SetStart(gameTimestamp);
+	case SokuLib::SCENE_TITLE:
+		titleScreenStateUpdate();
+	case SokuLib::SCENE_SELECTSENARIO:
+	case SokuLib::SCENE_ENDING:
+	case SokuLib::SCENE_LOGO:
+	case SokuLib::SCENE_OPENING:
+		state.gameTimestamp = 0;
+		break;
 
-	if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY) {
-		logMessage("This is a replay\n");
-		assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
-		assets.SetLargeText(SokuLib::stagesName[stage].c_str());
-		activity.SetDetails(SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode].c_str());
-		activity.SetState(std::string(SokuLib::charactersName[SokuLib::leftChar] + " vs " + SokuLib::charactersName[SokuLib::rightChar]).c_str());
-	} else {
-		logMessage("This is not a replay\n");
-		logMessagef("Stage: %i, Main: %i, Sub: %i, Left: %i, Right: %i\n", stage, SokuLib::mainMode, SokuLib::subMode, SokuLib::leftChar, SokuLib::rightChar);
-		assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
-		logMessage("Left\n");
-		assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
-		logMessage("Left\n");
-		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-		assets.SetSmallText(SokuLib::stagesName[stage].c_str());
-		logMessage("Stage\n");
-		activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
-		logMessage("Modes\n");
-		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSPLAYER)
-			activity.SetState((std::string("Against ") + profile2 + " as " + SokuLib::charactersName[SokuLib::rightChar]).c_str());
-		else
-			activity.SetState(("Against " + SokuLib::charactersName[SokuLib::rightChar]).c_str());
-		logMessage("Right\n");
+	default:
+		break;
+
+	case SokuLib::SCENE_BATTLE:
+	case SokuLib::SCENE_BATTLEWATCH:
+	case SokuLib::SCENE_BATTLESV:
+	case SokuLib::SCENE_BATTLECL:
+		auto &battle = SokuLib::getBattleMgr();
+
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER) {
+			state.won.first = battle.rightCharacterManager.score;
+			state.won.second = battle.leftCharacterManager.score;
+		} else {
+			state.won.first = battle.leftCharacterManager.score;
+			state.won.second = battle.rightCharacterManager.score;
+		}
+		break;
 	}
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
 }
 
-void loadMatch()
+void tick()
 {
-	logMessage("Loading local match\n");
-	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
+	StringIndex index;
+	unsigned party = 0;
 
-	logMessagef("profile is %s\n", profile1.c_str());
-	gameTimestamp = time(nullptr);
-	timeStamp.SetStart(totalTimestamp);
-	assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
-
-	if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY) {
-		assets.SetSmallImage(charactersImg[SokuLib::rightChar].c_str());
-		assets.SetSmallText(SokuLib::charactersName[SokuLib::rightChar].c_str());
-		activity.SetDetails(SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode].c_str());
-	} else {
-		assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-		assets.SetSmallText(SokuLib::stagesName[stage].c_str());
-		activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
-	}
-	activity.SetState("Loading...");
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void charSelect()
-{
-	logMessage("Choosing character\n");
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
-
-	logMessagef("Profile name is %s\n", profile1.c_str());
-	timeStamp.SetStart(totalTimestamp);
-	assets.SetSmallImage(charactersImg[SokuLib::rightChar].c_str());
-	assets.SetSmallText(SokuLib::charactersName[SokuLib::rightChar].c_str());
-	assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
-
-	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
-	activity.SetState("Character select...");
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void onlineBattle()
-{
-	logMessagef("In online battle. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
-	logMessagef("We are on stage %u\n", stage);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
-	char myChar;
-	char opChar;
-	std::string opName;
-	SokuLib::NetObject &infos = SokuLib::getNetObject();
-	auto &battle_manager = SokuLib::getBattleMgr();
-
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-
-	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) {
-		opName = convertShiftJisToUTF8(infos.profile2name);
-		myChar = SokuLib::leftChar;
-		opChar = SokuLib::rightChar;
-		won.first = battle_manager.leftCharacterManager->score;
-		won.second = battle_manager.rightCharacterManager->score;
-	} else {
-		opName = convertShiftJisToUTF8(infos.profile1name);
-		myChar = SokuLib::rightChar;
-		opChar = SokuLib::leftChar;
-		won.first = battle_manager.rightCharacterManager->score;
-		won.second = battle_manager.leftCharacterManager->score;
-	}
-	logMessagef("Opponent name is %s\n", opName.c_str());
-	logMessagef("My character is %u\n", myChar);
-	logMessagef("Opponent character is %u\n", opChar);
-
-	party.SetId(roomIp.c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	timeStamp.SetStart(gameTimestamp);
-	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetSmallText(SokuLib::stagesName[stage].c_str());
-	assets.SetLargeImage(charactersImg[myChar].c_str());
-	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
-
-	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
-	if (showWR)
-		activity.SetState((
-			std::string("Against ") + opName + " as " + SokuLib::charactersName[opChar] +
-			" (" + std::to_string(won.first) + " - " + std::to_string(won.second) + ")"
-		).c_str());
-	else
-		activity.SetState((std::string("Against ") + opName + " as " + SokuLib::charactersName[opChar]).c_str());
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void onlineBattleSpec()
-{
-	logMessagef("Watching online game. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
-	logMessagef("We are on stage %u\n", stage);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-	SokuLib::NetObject &infos = SokuLib::getNetObject();
-	auto &battle_manager = SokuLib::getBattleMgr();
-
-	timeStamp.SetStart(gameTimestamp);
-
-	won.first = battle_manager.leftCharacterManager->score;
-	won.second = battle_manager.rightCharacterManager->score;
-	party.SetId(roomIp.c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	assets.SetLargeImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetLargeText(SokuLib::stagesName[stage].c_str());
-	activity.SetDetails((
-		SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" +
-		convertShiftJisToUTF8(infos.profile1name) + " vs " +
-		convertShiftJisToUTF8(infos.profile2name) + ")"
-	).c_str());
-	activity.SetState((
-		SokuLib::charactersName[SokuLib::leftChar] + " vs " +
-		SokuLib::charactersName[SokuLib::rightChar] +
-		" (" + std::to_string(won.first) + " - " + std::to_string(won.second) + ")"
-	).c_str());
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void loadOnlineMatch()
-{
-	logMessagef("Loading online match. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
-	char myChar;
-
-	logMessagef("profile is %s\n", profile1.c_str());
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-
-	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
-		myChar = SokuLib::leftChar;
-	else
-		myChar = SokuLib::rightChar;
-	logMessagef("My character is %u\n", myChar);
-
-	party.SetId(roomIp.c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	gameTimestamp = time(nullptr);
-	timeStamp.SetStart(totalTimestamp);
-	assets.SetSmallImage(("stage_" + std::to_string(stage + 1)).c_str());
-	assets.SetSmallText(SokuLib::stagesName[stage].c_str());
-	assets.SetLargeImage(charactersImg[myChar].c_str());
-	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
-
-	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
-	activity.SetState("Loading...");
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void loadOnlineMatchSpec()
-{
-	if (!experimentalSpec)
-		return genericScreen();
-
-	logMessagef("Loading online match as spectator. Internal ip is %s\n", roomIp.c_str());
-	unsigned stage = SokuLib::flattenStageId(SokuLib::stageId);
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	SokuLib::NetObject &infos = SokuLib::getNetObject();
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-
-	party.SetId(roomIp.c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	gameTimestamp = time(nullptr);
-	timeStamp.SetStart(totalTimestamp);
-	assets.SetLargeImage(charactersImg[SokuLib::leftChar].c_str());
-	assets.SetLargeText(SokuLib::charactersName[SokuLib::leftChar].c_str());
-
-	assets.SetSmallImage(charactersImg[SokuLib::rightChar].c_str());
-	assets.SetSmallText(SokuLib::charactersName[SokuLib::rightChar].c_str());
-	activity.SetDetails((
-		SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" +
-		convertShiftJisToUTF8(infos.profile1name) + " vs " +
-		convertShiftJisToUTF8(infos.profile2name) + ")"
-	).c_str());
-	activity.SetState("Loading...");
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-	logMessage("Callback end\n");
-}
-
-void onlineCharSelect()
-{
-	logMessagef("Online character select. Internal ip is %s\n", roomIp.c_str());
-	SokuLib::NetObject &infos = SokuLib::getNetObject();
-	discord::Activity activity{};
-	auto &assets = activity.GetAssets();
-	auto &timeStamp = activity.GetTimestamps();
-	std::string profile1 = convertShiftJisToUTF8(SokuLib::player1Profile);
-	char myChar;
-	char opChar;
-	std::string opName;
-	auto &party = activity.GetParty();
-	auto &secrets = activity.GetSecrets();
-
-	logMessagef("profile is %s\n", profile1.c_str());
-	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) {
-		opName = convertShiftJisToUTF8(infos.profile2name);
-		myChar = SokuLib::leftChar;
-		opChar = SokuLib::rightChar;
-	} else {
-		opName = convertShiftJisToUTF8(infos.profile1name);
-		myChar = SokuLib::rightChar;
-		opChar = SokuLib::leftChar;
-	}
-	logMessagef("Opponent name is %s\n", opName.c_str());
-	logMessagef("My character is %u\n", myChar);
-	logMessagef("Opponent character is %u\n", opChar);
-
-	party.SetId(roomIp.c_str());
-	secrets.SetSpectate(("spec" + roomIp).c_str());
-	party.GetSize().SetCurrentSize(2);
-	party.GetSize().SetMaxSize(2);
-	score.first += won.first > won.second && won.first;
-	score.second += won.second > won.first && won.second;
-	logMessagef("Win %i:%i/Score %i:%i\n", won.first, won.second, score.first, score.second);
-	won = {0, 0};
-	timeStamp.SetStart(totalTimestamp);
-	assets.SetSmallImage(charactersImg[opChar].c_str());
-	assets.SetSmallText(SokuLib::charactersName[opChar].c_str());
-	assets.SetLargeImage(charactersImg[myChar].c_str());
-	assets.SetLargeText(SokuLib::charactersName[myChar].c_str());
-
-	activity.SetDetails((SokuLib::modeNames[SokuLib::mainMode][SokuLib::subMode] + " (" + profile1 + ")").c_str());
-	if (showWR)
-		activity.SetState((
-			"Character select... (vs " + std::string(opName) + " " +
-			std::to_string(score.first) + "w " +
-			std::to_string(score.second) + "l " +
-			(score.first + score.second ? std::to_string(score.first * 100 / (score.first + score.second)) : "N/A") +
-			"% wr)"
-		).c_str());
-	else
-		activity.SetState(("Character select... (vs " + std::string(opName) + ")").c_str());
-
-	core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-		auto code = static_cast<unsigned>(result);
-
-		if (code)
-			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
-	});
-}
-
-std::vector<std::function<void()>> sceneCallbacks{
-	genericScreen,       //SWRSSCENE_LOGO         = 0,
-	genericScreen,       //SWRSSCENE_OPENING      = 1,
-	titleScreen,         //SWRSSCENE_TITLE        = 2,
-	charSelect,          //SWRSSCENE_SELECT       = 3,
-	genericScreen,       //???                    = 4,
-	localBattle,         //SWRSSCENE_BATTLE       = 5,
-	loadMatch,           //SWRSSCENE_LOADING      = 6,
-	genericScreen,       //???                    = 7,
-	onlineCharSelect,    //SWRSSCENE_SELECTSV     = 8,
-	onlineCharSelect,    //SWRSSCENE_SELECTCL     = 9,
-	loadOnlineMatch,     //SWRSSCENE_LOADINGSV    = 10,
-	loadOnlineMatch,     //SWRSSCENE_LOADINGCL    = 11,
-	loadOnlineMatchSpec, //SWRSSCENE_LOADINGWATCH = 12,
-	onlineBattle,        //SWRSSCENE_BATTLESV     = 13,
-	onlineBattle,        //SWRSSCENE_BATTLECL     = 14,
-	onlineBattleSpec,    //SWRSSCENE_BATTLEWATCH  = 15,
-	genericScreen,       //SWRSSCENE_SELECTSENARIO= 16,
-	genericScreen,       //???                    = 17,
-	genericScreen,       //???                    = 18,
-	genericScreen,       //???                    = 19,
-	genericScreen,       //SWRSSCENE_ENDING       = 20,
-};
-
-enum MenuEnum {
-	MENU_NONE,
-	MENU_CONNECT,
-	MENU_REPLAY,
-	MENU_MUSICROOM,
-	MENU_RESULT,
-	MENU_PROFILE,
-	MENU_CONFIG,
-	MENU_COUNT
-};
-
-void onActivityJoin(const char *sec)
-{
-	logMessagef("Got activity join with payload %s\n", sec);
-
-	auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-	std::string secret = sec;
-	auto ip = secret.substr(4, secret.find_last_of(':') - 4);
-	unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
-	bool isSpec = secret.substr(0, 4) == "spec";
-
-	if (!SokuLib::isInNetworkMenu()) {
-		logMessage("Warping to connect screen.\n");
-		SokuLib::moveToConnectMenu();
-		menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-		logMessage("Done.\n");
-	} else
-		logMessage("Already in connect screen\n");
-
-	if (
-		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
-		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 3
-	)
-		return;
-	if (
-		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 255
-	)
-		return;
-	if (
-		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->subchoice == 2
-	)
-		return;
-
-	logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-	SokuLib::joinHost(
-		ip.c_str(),
-		port,
-		isSpec
-	);
-	roomIp = ip + ":" + std::to_string(port);
+	updateState();
+	getActivityParams(index, party);
+	updateActivity(index, party);
 }
 
 class MyThread : public std::thread {
@@ -732,68 +453,225 @@ public:
 			this->join();
 	}
 
+	static void onActivityJoin(const char *sec)
+	{
+		logMessagef("Got activity join with payload %s\n", sec);
+
+		auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+		std::string secret = sec;
+		auto ip = secret.substr(4, secret.find_last_of(':') - 4);
+		unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
+		bool isSpec = secret.substr(0, 4) == "spec";
+
+		if (!SokuLib::isInNetworkMenu()) {
+			logMessage("Warping to connect screen.\n");
+			SokuLib::moveToConnectMenu();
+			menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+			logMessage("Done.\n");
+		} else
+			logMessage("Already in connect screen\n");
+
+		if (
+			menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
+			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+			menuObj->subchoice == 3
+		)
+			return;
+		if (
+			menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
+			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
+			menuObj->subchoice == 255
+		)
+			return;
+		if (
+			menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
+			menuObj->subchoice == 2
+		)
+			return;
+
+		logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
+		SokuLib::joinHost(
+			ip.c_str(),
+			port,
+			isSpec
+		);
+		state.roomIp = ip + ":" + std::to_string(port);
+	}
+
+	void init()
+	{
+		logMessage("Connecting to discord client...\n");
+		discord::Result result;
+
+		do {
+			result = discord::Core::Create(config.clientId, DiscordCreateFlags_NoRequireDiscord, &state.core);
+
+			if (result != discord::Result::Ok) {
+				logMessagef("Error connecting to discord: %s\n", discordResultToString[static_cast<unsigned>(result)]);
+				logMessagef("Retrying in %i seconds\n", this->_connectTimeout);
+				std::this_thread::sleep_for(std::chrono::seconds(this->_connectTimeout));
+				if (this->_connectTimeout < 64)
+					this->_connectTimeout *= 2;
+			}
+		} while (result != discord::Result::Ok);
+		logMessage("Connected !\n");
+		state.core->ActivityManager().OnActivityJoin.Connect(MyThread::onActivityJoin);
+	}
+
+	void run() const
+	{
+		logMessage("Entering loop\n");
+		while (!this->isDone()) {
+			auto currentScene = SokuLib::sceneId;
+			auto newScene = SokuLib::newSceneId;
+
+			logMessagef("Current scene is %i vs new scene %i\n", currentScene, newScene);
+			if (currentScene != newScene)
+				state.totalTimestamp = 0;
+
+			if (currentScene >= 0 && currentScene == newScene) {
+				logMessagef("Calling callback %u\n", currentScene);
+				tick();
+				logMessage("Callback returned\n");
+			} else if (currentScene == SokuLib::SCENE_TITLE && (newScene == SokuLib::SCENE_SELECTSV || newScene == SokuLib::SCENE_SELECTCL))
+				updateActivity(STRING_INDEX_CONNECTING, 2);
+			else
+				logMessage("No callback call\n");
+			logMessage("Running discord callbacks\n");
+			state.core->RunCallbacks();
+			logMessagef("Waiting for next cycle (%llu ms)\n", config.refreshRate);
+			std::this_thread::sleep_for(std::chrono::milliseconds(config.refreshRate));
+		}
+		logMessage("Exit game\n");
+	}
+
 	void start() {
 		std::thread::operator=(std::thread([this] {
-			logMessage("Connecting to discord client...\n");
-			discord::Result result;
-
-			do {
-				result = discord::Core::Create(clientId, DiscordCreateFlags_NoRequireDiscord, &core);
-
-				if (result != discord::Result::Ok) {
-					logMessagef("Error connecting to discord: %s\n", discordResultToString[static_cast<unsigned>(result)]);
-					logMessagef("Retrying in %i seconds\n", this->_connectTimeout);
-					std::this_thread::sleep_for(std::chrono::seconds(this->_connectTimeout));
-					if (this->_connectTimeout < 64)
-						this->_connectTimeout *= 2;
-				}
-			} while (result != discord::Result::Ok);
-			logMessage("Connected !\n");
-			core->ActivityManager().OnActivityJoin.Connect(onActivityJoin);
-			logMessage("Entering loop\n");
-			while (!this->isDone()) {
-				currentScene = SokuLib::sceneId;
-
-				auto newScene = SokuLib::newSceneId;
-
-				logMessagef("Current scene is %i vs new scene %i\n", currentScene, newScene);
-				if (currentScene >= 0 && currentScene < sceneCallbacks.size() && currentScene == newScene) {
-					logMessagef("Calling callback %u\n", currentScene);
-					sceneCallbacks[currentScene]();
-					logMessage("Callback returned\n");
-				} else if (currentScene == SokuLib::SCENE_TITLE && (newScene == SokuLib::SCENE_SELECTSV || newScene == SokuLib::SCENE_SELECTCL))
-					connectedToRemoteLoadingCharSelect();
-				else
-					logMessage("No callback call\n");
-				logMessage("Running discord callbacks\n");
-				core->RunCallbacks();
-				logMessagef("Waiting for next cycle (%llu ms)\n", refreshRate);
-				std::this_thread::sleep_for(std::chrono::milliseconds(refreshRate));
-			}
-			logMessage("Exit game\n");
+			this->init();
+			this->run();
 		}));
 	}
 };
 static MyThread updateThread;
 
+void loadJsonStrings(const std::string &path)
+{
+	std::ifstream stream{path};
+	nlohmann::json value;
+
+	logMessagef("Loading config file %s\n", path.c_str());
+	if (stream.fail())
+		throw std::invalid_argument(strerror(errno));
+	stream >> value;
+	for (int i = 0; i < 20; i++) {
+		logMessagef("Loading character %i %s\n", i, value["characters"][i].dump().c_str());
+		charactersNames[i].first = value["characters"][i]["short_name"];
+		charactersNames[i].second = value["characters"][i]["full_name"];
+	}
+	logMessagef("Loading stages\n");
+	stagesNames = value["stages"].get<std::vector<std::string>>();
+	if (stagesNames.size() < 20)
+		throw std::invalid_argument("Stage list is too small");
+	logMessagef("Loading submenus\n");
+	submenusNames = value["submenus"].get<std::vector<std::string>>();
+	if (submenusNames.size() < 7)
+		throw std::invalid_argument("Submenus list is too small");
+	config.strings.clear();
+	config.strings.reserve(sizeof(allElems) / sizeof(*allElems));
+	for (auto &elem : allElems) {
+		auto &val = value[elem];
+		StringConfig cfg;
+
+		logMessagef("Loading elem %s %s\n", elem, val.dump().c_str());
+		cfg.timestamp     = val.contains("has_timer") && val["has_timer"].get<bool>();
+		cfg.set_timestamp = val.contains("has_set_length_timer") && val["has_set_length_timer"].get<bool>();
+		cfg.title         = val.contains("title") ?
+		                    CompiledStringFactory::compileString(val["title"]) :
+		                    nullptr;
+		cfg.description   = val.contains("description") ?
+		                    CompiledStringFactory::compileString(val["description"]) :
+		                    nullptr;
+		cfg.large_image   = val.contains("image") ?
+		                    CompiledStringFactory::compileString(val["image"]) :
+		                    nullptr;
+		cfg.small_image   = val.contains("small_image") ?
+		                    CompiledStringFactory::compileString(val["small_image"]) :
+		                    nullptr;
+		cfg.large_text    = val.contains("image_text") ?
+		                    CompiledStringFactory::compileString(val["image_text"]) :
+		                    nullptr;
+		cfg.small_text    = val.contains("small_image_text") ?
+		                    CompiledStringFactory::compileString(val["small_image_text"]) :
+		                    nullptr;
+		config.strings.push_back(cfg);
+	}
+}
+
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath)
 {
+	int i;
 	char buffer[64];
+	char file[MAX_PATH];
+	char path[MAX_PATH];
+	char local[LOCALE_NAME_MAX_LENGTH];
+	wchar_t localw[LOCALE_NAME_MAX_LENGTH];
 
 	logMessage("Loading settings...\n");
 	// �����V���b�g�_�E��
-	enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;
-	showWR = GetPrivateProfileInt("DiscordIntegration", "ShowWR", 0, profilePath) != 0;
-	experimentalSpec = GetPrivateProfileInt("DiscordIntegration", "ExperimentalSpectator", 0, profilePath) != 0;
-	refreshRate = GetPrivateProfileInt("DiscordIntegration", "RefreshTime", 1000, profilePath);
-	GetPrivateProfileString("DiscordIntegration", "HostImg", "", smallImg, sizeof(smallImg), profilePath);
+	config.enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;
+	config.refreshRate = GetPrivateProfileInt("DiscordIntegration", "RefreshTime", 1000, profilePath);
 	GetPrivateProfileString("DiscordIntegration", "ClientID", ClientID, buffer, sizeof(buffer), profilePath);
-	clientId = atoll(buffer);
-	GetPrivateProfileString("DiscordIntegration", "InviteIp", "", buffer, sizeof(buffer), profilePath);
-	if (inet_addr(buffer) != -1)
+	config.clientId = atoll(buffer);
+
+	auto ret = GetPrivateProfileString("DiscordIntegration", "InviteIp", "", buffer, sizeof(buffer), profilePath);
+
+	if (inet_addr(buffer) != -1 && ret)
 		myIp = strdup(buffer);
-	logMessagef("Enabled: %s\nClientID: %llu\nShowWR: %s\nHostImg: %s\nInviteIp: %s\n", enabled ? "true" : "false", clientId, showWR ? "true" : "false", smallImg, myIp);
+
+	ret = GetPrivateProfileString("DiscordIntegration", "StringFile", "", file, sizeof(file), profilePath);
+	strcpy(path, profilePath);
+	PathRemoveFileSpec(path);
+	PathAppend(path, file);
+
+	logMessagef("Enabled: %s\nClientID: %llu\nInviteIp: %s\nFile: %s", config.enabled ? "true" : "false", config.clientId, myIp, path);
+
+	try {
+		if (ret) {
+			loadJsonStrings(path);
+			return;
+		}
+	} catch (std::exception &e) {
+		MessageBoxA(nullptr, ("Cannot load file " + std::string(path) + ": " + e.what() + "\nFalling back to default files...").c_str(), "Loading error", MB_ICONWARNING);
+	}
+
+	strcpy(path, profilePath);
+	PathRemoveFileSpec(path);
+	strcat(path, "\\langs\\");
+	GetUserDefaultLocaleName(localw, sizeof(localw));
+	for (i = 0; localw[i]; i++)
+		local[i] = localw[i];
+	local[i] = 0;
+	if (strchr(local, '-') != nullptr)
+		*strchr(local, '-') = 0;
+	strcat(path, local);
+	strcat(path, ".json");
+	try {
+		loadJsonStrings(path);
+		return;
+	} catch (std::exception &e) {
+		logMessagef("%s: %s\n", path, e.what());
+	}
+
+	strcpy(path, profilePath);
+	PathRemoveFileSpec(path);
+	PathAppend(path, "langs/en.json");
+	try {
+		loadJsonStrings(path);
+	} catch (std::exception &e) {
+		MessageBoxA(nullptr, ("Cannot load file " + std::string(path) + ": " + e.what()).c_str(), "Loading error", MB_ICONERROR);
+		abort();
+	}
 }
 
 extern "C"
@@ -805,7 +683,7 @@ __declspec(dllexport) bool CheckVersion(const BYTE hash[16])
 extern "C"
 __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 {
-	bool &_en = enabled;
+	bool &_en = config.enabled;
 	char profilePath[1024 + MAX_PATH];
 
 	initLogger();
@@ -828,7 +706,7 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
-	if (enabled)
+	if (config.enabled)
 		updateThread.start();
 	else
 		logMessage("Disabled ;(\n");
