@@ -105,6 +105,7 @@ struct Config {
 	unsigned long long clientId = 0;
 };
 struct State {
+	unsigned host = 0;
 	time_t gameTimestamp = 0;
 	time_t totalTimestamp = 0;
 	discord::Core *core = nullptr;
@@ -186,8 +187,10 @@ void updateActivity(StringIndex index, unsigned party)
 
 	if (elem.timestamp)
 		timeStamp.SetStart(state.totalTimestamp);
-	if (elem.set_timestamp)
+	if (elem.set_timestamp) {
 		timeStamp.SetStart(state.gameTimestamp);
+		logMessagef("%i\n", state.gameTimestamp);
+	}
 	if (elem.title)
 		activity.SetDetails(elem.title->getString().c_str());
 	if (elem.description)
@@ -217,6 +220,7 @@ void getActivityParams(StringIndex &index, unsigned &party)
 
 	switch (SokuLib::sceneId) {
 	case SokuLib::SCENE_SELECT:
+		state.host = 0;
 		switch (SokuLib::mainMode) {
 		case SokuLib::BATTLE_MODE_PRACTICE:
 			index = STRING_INDEX_SELECT_PRACTICE;
@@ -230,10 +234,12 @@ void getActivityParams(StringIndex &index, unsigned &party)
 		}
 	case SokuLib::SCENE_SELECTSV:
 	case SokuLib::SCENE_SELECTCL:
+		state.host = 0;
 		index = STRING_INDEX_SELECT_VSNETWORK;
 		party = 2;
 		return;
 	case SokuLib::SCENE_LOADING:
+		state.host = 0;
 		switch (SokuLib::mainMode) {
 		case SokuLib::BATTLE_MODE_PRACTICE:
 			index = STRING_INDEX_LOADING_PRACTICE;
@@ -262,14 +268,17 @@ void getActivityParams(StringIndex &index, unsigned &party)
 		}
 	case SokuLib::SCENE_LOADINGSV:
 	case SokuLib::SCENE_LOADINGCL:
+		state.host = 0;
 		index = STRING_INDEX_LOADING_VSNETWORK;
 		party = 2;
 		return;
 	case SokuLib::SCENE_LOADINGWATCH:
+		state.host = 0;
 		index = STRING_INDEX_LOADING_SPECTATOR;
 		party = 2;
 		return;
 	case SokuLib::SCENE_BATTLE:
+		state.host = 0;
 		switch (SokuLib::mainMode) {
 		case SokuLib::BATTLE_MODE_PRACTICE:
 			index = STRING_INDEX_BATTLE_PRACTICE;
@@ -297,28 +306,35 @@ void getActivityParams(StringIndex &index, unsigned &party)
 			return;
 		}
 	case SokuLib::SCENE_BATTLEWATCH:
+		state.host = 0;
 		index = STRING_INDEX_BATTLE_SPECTATOR;
 		party = 2;
 		return;
 	case SokuLib::SCENE_BATTLESV:
 	case SokuLib::SCENE_BATTLECL:
+		state.host = 0;
 		index = STRING_INDEX_BATTLE_VSNETWORK;
 		party = 2;
 		return;
 	case SokuLib::SCENE_SELECTSENARIO:
+		state.host = 0;
 		//STRING_INDEX_SELECT_ARCADE;
 		index = STRING_INDEX_SELECT_STORY;
 		return;
 	case SokuLib::SCENE_ENDING:
+		state.host = 0;
 		index = STRING_INDEX_ENDING;
 		return;
 	case SokuLib::SCENE_LOGO:
+		state.host = 0;
 		index = STRING_INDEX_LOGO;
 		return;
 	case SokuLib::SCENE_OPENING:
+		state.host = 0;
 		index = STRING_INDEX_OPENING;
 		return;
 	default:
+		state.host = 0;
 		return;
 	case SokuLib::SCENE_TITLE:
 		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
@@ -338,15 +354,22 @@ void getActivityParams(StringIndex &index, unsigned &party)
 			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
 			menuObj->subchoice == 255
 		)) {
+			if (state.host != 2)
+				state.totalTimestamp = time(nullptr);
+			state.host = 2;
 			index = STRING_INDEX_CONNECTING;
 			party = 2;
 		} else if (
 			menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
 			menuObj->subchoice == 2
 		) {
+			if (state.host != 1)
+				state.totalTimestamp = time(nullptr);
+			state.host = 1;
 			index = STRING_INDEX_HOSTING;
 			party = 1;
-		}
+		} else
+			state.host = 0;
 	}
 }
 
@@ -405,7 +428,7 @@ void updateState()
 	case SokuLib::SCENE_ENDING:
 	case SokuLib::SCENE_LOGO:
 	case SokuLib::SCENE_OPENING:
-		state.gameTimestamp = 0;
+		state.gameTimestamp = time(nullptr);
 		break;
 
 	default:
@@ -527,7 +550,7 @@ public:
 
 			logMessagef("Current scene is %i vs new scene %i\n", currentScene, newScene);
 			if (currentScene != newScene)
-				state.totalTimestamp = 0;
+				state.totalTimestamp = time(nullptr);
 
 			if (currentScene >= 0 && currentScene == newScene) {
 				logMessagef("Calling callback %u\n", currentScene);
