@@ -171,8 +171,8 @@ void updateCache(bool isMultiplayer)
 	_cache.leftHand.clear();
 	_cache.rightHand.clear();
 
-	auto &leftDeck = battleMgr.leftCharacterManager->deckInfos;
-	auto &rightDeck = battleMgr.rightCharacterManager->deckInfos;
+	auto &leftDeck = battleMgr.leftCharacterManager.deckInfos;
+	auto &rightDeck = battleMgr.rightCharacterManager.deckInfos;
 
 	// Left remaining cards
 	if (leftDeck.deck.size == 20)
@@ -239,24 +239,24 @@ void updateCache(bool isMultiplayer)
 
 	Stats newStats;
 
-	newStats.doll =     battleMgr.leftCharacterManager->sacrificialDolls;
-	newStats.drops =    battleMgr.leftCharacterManager->drops;
-	newStats.rod =      battleMgr.leftCharacterManager->controlRod;
-	newStats.fan =      battleMgr.leftCharacterManager->tenguFans;
-	newStats.grimoire = battleMgr.leftCharacterManager->grimoires;
-	std::memcpy(newStats.skillMap, battleMgr.leftCharacterManager->skillMap, sizeof(newStats.skillMap));
+	newStats.doll =     battleMgr.leftCharacterManager.sacrificialDolls;
+	newStats.drops =    battleMgr.leftCharacterManager.drops;
+	newStats.rod =      battleMgr.leftCharacterManager.controlRod;
+	newStats.fan =      battleMgr.leftCharacterManager.tenguFans;
+	newStats.grimoire = battleMgr.leftCharacterManager.grimoires;
+	std::memcpy(newStats.skillMap, battleMgr.leftCharacterManager.skillMap, sizeof(newStats.skillMap));
 	if (memcmp(&newStats, &_cache.leftStats, sizeof(newStats)) != 0) {
 		std::memcpy(&_cache.leftStats, &newStats, sizeof(newStats));
 		if (!needRefresh)
 			broadcastOpcode(L_STATS_UPDATE, statsToString(newStats));
 	}
 
-	newStats.doll =     battleMgr.rightCharacterManager->sacrificialDolls;
-	newStats.drops =    battleMgr.rightCharacterManager->drops;
-	newStats.rod =      battleMgr.rightCharacterManager->controlRod;
-	newStats.fan =      battleMgr.rightCharacterManager->tenguFans;
-	newStats.grimoire = battleMgr.rightCharacterManager->grimoires;
-	std::memcpy(newStats.skillMap, battleMgr.rightCharacterManager->skillMap, sizeof(newStats.skillMap));
+	newStats.doll =     battleMgr.rightCharacterManager.sacrificialDolls;
+	newStats.drops =    battleMgr.rightCharacterManager.drops;
+	newStats.rod =      battleMgr.rightCharacterManager.controlRod;
+	newStats.fan =      battleMgr.rightCharacterManager.tenguFans;
+	newStats.grimoire = battleMgr.rightCharacterManager.grimoires;
+	std::memcpy(newStats.skillMap, battleMgr.rightCharacterManager.skillMap, sizeof(newStats.skillMap));
 	if (memcmp(&newStats, &_cache.rightStats, sizeof(newStats)) != 0) {
 		std::memcpy(&_cache.rightStats, &newStats, sizeof(newStats));
 		if (!needRefresh)
@@ -398,17 +398,17 @@ void onKO()
 	isPlaying = false;
 
 	if (
-		_cache.oldLeftScore != battleMgr.leftCharacterManager->score ||
-		_cache.oldRightScore != battleMgr.rightCharacterManager->score
+		_cache.oldLeftScore != battleMgr.leftCharacterManager.score ||
+		_cache.oldRightScore != battleMgr.rightCharacterManager.score
 	) {
-		if (battleMgr.leftCharacterManager->score == 2) {
+		if (battleMgr.leftCharacterManager.score == 2) {
 			_cache.leftScore++;
 			broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
-		} else if (battleMgr.rightCharacterManager->score == 2) {
+		} else if (battleMgr.rightCharacterManager.score == 2) {
 			_cache.rightScore++;
 			broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
 		}
-		_cache.oldLeftScore = battleMgr.leftCharacterManager->score;
-		_cache.oldRightScore = battleMgr.rightCharacterManager->score;
+		_cache.oldLeftScore = battleMgr.leftCharacterManager.score;
+		_cache.oldRightScore = battleMgr.rightCharacterManager.score;
 	}
 }

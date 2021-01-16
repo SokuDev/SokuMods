@@ -151,8 +151,10 @@ void WebServer::_serverLoop()
 	std::cerr << "New connection from " << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << std::endl;
 	try {
 		try {
+			requ.ip = newConnection.getRemote().sin_addr.s_addr;
 			s = newConnection.readUntilEOF();
 			requ = Socket::parseHttpRequest(s);
+			requ.ip = newConnection.getRemote().sin_addr.s_addr;
 			if (requ.path == "/chat")
 				return this->_addWebSocket(newConnection, requ);
 			else {
