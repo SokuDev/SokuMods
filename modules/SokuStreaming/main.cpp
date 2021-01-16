@@ -106,6 +106,8 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	webServer = std::make_unique<WebServer>();
 	webServer->addRoute("/", root);
 	webServer->addRoute("/state", state);
+	Socket::HttpResponse connect(const Socket::HttpRequest &requ);
+	webServer->addRoute("/connect", connect);
 	webServer->addStaticFolder("/static", std::string(parentPath) + "/static");
 	webServer->start(port);
 	webServer->onWebSocketConnect(onNewWebSocket);

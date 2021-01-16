@@ -25,6 +25,7 @@ public:
 		std::string body; //!< The body of the request
 		std::string method; //!< The method of the request (put, get, etc.)
 		std::string host; //!< The host to contact
+		unsigned ip;
 		int portno; //!< The port number to contact the host
 		std::map<std::string, std::string> header; //!< The header of the request (entry: value)
 		std::string path; //!< The url to fetch
