@@ -187,14 +187,13 @@ void updateActivity(StringIndex index, unsigned party)
 
 	if (elem.timestamp)
 		timeStamp.SetStart(state.totalTimestamp);
-	if (elem.set_timestamp) {
+	if (elem.set_timestamp)
 		timeStamp.SetStart(state.gameTimestamp);
-		logMessagef("%i\n", state.gameTimestamp);
-	}
+
 	if (elem.title)
-		activity.SetDetails(elem.title->getString().c_str());
+		activity.SetState(elem.title->getString().c_str());
 	if (elem.description)
-		activity.SetState(elem.description->getString().c_str());
+		activity.SetDetails(elem.description->getString().c_str());
 
 	if (elem.large_image)
 		assets.SetLargeImage(elem.large_image->getString().c_str());
@@ -341,7 +340,7 @@ void getActivityParams(StringIndex &index, unsigned &party)
 
 		index = STRING_INDEX_TITLE;
 		if (!SokuLib::isInNetworkMenu()) {
-			logMessage("We are not in a proper submenu, falling back to generic screen\n");
+			logMessage("We are not in a proper submenu\n");
 			return;
 		}
 
@@ -458,6 +457,7 @@ void tick()
 
 	updateState();
 	getActivityParams(index, party);
+	logMessagef("Calling callback %u\n", index);
 	updateActivity(index, party);
 }
 
@@ -553,7 +553,6 @@ public:
 				state.totalTimestamp = time(nullptr);
 
 			if (currentScene >= 0 && currentScene == newScene) {
-				logMessagef("Calling callback %u\n", currentScene);
 				tick();
 				logMessage("Callback returned\n");
 			} else if (currentScene == SokuLib::SCENE_TITLE && (newScene == SokuLib::SCENE_SELECTSV || newScene == SokuLib::SCENE_SELECTCL))
@@ -586,7 +585,7 @@ void loadJsonStrings(const std::string &path)
 	if (stream.fail())
 		throw std::invalid_argument(strerror(errno));
 	stream >> value;
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 21; i++) {
 		logMessagef("Loading character %i %s\n", i, value["characters"][i].dump().c_str());
 		charactersNames[i].first = value["characters"][i]["short_name"];
 		charactersNames[i].second = value["characters"][i]["full_name"];

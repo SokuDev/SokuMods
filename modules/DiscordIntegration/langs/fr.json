@@ -2,9 +2,9 @@
     "submenus": [
         "Ecran titre",
         "Ecran réseau",
-        "Selecting replay",
+        "Sélectionne replay",
         "Ecoute de la musique",
-        "Selectionne un contre la montre",
+        "Sélectionne un contre la montre",
         "Change de profile",
         "Modifie les options"
     ],
@@ -69,7 +69,8 @@
         },
         {
             "short_name": "Suika",
-            "full_name": "Suika Ibuki"},
+            "full_name": "Suika Ibuki"
+        },
         {
             "short_name": "Reisen",
             "full_name": "Reisen Undongein Inaba"
@@ -111,17 +112,17 @@
             "full_name": "Suwako Moriya"
         },
         {
-            "short_name": "Random",
-            "full_name": "Random Select"
+            "short_name": "Aléatoire",
+            "full_name": "Sélection aléatoire"
         }
     ],
     "logo": {
-        "title": "Regarde la cinematique d'introduction",
+        "title": "Regarde la cinématique d'introduction",
         "image": "cover",
         "has_timer": false
     },
     "opening": {
-        "title": "Regarde la cinematique d'introduction",
+        "title": "Regarde la cinématique d'introduction",
         "image": "cover",
         "has_timer": false
     },
@@ -190,7 +191,7 @@
         "has_set_length_timer": true
     },
     "select_arcade": {
-        "title": "Joue en mode arcade({{myProfileName}})",
+        "title": "Joue en mode arcade ({{myProfileName}})",
         "description": "Séléctionne un scenario...",
         "image": "{{myChrImg}}",
         "image_text": "{{myChrFullName}}",
@@ -382,7 +383,7 @@
         "has_set_length_timer": false
     },
     "ending": {
-        "title": "Regarde la cinematique de fin",
+        "title": "Regarde la cinématique de fin",
         "image": "cover",
         "has_timer": false
     },
