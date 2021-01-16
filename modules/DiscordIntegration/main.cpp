@@ -176,9 +176,11 @@ void updateActivity(StringIndex index, unsigned party)
 	auto &elem = config.strings[index];
 
 	if (party) {
-		if (party == 1)
-			secrets.SetJoin(("join" + state.roomIp).c_str());
-		secrets.SetSpectate(("spec" + state.roomIp).c_str());
+		if (!state.roomIp.empty()) {
+			if (party == 1)
+				secrets.SetJoin(("join" + state.roomIp).c_str());
+			secrets.SetSpectate(("spec" + state.roomIp).c_str());
+		}
 
 		partyObj.SetId(state.roomIp.c_str());
 		partyObj.GetSize().SetCurrentSize(party);
@@ -384,26 +386,25 @@ void titleScreenStateUpdate()
 	if ((
 		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
 		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 3 &&
-		state.roomIp.empty()
+		menuObj->subchoice == 3
 	) || (
 		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
 		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 255 &&
-		state.roomIp.empty()
-	 ))
-		state.roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
-	else if (
+		menuObj->subchoice == 255
+	)) {
+		if (state.roomIp.empty())
+			state.roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
+	} else if (
 		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->subchoice == 2 &&
-		state.roomIp.empty()
-	)
-		try {
-			state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
-			logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", state.roomIp.c_str(), menuObj->spectate ? "" : "not ");
-		} catch (...) {}
-	else
-		state.roomIp = "";
+		menuObj->subchoice == 2
+	) {
+		if (state.roomIp.empty())
+			try {
+				state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
+			} catch (...) {}
+		logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", state.roomIp.c_str(), menuObj->spectate ? "" : "not ");
+	} else if (!state.roomIp.empty())
+		state.roomIp.clear();
 }
 
 void updateState()
