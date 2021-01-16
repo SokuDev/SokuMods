@@ -260,7 +260,7 @@
     },
     "loading_vsplayer": {
         "title": "Joue en multijoueur (Hors ligne) ({{myProfileName}})",
-        "description": "Loading...",
+        "description": "Chargement...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -270,7 +270,7 @@
     },
     "select_practice": {
         "title": "Mode entrainement ({{myProfileName}})",
-        "description": "Character select...",
+        "description": "Sélection de personnage...",
         "image": "{{myChrImg}}",
         "small_image": "{{opChrImg}}",
         "image_text": "{{myChrFullName}}",
@@ -290,7 +290,7 @@
     },
     "loading_practice": {
         "title": "Mode entrainement ({{myProfileName}})",
-        "description": "Loading...",
+        "description": "Chargement...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -300,7 +300,7 @@
     },
     "select_vsnetwork": {
         "title": "Joue en multijoueur (En ligne) ({{myProfileName}})",
-        "description": "Character select... ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "description": "Sélection de personnage... ({{myWins}}-{{opWins}} {{myWr}} wr)",
         "image": "{{myChrImg}}",
         "small_image": "{{opChrImg}}",
         "image_text": "{{myChrFullName}}",
