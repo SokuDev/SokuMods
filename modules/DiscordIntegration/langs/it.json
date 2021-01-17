@@ -1,0 +1,401 @@
+﻿{
+    "submenus": [
+        "Menù Principale",
+        "Menù Online",
+        "Selezionando Replay",
+        "Ascoltando Musica",
+        "Selezionando Prova a Tempo",
+        "Modificando Profili",
+        "Modificando le Opzioni"
+    ],
+    "stages": [
+        "Santuario Hakurei",
+        "Foresta della Magia",
+        "Ruscello del Genbu",
+        "Montagna degli Youkai",
+        "Misterioso Oceano Celeste",
+        "Bhava-Agra",
+        "Santuario Hakurei",
+        "Negozio della Magia Kirisame",
+        "Torre dell'Orologio della Villa Scarlet",
+        "Foresta delle Bambole",
+        "Biblioteca della Villa Scarlet",
+        "Aldilà",
+        "Ingresso della Villa Scarlet",
+        "Giardino Innevato dell'Hakugyokurou",
+        "Foresta di Bamboo dei Dispersi",
+        "Sponda del Lago Nebbioso",
+        "Santuario Moriya",
+        "Apertura del Geyser",
+        "Passerella del Geyser",
+        "Nocciolo del Reattore Nucleare"
+    ],
+    "characters": [
+        {
+            "short_name": "Reimu",
+            "full_name": "Reimu Hakurei"
+        },
+        {
+            "short_name": "Marisa",
+            "full_name": "Marisa Kirisame"
+        },
+        {
+            "short_name": "Sakuya",
+            "full_name": "Sakuya Izayoi"
+        },
+        {
+            "short_name": "Alice",
+            "full_name": "Alice Margatroid"
+        },
+        {
+            "short_name": "Patchouli",
+            "full_name": "Patchouli Knowledge"
+        },
+        {
+            "short_name": "Youmu",
+            "full_name": "Youmu Konpaku"
+        },
+        {
+            "short_name": "Remilia",
+            "full_name": "Remilia Scarlet"
+        },
+        {
+            "short_name": "Yuyuko",
+            "full_name": "Yuyuko Saigyouji"
+        },
+        {
+            "short_name": "Yukari",
+            "full_name": "Yukari Yakumo"
+        },
+        {
+            "short_name": "Suika",
+            "full_name": "Suika Ibuki"},
+        {
+            "short_name": "Reisen",
+            "full_name": "Reisen Undongein Inaba"
+        },
+        {
+            "short_name": "Aya",
+            "full_name": "Aya Shameimaru"
+        },
+        {
+            "short_name": "Komachi",
+            "full_name": "Komachi Onozuka"
+        },
+        {
+            "short_name": "Iku",
+            "full_name": "Iku Nagae"
+        },
+        {
+            "short_name": "Tenshi",
+            "full_name": "Tenshi Hinanawi"
+        },
+        {
+            "short_name": "Sanae",
+            "full_name": "Sanae Kochiya"
+        },
+        {
+            "short_name": "Cirno",
+            "full_name": "Cirno"
+        },
+        {
+            "short_name": "Meiling",
+            "full_name": "Hong Meiling"
+        },
+        {
+            "short_name": "Utsuho",
+            "full_name": "Utsuho Reiuji"
+        },
+        {
+            "short_name": "Suwako",
+            "full_name": "Suwako Moriya"
+        },
+        {
+            "short_name": "Casuale",
+            "full_name": "Selezione Casuale"
+        }
+    ],
+    "logo": {
+        "title": "Guardando Filmato d'Apertura",
+        "image": "cover",
+        "has_timer": false
+    },
+    "opening": {
+        "title": "Guardando Filmato d'Apertura",
+        "image": "cover",
+        "has_timer": false
+    },
+    "title": {
+        "title": "Menù Principale",
+        "description": "{{submenu}}",
+        "image": "cover",
+        "has_timer": false
+    },
+    "select_vscomputer": {
+        "title": "Sfidando la CPU ({{myProfileName}})",
+        "description": "Selezione Personaggio...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_vscomputer": {
+        "title": "Sfidando la CPU ({{myProfileName}})",
+        "description": "VS {{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_vscomputer": {
+        "title": "Sfidando la CPU ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_story": {
+        "title": "Giocando Modalità Storia ({{myProfileName}})",
+        "description": "Selezionando Scenario...",
+        "image": "{{myChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "battle_story": {
+        "title": "Giocando Modalità Storia ({{myProfileName}})",
+        "description": "Combattendo {{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_story": {
+        "title": "Giocando Modalità Storia ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_arcade": {
+        "title": "Giocando Modalità Arcade ({{myProfileName}})",
+        "description": "Selezionando Scenario...",
+        "image": "{{myChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "battle_arcade": {
+        "title": "Giocando Modalità Arcade ({{myProfileName}})",
+        "description": "Combattendo {{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_arcade": {
+        "title": "Giocando Modalità Arcade ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_timetrial": {
+        "title": "Giocando Prova a Tempo ({{myProfileName}})",
+        "description": "VS {{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_timetrial": {
+        "title": "Giocando Prova a Tempo ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_vsplayer": {
+        "title": "Giocando MultiGiocatore (Offline) ({{myProfileName}})",
+        "description": "Selezione Personaggio...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_vsplayer": {
+        "title": "Giocando MultiGiocatore (Offline) ({{myProfileName}})",
+        "description": "VS {{opProfileName}} che gioca {{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_vsplayer": {
+        "title": "Giocando MultiGiocatore (Offline) ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_practice": {
+        "title": "Modalità Pratica ({{myProfileName}})",
+        "description": "Selezione Personaggio...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_practice": {
+        "title": "Modalità Pratica ({{myProfileName}})",
+        "description": "VS {{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_practice": {
+        "title": "Modalità Pratica ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_vsnetwork": {
+        "title": "Giocando MultiGiocatore (Online) ({{myProfileName}})",
+        "description": "Selezione Personaggio... ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_vsnetwork": {
+        "title": "Giocando MultiGiocatore (Online) ({{myProfileName}})",
+        "description": "VS {{opProfileName}} che gioca {{opChrFullName}} ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_vsnetwork": {
+        "title": "Giocando MultiGiocatore (Online) ({{myProfileName}})",
+        "description": "Caricamento... ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_spectator": {
+        "title": "Osservando Scontro ({{lProfileName}} vs {{rProfileName}})",
+        "description": "{{lChrFullName}} vs {{rChrFullName}} ({{lWins}}-{{rWins}})",
+        "image": "{{stageImg}}",
+        "image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_spectator": {
+        "title": "Osservando Scontro",
+        "description": "Caricamento... ({{lWins}}-{{rWins}})",
+        "image": "{{lChrImg}}",
+        "small_image": "{{rChrImg}}",
+        "image_text": "{{lChrFullName}}",
+        "small_image_text": "{{rChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_replay": {
+        "title": "Guardando Replays",
+        "description": "{{lChrFullName}} vs {{rChrFullName}}",
+        "image": "{{stageImg}}",
+        "image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_replay": {
+        "title": "Guardando Replays",
+        "description": "Caricamento...",
+        "image": "{{lChrImg}}",
+        "small_image": "{{rChrImg}}",
+        "image_text": "{{lChrFullName}}",
+        "small_image_text": "{{rChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "battle_story_replay": {
+        "title": "Guardando Replays Modalità Storia",
+        "description": "{{lChrFullName}} vs {{rChrFullName}}",
+        "image": "{{stageImg}}",
+        "image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_story_replay": {
+        "title": "Guardando Replays Modalità Storia",
+        "description": "Caricamento...",
+        "image": "{{lChrImg}}",
+        "small_image": "{{rChrImg}}",
+        "image_text": "{{lChrFullName}}",
+        "small_image_text": "{{rChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "ending": {
+        "title": "Guardando Filmato Conclusivo",
+        "image": "cover",
+        "has_timer": false
+    },
+    "hosting": {
+        "title": "Menù Principale",
+        "description": "Hosting...",
+        "image": "cover",
+        "has_timer": true
+    },
+    "connecting": {
+        "title": "Giocando MultiGiocatore (Online) ({{myProfileName}})",
+        "description": "Partecipando a uno Scontro...",
+        "image": "cover",
+        "has_timer": true
+    }
+}
