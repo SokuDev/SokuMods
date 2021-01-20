@@ -8,5 +8,9 @@
 
 std::string SubmenuString::getString() const
 {
-	return submenusNames[SokuLib::getCurrentMenu()];
+	auto menu = SokuLib::getCurrentMenu();
+
+	if (menu == SokuLib::MENU_COUNT)
+		return "Unknown menu";
+	return submenusNames[menu];
 }

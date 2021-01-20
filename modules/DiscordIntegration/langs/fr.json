@@ -6,7 +6,9 @@
         "Ecoute de la musique",
         "Sélectionne un contre la montre",
         "Change de profile",
-        "Modifie les options"
+        "Modifie les options",
+        "Construit un deck",
+        "Configure les touches"
     ],
     "stages": [
         "Temple Hakurei",
