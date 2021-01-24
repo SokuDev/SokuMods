@@ -75,14 +75,56 @@ Socket::HttpResponse root(const Socket::HttpRequest &requ)
 	return response;
 }
 
+static void setState(const Socket::HttpRequest &requ)
+{
+	if (requ.ip != 0x0100007F)
+		throw AbortConnectionException(403);
+	try {
+		auto result = nlohmann::json::parse(requ.body);
+
+		if (result.contains("left")) {
+			auto &chr = result["left"];
+
+			if (chr.contains("name"))
+				_cache.leftName = chr["name"];
+			if (chr.contains("score"))
+				_cache.leftScore = chr["score"];
+			/*result["left"] = {
+				{"character", cache.left},
+				{"score",     cache.leftScore},
+				{"name",      convertShiftJisToUTF8(cache.leftName.c_str())},
+				{"used",      cache.leftUsed},
+				{"deck",      leftDeck},
+				{"hand",      leftHand},
+				{"stats",     statsToJson(cache.leftStats)}
+			};*/
+		}
+		if (result.contains("right")) {
+			auto &chr = result["right"];
+
+			if (chr.contains("name"))
+				_cache.rightName = chr["name"];
+			if (chr.contains("score"))
+				_cache.rightScore = chr["score"];
+		}
+	} catch (nlohmann::detail::exception &) {
+		throw AbortConnectionException(400);
+	}
+	broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
+	_cache.noReset = true;
+}
+
 Socket::HttpResponse state(const Socket::HttpRequest &requ)
 {
 	Socket::HttpResponse response;
 
+	response.returnCode = 200;
+	if (requ.method == "POST")
+		return setState(requ), response;
+
 	if (requ.method != "GET")
 		throw AbortConnectionException(405);
 
-	response.returnCode = 200;
 	response.header["content-type"] = "application/json";
 	response.body = cacheToJson(_cache);
 	return response;

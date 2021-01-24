@@ -58,6 +58,7 @@ extern struct CachedMatchData {
 	unsigned int rightScore;
 	Stats leftStats;
 	Stats rightStats;
+	bool noReset;
 } _cache;
 extern bool needReset;
 extern bool needRefresh;
