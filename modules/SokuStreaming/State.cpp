@@ -143,7 +143,8 @@ void updateCache(bool isMultiplayer)
 	auto &battleMgr = SokuLib::getBattleMgr();
 
 	if (needReset) {
-		if (isMultiplayer) {
+		if (_cache.noReset);
+		else if (isMultiplayer) {
 			auto &netObj = SokuLib::getNetObject();
 
 			if (_cache.realLeftName != netObj.profile1name || _cache.realRightName != netObj.profile2name) {
@@ -154,7 +155,13 @@ void updateCache(bool isMultiplayer)
 				_cache.realLeftName = netObj.profile1name;
 				_cache.realRightName = netObj.profile2name;
 			}
-		} else {
+		} else if (
+			_cache.realLeftName != SokuLib::player1Profile.operator char *() ||
+			_cache.realRightName != SokuLib::player2Profile.operator char *() ||
+			SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY
+		) {
+			_cache.leftScore = 0;
+			_cache.rightScore = 0;
 			_cache.leftName = SokuLib::player1Profile;
 			_cache.rightName = SokuLib::player2Profile;
 			_cache.realLeftName = SokuLib::player1Profile;
@@ -162,6 +169,7 @@ void updateCache(bool isMultiplayer)
 		}
 		needReset = false;
 	}
+	_cache.noReset = false;
 
 	auto oldLeftHand = _cache.leftHand;
 	auto oldRightHand = _cache.rightHand;
