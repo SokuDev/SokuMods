@@ -18,6 +18,7 @@ int __fastcall CTitle_OnProcess(Title *This) {
 
 	needReset = true;
 	needRefresh = true;
+	checkKeyInputs();
 	return ret;
 }
 
@@ -41,6 +42,7 @@ int __fastcall CBattle_OnProcess(Battle *This) {
 void loadCommon()
 {
 	needRefresh = true;
+	checkKeyInputs();
 }
 
 int __fastcall CLoading_OnProcess(Loading *This) {
@@ -99,6 +101,8 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	keys[KEY_DECREASE_L_SCORE] = GetPrivateProfileInt("Keys", "DecreaseLeftScore",  '1', profilePath);
 	keys[KEY_INCREASE_L_SCORE] = GetPrivateProfileInt("Keys", "IncreaseLeftScore",  '2', profilePath);
 	keys[KEY_CHANGE_L_NAME]    = GetPrivateProfileInt("Keys", "ChangeLeftName",     '3', profilePath);
+	keys[KEY_RESET_SCORES]     = GetPrivateProfileInt("Keys", "ResetScores",        '5', profilePath);
+	keys[KEY_RESET_STATE]      = GetPrivateProfileInt("Keys", "ResetState",         '6', profilePath);
 	keys[KEY_DECREASE_R_SCORE] = GetPrivateProfileInt("Keys", "DecreaseRightScore", '8', profilePath);
 	keys[KEY_INCREASE_R_SCORE] = GetPrivateProfileInt("Keys", "IncreaseRightScore", '9', profilePath);
 	keys[KEY_CHANGE_R_NAME]    = GetPrivateProfileInt("Keys", "ChangeRightName",    '0', profilePath);

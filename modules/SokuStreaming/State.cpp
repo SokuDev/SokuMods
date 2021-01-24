@@ -108,6 +108,18 @@ void checkKeyInputs()
 			}};
 		}
 	}
+	if (isPressed[KEY_RESET_SCORES]) {
+		_cache.leftScore = 0;
+		_cache.rightScore = 0;
+		broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));
+		broadcastOpcode(R_SCORE_UPDATE, std::to_string(_cache.rightScore));
+	}
+	if (isPressed[KEY_RESET_STATE]) {
+		_cache = CachedMatchData();
+		broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
+		needRefresh = true;
+		needReset = true;
+	}
 }
 
 nlohmann::json statsToJson(const Stats &stats)
