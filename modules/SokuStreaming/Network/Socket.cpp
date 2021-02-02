@@ -270,9 +270,13 @@ Socket Socket::accept()
 	return {fd, serv_addr};
 }
 
-std::string Socket::generateHttpResponse(const Socket::HttpResponse &response)
+std::string Socket::generateHttpResponse(const Socket::HttpResponse &res)
 {
-	std::stringstream	msg;
+	auto response = res;
+	std::stringstream msg;
+
+	if (response.header.find("Content-Length") == response.header.end() && !response.body.empty())
+		response.header["Content-Length"] = std::to_string(response.body.size());
 
 	/* fill in the parameters */
 	msg << response.httpVer << " " << response.returnCode << " " << response.codeName << "\r\n";
@@ -282,13 +286,19 @@ std::string Socket::generateHttpResponse(const Socket::HttpResponse &response)
 	return msg.str();
 }
 
-std::string Socket::generateHttpRequest(const Socket::HttpRequest &request)
+std::string Socket::generateHttpRequest(const Socket::HttpRequest &req)
 {
-	std::stringstream	msg;
+	auto request = req;
+	std::stringstream msg;
+
+	/* fill in the parameters */
+	if (request.header.find("Host") == request.header.end())
+		request.header["Host"] = request.host;
+	if (request.header.find("Content-Length") == request.header.end() && !request.body.empty())
+		request.header["Content-Length"] = std::to_string(request.body.length());
 
 	/* fill in the parameters */
 	msg << request.method << " " << request.path << " " << request.httpVer << "\r\n";
-	msg << "Host: " << request.host << "\r\n";
 	for (auto &entry : request.header)
 		msg << entry.first << ": " << entry.second << "\r\n";
 	msg << "\r\n" << request.body;
