@@ -1,36 +1,36 @@
 {
     "submenus": [
-        "Title screen",
+        "Menu principal",
         "Network screen",
-        "Selecting replay",
-        "Listening to music",
-        "Selecting time trial",
-        "Changing profile",
-        "Editing configs",
-        "Constructing decks",
-        "Changing keys"
+        "Seleccionando repeticiones",
+        "Escuchando música",
+        "Seleccionando desafío del tiempo",
+        "Cambiando perfil",
+        "Editando configuración",
+	"Construyendo barajas",
+	"Cambiando controles"
     ],
     "stages": [
-        "Hakurei Shrine",
-        "Forest of Magic",
-        "Creek of Genbu",
-        "Youkai Mountain",
-        "Mysterious Sea of Cloud",
+        "Templo Hakurei",
+        "Bosque Mágico",
+        "Arroyo de Genbu",
+        "Montaña Youkai",
+        "Misterioso Mar de Nubes",
         "Bhava-Agra",
-        "Hakurei Shrine",
-        "Kirisame Magic Shop",
-        "Scarlet Devil Mansion Clock Tower",
-        "Forest of Dolls",
-        "Scarlet Devil Mansion Library",
-        "Netherworld",
-        "Scarlet Devil Mansion Foyer",
-        "Hakugyokurou Snowy Garden",
-        "Bamboo Forest of the Lost",
-        "Shore of Misty Lake",
-        "Moriya Shrine",
-        "Mouth of Geyser",
-        "Catwalk of Geyser",
-        "Fusion Reactor Core"
+        "Templo Hakurei",
+        "Tienda Mágica Kirisame",
+        "Torre del Reloj de Mansión Scarlet Devil",
+        "Bosque de las Muñecas",
+        "Biblioteca de Mansión Scarlet Devil",
+        "Inframundo",
+        "Vestíbulo de Mansión Scarlet Devil",
+        "Jardín Nevado Hakuryokurou",
+        "Bosque de Bambú de los Perdidos",
+        "Orilla del Lago de la Niebla",
+        "Templo Moriya",
+        "Boca del Géiser",
+        "Pasarela del Géiser",
+        "Núcleo del Reactor de Fusión"
     ],
     "characters": [
         {
@@ -71,8 +71,7 @@
         },
         {
             "short_name": "Suika",
-            "full_name": "Suika Ibuki"
-        },
+            "full_name": "Suika Ibuki"},
         {
             "short_name": "Reisen",
             "full_name": "Reisen Undongein Inaba"
@@ -119,24 +118,24 @@
         }
     ],
     "logo": {
-        "title": "Watching opening cutscene",
+        "title": "Viendo escena de inicio",
         "image": "cover",
         "has_timer": false
     },
     "opening": {
-        "title": "Watching opening cutscene",
+        "title": "Viendo la escena de inicio",
         "image": "cover",
         "has_timer": false
     },
     "title": {
-        "title": "Main menu",
+        "title": "Menú Principal",
         "description": "{{submenu}}",
         "image": "cover",
         "has_timer": false
     },
     "select_vscomputer": {
-        "title": "Playing against computer ({{myProfileName}})",
-        "description": "Character select...",
+        "title": "Jugando contra el computador ({{myProfileName}})",
+        "description": "Seleccionando personaje...",
         "image": "{{myChrImg}}",
         "small_image": "{{opChrImg}}",
         "image_text": "{{myChrFullName}}",
@@ -145,8 +144,8 @@
         "has_set_length_timer": true
     },
     "battle_vscomputer": {
-        "title": "Playing against computer ({{myProfileName}})",
-        "description": "Against {{opChrFullName}}",
+        "title": "Jugando contra el computador ({{myProfileName}})",
+        "description": "Contra {{opChrFullName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -156,7 +155,7 @@
     },
     "loading_vscomputer": {
         "title": "Playing against computer ({{myProfileName}})",
-        "description": "Loading...",
+        "description": "Cargando...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -165,16 +164,16 @@
         "has_set_length_timer": true
     },
     "select_story": {
-        "title": "Playing in story mode ({{myProfileName}})",
-        "description": "Selecting scenario...",
+        "title": "Jugando en modo historia ({{myProfileName}})",
+        "description": "Seleccionando escenario...",
         "image": "{{myChrImg}}",
         "image_text": "{{myChrFullName}}",
         "has_timer": true,
         "has_set_length_timer": false
     },
     "battle_story": {
-        "title": "Playing in story mode ({{myProfileName}})",
-        "description": "Fighting {{opChrFullName}}",
+        "title": "Jugando en modo historia ({{myProfileName}})",
+        "description": "Luchando contra {{opChrFullName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -183,8 +182,8 @@
         "has_set_length_timer": false
     },
     "loading_story": {
-        "title": "Playing in story mode ({{myProfileName}})",
-        "description": "Loading...",
+        "title": "Jugando en modo historia ({{myProfileName}})",
+        "description": "Cargando...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -193,16 +192,16 @@
         "has_set_length_timer": true
     },
     "select_arcade": {
-        "title": "Playing in arcade mode ({{myProfileName}})",
-        "description": "Selecting scenario...",
+        "title": "Jugando en modo arcade ({{myProfileName}})",
+        "description": "Seleccionando escenario...",
         "image": "{{myChrImg}}",
         "image_text": "{{myChrFullName}}",
         "has_timer": true,
         "has_set_length_timer": false
     },
     "battle_arcade": {
-        "title": "Playing in arcade mode ({{myProfileName}})",
-        "description": "Fighting {{opChrFullName}}",
+        "title": "Jugando en modo arcade ({{myProfileName}})",
+        "description": "Luchando contra {{opChrFullName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -211,8 +210,8 @@
         "has_set_length_timer": false
     },
     "loading_arcade": {
-        "title": "Playing in arcade mode ({{myProfileName}})",
-        "description": "Loading...",
+        "title": "Jugando en modo arcade ({{myProfileName}})",
+        "description": "Cargando...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -221,8 +220,8 @@
         "has_set_length_timer": true
     },
     "battle_timetrial": {
-        "title": "Playing time trial ({{myProfileName}})",
-        "description": "Against {{opChrFullName}}",
+        "title": "Jugando desafío del tiempo ({{myProfileName}})",
+        "description": "Contra {{opChrFullName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -231,8 +230,8 @@
         "has_set_length_timer": false
     },
     "loading_timetrial": {
-        "title": "Playing time trial ({{myProfileName}})",
-        "description": "Loading...",
+        "title": "Jugando desafío del tiempo ({{myProfileName}})",
+        "description": "Cargando...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -241,8 +240,8 @@
         "has_set_length_timer": true
     },
     "select_vsplayer": {
-        "title": "Playing multiplayer (Offline) ({{myProfileName}})",
-        "description": "Character select...",
+        "title": "Jugando multijugador (Desconectado) ({{myProfileName}})",
+        "description": "Seleccionando personaje...",
         "image": "{{myChrImg}}",
         "small_image": "{{opChrImg}}",
         "image_text": "{{myChrFullName}}",
@@ -251,8 +250,8 @@
         "has_set_length_timer": true
     },
     "battle_vsplayer": {
-        "title": "Playing multiplayer (Offline) ({{myProfileName}})",
-        "description": "Against {{opProfileName}} as {{opChrFullName}}",
+        "title": "Jugando multijugador (Desconectado) ({{myProfileName}})",
+        "description": "Contra {{opProfileName}} as {{opChrFullName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -261,8 +260,8 @@
         "has_set_length_timer": false
     },
     "loading_vsplayer": {
-        "title": "Playing multiplayer (Offline) ({{myProfileName}})",
-        "description": "Loading...",
+        "title": "Jugando multijugador (Desconectado) ({{myProfileName}})",
+        "description": "Cargando...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -271,8 +270,8 @@
         "has_set_length_timer": true
     },
     "select_practice": {
-        "title": "Practice mode ({{myProfileName}})",
-        "description": "Character select...",
+        "title": "Modo práctica ({{myProfileName}})",
+        "description": "Seleccionando personaje...",
         "image": "{{myChrImg}}",
         "small_image": "{{opChrImg}}",
         "image_text": "{{myChrFullName}}",
@@ -281,8 +280,8 @@
         "has_set_length_timer": true
     },
     "battle_practice": {
-        "title": "Practice mode ({{myProfileName}})",
-        "description": "Against {{opChrFullName}}",
+        "title": "Modo práctica ({{myProfileName}})",
+        "description": "Contra {{opChrFullName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -291,8 +290,8 @@
         "has_set_length_timer": false
     },
     "loading_practice": {
-        "title": "Practice mode ({{myProfileName}})",
-        "description": "Loading...",
+        "title": "Modo práctica ({{myProfileName}})",
+        "description": "Cargando...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -301,8 +300,8 @@
         "has_set_length_timer": true
     },
     "select_vsnetwork": {
-        "title": "Playing multiplayer (Online) ({{myProfileName}})",
-        "description": "Character select... ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "title": "Modo multijugador (En línea) ({{myProfileName}})",
+        "description": "Seleccionando personaje... ({{myWins}}-{{opWins}} {{myWr}} wr)",
         "image": "{{myChrImg}}",
         "small_image": "{{opChrImg}}",
         "image_text": "{{myChrFullName}}",
@@ -311,8 +310,8 @@
         "has_set_length_timer": true
     },
     "battle_vsnetwork": {
-        "title": "Playing multiplayer (Online) ({{myProfileName}})",
-        "description": "Against {{opProfileName}} as {{opChrFullName}} ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "title": "Modo multijugador (En línea) ({{myProfileName}})",
+        "description": "Contra {{opProfileName}} as {{opChrFullName}} ({{myWins}}-{{opWins}} {{myWr}} wr)",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -321,8 +320,8 @@
         "has_set_length_timer": false
     },
     "loading_vsnetwork": {
-        "title": "Playing multiplayer (Online) ({{myProfileName}})",
-        "description": "Loading... ({{myWins}}-{{opWins}} {{myWr}} wr)",
+        "title": "Modo multijugador (En línea) ({{myProfileName}})",
+        "description": "Cargando... ({{myWins}}-{{opWins}} {{myWr}} wr)",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
@@ -331,7 +330,7 @@
         "has_set_length_timer": true
     },
     "battle_spectator": {
-        "title": "Spectating game ({{lProfileName}} vs {{rProfileName}})",
+        "title": "Espectando partida ({{lProfileName}} vs {{rProfileName}})",
         "description": "{{lChrFullName}} vs {{rChrFullName}} ({{lWins}}-{{rWins}})",
         "image": "{{stageImg}}",
         "image_text": "{{stageName}}",
@@ -339,7 +338,7 @@
         "has_set_length_timer": false
     },
     "loading_spectator": {
-        "title": "Spectating game",
+        "title": "Espectando partida",
         "description": "Loading... ({{lWins}}-{{rWins}})",
         "image": "{{lChrImg}}",
         "small_image": "{{rChrImg}}",
@@ -349,7 +348,7 @@
         "has_set_length_timer": true
     },
     "battle_replay": {
-        "title": "Watching a replay",
+        "title": "Viendo una repetición",
         "description": "{{lChrFullName}} vs {{rChrFullName}}",
         "image": "{{stageImg}}",
         "image_text": "{{stageName}}",
@@ -357,7 +356,7 @@
         "has_set_length_timer": false
     },
     "loading_replay": {
-        "title": "Watching a replay",
+        "title": "Viendo una repetición",
         "description": "Loading...",
         "image": "{{lChrImg}}",
         "small_image": "{{rChrImg}}",
@@ -367,7 +366,7 @@
         "has_set_length_timer": false
     },
     "battle_story_replay": {
-        "title": "Watching story mode a replay",
+        "title": "Viendo una repetición de modo historia",
         "description": "{{lChrFullName}} vs {{rChrFullName}}",
         "image": "{{stageImg}}",
         "image_text": "{{stageName}}",
@@ -375,8 +374,8 @@
         "has_set_length_timer": false
     },
     "loading_story_replay": {
-        "title": "Watching story mode a replay",
-        "description": "Loading...",
+        "title": "Viendo una repetición de modo historia",
+        "description": "Cargando...",
         "image": "{{lChrImg}}",
         "small_image": "{{rChrImg}}",
         "image_text": "{{lChrFullName}}",
@@ -385,19 +384,19 @@
         "has_set_length_timer": false
     },
     "ending": {
-        "title": "Watching ending cutscene",
+        "title": "Viendo escena de créditos",
         "image": "cover",
         "has_timer": false
     },
     "hosting": {
-        "title": "Main menu",
-        "description": "Hosting...",
+        "title": "Menú principal",
+        "description": "Hosteando...",
         "image": "cover",
         "has_timer": true
     },
     "connecting": {
-        "title": "Playing multiplayer (Online) ({{myProfileName}})",
-        "description": "Joining room...",
+        "title": "Jugando multijugador (En línea) ({{myProfileName}})",
+        "description": "Entrando a la sala...",
         "image": "cover",
         "has_timer": true
     }
