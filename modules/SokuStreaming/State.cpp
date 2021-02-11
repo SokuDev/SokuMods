@@ -328,6 +328,7 @@ std::string cacheToJson(CachedMatchData cache)
 		{ "hand",      rightHand },
 		{ "stats",     statsToJson(cache.rightStats) }
 	};
+	result["round"] = cache.round;
 	return result.dump(-1, ' ', true);
 }
 
