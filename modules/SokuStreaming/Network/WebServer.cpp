@@ -148,7 +148,9 @@ void WebServer::_serverLoop()
 	Socket::HttpRequest requ;
 	std::string s;
 
+#ifdef _DEBUG
 	std::cerr << "New connection from " << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << std::endl;
+#endif
 	try {
 		try {
 			requ.ip = newConnection.getRemote().sin_addr.s_addr;
@@ -180,6 +182,7 @@ void WebServer::_serverLoop()
 	}
 	response.httpVer = "HTTP/1.1";
 	response.header["content-length"] = std::to_string(response.body.length());
+#ifdef _DEBUG
 	std::cout << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << " ";
 	if (!requ.httpVer.empty())
 		std::cout << requ.path;
@@ -188,6 +191,7 @@ void WebServer::_serverLoop()
 		std::cerr << "Parsing error of request \"" << s << "\"" << std::endl;
 	}
 	std::cout << ": " << response.returnCode << std::endl;
+#endif
 	try {
 		newConnection.send(Socket::generateHttpResponse(response));
 	} catch (...) {}

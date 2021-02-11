@@ -167,6 +167,7 @@ function update(state)
 
     let lchr = state.left.character;
     let rchr = state.right.character;
+    let round = document.getElementById("roundMarker");
 
     document.getElementById("lChr").setAttribute("src", getCharacterImage(lchr));
     document.getElementById("rChr").setAttribute("src", getCharacterImage(rchr));
@@ -174,6 +175,9 @@ function update(state)
     document.getElementById("rightName").textContent = state.right.name;
     document.getElementById("leftScore").textContent = state.left.score + "";
     document.getElementById("rightScore").textContent = state.right.score + "";
+
+    if (round)
+        round.textContent = state.round;
 
     displayDeck("lCard", state.left.used,  state.left.hand,  state.left.deck,  lchr);
     displayDeck("rCard", state.right.used, state.right.hand, state.right.deck, rchr);

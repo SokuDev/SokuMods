@@ -107,6 +107,8 @@ static void setState(const Socket::HttpRequest &requ)
 			if (chr.contains("score"))
 				_cache.rightScore = chr["score"];
 		}
+		if (result.contains("round"))
+			_cache.round = result["round"];
 	} catch (nlohmann::detail::exception &) {
 		throw AbortConnectionException(400);
 	}
