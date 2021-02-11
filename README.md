@@ -17,7 +17,7 @@ The code in this repository comes from various contributors:
 - *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Shinki* and *PC_volt* made ReplayInputView+
-- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro)
+- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and Hostlist
 - delthas made Autopunch, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
@@ -160,6 +160,12 @@ Available patches:
 ### GetIP
 
 **Automatically copy a host message to your clipboard when hosting.**
+
+### Hostlist
+
+**Overhauls the netplay menu by adding an in-game graphical lobby/hostlist connected to the Discord host list bot.**
+
+*The mod is connected to Konni only, not Parvati. Hopefully your server will move to Konni soon.*
 
 ### NetGameScore
 

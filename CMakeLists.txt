@@ -96,6 +96,14 @@ target_include_directories(MemoryModule PUBLIC MemoryModule)
 set(VERSION_110a "1")
 add_subdirectory(SokuLib)
 
+# SokuEngineLib
+
+add_library(SokuEngineLib STATIC IMPORTED)
+set_target_properties(SokuEngineLib PROPERTIES
+        IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/SokuEngineLib.lib)
+set_target_properties(SokuEngineLib PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+
 # modules
 
 function(module name)
@@ -176,6 +184,15 @@ install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine")
 module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
+
+module(Hostlist SokuEngine)
+target_sources(Hostlist PRIVATE
+        modules/Hostlist/dllmain.cpp)
+target_include_directories(Hostlist PRIVATE modules/Hostlist/include)
+target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+
+install(FILES modules/Hostlist/hostlistBG.png DESTINATION "SokuEngine/modules/Hostlist")
+install(FILES modules/Hostlist/romanan.ttf DESTINATION "SokuEngine/modules/Hostlist")
 
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)
