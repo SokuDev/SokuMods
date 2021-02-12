@@ -157,6 +157,8 @@ void WebServer::_serverLoop()
 			s = newConnection.readUntilEOF();
 			requ = Socket::parseHttpRequest(s);
 			requ.ip = newConnection.getRemote().sin_addr.s_addr;
+			if (requ.httpVer != "HTTP/1.1")
+				throw AbortConnectionException(505);
 			if (requ.path == "/chat")
 				return this->_addWebSocket(newConnection, requ);
 			else {
@@ -316,7 +318,9 @@ void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ)
 		}
 		wsock_weak.lock()->isThreadFinished = true;
 	});
+#ifdef _DEBUG
 	std::cout << inet_ntoa(sock.getRemote().sin_addr) << ":" << sock.getRemote().sin_port << " " << requ.path << ": " << response.returnCode << std::endl;
+#endif
 }
 
 void WebServer::broadcast(const std::string &msg)
