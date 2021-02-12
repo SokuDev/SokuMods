@@ -94,17 +94,19 @@ bool Hook(HMODULE this_module) {
 	PathRemoveFileSpecW(app_path);
 
 	wchar_t setting_path[MAX_PATH];
-	int argc;
-	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
-	if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
-		wcscpy(setting_path, arg_list[1]);
-		LocalFree(arg_list);
-	} else {
-		wcscpy(setting_path, app_path);
-		PathAppendW(setting_path, L"\\SWRSToys.ini");
-	}
-	if (arg_list) {
-		LocalFree(arg_list);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		int argc;
+		wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
 	}
 
 	wchar_t moduleKeys[1024];
