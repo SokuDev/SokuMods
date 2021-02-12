@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_RIGHTCHRIMGSTRING_HPP
 #define SWRSTOYS_RIGHTCHRIMGSTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class RightChrImgString : public CompiledString {
+class RightChrImgString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_RIGHTCHRIMGSTRING_HPP
+#endif // SWRSTOYS_RIGHTCHRIMGSTRING_HPP

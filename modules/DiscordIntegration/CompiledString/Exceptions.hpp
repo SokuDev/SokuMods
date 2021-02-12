@@ -5,17 +5,17 @@
 #ifndef SWRSTOYS_EXCEPTIONS_HPP
 #define SWRSTOYS_EXCEPTIONS_HPP
 
-
 #include <exception>
 
-class InvalidString : public std::exception {
+class InvalidString: public std::exception {
 private:
 	std::string _msg;
 
 public:
-	InvalidString(const std::string &&msg) : _msg(msg) {};
-	const char *what() const noexcept override { return this->_msg.c_str(); };
+	InvalidString(const std::string &&msg): _msg(msg){};
+	const char *what() const noexcept override {
+		return this->_msg.c_str();
+	};
 };
 
-
-#endif //SWRSTOYS_EXCEPTIONS_HPP
+#endif // SWRSTOYS_EXCEPTIONS_HPP

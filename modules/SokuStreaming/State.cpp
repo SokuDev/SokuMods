@@ -2,18 +2,18 @@
 // Created by PinkySmile on 08/12/2020.
 //
 
+#include "State.hpp"
+
+#include "Network/Handlers.hpp"
+#include "Utils/InputBox.hpp"
+#include "Utils/ShiftJISDecoder.hpp"
+#include "nlohmann/json.hpp"
 #include <SokuLib.hpp>
 #include <dinput.h>
 #include <iostream>
-#include "Network/Handlers.hpp"
-#include "nlohmann/json.hpp"
-#include "Utils/ShiftJISDecoder.hpp"
-#include "Utils/InputBox.hpp"
-#include "State.hpp"
 
 #define checkKey(key) (GetKeyState(keys[key]) & 0x8000)
 
-bool enabled;
 unsigned short port;
 std::vector<unsigned> keys(TOTAL_NB_OF_KEYS);
 std::unique_ptr<WebServer> webServer;
@@ -37,8 +37,7 @@ std::thread thread;
 std::vector<bool> oldState;
 bool isPlaying = false;
 
-void checkKeyInputs()
-{
+void checkKeyInputs() {
 	std::vector<bool> isPressed;
 
 	if (!threadUsed && thread.joinable())
@@ -77,7 +76,7 @@ void checkKeyInputs()
 			threadUsed = true;
 			if (thread.joinable())
 				thread.join();
-			thread = std::thread{[]{
+			thread = std::thread{[] {
 				auto answer = InputBox("Change left player name", "Left name", _cache.leftName);
 
 				if (answer.empty()) {
@@ -95,8 +94,8 @@ void checkKeyInputs()
 			threadUsed = true;
 			if (thread.joinable())
 				thread.join();
-			thread = std::thread{[]{
-				auto answer = InputBox("Change right player name", "Right name",  _cache.rightName);
+			thread = std::thread{[] {
+				auto answer = InputBox("Change right player name", "Right name", _cache.rightName);
 
 				if (answer.empty()) {
 					threadUsed = false;
@@ -122,15 +121,8 @@ void checkKeyInputs()
 	}
 }
 
-nlohmann::json statsToJson(const Stats &stats)
-{
-	nlohmann::json result = {
-		{"doll",     stats.doll},
-		{"rod",      stats.rod},
-		{"grimoire", stats.grimoire},
-		{"fan",      stats.fan},
-		{"drops",    stats.drops}
-	};
+nlohmann::json statsToJson(const Stats &stats) {
+	nlohmann::json result = {{"doll", stats.doll}, {"rod", stats.rod}, {"grimoire", stats.grimoire}, {"fan", stats.fan}, {"drops", stats.drops}};
 	std::map<std::string, unsigned char> skillMap;
 
 	for (int i = 0; i < 16; i++) {
@@ -142,20 +134,19 @@ nlohmann::json statsToJson(const Stats &stats)
 	return result;
 }
 
-std::string statsToString(const Stats &stats)
-{
+std::string statsToString(const Stats &stats) {
 	return statsToJson(stats).dump(-1, ' ', true);
 }
 
-void updateCache(bool isMultiplayer)
-{
+void updateCache(bool isMultiplayer) {
 	if (!isPlaying)
 		return;
 
 	auto &battleMgr = SokuLib::getBattleMgr();
 
 	if (needReset) {
-		if (_cache.noReset);
+		if (_cache.noReset)
+			;
 		else if (isMultiplayer) {
 			auto &netObj = SokuLib::getNetObject();
 
@@ -167,11 +158,8 @@ void updateCache(bool isMultiplayer)
 				_cache.realLeftName = netObj.profile1name;
 				_cache.realRightName = netObj.profile2name;
 			}
-		} else if (
-			_cache.realLeftName != SokuLib::player1Profile.operator char *() ||
-			_cache.realRightName != SokuLib::player2Profile.operator char *() ||
-			SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY
-		) {
+		} else if (_cache.realLeftName != SokuLib::player1Profile.operator char *() || _cache.realRightName != SokuLib::player2Profile.operator char *()
+			|| SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) {
 			_cache.leftScore = 0;
 			_cache.rightScore = 0;
 			_cache.leftName = SokuLib::player1Profile;
@@ -201,14 +189,14 @@ void updateCache(bool isMultiplayer)
 		_cache.leftCards.push_back(leftDeck.deck[i]);
 	std::sort(_cache.leftCards.begin(), _cache.leftCards.end());
 
-	//Right remaining cards
+	// Right remaining cards
 	if (rightDeck.deck.size == 20)
 		_cache.rightUsed.clear();
 	for (int i = 0; i < rightDeck.deck.size; i++)
 		_cache.rightCards.push_back(rightDeck.deck[i]);
 	std::sort(_cache.rightCards.begin(), _cache.rightCards.end());
 
-	//Hands
+	// Hands
 	for (int i = 0; i < leftDeck.cardCount; i++)
 		_cache.leftHand.push_back(leftDeck.handCardBase[(i + leftDeck.selectedCard) % leftDeck.handCardMax]->id);
 	for (int i = 0; i < rightDeck.cardCount; i++)
@@ -219,7 +207,7 @@ void updateCache(bool isMultiplayer)
 	auto leftOldSize = oldLeftHand.size();
 	auto rightOldSize = oldRightHand.size();
 
-	//Used cards
+	// Used cards
 	if (oldLeftHand.size() < _cache.leftHand.size())
 		oldLeftHand.clear();
 	if (oldRightHand.size() < _cache.rightHand.size())
@@ -259,10 +247,10 @@ void updateCache(bool isMultiplayer)
 
 	Stats newStats;
 
-	newStats.doll =     battleMgr.leftCharacterManager.sacrificialDolls;
-	newStats.drops =    battleMgr.leftCharacterManager.drops;
-	newStats.rod =      battleMgr.leftCharacterManager.controlRod;
-	newStats.fan =      battleMgr.leftCharacterManager.tenguFans;
+	newStats.doll = battleMgr.leftCharacterManager.sacrificialDolls;
+	newStats.drops = battleMgr.leftCharacterManager.drops;
+	newStats.rod = battleMgr.leftCharacterManager.controlRod;
+	newStats.fan = battleMgr.leftCharacterManager.tenguFans;
 	newStats.grimoire = battleMgr.leftCharacterManager.grimoires;
 	std::memcpy(newStats.skillMap, battleMgr.leftCharacterManager.skillMap, sizeof(newStats.skillMap));
 	if (memcmp(&newStats, &_cache.leftStats, sizeof(newStats)) != 0) {
@@ -271,10 +259,10 @@ void updateCache(bool isMultiplayer)
 			broadcastOpcode(L_STATS_UPDATE, statsToString(newStats));
 	}
 
-	newStats.doll =     battleMgr.rightCharacterManager.sacrificialDolls;
-	newStats.drops =    battleMgr.rightCharacterManager.drops;
-	newStats.rod =      battleMgr.rightCharacterManager.controlRod;
-	newStats.fan =      battleMgr.rightCharacterManager.tenguFans;
+	newStats.doll = battleMgr.rightCharacterManager.sacrificialDolls;
+	newStats.drops = battleMgr.rightCharacterManager.drops;
+	newStats.rod = battleMgr.rightCharacterManager.controlRod;
+	newStats.fan = battleMgr.rightCharacterManager.tenguFans;
 	newStats.grimoire = battleMgr.rightCharacterManager.grimoires;
 	std::memcpy(newStats.skillMap, battleMgr.rightCharacterManager.skillMap, sizeof(newStats.skillMap));
 	if (memcmp(&newStats, &_cache.rightStats, sizeof(newStats)) != 0) {
@@ -292,8 +280,7 @@ void updateCache(bool isMultiplayer)
 	checkKeyInputs();
 }
 
-std::string cacheToJson(CachedMatchData cache)
-{
+std::string cacheToJson(CachedMatchData cache) {
 	nlohmann::json result;
 	std::vector<unsigned short> leftDeck;
 	std::vector<unsigned short> rightDeck;
@@ -310,30 +297,15 @@ std::string cacheToJson(CachedMatchData cache)
 		rightHand = cache.rightHand;
 	}
 
-	result["left"] = {
-		{ "character", cache.left },
-		{ "score",     cache.leftScore },
-		{ "name",      convertShiftJisToUTF8(cache.leftName.c_str()) },
-		{ "used",      cache.leftUsed },
-		{ "deck",      leftDeck },
-		{ "hand",      leftHand },
-		{ "stats",     statsToJson(cache.leftStats) }
-	};
-	result["right"] = {
-		{ "character", cache.right },
-		{ "score",     cache.rightScore },
-		{ "name",      convertShiftJisToUTF8(cache.rightName.c_str()) },
-		{ "used",      cache.rightUsed },
-		{ "deck",      rightDeck },
-		{ "hand",      rightHand },
-		{ "stats",     statsToJson(cache.rightStats) }
-	};
+	result["left"] = {{"character", cache.left}, {"score", cache.leftScore}, {"name", convertShiftJisToUTF8(cache.leftName.c_str())}, {"used", cache.leftUsed},
+		{"deck", leftDeck}, {"hand", leftHand}, {"stats", statsToJson(cache.leftStats)}};
+	result["right"] = {{"character", cache.right}, {"score", cache.rightScore}, {"name", convertShiftJisToUTF8(cache.rightName.c_str())},
+		{"used", cache.rightUsed}, {"deck", rightDeck}, {"hand", rightHand}, {"stats", statsToJson(cache.rightStats)}};
 	result["round"] = cache.round;
 	return result.dump(-1, ' ', true);
 }
 
-std::string generateCardsJson(CachedMatchData cache)
-{
+std::string generateCardsJson(CachedMatchData cache) {
 	nlohmann::json result;
 	std::vector<unsigned short> leftDeck;
 	std::vector<unsigned short> rightDeck;
@@ -351,20 +323,19 @@ std::string generateCardsJson(CachedMatchData cache)
 	}
 
 	result["left"] = {
-		{ "used", cache.leftUsed },
-		{ "deck", leftDeck },
-		{ "hand", leftHand },
+		{"used", cache.leftUsed},
+		{"deck", leftDeck},
+		{"hand", leftHand},
 	};
 	result["right"] = {
-		{ "used", cache.rightUsed },
-		{ "deck", rightDeck },
-		{ "hand", rightHand },
+		{"used", cache.rightUsed},
+		{"deck", rightDeck},
+		{"hand", rightHand},
 	};
 	return result.dump(-1, ' ', true);
 }
 
-std::string generateRightCardsJson(CachedMatchData cache)
-{
+std::string generateRightCardsJson(CachedMatchData cache) {
 	nlohmann::json result;
 	std::vector<unsigned short> rightDeck;
 	std::vector<unsigned short> rightHand;
@@ -377,15 +348,14 @@ std::string generateRightCardsJson(CachedMatchData cache)
 	}
 
 	result = {
-		{ "used", cache.rightUsed },
-		{ "deck", rightDeck },
-		{ "hand", rightHand },
+		{"used", cache.rightUsed},
+		{"deck", rightDeck},
+		{"hand", rightHand},
 	};
 	return result.dump(-1, ' ', true);
 }
 
-std::string generateLeftCardsJson(CachedMatchData cache)
-{
+std::string generateLeftCardsJson(CachedMatchData cache) {
 	nlohmann::json result;
 	std::vector<unsigned short> leftDeck;
 	std::vector<unsigned short> leftHand;
@@ -398,30 +368,25 @@ std::string generateLeftCardsJson(CachedMatchData cache)
 	}
 
 	result = {
-		{ "used", cache.leftUsed },
-		{ "deck", leftDeck },
-		{ "hand", leftHand },
+		{"used", cache.leftUsed},
+		{"deck", leftDeck},
+		{"hand", leftHand},
 	};
 	return result.dump(-1, ' ', true);
 }
 
-void onRoundStart()
-{
+void onRoundStart() {
 	isPlaying = true;
 	_cache.oldLeftScore = 0;
 	_cache.oldRightScore = 0;
 }
 
-void onKO()
-{
+void onKO() {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
 	isPlaying = false;
 
-	if (
-		_cache.oldLeftScore != battleMgr.leftCharacterManager.score ||
-		_cache.oldRightScore != battleMgr.rightCharacterManager.score
-	) {
+	if (_cache.oldLeftScore != battleMgr.leftCharacterManager.score || _cache.oldRightScore != battleMgr.rightCharacterManager.score) {
 		if (battleMgr.leftCharacterManager.score == 2) {
 			_cache.leftScore++;
 			broadcastOpcode(L_SCORE_UPDATE, std::to_string(_cache.leftScore));

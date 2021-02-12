@@ -5,15 +5,14 @@
 #ifndef SWRSTOYS_STATE_HPP
 #define SWRSTOYS_STATE_HPP
 
-
-#include <SokuLib.hpp>
 #include "Network/WebServer.hpp"
+#include <SokuLib.hpp>
 
-struct Title{};
-struct Battle{};
-struct Loading{};
-struct BattleWatch{};
-struct LoadingWatch{};
+struct Title {};
+struct Battle {};
+struct Loading {};
+struct BattleWatch {};
+struct LoadingWatch {};
 
 enum Keys {
 	KEY_DECREASE_L_SCORE,
@@ -36,7 +35,6 @@ struct Stats {
 	SokuLib::Skill skillMap[16];
 };
 
-extern bool enabled;
 extern unsigned short port;
 extern std::vector<unsigned> keys;
 extern std::unique_ptr<WebServer> webServer;
@@ -83,5 +81,4 @@ void checkKeyInputs();
 void onRoundStart();
 void onKO();
 
-
-#endif //SWRSTOYS_STATE_HPP
+#endif // SWRSTOYS_STATE_HPP

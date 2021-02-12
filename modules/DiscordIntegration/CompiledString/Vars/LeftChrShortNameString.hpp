@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_LEFTCHRSHORTNAMESTRING_HPP
 #define SWRSTOYS_LEFTCHRSHORTNAMESTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class LeftChrShortNameString : public CompiledString {
+class LeftChrShortNameString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_LEFTCHRSHORTNAMESTRING_HPP
+#endif // SWRSTOYS_LEFTCHRSHORTNAMESTRING_HPP

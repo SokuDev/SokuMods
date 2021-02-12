@@ -2,11 +2,12 @@
 // Created by Gegel85 on 05/04/2019.
 //
 
+#include "Socket.hpp"
+
+#include "../../SokuStreaming/Network/Socket.hpp"
+#include "../Exceptions.hpp"
 #include <cstring>
 #include <sstream>
-#include "Socket.hpp"
-#include "../Exceptions.hpp"
-#include "../../SokuStreaming/Network/Socket.hpp"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -14,30 +15,26 @@
 #define close(fd) closesocket(fd)
 #endif
 
-
 #ifndef _WIN32
-#	include <netdb.h>
-#	include <arpa/inet.h>
-#	include <sys/select.h>
-	typedef fd_set FD_SET;
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/select.h>
+typedef fd_set FD_SET;
 #endif
 
-Socket::Socket()
-{
+Socket::Socket() {
 #ifdef _WIN32
-	WSADATA			WSAData;
-	WSAStartup(MAKEWORD(2,0), &WSAData);
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 0), &WSAData);
 #endif
 }
 
-Socket::~Socket()
-{
+Socket::~Socket() {
 	close(this->_sockfd);
 }
 
-void Socket::connect(const std::string &host, unsigned short portno)
-{
-	struct hostent	*server;
+void Socket::connect(const std::string &host, unsigned short portno) {
+	struct hostent *server;
 
 	if (this->isOpen())
 		throw AlreadyOpenedException("This socket is already opened");
@@ -54,9 +51,8 @@ void Socket::connect(const std::string &host, unsigned short portno)
 	this->connect(*reinterpret_cast<unsigned *>(server->h_addr), portno);
 }
 
-void Socket::connect(unsigned int ip, unsigned short portno)
-{
-	struct sockaddr_in	serv_addr = {};
+void Socket::connect(unsigned int ip, unsigned short portno) {
+	struct sockaddr_in serv_addr = {};
 
 	if (this->isOpen())
 		throw AlreadyOpenedException("This socket is already opened");
@@ -72,11 +68,10 @@ void Socket::connect(unsigned int ip, unsigned short portno)
 	this->_opened = true;
 }
 
-Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon)
-{
-	std::stringstream	response(respon);
-	HttpResponse		request;
-	std::string		str;
+Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon) {
+	std::stringstream response(respon);
+	HttpResponse request;
+	std::string str;
 
 	response >> request.httpVer;
 	response >> request.returnCode;
@@ -87,7 +82,7 @@ Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon)
 	std::getline(response, request.codeName);
 	request.codeName = request.codeName.substr(1, request.codeName.length() - 2);
 	while (std::getline(response, str) && str.length() > 2) {
-		std::size_t	pos = str.find(':');
+		std::size_t pos = str.find(':');
 
 		request.header[str.substr(0, pos)] = str.substr(pos + 2, str.size() - pos - 3);
 	}
@@ -96,9 +91,8 @@ Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon)
 	return request;
 }
 
-std::string Socket::generateHttpRequest(const Socket::HttpRequest &request)
-{
-	std::stringstream	msg;
+std::string Socket::generateHttpRequest(const Socket::HttpRequest &request) {
+	std::stringstream msg;
 
 	/* fill in the parameters */
 	msg << request.method << " " << request.path << " HTTP/1.0\r\n";
@@ -109,8 +103,7 @@ std::string Socket::generateHttpRequest(const Socket::HttpRequest &request)
 	return msg.str();
 }
 
-Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request)
-{
+Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request) {
 	if (this->isOpen())
 		throw AlreadyOpenedException("This socket is already opened");
 
@@ -125,18 +118,16 @@ Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request)
 	return answer;
 }
 
-void Socket::disconnect()
-{
+void Socket::disconnect() {
 	if (!this->isOpen())
 		throw NotConnectedException("This socket is not opened");
 	close(this->_sockfd);
 	this->_opened = false;
 }
 
-std::string Socket::makeRawRequest(const std::string &host, unsigned short portno, const std::string &content)
-{
-	unsigned	ip;
-	std::string	message;
+std::string Socket::makeRawRequest(const std::string &host, unsigned short portno, const std::string &content) {
+	unsigned ip;
+	std::string message;
 
 	ip = inet_addr(host.c_str());
 	if (ip != INADDR_NONE)
@@ -151,10 +142,9 @@ std::string Socket::makeRawRequest(const std::string &host, unsigned short portn
 	return message;
 }
 
-std::string Socket::read(int size)
-{
+std::string Socket::read(int size) {
 	std::string result;
-	char  buffer[1024];
+	char buffer[1024];
 
 	while (size != 0) {
 		int bytes = recv(this->_sockfd, buffer, (static_cast<unsigned>(size) >= sizeof(buffer)) ? sizeof(buffer) : size, 0);
@@ -171,9 +161,8 @@ std::string Socket::read(int size)
 	return result;
 }
 
-void Socket::send(const std::string &msg)
-{
-	unsigned	pos = 0;
+void Socket::send(const std::string &msg) {
+	unsigned pos = 0;
 
 	while (pos < msg.length()) {
 		int bytes = ::send(this->_sockfd, &msg.c_str()[pos], msg.length() - pos, 0);
@@ -184,14 +173,12 @@ void Socket::send(const std::string &msg)
 	}
 }
 
-std::string Socket::readUntilEOF()
-{
+std::string Socket::readUntilEOF() {
 	return this->read(-1);
 }
 
-bool	Socket::isOpen()
-{
-	FD_SET	set;
+bool Socket::isOpen() {
+	FD_SET set;
 	timeval time = {0, 0};
 
 	FD_ZERO(&set);

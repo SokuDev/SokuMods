@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_STAGENAMESTRING_HPP
 #define SWRSTOYS_STAGENAMESTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class StageNameString : public CompiledString {
+class StageNameString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_STAGENAMESTRING_HPP
+#endif // SWRSTOYS_STAGENAMESTRING_HPP

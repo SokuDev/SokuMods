@@ -2,18 +2,19 @@
 // Created by Gegel85 on 06/04/2019.
 //
 
-#include <windows.h>
-#include <Wincrypt.h>
-#include <sstream>
-#include <iostream>
-#include "../Exceptions.hpp"
 #include "WebSocket.hpp"
+
+#include <windows.h>
+#include "../Exceptions.hpp"
 #include "base64.hpp"
+#include <Wincrypt.h>
+#include <iostream>
+#include <sstream>
 
 #define WEBSOCKET_CODE(code) ((code - 1000 < 0 || code - 1000 > 15) ? ("???") : (codesStrings[code - 1000]))
 #define SHA1LEN 20
 
-const char * const WebSocket::codesStrings[] = {
+const char *const WebSocket::codesStrings[] = {
 	"Normal Closure",
 	"Going Away",
 	"Protocol error",
@@ -32,20 +33,19 @@ const char * const WebSocket::codesStrings[] = {
 	"TLS handshake",
 };
 
-void WebSocket::_establishHandshake(const std::string &host)
-{
-	Socket::HttpRequest	request;
-	Socket::HttpResponse	response;
+void WebSocket::_establishHandshake(const std::string &host) {
+	Socket::HttpRequest request;
+	Socket::HttpResponse response;
 
 	request.host = host;
 	request.path = "/chat";
 	request.method = "GET";
 	request.header = {
-		{"Sec-WebSocket-Key",      "x3JJHMbDL1EzLkh9GBhXDw=="},
-		{"Sec-WebSocket-Version",  "13"},
+		{"Sec-WebSocket-Key", "x3JJHMbDL1EzLkh9GBhXDw=="},
+		{"Sec-WebSocket-Version", "13"},
 		{"Sec-WebSocket-Protocol", "chat, superchat"},
-		{"Upgrade",                "websocket"},
-		{"Connection",             "Upgrade"},
+		{"Upgrade", "websocket"},
+		{"Connection", "Upgrade"},
 	};
 	this->sendHttpRequest(request);
 	response = this->parseHttpResponse(this->getRawAnswer());
@@ -55,16 +55,12 @@ void WebSocket::_establishHandshake(const std::string &host)
 	}
 }
 
-void WebSocket::send(const std::string &value)
-{
+void WebSocket::send(const std::string &value) {
 	std::stringstream stream;
-	std::string	result = value;
-	unsigned	random_value = this->_rand();
-	std::string	key = std::string("") +
-		static_cast<char>((random_value >> 24U) & 0xFFU) +
-		static_cast<char>((random_value >> 16U) & 0xFFU) +
-		static_cast<char>((random_value >> 8U) & 0xFFU) +
-		static_cast<char>(random_value & 0xFFU);
+	std::string result = value;
+	unsigned random_value = this->_rand();
+	std::string key = std::string("") + static_cast<char>((random_value >> 24U) & 0xFFU) + static_cast<char>((random_value >> 16U) & 0xFFU)
+		+ static_cast<char>((random_value >> 8U) & 0xFFU) + static_cast<char>(random_value & 0xFFU);
 
 	if (this->_masks)
 		for (unsigned i = 0; i < result.size(); i++)
@@ -86,8 +82,7 @@ void WebSocket::send(const std::string &value)
 	Socket::send(stream.str());
 }
 
-void WebSocket::_pong(const std::string &validator)
-{
+void WebSocket::_pong(const std::string &validator) {
 	std::stringstream stream;
 	unsigned char byte = 0x8A;
 
@@ -99,8 +94,7 @@ void WebSocket::_pong(const std::string &validator)
 	Socket::send(stream.str());
 }
 
-std::string WebSocket::strictRead(size_t i)
-{
+std::string WebSocket::strictRead(size_t i) {
 	std::string result = this->read(i);
 
 	if (i != result.size())
@@ -108,14 +102,13 @@ std::string WebSocket::strictRead(size_t i)
 	return result;
 }
 
-std::string WebSocket::getAnswer()
-{
-	std::string	result;
-	std::string	key;
-	unsigned long	length;
-	unsigned char	opcode;
-	bool	isMasked;
-	bool	isEnd;
+std::string WebSocket::getAnswer() {
+	std::string result;
+	std::string key;
+	unsigned long length;
+	unsigned char opcode;
+	bool isMasked;
+	bool isEnd;
 
 	if (!this->isOpen())
 		throw NotConnectedException("This socket is not connected to a server");
@@ -129,13 +122,10 @@ std::string WebSocket::getAnswer()
 	length &= 0x7FU;
 
 	if (length == 126)
-		length = (static_cast<unsigned char>(this->strictRead(1)[0]) << 8U) +
-			static_cast<unsigned char>(this->strictRead(1)[0]);
+		length = (static_cast<unsigned char>(this->strictRead(1)[0]) << 8U) + static_cast<unsigned char>(this->strictRead(1)[0]);
 	else if (length == 127)
-		length = (static_cast<unsigned char>(this->strictRead(1)[0]) << 24U) +
-			(static_cast<unsigned char>(this->strictRead(1)[0]) << 16U) +
-			(static_cast<unsigned char>(this->strictRead(1)[0]) << 8U) +
-			static_cast<unsigned char>(this->strictRead(1)[0]);
+		length = (static_cast<unsigned char>(this->strictRead(1)[0]) << 24U) + (static_cast<unsigned char>(this->strictRead(1)[0]) << 16U)
+			+ (static_cast<unsigned char>(this->strictRead(1)[0]) << 8U) + static_cast<unsigned char>(this->strictRead(1)[0]);
 
 	if (isMasked)
 		key = this->strictRead(4);
@@ -162,17 +152,13 @@ std::string WebSocket::getAnswer()
 	return result;
 }
 
-void WebSocket::disconnect()
-{
+void WebSocket::disconnect() {
 	try {
 		std::stringstream stream;
 		std::string result = "\x03\xe8";
 		unsigned random_value = this->_rand();
-		std::string key = std::string() +
-				  static_cast<char>((random_value >> 24U) & 0xFFU) +
-				  static_cast<char>((random_value >> 16U) & 0xFFU) +
-				  static_cast<char>((random_value >> 8U) & 0xFFU) +
-				  static_cast<char>(random_value & 0xFFU);
+		std::string key = std::string() + static_cast<char>((random_value >> 24U) & 0xFFU) + static_cast<char>((random_value >> 16U) & 0xFFU)
+			+ static_cast<char>((random_value >> 8U) & 0xFFU) + static_cast<char>(random_value & 0xFFU);
 
 		for (unsigned i = 0; i < result.size(); i++)
 			result[i] = result[i] ^ key[i % 4];
@@ -184,36 +170,26 @@ void WebSocket::disconnect()
 	}
 }
 
-std::string WebSocket::getRawAnswer()
-{
+std::string WebSocket::getRawAnswer() {
 	return Socket::readUntilEOF();
 }
 
-void WebSocket::sendHttpRequest(const Socket::HttpRequest &request)
-{
+void WebSocket::sendHttpRequest(const Socket::HttpRequest &request) {
 	std::string requestString = generateHttpRequest(request);
 
 	Socket::send(requestString);
 }
 
-void WebSocket::connect(const std::string &host, unsigned short portno)
-{
+void WebSocket::connect(const std::string &host, unsigned short portno) {
 	Socket::connect(host, portno);
 	this->_establishHandshake(host);
 }
 
-WebSocket::WebSocket(const Socket &sock) :
-	Socket(sock)
-{
-}
+WebSocket::WebSocket(const Socket &sock): Socket(sock) {}
 
-WebSocket::WebSocket(const Socket &&sock) :
-	Socket(sock)
-{
-}
+WebSocket::WebSocket(const Socket &&sock): Socket(sock) {}
 
-Socket::HttpResponse WebSocket::solveHandshake(const Socket::HttpRequest &request)
-{
+Socket::HttpResponse WebSocket::solveHandshake(const Socket::HttpRequest &request) {
 	Socket::HttpRequest requ = request;
 	HttpResponse response;
 
@@ -230,15 +206,13 @@ Socket::HttpResponse WebSocket::solveHandshake(const Socket::HttpRequest &reques
 	return response;
 }
 
-std::string WebSocket::_solveHandshakeToken(const std::string &token)
-{
+std::string WebSocket::_solveHandshakeToken(const std::string &token) {
 	if (token.empty())
 		throw AbortConnectionException(400);
 	return base64::encode(hashString(token + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));
 }
 
-std::vector<unsigned char> WebSocket::hashString(const std::string &str)
-{
+std::vector<unsigned char> WebSocket::hashString(const std::string &str) {
 	HCRYPTPROV hProv = 0;
 	HCRYPTHASH hHash = 0;
 	DWORD cbRead = 0;
@@ -274,19 +248,15 @@ std::vector<unsigned char> WebSocket::hashString(const std::string &str)
 	return {rgbHash, rgbHash + 20};
 }
 
-WebSocket &WebSocket::operator=(const WebSocket &s)
-{
+WebSocket &WebSocket::operator=(const WebSocket &s) {
 	Socket::operator=(s);
 	return *this;
 }
 
-WebSocket::WebSocket(const WebSocket &s) :
-	WebSocket(static_cast<Socket>(s))
-{
+WebSocket::WebSocket(const WebSocket &s): WebSocket(static_cast<Socket>(s)) {
 	this->_masks = s._masks;
 }
 
-void WebSocket::needsMask(bool masks)
-{
+void WebSocket::needsMask(bool masks) {
 	this->_masks = masks;
 }

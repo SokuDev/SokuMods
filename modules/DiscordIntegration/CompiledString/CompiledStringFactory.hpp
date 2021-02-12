@@ -5,11 +5,10 @@
 #ifndef SWRSTOYS_COMPILEDSTRINGFACTORY_HPP
 #define SWRSTOYS_COMPILEDSTRINGFACTORY_HPP
 
-
-#include <memory>
-#include <map>
-#include <functional>
 #include "CompiledString.hpp"
+#include <functional>
+#include <map>
+#include <memory>
 
 class CompiledStringFactory {
 private:
@@ -21,5 +20,4 @@ public:
 	static std::shared_ptr<CompiledString> compileString(const std::string &str);
 };
 
-
-#endif //SWRSTOYS_COMPILEDSTRINGFACTORY_HPP
+#endif // SWRSTOYS_COMPILEDSTRINGFACTORY_HPP

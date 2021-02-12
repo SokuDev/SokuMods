@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_OPPONENTWRSTRING_HPP
 #define SWRSTOYS_OPPONENTWRSTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class OpponentWRString : public CompiledString {
+class OpponentWRString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_OPPONENTWRSTRING_HPP
+#endif // SWRSTOYS_OPPONENTWRSTRING_HPP

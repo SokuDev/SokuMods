@@ -5,11 +5,10 @@
 #ifndef SWRSTOYS_COMPLEXCOMPILEDSTRING_HPP
 #define SWRSTOYS_COMPLEXCOMPILEDSTRING_HPP
 
-
-#include <memory>
 #include "CompiledString.hpp"
+#include <memory>
 
-class ComplexCompiledString : public CompiledString {
+class ComplexCompiledString: public CompiledString {
 private:
 	std::shared_ptr<CompiledString> _left;
 	std::shared_ptr<CompiledString> _right;
@@ -20,5 +19,4 @@ public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_COMPLEXCOMPILEDSTRING_HPP
+#endif // SWRSTOYS_COMPLEXCOMPILEDSTRING_HPP

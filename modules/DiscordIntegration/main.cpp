@@ -2,20 +2,20 @@
 // Created by Gegel85 on 31/10/2020
 //
 
-#include <thread>
-#include <ctime>
-#include <string>
-#include <array>
-#include <discord.h>
-#include <shlwapi.h>
-#include <SokuLib.hpp>
-#include <nlohmann/json.hpp>
-#include <fstream>
 #include "CompiledString/CompiledStringFactory.hpp"
 #include "CompiledString/Vars/vars.hpp"
-#include "logger.hpp"
 #include "Exceptions.hpp"
 #include "Network/getPublicIp.hpp"
+#include "logger.hpp"
+#include "nlohmann/json.hpp"
+#include <SokuLib.hpp>
+#include <array>
+#include <ctime>
+#include <discord.h>
+#include <fstream>
+#include <shlwapi.h>
+#include <string>
+#include <thread>
 
 enum StringIndex {
 	STRING_INDEX_LOGO,
@@ -100,9 +100,7 @@ struct StringConfig {
 };
 struct Config {
 	std::vector<StringConfig> strings;
-	bool enabled = false;
 	time_t refreshRate = 0;
-	unsigned long long clientId = 0;
 };
 struct State {
 	unsigned host = 0;
@@ -163,8 +161,7 @@ static const std::vector<const char *> discordResultToString{
 	"TransactionAborted",
 };
 
-void updateActivity(StringIndex index, unsigned party)
-{
+void updateActivity(StringIndex index, unsigned party) {
 	if (index >= config.strings.size())
 		return;
 
@@ -215,8 +212,7 @@ void updateActivity(StringIndex index, unsigned party)
 	});
 }
 
-void getActivityParams(StringIndex &index, unsigned &party)
-{
+void getActivityParams(StringIndex &index, unsigned &party) {
 	party = 0;
 
 	switch (SokuLib::sceneId) {
@@ -319,7 +315,7 @@ void getActivityParams(StringIndex &index, unsigned &party)
 		return;
 	case SokuLib::SCENE_SELECTSENARIO:
 		state.host = 0;
-		//STRING_INDEX_SELECT_ARCADE;
+		// STRING_INDEX_SELECT_ARCADE;
 		index = STRING_INDEX_SELECT_STORY;
 		return;
 	case SokuLib::SCENE_ENDING:
@@ -346,24 +342,15 @@ void getActivityParams(StringIndex &index, unsigned &party)
 			return;
 		}
 
-		if ((
-			menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
-			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-			menuObj->subchoice == 3
-		) || (
-			menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
-			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-			menuObj->subchoice == 255
-		)) {
+		if ((menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
+					&& menuObj->subchoice == 3)
+			|| (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)) {
 			if (state.host != 2)
 				state.totalTimestamp = time(nullptr);
 			state.host = 2;
 			index = STRING_INDEX_CONNECTING;
 			party = 2;
-		} else if (
-			menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
-			menuObj->subchoice == 2
-		) {
+		} else if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2) {
 			if (state.host != 1)
 				state.totalTimestamp = time(nullptr);
 			state.host = 1;
@@ -374,8 +361,7 @@ void getActivityParams(StringIndex &index, unsigned &party)
 	}
 }
 
-void titleScreenStateUpdate()
-{
+void titleScreenStateUpdate() {
 	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
 	if (!SokuLib::isInNetworkMenu()) {
@@ -383,32 +369,23 @@ void titleScreenStateUpdate()
 		return;
 	}
 
-	if ((
-		menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
-		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 3
-	) || (
-		menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-		menuObj->subchoice == 255
-	)) {
+	if ((menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
+				&& menuObj->subchoice == 3)
+		|| (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)) {
 		if (state.roomIp.empty())
 			state.roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
-	} else if (
-		menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
-		menuObj->subchoice == 2
-	) {
+	} else if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2) {
 		if (state.roomIp.empty())
 			try {
 				state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
-			} catch (...) {}
+			} catch (...) {
+			}
 		logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", state.roomIp.c_str(), menuObj->spectate ? "" : "not ");
 	} else if (!state.roomIp.empty())
 		state.roomIp.clear();
 }
 
-void updateState()
-{
+void updateState() {
 	switch (SokuLib::sceneId) {
 	case SokuLib::SCENE_SELECT:
 	case SokuLib::SCENE_SELECTSV:
@@ -417,7 +394,7 @@ void updateState()
 	case SokuLib::SCENE_LOADINGSV:
 	case SokuLib::SCENE_LOADINGCL:
 	case SokuLib::SCENE_LOADINGWATCH:
-		wins.first  += state.won.first  == 2;
+		wins.first += state.won.first == 2;
 		wins.second += state.won.second == 2;
 		state.won = {0, 0};
 		break;
@@ -451,8 +428,7 @@ void updateState()
 	}
 }
 
-void tick()
-{
+void tick() {
 	StringIndex index;
 	unsigned party = 0;
 
@@ -462,23 +438,23 @@ void tick()
 	updateActivity(index, party);
 }
 
-class MyThread : public std::thread {
+class MyThread: public std::thread {
 private:
 	bool _done;
 	int _connectTimeout = 1;
 
 public:
-	bool isDone() const { return this->_done; }
-	template<typename ...Args>
-	MyThread() : std::thread() {};
+	bool isDone() const {
+		return this->_done;
+	}
+	template<typename... Args> MyThread(): std::thread(){};
 	~MyThread() {
 		this->_done = true;
 		if (this->joinable())
 			this->join();
 	}
 
-	static void onActivityJoin(const char *sec)
-	{
+	static void onActivityJoin(const char *sec) {
 		logMessagef("Got activity join with payload %s\n", sec);
 
 		auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
@@ -495,40 +471,25 @@ public:
 		} else
 			logMessage("Already in connect screen\n");
 
-		if (
-			menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT &&
-			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-			menuObj->subchoice == 3
-		)
+		if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
+			&& menuObj->subchoice == 3)
 			return;
-		if (
-			menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST &&
-			menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE &&
-			menuObj->subchoice == 255
-		)
+		if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)
 			return;
-		if (
-			menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST &&
-			menuObj->subchoice == 2
-		)
+		if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2)
 			return;
 
 		logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-		SokuLib::joinHost(
-			ip.c_str(),
-			port,
-			isSpec
-		);
+		SokuLib::joinHost(ip.c_str(), port, isSpec);
 		state.roomIp = ip + ":" + std::to_string(port);
 	}
 
-	void init()
-	{
+	void init() {
 		logMessage("Connecting to discord client...\n");
 		discord::Result result;
 
 		do {
-			result = discord::Core::Create(config.clientId, DiscordCreateFlags_NoRequireDiscord, &state.core);
+			result = discord::Core::Create(atoll(ClientID), DiscordCreateFlags_NoRequireDiscord, &state.core);
 
 			if (result != discord::Result::Ok) {
 				logMessagef("Error connecting to discord: %s\n", discordResultToString[static_cast<unsigned>(result)]);
@@ -542,8 +503,7 @@ public:
 		state.core->ActivityManager().OnActivityJoin.Connect(MyThread::onActivityJoin);
 	}
 
-	void run() const
-	{
+	void run() const {
 		logMessage("Entering loop\n");
 		while (!this->isDone()) {
 			auto currentScene = SokuLib::sceneId;
@@ -577,8 +537,7 @@ public:
 };
 static MyThread updateThread;
 
-void loadJsonStrings(const std::string &path)
-{
+void loadJsonStrings(const std::string &path) {
 	std::ifstream stream{path};
 	nlohmann::json value;
 
@@ -606,33 +565,20 @@ void loadJsonStrings(const std::string &path)
 		StringConfig cfg;
 
 		logMessagef("Loading elem %s %s\n", elem, val.dump().c_str());
-		cfg.timestamp     = val.contains("has_timer") && val["has_timer"].get<bool>();
+		cfg.timestamp = val.contains("has_timer") && val["has_timer"].get<bool>();
 		cfg.set_timestamp = val.contains("has_set_length_timer") && val["has_set_length_timer"].get<bool>();
-		cfg.title         = val.contains("title") ?
-		                    CompiledStringFactory::compileString(val["title"]) :
-		                    nullptr;
-		cfg.description   = val.contains("description") ?
-		                    CompiledStringFactory::compileString(val["description"]) :
-		                    nullptr;
-		cfg.large_image   = val.contains("image") ?
-		                    CompiledStringFactory::compileString(val["image"]) :
-		                    nullptr;
-		cfg.small_image   = val.contains("small_image") ?
-		                    CompiledStringFactory::compileString(val["small_image"]) :
-		                    nullptr;
-		cfg.large_text    = val.contains("image_text") ?
-		                    CompiledStringFactory::compileString(val["image_text"]) :
-		                    nullptr;
-		cfg.small_text    = val.contains("small_image_text") ?
-		                    CompiledStringFactory::compileString(val["small_image_text"]) :
-		                    nullptr;
+		cfg.title = val.contains("title") ? CompiledStringFactory::compileString(val["title"]) : nullptr;
+		cfg.description = val.contains("description") ? CompiledStringFactory::compileString(val["description"]) : nullptr;
+		cfg.large_image = val.contains("image") ? CompiledStringFactory::compileString(val["image"]) : nullptr;
+		cfg.small_image = val.contains("small_image") ? CompiledStringFactory::compileString(val["small_image"]) : nullptr;
+		cfg.large_text = val.contains("image_text") ? CompiledStringFactory::compileString(val["image_text"]) : nullptr;
+		cfg.small_text = val.contains("small_image_text") ? CompiledStringFactory::compileString(val["small_image_text"]) : nullptr;
 		config.strings.push_back(cfg);
 	}
 }
 
 // �ݒ胍�[�h
-void LoadSettings(LPCSTR profilePath)
-{
+void LoadSettings(LPCSTR profilePath) {
 	int i;
 	char buffer[64];
 	char file[MAX_PATH];
@@ -641,11 +587,7 @@ void LoadSettings(LPCSTR profilePath)
 	wchar_t localw[LOCALE_NAME_MAX_LENGTH];
 
 	logMessage("Loading settings...\n");
-	// �����V���b�g�_�E��
-	config.enabled = GetPrivateProfileInt("DiscordIntegration", "Enabled", 1, profilePath) != 0;
 	config.refreshRate = GetPrivateProfileInt("DiscordIntegration", "RefreshTime", 1000, profilePath);
-	GetPrivateProfileString("DiscordIntegration", "ClientID", ClientID, buffer, sizeof(buffer), profilePath);
-	config.clientId = atoll(buffer);
 
 	auto ret = GetPrivateProfileString("DiscordIntegration", "InviteIp", "", buffer, sizeof(buffer), profilePath);
 
@@ -657,7 +599,7 @@ void LoadSettings(LPCSTR profilePath)
 	PathRemoveFileSpec(path);
 	PathAppend(path, file);
 
-	logMessagef("Enabled: %s\nClientID: %llu\nInviteIp: %s\nFile: %s", config.enabled ? "true" : "false", config.clientId, myIp, path);
+	logMessagef("ClientID: %llu\nInviteIp: %s\nFile: %s", ClientID, myIp, path);
 
 	try {
 		if (ret) {
@@ -665,7 +607,8 @@ void LoadSettings(LPCSTR profilePath)
 			return;
 		}
 	} catch (std::exception &e) {
-		MessageBoxA(nullptr, ("Cannot load file " + std::string(path) + ": " + e.what() + "\nFalling back to default files...").c_str(), "Loading error", MB_ICONWARNING);
+		MessageBoxA(
+			nullptr, ("Cannot load file " + std::string(path) + ": " + e.what() + "\nFalling back to default files...").c_str(), "Loading error", MB_ICONWARNING);
 	}
 
 	strcpy(path, profilePath);
@@ -697,16 +640,11 @@ void LoadSettings(LPCSTR profilePath)
 	}
 }
 
-extern "C"
-__declspec(dllexport) bool CheckVersion(const BYTE hash[16])
-{
+extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
 
-extern "C"
-__declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
-{
-	bool &_en = config.enabled;
+extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	char profilePath[1024 + MAX_PATH];
 
 	initLogger();
@@ -717,28 +655,23 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	PathAppend(profilePath, "DiscordIntegration.ini");
 	LoadSettings(profilePath);
 
-	//DWORD old;
+	// DWORD old;
 	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
-	//s_origCLogo_OnProcess   = TamperDword(vtbl_CLogo   + 4, (DWORD)CLogo_OnProcess);
-	//s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
-	//s_origCBattleSV_OnProcess = TamperDword(vtbl_CBattleSV + 4, (DWORD)CBattleSV_OnProcess);
-	//s_origCBattleCL_OnProcess = TamperDword(vtbl_CBattleCL + 4, (DWORD)CBattleCL_OnProcess);
-	//s_origCTitle_OnProcess  = TamperDword(vtbl_CTitle  + 4, (DWORD)CTitle_OnProcess);
-	//s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
+	// s_origCLogo_OnProcess   = TamperDword(vtbl_CLogo   + 4, (DWORD)CLogo_OnProcess);
+	// s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
+	// s_origCBattleSV_OnProcess = TamperDword(vtbl_CBattleSV + 4, (DWORD)CBattleSV_OnProcess);
+	// s_origCBattleCL_OnProcess = TamperDword(vtbl_CBattleCL + 4, (DWORD)CBattleCL_OnProcess);
+	// s_origCTitle_OnProcess  = TamperDword(vtbl_CTitle  + 4, (DWORD)CTitle_OnProcess);
+	// s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
 	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
-	if (config.enabled)
-		updateThread.start();
-	else
-		logMessage("Disabled ;(\n");
+	updateThread.start();
 	logMessage("Done...\n");
 	return true;
 }
 
-extern "C"
-int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
-{
+extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 	return TRUE;
 }

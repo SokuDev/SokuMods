@@ -4,12 +4,8 @@
 
 #include "BasicCompiledString.hpp"
 
-BasicCompiledString::BasicCompiledString(const std::string &&str) :
-	_value(str)
-{
-}
+BasicCompiledString::BasicCompiledString(const std::string &&str): _value(str) {}
 
-std::string BasicCompiledString::getString() const
-{
+std::string BasicCompiledString::getString() const {
 	return this->_value;
 }

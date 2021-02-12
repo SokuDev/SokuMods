@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_LEFTCHRIMGSTRING_HPP
 #define SWRSTOYS_LEFTCHRIMGSTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class LeftChrImgString : public CompiledString {
+class LeftChrImgString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_LEFTCHRIMGSTRING_HPP
+#endif // SWRSTOYS_LEFTCHRIMGSTRING_HPP

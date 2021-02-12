@@ -5,12 +5,10 @@
 #ifndef HISOUTENSOKUDISCORDINTEGRATION_SHIFTJISDECODER_HPP
 #define HISOUTENSOKUDISCORDINTEGRATION_SHIFTJISDECODER_HPP
 
-
-#include <string>
 #include <map>
+#include <string>
 
 std::string convertShiftJisToUTF8(const char *str);
 extern const std::map<unsigned short, unsigned short> convTable;
 
-
-#endif //HISOUTENSOKUDISCORDINTEGRATION_SHIFTJISDECODER_HPP
+#endif // HISOUTENSOKUDISCORDINTEGRATION_SHIFTJISDECODER_HPP

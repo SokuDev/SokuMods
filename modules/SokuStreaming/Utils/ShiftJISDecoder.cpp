@@ -4,12 +4,11 @@
 
 #include "ShiftJISDecoder.hpp"
 
-std::string convertShiftJisToUTF8(const char *str)
-{
+std::string convertShiftJisToUTF8(const char *str) {
 	std::string output;
 	auto bytes = reinterpret_cast<const unsigned char *>(str);
 
-	output.reserve(3 * strlen(str)); //ShiftJis won't give 4byte UTF8, so max. 3 byte per input char are needed
+	output.reserve(3 * strlen(str)); // ShiftJis won't give 4byte UTF8, so max. 3 byte per input char are needed
 	for (size_t indexInput = 0; str[indexInput]; indexInput++) {
 		unsigned char arraySection = (bytes[indexInput] >> 4U);
 		unsigned short arrayOffset;
@@ -19,12 +18,12 @@ std::string convertShiftJisToUTF8(const char *str)
 			indexInput++;
 			arrayOffset |= bytes[indexInput];
 		} else
-			arrayOffset = bytes[indexInput]; //this is one byte shiftjis
+			arrayOffset = bytes[indexInput]; // this is one byte shiftjis
 
-		//unicode number is...
+		// unicode number is...
 		uint16_t unicodeValue = convTable.at(arrayOffset);
 
-		//converting to UTF8
+		// converting to UTF8
 		if (unicodeValue < 0x80) {
 			output.push_back(unicodeValue);
 		} else if (unicodeValue < 0x800) {
@@ -37,7 +36,7 @@ std::string convertShiftJisToUTF8(const char *str)
 		}
 	}
 
-	output.shrink_to_fit(); //remove the unnecessary bytes
+	output.shrink_to_fit(); // remove the unnecessary bytes
 	return output;
 }
 

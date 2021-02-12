@@ -3,14 +3,14 @@
 //
 
 #include "getPublicIp.hpp"
+
+#include "../Exceptions.hpp"
 #include "../logger.hpp"
 #include "Socket.hpp"
-#include "../Exceptions.hpp"
 
 char *myIp = nullptr;
 
-const char *getMyIp()
-{
+const char *getMyIp() {
 	if (myIp)
 		return myIp;
 	logMessage("Fetching public IP\n");
@@ -18,12 +18,12 @@ const char *getMyIp()
 	try {
 		Socket sock;
 		Socket::HttpRequest request{
-			/*.body  */  "",
-			/*.method*/  "GET",
-			/*.host  */  "www.sfml-dev.org",
-			/*.portno*/  80,
-			/*.header*/  {},
-			/*.path  */  "/ip-provider.php",
+			/*.body  */ "",
+			/*.method*/ "GET",
+			/*.host  */ "www.sfml-dev.org",
+			/*.portno*/ 80,
+			/*.header*/ {},
+			/*.path  */ "/ip-provider.php",
 		};
 		auto response = sock.makeHttpRequest(request);
 

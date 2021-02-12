@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_MYCHRSHORTNAMESTRING_HPP
 #define SWRSTOYS_MYCHRSHORTNAMESTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class MyChrShortNameString : public CompiledString {
+class MyChrShortNameString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_MYCHRSHORTNAMESTRING_HPP
+#endif // SWRSTOYS_MYCHRSHORTNAMESTRING_HPP

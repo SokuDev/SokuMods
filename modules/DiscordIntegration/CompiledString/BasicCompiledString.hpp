@@ -5,10 +5,9 @@
 #ifndef SWRSTOYS_BASICCOMPILEDSTRING_HPP
 #define SWRSTOYS_BASICCOMPILEDSTRING_HPP
 
-
 #include "CompiledString.hpp"
 
-class BasicCompiledString : public CompiledString {
+class BasicCompiledString: public CompiledString {
 private:
 	std::string _value;
 
@@ -17,5 +16,4 @@ public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_BASICCOMPILEDSTRING_HPP
+#endif // SWRSTOYS_BASICCOMPILEDSTRING_HPP

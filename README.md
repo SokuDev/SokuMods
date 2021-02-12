@@ -13,7 +13,7 @@ The code in this repository comes from various contributors:
 - *DPhoenix* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
 - *fishshapedfish* made DPadFix
-- *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton
+- *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
 - *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Shinki* and *PC_volt* made ReplayInputView+
@@ -73,7 +73,9 @@ For now **it is recommended you use the SWRSToys pack**.
 
 **Automatically show your game status in Discord, send Soku invites and join games with one click on Discord.**
 
-See [here](modules/DiscordIntegration/README.md) for details. (Needs an update.)
+*The mod merely sends and receives IP addresses from Discord, you'll still need to forward your ports or use Autopunch.*
+
+See [here](modules/DiscordIntegration/README.md) for details.
 
 ### DPadFix
 
@@ -132,6 +134,12 @@ Available patches:
 ### SkipIntro
 
 **Skip the game intro screen, automatically enter a menu or a custom practice preset on start.**
+
+### SokuStreaming
+
+**Automatically create an overlay with useful information for streaming, usable from a browser or from OBS Studio.**
+
+*To use the mod, start playing or spectating, and in OBS Studio, add a Browser Capture at URL `http://localhost` with resolution 1920 x 1080.*
 
 ### SWRSokuRoll
 

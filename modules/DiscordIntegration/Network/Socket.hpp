@@ -5,16 +5,15 @@
 #ifndef DISC_ORD_SOCKET_HPP
 #define DISC_ORD_SOCKET_HPP
 
-
 #if defined _WIN32
-#	include <winsock.h>
+#include <winsock.h>
 #else
-#	include <sys/socket.h>
-#	define INVALID_SOCKET -1
-	typedef int SOCKET;
+#include <sys/socket.h>
+#define INVALID_SOCKET -1
+typedef int SOCKET;
 #endif
-#include <string>
 #include <map>
+#include <string>
 
 //! @brief Define a Socket
 class Socket {
@@ -64,7 +63,7 @@ public:
 
 	//! @brief Send a message
 	//! @param msg The message to send.
-	virtual void		send(const std::string &msg);
+	virtual void send(const std::string &msg);
 
 	//! @brief Read the Socket buffer.
 	//! @param size How much must be read.
@@ -94,7 +93,9 @@ public:
 
 	//! @brief Return the socket value.
 	//! @return SOCKET
-	SOCKET getSockFd() { return this->_sockfd; };
+	SOCKET getSockFd() {
+		return this->_sockfd;
+	};
 
 protected:
 	SOCKET _sockfd = INVALID_SOCKET; //!< The socket
@@ -106,4 +107,4 @@ protected:
 	HttpResponse parseHttpResponse(const std::string &respon);
 };
 
-#endif //DISC_ORD_SOCKET_HPP
+#endif // DISC_ORD_SOCKET_HPP

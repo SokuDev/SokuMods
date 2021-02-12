@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_OPPONENTCHRSHORTNAMESTRING_HPP
 #define SWRSTOYS_OPPONENTCHRSHORTNAMESTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class OpponentChrShortNameString : public CompiledString {
+class OpponentChrShortNameString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_OPPONENTCHRSHORTNAMESTRING_HPP
+#endif // SWRSTOYS_OPPONENTCHRSHORTNAMESTRING_HPP

@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_RIGHTPROFILENAMESTRING_HPP
 #define SWRSTOYS_RIGHTPROFILENAMESTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class RightProfileNameString : public CompiledString {
+class RightProfileNameString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_RIGHTPROFILENAMESTRING_HPP
+#endif // SWRSTOYS_RIGHTPROFILENAMESTRING_HPP

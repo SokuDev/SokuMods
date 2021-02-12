@@ -2,16 +2,16 @@
 // Created by Gegel85 on 31/10/2020.
 //
 
+#include "logger.hpp"
+
+#include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <cstdarg>
 #include <shlwapi.h>
-#include "logger.hpp"
 
 static FILE *logFile;
 
-void initLogger()
-{
+void initLogger() {
 #ifdef _DEBUG
 	FILE *_;
 
@@ -22,8 +22,7 @@ void initLogger()
 #endif
 }
 
-void logMessage(const char *msg)
-{
+void logMessage(const char *msg) {
 #ifdef _DEBUG
 	fwrite(msg, 1, strlen(msg), stdout);
 	logFile = fopen(LOG_FILE, "a");
@@ -32,8 +31,7 @@ void logMessage(const char *msg)
 #endif
 }
 
-void logMessagef(const char *format, ...)
-{
+void logMessagef(const char *format, ...) {
 	va_list list;
 
 #ifdef _DEBUG

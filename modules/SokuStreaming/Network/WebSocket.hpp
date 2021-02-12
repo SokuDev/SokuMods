@@ -5,11 +5,10 @@
 #ifndef DISC_ORD_WebSocket_HPP
 #define DISC_ORD_WebSocket_HPP
 
-
-#include <random>
 #include "Socket.hpp"
+#include <random>
 
-class WebSocket : public Socket {
+class WebSocket: public Socket {
 private:
 	bool _masks = true;
 	std::random_device _rand;
@@ -19,7 +18,7 @@ private:
 	static std::string _solveHandshakeToken(const std::string &token);
 
 public:
-	static const char * const codesStrings[];
+	static const char *const codesStrings[];
 
 	WebSocket(const WebSocket &);
 	explicit WebSocket(const Socket &);
@@ -41,5 +40,4 @@ public:
 	WebSocket &operator=(const WebSocket &);
 };
 
-
-#endif //DISC_ORD_WebSocket_HPP
+#endif // DISC_ORD_WebSocket_HPP

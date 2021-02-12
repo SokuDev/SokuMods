@@ -2,11 +2,12 @@
 // Created by PinkySmile on 04/12/2020.
 //
 
-#include <csignal>
-#include <iostream>
-#include <fstream>
 #include "WebServer.hpp"
+
 #include "../Exceptions.hpp"
+#include <csignal>
+#include <fstream>
+#include <iostream>
 
 const std::map<std::string, std::string> WebServer::types{
 	{"txt", "text/plain"},
@@ -31,118 +32,108 @@ const std::map<std::string, std::string> WebServer::types{
 };
 
 const std::map<unsigned short, std::string> WebServer::codes{
-	{ 100, "Continue"},
-	{ 101, "Switching Protocols" },
-	{ 102, "Processing" },
-	{ 103, "Early Hints" },
-	{ 200, "OK" },
-	{ 201, "Created" },
-	{ 202, "Accepted" },
-	{ 203, "Non-Authoritative Information" },
-	{ 204, "No Content" },
-	{ 205, "Reset Content" },
-	{ 206, "Partial Content" },
-	{ 207, "Multi-Status" },
-	{ 208, "Already Reported" },
-	{ 210, "Content Different" },
-	{ 226, "IM Used" },
-	{ 300, "Multiple Choices" },
-	{ 301, "Moved Permanently" },
-	{ 302, "Found" },
-	{ 303, "See Other" },
-	{ 304, "Not Modified" },
-	{ 305, "Use Proxy" },
-	{ 306, "Switch Proxy" },
-	{ 307, "Temporary Redirect" },
-	{ 308, "Permanent Redirect" },
-	{ 310, "Too many Redirects" },
-	{ 400, "Bad Request" },
-	{ 401, "Unauthorized" },
-	{ 402, "Payment Required" },
-	{ 403, "Forbidden" },
-	{ 404, "Not Found" },
-	{ 405, "Method Not Allowed" },
-	{ 406, "Not Acceptable" },
-	{ 407, "Proxy Authentication Required" },
-	{ 408, "Request Time-out" },
-	{ 409, "Conflict" },
-	{ 410, "Gone" },
-	{ 411, "Length Required" },
-	{ 412, "Precondition Failed" },
-	{ 413, "Request Entity Too Large" },
-	{ 414, "Request-URI Too Long" },
-	{ 415, "Unsupported Media Type" },
-	{ 416, "Requested range unsatisfiable" },
-	{ 417, "Expectation failed" },
-	{ 418, "I’m a teapot" },
-	{ 421, "Misdirected Request" },
-	{ 425, "Too Early" },
-	{ 426, "Upgrade Required" },
-	{ 428, "Precondition Required" },
-	{ 429, "Too Many Requests" },
-	{ 431, "Request Header Fields Too Large" },
-	{ 451, "Unavailable For Legal Reasons" },
-	{ 500, "Internal Server Error" },
-	{ 501, "Not Implemented" },
-	{ 502, "Bad Gateway" },
-	{ 503, "Service Unavailable" },
-	{ 504, "Gateway Time-out" },
-	{ 505, "HTTP Version not supported" },
-	{ 506, "Variant Also Negotiates" },
-	{ 509, "Bandwidth Limit Exceeded" },
-	{ 510, "Not extended" },
-	{ 511, "Network authentication required" },
+	{100, "Continue"},
+	{101, "Switching Protocols"},
+	{102, "Processing"},
+	{103, "Early Hints"},
+	{200, "OK"},
+	{201, "Created"},
+	{202, "Accepted"},
+	{203, "Non-Authoritative Information"},
+	{204, "No Content"},
+	{205, "Reset Content"},
+	{206, "Partial Content"},
+	{207, "Multi-Status"},
+	{208, "Already Reported"},
+	{210, "Content Different"},
+	{226, "IM Used"},
+	{300, "Multiple Choices"},
+	{301, "Moved Permanently"},
+	{302, "Found"},
+	{303, "See Other"},
+	{304, "Not Modified"},
+	{305, "Use Proxy"},
+	{306, "Switch Proxy"},
+	{307, "Temporary Redirect"},
+	{308, "Permanent Redirect"},
+	{310, "Too many Redirects"},
+	{400, "Bad Request"},
+	{401, "Unauthorized"},
+	{402, "Payment Required"},
+	{403, "Forbidden"},
+	{404, "Not Found"},
+	{405, "Method Not Allowed"},
+	{406, "Not Acceptable"},
+	{407, "Proxy Authentication Required"},
+	{408, "Request Time-out"},
+	{409, "Conflict"},
+	{410, "Gone"},
+	{411, "Length Required"},
+	{412, "Precondition Failed"},
+	{413, "Request Entity Too Large"},
+	{414, "Request-URI Too Long"},
+	{415, "Unsupported Media Type"},
+	{416, "Requested range unsatisfiable"},
+	{417, "Expectation failed"},
+	{418, "I’m a teapot"},
+	{421, "Misdirected Request"},
+	{425, "Too Early"},
+	{426, "Upgrade Required"},
+	{428, "Precondition Required"},
+	{429, "Too Many Requests"},
+	{431, "Request Header Fields Too Large"},
+	{451, "Unavailable For Legal Reasons"},
+	{500, "Internal Server Error"},
+	{501, "Not Implemented"},
+	{502, "Bad Gateway"},
+	{503, "Service Unavailable"},
+	{504, "Gateway Time-out"},
+	{505, "HTTP Version not supported"},
+	{506, "Variant Also Negotiates"},
+	{509, "Bandwidth Limit Exceeded"},
+	{510, "Not extended"},
+	{511, "Network authentication required"},
 };
 
-void WebServer::addRoute(const std::string &&route, std::function<Socket::HttpResponse(const Socket::HttpRequest &)> &&fct)
-{
+void WebServer::addRoute(const std::string &&route, std::function<Socket::HttpResponse(const Socket::HttpRequest &)> &&fct) {
 	this->_routes[route] = fct;
 }
 
-void WebServer::addStaticFolder(const std::string &&route, const std::string &&path)
-{
+void WebServer::addStaticFolder(const std::string &&route, const std::string &&path) {
 	this->_folders[route] = path;
 }
 
-void WebServer::start(unsigned short port)
-{
+void WebServer::start(unsigned short port) {
 	this->_sock.bind(port);
 	std::cout << "Started server on port " << port << std::endl;
-	this->_thread = std::thread([this]{
+	this->_thread = std::thread([this] {
 		while (!this->_closed)
 			this->_serverLoop();
 	});
 }
 
-void ___(int){}
+void ___(int) {}
 
-void WebServer::stop()
-{
+void WebServer::stop() {
 	this->_closed = true;
 	auto old = signal(SIGINT, ___);
 
-	std::for_each(
-		this->_webSocks.begin(),
-		this->_webSocks.end(),
-		[](std::shared_ptr<WebSocketConnection> &s) {
-			s->wsock.disconnect();
-			if (s->thread.joinable())
-				s->thread.join();
-		}
-	);
-	raise(SIGINT); //Interrupt accept
+	std::for_each(this->_webSocks.begin(), this->_webSocks.end(), [](std::shared_ptr<WebSocketConnection> &s) {
+		s->wsock.disconnect();
+		if (s->thread.joinable())
+			s->thread.join();
+	});
+	raise(SIGINT); // Interrupt accept
 	signal(SIGINT, old);
 	if (this->_thread.joinable())
 		this->_thread.join();
 }
 
-WebServer::~WebServer()
-{
+WebServer::~WebServer() {
 	this->stop();
 }
 
-void WebServer::_serverLoop()
-{
+void WebServer::_serverLoop() {
 	Socket newConnection = this->_sock.accept();
 	Socket::HttpResponse response;
 	Socket::HttpRequest requ;
@@ -196,57 +187,60 @@ void WebServer::_serverLoop()
 #endif
 	try {
 		newConnection.send(Socket::generateHttpResponse(response));
-	} catch (...) {}
+	} catch (...) {
+	}
 	newConnection.disconnect();
 }
 
-Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code)
-{
+Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code) {
 	Socket::HttpResponse response;
 
 	response.returnCode = code;
 	response.codeName = WebServer::codes.at(response.returnCode);
 	response.header["content-type"] = "text/html";
 	response.body = "<html>"
-		"<head>"
-			"<title>" + response.codeName + "</title>"
-		"</head>"
-		"<body>"
-			"<h1>" +
-				std::to_string(response.returnCode) + ": " + response.codeName +
-			"</h1>"
-		"</body>"
-	"</html>";
+									"<head>"
+									"<title>"
+		+ response.codeName
+		+ "</title>"
+			"</head>"
+			"<body>"
+			"<h1>"
+		+ std::to_string(response.returnCode) + ": " + response.codeName
+		+ "</h1>"
+			"</body>"
+			"</html>";
 	return response;
 }
 
-Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code, const std::string &extra)
-{
+Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code, const std::string &extra) {
 	Socket::HttpResponse response;
 
 	response.returnCode = code;
 	response.codeName = WebServer::codes.at(response.returnCode);
 	response.header["content-type"] = "text/html";
 	response.body = "<html>"
-		"<head>"
-			"<title>" + response.codeName + "</title>"
-		"</head>"
-		"<body>"
-			"<h1>" +
-				std::to_string(response.returnCode) + ": " + response.codeName + " (" + extra + ")"
+									"<head>"
+									"<title>"
+		+ response.codeName
+		+ "</title>"
+			"</head>"
+			"<body>"
+			"<h1>"
+		+ std::to_string(response.returnCode) + ": " + response.codeName + " (" + extra
+		+ ")"
 			"</h1>"
-		"</body>"
-	"</html>";
+			"</body>"
+			"</html>";
 	return response;
 }
 
-Socket::HttpResponse WebServer::_checkFolders(const Socket::HttpRequest &request)
-{
+Socket::HttpResponse WebServer::_checkFolders(const Socket::HttpRequest &request) {
 	Socket::HttpResponse response;
 
 	if (request.method != "GET")
 		throw AbortConnectionException(405);
-	//TODO: Fix vulnerability if using .. in URL
+	// TODO: Fix vulnerability if using .. in URL
 	for (auto &folder : this->_folders) {
 		if (request.path.substr(0, folder.first.length()) == folder.first) {
 			std::string realPath = folder.second + request.path.substr(folder.first.length());
@@ -269,9 +263,8 @@ Socket::HttpResponse WebServer::_checkFolders(const Socket::HttpRequest &request
 	throw AbortConnectionException(404);
 }
 
-std::string WebServer::_getContentType(const std::string &path)
-{
-	//TODO: Fix bug if URL contains a .
+std::string WebServer::_getContentType(const std::string &path) {
+	// TODO: Fix bug if URL contains a .
 	size_t pos = path.find_last_of('.');
 	size_t pos2 = path.find_last_of('/');
 
@@ -288,8 +281,7 @@ std::string WebServer::_getContentType(const std::string &path)
 	return it->second;
 }
 
-void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ)
-{
+void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ) {
 	auto response = WebSocket::solveHandshake(requ);
 	std::shared_ptr<WebSocketConnection> wsock;
 	std::weak_ptr<WebSocketConnection> wsock_weak;
@@ -303,7 +295,7 @@ void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ)
 	if (this->_onConnect)
 		this->_onConnect(wsock->wsock);
 	wsock->isThreadFinished = false;
-	wsock->thread = std::thread([this, wsock_weak]{
+	wsock->thread = std::thread([this, wsock_weak] {
 		try {
 			while (wsock_weak.lock()->wsock.isOpen()) {
 				std::string msg = wsock_weak.lock()->wsock.getAnswer();
@@ -323,23 +315,17 @@ void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ)
 #endif
 }
 
-void WebServer::broadcast(const std::string &msg)
-{
-	this->_webSocks.erase(
-		std::remove_if(
-			this->_webSocks.begin(),
-			this->_webSocks.end(),
-			[](std::shared_ptr<WebSocketConnection> &s) {
-				if (s->isThreadFinished) {
-					if (s->thread.joinable())
-						s->thread.join();
-					return true;
-				}
-				return false;
-			}
-		),
-		this->_webSocks.end()
-	);
+void WebServer::broadcast(const std::string &msg) {
+	this->_webSocks.erase(std::remove_if(this->_webSocks.begin(), this->_webSocks.end(),
+													[](std::shared_ptr<WebSocketConnection> &s) {
+														if (s->isThreadFinished) {
+															if (s->thread.joinable())
+																s->thread.join();
+															return true;
+														}
+														return false;
+													}),
+		this->_webSocks.end());
 	for (auto &wsock : this->_webSocks)
 		try {
 			wsock->wsock.send(msg);
@@ -348,18 +334,14 @@ void WebServer::broadcast(const std::string &msg)
 		}
 }
 
-void WebServer::onWebSocketConnect(const std::function<void(WebSocket &)> & fct)
-{
+void WebServer::onWebSocketConnect(const std::function<void(WebSocket &)> &fct) {
 	this->_onConnect = fct;
 }
 
-void WebServer::onWebSocketMessage(const std::function<void(WebSocket &, const std::string &)> & fct)
-{
+void WebServer::onWebSocketMessage(const std::function<void(WebSocket &, const std::string &)> &fct) {
 	this->_onMessage = fct;
 }
 
-void WebServer::onWebSocketError(const std::function<void(WebSocket &, const std::exception &)> & fct)
-{
+void WebServer::onWebSocketError(const std::function<void(WebSocket &, const std::exception &)> &fct) {
 	this->_onError = fct;
 }
-

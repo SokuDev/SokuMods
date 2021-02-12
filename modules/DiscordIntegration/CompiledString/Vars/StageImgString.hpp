@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_STAGEIMGSTRING_HPP
 #define SWRSTOYS_STAGEIMGSTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class StageImgString : public CompiledString {
+class StageImgString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_STAGEIMGSTRING_HPP
+#endif // SWRSTOYS_STAGEIMGSTRING_HPP

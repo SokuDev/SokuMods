@@ -5,13 +5,11 @@
 #ifndef SWRSTOYS_SUBMENUSTRING_HPP
 #define SWRSTOYS_SUBMENUSTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class SubmenuString : public CompiledString {
+class SubmenuString: public CompiledString {
 public:
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_SUBMENUSTRING_HPP
+#endif // SWRSTOYS_SUBMENUSTRING_HPP

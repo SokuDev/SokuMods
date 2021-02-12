@@ -5,16 +5,15 @@
 #ifndef DISC_ORD_SOCKET_HPP
 #define DISC_ORD_SOCKET_HPP
 
-
 #if defined _WIN32
-#	include <winsock.h>
+#include <winsock.h>
 #else
-#	include <sys/socket.h>
-#	define INVALID_SOCKET -1
-	typedef int SOCKET;
+#include <sys/socket.h>
+#define INVALID_SOCKET -1
+typedef int SOCKET;
 #endif
-#include <string>
 #include <map>
+#include <string>
 
 //! @brief Define a Socket
 class Socket {
@@ -120,7 +119,9 @@ public:
 
 	//! @brief Return the socket value.
 	//! @return SOCKET
-	SOCKET getSockFd() const { return this->_sockfd; };
+	SOCKET getSockFd() const {
+		return this->_sockfd;
+	};
 
 	const sockaddr_in &getRemote() const;
 
@@ -135,4 +136,4 @@ protected:
 	struct sockaddr_in _remote;
 };
 
-#endif //DISC_ORD_SOCKET_HPP
+#endif // DISC_ORD_SOCKET_HPP

@@ -1,6 +1,5 @@
 #pragma once
 #include <windows.h>
-#include <wchar.h>
 //
 #include "PatchMan.hpp"
 
@@ -37,7 +36,7 @@
 #define SFX_BACK 0x29
 
 struct CInputManagerCluster {
-	byte UNKNOWN[56];
+	::byte UNKNOWN[56];
 	struct {
 		int Xaxis;
 		int Yaxis;
@@ -55,42 +54,42 @@ struct CDesignSprite {
 	float UNKNOWN_1[2];
 	float x;
 	float y;
-	byte active;
-	byte UNKNOWN_2[3];
+	::byte active;
+	::byte UNKNOWN_2[3];
 	int UNKNOWN_3;
 };
 
 struct CMenuConnect {
 	void *vftable;
 	void *CNetworkBasePtr;
-	byte Choice;
-	byte Subchoice;
-	byte UNKNOWN_0[2];
+	::byte Choice;
+	::byte Subchoice;
+	::byte UNKNOWN_0[2];
 	void *CDesignBasePtr;
-	byte UNKNOWN_1[48];
+	::byte UNKNOWN_1[48];
 	CDesignSprite *MenuItemSprites[7];
-	byte UNKNOWN_2[860];
-	byte NotSpectateFlag;
-	byte Spectate;
-	byte UNKNOWN_3[2];
+	::byte UNKNOWN_2[860];
+	::byte NotSpectateFlag;
+	::byte Spectate;
+	::byte UNKNOWN_3[2];
 	uint MenuItem_Count;
-	byte UNKNOWN_4[8];
+	::byte UNKNOWN_4[8];
 	uint CursorPos;
 	uint CursorPos2;
-	byte UNKNOWN_5[48];
+	::byte UNKNOWN_5[48];
 	uint NumberInput_ArrowPos;
-	byte UNKNOWN_6[36];
+	::byte UNKNOWN_6[36];
 	uint Port;
-	byte UNKNOWN_7[4];
+	::byte UNKNOWN_7[4];
 	char IPString[20]; // Final/Used val
 	char IPWString; // Unknown size
-	byte UNKNOWN_8[2051];
+	::byte UNKNOWN_8[2051];
 	uint NotInSubMenuFlag;
-	byte UNKNOWN_9[332];
-	byte InSubMenuFlag;
-	byte UNKNOWN_10[171];
-	byte UnknownJoinFlag;
-	byte UNKNOWN_12[835];
+	::byte UNKNOWN_9[332];
+	::byte InSubMenuFlag;
+	::byte UNKNOWN_10[171];
+	::byte UnknownJoinFlag;
+	::byte UNKNOWN_12[835];
 };
 
 struct VC9String {

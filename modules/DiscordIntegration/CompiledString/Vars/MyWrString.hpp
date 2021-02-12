@@ -5,14 +5,11 @@
 #ifndef SWRSTOYS_MYWRSTRING_HPP
 #define SWRSTOYS_MYWRSTRING_HPP
 
-
 #include "../CompiledString.hpp"
 
-class MyWRString : public CompiledString {
+class MyWRString: public CompiledString {
 public:
-
 	std::string getString() const override;
 };
 
-
-#endif //SWRSTOYS_MYWRSTRING_HPP
+#endif // SWRSTOYS_MYWRSTRING_HPP

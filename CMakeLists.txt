@@ -161,23 +161,64 @@ target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
 module(CharactersInForeground)
 target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/CharactersInForeground.cpp)
 
+# DiscordIntegration main module
 set(DISCORD_CLIENT_ID "771968286199382056" CACHE STRING "DiscordIntegration mod Discord client ID")
-#module(DiscordIntegration)
-#target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}")
-#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-#    target_compile_options(DiscordIntegration PRIVATE /EHsc)
-#endif ()
-#target_sources(DiscordIntegration PRIVATE
-#        modules/DiscordIntegration/Network/getPublicIp.cpp
-#        modules/DiscordIntegration/Network/Socket.cpp
-#        modules/DiscordIntegration/SokuUtils/SokuState.cpp
-#        modules/DiscordIntegration/logger.cpp
-#        modules/DiscordIntegration/main.cpp
-#        modules/DiscordIntegration/ShiftJISDecoder.cpp)
-#target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
-
-install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys")
-install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine")
+module(DiscordIntegration)
+target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+    target_compile_options(DiscordIntegration PRIVATE /EHsc)
+endif ()
+target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
+set_target_properties(DiscordIntegration PROPERTIES
+        SUFFIX ".dat")
+target_sources(DiscordIntegration PRIVATE
+        modules/DiscordIntegration/Network/getPublicIp.cpp
+        modules/DiscordIntegration/Network/Socket.cpp
+        modules/DiscordIntegration/SokuUtils/SokuState.cpp
+        modules/DiscordIntegration/logger.cpp
+        modules/DiscordIntegration/main.cpp
+        modules/DiscordIntegration/ShiftJISDecoder.cpp
+        modules/DiscordIntegration/CompiledString/BasicCompiledString.cpp
+        modules/DiscordIntegration/CompiledString/ComplexCompiledString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/LeftChrShortNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/LeftChrFullNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/LeftChrImgString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/LeftProfileNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/LeftWinsString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/RightChrShortNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/RightChrFullNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/RightChrImgString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/RightProfileNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/RightWinsString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/MyChrShortNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/MyChrFullNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/MyChrImgString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/MyProfileNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/MyWrString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/OpponentChrShortNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/OpponentChrFullNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/OpponentChrImgString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/OpponentProfileNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/OpponentWrString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/SubmenuString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/StageImgString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/StageNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/vars.cpp
+        modules/DiscordIntegration/CompiledString/CompiledStringFactory.cpp)
+install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SWRSToys/modules/DiscordIntegration")
+install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SokuEngine/modules/DiscordIntegration")
+# DiscordIntegration loader
+add_library(DiscordIntegrationLoader MODULE)
+target_sources(DiscordIntegrationLoader PRIVATE
+        modules/DiscordIntegration/Loader.c)
+target_link_libraries(DiscordIntegrationLoader shlwapi user32 advapi32)
+set_target_properties(DiscordIntegrationLoader PROPERTIES
+        OUTPUT_NAME "DiscordIntegration")
+install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SWRSToys/modules/DiscordIntegration/")
+install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SokuEngine/modules/DiscordIntegration/")
+# DiscordIntegration Discord sdk
+install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys/modules/DiscordIntegration/")
+install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine/modules/DiscordIntegration/")
 
 module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
@@ -186,7 +227,6 @@ target_link_libraries(DPadFix dinput8 detours)
 module(Hostlist SokuEngine)
 target_sources(Hostlist PRIVATE
         modules/Hostlist/dllmain.cpp)
-target_include_directories(Hostlist PRIVATE modules/Hostlist/include)
 target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
 
 install(FILES modules/Hostlist/hostlistBG.png DESTINATION "SokuEngine/modules/Hostlist")
@@ -224,6 +264,22 @@ module(SkipIntro Default)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
+module(SokuStreaming)
+target_sources(SokuStreaming PRIVATE
+        modules/SokuStreaming/Network/Socket.cpp
+        modules/SokuStreaming/Network/WebServer.cpp
+        modules/SokuStreaming/Network/WebSocket.cpp
+        modules/SokuStreaming/Utils/ShiftJISDecoder.cpp
+        modules/SokuStreaming/main.cpp
+        modules/SokuStreaming/State.cpp
+        modules/SokuStreaming/Network/Handlers.cpp
+        modules/SokuStreaming/Utils/InputBox.cpp
+        )
+target_compile_options(SokuStreaming PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
+target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32 crypt32)
+install(DIRECTORY "modules/SokuStreaming/static" DESTINATION "SWRSToys/modules/SokuStreaming")
+install(DIRECTORY "modules/SokuStreaming/static" DESTINATION "SokuEngine/modules/SokuStreaming")
+
 module(SWRSokuRoll Default)
 target_sources(SWRSokuRoll PRIVATE modules/SWRSokuRoll/SWRSokuRoll.cpp)
 file(READ "${CMAKE_SOURCE_DIR}/bin/SokuRoll.dll" SokuRollData HEX)
@@ -255,114 +311,6 @@ module(PracticeEx Binary SokuEngine)
 module(shady-loader Binary SokuEngine)
 module(shady-lua Binary SokuEngine)
 module(SokuEngine Binary Default SokuEngine)
-
-# wip module
-
-add_library("SokuStreaming" MODULE
-        modules/SokuStreaming/Network/Socket.cpp
-        modules/SokuStreaming/Network/Socket.hpp
-        modules/SokuStreaming/Exceptions.hpp
-        modules/SokuStreaming/Network/WebServer.cpp
-        modules/SokuStreaming/Network/WebServer.hpp
-        modules/SokuStreaming/Network/WebSocket.cpp
-        modules/SokuStreaming/Network/WebSocket.hpp
-        modules/SokuStreaming/Utils/ShiftJISDecoder.cpp
-        modules/SokuStreaming/Utils/ShiftJISDecoder.hpp
-        modules/SokuStreaming/main.cpp
-        modules/SokuStreaming/State.cpp
-        modules/SokuStreaming/State.hpp
-        modules/SokuStreaming/Network/Handlers.cpp
-        modules/SokuStreaming/Network/Handlers.hpp
-        modules/SokuStreaming/Utils/InputBox.cpp
-        modules/SokuStreaming/Utils/InputBox.hpp
-)
-target_compile_definitions(SokuStreaming PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_compile_options(SokuStreaming PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
-target_include_directories(SokuStreaming PRIVATE include include/directx "modules/SokuStreaming/")
-target_link_directories(SokuStreaming PRIVATE lib)
-target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32 crypt32)
-install(TARGETS "SokuStreaming" LIBRARY DESTINATION "SWRSToys/modules/SokuStreaming/")
-install(TARGETS "SokuStreaming" LIBRARY DESTINATION "SokuEngine/modules/SokuStreaming/")
-set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; SokuStreaming=modules/SokuStreaming/SokuStreaming.dll\n")
-
-
-
-add_library("DiscordIntegration" MODULE
-        modules/DiscordIntegration/Network/getPublicIp.cpp
-        modules/DiscordIntegration/Network/Socket.cpp
-        modules/DiscordIntegration/SokuUtils/SokuState.cpp
-        modules/DiscordIntegration/logger.cpp
-        modules/DiscordIntegration/main.cpp
-        modules/DiscordIntegration/ShiftJISDecoder.cpp
-        modules/DiscordIntegration/CompiledString/CompiledString.hpp
-        modules/DiscordIntegration/CompiledString/BasicCompiledString.cpp
-        modules/DiscordIntegration/CompiledString/BasicCompiledString.hpp
-        modules/DiscordIntegration/CompiledString/ComplexCompiledString.cpp
-        modules/DiscordIntegration/CompiledString/ComplexCompiledString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftChrShortNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftChrShortNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftChrFullNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftChrFullNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftChrImgString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftChrImgString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftProfileNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftProfileNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftWinsString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/LeftWinsString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/RightChrShortNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/RightChrShortNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/RightChrFullNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/RightChrFullNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/RightChrImgString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/RightChrImgString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/RightProfileNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/RightProfileNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/RightWinsString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/RightWinsString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/MyChrShortNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/MyChrShortNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/MyChrFullNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/MyChrFullNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/MyChrImgString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/MyChrImgString.hpp
-	modules/DiscordIntegration/CompiledString/Vars/MyProfileNameString.cpp
-	modules/DiscordIntegration/CompiledString/Vars/MyProfileNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/MyWrString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/MyWrString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentChrShortNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentChrShortNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentChrFullNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentChrFullNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentChrImgString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentChrImgString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentProfileNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentProfileNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentWrString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/OpponentWrString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/SubmenuString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/SubmenuString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/StageImgString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/StageImgString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/StageNameString.cpp
-        modules/DiscordIntegration/CompiledString/Vars/StageNameString.hpp
-        modules/DiscordIntegration/CompiledString/Vars/vars.cpp
-        modules/DiscordIntegration/CompiledString/Vars/vars.hpp
-        modules/DiscordIntegration/CompiledString/CompiledStringFactory.cpp
-        modules/DiscordIntegration/CompiledString/CompiledStringFactory.hpp
-        modules/DiscordIntegration/CompiledString/Vars/Strings.hpp
-        modules/DiscordIntegration/CompiledString/Exceptions.hpp)
-target_compile_definitions(DiscordIntegration PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_compile_options(DiscordIntegration PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
-target_include_directories(DiscordIntegration PRIVATE include include/directx "modules/DiscordIntegration/" )
-target_link_directories(DiscordIntegration PRIVATE lib)
-install(TARGETS "DiscordIntegration" LIBRARY DESTINATION "SWRSToys/modules/DiscordIntegration/")
-install(TARGETS "DiscordIntegration" LIBRARY DESTINATION "SokuEngine/modules/DiscordIntegration/")
-set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; DiscordIntegration=modules/DiscordIntegration/DiscordIntegration.dll\n")
-target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}")
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-    target_compile_options(DiscordIntegration PRIVATE /EHsc)
-endif ()
-target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
 
 # install
 

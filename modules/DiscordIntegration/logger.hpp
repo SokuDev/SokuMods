@@ -11,4 +11,4 @@ void logMessagef(const char *format, ...);
 void logMessage(const char *msg);
 void initLogger();
 
-#endif //TOUHOUUNLDISCORDINTEGRATION_LOGGER_HPP
+#endif // TOUHOUUNLDISCORDINTEGRATION_LOGGER_HPP

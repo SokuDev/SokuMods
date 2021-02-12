@@ -12,4 +12,4 @@ extern int s_origCBattleCL_OnProcess;
 extern int s_origCTitle_OnProcess;
 extern int s_origCSelect_OnProcess;
 
-#endif //TOUHOUUNLDISCORDINTEGRATION_GLOBALS_HPP
+#endif // TOUHOUUNLDISCORDINTEGRATION_GLOBALS_HPP
