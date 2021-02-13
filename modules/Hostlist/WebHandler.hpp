@@ -59,7 +59,7 @@ string Request(const string &url) {
 	chunk.memory = (char *)malloc(1);
 	chunk.size = 0;
 
-	curl_easy_setopt(request_handle, CURLOPT_URL, url);
+	curl_easy_setopt(request_handle, CURLOPT_URL, &url[0]);
 	CURLcode res = curl_easy_perform(request_handle);
 
 	if (res != CURLE_OK) {
@@ -81,8 +81,8 @@ string Request(const string &url) {
 }
 
 CURLcode Put(const string &url, const string &data) {
-	curl_easy_setopt(put_handle, CURLOPT_URL, url);
-	curl_easy_setopt(put_handle, CURLOPT_POSTFIELDS, data);
+	curl_easy_setopt(put_handle, CURLOPT_URL, &url[0]);
+	curl_easy_setopt(put_handle, CURLOPT_POSTFIELDS, &data[0]);
 
 	return curl_easy_perform(put_handle);
 }
