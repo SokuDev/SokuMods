@@ -225,6 +225,9 @@ target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
 module(Hostlist SokuEngine)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+    target_compile_options(Hostlist PRIVATE /EHsc)
+endif ()
 target_sources(Hostlist PRIVATE
         modules/Hostlist/dllmain.cpp)
 target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
