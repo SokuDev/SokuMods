@@ -249,7 +249,7 @@ namespace Soku
 		void		TotalFrames(int num);
 		int			TotalFrames() const;
 		int			LoadedFrames() const;
-		int			Delay—ounter() const;
+		int			DelayCounter() const;
 		void		AddImage(ImTextureID tex);
 		void		Display(ImVec2& size, ImVec2& pos);
 		void		Reset();
