@@ -264,21 +264,26 @@ module(SkipIntro Default)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
-module(SokuStreaming)
-target_sources(SokuStreaming PRIVATE
-        modules/SokuStreaming/Network/Socket.cpp
-        modules/SokuStreaming/Network/WebServer.cpp
-        modules/SokuStreaming/Network/WebSocket.cpp
-        modules/SokuStreaming/Utils/ShiftJISDecoder.cpp
-        modules/SokuStreaming/main.cpp
-        modules/SokuStreaming/State.cpp
-        modules/SokuStreaming/Network/Handlers.cpp
-        modules/SokuStreaming/Utils/InputBox.cpp
-        )
-target_compile_options(SokuStreaming PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
-target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32 crypt32)
-install(DIRECTORY "modules/SokuStreaming/static" DESTINATION "SWRSToys/modules/SokuStreaming")
-install(DIRECTORY "modules/SokuStreaming/static" DESTINATION "SokuEngine/modules/SokuStreaming")
+set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
+if(BUILD_SOKU_STREAMING)
+    module(SokuStreaming)
+    target_sources(SokuStreaming PRIVATE
+            modules/SokuStreaming/Network/Socket.cpp
+            modules/SokuStreaming/Network/WebServer.cpp
+            modules/SokuStreaming/Network/WebSocket.cpp
+            modules/SokuStreaming/Utils/ShiftJISDecoder.cpp
+            modules/SokuStreaming/main.cpp
+            modules/SokuStreaming/State.cpp
+            modules/SokuStreaming/Network/Handlers.cpp
+            modules/SokuStreaming/Utils/InputBox.cpp
+            )
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+        target_compile_options(SokuStreaming PRIVATE /EHsc)
+    endif ()
+    target_link_libraries(SokuStreaming SokuLib shlwapi ws2_32 user32 advapi32 crypt32)
+    install(DIRECTORY "modules/SokuStreaming/static" DESTINATION "SWRSToys/modules/SokuStreaming")
+    install(DIRECTORY "modules/SokuStreaming/static" DESTINATION "SokuEngine/modules/SokuStreaming")
+endif()
 
 module(SWRSokuRoll Default)
 target_sources(SWRSokuRoll PRIVATE modules/SWRSokuRoll/SWRSokuRoll.cpp)
