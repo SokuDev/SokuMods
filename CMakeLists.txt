@@ -23,7 +23,7 @@ add_library(swrstoys MODULE
         swrstoys/SWRSToys.cpp)
 target_compile_definitions(swrstoys PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_include_directories(swrstoys PRIVATE include)
-target_link_libraries(swrstoys shlwapi user32 advapi32)
+target_link_libraries(swrstoys shlwapi user32 advapi32 shell32)
 set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
 install(TARGETS swrstoys LIBRARY DESTINATION "SWRSToys/")
