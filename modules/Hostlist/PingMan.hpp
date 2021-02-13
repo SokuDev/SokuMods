@@ -3,11 +3,12 @@
 #include <winsock2.h>
 #include "Host.hpp"
 #include "Status.hpp"
+#include <mutex>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unordered_map>
 
-#define PING_UPDATE_RATE 2000L
+#define PING_UPDATE_RATE 2200L
 #define MESSAGE_LEN 37
 
 extern LARGE_INTEGER timer_frequency;
@@ -40,6 +41,7 @@ struct PingInfo {
 WSADATA wsa;
 char message[MESSAGE_LEN];
 std::unordered_map<long, PingInfo> pings;
+std::mutex pings_mutex;
 SOCKET sock = INVALID_SOCKET;
 
 // Helper functions
@@ -90,9 +92,6 @@ int SocketReceive(long *ip) {
 	int addr_len = sizeof(addr);
 	// non blocking recvfrom b/c of socket receive timeout
 	if (recvfrom(sock, &response, sizeof(response), NULL, (SOCKADDR *)&addr, &addr_len) < 0) {
-		if (WSAGetLastError() == WSAETIMEDOUT) {
-			return ERROR_PINGTIMEOUT;
-		}
 		printf("[WinSock] recvfrom() failed with error code : %d.\n", WSAGetLastError());
 		return ERROR_RECVFROMFAILED;
 	}
@@ -104,6 +103,25 @@ int SocketReceive(long *ip) {
 		return ERROR_INVALIDRESPONSE;
 }
 }; // namespace
+
+void Update() {
+	while (true) {
+		long ip;
+		if (SocketReceive(&ip) == 0) {
+			LARGE_INTEGER counter;
+			QueryPerformanceCounter(&counter);
+			unsigned long long time = counter.QuadPart * 1000 / timer_frequency.QuadPart;
+
+			pings_mutex.lock();
+			PingInfo &ping = pings[ip];
+			ping.ping = (time - ping.oldTime) / 2;
+			if (ping.ping < 0) {
+				ping.ping = 0;
+			}
+			pings_mutex.unlock();
+		}
+	}
+}
 
 int Init() {
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -121,17 +139,8 @@ int Init() {
 	SockAddrInSetup(&local, "0.0.0.0", 0);
 	::bind(sock, (SOCKADDR *)&local, sizeof(local));
 
-	// don't use select, because autopunch doesn't handle those
-	// and could cause select to return that the socket is ready,
-	// but the read call could read a packet from the relay, then
-	// read again internally and block.
-	// instead, set a receive timeout (can't bother using nonblocking
-	// sockets ;)) and do a regular read.
-	// use a 1ms recv timeout for the non blocking read
-	// (because a 0ms recv timeout means "block forever" in win32).
-	// good enough.
-	DWORD timeout = 1;
-	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)(&timeout), sizeof(timeout));
+	thread update(Update);
+	update.detach();
 
 	return 0;
 }
@@ -142,6 +151,7 @@ void Cleanup() {
 
 // Credits to cc for the central ping manager idea.
 long Ping(long ip, short port) {
+	pings_mutex.lock();
 	LARGE_INTEGER counter;
 	QueryPerformanceCounter(&counter);
 	unsigned long long newTime = counter.QuadPart * 1000 / timer_frequency.QuadPart;
@@ -151,22 +161,12 @@ long Ping(long ip, short port) {
 			ping.oldTime = newTime;
 		}
 	}
-	return ping.ping;
+	long p = ping.ping;
+	pings_mutex.unlock();
+	return p;
 }
 
 long Ping(Host &host) {
 	return Ping(host.netIp, host.netPort);
-}
-
-void Update() {
-	LARGE_INTEGER counter;
-	QueryPerformanceCounter(&counter);
-	unsigned long long time = counter.QuadPart * 1000 / timer_frequency.QuadPart;
-
-	long ip;
-	while (SocketReceive(&ip) == 0) {
-		PingInfo &ping = pings[ip];
-		ping.ping = (time - ping.oldTime) / 2;
-	}
 }
 } // namespace PingMan

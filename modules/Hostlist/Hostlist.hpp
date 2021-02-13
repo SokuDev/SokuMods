@@ -69,8 +69,6 @@ void Update() {
 
 	// Get new hosts
 	if (!offline) {
-		PingMan::Update();
-
 		if (newTime - oldTime >= delayTime) {
 			try {
 				string s = WebHandler::Request("http://delthas.fr:14762/games");
@@ -118,9 +116,6 @@ void Update() {
 			oldTime = newTime;
 			refreshCount++;
 		}
-
-		// Ping update
-		PingMan::Update();
 	}
 }
 
