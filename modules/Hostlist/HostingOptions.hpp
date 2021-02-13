@@ -1,5 +1,5 @@
 #pragma once
-#include <Sokulib.h>
+#include <SokuLib.h>
 #include <fstream>
 #include <iostream>
 #include <json.hpp>
