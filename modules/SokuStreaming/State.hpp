@@ -33,6 +33,7 @@ struct Stats {
 	unsigned short fan;
 	unsigned short drops;
 	SokuLib::Skill skillMap[16];
+	unsigned int specialValue;
 };
 
 extern unsigned short port;

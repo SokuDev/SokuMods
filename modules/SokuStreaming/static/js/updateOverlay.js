@@ -6,10 +6,10 @@ let sokuCharacters = [
     {"name": 'patchouli', "skillPrefix": "Pa", "skills": [236, 22,  623, 214, 421]},
     {"name": 'youmu',     "skillPrefix": "Yo", "skills": [236, 623, 214, 22 ]},
     {"name": 'remilia',   "skillPrefix": "Re", "skills": [236, 214, 623, 22 ]},
-    {"name": 'yuyuko',    "skillPrefix": "Ji", "skills": [214, 236, 421, 623]},
+    {"name": 'yuyuko',    "skillPrefix": "Ji", "skills": [214, 236, 421, 623], 'special': 'butterflies'},
     {"name": 'yukari',    "skillPrefix": "Yu", "skills": [236, 623, 214, 421]},
     {"name": 'suika',     "skillPrefix": "Ib", "skills": [236, 623, 214, 22 ]},
-    {"name": 'reisen',    "skillPrefix": "Ud", "skills": [236, 214, 623, 22 ]},
+    {"name": 'reisen',    "skillPrefix": "Ud", "skills": [236, 214, 623, 22 ], 'special': 'elixir'},
     {"name": 'aya',       "skillPrefix": "Ay", "skills": [236, 214, 22,  421]},
     {"name": 'komachi',   "skillPrefix": "Ko", "skills": [236, 623, 22,  214]},
     {"name": 'iku',       "skillPrefix": "Ik", "skills": [236, 623, 22,  214]},
@@ -88,12 +88,27 @@ function displayStats(charId, id, stats)
 {
     let chr = sokuCharacters[charId];
 
+    if (chr.skills.length === 4) {
+        let nb = stats.special;
+        let div = document.getElementById(id + "skill4");
+        let icon = document.getElementById(id + "skill4icon");
+        let level = document.getElementById(id + "skill4lvl");
+
+        if (nb === 0)
+            div.style.height = "0";
+        else {
+            div.style.height = "";
+            icon.setAttribute("src", "/static/img/stats/" + chr.special + ".png");
+            level.setAttribute("src", "/static/img/stats/LEVEL00" + nb + ".png");
+        }
+    }
+
     updateStat(charId, id, stats, "rod");
     updateStat(charId, id, stats, "doll");
     updateStat(charId, id, stats, "fan");
     updateStat(charId, id, stats, "grimoire");
     updateStat(charId, id, stats, "drops");
-    for (let i = chr.skills.length; i < 5; i++) {
+    for (let i = chr.skills.length; i < chr.skills.length; i++) {
         document.getElementById(id + "skill" + i).style.height = "0";
     }
     for (const [key, value] of Object.entries(stats["skills"])) {

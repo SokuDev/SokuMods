@@ -122,7 +122,14 @@ void checkKeyInputs() {
 }
 
 nlohmann::json statsToJson(const Stats &stats) {
-	nlohmann::json result = {{"doll", stats.doll}, {"rod", stats.rod}, {"grimoire", stats.grimoire}, {"fan", stats.fan}, {"drops", stats.drops}};
+	nlohmann::json result = {
+		{"doll", stats.doll},
+		{"rod", stats.rod},
+		{"grimoire", stats.grimoire},
+		{"fan", stats.fan},
+		{"drops", stats.drops},
+		{"special", stats.specialValue}
+	};
 	std::map<std::string, unsigned char> skillMap;
 
 	for (int i = 0; i < 16; i++) {
@@ -252,6 +259,12 @@ void updateCache(bool isMultiplayer) {
 	newStats.rod = battleMgr.leftCharacterManager.controlRod;
 	newStats.fan = battleMgr.leftCharacterManager.tenguFans;
 	newStats.grimoire = battleMgr.leftCharacterManager.grimoires;
+	if (SokuLib::leftChar == SokuLib::CHARACTER_YUYUKO)
+		newStats.specialValue = battleMgr.leftCharacterManager.resurrectionButterfliesUsed;
+	else if (SokuLib::leftChar == SokuLib::CHARACTER_REISEN)
+		newStats.specialValue = battleMgr.leftCharacterManager.elixirUsed;
+	else
+		newStats.specialValue = 0;
 	std::memcpy(newStats.skillMap, battleMgr.leftCharacterManager.skillMap, sizeof(newStats.skillMap));
 	if (memcmp(&newStats, &_cache.leftStats, sizeof(newStats)) != 0) {
 		std::memcpy(&_cache.leftStats, &newStats, sizeof(newStats));
@@ -264,6 +277,12 @@ void updateCache(bool isMultiplayer) {
 	newStats.rod = battleMgr.rightCharacterManager.controlRod;
 	newStats.fan = battleMgr.rightCharacterManager.tenguFans;
 	newStats.grimoire = battleMgr.rightCharacterManager.grimoires;
+	if (SokuLib::rightChar == SokuLib::CHARACTER_YUYUKO)
+		newStats.specialValue = battleMgr.rightCharacterManager.resurrectionButterfliesUsed;
+	else if (SokuLib::rightChar == SokuLib::CHARACTER_REISEN)
+		newStats.specialValue = battleMgr.rightCharacterManager.elixirUsed;
+	else
+		newStats.specialValue = 0;
 	std::memcpy(newStats.skillMap, battleMgr.rightCharacterManager.skillMap, sizeof(newStats.skillMap));
 	if (memcmp(&newStats, &_cache.rightStats, sizeof(newStats)) != 0) {
 		std::memcpy(&_cache.rightStats, &newStats, sizeof(newStats));
@@ -297,10 +316,24 @@ std::string cacheToJson(CachedMatchData cache) {
 		rightHand = cache.rightHand;
 	}
 
-	result["left"] = {{"character", cache.left}, {"score", cache.leftScore}, {"name", convertShiftJisToUTF8(cache.leftName.c_str())}, {"used", cache.leftUsed},
-		{"deck", leftDeck}, {"hand", leftHand}, {"stats", statsToJson(cache.leftStats)}};
-	result["right"] = {{"character", cache.right}, {"score", cache.rightScore}, {"name", convertShiftJisToUTF8(cache.rightName.c_str())},
-		{"used", cache.rightUsed}, {"deck", rightDeck}, {"hand", rightHand}, {"stats", statsToJson(cache.rightStats)}};
+	result["left"] = {
+		{"character", cache.left},
+		{"score", cache.leftScore},
+		{"name", convertShiftJisToUTF8(cache.leftName.c_str())},
+		{"used", cache.leftUsed},
+		{"deck", leftDeck},
+		{"hand", leftHand},
+		{"stats", statsToJson(cache.leftStats)},
+	};
+	result["right"] = {
+		{"character", cache.right},
+		{"score", cache.rightScore},
+		{"name", convertShiftJisToUTF8(cache.rightName.c_str())},
+		{"used", cache.rightUsed},
+		{"deck", rightDeck},
+		{"hand", rightHand},
+		{"stats", statsToJson(cache.rightStats)},
+	};
 	result["round"] = cache.round;
 	return result.dump(-1, ' ', true);
 }
