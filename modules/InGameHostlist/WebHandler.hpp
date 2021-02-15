@@ -14,7 +14,8 @@ struct MemoryStruct {
 
 CURL *request_handle;
 CURL *put_handle;
-struct MemoryStruct chunk;
+struct MemoryStruct request_chunk;
+struct MemoryStruct put_chunk;
 curl_slist *headers;
 } // namespace
 
@@ -36,55 +37,66 @@ size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *user
 }
 
 void Init() {
-	chunk.memory = 0;
-	chunk.size = 0;
-
 	curl_global_init(CURL_GLOBAL_ALL);
 
 	request_handle = curl_easy_init();
 	curl_easy_setopt(request_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-	curl_easy_setopt(request_handle, CURLOPT_WRITEDATA, (void *)&chunk);
-	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	curl_easy_setopt(request_handle, CURLOPT_WRITEDATA, (void *)&request_chunk);
+	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, "swrstoys-ingamehostlist");
 
 	put_handle = curl_easy_init();
 	curl_easy_setopt(put_handle, CURLOPT_CUSTOMREQUEST, "PUT");
 	headers = curl_slist_append(headers, "Content-Type: application/json");
 	curl_easy_setopt(put_handle, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	curl_easy_setopt(put_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+	curl_easy_setopt(put_handle, CURLOPT_WRITEDATA, (void *)&put_chunk);
+	curl_easy_setopt(put_handle, CURLOPT_USERAGENT, "swrstoys-ingamehostlist");
 }
 
 string Request(const string &url) {
 	string response;
 	int response_code;
-	chunk.memory = (char *)malloc(1);
-	chunk.size = 0;
+	request_chunk.memory = (char *)malloc(1);
+	request_chunk.size = 0;
 
 	curl_easy_setopt(request_handle, CURLOPT_URL, &url[0]);
 	CURLcode res = curl_easy_perform(request_handle);
 
 	if (res != CURLE_OK) {
-		free(chunk.memory);
+		free(request_chunk.memory);
 		throw curl_easy_strerror(res);
 	}
 
 	curl_easy_getinfo(request_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
 	if (response_code != 200) {
-		free(chunk.memory);
+		free(request_chunk.memory);
 		throw response_code;
 	}
 
-	response = chunk.memory;
+	response = request_chunk.memory;
 
-	free(chunk.memory);
+	free(request_chunk.memory);
 	return response;
 }
 
-CURLcode Put(const string &url, const string &data) {
+string Put(const string &url, const string &data) {
+	string response;
+	put_chunk.memory = (char *)malloc(1);
+	put_chunk.size = 0;
+
 	curl_easy_setopt(put_handle, CURLOPT_URL, &url[0]);
 	curl_easy_setopt(put_handle, CURLOPT_POSTFIELDS, &data[0]);
+	CURLcode res = curl_easy_perform(put_handle);
 
-	return curl_easy_perform(put_handle);
+	if (res != CURLE_OK) {
+		free(put_chunk.memory);
+		return string("connection error: " + to_string(res));
+	}
+
+	response = put_chunk.memory;
+	free(put_chunk.memory);
+	return response;
 }
 
 void Cleanup() {

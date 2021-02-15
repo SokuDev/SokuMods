@@ -20,7 +20,6 @@ vector<function<void(void)>> eventCallbacks(2);
 CMenuConnect *menu;
 
 void Init() {
-	menuFont = ImGui::AddFontFromFile("Modules/Soku-Hostlist/romanan.ttf", 20.0f);
 	std::wstring font_path = module_path;
 	font_path.append(L"\\romanan.ttf");
 	char font_path_ansi[MAX_PATH];

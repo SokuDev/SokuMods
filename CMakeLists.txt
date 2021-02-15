@@ -224,16 +224,16 @@ module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
-module(Hostlist SokuEngine)
+module(InGameHostlist SokuEngine)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-    target_compile_options(Hostlist PRIVATE /EHsc)
+    target_compile_options(InGameHostlist PRIVATE /EHsc)
 endif ()
-target_sources(Hostlist PRIVATE
-        modules/Hostlist/dllmain.cpp)
-target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+target_sources(InGameHostlist PRIVATE
+        modules/InGameHostlist/dllmain.cpp)
+target_link_libraries(InGameHostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
 
-install(FILES modules/Hostlist/hostlistBG.png DESTINATION "SokuEngine/modules/Hostlist")
-install(FILES modules/Hostlist/romanan.ttf DESTINATION "SokuEngine/modules/Hostlist")
+install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
+install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SokuEngine/modules/InGameHostlist")
 
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)

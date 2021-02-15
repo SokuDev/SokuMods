@@ -35,6 +35,9 @@ bool firstTime = true;
 bool hosting = false;
 bool inMenu = false;
 
+mutex host_mutex;
+deque<string> host_payloads;
+
 void Update() {
 	while (true) {
 		if (inMenu == true)
@@ -43,7 +46,26 @@ void Update() {
 	}
 }
 
+void HostLoop() {
+	while (true) {
+		host_mutex.lock();
+		if (host_payloads.empty()) {
+			host_mutex.unlock();
+			this_thread::sleep_for(1ms);
+			continue;
+		}
+		string payload = host_payloads.front();
+		host_payloads.pop_front();
+		host_mutex.unlock();
+		string response = WebHandler::Put("http://delthas.fr:14762/games", payload);
+		if (!response.empty()) {
+			Status::Error(response);
+		}
+	}
+}
+
 thread *updateThread;
+thread *hostThread;
 
 BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
 	if (dwReason == DLL_PROCESS_ATTACH) {
@@ -79,10 +101,11 @@ SOKU_MODULE EntryPoint() {
 	Hostlist::Init();
 
 	updateThread = new thread(Update);
+	hostThread = new thread(HostLoop);
 
 	if (DEBUG) {
 		AllocConsole();
-		SetConsoleTitleA("Hostlist Debug");
+		SetConsoleTitleA("InGameHostlist Debug");
 		freopen("CONOUT$", "w", stdout);
 	}
 
@@ -103,8 +126,9 @@ SOKU_MODULE EntryPoint() {
 					"port",
 					HostingOptions::port,
 				};
-				// TODO: Add proper error checking.
-				WebHandler::Put("http://delthas.fr:14762/games", data.dump());
+				host_mutex.lock();
+				host_payloads.emplace_back(data.dump());
+				host_mutex.unlock();
 			}
 		}
 		hosting = !hosting;
