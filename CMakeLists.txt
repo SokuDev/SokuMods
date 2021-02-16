@@ -333,3 +333,28 @@ install(FILES README.md DESTINATION "SWRSToys"
         RENAME "SokuMods.txt")
 install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
+
+
+
+# WIP Module
+
+add_library(
+        "AdvancedPracticeMode"
+        MODULE
+        modules/AdvancedPracticeMode/main.cpp
+)
+target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include")
+target_link_directories("AdvancedPracticeMode" PRIVATE lib)
+target_link_libraries(
+        AdvancedPracticeMode
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${SFML_DIR}/lib/sfml-graphics.lib"
+        "${SFML_DIR}/lib/sfml-system.lib"
+        "${SFML_DIR}/lib/sfml-window.lib"
+)
+install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SWRSToys/modules/AdvancedPracticeMode/")
+install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SokuEngine/modules/AdvancedPracticeMode/")
