@@ -13,6 +13,7 @@
 #include <ctime>
 #include <discord.h>
 #include <fstream>
+#include <process.h>
 #include <shlwapi.h>
 #include <string>
 #include <thread>
@@ -438,20 +439,14 @@ void tick() {
 	updateActivity(index, party);
 }
 
-class MyThread: public std::thread {
+class MyThread {
 private:
-	bool _done;
+	bool _done = false;
 	int _connectTimeout = 1;
 
 public:
 	bool isDone() const {
 		return this->_done;
-	}
-	template<typename... Args> MyThread(): std::thread(){};
-	~MyThread() {
-		this->_done = true;
-		if (this->joinable())
-			this->join();
 	}
 
 	static void onActivityJoin(const char *sec) {
@@ -526,13 +521,6 @@ public:
 			std::this_thread::sleep_for(std::chrono::milliseconds(config.refreshRate));
 		}
 		logMessage("Exit game\n");
-	}
-
-	void start() {
-		std::thread::operator=(std::thread([this] {
-			this->init();
-			this->run();
-		}));
 	}
 };
 static MyThread updateThread;
@@ -640,6 +628,11 @@ void LoadSettings(LPCSTR profilePath) {
 	}
 }
 
+void start(void *ignored) {
+	updateThread.init();
+	updateThread.run();
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
@@ -667,7 +660,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
-	updateThread.start();
+	// can't use std::thread here beacause it deadlocks against DllMain DLL_THREAD_ATTACH in some circumstances
+	_beginthread(start, 0, nullptr);
 	logMessage("Done...\n");
 	return true;
 }
