@@ -267,6 +267,10 @@ module(SkipIntro Default)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
+module(FixMeiling236 Default)
+target_sources(FixMeiling236 PRIVATE
+        modules/FixMeiling236/main.cpp)
+
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)
     module(SokuStreaming)
