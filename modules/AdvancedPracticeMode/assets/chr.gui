@@ -1,0 +1,316 @@
+Renderer.1 {
+    arrowbackgroundcolor = #F5F5F5;
+    arrowbackgroundcolorhover = white;
+    arrowcolor = #3C3C3C;
+    arrowcolorhover = black;
+    backgroundcolor = #F5F5F5;
+    bordercolor = black;
+    borders = (1, 1, 1, 1);
+    padding = (0, 0, 0, 0);
+    textcolor = #3C3C3C;
+    texturearrow = None;
+    texturearrowdisabled = None;
+    texturearrowhover = None;
+    texturebackground = None;
+    texturebackgrounddisabled = None;
+}
+
+Renderer.2 {
+    texture = None;
+    transparenttexture = false;
+}
+
+ComboBox.Skill0Id {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    ItemsToDisplay = 0;
+    MaximumItems = 0;
+    Position = (50, 14);
+    Size = (180, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+Picture.Skill0Img {
+    Position = (10, 10);
+    Size = (32, 32);
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+Picture.Skill1Img {
+    Position = (10, 50);
+    Size = (32, 32);
+    renderer = &2;
+}
+
+ComboBox.Skill1Id {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    ItemsToDisplay = 0;
+    MaximumItems = 0;
+    Position = (50, 54);
+    Size = (180, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill2Id {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    ItemsToDisplay = 0;
+    MaximumItems = 0;
+    Position = (50, 94);
+    Size = (180, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill3Id {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    ItemsToDisplay = 0;
+    MaximumItems = 0;
+    Position = (50, 134);
+    Size = (180, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill4Id {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    ItemsToDisplay = 0;
+    MaximumItems = 0;
+    Position = (50, 174);
+    Size = (180, 22);
+    TextSize = 13;
+    Visible = false;
+    renderer = &1;
+}
+
+Picture.Skill2Img {
+    Position = (10, 90);
+    Size = (32, 32);
+    renderer = &2;
+}
+
+Picture.Skill3Img {
+    Position = (10, 130);
+    Size = (32, 32);
+    renderer = &2;
+}
+
+Picture.Skill4Img {
+    Position = (10, 170);
+    Size = (32, 32);
+    renderer = &2;
+}
+
+ComboBox.Skill0Lvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (240, 14);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill1Lvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, 4];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (240, 54);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill2Lvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, 4];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (240, 94);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill3Lvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, 4];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (240, 134);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.Skill4Lvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (240, 174);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    Visible = false;
+    renderer = &1;
+}
+
+Picture.DollPic {
+    Position = (10, 220);
+    Size = (32, 32);
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+ComboBox.DollLvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (50, 224);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+Picture.RodPic {
+    Position = (130, 220);
+    Size = (32, 32);
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+Picture.FanPic {
+    Position = (10, 270);
+    Size = (32, 32);
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+Picture.GrimPic {
+    Position = (130, 270);
+    Size = (32, 32);
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+Picture.DropPic {
+    Position = (10, 320);
+    Size = (32, 32);
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+ComboBox.RodLvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (180, 224);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.FanLvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Up;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (50, 274);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.GrimLvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Up;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (180, 274);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+ComboBox.DropLvl {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Up;
+    Items = [0, 1, 2];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (50, 324);
+    SelectedItemIndex = 0;
+    Size = (60, 22);
+    TextSize = 13;
+    renderer = &1;
+}
+
+Picture.SpecialPic {
+    Position = (130, 320);
+    Size = (32, 32);
+    Visible = false;
+
+    Renderer {
+        texture = None;
+        transparenttexture = false;
+    }
+}
+
+ComboBox.SpecialLevel {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Up;
+    Items = [0, 1, 2, 3, MAX];
+    ItemsToDisplay = 0;
+    MaximumItems = 5;
+    Position = (180, 324);
+    Size = (60, 22);
+    TextSize = 13;
+    Visible = false;
+    renderer = &1;
+}

@@ -47,7 +47,7 @@ option(ENABLE_UNIX_SOCKETS "" OFF)
 option(CURL_CA_BUNDLE "" none)
 option(CURL_CA_PATH "" none)
 option(CURL_WINDOWS_SSPI "" OFF)
-add_subdirectory(curl EXCLUDE_FROM_ALL)
+#add_subdirectory(curl EXCLUDE_FROM_ALL)
 
 # detours
 
@@ -153,7 +153,7 @@ endfunction()
 
 module(Autopunch Default)
 target_sources(Autopunch PRIVATE modules/Autopunch/Autopunch.c)
-target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
+#target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
 
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
@@ -230,7 +230,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" S
 endif ()
 target_sources(Hostlist PRIVATE
         modules/Hostlist/dllmain.cpp)
-target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+#target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
 
 install(FILES modules/Hostlist/hostlistBG.png DESTINATION "SokuEngine/modules/Hostlist")
 install(FILES modules/Hostlist/romanan.ttf DESTINATION "SokuEngine/modules/Hostlist")
@@ -346,10 +346,19 @@ add_library(
         "AdvancedPracticeMode"
         MODULE
         modules/AdvancedPracticeMode/main.cpp
+	modules/AdvancedPracticeMode/Moves.cpp
+        modules/AdvancedPracticeMode/Moves.hpp
+        modules/AdvancedPracticeMode/Gui.cpp
+        modules/AdvancedPracticeMode/Gui.hpp
 )
 target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include")
+target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
 target_link_directories("AdvancedPracticeMode" PRIVATE lib)
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
+else ()
+    set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
+endif ()
 target_link_libraries(
         AdvancedPracticeMode
         SokuLib
@@ -359,6 +368,8 @@ target_link_libraries(
         "${SFML_DIR}/lib/sfml-graphics.lib"
         "${SFML_DIR}/lib/sfml-system.lib"
         "${SFML_DIR}/lib/sfml-window.lib"
+        "${TGUILIB}"
 )
+message(${TGUILIB})
 install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SWRSToys/modules/AdvancedPracticeMode/")
 install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SokuEngine/modules/AdvancedPracticeMode/")
