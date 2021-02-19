@@ -224,6 +224,10 @@ module(DPadFix)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
+module(FixMeiling236 Default)
+target_sources(FixMeiling236 PRIVATE
+        modules/FixMeiling236/main.cpp)
+
 module(InGameHostlist SokuEngine)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     target_compile_options(InGameHostlist PRIVATE /EHsc)
@@ -266,10 +270,6 @@ target_sources(ReplayInputView+ PRIVATE
 module(SkipIntro Default)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
-
-module(FixMeiling236 Default)
-target_sources(FixMeiling236 PRIVATE
-        modules/FixMeiling236/main.cpp)
 
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)

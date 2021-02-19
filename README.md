@@ -10,14 +10,15 @@ This repository was originally created from the original SWRSToys release by *An
 
 The code in this repository comes from various contributors:
 - this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
-- *DPhoenix* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
+- *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
-- *fishshapedfish* made DPadFix
-- *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
+- *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix
+- *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
 - *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
-- *Shinki* and *PC_volt* made ReplayInputView+
+- *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
+- Fear, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
 - delthas made Autopunch, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
@@ -80,6 +81,12 @@ See [here](modules/DiscordIntegration/README.md) for details.
 ### DPadFix
 
 **Map the joystick DPad and trigger buttons to game inputs.**
+
+### FixMeiling236
+
+**Fix a serious game bug regarding an underministic Meiling 236 recovery duration which could cause game desyncs.**
+
+*This module is very lightweight; it is advised & good netplay etiquette to always enable it.*
 
 ### MemoryPatch
 
