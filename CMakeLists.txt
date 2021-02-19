@@ -256,10 +256,13 @@ target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 module(ReplayDnD)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
 
-module(ReplayInputView)
-target_sources(ReplayInputView PRIVATE
-        modules/ReplayInputView/ReplayInputView.cpp
-        modules/ReplayInputView/ReplayInputView.rc)
+set(BUILD_RIV false CACHE BOOL "Whether to build the legacy ReplayInputView (not RIV+) mod")
+if(BUILD_RIV)
+    module(ReplayInputView)
+    target_sources(ReplayInputView PRIVATE
+            modules/ReplayInputView/ReplayInputView.cpp
+            modules/ReplayInputView/ReplayInputView.rc)
+endif()
 
 module(ReplayInputView+)
 target_sources(ReplayInputView+ PRIVATE
