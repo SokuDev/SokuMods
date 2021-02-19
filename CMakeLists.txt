@@ -239,6 +239,15 @@ target_link_libraries(InGameHostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SokuEngine/modules/InGameHostlist")
 
+module(LabTool)
+target_sources(LabTool PRIVATE
+        modules/LabTool/dllmain.cpp
+        modules/LabTool/functions.cpp
+        modules/LabTool/joystick.cpp
+        modules/LabTool/LabTool.cpp
+        modules/LabTool/labtool_manager.cpp)
+target_link_libraries(LabTool dinput8 shlwapi user32)
+
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)
 
