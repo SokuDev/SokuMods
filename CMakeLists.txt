@@ -163,7 +163,7 @@ target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/Cha
 
 # DiscordIntegration main module
 set(DISCORD_CLIENT_ID "771968286199382056" CACHE STRING "DiscordIntegration mod Discord client ID")
-module(DiscordIntegration)
+module(DiscordIntegration Default)
 target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     target_compile_options(DiscordIntegration PRIVATE /EHsc)
@@ -220,7 +220,7 @@ install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SokuEngine/modules
 install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys/modules/DiscordIntegration/")
 install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine/modules/DiscordIntegration/")
 
-module(DPadFix)
+module(DPadFix Default)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
@@ -228,7 +228,7 @@ module(FixMeiling236 Default)
 target_sources(FixMeiling236 PRIVATE
         modules/FixMeiling236/main.cpp)
 
-module(InGameHostlist SokuEngine)
+module(InGameHostlist SokuEngine Default)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     target_compile_options(InGameHostlist PRIVATE /EHsc)
 endif ()
@@ -313,7 +313,7 @@ target_sources(WindowedFullscreen PRIVATE
 # passing "d3d9" conflicts with the generated d3d9 module somehow, pass an absolute path to the one in lib/
 target_link_libraries(WindowedFullscreen detours "${CMAKE_SOURCE_DIR}/lib/d3d9.lib")
 
-module(WindowResizer)
+module(WindowResizer Default)
 target_sources(WindowResizer PRIVATE
         modules/WindowResizer/WindowResizer.cpp)
 target_link_libraries(WindowResizer detours)
