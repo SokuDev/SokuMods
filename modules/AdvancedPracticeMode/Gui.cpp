@@ -59,6 +59,21 @@ namespace Practice
 		puts("All done");
 	}
 
+	static void makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
+	{
+		auto card = manager.addCard(id);
+
+		if (card)
+			card->cost = 1;
+		else {
+			SokuLib::Card card{id, 1};
+
+			puts("No sprite though");
+			manager.deckInfos.hand.pushCard(card);
+			manager.deckInfos.cardCount = manager.deckInfos.hand.size;
+		}
+	}
+
 	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
 	{
 		char nbSkills = 4;
@@ -115,6 +130,9 @@ namespace Practice
 				)
 			);
 		}
+		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager]{
+			makeFakeCard(manager, 200);
+		});
 	}
 
 	void loadAllGuiElements(LPCSTR profilePath)
