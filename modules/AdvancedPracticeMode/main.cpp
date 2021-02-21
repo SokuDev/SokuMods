@@ -10,6 +10,11 @@
 #include <SFML/Graphics.hpp>
 #include "Gui.hpp"
 
+#define PAYLOAD_ADDRESS_PLAYER 0x40A45E
+#define PAYLOAD_NEXT_INSTR_PLAYER (PAYLOAD_ADDRESS_PLAYER + 4)
+#define PAYLOAD_ADDRESS_DUMMY 0x48224E//0x40A45E
+#define PAYLOAD_NEXT_INSTR_DUMMY (PAYLOAD_ADDRESS_DUMMY + 4)
+
 using namespace SokuLib;
 
 struct Title {};
@@ -21,6 +26,7 @@ struct LoadingWatch {};
 
 sf::RenderWindow *sfmlWindow;
 void (*s_origKeymapManager_SetInputs)();
+void (*s_origDummy_SetInputs)();
 int (__thiscall BattleManager::*s_origCBattleManager_Render)();
 int (__thiscall BattleManager::*s_origCBattleManager_Start)();
 int (__thiscall BattleManager::*s_origCBattleManager_KO)();
@@ -34,7 +40,7 @@ char profilePath[1024 + MAX_PATH];
 char profileParent[1024 + MAX_PATH];
 KeyInput dummy;
 
-struct Test {
+struct TestKeyMapMgr {
 	KeymapManager base;
 
 	void handleInput()
@@ -43,9 +49,6 @@ struct Test {
 
 		if (&this->base == mgr.leftCharacterManager.keyManager->keymapManager)
 			return this->handlePlayerInput();
-		if (mgr.rightCharacterManager.keyManager && &this->base == mgr.rightCharacterManager.keyManager->keymapManager)
-			return this->handleDummyInput();
-		return (void)puts("Unknown input");
 	}
 
 	void handlePlayerInput()
@@ -53,35 +56,35 @@ struct Test {
 		puts("Player input");
 		memcpy(&dummy, &this->base.input, sizeof(this->base.input));
 		memset(&this->base.input, 0, sizeof(this->base.input));
-		//this->base.input.horizontalAxis = rand() % 3 - 1;
-		//this->base.input.verticalAxis = rand() % 3 - 1;
-		//this->base.input.a = rand() % 2;
-		//this->base.input.b = rand() % 2;
-		//this->base.input.c = rand() % 2;
-		//this->base.input.d = rand() % 2;
-		//this->base.input.changeCard = rand() % 2;
-		//this->base.input.spellcard = rand() % 2;
 	}
+};
 
-	void handleDummyInput()
+struct Dummy {
+	CharacterManager base;
+
+	void handleInput()
 	{
-		puts("Dummy input");
-		memcpy(&this->base.input, &dummy, sizeof(dummy));
+		memcpy(&this->base.keyMap, &dummy, sizeof(dummy));
 	}
 };
 
 void KeymapManagerSetInputs()
 {
-	// super
 	__asm push ecx;
 	s_origKeymapManager_SetInputs();
 	__asm pop ecx;
-	union_cast<void (*)()>(&Test::handleInput)();
+	union_cast<void (*)()>(&TestKeyMapMgr::handleInput)();
+}
+
+void __fastcall dummySetInputs()
+{
+	union_cast<void (*)()>(&Dummy::handleInput)();
 }
 
 static void activate()
 {
 	DWORD old;
+	int newOffset;
 
 	if (sfmlWindow)
 		return;
@@ -102,12 +105,17 @@ static void activate()
 	*(char *)0x42A333 = 10;
 	VirtualProtect((PVOID)0x42A333, 1, old, &old);
 
-	VirtualProtect((PVOID)0x40A45E, 4, PAGE_EXECUTE_WRITECOPY, &old);
-	int newOffset = (int)KeymapManagerSetInputs - 0x40A462;
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
+	newOffset = (int)KeymapManagerSetInputs - PAYLOAD_NEXT_INSTR_PLAYER;
+	s_origKeymapManager_SetInputs = reinterpret_cast<void (*)()>(*(int *)PAYLOAD_ADDRESS_PLAYER + PAYLOAD_NEXT_INSTR_PLAYER);
+	*(int *)PAYLOAD_ADDRESS_PLAYER = newOffset;
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
 
-	s_origKeymapManager_SetInputs = reinterpret_cast<void (*)()>(*(int *)0x40A45E + 0x40A462);
-	*(int *)0x40A45E = newOffset;
-	VirtualProtect((PVOID)0x40A45E, 4, old, &old);
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, PAGE_EXECUTE_WRITECOPY, &old);
+	newOffset = (int)dummySetInputs - PAYLOAD_NEXT_INSTR_DUMMY;
+	s_origDummy_SetInputs = reinterpret_cast<void (*)()>(*(int *)PAYLOAD_ADDRESS_DUMMY + PAYLOAD_NEXT_INSTR_DUMMY);
+	*(int *)PAYLOAD_ADDRESS_DUMMY = newOffset;
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, old, &old);
 }
 
 static void deactivate()
@@ -123,9 +131,13 @@ static void deactivate()
 	*(char *)0x42A333 = 8;
 	VirtualProtect((PVOID)0x42A333, 1, old, &old);
 
-	VirtualProtect((PVOID)0x40A45E, 4, PAGE_EXECUTE_WRITECOPY, &old);
-	*(int *)0x40A45E = union_cast<int>(s_origKeymapManager_SetInputs) - 0x40A462;
-	VirtualProtect((PVOID)0x40A45E, 4, old, &old);
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
+	*(int *)PAYLOAD_ADDRESS_PLAYER = union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_PLAYER;
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
+
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, PAGE_EXECUTE_WRITECOPY, &old);
+	*(int *)PAYLOAD_ADDRESS_DUMMY = union_cast<int>(s_origDummy_SetInputs) - PAYLOAD_NEXT_INSTR_DUMMY;
+	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, old, &old);
 }
 
 int __fastcall CTitle_OnProcess(Title *This)
@@ -238,12 +250,10 @@ int __fastcall CBattleManager_Render(BattleManager *This)
 void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 {
 	FILE *_;
-	Test test;
 
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
 	puts("Hello !");
-	printf("%p : %p\n", &test, &test.base);
 	//port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 }
 
