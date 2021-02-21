@@ -12,10 +12,8 @@
 
 #define PAYLOAD_ADDRESS_PLAYER 0x40A45E
 #define PAYLOAD_NEXT_INSTR_PLAYER (PAYLOAD_ADDRESS_PLAYER + 4)
-#define PAYLOAD_ADDRESS_DUMMY 0x48224E//0x40A45E
+#define PAYLOAD_ADDRESS_DUMMY 0x48224E
 #define PAYLOAD_NEXT_INSTR_DUMMY (PAYLOAD_ADDRESS_DUMMY + 4)
-
-using namespace SokuLib;
 
 struct Title {};
 struct Battle {};
@@ -27,9 +25,9 @@ struct LoadingWatch {};
 sf::RenderWindow *sfmlWindow;
 void (*s_origKeymapManager_SetInputs)();
 void (*s_origDummy_SetInputs)();
-int (__thiscall BattleManager::*s_origCBattleManager_Render)();
-int (__thiscall BattleManager::*s_origCBattleManager_Start)();
-int (__thiscall BattleManager::*s_origCBattleManager_KO)();
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
 int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
 int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
 int (__thiscall Loading::*s_origCLoading_Process)();
@@ -38,14 +36,14 @@ int (__thiscall Select::*s_origCSelect_Process)();
 int (__thiscall Title::*s_origCTitle_Process)();
 char profilePath[1024 + MAX_PATH];
 char profileParent[1024 + MAX_PATH];
-KeyInput dummy;
+SokuLib::KeyInput dummy;
 
 struct TestKeyMapMgr {
-	KeymapManager base;
+	SokuLib::KeymapManager base;
 
 	void handleInput()
 	{
-		auto &mgr = getBattleMgr();
+		auto &mgr = SokuLib::getBattleMgr();
 
 		if (&this->base == mgr.leftCharacterManager.keyManager->keymapManager)
 			return this->handlePlayerInput();
@@ -60,7 +58,7 @@ struct TestKeyMapMgr {
 };
 
 struct Dummy {
-	CharacterManager base;
+	SokuLib::CharacterManager base;
 
 	void handleInput()
 	{
@@ -73,12 +71,12 @@ void KeymapManagerSetInputs()
 	__asm push ecx;
 	s_origKeymapManager_SetInputs();
 	__asm pop ecx;
-	union_cast<void (*)()>(&TestKeyMapMgr::handleInput)();
+	SokuLib::union_cast<void (*)()>(&TestKeyMapMgr::handleInput)();
 }
 
 void __fastcall dummySetInputs()
 {
-	union_cast<void (*)()>(&Dummy::handleInput)();
+	SokuLib::union_cast<void (*)()>(&Dummy::handleInput)();
 }
 
 static void activate()
@@ -132,11 +130,11 @@ static void deactivate()
 	VirtualProtect((PVOID)0x42A333, 1, old, &old);
 
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
-	*(int *)PAYLOAD_ADDRESS_PLAYER = union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_PLAYER;
+	*(int *)PAYLOAD_ADDRESS_PLAYER = SokuLib::union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_PLAYER;
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
 
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, PAGE_EXECUTE_WRITECOPY, &old);
-	*(int *)PAYLOAD_ADDRESS_DUMMY = union_cast<int>(s_origDummy_SetInputs) - PAYLOAD_NEXT_INSTR_DUMMY;
+	*(int *)PAYLOAD_ADDRESS_DUMMY = SokuLib::union_cast<int>(s_origDummy_SetInputs) - PAYLOAD_NEXT_INSTR_DUMMY;
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, old, &old);
 }
 
@@ -156,7 +154,7 @@ int __fastcall CBattleWatch_OnProcess(BattleWatch *This)
 
 int __fastcall CBattle_OnProcess(Battle *This)
 {
-	auto &battle = getBattleMgr();
+	auto &battle = SokuLib::getBattleMgr();
 	bool activated = false;
 
 	//battle.leftCharacterManager.keyManager.keymapManager.horizontalAxis = 0;
@@ -168,8 +166,11 @@ int __fastcall CBattle_OnProcess(Battle *This)
 	//battle.leftCharacterManager.keyManager.keymapManager.changeCard = 0;
 	//battle.leftCharacterManager.keyManager.keymapManager.spellcard = 0;
 
-	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE) {
+		//__asm ;
+		//(0x42A4C9);
 		activated = true, activate();
+	}
 
 	memcpy(&battle.rightCharacterManager.keyMap, &dummy, sizeof(dummy));
 	// super
@@ -212,19 +213,19 @@ int __fastcall CLoadingWatch_OnProcess(LoadingWatch *This)
 	return (This->*s_origCLoadingWatch_Process)();
 }
 
-int __fastcall CBattleManager_KO(BattleManager *This)
+int __fastcall CBattleManager_KO(SokuLib::BattleManager *This)
 {
 	// super
 	return (This->*s_origCBattleManager_KO)();
 }
 
-int __fastcall CBattleManager_Start(BattleManager *This)
+int __fastcall CBattleManager_Start(SokuLib::BattleManager *This)
 {
 	// super
 	return (This->*s_origCBattleManager_Start)();
 }
 
-int __fastcall CBattleManager_Render(BattleManager *This)
+int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 {
 	// super
 	int ret = (This->*s_origCBattleManager_Render)();
@@ -263,51 +264,51 @@ void hookFunctions()
 
 	//Setup hooks
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCTitle_Process = union_cast<int (Title::*)()>(
-		TamperDword(
-			vtbl_CTitle + OFFSET_ON_PROCESS,
+	s_origCTitle_Process = SokuLib::union_cast<int (Title::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CTitle + SokuLib::OFFSET_ON_PROCESS,
 			reinterpret_cast<DWORD>(CTitle_OnProcess)
 		)
 	);
-	s_origCBattle_Process = union_cast<int (Battle::*)()>(
-		TamperDword(
-			vtbl_CBattle + OFFSET_ON_PROCESS,
+	s_origCBattle_Process = SokuLib::union_cast<int (Battle::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattle + SokuLib::OFFSET_ON_PROCESS,
 			reinterpret_cast<DWORD>(CBattle_OnProcess)
 		)
 	);
-	s_origCSelect_Process = union_cast<int (Select::*)()>(
-		TamperDword(
-			vtbl_CSelect + OFFSET_ON_PROCESS,
+	s_origCSelect_Process = SokuLib::union_cast<int (Select::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CSelect + SokuLib::OFFSET_ON_PROCESS,
 			reinterpret_cast<DWORD>(CSelect_OnProcess)
 		)
 	);
-	s_origCLoading_Process = union_cast<int (Loading::*)()>(
-		TamperDword(
-			vtbl_CLoading + OFFSET_ON_PROCESS,
+	s_origCLoading_Process = SokuLib::union_cast<int (Loading::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CLoading + SokuLib::OFFSET_ON_PROCESS,
 			reinterpret_cast<DWORD>(CLoading_OnProcess)
 		)
 	);
-	s_origCBattleManager_Start = union_cast<int (BattleManager::*)()>(
-		TamperDword(
-			vtbl_CBattleManager + BATTLE_MGR_OFFSET_ON_SAY_START,
+	s_origCBattleManager_Start = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_SAY_START,
 			reinterpret_cast<DWORD>(CBattleManager_Start)
 		)
 	);
-	s_origCBattleManager_KO = union_cast<int (BattleManager::*)()>(
-		TamperDword(
-			vtbl_CBattleManager + BATTLE_MGR_OFFSET_ON_KO,
+	s_origCBattleManager_KO = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_KO,
 			reinterpret_cast<DWORD>(CBattleManager_KO)
 		)
 	);
-	s_origCBattleManager_Render = union_cast<int (BattleManager::*)()>(
-		TamperDword(
-			vtbl_CBattleManager + BATTLE_MGR_OFFSET_ON_RENDER,
+	s_origCBattleManager_Render = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_RENDER,
 			reinterpret_cast<DWORD>(CBattleManager_Render)
 		)
 	);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
-	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16])
