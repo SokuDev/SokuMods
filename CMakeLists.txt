@@ -354,7 +354,7 @@ add_library(
 target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
 target_link_directories("AdvancedPracticeMode" PRIVATE lib)
-if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
     set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
 else ()
     set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
