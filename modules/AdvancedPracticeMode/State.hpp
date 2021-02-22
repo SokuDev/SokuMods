@@ -12,10 +12,15 @@
 
 namespace Practice
 {
+	struct Settings {
+		bool controlDummy = false;
+	};
+
 	extern sf::RenderWindow *sfmlWindow;
 	extern char profilePath[1024 + MAX_PATH];
 	extern char profileParent[1024 + MAX_PATH];
 	extern SokuLib::KeyInput dummy;
+	extern Settings settings;
 
 	void activate();
 	void deactivate();

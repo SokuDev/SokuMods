@@ -35,6 +35,7 @@ namespace Practice
 		SokuLib::union_cast<void (*)()>(&FakeKeyMapMgr::handleInput)();
 	}
 
+	Settings settings;
 	sf::RenderWindow *sfmlWindow;
 	char profilePath[1024 + MAX_PATH];
 	char profileParent[1024 + MAX_PATH];

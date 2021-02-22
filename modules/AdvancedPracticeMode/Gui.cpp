@@ -5,6 +5,7 @@
 #include <SokuLib.hpp>
 #include "Gui.hpp"
 #include "Moves.hpp"
+#include "State.hpp"
 
 namespace Practice
 {
@@ -32,10 +33,8 @@ namespace Practice
 		"suwako",
 	};
 	std::vector<sf::Texture> skillsTextures;
-
-	static tgui::Panel::Ptr leftPanel;
-	static tgui::Panel::Ptr rightPanel;
-
+	static tgui::Panel::Ptr panel;
+	static tgui::Tabs::Ptr tab;
 
 	inline void getSkillMap(SokuLib::CharacterManager &manager, char (&skills)[5], SokuLib::Character character)
 	{
@@ -135,14 +134,13 @@ namespace Practice
 		});
 	}
 
-	void loadAllGuiElements(LPCSTR profilePath)
+	static void displaySkillsPanel(const std::string &profile)
 	{
-		std::string profile = profilePath;
+		panel->loadWidgetsFromFile(profile + "/assets/skills.gui");
 
-		puts("Loading GUI file");
-		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
-		leftPanel = gui.get<tgui::Panel>("Left");
-		rightPanel = gui.get<tgui::Panel>("Right");
+		tgui::Panel::Ptr leftPanel = panel->get<tgui::Panel>("Left");
+		tgui::Panel::Ptr rightPanel = panel->get<tgui::Panel>("Right");
+
 		puts("Populate left GUI");
 		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
 		puts("Populate Right GUI");
@@ -150,6 +148,38 @@ namespace Practice
 		puts("Update state");
 		updateGuiState();
 		puts("All good !");
+	}
+
+	static void updateDummyPanel()
+	{
+		settings.controlDummy = panel->get<tgui::CheckBox>("control")->isChecked();
+	}
+
+	static void displayDummyPanel(const std::string &profile)
+	{
+		panel->loadWidgetsFromFile(profile + "/assets/dummy.gui");
+
+	}
+
+	void loadAllGuiElements(LPCSTR profilePath)
+	{
+		std::string profile = profilePath;
+
+		puts("Loading GUI file");
+		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
+		panel = gui.get<tgui::Panel>("Panel");
+		tab = gui.get<tgui::Tabs>("Tabs");
+		tab->connect("TabSelected", [profile]{
+			switch (tab->getSelectedIndex()) {
+			case 0:
+				return displaySkillsPanel(profile);
+			case 1:
+				return displayDummyPanel(profile);
+			default:
+				return panel->removeAllWidgets();
+			}
+		});
+		displaySkillsPanel(profile);
 	}
 
 	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
@@ -209,7 +239,16 @@ namespace Practice
 
 	void updateGuiState()
 	{
-		updateCharacterPanel(leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
-		updateCharacterPanel(rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
+		switch (tab->getSelectedIndex()) {
+		case 0:
+			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
+			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
+			break;
+		case 1:
+			updateDummyPanel();
+			break;
+		default:
+			break;
+		}
 	}
 }

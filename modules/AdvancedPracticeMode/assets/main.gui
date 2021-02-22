@@ -1,58 +1,18 @@
-Renderer.1 {
-    backgroundcolor = transparent;
-    bordercolor = #3C3C3C;
-    borders = (0, 0, 0, 0);
-    textcolor = #3C3C3C;
-    texturebackground = None;
-}
-
-Panel.Left {
-    Position = (10, 50);
-    Size = (310, 430);
+Panel.Panel {
+    Position = (0, 20);
+    Size = (640, 460);
 
     Renderer {
-        backgroundcolor = black;
+        backgroundcolor = white;
         bordercolor = black;
-        borders = (1, 1, 0, 1);
         texturebackground = None;
     }
 }
 
-Panel.Right {
-    Position = (320, 50);
-    Size = (310, 430);
-
-    Renderer {
-        backgroundcolor = black;
-        bordercolor = black;
-        borders = (1, 1, 1, 1);
-        texturebackground = None;
-    }
-}
-
-Label.Label1 {
-    AutoSize = true;
-    Position = (120, 30);
-    ScrollbarPolicy = Never;
-    Size = (43.2, 18);
-    Text = Player;
-    TextSize = 13;
-    renderer = &1;
-}
-
-Label.Label2 {
-    AutoSize = true;
-    Position = (440, 30);
-    ScrollbarPolicy = Never;
-    Size = (55.2, 18);
-    Text = Dummy;
-    TextSize = 13;
-    renderer = &1;
-}
-
-Tabs.Tabs1 {
+Tabs.Tabs {
     AutoSize = 0;
-    Size = (637.8, 22);
+    Selected = 0;
+    Size = (&.w, 20);
     Tabs = [Skills, Dummy, State, Macros, Misc];
     TextSize = 13;
 

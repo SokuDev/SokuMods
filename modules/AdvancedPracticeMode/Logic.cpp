@@ -10,6 +10,9 @@ namespace Practice
 {
 	void handlePlayerInput(SokuLib::KeymapManager &manager)
 	{
+		if (!settings.controlDummy)
+			return;
+
 		auto arraySrc = reinterpret_cast<int *>(&manager.input);
 		auto arrayDest = reinterpret_cast<int *>(&dummy);
 
@@ -26,7 +29,10 @@ namespace Practice
 
 	void handleDummyInput(SokuLib::KeymapManager &manager)
 	{
-		memcpy(&manager.input, &dummy, sizeof(dummy));
+		if (settings.controlDummy)
+			memcpy(&manager.input, &dummy, sizeof(manager.input));
+		else
+			memset(&manager.input, 0, sizeof(manager.input));
 	}
 
 	void handleInput(SokuLib::KeymapManager &manager)
