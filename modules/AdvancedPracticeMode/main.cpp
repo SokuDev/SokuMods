@@ -45,10 +45,8 @@ int __fastcall CBattle_OnProcess(Battle *This)
 {
 	auto &battle = SokuLib::getBattleMgr();
 
-	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE) {
-		*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 		Practice::activate();
-	}
 
 	// super
 	int ret = (This->*s_origCBattle_Process)();

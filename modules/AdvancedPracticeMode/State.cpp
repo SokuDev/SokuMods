@@ -41,13 +41,18 @@ namespace Practice
 	char profileParent[1024 + MAX_PATH];
 	SokuLib::KeyInput dummy;
 
+	static void update()
+	{
+		*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
+	}
+
 	void activate()
 	{
 		DWORD old;
 		int newOffset;
 
 		if (sfmlWindow)
-			return;
+			return update();
 
 		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
 		Practice::init(profileParent);
@@ -74,6 +79,7 @@ namespace Practice
 		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
 
 		((unsigned *)0x00898680)[1] = 0x008986A8;
+		update();
 	}
 
 	void deactivate()
