@@ -100,7 +100,6 @@ void Update() {
 					}
 				}
 
-				Status::Normal("Hostlist updated.");
 				delayTime = SHORT_WAITTIME;
 			} catch (const char *e) {
 				Status::Error(e);

@@ -13,6 +13,7 @@
 #include <ctime>
 #include <discord.h>
 #include <fstream>
+#include <process.h>
 #include <shlwapi.h>
 #include <string>
 #include <thread>
@@ -337,7 +338,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
 		index = STRING_INDEX_TITLE;
-		if (!SokuLib::isInNetworkMenu()) {
+		if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 			logMessage("We are not in a proper submenu\n");
 			return;
 		}
@@ -364,7 +365,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 void titleScreenStateUpdate() {
 	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
-	if (!SokuLib::isInNetworkMenu()) {
+	if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 		logMessage("We are not in a proper submenu\n");
 		return;
 	}
@@ -438,20 +439,14 @@ void tick() {
 	updateActivity(index, party);
 }
 
-class MyThread: public std::thread {
+class MyThread {
 private:
-	bool _done;
+	bool _done = false;
 	int _connectTimeout = 1;
 
 public:
 	bool isDone() const {
 		return this->_done;
-	}
-	template<typename... Args> MyThread(): std::thread(){};
-	~MyThread() {
-		this->_done = true;
-		if (this->joinable())
-			this->join();
 	}
 
 	static void onActivityJoin(const char *sec) {
@@ -463,10 +458,9 @@ public:
 		unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
 		bool isSpec = secret.substr(0, 4) == "spec";
 
-		if (!SokuLib::isInNetworkMenu()) {
+		if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 			logMessage("Warping to connect screen.\n");
-			SokuLib::moveToConnectMenu();
-			menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+			menuObj = &SokuLib::MenuConnect::moveToConnectMenu();
 			logMessage("Done.\n");
 		} else
 			logMessage("Already in connect screen\n");
@@ -480,7 +474,7 @@ public:
 			return;
 
 		logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-		SokuLib::joinHost(ip.c_str(), port, isSpec);
+		menuObj->joinHost(ip.c_str(), port, isSpec);
 		state.roomIp = ip + ":" + std::to_string(port);
 	}
 
@@ -526,13 +520,6 @@ public:
 			std::this_thread::sleep_for(std::chrono::milliseconds(config.refreshRate));
 		}
 		logMessage("Exit game\n");
-	}
-
-	void start() {
-		std::thread::operator=(std::thread([this] {
-			this->init();
-			this->run();
-		}));
 	}
 };
 static MyThread updateThread;
@@ -640,6 +627,11 @@ void LoadSettings(LPCSTR profilePath) {
 	}
 }
 
+void start(void *ignored) {
+	updateThread.init();
+	updateThread.run();
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
@@ -667,7 +659,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
-	updateThread.start();
+	// can't use std::thread here beacause it deadlocks against DllMain DLL_THREAD_ATTACH in some circumstances
+	_beginthread(start, 0, nullptr);
 	logMessage("Done...\n");
 	return true;
 }

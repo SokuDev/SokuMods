@@ -163,7 +163,7 @@ target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/Cha
 
 # DiscordIntegration main module
 set(DISCORD_CLIENT_ID "771968286199382056" CACHE STRING "DiscordIntegration mod Discord client ID")
-module(DiscordIntegration)
+module(DiscordIntegration Default)
 target_compile_definitions(DiscordIntegration PRIVATE _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ClientID="${DISCORD_CLIENT_ID}")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     target_compile_options(DiscordIntegration PRIVATE /EHsc)
@@ -220,20 +220,33 @@ install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SokuEngine/modules
 install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys/modules/DiscordIntegration/")
 install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine/modules/DiscordIntegration/")
 
-module(DPadFix)
+module(DPadFix Default)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
-module(Hostlist SokuEngine)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-    target_compile_options(Hostlist PRIVATE /EHsc)
-endif ()
-target_sources(Hostlist PRIVATE
-        modules/Hostlist/dllmain.cpp)
-#target_link_libraries(Hostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+module(FixMeiling236 Default)
+target_sources(FixMeiling236 PRIVATE
+        modules/FixMeiling236/main.cpp)
 
-install(FILES modules/Hostlist/hostlistBG.png DESTINATION "SokuEngine/modules/Hostlist")
-install(FILES modules/Hostlist/romanan.ttf DESTINATION "SokuEngine/modules/Hostlist")
+#module(InGameHostlist SokuEngine Default)
+#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+#    target_compile_options(Hostlist PRIVATE /EHsc)
+#endif ()
+#target_sources(InGameHostlist PRIVATE
+#        modules/InGameHostlist/dllmain.cpp)
+#target_link_libraries(InGameHostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+
+install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
+install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SokuEngine/modules/InGameHostlist")
+
+module(LabTool)
+target_sources(LabTool PRIVATE
+        modules/LabTool/dllmain.cpp
+        modules/LabTool/functions.cpp
+        modules/LabTool/joystick.cpp
+        modules/LabTool/LabTool.cpp
+        modules/LabTool/labtool_manager.cpp)
+target_link_libraries(LabTool dinput8 shlwapi user32)
 
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)
@@ -252,10 +265,13 @@ target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 module(ReplayDnD)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
 
-module(ReplayInputView)
-target_sources(ReplayInputView PRIVATE
-        modules/ReplayInputView/ReplayInputView.cpp
-        modules/ReplayInputView/ReplayInputView.rc)
+set(BUILD_RIV false CACHE BOOL "Whether to build the legacy ReplayInputView (not RIV+) mod")
+if(BUILD_RIV)
+    module(ReplayInputView)
+    target_sources(ReplayInputView PRIVATE
+            modules/ReplayInputView/ReplayInputView.cpp
+            modules/ReplayInputView/ReplayInputView.rc)
+endif()
 
 module(ReplayInputView+)
 target_sources(ReplayInputView+ PRIVATE
@@ -266,10 +282,6 @@ target_sources(ReplayInputView+ PRIVATE
 module(SkipIntro Default)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
-
-module(FixMeiling236 Default)
-target_sources(FixMeiling236 PRIVATE
-        modules/FixMeiling236/main.cpp)
 
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)
@@ -310,7 +322,7 @@ target_sources(WindowedFullscreen PRIVATE
 # passing "d3d9" conflicts with the generated d3d9 module somehow, pass an absolute path to the one in lib/
 target_link_libraries(WindowedFullscreen detours "${CMAKE_SOURCE_DIR}/lib/d3d9.lib")
 
-module(WindowResizer)
+module(WindowResizer Default)
 target_sources(WindowResizer PRIVATE
         modules/WindowResizer/WindowResizer.cpp)
 target_link_libraries(WindowResizer detours)

@@ -11,35 +11,29 @@ extern std::wstring module_path;
 
 namespace HostingOptions {
 bool enabled = false;
-int port = 10800;
+int port;
 bool spectate = true;
 bool publicHost = true;
 char message[256] = {0};
 
 void SaveConfig() {
 	std::wstring config_path = module_path;
-	config_path.append(L"\\config.json");
+	config_path.append(L"\\InGameHostlist.ini");
 
-	ofstream ofs(config_path);
-	JSON config = {"HostingOptions", {"port", port, "spectate", spectate, "public", publicHost, "message", message}};
-	ofs << config;
+	WritePrivateProfileStringW(L"InGameHostlist", L"Port", &std::to_wstring(port)[0], &config_path[0]);
+	WritePrivateProfileStringW(L"InGameHostlist", L"Spectatable", spectate ? L"1" : L"0", &config_path[0]);
+	WritePrivateProfileStringW(L"InGameHostlist", L"Hostlist", publicHost ? L"1" : L"0", &config_path[0]);
+	WritePrivateProfileStringA("InGameHostlist", "Message", message, &std::string(config_path.begin(), config_path.end())[0]);
 }
 
 void LoadConfig() {
 	std::wstring config_path = module_path;
-	config_path.append(L"\\config.json");
+	config_path.append(L"\\InGameHostlist.ini");
 
-	ifstream ifs(config_path);
-	if (ifs.good()) {
-		std::ostringstream ss;
-		ss << ifs.rdbuf();
-		JSON config = JSON::Load(ss.str());
-		port = config["HostingOptions"]["port"].ToInt();
-		spectate = config["HostingOptions"]["spectate"].ToBool();
-		publicHost = config["HostingOptions"]["public"].ToBool();
-		strcpy_s(message, 256, config["HostingOptions"]["message"].ToString().c_str());
-	} else
-		SaveConfig();
+	port = GetPrivateProfileIntW(L"InGameHostlist", L"Port", 10800, &config_path[0]);
+	spectate = GetPrivateProfileIntW(L"InGameHostlist", L"Spectatable", 1, &config_path[0]) != 0;
+	publicHost = GetPrivateProfileIntW(L"InGameHostlist", L"Hostlist", 1, &config_path[0]) != 0;
+	GetPrivateProfileStringA("InGameHostlist", "Message", "", message, sizeof(message), &std::string(config_path.begin(), config_path.end())[0]);
 }
 
 void Render() {

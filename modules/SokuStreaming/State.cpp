@@ -205,9 +205,9 @@ void updateCache(bool isMultiplayer) {
 
 	// Hands
 	for (int i = 0; i < leftDeck.cardCount; i++)
-		_cache.leftHand.push_back(leftDeck.handCardBase[(i + leftDeck.selectedCard) % leftDeck.handCardMax]->id);
+		_cache.leftHand.push_back(leftDeck.hand[i].id);
 	for (int i = 0; i < rightDeck.cardCount; i++)
-		_cache.rightHand.push_back(rightDeck.handCardBase[(i + rightDeck.selectedCard) % rightDeck.handCardMax]->id);
+		_cache.rightHand.push_back(rightDeck.hand[i].id);
 	std::sort(_cache.leftHand.begin(), _cache.leftHand.end());
 	std::sort(_cache.rightHand.begin(), _cache.rightHand.end());
 

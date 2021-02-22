@@ -10,14 +10,16 @@ This repository was originally created from the original SWRSToys release by *An
 
 The code in this repository comes from various contributors:
 - this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
-- *DPhoenix* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
+- *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
-- *fishshapedfish* made DPadFix
-- *[Gegel85](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
+- *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix
+- *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
 - *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
-- *Shinki* and *PC_volt* made ReplayInputView+
-- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and Hostlist
+- *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
+- *[PC_volt](https://github.com/PCvolt)* made LabTool
+- *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
+- Fear, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
 - delthas made Autopunch, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
@@ -80,6 +82,33 @@ See [here](modules/DiscordIntegration/README.md) for details.
 ### DPadFix
 
 **Map the joystick DPad and trigger buttons to game inputs.**
+
+### FixMeiling236
+
+**Fix a serious game bug regarding an underministic Meiling 236 recovery duration which could cause game desyncs.**
+
+*This module is very lightweight; it is advised & good netplay etiquette to always enable it.*
+
+### LabTool
+
+**Enhance practice mode by adding fast character position save/reset, character state colors, and frame data info.**
+
+<details>
+  <summary>Details</summary>
+
+#### Characters state colors
+
+- Display of **grazing** in *transparent*, **CH** in *red*, **invulnerability** in *blue* (do not trust it for DP moves, as they are strangely hardcoded), **guard unavailable** in *purple*.
+- **Position management**: 5 hardcoded positions + 1 position customizable with the save key, press 4, 1, 2, 3, 6 or 5 with the reset key. You can set your own keys in the .ini file.
+
+#### Frame data
+
+- **Gap time** in a blockstring displays the number of idle frames the defender comes back to between the first and second hit. If nothing is displayed, the string is tight, else, it is safely mashable by the amount displayed on the console. "Xf gap gets beaten by Xf move, and trades with X+1f move" is how you should interpret it.
+- **Frame advantage**: both characters must be on ground for the result to be displayed.
+- **Highjump cancel advantage**: p2 remains on the ground while p1 must hjc for the result to be displayed.
+- **Skills reset** with a key customizable in the .ini, reset the levels and the skills you used to default.
+
+</details>
 
 ### MemoryPatch
 
@@ -169,7 +198,7 @@ Available patches:
 
 **Automatically copy a host message to your clipboard when hosting.**
 
-### Hostlist
+### InGameHostlist
 
 **Overhauls the netplay menu by adding an in-game graphical lobby/hostlist connected to the Discord host list bot.**
 
