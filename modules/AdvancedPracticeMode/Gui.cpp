@@ -48,6 +48,7 @@ namespace Practice
 
 	void init(LPCSTR profilePath)
 	{
+		settings = Settings();
 		if (!skillsTextures.empty())
 			return;
 		skillsTextures.resize(SokuLib::CHARACTER_RANDOM);
@@ -55,7 +56,6 @@ namespace Practice
 			printf("Loading file %s\n", (std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png").c_str());
 			skillsTextures[i].loadFromFile(std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png");
 		}
-		puts("All done");
 	}
 
 	static void makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
@@ -77,17 +77,14 @@ namespace Practice
 	{
 		char nbSkills = 4;
 
-		puts("Load chr GUI file");
 		panel->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
 		if (character == SokuLib::CHARACTER_PATCHOULI) {
-			puts("Character is Patchy !");
 			nbSkills = 5;
 			panel->get<tgui::Widget>("Skill4Lvl")->setVisible(true);
 			panel->get<tgui::Widget>("Skill4Img")->setVisible(true);
 			panel->get<tgui::Widget>("Skill4Id")->setVisible(true);
 		}
 		if (character == SokuLib::CHARACTER_REISEN) {
-			puts("Character is Reisen !");
 			panel->get<tgui::Widget>("SpecialPic")->setVisible(true);
 			panel->get<tgui::Widget>("SpecialLevel")->setVisible(true);
 			panel->get<tgui::Picture>("SpecialPic")->getRenderer()->setTexture(profilePath + "/assets/stats/elixir.png");
@@ -95,13 +92,11 @@ namespace Practice
 			panel->get<tgui::ComboBox>("SpecialLevel")->setSelectedItemByIndex(0);
 		}
 		if (character == SokuLib::CHARACTER_YUYUKO) {
-			puts("Character is Yuyuko !");
 			panel->get<tgui::Widget>("SpecialPic")->setVisible(true);
 			panel->get<tgui::Widget>("SpecialLevel")->setVisible(true);
 			panel->get<tgui::Picture>("SpecialPic")->getRenderer()->setTexture(profilePath + "/assets/stats/butterflies.png");
 			panel->get<tgui::ComboBox>("SpecialLevel")->setSelectedItemByIndex(0);
 		}
-		puts("Load all textures");
 		panel->get<tgui::Picture>("DollPic")->getRenderer()->setTexture(profilePath + "/assets/stats/doll.png");
 		panel->get<tgui::Picture>("DropPic")->getRenderer()->setTexture(profilePath + "/assets/stats/drop.png");
 		panel->get<tgui::Picture>("RodPic")->getRenderer()->setTexture(profilePath + "/assets/stats/rod.png");
@@ -109,8 +104,6 @@ namespace Practice
 		panel->get<tgui::Picture>("FanPic")->getRenderer()->setTexture(profilePath + "/assets/stats/fan.png");
 
 		for (int i = 0; i < nbSkills; i++) {
-			puts("Set skill thing");
-
 			auto img = panel->get<tgui::Picture>("Skill" + std::to_string(i) + "Img");
 			auto lvl = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Lvl");
 			auto id = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Id");
@@ -130,7 +123,7 @@ namespace Practice
 			);
 		}
 		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager]{
-			makeFakeCard(manager, 200);
+			makeFakeCard(manager, 0);
 		});
 	}
 
@@ -141,13 +134,9 @@ namespace Practice
 		tgui::Panel::Ptr leftPanel = panel->get<tgui::Panel>("Left");
 		tgui::Panel::Ptr rightPanel = panel->get<tgui::Panel>("Right");
 
-		puts("Populate left GUI");
 		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
-		puts("Populate Right GUI");
 		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
-		puts("Update state");
 		updateGuiState();
-		puts("All good !");
 	}
 
 	static void updateDummyPanel()
@@ -158,14 +147,12 @@ namespace Practice
 	static void displayDummyPanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/dummy.gui");
-
 	}
 
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
 		std::string profile = profilePath;
 
-		puts("Loading GUI file");
 		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
 		panel = gui.get<tgui::Panel>("Panel");
 		tab = gui.get<tgui::Tabs>("Tabs");

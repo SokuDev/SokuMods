@@ -49,18 +49,21 @@ namespace Practice
 	{
 		sf::Event event;
 
-		if (sfmlWindow) {
-			sfmlWindow->clear(sf::Color(0xAA, 0xAA, 0xAA));
-			try {
-				Practice::updateGuiState();
-			} catch (std::exception &e) {
-				puts(e.what());
-				throw;
-			}
-			while (sfmlWindow->pollEvent(event))
-				Practice::gui.handleEvent(event);
-			Practice::gui.draw();
-			sfmlWindow->display();
+		sfmlWindow->clear(sf::Color(0xAA, 0xAA, 0xAA));
+		try {
+			Practice::updateGuiState();
+		} catch (std::exception &e) {
+			puts(e.what());
+			throw;
 		}
+		while (sfmlWindow->pollEvent(event))
+			Practice::gui.handleEvent(event);
+		Practice::gui.draw();
+		sfmlWindow->display();
+	}
+
+	void update()
+	{
+		*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
 	}
 }

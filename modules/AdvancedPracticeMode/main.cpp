@@ -11,21 +11,15 @@
 #include "State.hpp"
 
 struct Title {};
-struct Battle {};
 struct Select {};
 struct Loading {};
-struct BattleWatch {};
-struct LoadingWatch {};
-
+int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Process)();
 int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
-int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
-int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
 int (__thiscall Loading::*s_origCLoading_Process)();
-int (__thiscall Battle::*s_origCBattle_Process)();
 int (__thiscall Select::*s_origCSelect_Process)();
 int (__thiscall Title::*s_origCTitle_Process)();
+
+
 
 int __fastcall CTitle_OnProcess(Title *This)
 {
@@ -33,25 +27,6 @@ int __fastcall CTitle_OnProcess(Title *This)
 
 	// super
 	return (This->*s_origCTitle_Process)();
-}
-
-int __fastcall CBattleWatch_OnProcess(BattleWatch *This)
-{
-	// super
-	return (This->*s_origCBattleWatch_Process)();
-}
-
-int __fastcall CBattle_OnProcess(Battle *This)
-{
-	auto &battle = SokuLib::getBattleMgr();
-
-	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
-		Practice::activate();
-
-	// super
-	int ret = (This->*s_origCBattle_Process)();
-
-	return ret;
 }
 
 int __fastcall CSelect_OnProcess(Select *This)
@@ -70,34 +45,29 @@ int __fastcall CLoading_OnProcess(Loading *This)
 	return (This->*s_origCLoading_Process)();
 }
 
-int __fastcall CLoadingWatch_OnProcess(LoadingWatch *This)
-{
-	Practice::deactivate();
-
-	// super
-	return (This->*s_origCLoadingWatch_Process)();
-}
-
-int __fastcall CBattleManager_KO(SokuLib::BattleManager *This)
-{
-	// super
-	return (This->*s_origCBattleManager_KO)();
-}
-
-int __fastcall CBattleManager_Start(SokuLib::BattleManager *This)
-{
-	// super
-	return (This->*s_origCBattleManager_Start)();
-}
-
 int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 {
 	// super
 	int ret = (This->*s_origCBattleManager_Render)();
 
-	Practice::render();
+	if (Practice::sfmlWindow)
+		Practice::render();
 	return ret;
 }
+
+int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
+{
+	// super
+	auto result = (This->*s_origCBattleManager_Process)();
+
+	if (Practice::sfmlWindow)
+		Practice::update();
+	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
+		Practice::activate();
+	return result;
+}
+
+
 
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
@@ -122,12 +92,6 @@ void hookFunctions()
 			reinterpret_cast<DWORD>(CTitle_OnProcess)
 		)
 	);
-	s_origCBattle_Process = SokuLib::union_cast<int (Battle::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CBattle + SokuLib::OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CBattle_OnProcess)
-		)
-	);
 	s_origCSelect_Process = SokuLib::union_cast<int (Select::*)()>(
 		SokuLib::TamperDword(
 			SokuLib::vtbl_CSelect + SokuLib::OFFSET_ON_PROCESS,
@@ -140,16 +104,10 @@ void hookFunctions()
 			reinterpret_cast<DWORD>(CLoading_OnProcess)
 		)
 	);
-	s_origCBattleManager_Start = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
+	s_origCBattleManager_Process = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
 		SokuLib::TamperDword(
-			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_SAY_START,
-			reinterpret_cast<DWORD>(CBattleManager_Start)
-		)
-	);
-	s_origCBattleManager_KO = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_KO,
-			reinterpret_cast<DWORD>(CBattleManager_KO)
+			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_PROCESS,
+			reinterpret_cast<DWORD>(CBattleManager_OnProcess)
 		)
 	);
 	s_origCBattleManager_Render = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(

@@ -12,6 +12,7 @@ namespace Practice
 {
 	void handleInput(SokuLib::KeymapManager &manager);
 	void render();
+	void update();
 }
 
 
