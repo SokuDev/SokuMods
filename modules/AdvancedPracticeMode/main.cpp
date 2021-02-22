@@ -56,14 +56,22 @@ struct TestKeyMapMgr {
 
 	void handlePlayerInput()
 	{
-		puts("Player input");
-		memcpy(&dummy, &this->base.input, sizeof(this->base.input));
+		auto arraySrc = reinterpret_cast<int *>(&this->base.input);
+		auto arrayDest = reinterpret_cast<int *>(&dummy);
+
+		for (int i = 0; i < 8; i++) {
+			if (arraySrc[i] < 0)
+				arrayDest[i] = min(arrayDest[i] - 1, -1);
+			else if (arraySrc[i] > 0)
+				arrayDest[i] = max(arrayDest[i] + 1, 1);
+			else
+				arrayDest[i] = 0;
+		}
 		memset(&this->base.input, 0, sizeof(this->base.input));
 	}
 
 	void handleDummyInput()
 	{
-		puts("Dummy input");
 		memcpy(&this->base.input, &dummy, sizeof(dummy));
 	}
 };
@@ -153,22 +161,18 @@ int __fastcall CBattle_OnProcess(Battle *This)
 {
 	auto &battle = SokuLib::getBattleMgr();
 
-	//battle.leftCharacterManager.keyManager.keymapManager.horizontalAxis = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.verticalAxis = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.a = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.b = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.c = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.d = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.changeCard = 0;
-	//battle.leftCharacterManager.keyManager.keymapManager.spellcard = 0;
-
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE) {
 		*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
 		activate();
 	}
 
+	SokuLib::Action old = battle.rightCharacterManager.objectBase.action;
+
 	// super
 	int ret = (This->*s_origCBattle_Process)();
+
+	if (old != battle.rightCharacterManager.objectBase.action)
+		printf("Action changed from %i to %i\n", old, battle.rightCharacterManager.objectBase.action);
 
 	return ret;
 }
