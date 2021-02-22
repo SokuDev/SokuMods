@@ -338,7 +338,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
 		index = STRING_INDEX_TITLE;
-		if (!SokuLib::isInNetworkMenu()) {
+		if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 			logMessage("We are not in a proper submenu\n");
 			return;
 		}
@@ -365,7 +365,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 void titleScreenStateUpdate() {
 	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
-	if (!SokuLib::isInNetworkMenu()) {
+	if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 		logMessage("We are not in a proper submenu\n");
 		return;
 	}
@@ -458,10 +458,9 @@ public:
 		unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
 		bool isSpec = secret.substr(0, 4) == "spec";
 
-		if (!SokuLib::isInNetworkMenu()) {
+		if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 			logMessage("Warping to connect screen.\n");
-			SokuLib::moveToConnectMenu();
-			menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+			menuObj = &SokuLib::MenuConnect::moveToConnectMenu();
 			logMessage("Done.\n");
 		} else
 			logMessage("Already in connect screen\n");
@@ -475,7 +474,7 @@ public:
 			return;
 
 		logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-		SokuLib::joinHost(ip.c_str(), port, isSpec);
+		menuObj->joinHost(ip.c_str(), port, isSpec);
 		state.roomIp = ip + ":" + std::to_string(port);
 	}
 

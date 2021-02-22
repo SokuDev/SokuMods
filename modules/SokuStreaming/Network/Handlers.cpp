@@ -32,20 +32,17 @@ Socket::HttpResponse connect(const Socket::HttpRequest &requ) {
 		throw AbortConnectionException(400);
 	}
 
-	if (!SokuLib::isInNetworkMenu()) {
-		SokuLib::moveToConnectMenu();
-		menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-	}
+	if (!SokuLib::MenuConnect::isInNetworkMenu())
+		menuObj = &SokuLib::MenuConnect::moveToConnectMenu();
 
-	if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
-		&& menuObj->subchoice == 3)
+	if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 3)
 		throw AbortConnectionException(503);
 	if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)
 		throw AbortConnectionException(503);
 	if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2)
 		throw AbortConnectionException(503);
 
-	SokuLib::joinHost(ip.c_str(), hport, isSpec);
+	menuObj->joinHost(ip.c_str(), hport, isSpec);
 	response.returnCode = 202;
 	return response;
 }
