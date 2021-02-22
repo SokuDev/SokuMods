@@ -12,8 +12,12 @@
 
 #define PAYLOAD_ADDRESS_PLAYER 0x40A45E
 #define PAYLOAD_NEXT_INSTR_PLAYER (PAYLOAD_ADDRESS_PLAYER + 4)
-#define PAYLOAD_ADDRESS_DUMMY 0x48224E
-#define PAYLOAD_NEXT_INSTR_DUMMY (PAYLOAD_ADDRESS_DUMMY + 4)
+
+static const unsigned char patchCode[] = {
+	0x31, 0xED,                  //xor ebp, ebp
+	0xE9, 0x91, 0x01, 0x00, 0x00 //jmp pc+00000191
+};
+static unsigned char originalCode[sizeof(patchCode)];
 
 struct Title {};
 struct Battle {};
@@ -24,7 +28,6 @@ struct LoadingWatch {};
 
 sf::RenderWindow *sfmlWindow;
 void (*s_origKeymapManager_SetInputs)();
-void (*s_origDummy_SetInputs)();
 int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
 int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
 int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
@@ -47,6 +50,8 @@ struct TestKeyMapMgr {
 
 		if (&this->base == mgr.leftCharacterManager.keyManager->keymapManager)
 			return this->handlePlayerInput();
+		if (mgr.rightCharacterManager.keyManager && &this->base == mgr.rightCharacterManager.keyManager->keymapManager)
+			return this->handleDummyInput();
 	}
 
 	void handlePlayerInput()
@@ -55,14 +60,11 @@ struct TestKeyMapMgr {
 		memcpy(&dummy, &this->base.input, sizeof(this->base.input));
 		memset(&this->base.input, 0, sizeof(this->base.input));
 	}
-};
 
-struct Dummy {
-	SokuLib::CharacterManager base;
-
-	void handleInput()
+	void handleDummyInput()
 	{
-		memcpy(&this->base.keyMap, &dummy, sizeof(dummy));
+		puts("Dummy input");
+		memcpy(&this->base.input, &dummy, sizeof(dummy));
 	}
 };
 
@@ -74,19 +76,18 @@ void KeymapManagerSetInputs()
 	SokuLib::union_cast<void (*)()>(&TestKeyMapMgr::handleInput)();
 }
 
-void __fastcall dummySetInputs()
-{
-	SokuLib::union_cast<void (*)()>(&Dummy::handleInput)();
-}
+unsigned count = 0;
 
 static void activate()
 {
 	DWORD old;
 	int newOffset;
 
+	count++;
 	if (sfmlWindow)
 		return;
 
+	count = 0;
 	sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
 	Practice::init(profileParent);
 	Practice::gui.setTarget(*sfmlWindow);
@@ -97,11 +98,13 @@ static void activate()
 		throw;
 	}
 
-	//Bypass the basic practice features by messing up the check for practice mode.
-	VirtualProtect((PVOID)0x42A333, 1, PAGE_EXECUTE_WRITECOPY, &old);
-	// cmp eax, 08 -> cmp eax, 0A
-	*(char *)0x42A333 = 10;
-	VirtualProtect((PVOID)0x42A333, 1, old, &old);
+	//Bypass the basic practice features by skipping most of the function.
+	VirtualProtect((PVOID)0x42A331, sizeof(patchCode), PAGE_EXECUTE_WRITECOPY, &old);
+	for (unsigned i = 0; i < sizeof(patchCode); i++) {
+		originalCode[i] = ((unsigned char *)0x42A331)[i];
+		((unsigned char *)0x42A331)[i] = patchCode[i];
+	}
+	VirtualProtect((PVOID)0x42A331, sizeof(patchCode), old, &old);
 
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
 	newOffset = (int)KeymapManagerSetInputs - PAYLOAD_NEXT_INSTR_PLAYER;
@@ -109,11 +112,7 @@ static void activate()
 	*(int *)PAYLOAD_ADDRESS_PLAYER = newOffset;
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
 
-	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, PAGE_EXECUTE_WRITECOPY, &old);
-	newOffset = (int)dummySetInputs - PAYLOAD_NEXT_INSTR_DUMMY;
-	s_origDummy_SetInputs = reinterpret_cast<void (*)()>(*(int *)PAYLOAD_ADDRESS_DUMMY + PAYLOAD_NEXT_INSTR_DUMMY);
-	*(int *)PAYLOAD_ADDRESS_DUMMY = newOffset;
-	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, old, &old);
+	*(unsigned *)0x00898684 = 0x008986A8;
 }
 
 static void deactivate()
@@ -125,17 +124,15 @@ static void deactivate()
 
 	delete sfmlWindow;
 	sfmlWindow = nullptr;
-	VirtualProtect((PVOID)0x42A333, 1, PAGE_EXECUTE_WRITECOPY, &old);
-	*(char *)0x42A333 = 8;
-	VirtualProtect((PVOID)0x42A333, 1, old, &old);
+
+	VirtualProtect((PVOID)0x42A331, sizeof(patchCode), PAGE_EXECUTE_WRITECOPY, &old);
+	for (unsigned i = 0; i < sizeof(patchCode); i++)
+		((unsigned char *)0x42A331)[i] = originalCode[i];
+	VirtualProtect((PVOID)0x42A331, sizeof(patchCode), old, &old);
 
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
 	*(int *)PAYLOAD_ADDRESS_PLAYER = SokuLib::union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_PLAYER;
 	VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
-
-	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, PAGE_EXECUTE_WRITECOPY, &old);
-	*(int *)PAYLOAD_ADDRESS_DUMMY = SokuLib::union_cast<int>(s_origDummy_SetInputs) - PAYLOAD_NEXT_INSTR_DUMMY;
-	VirtualProtect((PVOID)PAYLOAD_ADDRESS_DUMMY, 4, old, &old);
 }
 
 int __fastcall CTitle_OnProcess(Title *This)
@@ -155,7 +152,6 @@ int __fastcall CBattleWatch_OnProcess(BattleWatch *This)
 int __fastcall CBattle_OnProcess(Battle *This)
 {
 	auto &battle = SokuLib::getBattleMgr();
-	bool activated = false;
 
 	//battle.leftCharacterManager.keyManager.keymapManager.horizontalAxis = 0;
 	//battle.leftCharacterManager.keyManager.keymapManager.verticalAxis = 0;
@@ -167,25 +163,13 @@ int __fastcall CBattle_OnProcess(Battle *This)
 	//battle.leftCharacterManager.keyManager.keymapManager.spellcard = 0;
 
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE) {
-		//__asm ;
-		//(0x42A4C9);
-		activated = true, activate();
+		*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
+		activate();
 	}
 
-	memcpy(&battle.rightCharacterManager.keyMap, &dummy, sizeof(dummy));
 	// super
 	int ret = (This->*s_origCBattle_Process)();
 
-	if (activated) {
-		//if (!battle.rightCharacterManager.keyManager.keymapManager) {
-		//	battle.rightCharacterManager.keyManager.keymapManager = New<KeymapManager>(sizeof(*battle.rightCharacterManager.keyManager.keymapManager));
-		//	memcpy(
-		//		battle.rightCharacterManager.keyManager.keymapManager,
-		//		battle.leftCharacterManager.keyManager.keymapManager,
-		//		sizeof(*battle.rightCharacterManager.keyManager.keymapManager)
-		//	);
-		//}
-	}
 	return ret;
 }
 
