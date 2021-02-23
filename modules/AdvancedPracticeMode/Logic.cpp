@@ -5,6 +5,7 @@
 #include "Logic.hpp"
 #include "State.hpp"
 #include "Gui.hpp"
+#include "Dummy.hpp"
 
 namespace Practice
 {
@@ -14,7 +15,7 @@ namespace Practice
 			return;
 
 		auto arraySrc = reinterpret_cast<int *>(&manager.input);
-		auto arrayDest = reinterpret_cast<int *>(&dummy);
+		auto arrayDest = reinterpret_cast<int *>(&lastPlayerInputs);
 
 		for (int i = 0; i < 8; i++) {
 			if (arraySrc[i] < 0)
@@ -30,9 +31,9 @@ namespace Practice
 	void handleDummyInput(SokuLib::KeymapManager &manager)
 	{
 		if (settings.controlDummy)
-			memcpy(&manager.input, &dummy, sizeof(manager.input));
+			memcpy(&manager.input, &lastPlayerInputs, sizeof(manager.input));
 		else
-			memset(&manager.input, 0, sizeof(manager.input));
+			moveDummy(manager);
 	}
 
 	void handleInput(SokuLib::KeymapManager &manager)
@@ -64,6 +65,8 @@ namespace Practice
 
 	void update()
 	{
-		*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
+		if (settings.activated) {
+			*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
+		}
 	}
 }

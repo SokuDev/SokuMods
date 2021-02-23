@@ -48,7 +48,7 @@ namespace Practice
 
 	void init(LPCSTR profilePath)
 	{
-		settings = Settings();
+		settings = Settings(settings.activated);
 		if (!skillsTextures.empty())
 			return;
 		skillsTextures.resize(SokuLib::CHARACTER_RANDOM);
@@ -141,12 +141,61 @@ namespace Practice
 
 	static void updateDummyPanel()
 	{
-		settings.controlDummy = panel->get<tgui::CheckBox>("control")->isChecked();
+		settings.controlDummy = panel->get<tgui::CheckBox>("Control")->isChecked();
 	}
 
 	static void displayDummyPanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/dummy.gui");
+		panel->get<tgui::CheckBox>("Control")->setChecked(settings.controlDummy);
+
+		auto airtech = panel->get<tgui::ComboBox>("Airtech");
+		auto tech = panel->get<tgui::ComboBox>("Tech");
+		auto breaking = panel->get<tgui::Panel>("Breaking");
+		auto normal = panel->get<tgui::CheckBox>("Normal");
+		auto x = panel->get<tgui::Slider>("X");
+		auto y = panel->get<tgui::Slider>("Y");
+		auto xen = panel->get<tgui::CheckBox>("XEnabled");
+		auto fct = [breaking]{
+			for (auto &widget : breaking->getWidgets())
+				widget->setEnabled(settings.activated);
+		};
+
+		x->setValue(settings.posX != 0 ? settings.posX : 40);
+		x->setEnabled(settings.posX != 0);
+		xen->setChecked(settings.posX != 0);
+
+		y->setValue(settings.posY != 0 ? settings.posY : 0);
+		y->setEnabled(settings.posY != 0);
+
+		xen->connect("Changed", [x](bool b){
+			x->setEnabled(b);
+			settings.posX = b ? x->getValue() : 0;
+		});
+		x->connect("ValueChanged", [](float v){
+			settings.posX = v;
+		});
+		y->connect("ValueChanged", [](float v){
+			settings.posY = v;
+		});
+
+		airtech->setSelectedItemByIndex(settings.airtech);
+		tech->setSelectedItemByIndex(settings.tech);
+		airtech->connect("ItemSelected", [](int item){
+			settings.airtech = static_cast<AirTechDirection>(item);
+		});
+		tech->connect("ItemSelected", [](int item){
+			settings.tech = static_cast<TechDirection>(item);
+		});
+		fct();
+		normal->setChecked(!settings.activated);
+		normal->connect("Changed", [fct](bool b){
+			if (b)
+				removeHooks();
+			else
+				placeHooks();
+			fct();
+		});
 	}
 
 	void loadAllGuiElements(LPCSTR profilePath)

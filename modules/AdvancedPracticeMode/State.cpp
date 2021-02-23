@@ -39,26 +39,17 @@ namespace Practice
 	sf::RenderWindow *sfmlWindow;
 	char profilePath[1024 + MAX_PATH];
 	char profileParent[1024 + MAX_PATH];
-	SokuLib::KeyInput dummy;
+	SokuLib::KeyInput lastPlayerInputs;
 
-	void activate()
+	void placeHooks()
 	{
 		DWORD old;
 		int newOffset;
 
-		if (sfmlWindow)
+		if (settings.activated)
 			return;
-
-		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
-		Practice::init(profileParent);
-		Practice::gui.setTarget(*sfmlWindow);
-		try {
-			Practice::loadAllGuiElements(profileParent);
-		} catch (std::exception &e) {
-			puts(e.what());
-			throw;
-		}
-
+		puts("Placing hooks");
+		settings.activated = true;
 		//Bypass the basic practice features by skipping most of the function.
 		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), PAGE_EXECUTE_WRITECOPY, &old);
 		for (unsigned i = 0; i < sizeof(patchCode); i++) {
@@ -76,16 +67,33 @@ namespace Practice
 		((unsigned *)0x00898680)[1] = 0x008986A8;
 	}
 
-	void deactivate()
+	void activate()
+	{
+		if (sfmlWindow)
+			return;
+
+		puts("Opening window");
+		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
+		puts("Window opened");
+		Practice::init(profileParent);
+		Practice::gui.setTarget(*sfmlWindow);
+		try {
+			Practice::loadAllGuiElements(profileParent);
+		} catch (std::exception &e) {
+			puts(e.what());
+			throw;
+		}
+		placeHooks();
+	}
+
+	void removeHooks()
 	{
 		DWORD old;
 
-		if (!sfmlWindow)
+		if (!settings.activated)
 			return;
-
-		delete sfmlWindow;
-		sfmlWindow = nullptr;
-
+		puts("Removing hooks");
+		settings.activated = false;
 		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), PAGE_EXECUTE_WRITECOPY, &old);
 		for (unsigned i = 0; i < sizeof(patchCode); i++)
 			((unsigned char *)0x42A331)[i] = originalCode[i];
@@ -94,5 +102,15 @@ namespace Practice
 		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
 		*(int *)PAYLOAD_ADDRESS_PLAYER = SokuLib::union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_PLAYER;
 		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
+	}
+
+	void deactivate()
+	{
+		if (!sfmlWindow)
+			return;
+
+		delete sfmlWindow;
+		sfmlWindow = nullptr;
+		removeHooks();
 	}
 }
