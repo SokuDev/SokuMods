@@ -9,8 +9,23 @@
 
 namespace Practice
 {
+	static int useCard = -1;
+
+	void playerUseCard(int handSize)
+	{
+		useCard = handSize;
+	}
+
 	void handlePlayerInput(SokuLib::KeymapManager &manager)
 	{
+		if (useCard != -1) {
+			memset(&manager.input, 0, sizeof(manager.input));
+			manager.input.changeCard = useCard;
+			manager.input.spellcard = !useCard;
+			useCard--;
+			return;
+		}
+
 		if (!settings.controlDummy)
 			return;
 

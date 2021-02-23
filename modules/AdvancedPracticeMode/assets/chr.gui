@@ -281,12 +281,12 @@ ComboBox.GrimLvl {
 ComboBox.DropLvl {
     ChangeItemOnScroll = true;
     ExpandDirection = Up;
-    Items = [0, 1, 2];
+    Items = [0, 1, 2, INVINCIBLE];
     ItemsToDisplay = 0;
     MaximumItems = 5;
     Position = (50, 324);
     SelectedItemIndex = 0;
-    Size = (60, 22);
+    Size = (80, 22);
     TextSize = 13;
     renderer = &1;
 }

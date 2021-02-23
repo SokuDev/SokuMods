@@ -157,6 +157,34 @@ Panel.Breaking {
         TextSize = 13;
         renderer = &2;
     }
+
+    Button.Button1 {
+        Position = (10, 210);
+        Text = "DP !";
+        TextSize = 13;
+
+        Renderer {
+            backgroundcolor = #F5F5F5;
+            backgroundcolordisabled = #E6E6E6;
+            backgroundcolordown = #EBEBEB;
+            backgroundcolorhover = white;
+            bordercolor = #3C3C3C;
+            bordercolordisabled = #7D7D7D;
+            bordercolordown = black;
+            bordercolorfocused = #1E1EB4;
+            bordercolorhover = black;
+            borders = (1, 1, 1, 1);
+            textcolor = #3C3C3C;
+            textcolordisabled = #7D7D7D;
+            textcolordown = black;
+            textcolorhover = black;
+            texture = None;
+            texturedisabled = None;
+            texturedown = None;
+            texturefocused = None;
+            texturehover = None;
+        }
+    }
 }
 
 CheckBox.XEnabled {

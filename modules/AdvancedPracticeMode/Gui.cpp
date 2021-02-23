@@ -6,6 +6,8 @@
 #include "Gui.hpp"
 #include "Moves.hpp"
 #include "State.hpp"
+#include "Dummy.hpp"
+#include "Logic.hpp"
 
 namespace Practice
 {
@@ -161,17 +163,20 @@ namespace Practice
 				widget->setEnabled(settings.activated);
 		};
 
+		panel->get<tgui::Button>("Button1")->connect("Clicked", []{
+			addInputSequence("623b");
+		});
+
 		x->setValue(settings.posX != 0 ? settings.posX : 40);
-		x->setEnabled(settings.posX != 0);
+		xen->connect("Changed", [x](bool b){
+			x->setEnabled(b);
+			settings.posX = b ? x->getValue() : 0;
+		});
 		xen->setChecked(settings.posX != 0);
 
 		y->setValue(settings.posY != 0 ? settings.posY : 0);
 		y->setEnabled(settings.posY != 0);
 
-		xen->connect("Changed", [x](bool b){
-			x->setEnabled(b);
-			settings.posX = b ? x->getValue() : 0;
-		});
 		x->connect("ValueChanged", [](float v){
 			settings.posX = v;
 		});
@@ -229,6 +234,7 @@ namespace Practice
 		auto drop = panel->get<tgui::ComboBox>("DropLvl");
 		auto special = panel->get<tgui::ComboBox>("SpecialLevel");
 
+		//TODO: Manager should be const but is modified here
 		getSkillMap(manager, skills, character);
 		for (int i = 0; i < nbSkills; i++) {
 			auto id = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Id");
@@ -265,7 +271,9 @@ namespace Practice
 		manager.controlRod = rod->getSelectedItemIndex();
 		manager.sacrificialDolls = doll->getSelectedItemIndex();
 		manager.tenguFans = fan->getSelectedItemIndex();
-		manager.drops = drop->getSelectedItemIndex();
+		manager.drops = min(drop->getSelectedItemIndex(), 2);
+		if (drop->getSelectedItemIndex() == 3)
+			manager.dropInvulTimeLeft = 2;
 		manager.grimoires = grimoire->getSelectedItemIndex();
 		if (character == SokuLib::CHARACTER_REISEN)
 			manager.elixirUsed = special->getSelectedItemIndex();

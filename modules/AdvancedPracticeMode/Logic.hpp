@@ -13,6 +13,7 @@ namespace Practice
 	void handleInput(SokuLib::KeymapManager &manager);
 	void render();
 	void update();
+	void playerUseCard(int handSize);
 }
 
 

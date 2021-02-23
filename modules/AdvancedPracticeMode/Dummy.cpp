@@ -2,11 +2,14 @@
 // Created by PinkySmile on 23/02/2021.
 //
 
+#include <vector>
 #include "Dummy.hpp"
 #include "State.hpp"
 
 namespace Practice
 {
+	static std::vector<SokuLib::KeyInput> nextDummyInputs;
+
 	static void handleAirTech(SokuLib::CharacterManager &player, SokuLib::CharacterManager &dummy, SokuLib::KeymapManager &manager)
 	{
 		auto direction = (player.objectBase.position.x < dummy.objectBase.position.x ? -1 : 1);
@@ -88,6 +91,16 @@ namespace Practice
 		auto &battle = SokuLib::getBattleMgr();
 		auto &player = battle.leftCharacterManager;
 		auto &dummy = battle.rightCharacterManager;
+		auto direction = (player.objectBase.position.x < dummy.objectBase.position.x ? -1 : 1);
+
+		if (!nextDummyInputs.empty()) {
+			auto &next = nextDummyInputs.front();
+
+			next.horizontalAxis *= direction;
+			memcpy(&manager.input, &next, sizeof(manager.input));
+			nextDummyInputs.erase(nextDummyInputs.begin());
+			return;
+		}
 
 		rand();
 		memset(&manager.input, 0, sizeof(manager.input));
@@ -101,5 +114,131 @@ namespace Practice
 			if (settings.posY != 0 && settings.posY != dummy.objectBase.position.y)
 				return moveDummyY(dummy, manager);
 		}
+	}
+
+	std::vector<std::string> moveNameToSequenceStrs(const std::string &input)
+	{
+		std::vector<std::string> sequenceStrs;
+
+		sequenceStrs.reserve(input.size());
+		for (char c : input) {
+			if (sequenceStrs.empty())
+				sequenceStrs.emplace_back(&c, 1);
+			else {
+				auto last = sequenceStrs.back().empty() ? 0 : sequenceStrs.back().back();
+
+				if (c == ' ')
+					sequenceStrs.emplace_back();
+				else if (isdigit(last) && isdigit(c))
+					sequenceStrs.emplace_back(&c, 1);
+				else
+					sequenceStrs.back().push_back(c);
+			}
+		}
+		printf("Sequence for move %s is:\n", input.c_str());
+		for (auto &str : sequenceStrs)
+			printf("%s\n", str.c_str());
+		return sequenceStrs;
+	}
+
+	std::vector<SokuLib::KeyInput> moveNameToSequence(const std::vector<std::string> &strs)
+	{
+		std::vector<SokuLib::KeyInput> results;
+
+		results.reserve(strs.size() * 2);
+		for (auto &str : strs) {
+			if (str.empty())
+				continue;
+			if (results.empty())
+				results.push_back(moveNameToInput(str));
+			else {
+				auto result = moveNameToInput(str);
+
+				if (result.horizontalAxis == results.back().horizontalAxis && result.verticalAxis == results.back().verticalAxis)
+					results.emplace_back();
+				results.push_back(result);
+			}
+		}
+		puts("Key sequence is:");
+		for (auto &in : results)
+			printf("h%i v%i a%i b%i c%i d%i ch%i s%i\n", in.horizontalAxis, in.verticalAxis, in.a, in.b, in.c, in.d, in.changeCard, in.spellcard);
+		return results;
+	}
+
+	std::vector<SokuLib::KeyInput> moveNameToSequence(const std::string &input)
+	{
+		return moveNameToSequence(moveNameToSequenceStrs(input));
+	}
+
+	SokuLib::KeyInput moveNameToInput(const std::string &input)
+	{
+		SokuLib::KeyInput result;
+
+		memset(&result, 0, sizeof(result));
+		for (auto c : input) {
+			switch (c) {
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				result.verticalAxis   = -((c - '1') / 3 - 1);
+				result.horizontalAxis = (c - '1') % 3 - 1;
+				break;
+			case 'a':
+			case 'A':
+				result.a = 1;
+				break;
+			case 'b':
+			case 'B':
+				result.b = 1;
+				break;
+			case 'c':
+			case 'C':
+				result.c = 1;
+				break;
+			case 'd':
+			case 'D':
+				result.d = 1;
+				break;
+			case 's':
+			case 'S':
+				result.spellcard = 1;
+				break;
+			default:
+				abort();
+			}
+		}
+		return result;
+	}
+
+	void addInputSequence(const std::vector<SokuLib::KeyInput> &inputs)
+	{
+		for (auto &in : inputs)
+			addNextInput(in);
+	}
+
+	void addInputSequence(const std::vector<std::string> &inputs)
+	{
+		addInputSequence(moveNameToSequence(inputs));
+	}
+
+	void addInputSequence(const std::string &inputs)
+	{
+		addInputSequence(moveNameToSequence(inputs));
+	}
+
+	void addNextInput(const SokuLib::KeyInput &input)
+	{
+		nextDummyInputs.push_back(input);
+	}
+
+	void addNextInput(const std::string &input)
+	{
+		addNextInput(moveNameToInput(input));
 	}
 }
