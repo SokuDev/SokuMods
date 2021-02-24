@@ -3,7 +3,6 @@
 #include <process.h>
 #include <shlwapi.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,7 +27,6 @@ char *to_utf8(const wchar_t *str) {
 	}
 	char *str_utf8 = malloc(length);
 	int r = WideCharToMultiByte(CP_UTF8, 0, str, -1, str_utf8, length, NULL, NULL);
-	printf("%d\n", r);
 	if (!r) {
 		free(str_utf8);
 		return NULL;
