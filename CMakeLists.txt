@@ -228,6 +228,10 @@ module(FixMeiling236 Default)
 target_sources(FixMeiling236 PRIVATE
         modules/FixMeiling236/main.cpp)
 
+module(GetIP)
+target_sources(GetIP PRIVATE modules/GetIP/main.c)
+target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
+
 module(InGameHostlist SokuEngine Default)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     target_compile_options(InGameHostlist PRIVATE /EHsc)
@@ -329,7 +333,6 @@ target_link_libraries(WindowResizer detours)
 
 # binary SokuEngine modules
 
-module(GetIP Binary SokuEngine)
 module(NetGameScore Binary SokuEngine)
 module(PracticeEx Binary SokuEngine)
 module(shady-loader Binary SokuEngine)

@@ -19,8 +19,8 @@ The code in this repository comes from various contributors:
 - *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
-- Fear, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
-- delthas made Autopunch, as well as all the plumbing: adding CMake, CI, formatting, ...
+- Fear Nagae, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
+- [delthas](https://github.com/delthas) made Autopunch, GetIP, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
 
@@ -88,6 +88,12 @@ See [here](modules/DiscordIntegration/README.md) for details.
 **Fix a serious game bug regarding an underministic Meiling 236 recovery duration which could cause game desyncs.**
 
 *This module is very lightweight; it is advised & good netplay etiquette to always enable it.*
+
+### GetIP
+
+**Automatically copy your IP and an optional host message to your clipboard when starting to host.**
+
+*This replaces an old deprecated module of the same name that was SokuEngine-exclusive and buggy.*
 
 ### LabTool
 
@@ -193,10 +199,6 @@ Available patches:
 **Make the game window resizable.**
 
 ## SokuEngine-exclusive mods
-
-### GetIP
-
-**Automatically copy a host message to your clipboard when hosting.**
 
 ### InGameHostlist
 
