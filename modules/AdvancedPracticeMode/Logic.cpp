@@ -53,6 +53,9 @@ namespace Practice
 
 	void handleInput(SokuLib::KeymapManager &manager)
 	{
+		if (SokuLib::sceneId != SokuLib::SCENE_BATTLE)
+			return;
+
 		auto &mgr = SokuLib::getBattleMgr();
 
 		if (&manager == mgr.leftCharacterManager.keyManager->keymapManager)

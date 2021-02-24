@@ -76,6 +76,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
+	freopen_s(&_, "CONERR$", "w", stderr);
 	puts("Hello !");
 	//port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 }
@@ -117,6 +118,13 @@ void hookFunctions()
 		)
 	);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
+
+	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+	int newOffset = reinterpret_cast<int>(Practice::loadDeckData) - PAYLOAD_NEXT_INSTR_DECK_INFOS;
+	Practice::s_origLoadDeckData = SokuLib::union_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &)>(*(int *)PAYLOAD_ADDRESS_DECK_INFOS + PAYLOAD_NEXT_INSTR_DECK_INFOS);
+	*(int *)PAYLOAD_ADDRESS_DECK_INFOS = newOffset;
+	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }

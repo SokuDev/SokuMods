@@ -60,19 +60,17 @@ namespace Practice
 		}
 	}
 
-	static void makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
+	static bool makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
 	{
+		printf("Insert card %i\n", id);
 		auto card = manager.addCard(id);
 
-		if (card)
+		if (card) {
 			card->cost = 1;
-		else {
-			SokuLib::Card card{id, 1};
-
-			puts("No sprite though");
-			manager.deckInfos.hand.pushCard(card);
-			manager.deckInfos.cardCount = manager.deckInfos.hand.size;
+			return true;
 		}
+		printf("Cannot insert card %i !", id);
+		return false;
 	}
 
 	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
@@ -124,8 +122,24 @@ namespace Practice
 				)
 			);
 		}
-		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager]{
-			makeFakeCard(manager, 0);
+		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
+			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
+			const char *brokenNames[] = {
+				"reimu", "marisa", "sakuya", "alice", "patchouli", "youmu", "remilia", "yuyuko", "yukari",
+				"suika", "udonge", "aya", "komachi", "iku", "tenshi", "sanae", "chirno", "meirin", "utsuho", "suwako"
+			};
+			std::vector<unsigned short> cards;
+
+			for (int i = 0; i < 21; i++)
+				cards.push_back(i);
+			for (int i = 100; i < last; i++)
+				cards.push_back(i);
+
+			auto &entry = characterSpellCards[brokenNames[character]];
+
+			for (auto &card : entry)
+				cards.push_back(card);
+			makeFakeCard(manager, cards[rand() % cards.size()]);
 		});
 	}
 
@@ -168,6 +182,7 @@ namespace Practice
 		});
 
 		x->setValue(settings.posX != 0 ? settings.posX : 40);
+		x->setEnabled(settings.posX != 0);
 		xen->connect("Changed", [x](bool b){
 			x->setEnabled(b);
 			settings.posX = b ? x->getValue() : 0;

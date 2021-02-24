@@ -6,11 +6,34 @@
 #include "Gui.hpp"
 #include "Logic.hpp"
 
-#define PAYLOAD_ADDRESS_PLAYER 0x40A45E
-#define PAYLOAD_NEXT_INSTR_PLAYER (PAYLOAD_ADDRESS_PLAYER + 4)
+#define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45E
+#define PAYLOAD_NEXT_INSTR_GET_INPUTS (PAYLOAD_ADDRESS_GET_INPUTS + 4)
 
 namespace Practice
 {
+	std::map<std::string, std::vector<unsigned short>> characterSpellCards{
+		{"alice", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
+		{"aya", {200, 201, 202, 203, 205, 206, 207, 208, 211, 212}},
+		{"chirno", {200, 201, 202, 203, 204, 205, 206, 207, 208, 210, 213}},
+		{"iku", {200, 201, 202, 203, 206, 207, 208, 209, 210, 211}},
+		{"komachi", {200, 201, 202, 203, 204, 205, 206, 207, 211}},
+		{"marisa", {200, 202, 203, 204, 205, 206, 207, 208, 209, 211, 212, 214, 215, 219}},
+		{"meirin", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 211}},
+		{"patchouli", {200, 201, 202, 203, 204, 205, 206, 207, 210, 211, 212, 213}},
+		{"reimu", {200, 201, 204, 206, 207, 208, 209, 210, 214, 219}},
+		{"remilia", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209}},
+		{"sakuya", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212}},
+		{"sanae", {200, 201, 202, 203, 204, 205, 206, 207, 210}},
+		{"suika", {200, 201, 202, 203, 204, 205, 206, 207, 208, 212}},
+		{"suwako", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 212}},
+		{"tenshi", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209}},
+		{"udonge", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
+		{"utsuho", {200, 201, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214}},
+		{"youmu", {200, 201, 202, 203, 204, 205, 206, 207, 208, 212}},
+		{"yukari", {200, 201, 202, 203, 204, 205, 206, 207, 208, 215}},
+		{"yuyuko", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 219}}
+	};
+	void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &);
 	static void (*s_origKeymapManager_SetInputs)();
 	static const unsigned char patchCode[] = {
 		0x31, 0xED,                  //xor ebp, ebp
@@ -35,6 +58,40 @@ namespace Practice
 		SokuLib::union_cast<void (*)()>(&FakeKeyMapMgr::handleInput)();
 	}
 
+	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<short> &newDeck)
+	{
+		bool isPatchy = strcmp(charName, "patchouli") == 0;
+		int number = (4 + isPatchy) * 3;
+		unsigned short originalDeck[20];
+
+		printf("Save old deck of %i cards\n", min(newDeck.size, 20));
+		for (int i = 0; i < min(newDeck.size, 20); i++) {
+			originalDeck[i] = newDeck[i];
+		}
+
+		printf("Loading deck for %s (%i skill cards)\n", charName, number);
+		for (int i = 0; i < number; i++)
+			newDeck[i] = 100 + i;
+		newDeck.size = number;
+		puts("Fake deck generated");
+		s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+
+		auto &entry = characterSpellCards[charName];
+
+		printf("Loading deck for %s (%i spell cards)\n", charName, entry.size());
+		for (int i = 0; i < entry.size(); i++)
+			newDeck[i] = entry[i];
+		puts("Fake deck generated");
+		newDeck.size = entry.size();
+		s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+
+		puts("Placing old deck back");
+		for (int i = 0; i < 20; i++)
+			newDeck[i] = originalDeck[i];
+		newDeck.size = 20;
+		puts("Work done !");
+	}
+
 	Settings settings;
 	sf::RenderWindow *sfmlWindow;
 	char profilePath[1024 + MAX_PATH];
@@ -51,18 +108,15 @@ namespace Practice
 		puts("Placing hooks");
 		settings.activated = true;
 		//Bypass the basic practice features by skipping most of the function.
-		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), PAGE_EXECUTE_WRITECOPY, &old);
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		for (unsigned i = 0; i < sizeof(patchCode); i++) {
 			originalCode[i] = ((unsigned char *)0x42A331)[i];
 			((unsigned char *)0x42A331)[i] = patchCode[i];
 		}
-		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), old, &old);
 
-		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
-		newOffset = (int)KeymapManagerSetInputs - PAYLOAD_NEXT_INSTR_PLAYER;
-		s_origKeymapManager_SetInputs = reinterpret_cast<void (*)()>(*(int *)PAYLOAD_ADDRESS_PLAYER + PAYLOAD_NEXT_INSTR_PLAYER);
-		*(int *)PAYLOAD_ADDRESS_PLAYER = newOffset;
-		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
+		newOffset = (int)KeymapManagerSetInputs - PAYLOAD_NEXT_INSTR_GET_INPUTS;
+		s_origKeymapManager_SetInputs = reinterpret_cast<void (*)()>(*(int *)PAYLOAD_ADDRESS_GET_INPUTS + PAYLOAD_NEXT_INSTR_GET_INPUTS);
+		*(int *)PAYLOAD_ADDRESS_GET_INPUTS = newOffset;
 
 		((unsigned *)0x00898680)[1] = 0x008986A8;
 	}
@@ -99,9 +153,9 @@ namespace Practice
 			((unsigned char *)0x42A331)[i] = originalCode[i];
 		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), old, &old);
 
-		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, PAGE_EXECUTE_WRITECOPY, &old);
-		*(int *)PAYLOAD_ADDRESS_PLAYER = SokuLib::union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_PLAYER;
-		VirtualProtect((PVOID)PAYLOAD_ADDRESS_PLAYER, 4, old, &old);
+		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, PAGE_EXECUTE_WRITECOPY, &old);
+		*(int *)PAYLOAD_ADDRESS_GET_INPUTS = SokuLib::union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_GET_INPUTS;
+		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, old, &old);
 	}
 
 	void deactivate()

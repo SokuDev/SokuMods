@@ -12,6 +12,9 @@
 
 namespace Practice
 {
+#define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
+#define PAYLOAD_NEXT_INSTR_DECK_INFOS (PAYLOAD_ADDRESS_DECK_INFOS + 4)
+
 	enum TechDirection {
 		NEUTRAL_TECH,
 		FORWARD_TECH,
@@ -37,12 +40,15 @@ namespace Practice
 		Settings(bool activated = false) : activated(activated) {};
 	};
 
+	extern std::map<std::string, std::vector<unsigned short>> characterSpellCards;
 	extern sf::RenderWindow *sfmlWindow;
 	extern char profilePath[1024 + MAX_PATH];
 	extern char profileParent[1024 + MAX_PATH];
 	extern SokuLib::KeyInput lastPlayerInputs;
 	extern Settings settings;
+	extern void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &);
 
+	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<short> &newDeck);
 	void activate();
 	void deactivate();
 	void placeHooks();
