@@ -62,8 +62,22 @@ LRESULT CALLBACK myWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 		::SendMessage(hWnd, WM_NCCALCSIZE, TRUE, (LPARAM)&nccp);
 
-		//クライアント領域を3:4補正して対応するウィンドウ領域を求める
 		rct = nccp.rgrc[0];
+		if (rct.right - rct.left < 640) {
+			if (wParam == WMSZ_TOPRIGHT || wParam == WMSZ_RIGHT || wParam == WMSZ_BOTTOMRIGHT) {
+				rct.right = rct.left + 640;
+			} else {
+				rct.left = rct.right - 640;
+			}
+		}
+		if (rct.bottom - rct.top < 480) {
+			if (wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOP || wParam == WMSZ_TOPRIGHT) {
+				rct.top = rct.bottom - 480;
+			} else {
+				rct.bottom = rct.top + 480;
+			}
+		}
+		//クライアント領域を3:4補正して対応するウィンドウ領域を求める
 		switch (wParam) {
 		case WMSZ_LEFT:
 		case WMSZ_RIGHT:
