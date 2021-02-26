@@ -2,6 +2,15 @@
 #include <cstdio>
 #include <shlwapi.h>
 
+#define WARN(fmt, ...) \
+	{ \
+		size_t needed = _snwprintf(NULL, 0, fmt, ##__VA_ARGS__); \
+		wchar_t *buf = (wchar_t *)malloc((needed + 1) * 2); \
+		_snwprintf(buf, (needed + 1), fmt, ##__VA_ARGS__); \
+		MessageBoxW(NULL, buf, L"SWRSToys", MB_ICONWARNING | MB_OK); \
+		free(buf); \
+	}
+
 class CryptHash {
 public:
 	CryptHash(): prov(NULL), hash(NULL) {}
@@ -120,26 +129,45 @@ bool Hook(HMODULE this_module) {
 		PathAppendW(module_path, L"\\");
 		PathAppendW(module_path, moduleValue);
 
-		bool loaded = false;
-		HMODULE module = LoadLibraryW(module_path);
-		if (module != NULL) {
-			bool (*const CheckVersion)(const BYTE[16]) = reinterpret_cast<bool (*)(const BYTE[16])>(GetProcAddress(module, "CheckVersion"));
-			bool (*const Initialize)(HMODULE, HMODULE) = reinterpret_cast<bool (*)(HMODULE, HMODULE)>(GetProcAddress(module, "Initialize"));
-			if (CheckVersion == NULL || Initialize == NULL || !CheckVersion(hash) || !Initialize(module, this_module)) {
-				FreeLibrary(module);
-			} else {
-				loaded = true;
-			}
-		}
+		// don't show errors for sokuengine, which "fails" even when it's loaded successfully
+		bool warn = !StrStrIW(moduleValue, L"SokuEngine");
 
-		// show a dialog if loading failed...
-		// except for sokuengine, which "fails" even when it's loaded successfully
-		if (!loaded && !StrStrIW(moduleValue, L"SokuEngine")) {
-			size_t needed = _snwprintf(NULL, 0, L"Failed loading %s!", moduleValue);
-			wchar_t *buf = (wchar_t *)malloc((needed + 1) * 2);
-			_snwprintf(buf, (needed + 1), L"Failed loading %s!", moduleValue);
-			MessageBoxW(NULL, buf, L"SWRSToys", MB_ICONWARNING | MB_OK);
-			free(buf);
+		HMODULE module = LoadLibraryW(module_path);
+		if (module == NULL) {
+			if (warn) {
+				WARN(L"Failed loading %s: loading failed: %x", moduleValue, GetLastError())
+			}
+			continue;
+		}
+		bool (*const CheckVersion)(const BYTE[16]) = reinterpret_cast<bool (*)(const BYTE[16])>(GetProcAddress(module, "CheckVersion"));
+		if (CheckVersion == NULL) {
+			if (warn) {
+				WARN(L"Failed loading %s: CheckVersion not found", moduleValue)
+			}
+			FreeLibrary(module);
+			continue;
+		}
+		bool (*const Initialize)(HMODULE, HMODULE) = reinterpret_cast<bool (*)(HMODULE, HMODULE)>(GetProcAddress(module, "Initialize"));
+		if (Initialize == NULL) {
+			if (warn) {
+				WARN(L"Failed loading %s: Initialize not found", moduleValue)
+			}
+			FreeLibrary(module);
+			continue;
+		}
+		if (!CheckVersion(hash)) {
+			if (warn) {
+				WARN(L"Failed loading %s: CheckVersion failed", moduleValue)
+			}
+			FreeLibrary(module);
+			continue;
+		}
+		if (!Initialize(module, this_module)) {
+			if (warn) {
+				WARN(L"Failed loading %s: Initialize failed", moduleValue)
+			}
+			FreeLibrary(module);
+			continue;
 		}
 	}
 
