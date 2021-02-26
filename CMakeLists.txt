@@ -292,7 +292,7 @@ target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/Text.cpp
         modules/ReplayInputView+/ReplayInputView.rc)
 
-module(SkipIntro Default)
+module(SkipIntro)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
