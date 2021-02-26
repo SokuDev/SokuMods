@@ -232,15 +232,24 @@ module(GetIP)
 target_sources(GetIP PRIVATE modules/GetIP/main.c)
 target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
 
-module(InGameHostlist SokuEngine Default)
+module(InGameHostlist Default)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
     target_compile_options(InGameHostlist PRIVATE /EHsc)
 endif ()
 target_sources(InGameHostlist PRIVATE
-        modules/InGameHostlist/dllmain.cpp)
-target_link_libraries(InGameHostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+        modules/InGameHostlist/src/dllmain.cpp
+        modules/InGameHostlist/imgui/imgui.cpp
+        modules/InGameHostlist/imgui/imgui_draw.cpp
+        modules/InGameHostlist/imgui/imgui_impl_dx9.cpp
+        modules/InGameHostlist/imgui/imgui_impl_win32.cpp
+        modules/InGameHostlist/imgui/imgui_widgets.cpp)
+target_compile_definitions(InGameHostlist PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> _HAS_STD_BYTE=0)
+target_include_directories(InGameHostlist PRIVATE include include/directx modules/InGameHostlist/include)
+target_link_libraries(InGameHostlist CURL::libcurl d3dx9 SokuEngineLib ws2_32 shlwapi)
 
+install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
+install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SokuEngine/modules/InGameHostlist")
 
 module(LabTool)

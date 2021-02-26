@@ -4,12 +4,12 @@
 [submodule "MemoryModule"]
 	path = MemoryModule
 	url = git@github.com:fancycode/MemoryModule.git
-[submodule "modules/SkipIntro/Soku-SkipIntro"]
-	path = modules/SkipIntro/Soku-SkipIntro
-	url = https://github.com/S-len/Soku-SkipIntro.git
 [submodule "SokuLib"]
 	path = SokuLib
 	url = https://github.com/SokuDev/SokuLib.git
 [submodule "curl"]
 	path = curl
 	url = https://github.com/curl/curl.git
+[submodule "modules/InGameHostlist"]
+	path = modules/InGameHostlist
+	url = https://github.com/SokuDev/InGameHostlist.git

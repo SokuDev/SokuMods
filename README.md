@@ -95,6 +95,12 @@ See [here](modules/DiscordIntegration/README.md) for details.
 
 *This replaces an old deprecated module of the same name that was SokuEngine-exclusive and buggy.*
 
+### InGameHostlist
+
+**Overhauls the netplay menu by adding an in-game graphical lobby/hostlist connected to the Discord host list bot.**
+
+*The mod is connected to Konni only, not Parvati. Hopefully your server will move to Konni soon.*
+
 ### LabTool
 
 **Enhance practice mode by adding fast character position save/reset, character state colors, and frame data info.**
@@ -199,12 +205,6 @@ Available patches:
 **Make the game window resizable.**
 
 ## SokuEngine-exclusive mods
-
-### InGameHostlist
-
-**Overhauls the netplay menu by adding an in-game graphical lobby/hostlist connected to the Discord host list bot.**
-
-*The mod is connected to Konni only, not Parvati. Hopefully your server will move to Konni soon.*
 
 ### NetGameScore
 
