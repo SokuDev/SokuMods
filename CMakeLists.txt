@@ -284,6 +284,10 @@ target_link_libraries(ReDelay dinput8 detours)
 module(ReplayDnD)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
 
+module(ReplayReSync)
+target_sources(ReplayReSync PRIVATE
+        modules/ReplayReSync/ReplayReSync.cpp)
+
 set(BUILD_RIV false CACHE BOOL "Whether to build the legacy ReplayInputView (not RIV+) mod")
 if(BUILD_RIV)
     module(ReplayInputView)

@@ -12,7 +12,7 @@ The code in this repository comes from various contributors:
 - this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
 - *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
-- *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix
+- *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
 - *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
@@ -181,6 +181,14 @@ Available patches:
 **Display keystrokes in game replays in real time, as well as hitboxes, ...**
 
 *The replay speed can also be changed with configurable hotkeys: by default F10 speeds up; F9 slows down; F11 pauses and unpauses the game; F12 steps a single frame forward; F4 toggles hitboxes display; F6 displays additional debug information; F7 cycles through different game inputs display.*
+
+### ReplayReSync
+
+**Work around a game bug causing desyncs by forcing the game state to Moutain Vapor or Normal.**
+
+*By default, the game is in normal state. When ending a game/spectate/replay during mountain vapor, the game goes in Mountain Vapor state and stays this way until the next game starts. When joining, spectating, or watching a replay that does not correspond to your state, you will be desynced.*
+
+*The mod allows you to manually set your state before joining/spectating/watching a replay to match the state of your peer/replay.*
 
 ### SkipIntro
 
