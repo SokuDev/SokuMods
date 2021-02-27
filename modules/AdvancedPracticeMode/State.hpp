@@ -19,19 +19,29 @@ namespace Practice
 		NEUTRAL_TECH,
 		FORWARD_TECH,
 		BACKWARD_TECH,
-		RANDOM_TECH,
+		RANDOM_TECH
 	};
 
 	enum AirTechDirection {
 		NO_AIRTECH,
 		FORWARD_AIRTECH,
 		BACKWARD_AIRTECH,
-		RANDOM_AIRTECH,
+		RANDOM_AIRTECH
+	};
+
+	enum BlockingSide {
+		NO_BLOCKING,
+		BLOCK,
+		HIGH_BLOCKING,
+		LOW_BLOCKING,
+		RANDOM_HEIGHT_BLOCKING
 	};
 
 	struct Settings {
+		bool realisticInputs = true;
 		bool activated;
 		bool controlDummy = false;
+		BlockingSide block = NO_BLOCKING;
 		TechDirection tech = NEUTRAL_TECH;
 		AirTechDirection airtech = NO_AIRTECH;
 		float posX = 0;

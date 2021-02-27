@@ -8,6 +8,7 @@
 
 namespace Practice
 {
+	static int counter = 0;
 	static std::vector<SokuLib::KeyInput> nextDummyInputs;
 
 	static void handleAirTech(SokuLib::CharacterManager &player, SokuLib::CharacterManager &dummy, SokuLib::KeymapManager &manager)
@@ -40,15 +41,15 @@ namespace Practice
 			techdir = rand() % 3 - 1;
 		manager.input.d = 1;
 		switch (settings.tech) {
-			case FORWARD_TECH:
-				manager.input.horizontalAxis = direction;
-				return;
-			case BACKWARD_TECH:
-				manager.input.horizontalAxis = -direction;
-				return;
-			case RANDOM_TECH:
-				manager.input.horizontalAxis = techdir;
-				return;
+		case FORWARD_TECH:
+			manager.input.horizontalAxis = direction;
+			return;
+		case BACKWARD_TECH:
+			manager.input.horizontalAxis = -direction;
+			return;
+		case RANDOM_TECH:
+			manager.input.horizontalAxis = techdir;
+			return;
 		}
 	}
 
@@ -84,36 +85,6 @@ namespace Practice
 		if (action >= SokuLib::ACTION_FORWARD_DASH && action < SokuLib::ACTION_5A)
 			return true;
 		return action == 181;
-	}
-
-	void moveDummy(SokuLib::KeymapManager &manager)
-	{
-		auto &battle = SokuLib::getBattleMgr();
-		auto &player = battle.leftCharacterManager;
-		auto &dummy = battle.rightCharacterManager;
-		auto direction = (player.objectBase.position.x < dummy.objectBase.position.x ? -1 : 1);
-
-		if (!nextDummyInputs.empty()) {
-			auto &next = nextDummyInputs.front();
-
-			next.horizontalAxis *= direction;
-			memcpy(&manager.input, &next, sizeof(manager.input));
-			nextDummyInputs.erase(nextDummyInputs.begin());
-			return;
-		}
-
-		rand();
-		memset(&manager.input, 0, sizeof(manager.input));
-		if (settings.airtech && dummy.objectBase.action >= SokuLib::ACTION_AIR_HIT_SMALL_HITSTUN && dummy.objectBase.action <= SokuLib::ACTION_AIR_HIT_GROUND_SLAMMED)
-			return handleAirTech(player, dummy, manager);
-		if (settings.tech && (dummy.objectBase.action == SokuLib::ACTION_KNOCKED_DOWN_STATIC || dummy.objectBase.action == SokuLib::ACTION_KNOCKED_DOWN))
-			return handleGroundTech(player, dummy, manager);
-		if (isIdle(dummy.objectBase.action)) {
-			if (settings.posX != 0 && settings.posX != dummy.objectBase.position.x)
-				return moveDummyX(dummy, manager);
-			if (settings.posY != 0 && settings.posY != dummy.objectBase.position.y)
-				return moveDummyY(dummy, manager);
-		}
 	}
 
 	std::vector<std::string> moveNameToSequenceStrs(const std::string &input)
@@ -240,5 +211,35 @@ namespace Practice
 	void addNextInput(const std::string &input)
 	{
 		addNextInput(moveNameToInput(input));
+	}
+
+	void moveDummy(SokuLib::KeymapManager &manager)
+	{
+		auto &battle = SokuLib::getBattleMgr();
+		auto &player = battle.leftCharacterManager;
+		auto &dummy = battle.rightCharacterManager;
+		auto direction = (player.objectBase.position.x < dummy.objectBase.position.x ? -1 : 1);
+
+		if (!nextDummyInputs.empty()) {
+			auto &next = nextDummyInputs.front();
+
+			next.horizontalAxis *= direction;
+			memcpy(&manager.input, &next, sizeof(manager.input));
+			nextDummyInputs.erase(nextDummyInputs.begin());
+			return;
+		}
+
+		rand();
+		memset(&manager.input, 0, sizeof(manager.input));
+		if (settings.airtech && dummy.objectBase.action >= SokuLib::ACTION_AIR_HIT_SMALL_HITSTUN && dummy.objectBase.action <= SokuLib::ACTION_AIR_HIT_GROUND_SLAMMED)
+			return handleAirTech(player, dummy, manager);
+		if (settings.tech && (dummy.objectBase.action == SokuLib::ACTION_KNOCKED_DOWN_STATIC || dummy.objectBase.action == SokuLib::ACTION_KNOCKED_DOWN))
+			return handleGroundTech(player, dummy, manager);
+		if (isIdle(dummy.objectBase.action)) {
+			if (settings.posX != 0 && settings.posX != dummy.objectBase.position.x)
+				return moveDummyX(dummy, manager);
+			if (settings.posY != 0 && settings.posY != dummy.objectBase.position.y)
+				return moveDummyY(dummy, manager);
+		}
 	}
 }

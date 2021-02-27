@@ -84,7 +84,7 @@ namespace Practice
 	void update()
 	{
 		if (settings.activated) {
-			*(int *)(*(int *)(0x008971c8) + 0x34) = 3;
+			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
 		}
 	}
 }
