@@ -9,10 +9,12 @@ packages:
   - llvm
   - lld
 sources:
-  - https://github.com/SokuDev/SokuMods.git
+  - https://github.com/SokuDev/SokuMods
 secrets:
   - 63d7a0ac-2635-4d42-9709-efcd2cf74858
 tasks:
+  - check: |
+      [ "$GITHUB_REF" = "refs/heads/master" ] || complete-build
   - setup: |
       cd SokuMods
       sh setup.sh
