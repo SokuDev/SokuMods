@@ -275,6 +275,12 @@ target_link_libraries(NetBellChanger winmm)
 module(NetProfileView)
 target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 
+module(ReDelay)
+target_sources(ReDelay PRIVATE
+        modules/ReDelay/ReDelay.cpp
+        modules/ReDelay/Text.cpp)
+target_link_libraries(ReDelay dinput8 detours)
+
 module(ReplayDnD)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
 

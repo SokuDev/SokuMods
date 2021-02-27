@@ -14,13 +14,14 @@ The code in this repository comes from various contributors:
 - *FireSeal* made SokuRoll
 - *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
-- *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
+- *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
-- Fear Nagae, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
-- [delthas](https://github.com/delthas) made Autopunch, GetIP, as well as all the plumbing: adding CMake, CI, formatting, ...
+- *Fear Nagae*, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
+- *Nepoke* made ReDelay
+- *[delthas](https://github.com/delthas)* made Autopunch, GetIP, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
 
@@ -150,6 +151,12 @@ Available patches:
 
 **Display profile name for players in a game with a specific formatting (color, font, ...) (spectating and/or playing).**
 
+### ReDelay
+
+**Simulate game input delay in Practice mode.**
+
+*Make sure to read the configuration file and set your game control keys properly for the mod to work.*
+
 ### ReplayDnD
 
 **Drag and drop a replay file to the game executable file to watch it immediately.**
@@ -158,13 +165,16 @@ Available patches:
 
 ### ReplayInputView *(deprecated)*
 
-*This module is now deprecated, use ReplayInputView+ instead.*
+<details>
+  <summary><em>This module is now deprecated, use ReplayInputView+ instead.</em></summary>
 
 **Display keystrokes in game replays in real time.**
 
 *The replay speed can also be changed with hotkeys: F10 speeds up; F11 slows down; F12 returns to original speed; F8 and F9 cycle through different game inputs display, for the left and right player respectively.*
 
 *This module does not have a configuration file.*
+
+</details>
 
 ### ReplayInputView+
 
