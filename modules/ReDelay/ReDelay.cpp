@@ -12,13 +12,13 @@ static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 static std::list<SokuLib::KeyInput> lastInputs;
 static std::list<SokuLib::KeyInput> lastInputsRight;
 static SokuLib::SWRFont font;
-static int textTexture;
 static char increaseDelay;
 static char lowerDelay;
 static bool wasMorePressed = false;
 static bool wasLessPressed = false;
 
-#define TEXTURE_SIZE (0x400)
+#define FONT_HEIGHT 14
+#define TEXTURE_SIZE 0x100
 #define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45D
 
 static void drawSprite(int texid, float x, float y, float cx, float cy)
@@ -35,17 +35,8 @@ static void drawSprite(int texid, float x, float y, float cx, float cy)
 		{x, y + cy, 0.0f, 1.0f, 0xffffffff, 0.0f, 1.0f},
 	};
 
-	printf("Draw %i\n", texid);
-
 	SokuLib::textureMgr.setTexture(texid, 0);
 	SokuLib::pd3dDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertices, sizeof(*vertices));
-}
-
-void createTexture(bool freeOld = true)
-{
-	if (freeOld)
-		SokuLib::textureMgr.remove(textTexture);
-	SokuLib::textureMgr.createTextTexture(&textTexture, std::to_string(lastInputs.size()).c_str(), font, TEXTURE_SIZE, 14 + 18, nullptr, nullptr);
 }
 
 void handleInput(SokuLib::KeymapManager *base)
@@ -66,18 +57,16 @@ void handleInput(SokuLib::KeymapManager *base)
 	} else
 		return;
 
+	if (GetForegroundWindow() != SokuLib::window)
+		return;
 
 	if ((GetKeyState(increaseDelay) & 0x8000) && !wasMorePressed) {
 		lastInputs.push_front({0});
 		lastInputsRight.push_front({0});
-		printf("Delay is %i frames\n", lastInputs.size());
-		createTexture();
 	}
 	if ((GetKeyState(lowerDelay) & 0x8000) && !lastInputs.empty() && !wasLessPressed) {
 		lastInputs.pop_back();
 		lastInputsRight.pop_back();
-		createTexture();
-		printf("Delay is %i frames\n", lastInputs.size());
 	}
 	wasMorePressed = (GetKeyState(increaseDelay) & 0x8000);
 	wasLessPressed = (GetKeyState(lowerDelay) & 0x8000);
@@ -96,18 +85,22 @@ void initFont()
 	if (created)
 		return;
 	created = true;
-	desc.r1 = 255;
-	desc.r2 = 255;
-	desc.g1 = 255;
-	desc.g2 = 255;
-	desc.b1 = 255;
-	desc.height = 14;
-	desc.weight = FW_NORMAL;
+	desc.r1 = 205;
+	desc.r2 = 205;
+	desc.g1 = 205;
+	desc.g2 = 205;
+	desc.b1 = 205;
+	desc.height = FONT_HEIGHT;
+	desc.weight = FW_BOLD;
 	desc.italic = 0;
-	desc.shadow = 1;
+	desc.shadow = 2;
 	desc.bufferSize = 1000000;
 	desc.charSpaceX = 0;
-	strcpy(reinterpret_cast<char *>(0x69F154), "Tahoma");
+	desc.charSpaceY = 0;
+	desc.offsetX = 0;
+	desc.offsetY = 0;
+	desc.useOffset = 0;
+	strcpy(desc.faceName, "Tahoma");
 	font.create();
 	font.setIndirect(desc);
 }
@@ -133,7 +126,6 @@ SokuLib::BattleManager *__fastcall CBattleManager_Create(SokuLib::BattleManager 
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		initFont();
 		lastInputs.clear();
-		createTexture(false);
 	default:
 		return This;
 	}
@@ -144,8 +136,13 @@ int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 	// super
 	int ret = (This->*s_origCBattleManager_Render)();
 
-	if (activated)
-		drawSprite(textTexture, 32, 600, TEXTURE_SIZE, 14 + 18.0f);
+	if (activated) {
+		int texture;
+
+		SokuLib::textureMgr.createTextTexture(&texture, std::to_string(lastInputs.size()).c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr);
+		drawSprite(texture, 3, 462, TEXTURE_SIZE, FONT_HEIGHT + 18.0f);
+		SokuLib::textureMgr.remove(texture);
+	}
 	return ret;
 }
 
@@ -160,7 +157,6 @@ void *__fastcall CBattleManager_Destruct(SokuLib::BattleManager *This, int, int 
 		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, PAGE_EXECUTE_WRITECOPY, &old);
 		SokuLib::TamperNearJmpOpr(PAYLOAD_ADDRESS_GET_INPUTS, SokuLib::union_cast<DWORD>(s_origKeymapManager_SetInputs));
 		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, old, &old);
-		SokuLib::textureMgr.remove(textTexture);
 	}
 	activated = false;
 	return ret;
@@ -206,6 +202,7 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 {
 	char profilePath[1024 + MAX_PATH];
+	FILE *_;
 
 	GetModuleFileName(hMyModule, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
