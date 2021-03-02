@@ -9,8 +9,9 @@ static void *(__thiscall SokuLib::BattleManager::*s_origCBattleManager_Destruct)
 static bool activated = false;
 static bool created = false;
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
-static std::list<SokuLib::KeyInput> lastInputs;
+static std::list<SokuLib::KeyInput> lastInputsLeft;
 static std::list<SokuLib::KeyInput> lastInputsRight;
+static std::pair<SokuLib::KeyInput, SokuLib::KeyInput> lastInputs;
 static SokuLib::SWRFont font;
 static char increaseDelay;
 static char lowerDelay;
@@ -39,6 +40,30 @@ static void drawSprite(int texid, float x, float y, float cx, float cy)
 	SokuLib::pd3dDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertices, sizeof(*vertices));
 }
 
+void updateInput(SokuLib::KeyInput &old, const SokuLib::KeyInput &n)
+{
+	old.a = n.a ? (old.a + 1) : 0;
+	old.b = n.b ? (old.b + 1) : 0;
+	old.c = n.c ? (old.c + 1) : 0;
+	old.d = n.d ? (old.d + 1) : 0;
+	old.changeCard = n.changeCard ? (old.changeCard + 1) : 0;
+	old.spellcard = n.spellcard ? (old.spellcard + 1) : 0;
+
+	if (n.horizontalAxis == 0)
+		old.horizontalAxis = 0;
+	else if (n.horizontalAxis > 0)
+		old.horizontalAxis = max(0, old.horizontalAxis) + 1;
+	else
+		old.horizontalAxis = min(0, old.horizontalAxis) - 1;
+
+	if (n.verticalAxis == 0)
+		old.verticalAxis = 0;
+	else if (n.verticalAxis > 0)
+		old.verticalAxis = max(0, old.verticalAxis) + 1;
+	else
+		old.verticalAxis = min(0, old.verticalAxis) - 1;
+}
+
 void handleInput(SokuLib::KeymapManager *base)
 {
 	if (SokuLib::sceneId != SokuLib::SCENE_BATTLE)
@@ -47,12 +72,14 @@ void handleInput(SokuLib::KeymapManager *base)
 	auto &mgr = SokuLib::getBattleMgr();
 
 	if (base == mgr.leftCharacterManager.keyManager->keymapManager) {
-		lastInputs.push_back(base->input);
-		memcpy(&base->input, &lastInputs.front(), sizeof(base->input));
-		lastInputs.pop_front();
+		lastInputsLeft.push_back(base->input);
+		updateInput(lastInputs.first, lastInputsLeft.front());
+		memcpy(&base->input, &lastInputs.first, sizeof(base->input));
+		lastInputsLeft.pop_front();
 	} else if (mgr.rightCharacterManager.keyManager && base == mgr.rightCharacterManager.keyManager->keymapManager) {
 		lastInputsRight.push_back(base->input);
-		memcpy(&base->input, &lastInputsRight.front(), sizeof(base->input));
+		updateInput(lastInputs.second, lastInputsRight.front());
+		memcpy(&base->input, &lastInputs.second, sizeof(base->input));
 		lastInputsRight.pop_front();
 	} else
 		return;
@@ -61,11 +88,11 @@ void handleInput(SokuLib::KeymapManager *base)
 		return;
 
 	if ((GetKeyState(increaseDelay) & 0x8000) && !wasMorePressed) {
-		lastInputs.push_front({0});
+		lastInputsLeft.push_front({0});
 		lastInputsRight.push_front({0});
 	}
-	if ((GetKeyState(lowerDelay) & 0x8000) && !lastInputs.empty() && !wasLessPressed) {
-		lastInputs.pop_back();
+	if ((GetKeyState(lowerDelay) & 0x8000) && !lastInputsLeft.empty() && !wasLessPressed) {
+		lastInputsLeft.pop_back();
 		lastInputsRight.pop_back();
 	}
 	wasMorePressed = (GetKeyState(increaseDelay) & 0x8000);
@@ -125,7 +152,7 @@ SokuLib::BattleManager *__fastcall CBattleManager_Create(SokuLib::BattleManager 
 		);
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		initFont();
-		lastInputs.clear();
+		lastInputsLeft.clear();
 	default:
 		return This;
 	}
@@ -139,7 +166,7 @@ int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 	if (activated) {
 		int texture;
 
-		SokuLib::textureMgr.createTextTexture(&texture, std::to_string(lastInputs.size()).c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr);
+		SokuLib::textureMgr.createTextTexture(&texture, std::to_string(lastInputsLeft.size()).c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr);
 		drawSprite(texture, 3, 462, TEXTURE_SIZE, FONT_HEIGHT + 18.0f);
 		SokuLib::textureMgr.remove(texture);
 	}
