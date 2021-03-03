@@ -10,7 +10,9 @@
 
 namespace Practice
 {
+	extern std::array<std::string, SokuLib::CHARACTER_RANDOM> names;
 	extern tgui::Gui gui;
+
 	void loadAllGuiElements(LPCSTR profilePath);
 	void updateGuiState();
 	void init(LPCSTR profilePath);

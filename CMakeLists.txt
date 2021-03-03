@@ -390,6 +390,8 @@ add_library(
         modules/AdvancedPracticeMode/Dummy.hpp
         modules/AdvancedPracticeMode/DrawUtils.cpp
         modules/AdvancedPracticeMode/DrawUtils.hpp
+        modules/AdvancedPracticeMode/Inputs.cpp
+        modules/AdvancedPracticeMode/Inputs.hpp
 )
 target_compile_options(AdvancedPracticeMode PRIVATE /Zi)
 target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
@@ -410,6 +412,8 @@ target_link_libraries(
         "${SFML_DIR}/lib/sfml-system.lib"
         "${SFML_DIR}/lib/sfml-window.lib"
         "${TGUILIB}"
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
 message(${TGUILIB})
 install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SWRSToys/modules/AdvancedPracticeMode/")

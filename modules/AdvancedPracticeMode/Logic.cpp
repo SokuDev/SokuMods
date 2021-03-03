@@ -6,6 +6,7 @@
 #include "State.hpp"
 #include "Gui.hpp"
 #include "Dummy.hpp"
+#include "Inputs.hpp"
 
 namespace Practice
 {
@@ -79,6 +80,7 @@ namespace Practice
 			Practice::gui.handleEvent(event);
 		Practice::gui.draw();
 		sfmlWindow->display();
+		displayInputs();
 	}
 
 	void update()

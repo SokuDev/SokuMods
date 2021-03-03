@@ -3,8 +3,8 @@
 //
 
 #include <d3d9.h>
+#include <D3dx9tex.h>
 #include <cmath>
-#include <algorithm>
 #include <SokuLib.hpp>
 #include "DrawUtils.hpp"
 
@@ -121,6 +121,31 @@ namespace Practice
 	Vector2<unsigned> Texture::getSize() const
 	{
 		return this->_size;
+	}
+
+	bool Texture::loadFromFile(Texture &buffer, const char *path)
+	{
+		HRESULT result;
+		int handle;
+		D3DXIMAGE_INFO info;
+
+		printf("Loading texture %s\n", path);
+		if (FAILED(result = D3DXGetImageInfoFromFile(path, &info))) {
+			fprintf(stderr, "D3DXGetImageInfoFromFile(\"%s\", %p) failed with code %li.\n", path, &info, result);
+			return false;
+		}
+
+		LPDIRECT3DTEXTURE9 *pphandle = SokuLib::textureMgr.allocate(&handle);
+
+		*pphandle = nullptr;
+		if (FAILED(result = D3DXCreateTextureFromFileA(SokuLib::pd3dDev, path, pphandle))) {
+			fprintf(stderr, "D3DXCreateTextureFromFile(%p, \"%s\", %p) failed with code %li.\n", SokuLib::pd3dDev, path, pphandle, result);
+			SokuLib::textureMgr.deallocate(handle);
+			return false;
+		}
+		printf("Texture handle: %i, Size: %ux%u\n", handle, info.Width, info.Height);
+		buffer.setHandle(handle, {info.Width, info.Height});
+		return true;
 	}
 
 	Vector2<unsigned> RectangularRenderingElement::getSize() const

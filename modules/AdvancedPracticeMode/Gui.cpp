@@ -7,7 +7,6 @@
 #include "Moves.hpp"
 #include "State.hpp"
 #include "Dummy.hpp"
-#include "Logic.hpp"
 
 namespace Practice
 {

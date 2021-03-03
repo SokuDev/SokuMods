@@ -6,6 +6,7 @@
 #define SWRSTOYS_DRAWUTILS_HPP
 
 
+#include <windows.h>
 #include <d3d9types.h>
 
 namespace Practice
@@ -30,7 +31,6 @@ namespace Practice
 		DxSokuColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept;
 		DxSokuColor(unsigned color) noexcept;
 
-		operator unsigned() const;
 		DxSokuColor &operator=(unsigned color);
 		DxSokuColor operator+(const DxSokuColor &other) const;
 		DxSokuColor &operator+=(const DxSokuColor &other);
@@ -50,6 +50,8 @@ namespace Practice
 			this->a = std::min<unsigned char>(this->a * alpha, 255);
 			return *this;
 		}
+
+		operator unsigned() const;
 
 		static const DxSokuColor White;
 		static const DxSokuColor Yellow;
@@ -85,6 +87,8 @@ namespace Practice
 		void swap(Texture &other);
 		void destroy();
 		int releaseHandle();
+
+		static bool loadFromFile(Texture &buffer, const char *path);
 	};
 
 	class RenderingElement {

@@ -5,6 +5,7 @@
 #include "State.hpp"
 #include "Gui.hpp"
 #include "Logic.hpp"
+#include "Inputs.hpp"
 
 #define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45E
 #define PAYLOAD_NEXT_INSTR_GET_INPUTS (PAYLOAD_ADDRESS_GET_INPUTS + 4)
@@ -34,28 +35,17 @@ namespace Practice
 		{"yuyuko", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 219}}
 	};
 	void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &);
-	static void (*s_origKeymapManager_SetInputs)();
+	static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 	static const unsigned char patchCode[] = {
 		0x31, 0xED,                  //xor ebp, ebp
 		0xE9, 0x91, 0x01, 0x00, 0x00 //jmp pc+00000191
 	};
 	static unsigned char originalCode[sizeof(patchCode)];
 
-	struct FakeKeyMapMgr {
-		SokuLib::KeymapManager base;
-
-		void handleInput()
-		{
-			Practice::handleInput(this->base);
-		}
-	};
-
-	void KeymapManagerSetInputs()
+	void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 	{
-		__asm push ecx;
-		s_origKeymapManager_SetInputs();
-		__asm pop ecx;
-		SokuLib::union_cast<void (*)()>(&FakeKeyMapMgr::handleInput)();
+		(This->*s_origKeymapManager_SetInputs)();
+		Practice::handleInput(*This);
 	}
 
 	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<short> &newDeck)
@@ -115,7 +105,7 @@ namespace Practice
 		}
 
 		newOffset = (int)KeymapManagerSetInputs - PAYLOAD_NEXT_INSTR_GET_INPUTS;
-		s_origKeymapManager_SetInputs = reinterpret_cast<void (*)()>(*(int *)PAYLOAD_ADDRESS_GET_INPUTS + PAYLOAD_NEXT_INSTR_GET_INPUTS);
+		s_origKeymapManager_SetInputs = SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(*(int *)PAYLOAD_ADDRESS_GET_INPUTS + PAYLOAD_NEXT_INSTR_GET_INPUTS);
 		*(int *)PAYLOAD_ADDRESS_GET_INPUTS = newOffset;
 
 		((unsigned *)0x00898680)[1] = 0x008986A8;
@@ -129,6 +119,7 @@ namespace Practice
 		puts("Opening window");
 		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
 		puts("Window opened");
+		Practice::initInputDisplay(profileParent);
 		Practice::init(profileParent);
 		Practice::gui.setTarget(*sfmlWindow);
 		try {
