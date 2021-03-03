@@ -976,7 +976,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	GetModuleFileName(hMyModule, s_profilePath, 1024);
 	PathRemoveFileSpec(s_profilePath);
-	PathAppend(s_profilePath, "ReplayInputView.ini");
+	PathAppend(s_profilePath, "ReplayInputView+.ini");
 
 	DWORD old;
 	::VirtualProtect((PVOID)text_Offset, text_Size, PAGE_EXECUTE_WRITECOPY, &old);
