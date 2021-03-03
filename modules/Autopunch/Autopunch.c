@@ -127,8 +127,8 @@ bool fetch_mod(wchar_t *version) {
 	}
 	FILE *out = NULL;
 	curl_easy_setopt(curl, CURLOPT_URL, fetch_url_utf8);
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 3200L);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 40000L);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 20000L);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
