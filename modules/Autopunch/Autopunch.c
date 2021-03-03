@@ -3,7 +3,6 @@
 #include <process.h>
 #include <shlwapi.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,7 +27,6 @@ char *to_utf8(const wchar_t *str) {
 	}
 	char *str_utf8 = malloc(length);
 	int r = WideCharToMultiByte(CP_UTF8, 0, str, -1, str_utf8, length, NULL, NULL);
-	printf("%d\n", r);
 	if (!r) {
 		free(str_utf8);
 		return NULL;
@@ -101,7 +99,6 @@ size_t write_mod(void *ptr, size_t size, size_t n, FILE **out) {
 		if (*out == NULL) {
 			return 0;
 		}
-		_beginthread(display_dialog, 0, L"Autopunch update available, downloading in the background, will prompt again when done!");
 	}
 	return fwrite(ptr, size, n, *out);
 }
@@ -130,8 +127,8 @@ bool fetch_mod(wchar_t *version) {
 	}
 	FILE *out = NULL;
 	curl_easy_setopt(curl, CURLOPT_URL, fetch_url_utf8);
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 3200L);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 40000L);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 20000L);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);

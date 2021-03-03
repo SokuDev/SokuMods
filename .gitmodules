@@ -13,3 +13,6 @@
 [submodule "curl"]
 	path = curl
 	url = https://github.com/curl/curl.git
+[submodule "modules/InGameHostlist"]
+	path = modules/InGameHostlist
+	url = https://github.com/SokuDev/InGameHostlist.git

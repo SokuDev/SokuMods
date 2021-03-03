@@ -154,6 +154,12 @@ endfunction()
 module(Autopunch Default)
 target_sources(Autopunch PRIVATE modules/Autopunch/Autopunch.c)
 #target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
+set(INSTALL_AUTOPUNCH_DAT false CACHE BOOL "Whether to pre-install the current Autopunch dat")
+if(INSTALL_AUTOPUNCH_DAT)
+    file(DOWNLOAD "http://autopunch-update.delthas.fr/update" "${CMAKE_BINARY_DIR}/autopunch.dat")
+    install(FILES "${CMAKE_BINARY_DIR}/autopunch.dat" DESTINATION "SWRSToys/modules/Autopunch/")
+    install(FILES "${CMAKE_BINARY_DIR}/autopunch.dat" DESTINATION "SokuEngine/modules/Autopunch/")
+endif()
 
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
@@ -228,15 +234,28 @@ module(FixMeiling236 Default)
 target_sources(FixMeiling236 PRIVATE
         modules/FixMeiling236/main.cpp)
 
-#module(InGameHostlist SokuEngine Default)
+#module(GetIP)
+#target_sources(GetIP PRIVATE modules/GetIP/main.c)
+#target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
+
+#module(InGameHostlist Default)
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-#    target_compile_options(Hostlist PRIVATE /EHsc)
+#    target_compile_options(InGameHostlist PRIVATE /EHsc)
 #endif ()
 #target_sources(InGameHostlist PRIVATE
-#        modules/InGameHostlist/dllmain.cpp)
-#target_link_libraries(InGameHostlist CURL::libcurl SokuEngineLib ws2_32 shlwapi)
+#        modules/InGameHostlist/src/dllmain.cpp
+#        modules/InGameHostlist/imgui/imgui.cpp
+#        modules/InGameHostlist/imgui/imgui_draw.cpp
+#        modules/InGameHostlist/imgui/imgui_impl_dx9.cpp
+#        modules/InGameHostlist/imgui/imgui_impl_win32.cpp
+#        modules/InGameHostlist/imgui/imgui_widgets.cpp)
+#target_compile_definitions(InGameHostlist PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> _HAS_STD_BYTE=0)
+#target_include_directories(InGameHostlist PRIVATE include include/directx modules/InGameHostlist/include)
+#target_link_libraries(InGameHostlist CURL::libcurl d3dx9 SokuEngineLib ws2_32 shlwapi)
 
+install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
+install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SokuEngine/modules/InGameHostlist")
 
 module(LabTool)
@@ -262,16 +281,18 @@ target_link_libraries(NetBellChanger winmm)
 module(NetProfileView)
 target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 
+module(ReDelay)
+target_sources(ReDelay PRIVATE
+        modules/ReDelay/ReDelay.cpp
+        modules/ReDelay/Text.cpp)
+target_link_libraries(ReDelay dinput8 detours)
+
 module(ReplayDnD)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
 
-set(BUILD_RIV false CACHE BOOL "Whether to build the legacy ReplayInputView (not RIV+) mod")
-if(BUILD_RIV)
-    module(ReplayInputView)
-    target_sources(ReplayInputView PRIVATE
-            modules/ReplayInputView/ReplayInputView.cpp
-            modules/ReplayInputView/ReplayInputView.rc)
-endif()
+module(ReplayReSync)
+target_sources(ReplayReSync PRIVATE
+        modules/ReplayReSync/ReplayReSync.cpp)
 
 module(ReplayInputView+)
 target_sources(ReplayInputView+ PRIVATE
@@ -279,7 +300,7 @@ target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/Text.cpp
         modules/ReplayInputView+/ReplayInputView.rc)
 
-module(SkipIntro Default)
+module(SkipIntro)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
@@ -329,7 +350,6 @@ target_link_libraries(WindowResizer detours)
 
 # binary SokuEngine modules
 
-module(GetIP Binary SokuEngine)
 module(NetGameScore Binary SokuEngine)
 module(PracticeEx Binary SokuEngine)
 module(shady-loader Binary SokuEngine)

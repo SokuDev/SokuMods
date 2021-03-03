@@ -12,15 +12,16 @@ The code in this repository comes from various contributors:
 - this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
 - *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
-- *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix
+- *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
-- *Ichirin* made CharactersInForeground, GetIP, NetGameScord, PracticeEx, SokuEngine, SWRSokuRoll
+- *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
-- Fear, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
-- delthas made Autopunch, as well as all the plumbing: adding CMake, CI, formatting, ...
+- *Fear Nagae*, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
+- *Nepoke* made ReDelay
+- *[delthas](https://github.com/delthas)* made Autopunch, GetIP, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
 
@@ -89,6 +90,18 @@ See [here](modules/DiscordIntegration/README.md) for details.
 
 *This module is very lightweight; it is advised & good netplay etiquette to always enable it.*
 
+### GetIP
+
+**Automatically copy your IP and an optional host message to your clipboard when starting to host.**
+
+*This replaces an old deprecated module of the same name that was SokuEngine-exclusive and buggy.*
+
+### InGameHostlist
+
+**Overhauls the netplay menu by adding an in-game graphical lobby/hostlist connected to the Discord host list bot.**
+
+*The mod is connected to Konni only, not Parvati. Hopefully your server will move to Konni soon.*
+
 ### LabTool
 
 **Enhance practice mode by adding fast character position save/reset, character state colors, and frame data info.**
@@ -138,27 +151,33 @@ Available patches:
 
 **Display profile name for players in a game with a specific formatting (color, font, ...) (spectating and/or playing).**
 
+### ReDelay
+
+**Simulate game input delay in Practice mode.**
+
+*Make sure to read the configuration file and set your game control keys properly for the mod to work.*
+
 ### ReplayDnD
 
 **Drag and drop a replay file to the game executable file to watch it immediately.**
 
 *Dragging a replay to a running game window does not work; you need to drag it to the game exacutable file in Windows Explorer.*
 
-### ReplayInputView *(deprecated)*
-
-*This module is now deprecated, use ReplayInputView+ instead.*
-
-**Display keystrokes in game replays in real time.**
-
-*The replay speed can also be changed with hotkeys: F10 speeds up; F11 slows down; F12 returns to original speed; F8 and F9 cycle through different game inputs display, for the left and right player respectively.*
-
-*This module does not have a configuration file.*
-
 ### ReplayInputView+
 
 **Display keystrokes in game replays in real time, as well as hitboxes, ...**
 
 *The replay speed can also be changed with configurable hotkeys: by default F10 speeds up; F9 slows down; F11 pauses and unpauses the game; F12 steps a single frame forward; F4 toggles hitboxes display; F6 displays additional debug information; F7 cycles through different game inputs display.*
+
+*ReplayInputView+ replaces the dated ReplayInputView mod.*
+
+### ReplayReSync
+
+**Work around a game bug causing desyncs by forcing the game state to Moutain Vapor or Normal.**
+
+*By default, the game is in normal state. When ending a game/spectate/replay during mountain vapor, the game goes in Mountain Vapor state and stays this way until the next game starts. When joining, spectating, or watching a replay that does not correspond to your state, you will be desynced.*
+
+*The mod allows you to manually set your state before joining/spectating/watching a replay to match the state of your peer/replay.*
 
 ### SkipIntro
 
@@ -193,16 +212,6 @@ Available patches:
 **Make the game window resizable.**
 
 ## SokuEngine-exclusive mods
-
-### GetIP
-
-**Automatically copy a host message to your clipboard when hosting.**
-
-### InGameHostlist
-
-**Overhauls the netplay menu by adding an in-game graphical lobby/hostlist connected to the Discord host list bot.**
-
-*The mod is connected to Konni only, not Parvati. Hopefully your server will move to Konni soon.*
 
 ### NetGameScore
 
