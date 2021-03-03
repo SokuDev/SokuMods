@@ -288,14 +288,6 @@ module(ReplayReSync)
 target_sources(ReplayReSync PRIVATE
         modules/ReplayReSync/ReplayReSync.cpp)
 
-set(BUILD_RIV false CACHE BOOL "Whether to build the legacy ReplayInputView (not RIV+) mod")
-if(BUILD_RIV)
-    module(ReplayInputView)
-    target_sources(ReplayInputView PRIVATE
-            modules/ReplayInputView/ReplayInputView.cpp
-            modules/ReplayInputView/ReplayInputView.rc)
-endif()
-
 module(ReplayInputView+)
 target_sources(ReplayInputView+ PRIVATE
         modules/ReplayInputView+/ReplayInputView.cpp

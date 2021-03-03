@@ -163,24 +163,13 @@ Available patches:
 
 *Dragging a replay to a running game window does not work; you need to drag it to the game exacutable file in Windows Explorer.*
 
-### ReplayInputView *(deprecated)*
-
-<details>
-  <summary><em>This module is now deprecated, use ReplayInputView+ instead.</em></summary>
-
-**Display keystrokes in game replays in real time.**
-
-*The replay speed can also be changed with hotkeys: F10 speeds up; F11 slows down; F12 returns to original speed; F8 and F9 cycle through different game inputs display, for the left and right player respectively.*
-
-*This module does not have a configuration file.*
-
-</details>
-
 ### ReplayInputView+
 
 **Display keystrokes in game replays in real time, as well as hitboxes, ...**
 
 *The replay speed can also be changed with configurable hotkeys: by default F10 speeds up; F9 slows down; F11 pauses and unpauses the game; F12 steps a single frame forward; F4 toggles hitboxes display; F6 displays additional debug information; F7 cycles through different game inputs display.*
+
+*ReplayInputView+ replaces the dated ReplayInputView mod.*
 
 ### ReplayReSync
 
