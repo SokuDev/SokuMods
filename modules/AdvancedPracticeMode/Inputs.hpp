@@ -10,6 +10,7 @@ namespace Practice
 {
 	void initInputDisplay(LPCSTR profilePath);
 	void displayInputs();
+	void updateInputLists();
 }
 
 

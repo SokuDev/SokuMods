@@ -88,5 +88,6 @@ namespace Practice
 		if (settings.activated) {
 			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
 		}
+		updateInputLists();
 	}
 }
