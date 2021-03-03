@@ -7,6 +7,7 @@
 #include "DrawUtils.hpp"
 #include "Inputs.hpp"
 #include "Gui.hpp"
+#include "State.hpp"
 
 namespace Practice
 {
@@ -164,9 +165,13 @@ namespace Practice
 
 	void displayInputs()
 	{
-		leftBox.draw();
-		rightBox.draw();
-		drawInputList(leftInputList, {0, 60}, false);
-		drawInputList(rightInputList, {640 - BOX_WIDTH, 60}, true);
+		if (settings.showLeftInputBox) {
+			leftBox.draw();
+			drawInputList(leftInputList, {0, 60}, false);
+		}
+		if (settings.showRightInputBox) {
+			rightBox.draw();
+			drawInputList(rightInputList, {640 - BOX_WIDTH, 60}, true);
+		}
 	}
 }

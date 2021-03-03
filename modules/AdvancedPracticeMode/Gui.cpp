@@ -217,6 +217,45 @@ namespace Practice
 		});
 	}
 
+	static void updateStatePanel()
+	{
+	}
+
+	static void setNewWeather(SokuLib::Weather weather)
+	{
+		if (weather == SokuLib::WEATHER_CLEAR) {
+			settings.weatherResetRequest = true;
+			return;
+		}
+		SokuLib::displayedWeather = weather;
+		SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
+		SokuLib::weatherCounter = 999;
+	}
+
+	static void displayStatePanel(const std::string &profile)
+	{
+		panel->loadWidgetsFromFile(profile + "/assets/state.gui");
+
+		auto force = panel->get<tgui::CheckBox>("ForceWeather");
+		auto weather = panel->get<tgui::ComboBox>("Weather");
+
+		force->setChecked(settings.forceWeather);
+		force->connect("Changed", [weather](bool newValue){
+			settings.forceWeather = newValue;
+			weather->setEnabled(newValue);
+			if (newValue)
+				setNewWeather(static_cast<SokuLib::Weather>(weather->getSelectedItemIndex()));
+		});
+		weather->setEnabled(settings.forceWeather);
+		if (settings.forceWeather && SokuLib::activeWeather != SokuLib::WEATHER_CLEAR)
+			weather->setSelectedItemByIndex(SokuLib::displayedWeather);
+		else
+			weather->setSelectedItemByIndex(SokuLib::WEATHER_CLEAR);
+		weather->connect("ItemSelected", [](int item){
+			setNewWeather(static_cast<SokuLib::Weather>(item));
+		});
+	}
+
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
 		std::string profile = profilePath;
@@ -230,6 +269,8 @@ namespace Practice
 				return displaySkillsPanel(profile);
 			case 1:
 				return displayDummyPanel(profile);
+			case 2:
+				return displayStatePanel(profile);
 			default:
 				return panel->removeAllWidgets();
 			}
@@ -304,6 +345,9 @@ namespace Practice
 			break;
 		case 1:
 			updateDummyPanel();
+			break;
+		case 2:
+			updateStatePanel();
 			break;
 		default:
 			break;

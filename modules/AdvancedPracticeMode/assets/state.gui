@@ -1,0 +1,62 @@
+ComboBox.Weather {
+    ChangeItemOnScroll = true;
+    ExpandDirection = Down;
+    Items = [Sunny, Drizzle, Cloudy, "Blue Sky", Hail, "Spring Haze", "Heavy Fog", Snow, "Sun Shower", Sprinkle, Tempest, "Mountain Vapor", "River Mist", Typhoon, Calm, "Diamond Dust", "Dust Storm", "Scorching Sun", Monsoon, Aurora, Twilight, Clear];
+    ItemsToDisplay = 20;
+    MaximumItems = 0;
+    Position = (10, 10);
+    SelectedItemIndex = 21;
+    Size = (130, 22);
+    TextSize = 13;
+
+    Renderer {
+        arrowbackgroundcolor = #F5F5F5;
+        arrowbackgroundcolorhover = white;
+        arrowcolor = #3C3C3C;
+        arrowcolorhover = black;
+        backgroundcolor = #F5F5F5;
+        bordercolor = black;
+        borders = (1, 1, 1, 1);
+        padding = (0, 0, 0, 0);
+        textcolor = #3C3C3C;
+        texturearrow = None;
+        texturearrowdisabled = None;
+        texturearrowhover = None;
+        texturebackground = None;
+        texturebackgrounddisabled = None;
+    }
+}
+
+CheckBox.ForceWeather {
+    Checked = true;
+    Position = (10, 40);
+    Size = (18, 18);
+    Text = "Force weather";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorfocused = #1E1EB4;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        checkcolor = #3C3C3C;
+        checkcolordisabled = #7D7D7D;
+        checkcolorhover = black;
+        textcolor = #3C3C3C;
+        textcolordisabled = #7D7D7D;
+        textcolorhover = black;
+        textdistanceratio = 0.2;
+        texturechecked = None;
+        texturecheckeddisabled = None;
+        texturecheckedfocused = None;
+        texturecheckedhover = None;
+        textureunchecked = None;
+        textureuncheckeddisabled = None;
+        textureuncheckedfocused = None;
+        textureuncheckedhover = None;
+    }
+}

@@ -41,11 +41,15 @@ namespace Practice
 		bool realisticInputs = true;
 		bool activated;
 		bool controlDummy = false;
+		bool forceWeather = true;
+		bool weatherResetRequest = false;
 		BlockingSide block = NO_BLOCKING;
 		TechDirection tech = NEUTRAL_TECH;
 		AirTechDirection airtech = NO_AIRTECH;
 		float posX = 0;
 		float posY = 0;
+		bool showLeftInputBox = true;
+		bool showRightInputBox = true;
 
 		Settings(bool activated = false) : activated(activated) {};
 	};

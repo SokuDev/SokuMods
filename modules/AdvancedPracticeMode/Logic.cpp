@@ -88,6 +88,15 @@ namespace Practice
 		if (settings.activated) {
 			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
 		}
+		if (settings.forceWeather) {
+			if (settings.weatherResetRequest) {
+				settings.weatherResetRequest = SokuLib::activeWeather != SokuLib::WEATHER_CLEAR;
+				SokuLib::weatherCounter = 1;
+			} else if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR)
+				SokuLib::weatherCounter = -1;
+			else
+				SokuLib::weatherCounter = 999;
+		}
 		updateInputLists();
 	}
 }
