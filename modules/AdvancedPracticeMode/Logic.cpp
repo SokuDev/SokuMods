@@ -83,6 +83,12 @@ namespace Practice
 		displayInputs();
 	}
 
+	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager)
+	{
+		if (manager.objectBase.action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
+			manager.objectBase.hp = state.hp;
+	}
+
 	void update()
 	{
 		if (settings.activated) {
@@ -97,6 +103,8 @@ namespace Practice
 			else
 				SokuLib::weatherCounter = 999;
 		}
+		applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager);
+		applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager);
 		updateInputLists();
 	}
 }

@@ -37,6 +37,16 @@ namespace Practice
 		RANDOM_HEIGHT_BLOCKING
 	};
 
+	struct CharacterState {
+		unsigned hp;
+		SokuLib::Skill map[15];
+		unsigned char dropLevel;
+		unsigned char dollLevel;
+		unsigned char rodLevel;
+		unsigned char grimoireLevel;
+		unsigned char fanLevel;
+	};
+
 	struct Settings {
 		bool realisticInputs = true;
 		bool activated;
@@ -50,6 +60,8 @@ namespace Practice
 		float posY = 0;
 		bool showLeftInputBox = true;
 		bool showRightInputBox = true;
+		CharacterState leftState;
+		CharacterState rightState;
 
 		Settings(bool activated = false) : activated(activated) {};
 	};

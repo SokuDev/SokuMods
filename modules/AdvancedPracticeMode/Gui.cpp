@@ -72,7 +72,7 @@ namespace Practice
 		return false;
 	}
 
-	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
+	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
 		char nbSkills = 4;
 
@@ -121,6 +121,9 @@ namespace Practice
 				)
 			);
 		}
+		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue){
+			state.hp = newValue;
+		});
 		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
 			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
 			const char *brokenNames[] = {
@@ -149,8 +152,8 @@ namespace Practice
 		tgui::Panel::Ptr leftPanel = panel->get<tgui::Panel>("Left");
 		tgui::Panel::Ptr rightPanel = panel->get<tgui::Panel>("Right");
 
-		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
-		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
+		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.leftState);
+		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.rightState);
 		updateGuiState();
 	}
 

@@ -84,7 +84,7 @@ namespace Practice
 			return true;
 		if (action >= SokuLib::ACTION_FORWARD_DASH && action < SokuLib::ACTION_5A)
 			return true;
-		return action == 181;
+		return action == SokuLib::ACTION_FORWARD_AIRTECH || action == SokuLib::ACTION_BACKWARD_AIRTECH;
 	}
 
 	std::vector<std::string> moveNameToSequenceStrs(const std::string &input)

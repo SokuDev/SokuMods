@@ -342,3 +342,45 @@ Button.Button1 {
         texturehover = None;
     }
 }
+
+Label.Label1 {
+    AutoSize = true;
+    Position = (10, 390);
+    ScrollbarPolicy = Never;
+    Size = (20.2, 18);
+    Text = HP;
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        bordercolor = #3C3C3C;
+        borders = (0, 0, 0, 0);
+        textcolor = #3C3C3C;
+        texturebackground = None;
+    }
+}
+
+Slider.HP {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 10000;
+    Minimum = 1;
+    Position = (40, 390);
+    Size = (190, 16);
+    Step = 1;
+    Value = 10000;
+
+    Renderer {
+        bordercolor = #3C3C3C;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        texturethumb = None;
+        texturethumbhover = None;
+        texturetrack = None;
+        texturetrackhover = None;
+        thumbcolor = #F5F5F5;
+        thumbcolorhover = white;
+        trackcolor = #F5F5F5;
+        trackcolorhover = white;
+    }
+}
