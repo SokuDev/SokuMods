@@ -99,7 +99,6 @@ size_t write_mod(void *ptr, size_t size, size_t n, FILE **out) {
 		if (*out == NULL) {
 			return 0;
 		}
-		_beginthread(display_dialog, 0, L"Autopunch update available, downloading in the background, will prompt again when done!");
 	}
 	return fwrite(ptr, size, n, *out);
 }
