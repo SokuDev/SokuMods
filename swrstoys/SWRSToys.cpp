@@ -132,6 +132,14 @@ bool Hook(HMODULE this_module) {
 		// don't show errors for sokuengine, which "fails" even when it's loaded successfully
 		bool warn = !StrStrIW(moduleValue, L"SokuEngine");
 
+		DWORD attrs = GetFileAttributesW(module_path);
+		if (attrs == INVALID_FILE_ATTRIBUTES || attrs & FILE_ATTRIBUTE_DIRECTORY) {
+			if (warn) {
+				WARN(L"Failed loading %s: file does not exist", moduleValue)
+			}
+			continue;
+		}
+
 		HMODULE module = LoadLibraryW(module_path);
 		if (module == NULL) {
 			if (warn) {
