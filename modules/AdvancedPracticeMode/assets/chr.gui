@@ -355,7 +355,7 @@ Label.Label1 {
         backgroundcolor = transparent;
         bordercolor = #3C3C3C;
         borders = (0, 0, 0, 0);
-        textcolor = #3C3C3C;
+        textcolor = white;
         texturebackground = None;
     }
 }

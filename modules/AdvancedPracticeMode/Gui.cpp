@@ -37,12 +37,13 @@ namespace Practice
 	static tgui::Panel::Ptr panel;
 	static tgui::Tabs::Ptr tab;
 
-	inline void getSkillMap(SokuLib::CharacterManager &manager, char (&skills)[5], SokuLib::Character character)
+	inline void getSkillMap(SokuLib::Skill *skillMap, char (&skills)[5], SokuLib::Character character)
 	{
 		char nbSkills = 4 + (character == SokuLib::CHARACTER_PATCHOULI);
 
+		memset(skills, 0, sizeof(skills));
 		for (char i = nbSkills; i < 3 * nbSkills; i++) {
-			if (!manager.skillMap[i].notUsed)
+			if (!skillMap[i].notUsed)
 				skills[i % nbSkills] = i / nbSkills;
 		}
 	}
@@ -77,6 +78,28 @@ namespace Practice
 		char nbSkills = 4;
 
 		panel->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
+
+		auto spePic = panel->get<tgui::Picture>("SpecialPic");
+		auto speLvl = panel->get<tgui::ComboBox>("SpecialLevel");
+
+		auto dollPic = panel->get<tgui::Picture>("DollPic");
+		auto dollLvl = panel->get<tgui::ComboBox>("DollLvl");
+
+		auto dropPic = panel->get<tgui::Picture>("DropPic");
+		auto dropLvl = panel->get<tgui::ComboBox>("DropLvl");
+
+		auto rodPic = panel->get<tgui::Picture>("RodPic");
+		auto rodLvl = panel->get<tgui::ComboBox>("RodLvl");
+
+		auto grimPic = panel->get<tgui::Picture>("GrimPic");
+		auto grimLvl = panel->get<tgui::ComboBox>("GrimLvl");
+
+		auto fanPic = panel->get<tgui::Picture>("FanPic");
+		auto fanLvl = panel->get<tgui::ComboBox>("FanLvl");
+
+		char skills[5];
+
+		getSkillMap(state.skillMap, skills, character);
 		if (character == SokuLib::CHARACTER_PATCHOULI) {
 			nbSkills = 5;
 			panel->get<tgui::Widget>("Skill4Lvl")->setVisible(true);
@@ -84,23 +107,46 @@ namespace Practice
 			panel->get<tgui::Widget>("Skill4Id")->setVisible(true);
 		}
 		if (character == SokuLib::CHARACTER_REISEN) {
-			panel->get<tgui::Widget>("SpecialPic")->setVisible(true);
-			panel->get<tgui::Widget>("SpecialLevel")->setVisible(true);
-			panel->get<tgui::Picture>("SpecialPic")->getRenderer()->setTexture(profilePath + "/assets/stats/elixir.png");
-			panel->get<tgui::ComboBox>("SpecialLevel")->removeItem("MAX");
-			panel->get<tgui::ComboBox>("SpecialLevel")->setSelectedItemByIndex(0);
+			spePic->setVisible(true);
+			speLvl->setVisible(true);
+			spePic->getRenderer()->setTexture(profilePath + "/assets/stats/elixir.png");
+			speLvl->removeItem("MAX");
 		}
 		if (character == SokuLib::CHARACTER_YUYUKO) {
-			panel->get<tgui::Widget>("SpecialPic")->setVisible(true);
-			panel->get<tgui::Widget>("SpecialLevel")->setVisible(true);
-			panel->get<tgui::Picture>("SpecialPic")->getRenderer()->setTexture(profilePath + "/assets/stats/butterflies.png");
-			panel->get<tgui::ComboBox>("SpecialLevel")->setSelectedItemByIndex(0);
+			spePic->setVisible(true);
+			speLvl->setVisible(true);
+			spePic->getRenderer()->setTexture(profilePath + "/assets/stats/butterflies.png");
 		}
-		panel->get<tgui::Picture>("DollPic")->getRenderer()->setTexture(profilePath + "/assets/stats/doll.png");
-		panel->get<tgui::Picture>("DropPic")->getRenderer()->setTexture(profilePath + "/assets/stats/drop.png");
-		panel->get<tgui::Picture>("RodPic")->getRenderer()->setTexture(profilePath + "/assets/stats/rod.png");
-		panel->get<tgui::Picture>("GrimPic")->getRenderer()->setTexture(profilePath + "/assets/stats/grimoire.png");
-		panel->get<tgui::Picture>("FanPic")->getRenderer()->setTexture(profilePath + "/assets/stats/fan.png");
+
+		dollPic->getRenderer()->setTexture(profilePath + "/assets/stats/doll.png");
+		dropPic->getRenderer()->setTexture(profilePath + "/assets/stats/drop.png");
+		rodPic->getRenderer()->setTexture(profilePath + "/assets/stats/rod.png");
+		grimPic->getRenderer()->setTexture(profilePath + "/assets/stats/grimoire.png");
+		fanPic->getRenderer()->setTexture(profilePath + "/assets/stats/fan.png");
+		dollLvl->setSelectedItemByIndex(state.dollLevel);
+		dropLvl->setSelectedItemByIndex(state.dropLevel);
+		rodLvl->setSelectedItemByIndex(state.rodLevel);
+		grimLvl->setSelectedItemByIndex(state.grimoireLevel);
+		fanLvl->setSelectedItemByIndex(state.fanLevel);
+		speLvl->setSelectedItemByIndex(state.specialValue);
+		dollLvl->connect("ItemSelected", [&state](int item){
+			state.dollLevel = item;
+		});
+		dropLvl->connect("ItemSelected", [&state](int item){
+			state.dropLevel = item;
+		});
+		rodLvl->connect("ItemSelected", [&state](int item){
+			state.rodLevel = item;
+		});
+		grimLvl->connect("ItemSelected", [&state](int item){
+			state.grimoireLevel = item;
+		});
+		fanLvl->connect("ItemSelected", [&state](int item){
+			state.fanLevel = item;
+		});
+		speLvl->connect("ItemSelected", [&state](int item){
+			state.specialValue = item;
+		});
 
 		for (int i = 0; i < nbSkills; i++) {
 			auto img = panel->get<tgui::Picture>("Skill" + std::to_string(i) + "Img");
@@ -109,18 +155,62 @@ namespace Practice
 
 			for (int j = 0; j < 3; j++)
 				id->addItem(movesNames[character][i + j * nbSkills]);
-			id->setSelectedItemByIndex(0);
+			id->setSelectedItemByIndex(skills[i]);
+			id->connect("ItemSelected", [lvl, img, &state, nbSkills, i, character](std::weak_ptr<tgui::ComboBox> skill, int item){
+				lvl->disconnectAll("ItemSelected");
+				lvl->removeAllItems();
+				for (int j = item != 0; j < 5; j++)
+					lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
+				lvl->connect("ItemSelected", [&state, i, nbSkills, skill](int item){
+					auto index = skill.lock()->getSelectedItemIndex();
+
+					for (int j = 0; j < 3; j++) {
+						if (j == index) {
+							state.skillMap[j * nbSkills + i].notUsed = false;
+							state.skillMap[j * nbSkills + i].level = item + (index != 0);
+						} else {
+							state.skillMap[j * nbSkills + i].notUsed = true;
+							state.skillMap[j * nbSkills + i].level = 0x7F;
+						}
+					}
+				});
+				lvl->setSelectedItemByIndex(0);
+
+				img->getRenderer()->setTexture(
+					tgui::Texture(
+						skillsTextures[character],
+						sf::IntRect((item * nbSkills + i) * 32, 0, 32, 32)
+					)
+				);
+			}, std::weak_ptr<tgui::ComboBox>(id));
+
+			lvl->disconnectAll("ItemSelected");
 			lvl->removeAllItems();
-			for (int j = 0; j < 5; j++)
+			for (int j = skills[i] != 0; j < 5; j++)
 				lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
-			lvl->setSelectedItemByIndex(0);
+			lvl->setSelectedItemByIndex(state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
+			lvl->connect("ItemSelected", [&state, i, nbSkills](std::weak_ptr<tgui::ComboBox> skill, int item){
+				auto index = skill.lock()->getSelectedItemIndex();
+
+				for (int j = 0; j < 3; j++) {
+					if (j == index) {
+						state.skillMap[j * nbSkills + i].notUsed = false;
+						state.skillMap[j * nbSkills + i].level = item + (index != 0);
+					} else {
+						state.skillMap[j * nbSkills + i].notUsed = true;
+						state.skillMap[j * nbSkills + i].level = 0x7F;
+					}
+				}
+			}, std::weak_ptr<tgui::ComboBox>(id));
+
 			img->getRenderer()->setTexture(
 				tgui::Texture(
 					skillsTextures[character],
-					sf::IntRect(i * 32, 0, 32, 32)
+					sf::IntRect((skills[i] * nbSkills + i) * 32, 0, 32, 32)
 				)
 			);
 		}
+
 		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue){
 			state.hp = newValue;
 		});
@@ -283,60 +373,6 @@ namespace Practice
 
 	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
 	{
-		char nbSkills = 4 + (character == SokuLib::CHARACTER_PATCHOULI);
-		char skills[5] = {0, 0, 0, 0, 0};
-		auto doll = panel->get<tgui::ComboBox>("DollLvl");
-		auto rod = panel->get<tgui::ComboBox>("RodLvl");
-		auto fan = panel->get<tgui::ComboBox>("FanLvl");
-		auto grimoire = panel->get<tgui::ComboBox>("GrimLvl");
-		auto drop = panel->get<tgui::ComboBox>("DropLvl");
-		auto special = panel->get<tgui::ComboBox>("SpecialLevel");
-
-		//TODO: Manager should be const but is modified here
-		getSkillMap(manager, skills, character);
-		for (int i = 0; i < nbSkills; i++) {
-			auto id = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Id");
-			auto lvl = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Lvl");
-			auto expectedLevel = lvl->getSelectedItemIndex() + (skills[i] != 0);
-			int index = id->getSelectedItemIndex();
-
-			if (index != skills[i]) {
-				auto img = panel->get<tgui::Picture>("Skill" + std::to_string(i) + "Img");
-
-				for (int j = 0; j < 3; j++) {
-					manager.skillMap[i + j * nbSkills].notUsed = true;
-					manager.skillMap[i + j * nbSkills].level = -1;
-				}
-				lvl->removeAllItems();
-				for (int j = (index != 0); j < 5; j++)
-					lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
-				lvl->setSelectedItemByIndex(0);
-				manager.skillMap[i + index * nbSkills].notUsed = false;
-				manager.skillMap[i + index * nbSkills].level = 1;
-				img->getRenderer()->setTexture(
-					tgui::Texture(
-						skillsTextures[character],
-						sf::IntRect((index * nbSkills + i) * 32, 0, 32, 32)
-					)
-				);
-			} else {
-				for (int j = 0; j < 3; j++) {
-					manager.skillMap[i + j * nbSkills].notUsed = j != skills[i];
-					manager.skillMap[i + j * nbSkills].level = j != skills[i] ? -1 : expectedLevel;
-				}
-			}
-		}
-		manager.controlRod = rod->getSelectedItemIndex();
-		manager.sacrificialDolls = doll->getSelectedItemIndex();
-		manager.tenguFans = fan->getSelectedItemIndex();
-		manager.drops = min(drop->getSelectedItemIndex(), 2);
-		if (drop->getSelectedItemIndex() == 3)
-			manager.dropInvulTimeLeft = 2;
-		manager.grimoires = grimoire->getSelectedItemIndex();
-		if (character == SokuLib::CHARACTER_REISEN)
-			manager.elixirUsed = special->getSelectedItemIndex();
-		else if (character == SokuLib::CHARACTER_YUYUKO)
-			manager.resurrectionButterfliesUsed = special->getSelectedItemIndex();
 	}
 
 	void updateGuiState()

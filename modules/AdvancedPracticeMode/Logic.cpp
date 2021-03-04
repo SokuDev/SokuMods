@@ -83,10 +83,22 @@ namespace Practice
 		displayInputs();
 	}
 
-	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager)
+	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager, SokuLib::Character character)
 	{
 		if (manager.objectBase.action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
 			manager.objectBase.hp = state.hp;
+		memcpy(&manager.skillMap, &state.skillMap, sizeof(state.skillMap));
+		manager.controlRod = state.rodLevel;
+		manager.sacrificialDolls = state.dollLevel;
+		manager.tenguFans = state.fanLevel;
+		manager.drops = min(state.dropLevel, 2);
+		if (state.dropLevel == 3)
+			manager.dropInvulTimeLeft = 2;
+		manager.grimoires = state.grimoireLevel;
+		if (character == SokuLib::CHARACTER_REISEN)
+			manager.elixirUsed = state.specialValue;
+		else if (character == SokuLib::CHARACTER_YUYUKO)
+			manager.resurrectionButterfliesUsed = state.specialValue;
 	}
 
 	void update()
@@ -103,8 +115,8 @@ namespace Practice
 			else
 				SokuLib::weatherCounter = 999;
 		}
-		applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager);
-		applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager);
+		applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
+		applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
 		updateInputLists();
 	}
 }

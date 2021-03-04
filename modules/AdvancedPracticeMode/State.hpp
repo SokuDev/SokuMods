@@ -38,13 +38,38 @@ namespace Practice
 	};
 
 	struct CharacterState {
-		unsigned hp;
-		SokuLib::Skill map[15];
-		unsigned char dropLevel;
-		unsigned char dollLevel;
-		unsigned char rodLevel;
-		unsigned char grimoireLevel;
-		unsigned char fanLevel;
+		unsigned hp = 10000;
+		SokuLib::Skill skillMap[15];
+		unsigned char dropLevel = 0;
+		unsigned char dollLevel = 0;
+		unsigned char rodLevel = 0;
+		unsigned char grimoireLevel = 0;
+		unsigned char fanLevel = 0;
+		unsigned char specialValue = 0;
+
+		CharacterState(SokuLib::Character chr) :
+			skillMap{
+				{0x00, false},
+				{0x00, false},
+				{0x00, false},
+				{0x00, false},
+				{
+					static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
+					chr != SokuLib::CHARACTER_PATCHOULI
+				},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+			}
+		{
+		}
 	};
 
 	struct Settings {
@@ -63,7 +88,11 @@ namespace Practice
 		CharacterState leftState;
 		CharacterState rightState;
 
-		Settings(bool activated = false) : activated(activated) {};
+		Settings(bool activated = false) :
+			activated(activated),
+			leftState(SokuLib::leftChar),
+			rightState(SokuLib::rightChar)
+		{};
 	};
 
 	extern std::map<std::string, std::vector<unsigned short>> characterSpellCards;
