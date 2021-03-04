@@ -31,7 +31,7 @@ CheckBox.ForceWeather {
     Checked = true;
     Position = (10, 40);
     Size = (18, 18);
-    Text = "Force weather";
+    Text = "Force weather at";
     TextSize = 13;
 
     Renderer {
@@ -58,5 +58,45 @@ CheckBox.ForceWeather {
         textureuncheckeddisabled = None;
         textureuncheckedfocused = None;
         textureuncheckedhover = None;
+    }
+}
+
+SpinButton.Timer {
+    Maximum = 999;
+    Minimum = -1;
+    Position = (190, 30);
+    Size = (20, 42);
+    Step = 1;
+    Value = -1;
+
+    Renderer {
+        arrowcolor = #3C3C3C;
+        arrowcolorhover = black;
+        backgroundcolor = #F5F5F5;
+        backgroundcolorhover = white;
+        borderbetweenarrows = 2;
+        bordercolor = black;
+        borders = (1, 1, 1, 1);
+        texturearrowdown = None;
+        texturearrowdownhover = None;
+        texturearrowup = None;
+        texturearrowuphover = None;
+    }
+}
+
+Label.TimerLabel {
+    AutoSize = true;
+    Position = (150, 40);
+    ScrollbarPolicy = Never;
+    Size = (16.2, 18);
+    Text = "-1";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        bordercolor = #3C3C3C;
+        borders = (0, 0, 0, 0);
+        textcolor = #3C3C3C;
+        texturebackground = None;
     }
 }

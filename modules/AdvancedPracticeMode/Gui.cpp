@@ -214,6 +214,14 @@ namespace Practice
 		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue){
 			state.hp = newValue;
 		});
+
+		panel->get<tgui::Slider>("SP")->connect("ValueChanged", [&state](float newValue) {
+			state.maxCurrentSpirit = newValue;
+		});
+
+		state.SPInstantRegen = panel->get<tgui::CheckBox>("SPInstantRegen")->isChecked();
+		
+
 		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
 			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
 			const char *brokenNames[] = {
@@ -331,6 +339,13 @@ namespace Practice
 
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
+		auto timer = panel->get<tgui::SpinButton>("Timer");
+		auto timeLabel = panel->get<tgui::Label>("TimerLabel");
+
+		timer->connect("ValueChanged", [/*timeLabel*/](int time) {
+			//settings.weatherTime = time;
+			// timeLabel->setText(std::to_string(time));
+		});
 
 		force->setChecked(settings.forceWeather);
 		force->connect("Changed", [weather](bool newValue){
@@ -371,16 +386,17 @@ namespace Practice
 		displaySkillsPanel(profile);
 	}
 
-	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
+	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
+		state.SPInstantRegen = panel->get<tgui::CheckBox>("SPInstantRegen")->isChecked();
 	}
 
 	void updateGuiState()
 	{
 		switch (tab->getSelectedIndex()) {
 		case 0:
-			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
-			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
+			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar, settings.leftState);
+			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.rightState);
 			break;
 		case 1:
 			updateDummyPanel();

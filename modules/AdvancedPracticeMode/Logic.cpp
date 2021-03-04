@@ -86,7 +86,17 @@ namespace Practice
 	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager, SokuLib::Character character)
 	{
 		if (manager.objectBase.action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
+		{
 			manager.objectBase.hp = state.hp;
+
+			if (state.SPInstantRegen)
+				manager.currentSpirit = state.maxCurrentSpirit;
+		}
+
+		if(manager.currentSpirit >= state.maxCurrentSpirit)
+			manager.currentSpirit = state.maxCurrentSpirit;
+		
+
 		memcpy(&manager.skillMap, &state.skillMap, sizeof(state.skillMap));
 		manager.controlRod = state.rodLevel;
 		manager.sacrificialDolls = state.dollLevel;

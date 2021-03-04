@@ -39,6 +39,8 @@ namespace Practice
 
 	struct CharacterState {
 		unsigned hp = 10000;
+		unsigned maxCurrentSpirit = 1000;
+		bool SPInstantRegen = true;
 		SokuLib::Skill skillMap[15];
 		unsigned char dropLevel = 0;
 		unsigned char dollLevel = 0;
@@ -78,6 +80,7 @@ namespace Practice
 		bool controlDummy = false;
 		bool forceWeather = true;
 		bool weatherResetRequest = false;
+		int weatherTime = -1;
 		BlockingSide block = NO_BLOCKING;
 		TechDirection tech = NEUTRAL_TECH;
 		AirTechDirection airtech = NO_AIRTECH;

@@ -1,4 +1,18 @@
 Renderer.1 {
+    bordercolor = #3C3C3C;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    texturethumb = None;
+    texturethumbhover = None;
+    texturetrack = None;
+    texturetrackhover = None;
+    thumbcolor = #F5F5F5;
+    thumbcolorhover = white;
+    trackcolor = #F5F5F5;
+    trackcolorhover = white;
+}
+
+Renderer.2 {
     arrowbackgroundcolor = #F5F5F5;
     arrowbackgroundcolorhover = white;
     arrowcolor = #3C3C3C;
@@ -15,7 +29,7 @@ Renderer.1 {
     texturebackgrounddisabled = None;
 }
 
-Renderer.2 {
+Renderer.3 {
     texture = None;
     transparenttexture = false;
 }
@@ -28,7 +42,7 @@ ComboBox.Skill0Id {
     Position = (50, 14);
     Size = (180, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Picture.Skill0Img {
@@ -44,7 +58,7 @@ Picture.Skill0Img {
 Picture.Skill1Img {
     Position = (10, 50);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 ComboBox.Skill1Id {
@@ -55,7 +69,7 @@ ComboBox.Skill1Id {
     Position = (50, 54);
     Size = (180, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill2Id {
@@ -66,7 +80,7 @@ ComboBox.Skill2Id {
     Position = (50, 94);
     Size = (180, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill3Id {
@@ -77,7 +91,7 @@ ComboBox.Skill3Id {
     Position = (50, 134);
     Size = (180, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill4Id {
@@ -89,25 +103,25 @@ ComboBox.Skill4Id {
     Size = (180, 22);
     TextSize = 13;
     Visible = false;
-    renderer = &1;
+    renderer = &2;
 }
 
 Picture.Skill2Img {
     Position = (10, 90);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 Picture.Skill3Img {
     Position = (10, 130);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 Picture.Skill4Img {
     Position = (10, 170);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 ComboBox.Skill0Lvl {
@@ -120,7 +134,7 @@ ComboBox.Skill0Lvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill1Lvl {
@@ -133,7 +147,7 @@ ComboBox.Skill1Lvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill2Lvl {
@@ -146,7 +160,7 @@ ComboBox.Skill2Lvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill3Lvl {
@@ -159,7 +173,7 @@ ComboBox.Skill3Lvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Skill4Lvl {
@@ -173,7 +187,7 @@ ComboBox.Skill4Lvl {
     Size = (60, 22);
     TextSize = 13;
     Visible = false;
-    renderer = &1;
+    renderer = &2;
 }
 
 Picture.DollPic {
@@ -196,7 +210,7 @@ ComboBox.DollLvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Picture.RodPic {
@@ -249,7 +263,7 @@ ComboBox.RodLvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.FanLvl {
@@ -262,7 +276,7 @@ ComboBox.FanLvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.GrimLvl {
@@ -275,7 +289,7 @@ ComboBox.GrimLvl {
     SelectedItemIndex = 0;
     Size = (60, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.DropLvl {
@@ -288,7 +302,7 @@ ComboBox.DropLvl {
     SelectedItemIndex = 0;
     Size = (80, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Picture.SpecialPic {
@@ -312,11 +326,11 @@ ComboBox.SpecialLevel {
     Size = (60, 22);
     TextSize = 13;
     Visible = false;
-    renderer = &1;
+    renderer = &2;
 }
 
 Button.Button1 {
-    Position = (10, 360);
+    Position = (50, 350);
     Text = Button;
     TextSize = 13;
 
@@ -345,7 +359,7 @@ Button.Button1 {
 
 Label.Label1 {
     AutoSize = true;
-    Position = (10, 390);
+    Position = (10, 380);
     ScrollbarPolicy = Never;
     Size = (20.2, 18);
     Text = HP;
@@ -365,22 +379,72 @@ Slider.HP {
     InvertedDirection = false;
     Maximum = 10000;
     Minimum = 1;
-    Position = (40, 390);
+    Position = (40, 380);
     Size = (190, 16);
     Step = 1;
     Value = 10000;
+    renderer = &1;
+}
+
+Slider.SP {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 1000;
+    Minimum = 0;
+    Position = (40, 400);
+    Size = (190, 16);
+    Step = 25;
+    Value = 1000;
+    renderer = &1;
+}
+
+Label.Label2 {
+    AutoSize = true;
+    Position = (10, 400);
+    ScrollbarPolicy = Never;
+    Size = (19.2, 18);
+    Text = SP;
+    TextSize = 13;
 
     Renderer {
+        backgroundcolor = transparent;
         bordercolor = #3C3C3C;
+        borders = (0, 0, 0, 0);
+        textcolor = white;
+        texturebackground = None;
+    }
+}
+
+CheckBox.SPInstantRegen {
+    Checked = true;
+    Position = (20, 420);
+    Size = (18, 18);
+    Text = "Instant Regen";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorfocused = #1E1EB4;
         bordercolorhover = black;
         borders = (1, 1, 1, 1);
-        texturethumb = None;
-        texturethumbhover = None;
-        texturetrack = None;
-        texturetrackhover = None;
-        thumbcolor = #F5F5F5;
-        thumbcolorhover = white;
-        trackcolor = #F5F5F5;
-        trackcolorhover = white;
+        checkcolor = #3C3C3C;
+        checkcolordisabled = #7D7D7D;
+        checkcolorhover = black;
+        textcolor = white;
+        textcolordisabled = #7D7D7D;
+        textcolorhover = black;
+        textdistanceratio = 0.2;
+        texturechecked = None;
+        texturecheckeddisabled = None;
+        texturecheckedfocused = None;
+        texturecheckedhover = None;
+        textureunchecked = None;
+        textureuncheckeddisabled = None;
+        textureuncheckedfocused = None;
+        textureuncheckedhover = None;
     }
 }
