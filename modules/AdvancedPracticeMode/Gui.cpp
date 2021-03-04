@@ -211,14 +211,6 @@ namespace Practice
 			);
 		}
 
-		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue){
-			state.hp = newValue;
-		});
-
-		panel->get<tgui::Slider>("SP")->connect("ValueChanged", [&state](float newValue) {
-			state.maxCurrentSpirit = newValue;
-		});
-
 		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
 			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
 			const char *brokenNames[] = {
@@ -238,6 +230,11 @@ namespace Practice
 				cards.push_back(card);
 			makeFakeCard(manager, cards[rand() % cards.size()]);
 		});
+
+		// HP and SP
+		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue) { state.hp = newValue; });
+		panel->get<tgui::Slider>("SP")->connect("ValueChanged", [&state](float newValue) { state.maxCurrentSpirit = newValue; });
+		panel->get<tgui::Slider>("BrokenOrbs")->connect("ValueChanged", [&state](float newValue) { state.brokenOrbs = newValue; });
 	}
 
 	static void displaySkillsPanel(const std::string &profile)

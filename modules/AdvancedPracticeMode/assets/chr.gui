@@ -482,3 +482,28 @@ CheckBox.HPInstantRegen {
         textureuncheckedhover = None;
     }
 }
+
+Slider.BrokenOrbs {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 5;
+    Minimum = 0;
+    Position = (250, 420);
+    Size = (70, 16);
+    Step = 1;
+    Value = 0;
+
+    Renderer {
+        bordercolor = #3C3C3C;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        texturethumb = None;
+        texturethumbhover = None;
+        texturetrack = None;
+        texturetrackhover = None;
+        thumbcolor = #F5F5F5;
+        thumbcolorhover = white;
+        trackcolor = #F5F5F5;
+        trackcolorhover = white;
+    }
+}

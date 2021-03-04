@@ -42,6 +42,7 @@ namespace Practice
 		unsigned maxCurrentSpirit = 1000;
 		bool HPInstantRegen = true;
 		bool SPInstantRegen = true;
+		unsigned brokenOrbs = 0;
 		SokuLib::Skill skillMap[15];
 		unsigned char dropLevel = 0;
 		unsigned char dollLevel = 0;

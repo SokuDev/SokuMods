@@ -94,9 +94,11 @@ namespace Practice
 				manager.currentSpirit = state.maxCurrentSpirit;
 		}
 
-		if(manager.currentSpirit >= state.maxCurrentSpirit)
+		if (manager.currentSpirit >= state.maxCurrentSpirit)
 			manager.currentSpirit = state.maxCurrentSpirit;
 		
+		manager.maxSpirit = 1000 - state.brokenOrbs * 200;
+		manager.timeWithBrokenOrb = 0;
 
 		memcpy(&manager.skillMap, &state.skillMap, sizeof(state.skillMap));
 		manager.controlRod = state.rodLevel;
