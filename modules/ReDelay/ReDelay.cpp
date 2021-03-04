@@ -229,8 +229,6 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 {
 	char profilePath[1024 + MAX_PATH];
-	FILE *_;
-
 	GetModuleFileName(hMyModule, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
 	PathAppend(profilePath, "ReDelay.ini");
