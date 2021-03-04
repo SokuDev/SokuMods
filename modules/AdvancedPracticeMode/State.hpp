@@ -40,6 +40,7 @@ namespace Practice
 	struct CharacterState {
 		unsigned hp = 10000;
 		unsigned maxCurrentSpirit = 1000;
+		bool HPInstantRegen = true;
 		bool SPInstantRegen = true;
 		SokuLib::Skill skillMap[15];
 		unsigned char dropLevel = 0;

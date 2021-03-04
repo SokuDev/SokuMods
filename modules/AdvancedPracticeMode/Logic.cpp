@@ -87,7 +87,8 @@ namespace Practice
 	{
 		if (manager.objectBase.action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
 		{
-			manager.objectBase.hp = state.hp;
+			if (state.HPInstantRegen)
+				manager.objectBase.hp = state.hp;
 
 			if (state.SPInstantRegen)
 				manager.currentSpirit = state.maxCurrentSpirit;

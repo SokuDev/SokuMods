@@ -219,9 +219,6 @@ namespace Practice
 			state.maxCurrentSpirit = newValue;
 		});
 
-		state.SPInstantRegen = panel->get<tgui::CheckBox>("SPInstantRegen")->isChecked();
-		
-
 		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
 			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
 			const char *brokenNames[] = {
@@ -388,6 +385,7 @@ namespace Practice
 
 	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
+		state.HPInstantRegen = panel->get<tgui::CheckBox>("HPInstantRegen")->isChecked();
 		state.SPInstantRegen = panel->get<tgui::CheckBox>("SPInstantRegen")->isChecked();
 	}
 
