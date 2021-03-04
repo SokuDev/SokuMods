@@ -14,7 +14,7 @@ static std::list<SokuLib::KeyInput> lastInputsRight;
 static std::pair<SokuLib::KeyInput, SokuLib::KeyInput> lastInputs;
 static SokuLib::SWRFont font;
 static char increaseDelay;
-static char lowerDelay;
+static char decreaseDelay;
 static bool wasMorePressed = false;
 static bool wasLessPressed = false;
 
@@ -91,12 +91,12 @@ void handleInput(SokuLib::KeymapManager *base)
 		lastInputsLeft.push_front({0});
 		lastInputsRight.push_front({0});
 	}
-	if ((GetKeyState(lowerDelay) & 0x8000) && !lastInputsLeft.empty() && !wasLessPressed) {
+	if ((GetKeyState(decreaseDelay) & 0x8000) && !lastInputsLeft.empty() && !wasLessPressed) {
 		lastInputsLeft.pop_back();
 		lastInputsRight.pop_back();
 	}
 	wasMorePressed = (GetKeyState(increaseDelay) & 0x8000);
-	wasLessPressed = (GetKeyState(lowerDelay) & 0x8000);
+	wasLessPressed = (GetKeyState(decreaseDelay) & 0x8000);
 }
 
 void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
@@ -234,8 +234,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	GetModuleFileName(hMyModule, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
 	PathAppend(profilePath, "ReDelay.ini");
-	lowerDelay = GetPrivateProfileIntA("Keys", "LowerDelay", 'N', profilePath);
-	increaseDelay = GetPrivateProfileIntA("Keys", "RaiseDelay", 'M', profilePath);
+	increaseDelay = GetPrivateProfileIntA("Keys", "IncreaseDelay", 0x6B, profilePath);
+	decreaseDelay = GetPrivateProfileIntA("Keys", "DecreaseDelay", 0x6D, profilePath);
 	hookFunctions();
 
 	return true;
