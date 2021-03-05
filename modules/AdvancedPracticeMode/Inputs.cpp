@@ -511,6 +511,21 @@ namespace Practice
 			{LEFTUP_SPRITE_POS},
 			{24, 32}
 		} },
+		{ SokuLib::ACTION_WALK_FORWARD, {
+			inputSheet,
+			{RIGHT_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_CROUCHING, {
+			inputSheet,
+			{DOWN_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_WALK_BACKWARD, {
+			inputSheet,
+			{LEFT_SPRITE_POS},
+			{24, 32}
+		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL1_B, {
 			inputSheet,
 			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},

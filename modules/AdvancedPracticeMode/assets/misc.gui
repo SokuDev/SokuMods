@@ -1,34 +1,61 @@
+Renderer.1 {
+    backgroundcolor = #F5F5F5;
+    backgroundcolordisabled = #E6E6E6;
+    backgroundcolorhover = white;
+    bordercolor = #3C3C3C;
+    bordercolordisabled = #7D7D7D;
+    bordercolorfocused = #1E1EB4;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    checkcolor = #3C3C3C;
+    checkcolordisabled = #7D7D7D;
+    checkcolorhover = black;
+    textcolor = #3C3C3C;
+    textcolordisabled = #7D7D7D;
+    textcolorhover = black;
+    textdistanceratio = 0.2;
+    texturechecked = None;
+    texturecheckeddisabled = None;
+    texturecheckedfocused = None;
+    texturecheckedhover = None;
+    textureunchecked = None;
+    textureuncheckeddisabled = None;
+    textureuncheckedfocused = None;
+    textureuncheckedhover = None;
+}
+
+Renderer.2 {
+    backgroundcolor = #F5F5F5;
+    backgroundcolordisabled = #E6E6E6;
+    backgroundcolorhover = white;
+    bordercolor = #3C3C3C;
+    bordercolordisabled = #7D7D7D;
+    bordercolorfocused = #1E1EB4;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    checkcolor = #3C3C3C;
+    checkcolordisabled = #7D7D7D;
+    checkcolorhover = black;
+    textcolor = #3C3C3C;
+    textcolordisabled = #7D7D7D;
+    textcolorhover = black;
+    textdistanceratio = 0.2;
+    texturechecked = None;
+    texturecheckeddisabled = None;
+    texturecheckedfocused = None;
+    texturecheckedhover = None;
+    textureunchecked = None;
+    textureuncheckeddisabled = None;
+    textureuncheckedfocused = None;
+    textureuncheckedhover = None;
+}
+
 CheckBox.LeftInputs {
     Position = (10, 10);
     Size = (18, 18);
     Text = "Show left inputs";
     TextSize = 13;
-
-    Renderer {
-        backgroundcolor = #F5F5F5;
-        backgroundcolordisabled = #E6E6E6;
-        backgroundcolorhover = white;
-        bordercolor = #3C3C3C;
-        bordercolordisabled = #7D7D7D;
-        bordercolorfocused = #1E1EB4;
-        bordercolorhover = black;
-        borders = (1, 1, 1, 1);
-        checkcolor = #3C3C3C;
-        checkcolordisabled = #7D7D7D;
-        checkcolorhover = black;
-        textcolor = #3C3C3C;
-        textcolordisabled = #7D7D7D;
-        textcolorhover = black;
-        textdistanceratio = 0.2;
-        texturechecked = None;
-        texturecheckeddisabled = None;
-        texturecheckedfocused = None;
-        texturecheckedhover = None;
-        textureunchecked = None;
-        textureuncheckeddisabled = None;
-        textureuncheckedfocused = None;
-        textureuncheckedhover = None;
-    }
+    renderer = &1;
 }
 
 CheckBox.RightInputs {
@@ -36,30 +63,21 @@ CheckBox.RightInputs {
     Size = (18, 18);
     Text = "Show right inputs";
     TextSize = 13;
+    renderer = &1;
+}
 
-    Renderer {
-        backgroundcolor = #F5F5F5;
-        backgroundcolordisabled = #E6E6E6;
-        backgroundcolorhover = white;
-        bordercolor = #3C3C3C;
-        bordercolordisabled = #7D7D7D;
-        bordercolorfocused = #1E1EB4;
-        bordercolorhover = black;
-        borders = (1, 1, 1, 1);
-        checkcolor = #3C3C3C;
-        checkcolordisabled = #7D7D7D;
-        checkcolorhover = black;
-        textcolor = #3C3C3C;
-        textcolordisabled = #7D7D7D;
-        textcolorhover = black;
-        textdistanceratio = 0.2;
-        texturechecked = None;
-        texturecheckeddisabled = None;
-        texturecheckedfocused = None;
-        texturecheckedhover = None;
-        textureunchecked = None;
-        textureuncheckeddisabled = None;
-        textureuncheckedfocused = None;
-        textureuncheckedhover = None;
-    }
+CheckBox.RawInputs {
+    Position = (10, 70);
+    Size = (18, 18);
+    Text = "Show raw inputs";
+    TextSize = 13;
+    renderer = &2;
+}
+
+CheckBox.Empty {
+    Position = (10, 100);
+    Size = (18, 18);
+    Text = "Show empty inputs";
+    TextSize = 13;
+    renderer = &2;
 }
