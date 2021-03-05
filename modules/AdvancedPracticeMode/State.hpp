@@ -82,7 +82,7 @@ namespace Practice
 		bool controlDummy = false;
 		bool forceWeather = true;
 		bool weatherResetRequest = false;
-		int weatherTime = -1;
+		int weatherTime = 999;
 		BlockingSide block = NO_BLOCKING;
 		TechDirection tech = NEUTRAL_TECH;
 		AirTechDirection airtech = NO_AIRTECH;

@@ -338,16 +338,12 @@ namespace Practice
 
 
 			editTimer->connect("ReturnKeyPressed", [](std::string time) {
-				int intTime = -1;
+				int intTime = 999;
 			
-				if (time.length() != 0 && time.compare("-") != 0) {
+				if (time.length() != 0) {
 					intTime = stoi(time);
-
-					if (intTime < -1)
-						intTime = -1;
+					settings.weatherTime = intTime;
 				}
-				settings.weatherTime = intTime;
-				std::cout << time << std::endl;
 			});
 
 
