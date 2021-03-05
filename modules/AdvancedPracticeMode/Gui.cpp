@@ -336,9 +336,9 @@ namespace Practice
 		auto timer = panel->get<tgui::SpinButton>("Timer");
 		auto timeLabel = panel->get<tgui::Label>("TimerLabel");
 
-		timer->connect("ValueChanged", [/*timeLabel*/](int time) {
-			//settings.weatherTime = time;
-			// timeLabel->setText(std::to_string(time));
+		timer->connect("ValueChanged", [timeLabel](float time) {
+			settings.weatherTime = time;
+			timeLabel->setText(std::to_string(time));
 		});
 
 		force->setChecked(settings.forceWeather);
