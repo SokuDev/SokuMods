@@ -61,42 +61,34 @@ CheckBox.ForceWeather {
     }
 }
 
-SpinButton.Timer {
-    Maximum = 999;
-    Minimum = -1;
-    Position = (190, 30);
-    Size = (20, 42);
-    Step = 1;
-    Value = -1;
-
-    Renderer {
-        arrowcolor = #3C3C3C;
-        arrowcolorhover = black;
-        backgroundcolor = #F5F5F5;
-        backgroundcolorhover = white;
-        borderbetweenarrows = 2;
-        bordercolor = black;
-        borders = (1, 1, 1, 1);
-        texturearrowdown = None;
-        texturearrowdownhover = None;
-        texturearrowup = None;
-        texturearrowuphover = None;
-    }
-}
-
-Label.TimerLabel {
-    AutoSize = true;
+EditBox.EditTimer {
+    Alignment = Right;
+    InputValidator = "[0-9]{1,3}";
+    MaximumCharacters = 3;
     Position = (150, 40);
-    ScrollbarPolicy = Never;
-    Size = (16.2, 18);
-    Text = "-1";
+    Size = (30, 22);
+    Text = 999;
     TextSize = 13;
 
     Renderer {
-        backgroundcolor = transparent;
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
         bordercolor = #3C3C3C;
-        borders = (0, 0, 0, 0);
+        bordercolordisabled = #7D7D7D;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        caretcolor = black;
+        caretwidth = 1;
+        defaulttextcolor = #A0A0A0;
+        padding = (0, 0, 0, 0);
+        selectedtextbackgroundcolor = #006EFF;
+        selectedtextcolor = white;
         textcolor = #3C3C3C;
-        texturebackground = None;
+        textcolordisabled = #7D7D7D;
+        texture = None;
+        texturedisabled = None;
+        texturefocused = None;
+        texturehover = None;
     }
 }

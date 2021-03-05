@@ -114,11 +114,7 @@ namespace Practice
 			manager.resurrectionButterfliesUsed = state.specialValue;
 	}
 
-	void update()
-	{
-		if (settings.activated) {
-			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
-		}
+	void weatherControl() {
 		if (settings.forceWeather) {
 			if (settings.weatherResetRequest) {
 				settings.weatherResetRequest = SokuLib::activeWeather != SokuLib::WEATHER_CLEAR;
@@ -126,8 +122,17 @@ namespace Practice
 			} else if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR)
 				SokuLib::weatherCounter = -1;
 			else
-				SokuLib::weatherCounter = 999;
+				SokuLib::weatherCounter = settings.weatherTime;
 		}
+	}
+
+	void update()
+	{
+		if (settings.activated) {
+			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
+		}
+		
+		weatherControl();
 		applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
 		applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
 		updateInputLists();

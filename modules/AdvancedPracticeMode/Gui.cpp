@@ -1,7 +1,7 @@
 //
 // Created by PinkySmile on 18/02/2021.
 //
-
+#include <iostream>
 #include <SokuLib.hpp>
 #include "Gui.hpp"
 #include "Moves.hpp"
@@ -75,6 +75,7 @@ namespace Practice
 
 	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
+		// Levels
 		char nbSkills = 4;
 
 		panel->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
@@ -326,20 +327,29 @@ namespace Practice
 		SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
 		SokuLib::weatherCounter = 999;
 	}
-
+	
 	static void displayStatePanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/state.gui");
 
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
-		auto timer = panel->get<tgui::SpinButton>("Timer");
-		auto timeLabel = panel->get<tgui::Label>("TimerLabel");
+		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
 
-		timer->connect("ValueChanged", [timeLabel](float time) {
-			settings.weatherTime = time;
-			timeLabel->setText(std::to_string(time));
-		});
+
+			editTimer->connect("ReturnKeyPressed", [](std::string time) {
+				int intTime = -1;
+			
+				if (time.length() != 0 && time.compare("-") != 0) {
+					intTime = stoi(time);
+
+					if (intTime < -1)
+						intTime = -1;
+				}
+				settings.weatherTime = intTime;
+				std::cout << time << std::endl;
+			});
+
 
 		force->setChecked(settings.forceWeather);
 		force->connect("Changed", [weather](bool newValue){
