@@ -12,7 +12,7 @@
 
 namespace Practice
 {
-#define BOX_WIDTH 140
+#define BOX_WIDTH 170
 #define BOX_HEIGHT 340
 #define MIN_ALPHA 0.5
 #define MAX_ALPHA 1.0
@@ -63,10 +63,14 @@ namespace Practice
 		std::vector<Vector2<int>> _rects;
 		Vector2<unsigned> _rectSize;
 
-		void _drawSkill(Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character) const
+		void _drawSkill(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action) const
 		{
+			int nb = 4 + (character == SokuLib::CHARACTER_PATCHOULI);
+			int move = ((action - 500) / 20) * 3 + ((action - 500) % 20 / 5);
+			int rectPos = (move % 3) * nb + move / 3;
 			std::vector<Vector2<int>> rects;
 
+			printf("%i -> %i -> %i\n", action, move, rectPos);
 			for (auto c : this->_sequences[character]) {
 				switch (c) {
 				case '1':
@@ -90,80 +94,52 @@ namespace Practice
 				case 'c':
 					rects.push_back(C_SPRITE_POS);
 					break;
+				case 'j':
+					rects.push_back(AIR_SPRITE_POS);
+					break;
 				default:
 					abort();
 				}
 			}
-			this->_sprite.setSize({max(size.x, size.y), max(size.x, size.y)});
+			skills.setSize({size.y, size.y});
+			skills.rect.top = 0;
+			skills.rect.left = rectPos * 32;
+			skills.rect.width = 32;
+			skills.rect.height = 32;
 			if (reverse) {
+				pos.x += size.x;
 				for (unsigned i = rects.size(); i > 0; i--) {
+					pos.x -= size.x;
 					this->_sprite.setPosition(pos);
 					this->_sprite.rect.top = rects[i - 1].y;
 					this->_sprite.rect.left = rects[i - 1].x;
 					this->_sprite.rect.width = this->_rectSize.x;
 					this->_sprite.rect.height = this->_rectSize.y;
 					this->_sprite.draw();
-					pos.x -= size.x;
 				}
-				this->_sprite2.setPosition(pos);
-				this->_sprite2.rect.top = this->_startRect.y;
-				this->_sprite2.rect.left = this->_startRect.x;
-				this->_sprite2.rect.width = this->_rectSize.x;
-				this->_sprite2.rect.height = this->_rectSize.y;
-				this->_sprite2.draw();
+				pos.x -= size.y;
+				skills.setPosition(pos);
+				skills.draw();
 			} else {
-				this->_sprite2.setPosition(pos);
-				this->_sprite2.rect.top = this->_startRect.y;
-				this->_sprite2.rect.left = this->_startRect.x;
-				this->_sprite2.rect.width = this->_rectSize.x;
-				this->_sprite2.rect.height = this->_rectSize.y;
-				this->_sprite2.draw();
+				skills.setPosition(pos);
+				skills.draw();
+				pos.x += size.y;
 				for (const auto &rect : rects) {
-					pos.x += size.x;
 					this->_sprite.setPosition(pos);
 					this->_sprite.rect.top = rect.y;
 					this->_sprite.rect.left = rect.x;
 					this->_sprite.rect.width = this->_rectSize.x;
 					this->_sprite.rect.height = this->_rectSize.y;
 					this->_sprite.draw();
+					pos.x += size.x;
 				}
 			}
 		}
 
-	public:
-		MoveSpriteDescriptor(Sprite &sprite, const std::vector<Vector2<int>>& rects, Vector2<unsigned> rectSize) :
-			MoveSpriteDescriptor(sprite, sprite, rects, rectSize)
-		{
-		}
-
-		MoveSpriteDescriptor(Sprite &sprite, Sprite &sprite2, std::vector<std::string> sequences, Vector2<unsigned> rectSize) :
-			_isSkill(true),
-			_sequences(std::move(sequences)),
-			_sprite(sprite),
-			_sprite2(sprite2),
-			_rectSize(rectSize)
-		{
-			this->_rects.erase(this->_rects.begin());
-		}
-
-		MoveSpriteDescriptor(Sprite &sprite, Sprite &sprite2, std::vector<Vector2<int>> rects, Vector2<unsigned> rectSize) :
-			_sprite(sprite),
-			_sprite2(sprite2),
-			_startRect(rects[0]),
-			_rects(std::move(rects)),
-			_rectSize(rectSize)
-		{
-			this->_rects.erase(this->_rects.begin());
-		}
-
-		void draw(Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, float alpha = 1) const
+		void _normalDraw(Vector2<int> pos, Vector2<unsigned> size, bool reverse, float alpha = 1) const
 		{
 			this->_sprite2.setSize(size);
 			this->_sprite2.tint = DxSokuColor::White * alpha;
-			this->_sprite.setSize(size);
-			this->_sprite.tint = DxSokuColor::White * alpha;
-			if (this->_isSkill)
-				return this->_drawSkill(pos, size, reverse, character);
 			if (reverse) {
 				for (unsigned i = this->_rects.size(); i > 0; i--) {
 					this->_sprite.setPosition(pos);
@@ -197,6 +173,42 @@ namespace Practice
 					this->_sprite.draw();
 				}
 			}
+		}
+
+	public:
+		MoveSpriteDescriptor(Sprite &sprite, const std::vector<Vector2<int>>& rects, Vector2<unsigned> rectSize) :
+			MoveSpriteDescriptor(sprite, sprite, rects, rectSize)
+		{
+		}
+
+		MoveSpriteDescriptor(Sprite &sprite, std::vector<std::string> sequences, Vector2<unsigned> rectSize) :
+			_isSkill(true),
+			_sequences(std::move(sequences)),
+			_sprite(sprite),
+			_sprite2(sprite),
+			_rectSize(rectSize)
+		{
+			assert(sequence.size() == 20);
+		}
+
+		MoveSpriteDescriptor(Sprite &sprite, Sprite &sprite2, std::vector<Vector2<int>> rects, Vector2<unsigned> rectSize) :
+			_sprite(sprite),
+			_sprite2(sprite2),
+			_startRect(rects[0]),
+			_rects(std::move(rects)),
+			_rectSize(rectSize)
+		{
+			this->_rects.erase(this->_rects.begin());
+		}
+
+		void draw(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action, float alpha = 1) const
+		{
+			this->_sprite.setSize(size);
+			this->_sprite.tint = DxSokuColor::White * alpha;
+			if (this->_isSkill)
+				return this->_drawSkill(skills, pos, size, reverse, character, action);
+			else
+				return this->_normalDraw(pos, size, reverse, alpha);
 		}
 	};
 
@@ -496,6 +508,306 @@ namespace Practice
 			inputSheet,
 			{LEFTUP_SPRITE_POS},
 			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL1_B, {
+			inputSheet,
+			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL1_C, {
+			inputSheet,
+			{"236c", "214c", "623c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "214c", "623c", "214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL1_B, {
+			inputSheet,
+			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL1_C, {
+			inputSheet,
+			{"236c", "214c", "623c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "214c", "623c", "214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL1_B, {
+			inputSheet,
+			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL1_C, {
+			inputSheet,
+			{"236c", "214c", "623c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "214c", "623c", "214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL2_B, {
+			inputSheet,
+			{"214b", "623b", "214b", "623b", "22b", "623b", "214b", "236b", "623b", "623b", "214b", "214b", "623b", "623b", "22b", "22b", "214b", "623b", "236b", "623b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL2_C, {
+			inputSheet,
+			{"214c", "623c", "214c", "623c", "22c", "623c", "214c", "236c", "623c", "623c", "214c", "214c", "623c", "623c", "22c", "22c", "214c", "623c", "236c", "623c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL2_B, {
+			inputSheet,
+			{"214b", "623b", "214b", "623b", "22b", "623b", "214b", "236b", "623b", "623b", "214b", "214b", "623b", "623b", "22b", "22b", "214b", "623b", "236b", "623b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL2_C, {
+			inputSheet,
+			{"214c", "623c", "214c", "623c", "22c", "623c", "214c", "236c", "623c", "623c", "214c", "214c", "623c", "623c", "22c", "22c", "214c", "623c", "236c", "623c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL2_B, {
+			inputSheet,
+			{"214b", "623b", "214b", "623b", "22b", "623b", "214b", "236b", "623b", "623b", "214b", "214b", "623b", "623b", "22b", "22b", "214b", "623b", "236b", "623b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL2_C, {
+			inputSheet,
+			{"214c", "623c", "214c", "623c", "22c", "623c", "214c", "236c", "623c", "623c", "214c", "214c", "623c", "623c", "22c", "22c", "214c", "623c", "236c", "623c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL3_B, {
+			inputSheet,
+			{"421b", "22b", "236b", "214b", "623b", "214b", "623b", "421b", "214b", "214b", "623b", "22b", "22b", "22b", "236b", "623b", "22b", "22b", "22b", "236b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL3_C, {
+			inputSheet,
+			{"421c", "22c", "236c", "214c", "623c", "214c", "623c", "421c", "214c", "214c", "623c", "22c", "22c", "22c", "236c", "623c", "22c", "22c", "22c", "236c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL3_B, {
+			inputSheet,
+			{"421b", "22b", "236b", "214b", "623b", "214b", "623b", "421b", "214b", "214b", "623b", "22b", "22b", "22b", "236b", "623b", "22b", "22b", "22b", "236b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL3_C, {
+			inputSheet,
+			{"421c", "22c", "236c", "214c", "623c", "214c", "623c", "421c", "214c", "214c", "623c", "22c", "22c", "22c", "236c", "623c", "22c", "22c", "22c", "236c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL3_B, {
+			inputSheet,
+			{"421b", "22b", "236b", "214b", "623b", "214b", "623b", "421b", "214b", "214b", "623b", "22b", "22b", "22b", "236b", "623b", "22b", "22b", "22b", "236b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL3_C, {
+			inputSheet,
+			{"421c", "22c", "236c", "214c", "623c", "214c", "623c", "421c", "214c", "214c", "623c", "22c", "22c", "22c", "236c", "623c", "22c", "22c", "22c", "236c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL4_B, {
+			inputSheet,
+			{"623b", "236b", "22b", "22b", "214b", "22b", "22b", "623b", "421b", "22b", "22b", "421b", "214b", "214b", "623b", "214b", "623b", "236b", "214b", "22b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL4_C, {
+			inputSheet,
+			{"623c", "236c", "22c", "22c", "214c", "22c", "22c", "623c", "421c", "22c", "22c", "421c", "214c", "214c", "623c", "214c", "623c", "236c", "214c", "22c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL4_B, {
+			inputSheet,
+			{"623b", "236b", "22b", "22b", "214b", "22b", "22b", "623b", "421b", "22b", "22b", "421b", "214b", "214b", "623b", "214b", "623b", "236b", "214b", "22b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL4_C, {
+			inputSheet,
+			{"623c", "236c", "22c", "22c", "214c", "22c", "22c", "623c", "421c", "22c", "22c", "421c", "214c", "214c", "623c", "214c", "623c", "236c", "214c", "22c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL4_B, {
+			inputSheet,
+			{"623b", "236b", "22b", "22b", "214b", "22b", "22b", "623b", "421b", "22b", "22b", "421b", "214b", "214b", "623b", "214b", "623b", "236b", "214b", "22b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL4_C, {
+			inputSheet,
+			{"623c", "236c", "22c", "22c", "214c", "22c", "22c", "623c", "421c", "22c", "22c", "421c", "214c", "214c", "623c", "214c", "623c", "236c", "214c", "22c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL5_B, {
+			inputSheet,
+			{"i", "i", "i", "i", "421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL5_C, {
+			inputSheet,
+			{"i", "i", "i", "i", "421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL5_B, {
+			inputSheet,
+			{"i", "i", "i", "i", "421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL5_C, {
+			inputSheet,
+			{"i", "i", "i", "i", "421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL5_B, {
+			inputSheet,
+			{"i", "i", "i", "i", "421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL5_C, {
+			inputSheet,
+			{"i", "i", "i", "i", "421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL1_AIR_B, {
+			inputSheet,
+			{"j236b", "j214b", "j623b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j214b", "j623b", "j214b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL1_AIR_C, {
+			inputSheet,
+			{"j236c", "j214c", "j623c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j214c", "j623c", "j214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL1_AIR_B, {
+			inputSheet,
+			{"j236b", "j214b", "j623b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j214b", "j623b", "j214b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL1_AIR_C, {
+			inputSheet,
+			{"j236c", "j214c", "j623c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j214c", "j623c", "j214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL1_AIR_B, {
+			inputSheet,
+			{"j236b", "j214b", "j623b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j214b", "j623b", "j214b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL1_AIR_C, {
+			inputSheet,
+			{"j236c", "j214c", "j623c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j214c", "j623c", "j214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL2_AIR_B, {
+			inputSheet,
+			{"j214b", "j623b", "j214b", "j623b", "j22b", "j623b", "j214b", "j236b", "j623b", "j623b", "j214b", "j214b", "j623b", "j623b", "j22b", "j22b", "j214b", "j623b", "j236b", "j623b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL2_AIR_C, {
+			inputSheet,
+			{"j214c", "j623c", "j214c", "j623c", "j22c", "j623c", "j214c", "j236c", "j623c", "j623c", "j214c", "j214c", "j623c", "j623c", "j22c", "j22c", "j214c", "j623c", "j236c", "j623c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL2_AIR_B, {
+			inputSheet,
+			{"j214b", "j623b", "j214b", "j623b", "j22b", "j623b", "j214b", "j236b", "j623b", "j623b", "j214b", "j214b", "j623b", "j623b", "j22b", "j22b", "j214b", "j623b", "j236b", "j623b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL2_AIR_C, {
+			inputSheet,
+			{"j214c", "j623c", "j214c", "j623c", "j22c", "j623c", "j214c", "j236c", "j623c", "j623c", "j214c", "j214c", "j623c", "j623c", "j22c", "j22c", "j214c", "j623c", "j236c", "j623c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL2_AIR_B, {
+			inputSheet,
+			{"j214b", "j623b", "j214b", "j623b", "j22b", "j623b", "j214b", "j236b", "j623b", "j623b", "j214b", "j214b", "j623b", "j623b", "j22b", "j22b", "j214b", "j623b", "j236b", "j623b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL2_AIR_C, {
+			inputSheet,
+			{"j214c", "j623c", "j214c", "j623c", "j22c", "j623c", "j214c", "j236c", "j623c", "j623c", "j214c", "j214c", "j623c", "j623c", "j22c", "j22c", "j214c", "j623c", "j236c", "j623c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL3_AIR_B, {
+			inputSheet,
+			{"j421b", "j22b", "j236b", "j214b", "j623b", "j214b", "j623b", "j421b", "j214b", "j214b", "j623b", "j22b", "j22b", "j22b", "j236b", "j623b", "j22b", "j22b", "j22b", "j236b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL3_AIR_C, {
+			inputSheet,
+			{"j421c", "j22c", "j236c", "j214c", "j623c", "j214c", "j623c", "j421c", "j214c", "j214c", "j623c", "j22c", "j22c", "j22c", "j236c", "j623c", "j22c", "j22c", "j22c", "j236c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL3_AIR_B, {
+			inputSheet,
+			{"j421b", "j22b", "j236b", "j214b", "j623b", "j214b", "j623b", "j421b", "j214b", "j214b", "j623b", "j22b", "j22b", "j22b", "j236b", "j623b", "j22b", "j22b", "j22b", "j236b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL3_AIR_C, {
+			inputSheet,
+			{"j421c", "j22c", "j236c", "j214c", "j623c", "j214c", "j623c", "j421c", "j214c", "j214c", "j623c", "j22c", "j22c", "j22c", "j236c", "j623c", "j22c", "j22c", "j22c", "j236c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL3_AIR_B, {
+			inputSheet,
+			{"j421b", "j22b", "j236b", "j214b", "j623b", "j214b", "j623b", "j421b", "j214b", "j214b", "j623b", "j22b", "j22b", "j22b", "j236b", "j623b", "j22b", "j22b", "j22b", "j236b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL3_AIR_C, {
+			inputSheet,
+			{"j421c", "j22c", "j236c", "j214c", "j623c", "j214c", "j623c", "j421c", "j214c", "j214c", "j623c", "j22c", "j22c", "j22c", "j236c", "j623c", "j22c", "j22c", "j22c", "j236c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL4_AIR_B, {
+			inputSheet,
+			{"j623b", "j236b", "j22b", "j22b", "j214b", "j22b", "j22b", "j623b", "j421b", "j22b", "j22b", "j421b", "j214b", "j214b", "j623b", "j214b", "j623b", "j236b", "j214b", "j22b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL4_AIR_C, {
+			inputSheet,
+			{"j623c", "j236c", "j22c", "j22c", "j214c", "j22c", "j22c", "j623c", "j421c", "j22c", "j22c", "j421c", "j214c", "j214c", "j623c", "j214c", "j623c", "j236c", "j214c", "j22c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL4_AIR_B, {
+			inputSheet,
+			{"j623b", "j236b", "j22b", "j22b", "j214b", "j22b", "j22b", "j623b", "j421b", "j22b", "j22b", "j421b", "j214b", "j214b", "j623b", "j214b", "j623b", "j236b", "j214b", "j22b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL4_AIR_C, {
+			inputSheet,
+			{"j623c", "j236c", "j22c", "j22c", "j214c", "j22c", "j22c", "j623c", "j421c", "j22c", "j22c", "j421c", "j214c", "j214c", "j623c", "j214c", "j623c", "j236c", "j214c", "j22c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL4_AIR_B, {
+			inputSheet,
+			{"j623b", "j236b", "j22b", "j22b", "j214b", "j22b", "j22b", "j623b", "j421b", "j22b", "j22b", "j421b", "j214b", "j214b", "j623b", "j214b", "j623b", "j236b", "j214b", "j22b"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL4_AIR_C, {
+			inputSheet,
+			{"j623c", "j236c", "j22c", "j22c", "j214c", "j22c", "j22c", "j623c", "j421c", "j22c", "j22c", "j421c", "j214c", "j214c", "j623c", "j214c", "j623c", "j236c", "j214c", "j22c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL5_AIR_B, {
+			inputSheet,
+			{"i", "i", "i", "i", "j421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_DEFAULT_SKILL5_AIR_C, {
+			inputSheet,
+			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL5_AIR_B, {
+			inputSheet,
+			{"i", "i", "i", "i", "j421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT1_SKILL5_AIR_C, {
+			inputSheet,
+			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL5_AIR_B, {
+			inputSheet,
+			{"i", "i", "i", "i", "j421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ALT2_SKILL5_AIR_C, {
+			inputSheet,
+			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{24, 32}
 		} }
 	};
 
@@ -584,7 +896,7 @@ namespace Practice
 			pos.x += SPRITE_SIZE;
 	}
 
-	void drawInputList(const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
+	void drawInputList(Sprite &skills, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
 	{
 		int baseX = offset.x;
 		int border = offset.x;
@@ -618,7 +930,7 @@ namespace Practice
 			auto it = moveSprites.find(input.action);
 
 			if (it != moveSprites.end())
-				it->second.draw({border, offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, alpha);
+				it->second.draw(skills, {border, offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 			i++;
 			if (i >= (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
@@ -630,11 +942,11 @@ namespace Practice
 	{
 		if (settings.showLeftInputBox) {
 			leftBox.draw();
-			drawInputList(leftInputList, {0, 60}, false, SokuLib::leftChar);
+			drawInputList(leftSkillSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
 		}
 		if (settings.showRightInputBox) {
 			rightBox.draw();
-			drawInputList(rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
+			drawInputList(rightSkillSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
 		}
 	}
 }
