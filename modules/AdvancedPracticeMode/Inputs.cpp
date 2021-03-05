@@ -13,12 +13,15 @@
 namespace Practice
 {
 #define BOX_WIDTH 170
+#define BOX_WIDTH2 116
 #define BOX_HEIGHT 340
 #define MIN_ALPHA 0.5
 #define MAX_ALPHA 1.0
 #define MIN_BOX_ALPHA 0.1
 #define MAX_BOX_ALPHA 0.4
 #define SPRITE_SIZE 24
+#define MAX_LIST_SIZE 0x100
+//(BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3)))
 
 #define A_SPRITE_POS         Vector2<int>{0,   28}
 #define B_SPRITE_POS         Vector2<int>{32,  28}
@@ -70,7 +73,6 @@ namespace Practice
 			int rectPos = (move % 3) * nb + move / 3;
 			std::vector<Vector2<int>> rects;
 
-			printf("%i -> %i -> %i\n", action, move, rectPos);
 			for (auto c : this->_sequences[character]) {
 				switch (c) {
 				case '1':
@@ -818,7 +820,6 @@ namespace Practice
 		leftInputList.clear();
 		rightInputList.clear();
 		leftBox.setPosition({0, 60});
-		leftBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 		leftBox.fillColors[GradiantRect::RECT_TOP_LEFT_CORNER]    = leftBox.fillColors[GradiantRect::RECT_TOP_RIGHT_CORNER]    = DxSokuColor::Black * MIN_BOX_ALPHA;
 		leftBox.fillColors[GradiantRect::RECT_BOTTOM_LEFT_CORNER] = leftBox.fillColors[GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = DxSokuColor::Black * MAX_BOX_ALPHA;
 		leftBox.borderColors[0] = leftBox.borderColors[1] = leftBox.borderColors[2] = leftBox.borderColors[3] = DxSokuColor::Transparent;
@@ -833,14 +834,8 @@ namespace Practice
 	bool isCancelableByItself(SokuLib::Action action)
 	{
 		switch (action) {
-		case SokuLib::ACTION_4A:
-		case SokuLib::ACTION_2A:
-		case SokuLib::ACTION_FLY:
-		case SokuLib::ACTION_FORWARD_AIRDASH:
-		case SokuLib::ACTION_BACKWARD_AIRTECH:
-			return true;
 		default:
-			return false;
+			return true;
 		}
 	}
 
@@ -848,7 +843,7 @@ namespace Practice
 	{
 		if (list.empty() || list.front().input != character.keyMap) {
 			list.push_front({character.keyMap, 1, SokuLib::ACTION_IDLE});
-			while (list.size() > 2 * (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
+			while (list.size() > MAX_LIST_SIZE)
 				list.pop_back();
 		}
 
@@ -859,7 +854,7 @@ namespace Practice
 			if ((realAction != last.action || isCancelableByItself(realAction)) && character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0) {
 				if (front->action) {
 					list.push_front(list.front());
-					while (list.size() > 2 * (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
+					while (list.size() > MAX_LIST_SIZE)
 						list.pop_back();
 					front = &list.front();
 					front->duration = 0;
@@ -911,7 +906,7 @@ namespace Practice
 			border += BOX_WIDTH - SPRITE_SIZE;
 		offset.y += BOX_HEIGHT + (SPRITE_SIZE / 6);
 		for (auto &input : list) {
-			if (memcmp(&input.input, &empty, sizeof(empty)) == 0 && !input.action)
+			if ((memcmp(&input.input, &empty, sizeof(empty)) == 0 || settings.showEmptyInputs) && !input.action)
 				continue;
 			offset.y -= SPRITE_SIZE + (SPRITE_SIZE / 3);
 			offset.x = baseX;
@@ -933,7 +928,39 @@ namespace Practice
 				it->second.draw(skills, {border, offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 			i++;
-			if (i >= (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
+			if (i > (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
+				break;
+		}
+	}
+
+	void drawInputListOnlyMoves(Sprite &skills, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
+	{
+		int baseX = offset.x;
+		float alpha = MAX_ALPHA;
+		int i = 0;
+		SokuLib::KeyInput empty;
+
+		memset(&empty, 0, sizeof(empty));
+		if (reversed)
+			baseX += BOX_WIDTH2 - (SPRITE_SIZE - (SPRITE_SIZE / 4));
+		offset.y += BOX_HEIGHT + (SPRITE_SIZE / 6);
+		for (auto &input : list) {
+			if (!input.action)
+				continue;
+
+			auto it = moveSprites.find(input.action);
+
+			if (it == moveSprites.end())
+				continue;
+
+			offset.y -= SPRITE_SIZE + (SPRITE_SIZE / 3);
+			offset.x = baseX;
+
+			it->second.draw(skills, offset, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, reversed, character, input.action, alpha);
+			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
+
+			i++;
+			if (i > (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
 				break;
 		}
 	}
@@ -941,12 +968,28 @@ namespace Practice
 	void displayInputs()
 	{
 		if (settings.showLeftInputBox) {
-			leftBox.draw();
-			drawInputList(leftSkillSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+			if (settings.showRawInputs) {
+				leftBox.setSize({BOX_WIDTH, BOX_HEIGHT});
+				leftBox.draw();
+				drawInputList(leftSkillSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+			} else {
+				leftBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
+				leftBox.draw();
+				drawInputListOnlyMoves(leftSkillSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+			}
 		}
 		if (settings.showRightInputBox) {
-			rightBox.draw();
-			drawInputList(rightSkillSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
+			if (settings.showRawInputs) {
+				rightBox.setSize({BOX_WIDTH, BOX_HEIGHT});
+				rightBox.setPosition({640 - BOX_WIDTH, 60});
+				leftBox.draw();
+				drawInputList(rightSkillSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
+			} else {
+				rightBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
+				rightBox.setPosition({640 - BOX_WIDTH2, 60});
+				rightBox.draw();
+				drawInputListOnlyMoves(rightSkillSheet, rightInputList, {640 - BOX_WIDTH2, 60}, true, SokuLib::rightChar);
+			}
 		}
 	}
 }
