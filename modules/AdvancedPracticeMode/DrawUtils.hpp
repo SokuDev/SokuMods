@@ -15,6 +15,23 @@ namespace Practice
 	struct Vector2 {
 		T x;
 		T y;
+
+		template<typename T2>
+		Vector2<T> &operator+=(Vector2<T2> other)
+		{
+			this->x += other.x;
+			this->y += other.y;
+			return *this;
+		}
+
+		template<typename T2>
+		Vector2<T> operator-(Vector2<T2> other)
+		{
+			return {
+				this->x - other.x,
+				this->y - other.y
+			};
+		}
 	};
 
 	struct DxSokuColor {
