@@ -270,6 +270,11 @@ namespace Practice
 		};
 
 		panel->get<tgui::Button>("Button1")->connect("Clicked", []{
+			//static int i = 0;
+			//static const char *s[] = {"d 2d", "d 1d", "d 4d", "d 6d"};
+
+			//addInputSequence(s[i]);
+			//i = (i + 1) % 4;
 			addInputSequence("623b");
 		});
 
