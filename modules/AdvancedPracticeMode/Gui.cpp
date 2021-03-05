@@ -354,6 +354,36 @@ namespace Practice
 		});
 	}
 
+	static void displayMiscPanel(const std::string &profile)
+	{
+		panel->loadWidgetsFromFile(profile + "/assets/misc.gui");
+
+		auto leftBox = panel->get<tgui::CheckBox>("LeftInputs");
+		auto rightBox = panel->get<tgui::CheckBox>("RightInputs");
+		auto rawBox = panel->get<tgui::CheckBox>("RawInputs");
+		auto emptyBox = panel->get<tgui::CheckBox>("Empty");
+
+		leftBox->setChecked(settings.showLeftInputBox);
+		leftBox->connect("Changed", [](bool b){
+			settings.showLeftInputBox = b;
+		});
+
+		rightBox->setChecked(settings.showRightInputBox);
+		rightBox->connect("Changed", [](bool b){
+			settings.showRightInputBox = b;
+		});
+
+		rawBox->setChecked(settings.showRawInputs);
+		rawBox->connect("Changed", [](bool b){
+			settings.showRawInputs = b;
+		});
+
+		emptyBox->setChecked(settings.showEmptyInputs);
+		emptyBox->connect("Changed", [](bool b){
+			settings.showEmptyInputs = b;
+		});
+	}
+
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
 		std::string profile = profilePath;
@@ -369,6 +399,8 @@ namespace Practice
 				return displayDummyPanel(profile);
 			case 2:
 				return displayStatePanel(profile);
+			case 4:
+				return displayMiscPanel(profile);
 			default:
 				return panel->removeAllWidgets();
 			}
@@ -377,6 +409,10 @@ namespace Practice
 	}
 
 	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
+	{
+	}
+
+	static void updateMiscPanel()
 	{
 	}
 
@@ -392,6 +428,9 @@ namespace Practice
 			break;
 		case 2:
 			updateStatePanel();
+			break;
+		case 4:
+			updateMiscPanel();
 			break;
 		default:
 			break;

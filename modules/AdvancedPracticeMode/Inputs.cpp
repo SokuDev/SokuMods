@@ -921,7 +921,7 @@ namespace Practice
 			border += BOX_WIDTH - SPRITE_SIZE;
 		offset.y += BOX_HEIGHT + (SPRITE_SIZE / 6);
 		for (auto &input : list) {
-			if ((memcmp(&input.input, &empty, sizeof(empty)) == 0 || settings.showEmptyInputs) && !input.action)
+			if (memcmp(&input.input, &empty, sizeof(empty)) == 0 && !settings.showEmptyInputs && !input.action)
 				continue;
 			offset.y -= SPRITE_SIZE + (SPRITE_SIZE / 3);
 			offset.x = baseX;
@@ -997,7 +997,7 @@ namespace Practice
 			if (settings.showRawInputs) {
 				rightBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 				rightBox.setPosition({640 - BOX_WIDTH, 60});
-				leftBox.draw();
+				rightBox.draw();
 				drawInputList(rightSkillSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
 			} else {
 				rightBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
