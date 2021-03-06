@@ -350,17 +350,7 @@ namespace Practice
 		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
 
 		editTimer->connect("TextChanged", [](std::string time) {
-			int intTime = 99;
-			int floatTime = 9;
-			
-			if (!time.empty()) {
-				char *pch = strtok((char*)time.c_str(), ".");
-				intTime = atoi(pch);
-
-				pch = strtok(NULL, ".");
-				floatTime = pch != NULL ? atoi(pch) : 0;
-				settings.weatherTime = intTime * 10 + floatTime;
-			}
+			settings.weatherTime = !time.empty() ? atof(time.c_str()) * 10 : 999;
 		});
 
 		std::string editTimerStr = std::to_string(settings.weatherTime / 10) + "." + std::to_string(settings.weatherTime % 10);
