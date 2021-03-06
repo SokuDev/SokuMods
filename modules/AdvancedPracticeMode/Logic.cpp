@@ -86,7 +86,20 @@ namespace Practice
 	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager, SokuLib::Character character)
 	{
 		if (manager.objectBase.action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
-			manager.objectBase.hp = state.hp;
+		{
+			if (state.HPInstantRegen)
+				manager.objectBase.hp = state.hp;
+
+			if (state.SPInstantRegen)
+				manager.currentSpirit = state.maxCurrentSpirit;
+		}
+
+		if (manager.currentSpirit >= state.maxCurrentSpirit)
+			manager.currentSpirit = state.maxCurrentSpirit;
+		
+		manager.maxSpirit = 1000 - state.brokenOrbs * 200;
+		manager.timeWithBrokenOrb = 0;
+
 		memcpy(&manager.skillMap, &state.skillMap, sizeof(state.skillMap));
 		manager.controlRod = state.rodLevel;
 		manager.sacrificialDolls = state.dollLevel;
@@ -101,11 +114,7 @@ namespace Practice
 			manager.resurrectionButterfliesUsed = state.specialValue;
 	}
 
-	void update()
-	{
-		if (settings.activated) {
-			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
-		}
+	void weatherControl() {
 		if (settings.forceWeather) {
 			if (settings.weatherResetRequest) {
 				settings.weatherResetRequest = SokuLib::activeWeather != SokuLib::WEATHER_CLEAR;
@@ -113,8 +122,17 @@ namespace Practice
 			} else if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR)
 				SokuLib::weatherCounter = -1;
 			else
-				SokuLib::weatherCounter = 999;
+				SokuLib::weatherCounter = settings.weatherTime;
 		}
+	}
+
+	void update()
+	{
+		if (settings.activated) {
+			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
+		}
+		
+		weatherControl();
 		applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
 		applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
 		updateInputLists();

@@ -1,7 +1,6 @@
 //
 // Created by PinkySmile on 18/02/2021.
 //
-
 #include <SokuLib.hpp>
 #include "Gui.hpp"
 #include "Moves.hpp"
@@ -75,6 +74,7 @@ namespace Practice
 
 	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
+		// Levels
 		char nbSkills = 4;
 
 		panel->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
@@ -211,9 +211,6 @@ namespace Practice
 			);
 		}
 
-		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue){
-			state.hp = newValue;
-		});
 		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
 			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
 			const char *brokenNames[] = {
@@ -233,6 +230,20 @@ namespace Practice
 				cards.push_back(card);
 			makeFakeCard(manager, cards[rand() % cards.size()]);
 		});
+
+		// HP and SP
+		auto HP = panel->get<tgui::Slider>("HP");
+		auto SP = panel->get<tgui::Slider>("SP");
+		auto brokenOrbs = panel->get<tgui::Slider>("BrokenOrbs");
+		HP->connect("ValueChanged", [&state](float newValue) { state.hp = newValue; });
+		SP->connect("ValueChanged", [&state](float newValue) { state.maxCurrentSpirit = newValue; });
+		brokenOrbs->connect("ValueChanged", [&state](float newValue) { state.brokenOrbs = newValue; });
+		HP->setValue(state.hp);
+		SP->setValue(state.maxCurrentSpirit);
+		brokenOrbs->setValue(state.brokenOrbs);
+
+		panel->get<tgui::CheckBox>("HPInstantRegen")->setChecked(state.HPInstantRegen);
+		panel->get<tgui::CheckBox>("SPInstantRegen")->setChecked(state.SPInstantRegen);
 	}
 
 	static void displaySkillsPanel(const std::string &profile)
@@ -329,14 +340,31 @@ namespace Practice
 		SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
 		SokuLib::weatherCounter = 999;
 	}
-
+	
 	static void displayStatePanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/state.gui");
 
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
+		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
 
+		editTimer->connect("TextChanged", [](std::string time) {
+			int intTime = 99;
+			int floatTime = 9;
+			
+			if (!time.empty()) {
+				char *pch = strtok((char*)time.c_str(), ".");
+				intTime = atoi(pch);
+
+				pch = strtok(NULL, ".");
+				floatTime = pch != NULL ? atoi(pch) : 0;
+				settings.weatherTime = intTime * 10 + floatTime;
+			}
+		});
+
+		std::string editTimerStr = std::to_string(settings.weatherTime / 10) + "." + std::to_string(settings.weatherTime % 10);
+		editTimer->setText(editTimerStr);
 		force->setChecked(settings.forceWeather);
 		force->connect("Changed", [weather](bool newValue){
 			settings.forceWeather = newValue;
@@ -408,8 +436,10 @@ namespace Practice
 		displaySkillsPanel(profile);
 	}
 
-	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character)
+	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
+		state.HPInstantRegen = panel->get<tgui::CheckBox>("HPInstantRegen")->isChecked();
+		state.SPInstantRegen = panel->get<tgui::CheckBox>("SPInstantRegen")->isChecked();
 	}
 
 	static void updateMiscPanel()
@@ -420,8 +450,8 @@ namespace Practice
 	{
 		switch (tab->getSelectedIndex()) {
 		case 0:
-			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
-			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
+			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar, settings.leftState);
+			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.rightState);
 			break;
 		case 1:
 			updateDummyPanel();

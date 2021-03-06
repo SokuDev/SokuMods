@@ -16,6 +16,20 @@ Renderer.1 {
 }
 
 Renderer.2 {
+    bordercolor = #3C3C3C;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    texturethumb = None;
+    texturethumbhover = None;
+    texturetrack = None;
+    texturetrackhover = None;
+    thumbcolor = #F5F5F5;
+    thumbcolorhover = white;
+    trackcolor = #F5F5F5;
+    trackcolorhover = white;
+}
+
+Renderer.3 {
     texture = None;
     transparenttexture = false;
 }
@@ -44,7 +58,7 @@ Picture.Skill0Img {
 Picture.Skill1Img {
     Position = (10, 50);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 ComboBox.Skill1Id {
@@ -95,19 +109,19 @@ ComboBox.Skill4Id {
 Picture.Skill2Img {
     Position = (10, 90);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 Picture.Skill3Img {
     Position = (10, 130);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 Picture.Skill4Img {
     Position = (10, 170);
     Size = (32, 32);
-    renderer = &2;
+    renderer = &3;
 }
 
 ComboBox.Skill0Lvl {
@@ -316,7 +330,7 @@ ComboBox.SpecialLevel {
 }
 
 Button.Button1 {
-    Position = (10, 360);
+    Position = (260, 350);
     Text = Button;
     TextSize = 13;
 
@@ -345,7 +359,7 @@ Button.Button1 {
 
 Label.Label1 {
     AutoSize = true;
-    Position = (10, 390);
+    Position = (10, 380);
     ScrollbarPolicy = Never;
     Size = (20.2, 18);
     Text = HP;
@@ -365,10 +379,119 @@ Slider.HP {
     InvertedDirection = false;
     Maximum = 10000;
     Minimum = 1;
-    Position = (40, 390);
+    Position = (40, 380);
     Size = (190, 16);
     Step = 1;
     Value = 10000;
+    renderer = &2;
+}
+
+Slider.SP {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 1000;
+    Minimum = 0;
+    Position = (40, 420);
+    Size = (190, 16);
+    Step = 25;
+    Value = 1000;
+    renderer = &2;
+}
+
+Label.Label2 {
+    AutoSize = true;
+    Position = (10, 420);
+    ScrollbarPolicy = Never;
+    Size = (19.2, 18);
+    Text = SP;
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        bordercolor = #3C3C3C;
+        borders = (0, 0, 0, 0);
+        textcolor = white;
+        texturebackground = None;
+    }
+}
+
+CheckBox.SPInstantRegen {
+    Checked = true;
+    Position = (10, 400);
+    Size = (18, 18);
+    Text = "Instant Regen";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorfocused = #1E1EB4;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        checkcolor = #3C3C3C;
+        checkcolordisabled = #7D7D7D;
+        checkcolorhover = black;
+        textcolor = white;
+        textcolordisabled = #7D7D7D;
+        textcolorhover = black;
+        textdistanceratio = 0.2;
+        texturechecked = None;
+        texturecheckeddisabled = None;
+        texturecheckedfocused = None;
+        texturecheckedhover = None;
+        textureunchecked = None;
+        textureuncheckeddisabled = None;
+        textureuncheckedfocused = None;
+        textureuncheckedhover = None;
+    }
+}
+
+CheckBox.HPInstantRegen {
+    Checked = true;
+    Position = (10, 360);
+    Size = (18, 18);
+    Text = "Instant Regen";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorfocused = #1E1EB4;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        checkcolor = #3C3C3C;
+        checkcolordisabled = #7D7D7D;
+        checkcolorhover = black;
+        textcolor = white;
+        textcolordisabled = #7D7D7D;
+        textcolorhover = black;
+        textdistanceratio = 0.2;
+        texturechecked = None;
+        texturecheckeddisabled = None;
+        texturecheckedfocused = None;
+        texturecheckedhover = None;
+        textureunchecked = None;
+        textureuncheckeddisabled = None;
+        textureuncheckedfocused = None;
+        textureuncheckedhover = None;
+    }
+}
+
+Slider.BrokenOrbs {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 5;
+    Minimum = 0;
+    Position = (250, 420);
+    Size = (70, 16);
+    Step = 1;
+    Value = 0;
 
     Renderer {
         bordercolor = #3C3C3C;

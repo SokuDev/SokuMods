@@ -6,30 +6,6 @@ Renderer.1 {
     texturebackground = None;
 }
 
-Panel.Left {
-    Position = (9, 15);
-    Size = (310, 430);
-
-    Renderer {
-        backgroundcolor = black;
-        bordercolor = black;
-        borders = (1, 1, 0, 1);
-        texturebackground = None;
-    }
-}
-
-Panel.Right {
-    Position = (321, 15);
-    Size = (310, 430);
-
-    Renderer {
-        backgroundcolor = black;
-        bordercolor = black;
-        borders = (1, 1, 1, 1);
-        texturebackground = None;
-    }
-}
-
 Label.Label1 {
     AutoSize = true;
     Position = (120, 0);
@@ -48,4 +24,28 @@ Label.Label2 {
     Text = Dummy;
     TextSize = 13;
     renderer = &1;
+}
+
+ScrollablePanel.Left {
+    ContentSize = (0, 0);
+    Position = (0, 20);
+    Size = (316.977, 440);
+
+    Renderer {
+        backgroundcolor = black;
+        bordercolor = black;
+        texturebackground = None;
+    }
+}
+
+ScrollablePanel.Right {
+    ContentSize = (0, 0);
+    Position = (323.023, 20);
+    Size = (316.977, 440);
+
+    Renderer {
+        backgroundcolor = black;
+        bordercolor = black;
+        texturebackground = None;
+    }
 }

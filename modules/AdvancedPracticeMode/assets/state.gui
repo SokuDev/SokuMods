@@ -31,7 +31,7 @@ CheckBox.ForceWeather {
     Checked = true;
     Position = (10, 40);
     Size = (18, 18);
-    Text = "Force weather";
+    Text = "Force weather at";
     TextSize = 13;
 
     Renderer {
@@ -58,5 +58,53 @@ CheckBox.ForceWeather {
         textureuncheckeddisabled = None;
         textureuncheckedfocused = None;
         textureuncheckedhover = None;
+    }
+}
+
+EditBox.EditTimer {
+    Alignment = Right;
+    InputValidator = "(?=.*\\d)\\d{1,2}(?:\\.\\d)?[.]?";
+    MaximumCharacters = 4;
+    Position = (150, 40);
+    Size = (40, 22);
+    Text = "99.9";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        caretcolor = black;
+        caretwidth = 1;
+        defaulttextcolor = #A0A0A0;
+        padding = (0, 0, 0, 0);
+        selectedtextbackgroundcolor = #006EFF;
+        selectedtextcolor = white;
+        textcolor = #3C3C3C;
+        textcolordisabled = #7D7D7D;
+        texture = None;
+        texturedisabled = None;
+        texturefocused = None;
+        texturehover = None;
+    }
+}
+
+Label.Label1 {
+    AutoSize = true;
+    Position = (190, 40);
+    Size = (117.2, 18);
+    Text = "(from 2.0 to 99.9)";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        bordercolor = #3C3C3C;
+        borders = (0, 0, 0, 0);
+        textcolor = #3C3C3C;
+        texturebackground = None;
     }
 }
