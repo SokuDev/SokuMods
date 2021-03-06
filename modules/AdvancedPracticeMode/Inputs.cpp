@@ -65,6 +65,42 @@ namespace Practice
 		Vector2<int> _startRect;
 		std::vector<Vector2<int>> _rects;
 		Vector2<unsigned> _rectSize;
+		Vector2<unsigned> _rectSize2;
+
+		void _drawSpell(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
+		{
+			spell.setSize({41 * size.y / 65, size.y});
+			spell.tint = DxSokuColor::White * alpha;
+			if (reverse) {
+				this->_sprite.setPosition(pos);
+				this->_sprite.rect.top = this->_startRect.y;
+				this->_sprite.rect.left = this->_startRect.x;
+				this->_sprite.rect.width = this->_rectSize.x;
+				this->_sprite.rect.height = this->_rectSize.y;
+				this->_sprite.draw();
+				pos.x -= size.x;
+				spell.setPosition(pos);
+				spell.rect.top = 0;
+				spell.rect.left = (action - SokuLib::ACTION_USING_SC_ID_200) * 41;
+				spell.rect.width = 41;
+				spell.rect.height = 65;
+				spell.draw();
+			} else {
+				spell.setPosition(pos);
+				spell.rect.top = 0;
+				spell.rect.left = (action - SokuLib::ACTION_USING_SC_ID_200) * 41;
+				spell.rect.width = 41;
+				spell.rect.height = 65;
+				spell.draw();
+				pos.x += size.x;
+				this->_sprite.setPosition(pos);
+				this->_sprite.rect.top = this->_startRect.y;
+				this->_sprite.rect.left = this->_startRect.x;
+				this->_sprite.rect.width = this->_rectSize.x;
+				this->_sprite.rect.height = this->_rectSize.y;
+				this->_sprite.draw();
+			}
+		}
 
 		void _drawSkill(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action) const
 		{
@@ -155,15 +191,15 @@ namespace Practice
 				this->_sprite2.setPosition(pos);
 				this->_sprite2.rect.top = this->_startRect.y;
 				this->_sprite2.rect.left = this->_startRect.x;
-				this->_sprite2.rect.width = this->_rectSize.x;
-				this->_sprite2.rect.height = this->_rectSize.y;
+				this->_sprite2.rect.width = this->_rectSize2.x;
+				this->_sprite2.rect.height = this->_rectSize2.y;
 				this->_sprite2.draw();
 			} else {
 				this->_sprite2.setPosition(pos);
 				this->_sprite2.rect.top = this->_startRect.y;
 				this->_sprite2.rect.left = this->_startRect.x;
-				this->_sprite2.rect.width = this->_rectSize.x;
-				this->_sprite2.rect.height = this->_rectSize.y;
+				this->_sprite2.rect.width = this->_rectSize2.x;
+				this->_sprite2.rect.height = this->_rectSize2.y;
 				this->_sprite2.draw();
 				for (const auto &rect : this->_rects) {
 					pos.x += size.x;
@@ -178,8 +214,17 @@ namespace Practice
 		}
 
 	public:
+		MoveSpriteDescriptor(Sprite &sprite, Vector2<int> rect, Vector2<unsigned> rectSize) :
+			_sprite(sprite),
+			_sprite2(sprite),
+			_startRect(rect),
+			_rectSize(rectSize),
+			_rectSize2(rectSize)
+		{
+		}
+
 		MoveSpriteDescriptor(Sprite &sprite, const std::vector<Vector2<int>>& rects, Vector2<unsigned> rectSize) :
-			MoveSpriteDescriptor(sprite, sprite, rects, rectSize)
+			MoveSpriteDescriptor(sprite, sprite, rects, rectSize, rectSize)
 		{
 		}
 
@@ -190,24 +235,28 @@ namespace Practice
 			_sprite2(sprite),
 			_rectSize(rectSize)
 		{
-			assert(sequence.size() == 20);
 		}
 
-		MoveSpriteDescriptor(Sprite &sprite, Sprite &sprite2, std::vector<Vector2<int>> rects, Vector2<unsigned> rectSize) :
+		MoveSpriteDescriptor(Sprite &sprite, Sprite &sprite2, std::vector<Vector2<int>> rects, Vector2<unsigned> rectSize, Vector2<unsigned> rectSize2) :
 			_sprite(sprite),
 			_sprite2(sprite2),
 			_startRect(rects[0]),
 			_rects(std::move(rects)),
-			_rectSize(rectSize)
+			_rectSize(rectSize),
+			_rectSize2(rectSize2)
 		{
 			this->_rects.erase(this->_rects.begin());
 		}
 
-		void draw(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action, float alpha = 1) const
+		//TODO: Pass a struct instead of this never-ending argument list
+		void draw(Sprite &skills, Sprite &spells, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action, float alpha = 1) const
 		{
 			this->_sprite.setSize(size);
 			this->_sprite.tint = DxSokuColor::White * alpha;
-			if (this->_isSkill)
+			//TODO: Find a more elegant way to do this
+			if (action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219)
+				return this->_drawSpell(spells, pos, size, reverse, action, alpha);
+			else if (this->_isSkill)
 				return this->_drawSkill(skills, pos, size, reverse, character, action);
 			else
 				return this->_normalDraw(pos, size, reverse, alpha);
@@ -252,7 +301,10 @@ namespace Practice
 	static std::list<Input> rightInputList;
 	static Sprite leftSkillSheet;
 	static Sprite rightSkillSheet;
+	static Sprite leftScSheet;
+	static Sprite rightScSheet;
 	static Sprite inputSheet;
+	static Sprite systemsSheet;
 	static MoveState lastLeftMove;
 	static MoveState lastRightMove;
 	static const std::map<SokuLib::Action, MoveSpriteDescriptor> moveSprites{
@@ -825,7 +877,83 @@ namespace Practice
 			inputSheet,
 			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
 			{24, 32}
-		} }
+		} },
+		{ SokuLib::ACTION_USING_SC_ID_200, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_201, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_202, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_203, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_204, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_205, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_206, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_207, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_208, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_209, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_210, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_211, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_212, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_213, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_214, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_215, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_216, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_217, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_218, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_USING_SC_ID_219, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_SYSTEM_CARD, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 21, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_IBUKI_GOURD, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 9, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_RECOVERY_CHARM, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 15, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_MAGIC_POTION, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 1, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_TALISMAN, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 0, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_DIVINE_RAIMENT_OF_THE_DRAGON_FISH, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 13, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_LEFT_HANDED_FOLDING_FAN, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 8, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
+		{ SokuLib::ACTION_SPELL_BREAKING_DRUG, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 11, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
 	};
 
 	void initInputDisplay(LPCSTR profilePath)
@@ -842,8 +970,12 @@ namespace Practice
 		rightBox.setPosition({640 - BOX_WIDTH, 60});
 		if (!inputSheet.texture.hasTexture())
 			Texture::loadFromFile(inputSheet.texture, (profile + "/assets/inputs.png").c_str());
-		Texture::loadFromFile(leftSkillSheet.texture, (profile +  + "/assets/skills/" + names[SokuLib::leftChar] + "Skills.png").c_str());
+		if (!systemsSheet.texture.hasTexture())
+			Texture::loadFromFile(systemsSheet.texture, (profile + "/assets/cards/systemCards.png").c_str());
+		Texture::loadFromFile(leftSkillSheet.texture,  (profile +  + "/assets/skills/" + names[SokuLib::leftChar]  + "Skills.png").c_str());
 		Texture::loadFromFile(rightSkillSheet.texture, (profile +  + "/assets/skills/" + names[SokuLib::rightChar] + "Skills.png").c_str());
+		Texture::loadFromFile(leftScSheet.texture,     (profile +  + "/assets/cards/"  + names[SokuLib::leftChar]  + "Spells.png").c_str());
+		Texture::loadFromFile(rightScSheet.texture,    (profile +  + "/assets/cards/"  + names[SokuLib::rightChar] + "Spells.png").c_str());
 	}
 
 	bool isCancelableByItself(SokuLib::Action action)
@@ -906,7 +1038,8 @@ namespace Practice
 			pos.x += SPRITE_SIZE;
 	}
 
-	void drawInputList(Sprite &skills, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
+	//TODO: Pass a struct instead of this never-ending argument list
+	void drawInputList(Sprite &skills, Sprite &spells, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
 	{
 		int baseX = offset.x;
 		int border = offset.x;
@@ -940,7 +1073,7 @@ namespace Practice
 			auto it = moveSprites.find(input.action);
 
 			if (it != moveSprites.end())
-				it->second.draw(skills, {border, offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
+				it->second.draw(skills, spells, {border, offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 			i++;
 			if (i > (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
@@ -948,7 +1081,7 @@ namespace Practice
 		}
 	}
 
-	void drawInputListOnlyMoves(Sprite &skills, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
+	void drawInputListOnlyMoves(Sprite &skills, Sprite &spells, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
 	{
 		int baseX = offset.x;
 		float alpha = MAX_ALPHA;
@@ -971,7 +1104,7 @@ namespace Practice
 			offset.y -= SPRITE_SIZE + (SPRITE_SIZE / 3);
 			offset.x = baseX;
 
-			it->second.draw(skills, offset, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, reversed, character, input.action, alpha);
+			it->second.draw(skills, spells, offset, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, reversed, character, input.action, alpha);
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 
 			i++;
@@ -986,11 +1119,11 @@ namespace Practice
 			if (settings.showRawInputs) {
 				leftBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 				leftBox.draw();
-				drawInputList(leftSkillSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+				drawInputList(leftSkillSheet, leftScSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
 			} else {
 				leftBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
 				leftBox.draw();
-				drawInputListOnlyMoves(leftSkillSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+				drawInputListOnlyMoves(leftSkillSheet, leftScSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
 			}
 		}
 		if (settings.showRightInputBox) {
@@ -998,12 +1131,12 @@ namespace Practice
 				rightBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 				rightBox.setPosition({640 - BOX_WIDTH, 60});
 				rightBox.draw();
-				drawInputList(rightSkillSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
+				drawInputList(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
 			} else {
 				rightBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
 				rightBox.setPosition({640 - BOX_WIDTH2, 60});
 				rightBox.draw();
-				drawInputListOnlyMoves(rightSkillSheet, rightInputList, {640 - BOX_WIDTH2, 60}, true, SokuLib::rightChar);
+				drawInputListOnlyMoves(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH2, 60}, true, SokuLib::rightChar);
 			}
 		}
 	}
