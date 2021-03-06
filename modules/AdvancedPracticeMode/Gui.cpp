@@ -1,7 +1,6 @@
 //
 // Created by PinkySmile on 18/02/2021.
 //
-#include <iostream>
 #include <SokuLib.hpp>
 #include "Gui.hpp"
 #include "Moves.hpp"
@@ -233,9 +232,18 @@ namespace Practice
 		});
 
 		// HP and SP
-		panel->get<tgui::Slider>("HP")->connect("ValueChanged", [&state](float newValue) { state.hp = newValue; });
-		panel->get<tgui::Slider>("SP")->connect("ValueChanged", [&state](float newValue) { state.maxCurrentSpirit = newValue; });
-		panel->get<tgui::Slider>("BrokenOrbs")->connect("ValueChanged", [&state](float newValue) { state.brokenOrbs = newValue; });
+		auto HP = panel->get<tgui::Slider>("HP");
+		auto SP = panel->get<tgui::Slider>("SP");
+		auto brokenOrbs = panel->get<tgui::Slider>("BrokenOrbs");
+		HP->connect("ValueChanged", [&state](float newValue) { state.hp = newValue; });
+		SP->connect("ValueChanged", [&state](float newValue) { state.maxCurrentSpirit = newValue; });
+		brokenOrbs->connect("ValueChanged", [&state](float newValue) { state.brokenOrbs = newValue; });
+		HP->setValue(state.hp);
+		SP->setValue(state.maxCurrentSpirit);
+		brokenOrbs->setValue(state.brokenOrbs);
+
+		panel->get<tgui::CheckBox>("HPInstantRegen")->setChecked(state.HPInstantRegen);
+		panel->get<tgui::CheckBox>("SPInstantRegen")->setChecked(state.SPInstantRegen);
 	}
 
 	static void displaySkillsPanel(const std::string &profile)
@@ -336,17 +344,22 @@ namespace Practice
 		auto weather = panel->get<tgui::ComboBox>("Weather");
 		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
 
-
-			editTimer->connect("ReturnKeyPressed", [](std::string time) {
-				int intTime = 999;
+		editTimer->connect("TextChanged", [](std::string time) {
+			int intTime = 99;
+			int floatTime = 9;
 			
-				if (time.length() != 0) {
-					intTime = stoi(time);
-					settings.weatherTime = intTime;
-				}
-			});
+			if (!time.empty()) {
+				char *pch = strtok((char*)time.c_str(), ".");
+				intTime = atoi(pch);
 
+				pch = strtok(NULL, ".");
+				floatTime = pch != NULL ? atoi(pch) : 0;
+				settings.weatherTime = intTime * 10 + floatTime;
+			}
+		});
 
+		std::string editTimerStr = std::to_string(settings.weatherTime / 10) + "." + std::to_string(settings.weatherTime % 10);
+		editTimer->setText(editTimerStr);
 		force->setChecked(settings.forceWeather);
 		force->connect("Changed", [weather](bool newValue){
 			settings.forceWeather = newValue;
