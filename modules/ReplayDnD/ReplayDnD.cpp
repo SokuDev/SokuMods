@@ -65,6 +65,12 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
+	// allow running multiple instances until we can switch a
+	// running game to a replay
+	VirtualProtect((void *)0x007FB5C8, 1, PAGE_EXECUTE_WRITECOPY, &old);
+	*(char *)(0x007FB5C8) = 0xB8;
+	VirtualProtect((void *)0x007FB5C8, 1, old, &old);
+
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 
 	return true;
