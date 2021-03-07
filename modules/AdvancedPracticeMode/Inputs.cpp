@@ -1059,6 +1059,10 @@ namespace Practice
 	{
 		if (characterId == SokuLib::CHARACTER_MARISA && character.orreriesTimeLeft && character.objectBase.action == SokuLib::ACTION_USING_SC_ID_215)
 			return FAKE_ACTION_ORRERIES_REACTIVATE;
+		// Oopsie doopsie ! I left some spaghetti here.
+		// Let me clean that up for you :))))
+		if (characterId == SokuLib::CHARACTER_IKU && (character.objectBase.action >= SokuLib::ACTION_5AAA && character.objectBase.action <= SokuLib::ACTION_5AAAAA))
+			return static_cast<SokuLib::Action>(character.objectBase.action - 1);
 		return character.objectBase.action;
 	}
 
