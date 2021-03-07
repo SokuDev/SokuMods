@@ -128,13 +128,16 @@ namespace Practice
 
 	void update()
 	{
+		updateInputLists();
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE)
+			return;
+
 		if (settings.activated) {
 			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
 		}
-		
+
 		weatherControl();
 		applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
 		applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
-		updateInputLists();
 	}
 }

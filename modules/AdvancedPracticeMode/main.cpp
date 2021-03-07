@@ -62,7 +62,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 
 	if (Practice::sfmlWindow)
 		Practice::update();
-	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
+	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE || SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
 		Practice::activate();
 	return result;
 }

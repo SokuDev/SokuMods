@@ -1059,8 +1059,6 @@ namespace Practice
 	{
 		if (characterId == SokuLib::CHARACTER_MARISA && character.orreriesTimeLeft && character.objectBase.action == SokuLib::ACTION_USING_SC_ID_215)
 			return FAKE_ACTION_ORRERIES_REACTIVATE;
-		// Oopsie doopsie ! I left some spaghetti here.
-		// Let me clean that up for you :))))
 		if (characterId == SokuLib::CHARACTER_IKU && (character.objectBase.action >= SokuLib::ACTION_5AAA && character.objectBase.action <= SokuLib::ACTION_5AAAAA))
 			return static_cast<SokuLib::Action>(character.objectBase.action - 1);
 		return character.objectBase.action;
@@ -1070,18 +1068,19 @@ namespace Practice
 	{
 		if (action == FAKE_ACTION_ORRERIES_REACTIVATE)
 			return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 1;
-		// Wow I really left some everywhere !
 		if (
 			characterId == SokuLib::CHARACTER_YUKARI &&
 			(action == SokuLib::ACTION_4A || action == SokuLib::ACTION_5A)
 		)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
-		// Al dante or well cooked ?
 		if (characterId == SokuLib::CHARACTER_AYA && action == SokuLib::ACTION_66B)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
-		// Bolognaise with it ?
 		if (characterId == SokuLib::CHARACTER_SUWAKO && (action == SokuLib::ACTION_DEFAULT_SKILL2_B || action == SokuLib::ACTION_DEFAULT_SKILL2_AIR_B))
 			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 6 || character.objectBase.actionBlockId == 0);
+		if (characterId == SokuLib::CHARACTER_REMILIA && action == SokuLib::ACTION_ALT1_SKILL1_B)
+			return character.objectBase.frameCount == 0;
+		if (characterId == SokuLib::CHARACTER_YOUMU && action == SokuLib::ACTION_DEFAULT_SKILL3_B)
+			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId < 3);
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
 	}
 
