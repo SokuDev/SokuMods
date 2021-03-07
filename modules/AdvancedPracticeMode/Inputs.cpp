@@ -21,6 +21,7 @@ namespace Practice
 #define MAX_BOX_ALPHA 0.4
 #define SPRITE_SIZE 24
 #define MAX_LIST_SIZE 0x100
+#define FAKE_ACTION_ORRERIES_REACTIVATE static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 1)
 //(BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3)))
 
 #define A_SPRITE_POS         Vector2<int>{0,   28}
@@ -66,6 +67,47 @@ namespace Practice
 		std::vector<Vector2<int>> _rects;
 		Vector2<unsigned> _rectSize;
 		Vector2<unsigned> _rectSize2;
+
+		void _displayOrreriesSpecialStuff(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
+		{
+			spell.setSize({41 * size.y / 65, size.y});
+			spell.tint = DxSokuColor::White * alpha;
+			spell.rect.top = 0;
+			spell.rect.left = 15 * 41;
+			spell.rect.width = 41;
+			spell.rect.height = 65;
+			if (reverse) {
+				for (unsigned i = this->_rects.size(); i > 0; i--) {
+					this->_sprite.setPosition(pos);
+					this->_sprite.rect.top = this->_rects[i - 1].y;
+					this->_sprite.rect.left = this->_rects[i - 1].x;
+					this->_sprite.rect.width = this->_rectSize.x;
+					this->_sprite.rect.height = this->_rectSize.y;
+					this->_sprite.draw();
+					pos.x -= size.x;
+				}
+				for (int i = action == FAKE_ACTION_ORRERIES_REACTIVATE; i >= 0; i--) {
+					spell.setPosition(pos);
+					spell.draw();
+					pos.x -= spell.getSize().x;
+				}
+			} else {
+				for (int i = action == FAKE_ACTION_ORRERIES_REACTIVATE; i >= 0; i--) {
+					spell.setPosition(pos);
+					spell.draw();
+					pos.x += spell.getSize().x;
+				}
+				for (const auto &rect : this->_rects) {
+					this->_sprite.setPosition(pos);
+					this->_sprite.rect.top = rect.y;
+					this->_sprite.rect.left = rect.x;
+					this->_sprite.rect.width = this->_rectSize.x;
+					this->_sprite.rect.height = this->_rectSize.y;
+					this->_sprite.draw();
+					pos.x += size.x;
+				}
+			}
+		}
 
 		void _drawSpell(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
 		{
@@ -256,6 +298,8 @@ namespace Practice
 			//TODO: Find a more elegant way to do this
 			if (action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219)
 				return this->_drawSpell(spells, pos, size, reverse, action, alpha);
+			else if (action >= SokuLib::ACTION_ORRERIES_B && action <= FAKE_ACTION_ORRERIES_REACTIVATE)
+				return this->_displayOrreriesSpecialStuff(spells, pos, size, reverse, action, alpha);
 			else if (this->_isSkill)
 				return this->_drawSkill(skills, pos, size, reverse, character, action);
 			else
@@ -954,6 +998,31 @@ namespace Practice
 			{24, 32},
 			{41, 65}
 		} },
+		{ SokuLib::ACTION_ORRERIES_B, {
+			inputSheet,
+			{Vector2<int>{41 * 15}, B_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_ORRERIES_C, {
+			inputSheet,
+			{Vector2<int>{41 * 15}, C_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_AIR_ORRERIES_B, {
+			inputSheet,
+			{Vector2<int>{41 * 15}, AIR_SPRITE_POS, B_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_AIR_ORRERIES_C, {
+			inputSheet,
+			{Vector2<int>{41 * 15}, AIR_SPRITE_POS, C_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_ORRERIES_REACTIVATE, { //This is the fake action generated when using the Orreries card when Orreries is already active
+			inputSheet,
+			{Vector2<int>{41 * 15}, SC_SPRITE_POS},
+			{24, 32}
+		} },
 	};
 
 	void initInputDisplay(LPCSTR profilePath)
@@ -986,7 +1055,25 @@ namespace Practice
 		}
 	}
 
-	void updateList(std::list<Input> &list, SokuLib::CharacterManager &character, MoveState &last)
+	SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::Character characterId)
+	{
+		if (characterId == SokuLib::CHARACTER_MARISA && character.orreriesTimeLeft && character.objectBase.action == SokuLib::ACTION_USING_SC_ID_215)
+			return FAKE_ACTION_ORRERIES_REACTIVATE;
+		return character.objectBase.action;
+	}
+
+	bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &character, SokuLib::Character characterId)
+	{
+		if (
+			action == FAKE_ACTION_ORRERIES_REACTIVATE &&
+			character.objectBase.frameCount == 0 &&
+			character.objectBase.actionBlockId == 1
+		)
+			return true;
+		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
+	}
+
+	void updateList(std::list<Input> &list, SokuLib::CharacterManager &character, MoveState &last, SokuLib::Character characterId)
 	{
 		if (list.empty() || list.front().input != character.keyMap) {
 			list.push_front({character.keyMap, 1, SokuLib::ACTION_IDLE});
@@ -994,11 +1081,12 @@ namespace Practice
 				list.pop_back();
 		}
 
-		auto realAction = character.objectBase.action;
+		auto realAction = addCustomActions(character, characterId);
 		auto *front = &list.front();
 
 		if (moveSprites.find(realAction) != moveSprites.end()) {
-			if ((realAction != last.action || isCancelableByItself(realAction)) && character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0) {
+			printf("%i: %i|%i|%i|%i|%i\n", realAction, character.objectBase.action, character.objectBase.actionBlockId, character.objectBase.animationCounter, character.objectBase.animationSubFrame, character.objectBase.frameCount);
+			if ((realAction != last.action || isCancelableByItself(realAction)) && isStartOfMove(realAction, character, characterId)) {
 				if (front->action) {
 					list.push_front(list.front());
 					while (list.size() > MAX_LIST_SIZE)
@@ -1018,8 +1106,8 @@ namespace Practice
 
 	void updateInputLists()
 	{
-		updateList(leftInputList,  SokuLib::getBattleMgr().leftCharacterManager,  lastLeftMove);
-		updateList(rightInputList, SokuLib::getBattleMgr().rightCharacterManager, lastRightMove);
+		updateList(leftInputList,  SokuLib::getBattleMgr().leftCharacterManager,  lastLeftMove,  SokuLib::leftChar);
+		updateList(rightInputList, SokuLib::getBattleMgr().rightCharacterManager, lastRightMove, SokuLib::rightChar);
 	}
 
 	void showInput(int value, Vector2<int> &pos, Vector2<int> sheetPos, bool goLeft)
