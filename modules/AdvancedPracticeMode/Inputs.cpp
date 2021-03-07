@@ -41,8 +41,9 @@ namespace Practice
 #define LEFTDOWN_SPRITE_POS  Vector2<int>{224, -4}
 #define BE_SPRITE_POS        Vector2<int>{192, 28}
 #define HJ_SPRITE_POS        Vector2<int>{224, 32}
-#define DASH_SPRITE_POS      Vector2<int>{256, 32}
 #define AIR_SPRITE_POS       Vector2<int>{256, 0}
+#define DASH_SPRITE_POS      Vector2<int>{256, 32}
+#define LILIPAD_SPRITE_POS   Vector2<int>{288, 0}
 #define FAR_SPRITE_POS       Vector2<int>{288, 32}
 
 	struct MoveState {
@@ -453,6 +454,11 @@ namespace Practice
 			{DOWN_SPRITE_POS, B_SPRITE_POS},
 			{24, 32}
 		} },
+		{ SokuLib::ACTION_3B, {
+			inputSheet,
+			{RIGHTDOWN_SPRITE_POS, B_SPRITE_POS},
+			{24, 32}
+		} },
 		{ SokuLib::ACTION_j5B, {
 			inputSheet,
 			{AIR_SPRITE_POS, B_SPRITE_POS},
@@ -531,6 +537,16 @@ namespace Practice
 		{ SokuLib::ACTION_BACKDASH, {
 			inputSheet,
 			{LEFT_SPRITE_POS, DASH_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_LILIPAD_FORWARD_DASH, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, RIGHT_SPRITE_POS, DASH_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_LILIPAD_BACKDASH, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, LEFT_SPRITE_POS, DASH_SPRITE_POS},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_FORWARD_AIRDASH, {
@@ -1094,6 +1110,8 @@ namespace Practice
 			return character.objectBase.frameCount == 0;
 		if (characterId == SokuLib::CHARACTER_YOUMU && action == SokuLib::ACTION_DEFAULT_SKILL3_B)
 			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId < 3);
+		if (characterId == SokuLib::CHARACTER_SUWAKO && action >= SokuLib::ACTION_NEUTRAL_HIGH_JUMP && action <= SokuLib::ACTION_BACKWARD_HIGH_JUMP)
+			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 0 || character.objectBase.actionBlockId == 4);
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
 	}
 
@@ -1109,7 +1127,6 @@ namespace Practice
 		auto *front = &list.front();
 
 		if (moveSprites.find(realAction) != moveSprites.end()) {
-			printf("%i: %i|%i|%i|%i|%i\n", realAction, character.objectBase.action, character.objectBase.actionBlockId, character.objectBase.animationCounter, character.objectBase.animationSubFrame, character.objectBase.frameCount);
 			if ((realAction != last.action || isCancelableByItself(realAction)) && isStartOfMove(realAction, character, characterId)) {
 				if (front->action) {
 					list.push_front(list.front());
