@@ -351,12 +351,12 @@ target_sources(WindowResizer PRIVATE
         modules/WindowResizer/WindowResizer.cpp)
 target_link_libraries(WindowResizer detours)
 
-# binary SokuEngine modules
+# binary modules
+
+module(shady-loader Binary)
 
 module(NetGameScore Binary SokuEngine)
 module(PracticeEx Binary SokuEngine)
-module(shady-loader Binary SokuEngine)
-module(shady-lua Binary SokuEngine)
 module(SokuEngine Binary Default SokuEngine)
 
 # install

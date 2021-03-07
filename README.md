@@ -10,7 +10,7 @@ This repository was originally created from the original SWRSToys release by *An
 
 The code in this repository comes from various contributors:
 - this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
-- *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader, shady-lua](https://github.com/enebe-nb/shady-packer), UPnPNat
+- *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
 - *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
@@ -183,6 +183,14 @@ Available patches:
 
 *The mod allows you to manually set your state before joining/spectating/watching a replay to match the state of your peer/replay.*
 
+### shady-loader
+
+**Simply load custom game resources (sprites, images, sounds, music, ...) to the game.**
+
+*To add and remove mods, use the shady-manage program in `modules/shady-loader/` or use the in-game ModConfig menu if you're using SokuEngine.*
+
+*To create mods, refer to the [official project documentation](https://github.com/enebe-nb/shady-packer/wiki/tools-loader).*
+
 ### SkipIntro
 
 **Skip the game intro screen, automatically enter a menu or a custom practice preset on start.**
@@ -228,12 +236,6 @@ Available patches:
 **Greatly improve Practice mode by adding several game options and support for macros.**
 
 *This module is configured in-game in Practice mode.*
-
-### shady-loader - shady-lua
-
-**Simply load custom game resources (sprites, images, sounds, music, ...) to the game.**
-
-*This module is configured in-game in the ModConfig menu.*
 
 ## Making a module
 
