@@ -1079,6 +1079,9 @@ namespace Practice
 		// Al dante or well cooked ?
 		if (characterId == SokuLib::CHARACTER_AYA && action == SokuLib::ACTION_66B)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
+		// Bolognaise with it ?
+		if (characterId == SokuLib::CHARACTER_SUWAKO && (action == SokuLib::ACTION_DEFAULT_SKILL2_B || action == SokuLib::ACTION_DEFAULT_SKILL2_AIR_B))
+			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 6 || character.objectBase.actionBlockId == 0);
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
 	}
 
