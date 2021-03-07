@@ -44,10 +44,14 @@ void LoadSettings(LPCSTR profilePath) {
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
-	return ::memcmp(TARGET_HASH, hash, sizeof TARGET_HASH) == 0;
+	return true;
 }
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
+	if (__argc != 2 || !StrStrI(__argv[1], "rep")) {
+		return true;
+	}
+
 	char profilePath[1024 + MAX_PATH];
 
 	GetModuleFileName(hMyModule, profilePath, 1024);
