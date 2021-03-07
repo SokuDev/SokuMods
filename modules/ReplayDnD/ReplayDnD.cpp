@@ -14,18 +14,15 @@ static bool s_swrapt;
 static bool s_autoShutdown;
 
 int __fastcall CLogo_OnProcess(void *This) {
-	int ret = CLogo_Process(This);
-	if (ret == 2 && __argc == 2) {
-		if (CInputManager_ReadReplay(g_inputMgr, __argv[1])) {
-			s_swrapt = true;
-			// 入力があったように見せかける。END
-			*(BYTE *)((DWORD)g_inputMgrs + 0x74) = 0xFF;
-			// リプモードにチェンジ
-			SetBattleMode(3, 2);
-			ret = 6;
-		}
+	if (CInputManager_ReadReplay(g_inputMgr, __argv[1])) {
+		s_swrapt = true;
+		// 入力があったように見せかける。END
+		*(BYTE *)((DWORD)g_inputMgrs + 0x74) = 0xFF;
+		// リプモードにチェンジ
+		SetBattleMode(3, 2);
+		return 6;
 	}
-	return ret;
+	return CLogo_Process(This);
 }
 
 int __fastcall CBattle_OnProcess(void *This) {
