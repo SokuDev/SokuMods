@@ -1,8 +1,8 @@
 #include <windows.h>
-#include <shlwapi.h>
-
-#define SWRS_USES_HASH
 #include "swrs.h"
+#include <process.h>
+#include <shlobj.h>
+#include <shlwapi.h>
 
 #define CLogo_Process(p) Ccall(p, s_origCLogo_OnProcess, int, ())()
 #define CBattle_Process(p) Ccall(p, s_origCBattle_OnProcess, int, ())()
@@ -43,6 +43,60 @@ void LoadSettings(LPCSTR profilePath) {
 	s_autoShutdown = GetPrivateProfileInt("ReplayDnD", "AutoShutdown", 1, profilePath) != 0;
 }
 
+void load_thread(void *unused) {
+	HKEY key;
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\.rep", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
+		return;
+	}
+	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, L"SokuReplay", sizeof(L"SokuReplay"))) {
+		return;
+	}
+	RegCloseKey(key);
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
+		return;
+	}
+	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, L"Soku Replay", sizeof(L"Soku Replay"))) {
+		return;
+	}
+	if (RegSetKeyValueW(key, NULL, L"AlwaysShowExt", REG_SZ, L"1", sizeof(L"1"))) {
+		return;
+	}
+	RegCloseKey(key);
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\Shell\\Open", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
+		return;
+	}
+	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, L"Watch in Soku", sizeof(L"Watch in Soku"))) {
+		return;
+	}
+	RegCloseKey(key);
+	wchar_t exe_path[MAX_PATH + 1024];
+	exe_path[0] = L'"';
+	if (!GetModuleFileNameW(NULL, &exe_path[1], MAX_PATH + 1023)) {
+		return;
+	}
+	DWORD disposition;
+	if (RegCreateKeyExW(
+				HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\DefaultIcon", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, &disposition)) {
+		return;
+	}
+	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, &exe_path[1], 2 * (wcslen(exe_path) + 1))) {
+		return;
+	}
+	RegCloseKey(key);
+	if (RegCreateKeyExW(
+				HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\Shell\\Open\\Command", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
+		return;
+	}
+	StrCatW(exe_path, L"\" \"%1\"");
+	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, exe_path, 2 * (wcslen(exe_path) + 1))) {
+		return;
+	}
+	RegCloseKey(key);
+	if (disposition == REG_CREATED_NEW_KEY) {
+		SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+	}
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
@@ -73,6 +127,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 
+	_beginthread(load_thread, 0, NULL);
 	return true;
 }
 
