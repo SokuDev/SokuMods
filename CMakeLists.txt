@@ -354,6 +354,8 @@ target_link_libraries(WindowResizer detours)
 # binary modules
 
 module(shady-loader Binary)
+install(FILES bin/shady-manage.exe DESTINATION "SWRSToys/modules/shady-loader")
+install(FILES bin/shady-manage.exe DESTINATION "SokuEngine/modules/shady-loader")
 
 module(NetGameScore Binary SokuEngine)
 module(PracticeEx Binary SokuEngine)
