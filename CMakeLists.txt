@@ -230,6 +230,10 @@ module(DPadFix Default)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
+module(EasyDecks Default)
+target_sources(EasyDecks PRIVATE
+        modules/EasyDecks/EasyDecks.cpp)
+
 module(FixMeiling236 Default)
 target_sources(FixMeiling236 PRIVATE
         modules/FixMeiling236/main.cpp)

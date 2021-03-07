@@ -14,7 +14,7 @@ The code in this repository comes from various contributors:
 - *FireSeal* made SokuRoll
 - *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
-- *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll
+- *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll, EasyDecks
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
@@ -83,6 +83,10 @@ See [here](modules/DiscordIntegration/README.md) for details.
 ### DPadFix
 
 **Map the joystick DPad and trigger buttons to game inputs.**
+
+### EasyDecks
+
+**Edit your decks freely during a netplay session.**
 
 ### FixMeiling236
 
