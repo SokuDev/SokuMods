@@ -22,6 +22,7 @@ namespace Practice
 #define SPRITE_SIZE 24
 #define MAX_LIST_SIZE 0x100
 #define FAKE_ACTION_ORRERIES_REACTIVATE static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 1)
+#define FAKE_ACTION_5AAA6A static_cast<SokuLib::Action>(SokuLib::ACTION_j5AA + 1)
 //(BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3)))
 
 #define A_SPRITE_POS         Vector2<int>{0,   28}
@@ -1023,6 +1024,16 @@ namespace Practice
 			{Vector2<int>{41 * 15}, SC_SPRITE_POS},
 			{24, 32}
 		} },
+		{ FAKE_ACTION_5AAA6A, { //This is the fake action generated when Meiling uses 5AAA6A
+			inputSheet,
+			{A_SPRITE_POS, A_SPRITE_POS, A_SPRITE_POS, RIGHT_SPRITE_POS, A_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_5AAA3A, {
+			inputSheet,
+			{A_SPRITE_POS, A_SPRITE_POS, A_SPRITE_POS, RIGHTDOWN_SPRITE_POS, A_SPRITE_POS},
+			{24, 32}
+		} },
 	};
 
 	void initInputDisplay(LPCSTR profilePath)
@@ -1061,6 +1072,8 @@ namespace Practice
 			return FAKE_ACTION_ORRERIES_REACTIVATE;
 		if (characterId == SokuLib::CHARACTER_IKU && (character.objectBase.action >= SokuLib::ACTION_5AAA && character.objectBase.action <= SokuLib::ACTION_5AAAAA))
 			return static_cast<SokuLib::Action>(character.objectBase.action - 1);
+		if (characterId == SokuLib::CHARACTER_MEILING && character.objectBase.action == SokuLib::ACTION_5AAAAA)
+			return FAKE_ACTION_5AAA6A;
 		return character.objectBase.action;
 	}
 
