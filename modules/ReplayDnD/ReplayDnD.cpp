@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "swrs.h"
+#include <detours.h>
 #include <process.h>
 #include <shlobj.h>
 #include <shlwapi.h>
@@ -7,11 +8,26 @@
 #define CLogo_Process(p) Ccall(p, s_origCLogo_OnProcess, int, ())()
 #define CBattle_Process(p) Ccall(p, s_origCBattle_OnProcess, int, ())()
 
+#define ADDR_SET_VOLUME 0x00403D10
+
+class CDetour {
+public:
+	void SetVolume(float volume);
+	static void (CDetour::*ActualSetVolume)(float volume);
+};
+
+void CDetour::SetVolume(float volume) {
+	(this->*ActualSetVolume)(0);
+}
+
+void (CDetour::*CDetour::ActualSetVolume)(float) = union_cast<void (CDetour::*)(float)>(ADDR_SET_VOLUME);
+
 static DWORD s_origCLogo_OnProcess;
 static DWORD s_origCBattle_OnProcess;
 
 static bool s_swrapt;
 static bool s_autoShutdown;
+static bool s_muteMusic;
 
 int __fastcall CLogo_OnProcess(void *This) {
 	if (CInputManager_ReadReplay(g_inputMgr, __argv[1])) {
@@ -41,6 +57,7 @@ int __fastcall CBattle_OnProcess(void *This) {
 void LoadSettings(LPCSTR profilePath) {
 	// 自動シャットダウン
 	s_autoShutdown = GetPrivateProfileInt("ReplayDnD", "AutoShutdown", 1, profilePath) != 0;
+	s_muteMusic = GetPrivateProfileInt("ReplayDnD", "MuteMusic", 1, profilePath) != 0;
 }
 
 void load_thread(void *unused) {
@@ -126,6 +143,14 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	VirtualProtect((void *)0x007FB5C8, 1, old, &old);
 
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
+
+	if (s_muteMusic) {
+		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
+		void (CDetour::*setVolumeShim)(float) = &CDetour::SetVolume;
+		DetourAttach(&(PVOID &)CDetour::ActualSetVolume, *(PBYTE *)&setVolumeShim);
+		DetourTransactionCommit();
+	}
 
 	_beginthread(load_thread, 0, NULL);
 	return true;
