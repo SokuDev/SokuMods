@@ -68,6 +68,19 @@ namespace Practice
 #define FAKE_ACTION_LILIPAD_ALT1_214c static_cast<SokuLib::Action>(1130)
 #define FAKE_ACTION_LILIPAD_ALT2_214b static_cast<SokuLib::Action>(1131)
 #define FAKE_ACTION_LILIPAD_ALT2_214c static_cast<SokuLib::Action>(1132)
+#define FAKE_ACTION_lSC201 static_cast<SokuLib::Action>(1133)
+#define FAKE_ACTION_jSC201 static_cast<SokuLib::Action>(1134)
+#define FAKE_ACTION_uSC202 static_cast<SokuLib::Action>(1135)
+#define FAKE_ACTION_jSC203 static_cast<SokuLib::Action>(1136)
+#define FAKE_ACTION_lSC203 static_cast<SokuLib::Action>(1137)
+#define FAKE_ACTION_jSC204 static_cast<SokuLib::Action>(1138)
+#define FAKE_ACTION_lSC205 static_cast<SokuLib::Action>(1139)
+#define FAKE_ACTION_uSC205 static_cast<SokuLib::Action>(1140)
+#define FAKE_ACTION_lSC206 static_cast<SokuLib::Action>(1141)
+#define FAKE_ACTION_jSC207 static_cast<SokuLib::Action>(1142)
+#define FAKE_ACTION_lSC209 static_cast<SokuLib::Action>(1143)
+#define FAKE_ACTION_jSC209 static_cast<SokuLib::Action>(1144)
+#define FAKE_ACTION_uSC212 static_cast<SokuLib::Action>(1145)
 
 #define A_SPRITE_POS           Vector2<int>{0,   28}
 #define B_SPRITE_POS           Vector2<int>{32,  28}
@@ -157,6 +170,36 @@ namespace Practice
 			}
 		}
 
+		static unsigned _getSpellIndex(SokuLib::Action action)
+		{
+			switch (action) {
+			case FAKE_ACTION_lSC201:
+			case FAKE_ACTION_jSC201:
+				return 1;
+			case FAKE_ACTION_uSC202:
+				return 2;
+			case FAKE_ACTION_jSC203:
+			case FAKE_ACTION_lSC203:
+				return 3;
+			case FAKE_ACTION_jSC204:
+				return 4;
+			case FAKE_ACTION_lSC205:
+			case FAKE_ACTION_uSC205:
+				return 5;
+			case FAKE_ACTION_lSC206:
+				return 6;
+			case FAKE_ACTION_jSC207:
+				return 7;
+			case FAKE_ACTION_lSC209:
+			case FAKE_ACTION_jSC209:
+				return 9;
+			case FAKE_ACTION_uSC212:
+				return 12;
+			default:
+				return (action - SokuLib::ACTION_USING_SC_ID_200);
+			}
+		}
+
 		void _displayOrreriesSpecialStuff(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
 		{
 			spell.setSize({41 * size.y / 65, size.y});
@@ -200,42 +243,34 @@ namespace Practice
 
 		void _drawSpell(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
 		{
+			unsigned index = MoveSpriteDescriptor::_getSpellIndex(action);
+
 			spell.setSize({41 * size.y / 65, size.y});
 			spell.tint = DxSokuColor::White * alpha;
 			if (reverse) {
-				this->_sprite.setPosition(pos);
-				this->_sprite.rect.top = this->_startRect.y;
-				this->_sprite.rect.left = this->_startRect.x;
-				this->_sprite.rect.width = this->_rectSize.x;
-				this->_sprite.rect.height = this->_rectSize.y;
-				this->_sprite.draw();
+				this->_normalDraw(pos, size, reverse, alpha);
 				pos.x -= size.x;
 				spell.setPosition(pos);
 				spell.rect.top = 0;
-				spell.rect.left = (action - SokuLib::ACTION_USING_SC_ID_200) * 41;
+				spell.rect.left = index * 41;
 				spell.rect.width = 41;
 				spell.rect.height = 65;
 				spell.draw();
 			} else {
 				spell.setPosition(pos);
 				spell.rect.top = 0;
-				spell.rect.left = (action - SokuLib::ACTION_USING_SC_ID_200) * 41;
+				spell.rect.left = index * 41;
 				spell.rect.width = 41;
 				spell.rect.height = 65;
 				spell.draw();
 				pos.x += size.x;
-				this->_sprite.setPosition(pos);
-				this->_sprite.rect.top = this->_startRect.y;
-				this->_sprite.rect.left = this->_startRect.x;
-				this->_sprite.rect.width = this->_rectSize.x;
-				this->_sprite.rect.height = this->_rectSize.y;
-				this->_sprite.draw();
+				this->_normalDraw(pos, size, reverse, alpha);
 			}
 		}
 
 		void _drawSkill(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action) const
 		{
-			int rectPos = this->_getSpriteIndex(action, character);
+			int rectPos = MoveSpriteDescriptor::_getSpriteIndex(action, character);
 			std::vector<Vector2<int>> rects;
 
 			for (auto c : this->_sequences[character]) {
@@ -389,7 +424,7 @@ namespace Practice
 			this->_sprite2.setSize(size);
 			this->_sprite2.tint = (action == FAKE_ACTION_LILIPAD_DESPAWN ? DxSokuColor::Red : DxSokuColor::White) * alpha;
 			//TODO: Find a more elegant way to do this
-			if (action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219)
+			if ((action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219) || (action >= FAKE_ACTION_lSC201 && action <= FAKE_ACTION_uSC212))
 				return this->_drawSpell(spells, pos, size, reverse, action, alpha);
 			else if (action >= SokuLib::ACTION_ORRERIES_B && action <= FAKE_ACTION_ORRERIES_REACTIVATE)
 				return this->_displayOrreriesSpecialStuff(spells, pos, size, reverse, action, alpha);
@@ -1321,6 +1356,71 @@ namespace Practice
 			{LILIPAD_SPRITE_POS, RIGHT_SPRITE_POS, A_SPRITE_POS},
 			{24, 32}
 		} },
+		{ FAKE_ACTION_lSC201, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_jSC201, {
+			inputSheet,
+			{AIR_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_uSC202, {
+			inputSheet,
+			{UNDERGROUND_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_jSC203, {
+			inputSheet,
+			{AIR_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_lSC203, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_jSC204, {
+			inputSheet,
+			{AIR_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_lSC205, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_uSC205, {
+			inputSheet,
+			{UNDERGROUND_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_lSC206, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_jSC207, {
+			inputSheet,
+			{AIR_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_lSC209, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_jSC209, {
+			inputSheet,
+			{AIR_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_uSC212, {
+			inputSheet,
+			{UNDERGROUND_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} }
 	};
 
 	void initInputDisplay(LPCSTR profilePath)
@@ -1439,6 +1539,32 @@ namespace Practice
 				return FAKE_ACTION_LILIPAD_ALT2_214b;
 			case SokuLib::ACTION_ALT2_SKILL1_AIR_C:
 				return FAKE_ACTION_LILIPAD_ALT2_214c;
+			case SokuLib::ACTION_USING_SC_ID_201:
+				return FAKE_ACTION_lSC201;
+			case SokuLib::ACTION_SC_ID_201_ALT_EFFECT:
+				return FAKE_ACTION_jSC201;
+			case SokuLib::ACTION_SC_ID_202_ALT_EFFECT:
+				return FAKE_ACTION_uSC202;
+			case SokuLib::ACTION_SC_ID_203_ALT_EFFECT:
+				return FAKE_ACTION_jSC203;
+			case SokuLib::ACTION_USING_SC_ID_203:
+				return FAKE_ACTION_lSC203;
+			case SokuLib::ACTION_SC_ID_204_ALT_EFFECT:
+				return FAKE_ACTION_jSC204;
+			case SokuLib::ACTION_USING_SC_ID_205:
+				return FAKE_ACTION_lSC205;
+			case SokuLib::ACTION_SC_ID_205_ALT_EFFECT:
+				return FAKE_ACTION_uSC205;
+			case SokuLib::ACTION_SC_ID_206_ALT_EFFECT:
+				return FAKE_ACTION_lSC206;
+			case SokuLib::ACTION_SC_ID_207_ALT_EFFECT:
+				return FAKE_ACTION_jSC207;
+			case SokuLib::ACTION_USING_SC_ID_209:
+				return FAKE_ACTION_lSC209;
+			case SokuLib::ACTION_SC_ID_209_ALT_EFFECT:
+				return FAKE_ACTION_jSC209;
+			case SokuLib::ACTION_USING_SC_ID_212:
+				return FAKE_ACTION_uSC212;
 			default:
 				break;
 			}
@@ -1468,6 +1594,8 @@ namespace Practice
 			if (action == SokuLib::ACTION_SUWAKO_j2D)
 				return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 3 || character.objectBase.actionBlockId == 0);
 			if (action == SokuLib::ACTION_j6C)
+				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0 && character.objectBase.animationCounter == 0;
+			if (action == SokuLib::ACTION_USING_SC_ID_201 || action == SokuLib::ACTION_SC_ID_201_ALT_EFFECT)
 				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0 && character.objectBase.animationCounter == 0;
 		}
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
