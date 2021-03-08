@@ -196,6 +196,8 @@ namespace Practice
 			case FAKE_ACTION_uSC212:
 				return 12;
 			default:
+				if (action >= SokuLib::ACTION_SC_ID_200_ALT_EFFECT)
+					return (action - SokuLib::ACTION_SC_ID_200_ALT_EFFECT);
 				return (action - SokuLib::ACTION_USING_SC_ID_200);
 			}
 		}
@@ -424,7 +426,11 @@ namespace Practice
 			this->_sprite2.setSize(size);
 			this->_sprite2.tint = (action == FAKE_ACTION_LILIPAD_DESPAWN ? DxSokuColor::Red : DxSokuColor::White) * alpha;
 			//TODO: Find a more elegant way to do this
-			if ((action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219) || (action >= FAKE_ACTION_lSC201 && action <= FAKE_ACTION_uSC212))
+			if (
+				(action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219) ||
+				(action >= FAKE_ACTION_lSC201 && action <= FAKE_ACTION_uSC212) ||
+				(action >= SokuLib::ACTION_SC_ID_200_ALT_EFFECT && action <= SokuLib::ACTION_SC_ID_219_ALT_EFFECT)
+			)
 				return this->_drawSpell(spells, pos, size, reverse, action, alpha);
 			else if (action >= SokuLib::ACTION_ORRERIES_B && action <= FAKE_ACTION_ORRERIES_REACTIVATE)
 				return this->_displayOrreriesSpecialStuff(spells, pos, size, reverse, action, alpha);
@@ -1419,6 +1425,11 @@ namespace Practice
 		{ FAKE_ACTION_uSC212, {
 			inputSheet,
 			{UNDERGROUND_SPRITE_POS, SC_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_FANTASY_HEAVEN_ACTIVATE, {
+			inputSheet,
+			{REIMU_SPRITE_POS},
 			{24, 32}
 		} }
 	};
