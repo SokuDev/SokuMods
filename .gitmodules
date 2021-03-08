@@ -6,7 +6,7 @@
 	url = git@github.com:fancycode/MemoryModule.git
 [submodule "modules/SkipIntro/Soku-SkipIntro"]
 	path = modules/SkipIntro/Soku-SkipIntro
-	url = https://github.com/S-len/Soku-SkipIntro.git
+	url = https://github.com/SokuDev/SkipIntro.git
 [submodule "SokuLib"]
 	path = SokuLib
 	url = https://github.com/SokuDev/SokuLib.git
