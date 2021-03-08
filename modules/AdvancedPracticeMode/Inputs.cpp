@@ -1445,12 +1445,15 @@ namespace Practice
 		Texture::loadFromFile(rightScSheet.texture,    (profile +  + "/assets/cards/"  + names[SokuLib::rightChar] + "Spells.png").c_str());
 	}
 
-	bool isCancelableByItself(SokuLib::Action action)
+	bool isCancelableBy(SokuLib::Action last, SokuLib::Action action)
 	{
-		switch (action) {
-		default:
-			return true;
-		}
+		if (last == SokuLib::ACTION_66A && action == SokuLib::ACTION_j5A)
+			return false;
+		if (last == SokuLib::ACTION_ALT2_SKILL3_AIR_B && action == FAKE_ACTION_UNDERGROUND_ALT2_236b)
+			return false;
+		if (last == SokuLib::ACTION_ALT2_SKILL3_AIR_C && action == FAKE_ACTION_UNDERGROUND_ALT2_236c)
+			return false;
+		return true;
 	}
 
 	SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::Character characterId)
@@ -1614,7 +1617,7 @@ namespace Practice
 
 		if (moveSprites.find(realAction) != moveSprites.end()) {
 			printf("%i: action %i|block %i|frame %i|subanim %i|subframe %i\n", realAction, character.objectBase.action, character.objectBase.actionBlockId, character.objectBase.frameCount, character.objectBase.animationCounter, character.objectBase.animationSubFrame);
-			if ((realAction != last.action || isCancelableByItself(realAction)) && isStartOfMove(realAction, character, characterId)) {
+			if (isCancelableBy(last.action, realAction) && isStartOfMove(realAction, character, characterId)) {
 				if (front->action) {
 					list.push_front(list.front());
 					while (list.size() > MAX_LIST_SIZE)
