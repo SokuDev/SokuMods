@@ -82,28 +82,28 @@ namespace Practice
 #define FAKE_ACTION_jSC209 static_cast<SokuLib::Action>(1144)
 #define FAKE_ACTION_uSC212 static_cast<SokuLib::Action>(1145)
 
-#define A_SPRITE_POS           Vector2<int>{0,   28}
-#define B_SPRITE_POS           Vector2<int>{32,  28}
-#define C_SPRITE_POS           Vector2<int>{64,  28}
-#define D_SPRITE_POS           Vector2<int>{96,  28}
-#define CH_SPRITE_POS          Vector2<int>{128, 28}
-#define SC_SPRITE_POS          Vector2<int>{160, 28}
-#define UP_SPRITE_POS          Vector2<int>{0,   -4}
-#define DOWN_SPRITE_POS        Vector2<int>{32,  -4}
-#define LEFT_SPRITE_POS        Vector2<int>{64,  -4}
-#define RIGHT_SPRITE_POS       Vector2<int>{96,  -4}
-#define LEFTUP_SPRITE_POS      Vector2<int>{128, -4}
-#define RIGHTUP_SPRITE_POS     Vector2<int>{160, -4}
-#define RIGHTDOWN_SPRITE_POS   Vector2<int>{192, -4}
-#define LEFTDOWN_SPRITE_POS    Vector2<int>{224, -4}
-#define BE_SPRITE_POS          Vector2<int>{192, 28}
-#define HJ_SPRITE_POS          Vector2<int>{224, 32}
-#define AIR_SPRITE_POS         Vector2<int>{256, 0}
-#define DASH_SPRITE_POS        Vector2<int>{256, 32}
-#define LILIPAD_SPRITE_POS     Vector2<int>{288, 0}
-#define FAR_SPRITE_POS         Vector2<int>{288, 32}
-#define UNDERGROUND_SPRITE_POS Vector2<int>{320, 0}
-#define REIMU_SPRITE_POS       Vector2<int>{320, 32}
+#define A_SPRITE_POS           Vector2<int>{0,   32}
+#define B_SPRITE_POS           Vector2<int>{32,  32}
+#define C_SPRITE_POS           Vector2<int>{64,  32}
+#define D_SPRITE_POS           Vector2<int>{96,  32}
+#define CH_SPRITE_POS          Vector2<int>{128, 32}
+#define SC_SPRITE_POS          Vector2<int>{160, 32}
+#define UP_SPRITE_POS          Vector2<int>{0,   0}
+#define DOWN_SPRITE_POS        Vector2<int>{32,  0}
+#define LEFT_SPRITE_POS        Vector2<int>{64,  0}
+#define RIGHT_SPRITE_POS       Vector2<int>{96,  0}
+#define LEFTUP_SPRITE_POS      Vector2<int>{128, 0}
+#define RIGHTUP_SPRITE_POS     Vector2<int>{160, 0}
+#define RIGHTDOWN_SPRITE_POS   Vector2<int>{192, 0}
+#define LEFTDOWN_SPRITE_POS    Vector2<int>{224, 0}
+#define BE_SPRITE_POS          Vector2<int>{192, 32}
+#define HJ_SPRITE_POS          Vector2<int>{224, 36}
+#define AIR_SPRITE_POS         Vector2<int>{256, 4}
+#define DASH_SPRITE_POS        Vector2<int>{256, 36}
+#define LILIPAD_SPRITE_POS     Vector2<int>{288, 4}
+#define FAR_SPRITE_POS         Vector2<int>{288, 36}
+#define UNDERGROUND_SPRITE_POS Vector2<int>{320, 4}
+#define REIMU_SPRITE_POS       Vector2<int>{320, 36}
 
 	struct MoveState {
 		SokuLib::Action action;
