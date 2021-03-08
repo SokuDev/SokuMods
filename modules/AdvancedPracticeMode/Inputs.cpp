@@ -21,30 +21,74 @@ namespace Practice
 #define MAX_BOX_ALPHA 0.4
 #define SPRITE_SIZE 24
 #define MAX_LIST_SIZE 0x100
-#define FAKE_ACTION_ORRERIES_REACTIVATE static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 1)
-#define FAKE_ACTION_5AAA6A static_cast<SokuLib::Action>(SokuLib::ACTION_j5AA + 1)
-//(BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3)))
 
-#define A_SPRITE_POS         Vector2<int>{0,   28}
-#define B_SPRITE_POS         Vector2<int>{32,  28}
-#define C_SPRITE_POS         Vector2<int>{64,  28}
-#define D_SPRITE_POS         Vector2<int>{96,  28}
-#define CH_SPRITE_POS        Vector2<int>{128, 28}
-#define SC_SPRITE_POS        Vector2<int>{160, 28}
-#define UP_SPRITE_POS        Vector2<int>{0,   -4}
-#define DOWN_SPRITE_POS      Vector2<int>{32,  -4}
-#define LEFT_SPRITE_POS      Vector2<int>{64,  -4}
-#define RIGHT_SPRITE_POS     Vector2<int>{96,  -4}
-#define LEFTUP_SPRITE_POS    Vector2<int>{128, -4}
-#define RIGHTUP_SPRITE_POS   Vector2<int>{160, -4}
-#define RIGHTDOWN_SPRITE_POS Vector2<int>{192, -4}
-#define LEFTDOWN_SPRITE_POS  Vector2<int>{224, -4}
-#define BE_SPRITE_POS        Vector2<int>{192, 28}
-#define HJ_SPRITE_POS        Vector2<int>{224, 32}
-#define AIR_SPRITE_POS       Vector2<int>{256, 0}
-#define DASH_SPRITE_POS      Vector2<int>{256, 32}
-#define LILIPAD_SPRITE_POS   Vector2<int>{288, 0}
-#define FAR_SPRITE_POS       Vector2<int>{288, 32}
+
+#define FAKE_ACTION_ORRERIES_REACTIVATE static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 1)
+#define FAKE_ACTION_5AAA6A static_cast<SokuLib::Action>(1000)
+#define FAKE_ACTION_FLY1 static_cast<SokuLib::Action>(1001)
+#define FAKE_ACTION_FLY2 static_cast<SokuLib::Action>(1002)
+#define FAKE_ACTION_FLY3 static_cast<SokuLib::Action>(1003)
+#define FAKE_ACTION_FLY4 static_cast<SokuLib::Action>(1004)
+#define FAKE_ACTION_FLY6 static_cast<SokuLib::Action>(1005)
+#define FAKE_ACTION_FLY7 static_cast<SokuLib::Action>(1006)
+#define FAKE_ACTION_FLY8 static_cast<SokuLib::Action>(1007)
+#define FAKE_ACTION_FLY9 static_cast<SokuLib::Action>(1008)
+
+//Suwako stuff
+#define FAKE_ACTION_j1D static_cast<SokuLib::Action>(1100)
+#define FAKE_ACTION_j3D static_cast<SokuLib::Action>(1101)
+#define FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP static_cast<SokuLib::Action>(1102)
+#define FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP static_cast<SokuLib::Action>(1103)
+#define FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP static_cast<SokuLib::Action>(1104)
+#define FAKE_ACTION_LILIPAD_A static_cast<SokuLib::Action>(1105)
+#define FAKE_ACTION_LILIPAD_3A static_cast<SokuLib::Action>(1106)
+#define FAKE_ACTION_LILIPAD_2B static_cast<SokuLib::Action>(1107)
+#define FAKE_ACTION_LILIPAD_6B static_cast<SokuLib::Action>(1108)
+#define FAKE_ACTION_LILIPAD_2C static_cast<SokuLib::Action>(1109)
+#define FAKE_ACTION_LILIPAD_SPAWN static_cast<SokuLib::Action>(1110)
+#define FAKE_ACTION_LILIPAD_DESPAWN static_cast<SokuLib::Action>(1111)
+#define FAKE_ACTION_LILIPAD_DEFAULT_22B static_cast<SokuLib::Action>(1112)
+#define FAKE_ACTION_LILIPAD_DEFAULT_22C static_cast<SokuLib::Action>(1113)
+#define FAKE_ACTION_UNDERGROUND_ALT1_22B static_cast<SokuLib::Action>(1114)
+#define FAKE_ACTION_UNDERGROUND_ALT1_22C static_cast<SokuLib::Action>(1115)
+#define FAKE_ACTION_LILIPAD_DEFAULT_623b static_cast<SokuLib::Action>(1116)
+#define FAKE_ACTION_UNDERGROUND_DEFAULT_623b static_cast<SokuLib::Action>(1117)
+#define FAKE_ACTION_UNDERGROUND_DEFAULT_623c static_cast<SokuLib::Action>(1118)
+#define FAKE_ACTION_LILIPAD_ALT1_623b static_cast<SokuLib::Action>(1119)
+#define FAKE_ACTION_LILIPAD_ALT1_623c static_cast<SokuLib::Action>(1120)
+#define FAKE_ACTION_LILIPAD_DEFAULT_236b static_cast<SokuLib::Action>(1121)
+#define FAKE_ACTION_LILIPAD_DEFAULT_236c static_cast<SokuLib::Action>(1122)
+#define FAKE_ACTION_LILIPAD_ALT1_236b static_cast<SokuLib::Action>(1123)
+#define FAKE_ACTION_LILIPAD_ALT1_236c static_cast<SokuLib::Action>(1124)
+#define FAKE_ACTION_LILIPAD_ALT2_236b static_cast<SokuLib::Action>(1125)
+#define FAKE_ACTION_LILIPAD_ALT2_236c static_cast<SokuLib::Action>(1126)
+#define FAKE_ACTION_UNDERGROUND_DEFAULT_214b static_cast<SokuLib::Action>(1127)
+#define FAKE_ACTION_UNDERGROUND_DEFAULT_214c static_cast<SokuLib::Action>(1128)
+#define FAKE_ACTION_LILIPAD_ALT2_214b static_cast<SokuLib::Action>(1129)
+#define FAKE_ACTION_LILIPAD_ALT2_214c static_cast<SokuLib::Action>(1130)
+
+#define A_SPRITE_POS           Vector2<int>{0,   28}
+#define B_SPRITE_POS           Vector2<int>{32,  28}
+#define C_SPRITE_POS           Vector2<int>{64,  28}
+#define D_SPRITE_POS           Vector2<int>{96,  28}
+#define CH_SPRITE_POS          Vector2<int>{128, 28}
+#define SC_SPRITE_POS          Vector2<int>{160, 28}
+#define UP_SPRITE_POS          Vector2<int>{0,   -4}
+#define DOWN_SPRITE_POS        Vector2<int>{32,  -4}
+#define LEFT_SPRITE_POS        Vector2<int>{64,  -4}
+#define RIGHT_SPRITE_POS       Vector2<int>{96,  -4}
+#define LEFTUP_SPRITE_POS      Vector2<int>{128, -4}
+#define RIGHTUP_SPRITE_POS     Vector2<int>{160, -4}
+#define RIGHTDOWN_SPRITE_POS   Vector2<int>{192, -4}
+#define LEFTDOWN_SPRITE_POS    Vector2<int>{224, -4}
+#define BE_SPRITE_POS          Vector2<int>{192, 28}
+#define HJ_SPRITE_POS          Vector2<int>{224, 32}
+#define AIR_SPRITE_POS         Vector2<int>{256, 0}
+#define DASH_SPRITE_POS        Vector2<int>{256, 32}
+#define LILIPAD_SPRITE_POS     Vector2<int>{288, 0}
+#define FAR_SPRITE_POS         Vector2<int>{288, 32}
+#define UNDERGROUND_SPRITE_POS Vector2<int>{320, 0}
+#define REIMU_SPRITE_POS       Vector2<int>{320, 32}
 
 	struct MoveState {
 		SokuLib::Action action;
@@ -178,6 +222,12 @@ namespace Practice
 					break;
 				case 'j':
 					rects.push_back(AIR_SPRITE_POS);
+					break;
+				case 'l':
+					rects.push_back(LILIPAD_SPRITE_POS);
+					break;
+				case 'u':
+					rects.push_back(UNDERGROUND_SPRITE_POS);
 					break;
 				default:
 					abort();
@@ -761,32 +811,32 @@ namespace Practice
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_B, {
 			inputSheet,
-			{"i", "i", "i", "i", "421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_C, {
 			inputSheet,
-			{"i", "i", "i", "i", "421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_B, {
 			inputSheet,
-			{"i", "i", "i", "i", "421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_C, {
 			inputSheet,
-			{"i", "i", "i", "i", "421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_B, {
 			inputSheet,
-			{"i", "i", "i", "i", "421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_C, {
 			inputSheet,
-			{"i", "i", "i", "i", "421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL1_AIR_B, {
@@ -911,32 +961,32 @@ namespace Practice
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_AIR_B, {
 			inputSheet,
-			{"i", "i", "i", "i", "j421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "j421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_AIR_C, {
 			inputSheet,
-			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "j421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_AIR_B, {
 			inputSheet,
-			{"i", "i", "i", "i", "j421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "j421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_AIR_C, {
 			inputSheet,
-			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "j421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_AIR_B, {
 			inputSheet,
-			{"i", "i", "i", "i", "j421b", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "j421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_AIR_C, {
 			inputSheet,
-			{"i", "i", "i", "i", "j421c", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i", "i"},
+			{"", "", "", "", "j421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_USING_SC_ID_200, { inputSheet, SC_SPRITE_POS, {24, 32} } },
@@ -1127,6 +1177,7 @@ namespace Practice
 		auto *front = &list.front();
 
 		if (moveSprites.find(realAction) != moveSprites.end()) {
+			printf("%i: action %i|block %i|frame %i|subanim %i|subframe %i\n", realAction, character.objectBase.action, character.objectBase.actionBlockId, character.objectBase.frameCount, character.objectBase.animationCounter, character.objectBase.animationSubFrame);
 			if ((realAction != last.action || isCancelableByItself(realAction)) && isStartOfMove(realAction, character, characterId)) {
 				if (front->action) {
 					list.push_front(list.front());
@@ -1140,8 +1191,11 @@ namespace Practice
 			last.animation = character.objectBase.animationCounter;
 			last.subFrames = character.objectBase.animationSubFrame;
 			last.frames = character.objectBase.frameCount;
-		} else
+		} else {
 			last.action = SokuLib::ACTION_IDLE;
+			if (realAction)
+				printf("Unknown action %i\n", realAction);
+		}
 		front->duration++;
 	}
 
