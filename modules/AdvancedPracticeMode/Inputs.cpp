@@ -56,16 +56,18 @@ namespace Practice
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_623c static_cast<SokuLib::Action>(1118)
 #define FAKE_ACTION_LILIPAD_ALT1_623b static_cast<SokuLib::Action>(1119)
 #define FAKE_ACTION_LILIPAD_ALT1_623c static_cast<SokuLib::Action>(1120)
-#define FAKE_ACTION_LILIPAD_DEFAULT_236b static_cast<SokuLib::Action>(1121)
-#define FAKE_ACTION_LILIPAD_DEFAULT_236c static_cast<SokuLib::Action>(1122)
-#define FAKE_ACTION_LILIPAD_ALT1_236b static_cast<SokuLib::Action>(1123)
-#define FAKE_ACTION_LILIPAD_ALT1_236c static_cast<SokuLib::Action>(1124)
-#define FAKE_ACTION_LILIPAD_ALT2_236b static_cast<SokuLib::Action>(1125)
-#define FAKE_ACTION_LILIPAD_ALT2_236c static_cast<SokuLib::Action>(1126)
+#define FAKE_ACTION_UNDERGROUND_DEFAULT_236b static_cast<SokuLib::Action>(1121)
+#define FAKE_ACTION_UNDERGROUND_DEFAULT_236c static_cast<SokuLib::Action>(1122)
+#define FAKE_ACTION_UNDERGROUND_ALT1_236b static_cast<SokuLib::Action>(1123)
+#define FAKE_ACTION_UNDERGROUND_ALT1_236c static_cast<SokuLib::Action>(1124)
+#define FAKE_ACTION_UNDERGROUND_ALT2_236b static_cast<SokuLib::Action>(1125)
+#define FAKE_ACTION_UNDERGROUND_ALT2_236c static_cast<SokuLib::Action>(1126)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_214b static_cast<SokuLib::Action>(1127)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_214c static_cast<SokuLib::Action>(1128)
-#define FAKE_ACTION_LILIPAD_ALT2_214b static_cast<SokuLib::Action>(1129)
-#define FAKE_ACTION_LILIPAD_ALT2_214c static_cast<SokuLib::Action>(1130)
+#define FAKE_ACTION_LILIPAD_ALT1_214b static_cast<SokuLib::Action>(1129)
+#define FAKE_ACTION_LILIPAD_ALT1_214c static_cast<SokuLib::Action>(1130)
+#define FAKE_ACTION_LILIPAD_ALT2_214b static_cast<SokuLib::Action>(1131)
+#define FAKE_ACTION_LILIPAD_ALT2_214c static_cast<SokuLib::Action>(1132)
 
 #define A_SPRITE_POS           Vector2<int>{0,   28}
 #define B_SPRITE_POS           Vector2<int>{32,  28}
@@ -113,6 +115,47 @@ namespace Practice
 		std::vector<Vector2<int>> _rects;
 		Vector2<unsigned> _rectSize;
 		Vector2<unsigned> _rectSize2;
+
+		static unsigned _getSpriteIndex(SokuLib::Action action, SokuLib::Character character)
+		{
+			switch (action) {
+			case FAKE_ACTION_LILIPAD_DEFAULT_22B:
+			case FAKE_ACTION_LILIPAD_DEFAULT_22C:
+				return 3;
+			case FAKE_ACTION_UNDERGROUND_ALT1_22B:
+			case FAKE_ACTION_UNDERGROUND_ALT1_22C:
+				return 7;
+			case FAKE_ACTION_LILIPAD_DEFAULT_623b:
+			case FAKE_ACTION_UNDERGROUND_DEFAULT_623b:
+			case FAKE_ACTION_UNDERGROUND_DEFAULT_623c:
+				return 1;
+			case FAKE_ACTION_LILIPAD_ALT1_623b:
+			case FAKE_ACTION_LILIPAD_ALT1_623c:
+				return 5;
+			case FAKE_ACTION_UNDERGROUND_DEFAULT_236b:
+			case FAKE_ACTION_UNDERGROUND_DEFAULT_236c:
+				return 2;
+			case FAKE_ACTION_UNDERGROUND_ALT1_236b:
+			case FAKE_ACTION_UNDERGROUND_ALT1_236c:
+				return 6;
+			case FAKE_ACTION_UNDERGROUND_ALT2_236b:
+			case FAKE_ACTION_UNDERGROUND_ALT2_236c:
+				return 10;
+			case FAKE_ACTION_UNDERGROUND_DEFAULT_214b:
+			case FAKE_ACTION_UNDERGROUND_DEFAULT_214c:
+				return 0;
+			case FAKE_ACTION_LILIPAD_ALT1_214b:
+			case FAKE_ACTION_LILIPAD_ALT1_214c:
+				return 4;
+			case FAKE_ACTION_LILIPAD_ALT2_214b:
+			case FAKE_ACTION_LILIPAD_ALT2_214c:
+				return 8;
+			default:
+				int move = ((action - 500) / 20) * 3 + ((action - 500) % 20 / 5);
+
+				return (move % 3) * (4 + (character == SokuLib::CHARACTER_PATCHOULI)) + move / 3;
+			}
+		}
 
 		void _displayOrreriesSpecialStuff(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
 		{
@@ -192,9 +235,7 @@ namespace Practice
 
 		void _drawSkill(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action) const
 		{
-			int nb = 4 + (character == SokuLib::CHARACTER_PATCHOULI);
-			int move = ((action - 500) / 20) * 3 + ((action - 500) % 20 / 5);
-			int rectPos = (move % 3) * nb + move / 3;
+			int rectPos = this->_getSpriteIndex(action, character);
 			std::vector<Vector2<int>> rects;
 
 			for (auto c : this->_sequences[character]) {
@@ -270,8 +311,6 @@ namespace Practice
 
 		void _normalDraw(Vector2<int> pos, Vector2<unsigned> size, bool reverse, float alpha = 1) const
 		{
-			this->_sprite2.setSize(size);
-			this->_sprite2.tint = DxSokuColor::White * alpha;
 			if (reverse) {
 				for (unsigned i = this->_rects.size(); i > 0; i--) {
 					this->_sprite.setPosition(pos);
@@ -347,6 +386,8 @@ namespace Practice
 		{
 			this->_sprite.setSize(size);
 			this->_sprite.tint = DxSokuColor::White * alpha;
+			this->_sprite2.setSize(size);
+			this->_sprite2.tint = (action == FAKE_ACTION_LILIPAD_DESPAWN ? DxSokuColor::Red : DxSokuColor::White) * alpha;
 			//TODO: Find a more elegant way to do this
 			if (action >= SokuLib::ACTION_USING_SC_ID_200 && action <= SokuLib::ACTION_USING_SC_ID_219)
 				return this->_drawSpell(spells, pos, size, reverse, action, alpha);
@@ -1100,6 +1141,186 @@ namespace Practice
 			{A_SPRITE_POS, A_SPRITE_POS, A_SPRITE_POS, RIGHTDOWN_SPRITE_POS, A_SPRITE_POS},
 			{24, 32}
 		} },
+		{ FAKE_ACTION_j1D, {
+			inputSheet,
+			{AIR_SPRITE_POS, LEFTDOWN_SPRITE_POS, DASH_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_j3D, {
+			inputSheet,
+			{AIR_SPRITE_POS, RIGHTDOWN_SPRITE_POS, DASH_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, UP_SPRITE_POS, HJ_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, RIGHTUP_SPRITE_POS, HJ_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, LEFTUP_SPRITE_POS, HJ_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_A, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, A_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_3A, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, RIGHTDOWN_SPRITE_POS, A_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_2B, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, DOWN_SPRITE_POS, B_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_6B, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, RIGHT_SPRITE_POS, B_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_2C, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, DOWN_SPRITE_POS, C_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_SPAWN, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_DESPAWN, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_DEFAULT_22B, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l22b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_DEFAULT_22C, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l22c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_ALT1_22B, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u22b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_ALT1_22C, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u22c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_DEFAULT_623b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l623b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_DEFAULT_623b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u623b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_DEFAULT_623c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u623c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_ALT1_623b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l623b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_ALT1_623c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l623c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_DEFAULT_236b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_DEFAULT_236c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_ALT1_236b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_ALT1_236c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_ALT2_236b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_ALT2_236c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_DEFAULT_214b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u214b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_UNDERGROUND_DEFAULT_214c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u214c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_ALT1_214b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_ALT1_214c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214c"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_ALT2_214b, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214b"},
+			{24, 32}
+		} },
+		{ FAKE_ACTION_LILIPAD_ALT2_214c, {
+			inputSheet,
+			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214c"},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_SUWAKO_j2D, {
+			inputSheet,
+			{AIR_SPRITE_POS, DOWN_SPRITE_POS, DASH_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_SUWAKO_3A, {
+			inputSheet,
+			{RIGHTDOWN_SPRITE_POS, A_SPRITE_POS},
+			{24, 32}
+		} },
+		{ SokuLib::ACTION_SUWAKO_LILIPAD_6A, {
+			inputSheet,
+			{LILIPAD_SPRITE_POS, RIGHT_SPRITE_POS, A_SPRITE_POS},
+			{24, 32}
+		} },
 	};
 
 	void initInputDisplay(LPCSTR profilePath)
@@ -1140,6 +1361,87 @@ namespace Practice
 			return static_cast<SokuLib::Action>(character.objectBase.action - 1);
 		if (characterId == SokuLib::CHARACTER_MEILING && character.objectBase.action == SokuLib::ACTION_5AAAAA)
 			return FAKE_ACTION_5AAA6A;
+		//My mom says I am special !
+		if (characterId == SokuLib::CHARACTER_SUWAKO)
+			switch (character.objectBase.action) {
+			case SokuLib::ACTION_NEUTRAL_HIGH_JUMP:
+				if (character.objectBase.actionBlockId == 4)
+					return FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP;
+				break;
+			case SokuLib::ACTION_BACKWARD_HIGH_JUMP:
+				if (character.objectBase.actionBlockId == 4)
+					return FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP;
+				break;
+			case SokuLib::ACTION_FORWARD_HIGH_JUMP:
+				if (character.objectBase.actionBlockId == 4)
+					return FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP;
+				break;
+			case SokuLib::ACTION_SUWAKO_j1D_j3D:
+				printf("%f\n", character.objectBase.speed.x);
+				if (copysign(1, character.objectBase.speed.x) == character.objectBase.direction)
+					return FAKE_ACTION_j3D;
+				return FAKE_ACTION_j1D;
+			case SokuLib::ACTION_2A:
+				return FAKE_ACTION_LILIPAD_A;
+			case SokuLib::ACTION_3A:
+				return FAKE_ACTION_LILIPAD_3A;
+			case SokuLib::ACTION_2B:
+				return FAKE_ACTION_LILIPAD_2B;
+			case SokuLib::ACTION_3B:
+				return FAKE_ACTION_LILIPAD_6B;
+			case SokuLib::ACTION_2C:
+				return FAKE_ACTION_LILIPAD_2C;
+			case SokuLib::ACTION_CROUCHING:
+				return FAKE_ACTION_LILIPAD_SPAWN;
+			case SokuLib::ACTION_STANDING_UP:
+				return FAKE_ACTION_LILIPAD_DESPAWN;
+			case SokuLib::ACTION_DEFAULT_SKILL4_AIR_B:
+				return FAKE_ACTION_LILIPAD_DEFAULT_22B;
+			case SokuLib::ACTION_DEFAULT_SKILL4_AIR_C:
+				return FAKE_ACTION_LILIPAD_DEFAULT_22C;
+			case SokuLib::ACTION_ALT1_SKILL4_AIR_B:
+				return FAKE_ACTION_UNDERGROUND_ALT1_22B;
+			case SokuLib::ACTION_ALT1_SKILL4_AIR_C:
+				return FAKE_ACTION_UNDERGROUND_ALT1_22C;
+			case SokuLib::ACTION_DEFAULT_SKILL2_AIR_B:
+				if (character.objectBase.actionBlockId == 6)
+					return FAKE_ACTION_UNDERGROUND_DEFAULT_623c;
+				return FAKE_ACTION_LILIPAD_DEFAULT_623b;
+			case SokuLib::ACTION_DEFAULT_SKILL2_B:
+				if (character.objectBase.actionBlockId == 6)
+					return FAKE_ACTION_UNDERGROUND_DEFAULT_623b;
+				break;
+			case SokuLib::ACTION_ALT1_SKILL2_B:
+				return FAKE_ACTION_LILIPAD_ALT1_623b;
+			case SokuLib::ACTION_ALT1_SKILL2_C:
+				return FAKE_ACTION_LILIPAD_ALT1_623c;
+			case SokuLib::ACTION_DEFAULT_SKILL3_B:
+				return FAKE_ACTION_UNDERGROUND_DEFAULT_236b;
+			case SokuLib::ACTION_DEFAULT_SKILL3_C:
+				return FAKE_ACTION_UNDERGROUND_DEFAULT_236c;
+			case SokuLib::ACTION_ALT1_SKILL3_B:
+				return FAKE_ACTION_UNDERGROUND_ALT1_236b;
+			case SokuLib::ACTION_ALT1_SKILL3_C:
+				return FAKE_ACTION_UNDERGROUND_ALT1_236c;
+			case SokuLib::ACTION_ALT2_SKILL3_B:
+				return FAKE_ACTION_UNDERGROUND_ALT2_236b;
+			case SokuLib::ACTION_ALT2_SKILL3_C:
+				return FAKE_ACTION_UNDERGROUND_ALT2_236c;
+			case SokuLib::ACTION_DEFAULT_SKILL1_B:
+				return FAKE_ACTION_UNDERGROUND_DEFAULT_214b;
+			case SokuLib::ACTION_DEFAULT_SKILL1_C:
+				return FAKE_ACTION_UNDERGROUND_DEFAULT_214c;
+			case SokuLib::ACTION_ALT1_SKILL1_AIR_B:
+				return FAKE_ACTION_LILIPAD_ALT1_214b;
+			case SokuLib::ACTION_ALT1_SKILL1_AIR_C:
+				return FAKE_ACTION_LILIPAD_ALT1_214c;
+			case SokuLib::ACTION_ALT2_SKILL1_AIR_B:
+				return FAKE_ACTION_LILIPAD_ALT2_214b;
+			case SokuLib::ACTION_ALT2_SKILL1_AIR_C:
+				return FAKE_ACTION_LILIPAD_ALT2_214c;
+			default:
+				break;
+			}
 		return character.objectBase.action;
 	}
 
@@ -1154,14 +1456,23 @@ namespace Practice
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
 		if (characterId == SokuLib::CHARACTER_AYA && action == SokuLib::ACTION_66B)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
-		if (characterId == SokuLib::CHARACTER_SUWAKO && (action == SokuLib::ACTION_DEFAULT_SKILL2_B || action == SokuLib::ACTION_DEFAULT_SKILL2_AIR_B))
-			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 6 || character.objectBase.actionBlockId == 0);
 		if (characterId == SokuLib::CHARACTER_REMILIA && action == SokuLib::ACTION_ALT1_SKILL1_B)
 			return character.objectBase.frameCount == 0;
 		if (characterId == SokuLib::CHARACTER_YOUMU && action == SokuLib::ACTION_DEFAULT_SKILL3_B)
 			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId < 3);
-		if (characterId == SokuLib::CHARACTER_SUWAKO && action >= SokuLib::ACTION_NEUTRAL_HIGH_JUMP && action <= SokuLib::ACTION_BACKWARD_HIGH_JUMP)
-			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 0 || character.objectBase.actionBlockId == 4);
+
+		if (characterId == SokuLib::CHARACTER_SUWAKO) {
+			if (action == FAKE_ACTION_UNDERGROUND_DEFAULT_623c || action == FAKE_ACTION_UNDERGROUND_DEFAULT_623b)
+				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 6;
+			if (action >= FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP && action <= FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP)
+				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 4;
+			if (action == FAKE_ACTION_j1D || action == FAKE_ACTION_j3D)
+				return character.objectBase.frameCount == 10 && (character.objectBase.actionBlockId == 3 || character.objectBase.actionBlockId == 0);
+			if (action == SokuLib::ACTION_SUWAKO_j2D)
+				return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 3 || character.objectBase.actionBlockId == 0);
+			if (action == SokuLib::ACTION_j6C)
+				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0 && character.objectBase.animationCounter == 0;
+		}
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
 	}
 
@@ -1193,7 +1504,7 @@ namespace Practice
 			last.frames = character.objectBase.frameCount;
 		} else {
 			last.action = SokuLib::ACTION_IDLE;
-			if (realAction)
+			if (realAction >= 200)
 				printf("Unknown action %i\n", realAction);
 		}
 		front->duration++;
