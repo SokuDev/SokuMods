@@ -1449,10 +1449,7 @@ namespace Practice
 	{
 		if (action == FAKE_ACTION_ORRERIES_REACTIVATE)
 			return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 1;
-		if (
-			characterId == SokuLib::CHARACTER_YUKARI &&
-			(action == SokuLib::ACTION_4A || action == SokuLib::ACTION_5A)
-		)
+		if (characterId == SokuLib::CHARACTER_YUKARI && (action == SokuLib::ACTION_4A || action == SokuLib::ACTION_5A))
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
 		if (characterId == SokuLib::CHARACTER_AYA && action == SokuLib::ACTION_66B)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
