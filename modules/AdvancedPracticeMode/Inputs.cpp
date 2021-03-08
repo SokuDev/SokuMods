@@ -1610,6 +1610,11 @@ namespace Practice
 				return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 0 || character.objectBase.actionBlockId == 6);
 		}
 
+		if (characterId == SokuLib::CHARACTER_REIMU) {
+			if (action == SokuLib::ACTION_ALT1_SKILL4_B || action == SokuLib::ACTION_ALT1_SKILL4_C)
+				return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 0 || character.objectBase.actionBlockId == 2 || character.objectBase.actionBlockId == 7);
+		}
+
 		if (characterId == SokuLib::CHARACTER_SUWAKO) {
 			if (action == FAKE_ACTION_UNDERGROUND_DEFAULT_623c || action == FAKE_ACTION_UNDERGROUND_DEFAULT_623b)
 				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 6;
