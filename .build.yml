@@ -2,12 +2,17 @@ image: archlinux
 packages:
   - curl
   - unzip
-  - msitools
   - zip
   - cmake-git
   - clang
   - llvm
   - lld
+  # msitools deps
+  - libgsf
+  - gcab
+  - intltool
+  - vala
+  - tar
 sources:
   - https://github.com/SokuDev/SokuMods
 secrets:
@@ -15,6 +20,14 @@ secrets:
 tasks:
   - check: |
       [ "$GITHUB_REF" = "refs/heads/master" ] || complete-build
+  - msitools: |
+      # msitools 0.101 is broken on AUR, build 0.100 ourselves
+      curl http://ftp.gnome.org/pub/GNOME/sources/msitools/0.100/msitools-0.100.tar.xz -L -o - | tar xJf -
+      cd msitools-*
+      ./configure --prefix=/usr
+      sed -i 's|LIBTOOL = $(SHELL) $(top_builddir)/libtool|LIBTOOL = /usr/bin/libtool|g' Makefile
+      make
+      sudo make install
   - setup: |
       cd SokuMods
       sh setup.sh
