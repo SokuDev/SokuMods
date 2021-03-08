@@ -1475,6 +1475,10 @@ namespace Practice
 			return static_cast<SokuLib::Action>(character.objectBase.action - 1);
 		if (characterId == SokuLib::CHARACTER_MEILING && character.objectBase.action == SokuLib::ACTION_5AAAAA)
 			return FAKE_ACTION_5AAA6A;
+		if (characterId == SokuLib::CHARACTER_YOUMU && character.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL3_B && character.objectBase.actionBlockId == 6)
+			return SokuLib::ACTION_DEFAULT_SKILL3_C;
+		if (characterId == SokuLib::CHARACTER_REMILIA && character.objectBase.action == SokuLib::ACTION_ALT1_SKILL1_B && character.objectBase.actionBlockId == 3)
+			return SokuLib::ACTION_ALT1_SKILL1_C;
 		//My mom says I am special !
 		if (characterId == SokuLib::CHARACTER_SUWAKO)
 			switch (character.objectBase.action) {
@@ -1593,10 +1597,18 @@ namespace Practice
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
 		if (characterId == SokuLib::CHARACTER_AYA && action == SokuLib::ACTION_66B)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
-		if (characterId == SokuLib::CHARACTER_REMILIA && action == SokuLib::ACTION_ALT1_SKILL1_B)
-			return character.objectBase.frameCount == 0;
-		if (characterId == SokuLib::CHARACTER_YOUMU && action == SokuLib::ACTION_DEFAULT_SKILL3_B)
-			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId < 3);
+
+		if (characterId == SokuLib::CHARACTER_REMILIA) {
+			if (action == SokuLib::ACTION_ALT1_SKILL1_B || action == SokuLib::ACTION_ALT1_SKILL1_C)
+				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId < 4;
+		}
+
+		if (characterId == SokuLib::CHARACTER_YOUMU) {
+			if (action == SokuLib::ACTION_DEFAULT_SKILL3_B)
+				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId < 3;
+			if (action == SokuLib::ACTION_DEFAULT_SKILL3_C)
+				return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 0 || character.objectBase.actionBlockId == 6);
+		}
 
 		if (characterId == SokuLib::CHARACTER_SUWAKO) {
 			if (action == FAKE_ACTION_UNDERGROUND_DEFAULT_623c || action == FAKE_ACTION_UNDERGROUND_DEFAULT_623b)
