@@ -119,6 +119,8 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 }
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
+	_beginthread(load_thread, 0, NULL);
+
 	if (__argc != 2 || !StrStrI(__argv[1], "rep")) {
 		return true;
 	}
@@ -151,8 +153,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		DetourAttach(&(PVOID &)CDetour::ActualSetVolume, *(PBYTE *)&setVolumeShim);
 		DetourTransactionCommit();
 	}
-
-	_beginthread(load_thread, 0, NULL);
 	return true;
 }
 

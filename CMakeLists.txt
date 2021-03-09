@@ -292,7 +292,7 @@ target_link_libraries(ReDelay SokuLib)
 
 module(ReplayDnD)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
-target_link_libraries(ReplayDnD detours)
+target_link_libraries(ReplayDnD detours shlwapi shell32)
 
 module(ReplayReSync)
 target_sources(ReplayReSync PRIVATE
