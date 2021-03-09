@@ -406,8 +406,9 @@ __declspec(naked) static void Thunk_CHandleManager_Deallocate(void *p, int id) {
 #define g_rightCharID (*reinterpret_cast<int *>(ADDR_RCHARID))
 /*
 // argc/argv
-#define __argc       (*(int*)0x00887B38)
-#define __argv       (*(char***)0x00887B3C)
+actual 1.10a argc and argv values, but might conflict with existing mods
+#define __argc       (*(int*)0x0089AB5C)
+#define __argv       (*(char***)0x0089AB60)
 
 */
 // 仮想関数テーブル
