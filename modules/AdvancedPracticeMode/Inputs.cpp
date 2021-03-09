@@ -3,8 +3,10 @@
 //
 
 #include <SokuLib.hpp>
+#include <d3d9.h>
 #include <list>
 #include <utility>
+#include <d3dx9.h>
 #include "DrawUtils.hpp"
 #include "Inputs.hpp"
 #include "Gui.hpp"
@@ -14,13 +16,14 @@ namespace Practice
 {
 #define BOX_WIDTH 170
 #define BOX_WIDTH2 116
-#define BOX_HEIGHT 340
-#define MIN_ALPHA 0.5
+#define BOX_HEIGHT 354
+#define MIN_ALPHA 0.25
 #define MAX_ALPHA 1.0
-#define MIN_BOX_ALPHA 0.1
+#define MIN_BOX_ALPHA 0
 #define MAX_BOX_ALPHA 0.4
 #define SPRITE_SIZE 24
 #define MAX_LIST_SIZE 0x100
+#define FRAMES_SIZE 16
 
 
 #define FAKE_ACTION_ORRERIES_REACTIVATE static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 1)
@@ -475,8 +478,11 @@ namespace Practice
 	};
 	static GradiantRect leftBox;
 	static GradiantRect rightBox;
+	static std::vector<Vector2<float>> leftLastInputList;
+	static std::vector<Vector2<float>> rightLastInputList;
 	static std::list<Input> leftInputList;
 	static std::list<Input> rightInputList;
+	static ID3DXLine *line[FRAMES_SIZE] = {nullptr};
 	static Sprite leftSkillSheet;
 	static Sprite rightSkillSheet;
 	static Sprite leftScSheet;
@@ -1440,7 +1446,11 @@ namespace Practice
 
 		leftInputList.clear();
 		rightInputList.clear();
-		leftBox.setPosition({0, 60});
+		leftLastInputList.clear();
+		rightLastInputList.clear();
+		leftLastInputList.resize(FRAMES_SIZE);
+		rightLastInputList.resize(FRAMES_SIZE);
+		leftBox.setPosition({0, 0});
 		leftBox.fillColors[GradiantRect::RECT_TOP_LEFT_CORNER]    = leftBox.fillColors[GradiantRect::RECT_TOP_RIGHT_CORNER]    = DxSokuColor::Black * MIN_BOX_ALPHA;
 		leftBox.fillColors[GradiantRect::RECT_BOTTOM_LEFT_CORNER] = leftBox.fillColors[GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = DxSokuColor::Black * MAX_BOX_ALPHA;
 		leftBox.borderColors[0] = leftBox.borderColors[1] = leftBox.borderColors[2] = leftBox.borderColors[3] = DxSokuColor::Transparent;
@@ -1450,6 +1460,11 @@ namespace Practice
 			Texture::loadFromFile(inputSheet.texture, (profile + "/assets/inputs.png").c_str());
 		if (!systemsSheet.texture.hasTexture())
 			Texture::loadFromFile(systemsSheet.texture, (profile + "/assets/cards/systemCards.png").c_str());
+		if (!line[0])
+			for (int i = 0; i < FRAMES_SIZE; i++) {
+				D3DXCreateLine(SokuLib::pd3dDev, &line[i]);
+				line[i]->SetWidth(i * 10.f / FRAMES_SIZE);
+			}
 		Texture::loadFromFile(leftSkillSheet.texture,  (profile +  + "/assets/skills/" + names[SokuLib::leftChar]  + "Skills.png").c_str());
 		Texture::loadFromFile(rightSkillSheet.texture, (profile +  + "/assets/skills/" + names[SokuLib::rightChar] + "Skills.png").c_str());
 		Texture::loadFromFile(leftScSheet.texture,     (profile +  + "/assets/cards/"  + names[SokuLib::leftChar]  + "Spells.png").c_str());
@@ -1632,13 +1647,30 @@ namespace Practice
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
 	}
 
-	void updateList(std::list<Input> &list, SokuLib::CharacterManager &character, MoveState &last, SokuLib::Character characterId)
+	Vector2<float> keyMapToVertex(const SokuLib::KeyInput &input)
+	{
+		Vector2<int> pos{
+			(input.horizontalAxis > 0) - (input.horizontalAxis < 0),
+			(input.verticalAxis > 0) - (input.verticalAxis < 0)
+		};
+		double angle = atan2(pos.y, pos.x);
+
+		return Vector2<float>{
+			pos.x ? static_cast<float>(cos(angle) * 16) : 0,
+			pos.y ? static_cast<float>(sin(angle) * 16) : 0
+		};
+	}
+
+	void updateList(std::list<Input> &list, std::vector<Vector2<float>> &lastInputs, SokuLib::CharacterManager &character, MoveState &last, SokuLib::Character characterId)
 	{
 		if (list.empty() || list.front().input != character.keyMap) {
 			list.push_front({character.keyMap, 1, SokuLib::ACTION_IDLE});
 			while (list.size() > MAX_LIST_SIZE)
 				list.pop_back();
 		}
+
+		lastInputs.push_back(keyMapToVertex(character.keyMap));
+		lastInputs.erase(lastInputs.begin());
 
 		auto realAction = addCustomActions(character, characterId);
 		auto *front = &list.front();
@@ -1668,8 +1700,8 @@ namespace Practice
 
 	void updateInputLists()
 	{
-		updateList(leftInputList,  SokuLib::getBattleMgr().leftCharacterManager,  lastLeftMove,  SokuLib::leftChar);
-		updateList(rightInputList, SokuLib::getBattleMgr().rightCharacterManager, lastRightMove, SokuLib::rightChar);
+		updateList(leftInputList,  leftLastInputList,  SokuLib::getBattleMgr().leftCharacterManager,  lastLeftMove,  SokuLib::leftChar);
+		updateList(rightInputList, rightLastInputList, SokuLib::getBattleMgr().rightCharacterManager, lastRightMove, SokuLib::rightChar);
 	}
 
 	void showInput(int value, Vector2<int> &pos, Vector2<int> sheetPos, bool goLeft)
@@ -1713,12 +1745,12 @@ namespace Practice
 
 			inputSheet.tint = DxSokuColor::White * alpha;
 			showInput(dir != 5, offset, dirSheetOffset[dir - 1], reversed);
-			showInput(input.input.a, offset, {0, 32}, reversed);
-			showInput(input.input.b, offset, {32, 32}, reversed);
-			showInput(input.input.c, offset, {64, 32}, reversed);
-			showInput(input.input.d, offset, {96, 32}, reversed);
-			showInput(input.input.changeCard, offset, {128, 32}, reversed);
-			showInput(input.input.spellcard, offset, {160, 32}, reversed);
+			showInput(input.input.a, offset, {0, 36}, reversed);
+			showInput(input.input.b, offset, {32, 36}, reversed);
+			showInput(input.input.c, offset, {64, 36}, reversed);
+			showInput(input.input.d, offset, {96, 36}, reversed);
+			showInput(input.input.changeCard, offset, {128, 36}, reversed);
+			showInput(input.input.spellcard, offset, {160, 36}, reversed);
 
 			auto it = moveSprites.find(input.action);
 
@@ -1763,31 +1795,102 @@ namespace Practice
 		}
 	}
 
+	void drawJoypad(const std::vector<Vector2<float>> &list, Vector2<int> offset)
+	{
+		std::vector<D3DXVECTOR2> points;
+
+		inputSheet.tint = DxSokuColor::White;
+		inputSheet.rect.width = 64;
+		inputSheet.rect.height = 64;
+		inputSheet.rect.top = 4;
+		inputSheet.rect.left = 352;
+		inputSheet.setSize({64, 64});
+		inputSheet.setPosition(offset);
+		inputSheet.draw();
+
+		inputSheet.rect.left = 416;
+		inputSheet.setPosition(offset + list.back());
+		inputSheet.draw();
+
+		auto base = offset + Vector2<int>{32, 32};
+
+		for (int i = 0; i < list.size() - 1; i++) {
+			D3DXVECTOR2 points[2];
+
+			if (list[i] == list[i + 1])
+				continue;
+
+			points[0] = list[i] + base;
+			points[1] = list[i + 1] + base;
+			line[i]->Draw(points, 2, DxSokuColor::Black);
+		}
+	}
+
+	void drawKeys(const SokuLib::KeyInput &current, Vector2<int> offset, bool reversed)
+	{
+		inputSheet.rect.width = 24;
+		inputSheet.rect.height = 24;
+		inputSheet.rect.top = 36;
+		inputSheet.rect.left = 0;
+		inputSheet.setSize({24, 24});
+
+		if (reversed)
+			offset.x += 104 - 24;
+
+		auto base = offset;
+
+		base.y += 26;
+		for (int i = 0, j = 0; j < 2; j++)
+			for (int k = 0; k < 3; k++, i++) {
+				inputSheet.tint = (reinterpret_cast<const int *>(&current.a)[i] ? DxSokuColor::White : (DxSokuColor::White + DxSokuColor::Black));
+				inputSheet.setPosition(base);
+				inputSheet.draw();
+				inputSheet.rect.left += 32;
+				base.x += (reversed ? -26 : 26);
+				base.y += 4;
+				if (i == 2)
+					base = offset;
+			}
+	}
+
+	void drawControllerBox(const SokuLib::KeyInput &current, const std::vector<Vector2<float>> &list, Vector2<int> offset, bool reverse)
+	{
+		if (!reverse) {
+			drawJoypad(list, offset);
+			drawKeys(current, offset + Vector2<int>{66, 16}, false);
+		} else {
+			drawJoypad(list, offset + Vector2<int>{104, 0});
+			drawKeys(current, offset + Vector2<int>{0, 16}, true);
+		}
+	}
+
 	void displayInputs()
 	{
 		if (settings.showLeftInputBox) {
 			if (settings.showRawInputs) {
 				leftBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 				leftBox.draw();
-				drawInputList(leftSkillSheet, leftScSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+				drawInputList(leftSkillSheet, leftScSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
 			} else {
 				leftBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
 				leftBox.draw();
-				drawInputListOnlyMoves(leftSkillSheet, leftScSheet, leftInputList, {0, 60}, false, SokuLib::leftChar);
+				drawInputListOnlyMoves(leftSkillSheet, leftScSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
 			}
+			drawControllerBox(leftInputList.front().input, leftLastInputList, {60, 360}, false);
 		}
 		if (settings.showRightInputBox) {
 			if (settings.showRawInputs) {
 				rightBox.setSize({BOX_WIDTH, BOX_HEIGHT});
-				rightBox.setPosition({640 - BOX_WIDTH, 60});
+				rightBox.setPosition({640 - BOX_WIDTH, 0});
 				rightBox.draw();
-				drawInputList(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH, 60}, true, SokuLib::rightChar);
+				drawInputList(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH, 0}, true, SokuLib::rightChar);
 			} else {
 				rightBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
-				rightBox.setPosition({640 - BOX_WIDTH2, 60});
+				rightBox.setPosition({640 - BOX_WIDTH2, 0});
 				rightBox.draw();
-				drawInputListOnlyMoves(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH2, 60}, true, SokuLib::rightChar);
+				drawInputListOnlyMoves(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH2, 0}, true, SokuLib::rightChar);
 			}
+			drawControllerBox(rightInputList.front().input, rightLastInputList, {408, 360}, true);
 		}
 	}
 }

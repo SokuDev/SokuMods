@@ -17,6 +17,29 @@ namespace Practice
 		T y;
 
 		template<typename T2>
+		bool operator==(const Vector2<T2> &other) const
+		{
+			return this->x == other.x && this->y == other.y;
+		}
+
+		template<typename T2>
+		Vector2<T> &operator-=(Vector2<T2> other)
+		{
+			this->x -= other.x;
+			this->y -= other.y;
+			return *this;
+		}
+
+		template<typename T2>
+		Vector2<T> operator-(const Vector2<T2> &other) const
+		{
+			return {
+				static_cast<T>(this->x - other.x),
+				static_cast<T>(this->y - other.y)
+			};
+		}
+
+		template<typename T2>
 		Vector2<T> &operator+=(Vector2<T2> other)
 		{
 			this->x += other.x;
@@ -25,11 +48,19 @@ namespace Practice
 		}
 
 		template<typename T2>
-		Vector2<T> operator-(Vector2<T2> other)
+		Vector2<T> operator+(const Vector2<T2> &other) const
 		{
 			return {
-				this->x - other.x,
-				this->y - other.y
+				static_cast<T>(this->x + other.x),
+				static_cast<T>(this->y + other.y)
+			};
+		}
+
+		operator D3DXVECTOR2() const
+		{
+			return {
+				static_cast<float>(this->x),
+				static_cast<float>(this->y)
 			};
 		}
 	};
@@ -124,6 +155,28 @@ namespace Practice
 		float rhw; // RHW = reciprocal of the homogeneous (clip space) w coordinate of a vertex (the 4th dimension for computing the scaling and translating)
 		D3DCOLOR color;
 		float u, v;
+
+		template<typename T>
+		Vertex operator+(const Vector2<T> &vec) const
+		{
+			return {
+				this->x + vec.x,
+				this->y + vec.y,
+				this->z,
+				this->rhw,
+				this->color,
+				this->u,
+				this->v
+			};
+		}
+
+		template<typename T>
+		Vertex &operator+=(const Vector2<T> &vec)
+		{
+			this->x += vec.x;
+			this->y += vec.y;
+			return *this;
+		}
 	};
 
 	class RectangularRenderingElement : public RenderingElement {
