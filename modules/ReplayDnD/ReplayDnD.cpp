@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "swrs.h"
+#include <cstdio>
 #include <detours.h>
 #include <process.h>
 #include <shlobj.h>
@@ -9,6 +10,15 @@
 #define CBattle_Process(p) Ccall(p, s_origCBattle_OnProcess, int, ())()
 
 #define ADDR_SET_VOLUME 0x00403D10
+
+#define WARN(fmt, ...) \
+	{ \
+		size_t needed = _snwprintf(NULL, 0, fmt, ##__VA_ARGS__); \
+		wchar_t *buf = (wchar_t *)malloc((needed + 1) * 2); \
+		_snwprintf(buf, (needed + 1), fmt, ##__VA_ARGS__); \
+		MessageBoxW(NULL, buf, L"ReplayDnD", MB_ICONWARNING | MB_OK); \
+		free(buf); \
+	}
 
 class CDetour {
 public:
@@ -22,6 +32,23 @@ void CDetour::SetVolume(float volume) {
 
 void (CDetour::*CDetour::ActualSetVolume)(float) = union_cast<void (CDetour::*)(float)>(ADDR_SET_VOLUME);
 
+char *replay_path_pointer_fake;
+wchar_t *replay_path_pointer_actual;
+
+HANDLE(__stdcall *actual_CreateFileA)
+(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
+	DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+	= CreateFileA;
+
+HANDLE __stdcall my_CreateFileA(char *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+	DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) {
+	if (lpFileName && replay_path_pointer_fake && !strcmp(lpFileName, replay_path_pointer_fake)) {
+		return CreateFileW(
+			replay_path_pointer_actual, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+	}
+	return actual_CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+}
+
 static DWORD s_origCLogo_OnProcess;
 static DWORD s_origCBattle_OnProcess;
 
@@ -30,13 +57,23 @@ static bool s_autoShutdown;
 static bool s_muteMusic;
 
 int __fastcall CLogo_OnProcess(void *This) {
-	if (CInputManager_ReadReplay(g_inputMgr, __argv[1])) {
-		s_swrapt = true;
-		// 入力があったように見せかける。END
-		*(BYTE *)((DWORD)g_inputMgrs + 0x74) = 0xFF;
-		// リプモードにチェンジ
-		SetBattleMode(3, 2);
-		return 6;
+	static bool loaded = false;
+	if (!loaded) {
+		loaded = true;
+		replay_path_pointer_fake = __argv[1];
+		int _;
+		wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &_);
+		replay_path_pointer_actual = wargv[1];
+		if (CInputManager_ReadReplay(g_inputMgr, replay_path_pointer_fake)) {
+			s_swrapt = true;
+			// 入力があったように見せかける。END
+			*(BYTE *)((DWORD)g_inputMgrs + 0x74) = 0xFF;
+			// リプモードにチェンジ
+			SetBattleMode(3, 2);
+			return 6;
+		} else {
+			WARN(L"Failed loading %s", replay_path_pointer_actual);
+		}
 	}
 	return CLogo_Process(This);
 }
@@ -150,7 +187,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
 		void (CDetour::*setVolumeShim)(float) = &CDetour::SetVolume;
-		DetourAttach(&(PVOID &)CDetour::ActualSetVolume, *(PBYTE *)&setVolumeShim);
+		DetourAttach((void **)&CDetour::ActualSetVolume, *(PBYTE *)&setVolumeShim);
+		DetourAttach((void **)&actual_CreateFileA, my_CreateFileA);
 		DetourTransactionCommit();
 	}
 	return true;
