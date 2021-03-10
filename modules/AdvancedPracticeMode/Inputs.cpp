@@ -1876,7 +1876,8 @@ namespace Practice
 				leftBox.draw();
 				drawInputListOnlyMoves(leftSkillSheet, leftScSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
 			}
-			drawControllerBox(leftInputList.front().input, leftLastInputList, {60, 360}, false);
+			if (!leftInputList.empty())
+				drawControllerBox(leftInputList.front().input, leftLastInputList, {60, 360}, false);
 		}
 		if (settings.showRightInputBox) {
 			if (settings.showRawInputs) {
@@ -1890,7 +1891,8 @@ namespace Practice
 				rightBox.draw();
 				drawInputListOnlyMoves(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH2, 0}, true, SokuLib::rightChar);
 			}
-			drawControllerBox(rightInputList.front().input, rightLastInputList, {408, 360}, true);
+			if (!rightInputList.empty())
+				drawControllerBox(rightInputList.front().input, rightLastInputList, {408, 360}, true);
 		}
 	}
 }

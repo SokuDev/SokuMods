@@ -7,6 +7,7 @@
 #include "Gui.hpp"
 #include "Dummy.hpp"
 #include "Inputs.hpp"
+#include "Hitboxes.hpp"
 
 namespace Practice
 {
@@ -80,6 +81,7 @@ namespace Practice
 			Practice::gui.handleEvent(event);
 		Practice::gui.draw();
 		sfmlWindow->display();
+		drawAllBoxes();
 		displayInputs();
 	}
 

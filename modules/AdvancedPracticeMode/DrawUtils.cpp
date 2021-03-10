@@ -150,7 +150,7 @@ namespace Practice
 
 	Vector2<unsigned> RectangularRenderingElement::getSize() const
 	{
-		return this->size;
+		return this->_size;
 	}
 
 	Vector2<int> RenderingElement::getPosition() const
@@ -165,18 +165,60 @@ namespace Practice
 
 	void RectangularRenderingElement::setSize(const Vector2<unsigned int> &newSize)
 	{
-		this->size = newSize;
-		this->_vertex[2].x = this->_vertex[1].x = this->_position.x + this->size.x;
-		this->_vertex[2].y = this->_vertex[3].y = this->_position.y + this->size.y;
+		this->_size = newSize;
+		if (this->_camera) {
+			this->_vertex[2].x = this->_vertex[1].x = this->_camera->scale * (1.f * this->_position.x + this->_size.x + this->_camera->translate.x);
+			this->_vertex[2].y = this->_vertex[3].y = this->_camera->scale * (1.f * this->_position.y + this->_size.y + this->_camera->translate.y);
+		} else {
+			this->_vertex[2].x = this->_vertex[1].x = 1.f * this->_position.x + this->_size.x;
+			this->_vertex[2].y = this->_vertex[3].y = 1.f * this->_position.y + this->_size.y;
+		}
 	}
 
 	void RectangularRenderingElement::setPosition(const Vector2<int> &newPos)
 	{
 		RenderingElement::setPosition(newPos);
-		this->_vertex[0].x = this->_vertex[3].x = this->_position.x;
-		this->_vertex[2].x = this->_vertex[1].x = this->_position.x + this->size.x;
-		this->_vertex[0].y = this->_vertex[1].y = this->_position.y;
-		this->_vertex[2].y = this->_vertex[3].y = this->_position.y + this->size.y;
+		if (this->_camera) {
+			this->_vertex[0].x = this->_vertex[3].x = this->_camera->scale * (this->_camera->translate.x + this->_position.x);
+			this->_vertex[2].x = this->_vertex[1].x = this->_camera->scale * (1.f * this->_camera->translate.x + this->_position.x + this->_size.x);
+			this->_vertex[0].y = this->_vertex[1].y = this->_camera->scale * (this->_camera->translate.y + this->_position.y);
+			this->_vertex[2].y = this->_vertex[3].y = this->_camera->scale * (1.f * this->_camera->translate.y + this->_position.y + this->_size.y);
+		} else {
+			this->_vertex[0].x = this->_vertex[3].x = this->_position.x;
+			this->_vertex[2].x = this->_vertex[1].x = 1.f * this->_position.x + this->_size.x;
+			this->_vertex[0].y = this->_vertex[1].y = this->_position.y;
+			this->_vertex[2].y = this->_vertex[3].y = 1.f * this->_position.y + this->_size.y;
+		}
+	}
+
+	RectangularRenderingElement::RectangularRenderingElement(const SokuLib::Camera &camera) noexcept :
+		_camera(&camera)
+	{
+	}
+
+	void RectangularRenderingElement::setRect(const FloatRect &rect)
+	{
+		Vector2<int> pos{
+			static_cast<int>(min(rect.x1, rect.x2)),
+			static_cast<int>(min(rect.y1, rect.y2))
+		};
+		Vector2<unsigned> size{
+			static_cast<unsigned int>(std::abs(rect.x1 - rect.x2)),
+			static_cast<unsigned int>(std::abs(rect.y1 - rect.y2))
+		};
+
+		this->setSize(size);
+		this->setPosition(pos);
+	}
+
+	void RectangularRenderingElement::rawSetRect(const Rect<Vector2<float>> &rect)
+	{
+		const Vector2<float> (&array)[4] = *reinterpret_cast<const Vector2<float>(*)[4]>(&rect);
+
+		for (int i = 0; i < 4; i++) {
+			this->_vertex[i].x = array[i].x;
+			this->_vertex[i].y = array[i].y;
+		}
 	}
 
 	void GradiantRect::draw() const
@@ -195,31 +237,41 @@ namespace Practice
 		SokuLib::pd3dDev->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, borders, sizeof(*borders));
 	}
 
-	void Rect::draw() const
+	GradiantRect::GradiantRect(const SokuLib::Camera &camera) noexcept :
+		RectangularRenderingElement(camera)
+	{
+	}
+
+	void RectangleShape::draw() const
 	{
 		GradiantRect::draw();
 	}
 
-	void Rect::setFillColor(const DxSokuColor &color)
+	void RectangleShape::setFillColor(const DxSokuColor &color)
 	{
 		for (auto &fillColor : this->fillColors)
 			fillColor = color;
 	}
 
-	void Rect::setBorderColor(const DxSokuColor &color)
+	void RectangleShape::setBorderColor(const DxSokuColor &color)
 	{
 		for (auto &borderColor : this->borderColors)
 			borderColor = color;
 	}
 
-	DxSokuColor Rect::getFillColor() const
+	DxSokuColor RectangleShape::getFillColor() const
 	{
 		return *this->fillColors;
 	}
 
-	DxSokuColor Rect::getBorderColor() const
+	DxSokuColor RectangleShape::getBorderColor() const
 	{
 		return *this->borderColors;
+	}
+
+	RectangleShape::RectangleShape(const SokuLib::Camera &camera) noexcept :
+		GradiantRect(camera)
+	{
 	}
 
 	void Sprite::draw() const
@@ -230,7 +282,6 @@ namespace Practice
 			vertexs[i] = this->_vertex[i];
 			vertexs[i].color = this->tint;
 		}
-		this->texture.activate();
 
 		auto size = this->texture.getSize();
 
@@ -245,6 +296,7 @@ namespace Practice
 			vertexs[1].v = vertexs[0].v = top;
 			vertexs[2].v = vertexs[3].v = bottom;
 		}
+		this->texture.activate();
 		SokuLib::pd3dDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertexs, sizeof(*vertexs));
 	}
 }

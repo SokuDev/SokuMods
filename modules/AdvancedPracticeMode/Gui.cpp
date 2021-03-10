@@ -50,7 +50,9 @@ namespace Practice
 	void init(LPCSTR profilePath)
 	{
 		settings = Settings(settings.activated);
+#ifdef NDEBUG
 		if (!skillsTextures.empty())
+#endif
 			return;
 		skillsTextures.resize(SokuLib::CHARACTER_RANDOM);
 		for (int i = 0; i < SokuLib::CHARACTER_RANDOM; i++) {
@@ -404,6 +406,9 @@ namespace Practice
 
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
+#ifndef NDEBUG
+		return;
+#endif
 		std::string profile = profilePath;
 
 		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
@@ -438,6 +443,9 @@ namespace Practice
 
 	void updateGuiState()
 	{
+#ifndef NDEBUG
+		return;
+#endif
 		switch (tab->getSelectedIndex()) {
 		case 0:
 			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar, settings.leftState);

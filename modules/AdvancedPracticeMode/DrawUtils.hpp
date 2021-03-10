@@ -7,7 +7,8 @@
 
 
 #include <windows.h>
-#include <d3d9types.h>
+#include <d3dx9.h>
+#include <SokuLib.hpp>
 
 namespace Practice
 {
@@ -53,6 +54,23 @@ namespace Practice
 			return {
 				static_cast<T>(this->x + other.x),
 				static_cast<T>(this->y + other.y)
+			};
+		}
+
+		template<typename T2>
+		Vector2<T> &operator*=(T2 scalar)
+		{
+			this->x *= scalar;
+			this->y *= scalar;
+			return *this;
+		}
+
+		template<typename T2>
+		Vector2<T> operator*(T2 scalar) const
+		{
+			return {
+				static_cast<T>(this->x * scalar),
+				static_cast<T>(this->y * scalar)
 			};
 		}
 
@@ -179,9 +197,19 @@ namespace Practice
 		}
 	};
 
+	template<typename T>
+	struct Rect {
+		T x1;
+		T y1;
+		T x2;
+		T y2;
+	};
+	typedef Rect<float> FloatRect;
+
 	class RectangularRenderingElement : public RenderingElement {
 	private:
-		Vector2<unsigned> size = {0, 0};
+		Vector2<unsigned> _size = {0, 0};
+		const SokuLib::Camera *_camera = nullptr;
 
 	protected:
 		Vertex _vertex[4] = {
@@ -194,8 +222,12 @@ namespace Practice
 	public:
 		Vector2<unsigned> getSize() const;
 
+		RectangularRenderingElement() noexcept = default;
+		RectangularRenderingElement(const SokuLib::Camera &camera) noexcept;
 		void setSize(const Vector2<unsigned> &);
 		void setPosition(const Vector2<int> &) override;
+		void setRect(const FloatRect &rect);
+		void rawSetRect(const Rect<Vector2<float>> &rect);
 	};
 
 	struct TextureRect {
@@ -226,10 +258,12 @@ namespace Practice
 		DxSokuColor fillColors[4] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
 		DxSokuColor borderColors[4] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
 
+		GradiantRect() noexcept = default;
+		GradiantRect(const SokuLib::Camera &camera) noexcept;
 		void draw() const override;
 	};
 
-	class Rect : protected GradiantRect {
+	class RectangleShape : protected GradiantRect {
 	public:
 		void setFillColor(const DxSokuColor &color);
 		void setBorderColor(const DxSokuColor &color);
@@ -237,11 +271,15 @@ namespace Practice
 		DxSokuColor getFillColor() const;
 		DxSokuColor getBorderColor() const;
 
+		RectangleShape() noexcept = default;
+		RectangleShape(const SokuLib::Camera &camera) noexcept;
 		void draw() const override;
 		using RectangularRenderingElement::setSize;
 		using RectangularRenderingElement::getSize;
 		using RenderingElement::getPosition;
 		using RectangularRenderingElement::setPosition;
+		using RectangularRenderingElement::setRect;
+		using RectangularRenderingElement::rawSetRect;
 	};
 }
 
