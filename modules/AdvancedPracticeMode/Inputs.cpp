@@ -1510,7 +1510,6 @@ namespace Practice
 					return FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP;
 				break;
 			case SokuLib::ACTION_SUWAKO_j1D_j3D:
-				printf("%f\n", character.objectBase.speed.x);
 				if (copysign(1, character.objectBase.speed.x) == character.objectBase.direction)
 					return FAKE_ACTION_j3D;
 				return FAKE_ACTION_j1D;
@@ -1692,7 +1691,7 @@ namespace Practice
 			last.frames = character.objectBase.frameCount;
 		} else {
 			last.action = SokuLib::ACTION_IDLE;
-			if (realAction >= 200)
+			if (realAction >= 300)
 				printf("Unknown action %i\n", realAction);
 		}
 		front->duration++;

@@ -13,7 +13,6 @@ namespace Practice
 
 	static void drawBox(const SokuLib::Box &box, const SokuLib::RotationBox *rotation, DxSokuColor borderColor, DxSokuColor fillColor)
 	{
-		printf("Rotation is at %p\n", rotation);
 		if (!rotation) {
 			FloatRect rect{};
 
@@ -58,9 +57,6 @@ namespace Practice
 		rect.y2 = SokuLib::camera.scale * (box.bottom - std::ceil(manager.position.y) + SokuLib::camera.translate.y);
 
 		rectangle.setRect(rect);
-		printf("%f:%f %f:%f -> %i:%i %u:%u\n", rect.x1, rect.y1, rect.x2, rect.y2, rectangle.getPosition().x, rectangle.getPosition().y, rectangle.getSize().x, rectangle.getSize().y);
-		if (rectangle.getSize().y >= 480)
-			system("pause");
 		rectangle.setFillColor(DxSokuColor::Yellow * 0.5);
 		rectangle.setBorderColor(DxSokuColor::Yellow);
 		rectangle.draw();
@@ -91,44 +87,10 @@ namespace Practice
 		auto array = manager.objects.list.vector();
 
 		for (const auto elem : array) {
-
-			typedef struct {
-				int alloc;
-				void *head;
-				int size;
-			} OBJ_LIST;
-
-			typedef struct {
-				void *next;
-				void *prev;
-				void *val;
-			} NODE;
-
-			OBJ_LIST objProjList;
-			NODE objProjIter;
-
-			char *objProjMgr = *(char **)((char*)&manager + 0x6F8);
-
-			//(std::list<CharacterObject *>)
-			objProjMgr = objProjMgr + 4;
-			/*if(!ReadProcessMemory(ph, objProjMgr + ADDR_OBJPROJOFS, &objProjList, sizeof(objProjList))) {
-				return;
-			}*/
-			memcpy_s(&objProjList, sizeof(objProjList), objProjMgr + 0x54, sizeof(objProjList));
-			/*if(!ReadProcessMemory(ph, objProjList.head, &objProjIter, sizeof(objProjIter))) {
-				return;
-			}*/
-			memcpy_s(&objProjIter, sizeof(objProjIter), objProjList.head, sizeof(objProjIter));
-
-
-			printf("Check elem %p\n", elem);
-			if ((elem->isActive && elem->hitCount > 0) || elem->frameData.attackFlags.value > 0) {
-				printf("Showing object %p\n", elem);
+			//if ((elem->isActive && elem->hitCount > 0) || elem->frameData.attackFlags.value > 0) {
 				drawHurtBoxes(*elem);
-				printf("Showing object %p (2)\n", elem);
 				drawHitBoxes(*elem);
-				printf("Shown object %p\n", elem);
-			}
+			//}
 		}
 	}
 
@@ -136,9 +98,7 @@ namespace Practice
 	{
 		auto &battle = SokuLib::getBattleMgr();
 
-		puts("Left character");
 		drawPlayerBoxes(battle.leftCharacterManager);
-		puts("Right character");
 		drawPlayerBoxes(battle.rightCharacterManager);
 	}
 }
