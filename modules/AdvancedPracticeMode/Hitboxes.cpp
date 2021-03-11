@@ -64,6 +64,23 @@ namespace Practice
 		rectangle.draw();
 	}
 
+	static void drawPositionBox(const SokuLib::ObjectManager &manager)
+	{
+		FloatRect rect{};
+
+		rectangle.setPosition({
+			static_cast<int>(SokuLib::camera.scale * (manager.position.x - 2 + SokuLib::camera.translate.x)),
+			static_cast<int>(SokuLib::camera.scale * (-manager.position.y - 2 + SokuLib::camera.translate.y))
+		});
+		rectangle.setSize({
+			static_cast<unsigned int>(SokuLib::camera.scale * 5),
+			static_cast<unsigned int>(SokuLib::camera.scale * 5)
+		});
+		rectangle.setFillColor(DxSokuColor::White);
+		rectangle.setBorderColor(DxSokuColor::White + DxSokuColor::Black);
+		rectangle.draw();
+	}
+
 	static void drawHurtBoxes(const SokuLib::ObjectManager &manager)
 	{
 		if (manager.hurtBoxCount > 5)
@@ -108,14 +125,17 @@ namespace Practice
 		drawCollisionBox(manager.objectBase);
 		drawHurtBoxes(manager.objectBase);
 		drawHitBoxes(manager.objectBase);
+		drawPositionBox(manager.objectBase);
 
 		auto array = manager.objects.list.vector();
 
 		for (const auto elem : array) {
-			//if ((elem->isActive && elem->hitCount > 0) || elem->frameData.attackFlags.value > 0) {
+			if ((elem->isActive && elem->hitCount > 0) || elem->frameData.attackFlags.value > 0) {
+				drawCollisionBox(*elem);
 				drawHurtBoxes(*elem);
 				drawHitBoxes(*elem);
-			//}
+				drawPositionBox(*elem);
+			}
 		}
 	}
 
