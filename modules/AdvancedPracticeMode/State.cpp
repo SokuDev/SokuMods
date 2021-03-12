@@ -6,6 +6,7 @@
 #include "Gui.hpp"
 #include "Logic.hpp"
 #include "Inputs.hpp"
+#include "Hitboxes.hpp"
 
 #define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45E
 #define PAYLOAD_NEXT_INSTR_GET_INPUTS (PAYLOAD_ADDRESS_GET_INPUTS + 4)
@@ -120,6 +121,7 @@ namespace Practice
 		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
 		puts("Window opened");
 		Practice::initInputDisplay(profileParent);
+		Practice::initBoxDisplay(profileParent);
 		Practice::init(profileParent);
 		Practice::gui.setTarget(*sfmlWindow);
 		try {

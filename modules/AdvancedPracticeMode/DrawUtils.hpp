@@ -233,8 +233,8 @@ namespace Practice
 	struct TextureRect {
 		int left;
 		int top;
-		unsigned width;
-		unsigned height;
+		int width;
+		int height;
 	};
 
 	class Sprite : public RectangularRenderingElement {

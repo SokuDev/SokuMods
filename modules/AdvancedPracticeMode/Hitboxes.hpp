@@ -6,8 +6,11 @@
 #define SWRSTOYS_HITBOXES_HPP
 
 
+#include <windows.h>
+
 namespace Practice
 {
+	void initBoxDisplay(LPCSTR profilePath);
 	void drawAllBoxes();
 }
 
