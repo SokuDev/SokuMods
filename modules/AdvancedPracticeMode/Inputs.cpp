@@ -1674,6 +1674,14 @@ namespace Practice
 		auto realAction = addCustomActions(character, characterId);
 		auto *front = &list.front();
 
+		if (
+			last.action == realAction &&
+			last.animation == character.objectBase.animationCounter &&
+			last.subFrames == character.objectBase.animationSubFrame &&
+			last.frames == character.objectBase.frameCount
+		)
+			return;
+
 		if (moveSprites.find(realAction) != moveSprites.end()) {
 			printf("%i: action %i|block %i|frame %i|subanim %i|subframe %i\n", realAction, character.objectBase.action, character.objectBase.actionBlockId, character.objectBase.frameCount, character.objectBase.animationCounter, character.objectBase.animationSubFrame);
 			if (isCancelableBy(last.action, realAction) && isStartOfMove(realAction, character, characterId)) {
