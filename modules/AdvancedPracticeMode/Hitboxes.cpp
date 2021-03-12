@@ -148,6 +148,11 @@ namespace Practice
 			flagsSprite.rect.left = textureOffset.x;
 		}
 		flagsSprite.rect.top = textureOffset.y;
+		rectangle.setPosition(barPos);
+		rectangle.setSize({32, 32});
+		rectangle.setBorderColor(DxSokuColor::Transparent);
+		rectangle.setFillColor(DxSokuColor::White * 0.5);
+		rectangle.draw();
 		flagsSprite.setPosition(barPos);
 		flagsSprite.draw();
 		if (!reverse)
