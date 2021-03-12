@@ -159,19 +159,20 @@ namespace Practice
 			barPos.x += 32;
 	}
 
-	static void displayPlayerFrameFlags(const SokuLib::ObjectManager &manager, Vector2<int> barPos, bool reverse)
+	static void displayPlayerFrameFlags(const SokuLib::CharacterManager &manager, Vector2<int> barPos, bool reverse)
 	{
-		auto &flags = manager.frameData.frameFlags;
+		auto &base = manager.objectBase;
+		auto &flags = base.frameData.frameFlags;
 
 		if (flags.graze)
 			displayPlayerFrameFlag(GRAZE_SPRITE_OFF, barPos, reverse);
 		if (flags.highJumpCancellable)
 			displayPlayerFrameFlag(HJC_SPRITE_OFF, barPos, reverse);
-		if (flags.grabInvincible)
+		if (flags.grabInvincible || manager.grabInvulTimer)
 			displayPlayerFrameFlag(GRAB_INVUL_SPRITE_OFF, barPos, reverse);
-		if (flags.projectileInvincible)
+		if (flags.projectileInvincible || manager.projectileInvulTimer)
 			displayPlayerFrameFlag(PROJ_INVUL_SPRITE_OFF, barPos, reverse);
-		if (flags.meleeInvincible)
+		if (flags.meleeInvincible || manager.meleeInvulTimer)
 			displayPlayerFrameFlag(MELEE_INVUL_SPRITE_OFF, barPos, reverse);
 		if (flags.guardAvailable)
 			displayPlayerFrameFlag(CAN_BLOCK_SPRITE_OFF, barPos, reverse);
@@ -183,7 +184,7 @@ namespace Practice
 		drawHurtBoxes(manager.objectBase);
 		drawHitBoxes(manager.objectBase);
 		drawPositionBox(manager.objectBase);
-		displayPlayerFrameFlags(manager.objectBase, barPos, reverse);
+		displayPlayerFrameFlags(manager, barPos, reverse);
 
 		auto array = manager.objects.list.vector();
 
