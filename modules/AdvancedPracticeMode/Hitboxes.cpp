@@ -26,8 +26,13 @@ namespace Practice
 #define DROP_SPRITE_OFF        {160, 32}
 #define HEALTH_SPRITE_OFF      {192, 32}
 
+	struct MaxAttributes {
+		unsigned short drop;
+	};
+
 	static RectangleShape rectangle;
 	static Sprite flagsSprite;
+	static std::pair<MaxAttributes, MaxAttributes> allMaxAttributes;
 
 	void initBoxDisplay(LPCSTR profilePath)
 	{
@@ -159,10 +164,62 @@ namespace Practice
 			barPos.x += 32;
 	}
 
-	static void displayPlayerFrameFlags(const SokuLib::CharacterManager &manager, Vector2<int> barPos, bool reverse)
+	static void displayPlayerBar(Vector2<int> textureOffset, Vector2<int> &barPos, Vector2<int> basePos, unsigned value, unsigned max, bool reverse)
 	{
+		if (barPos.x != basePos.x || barPos.y != basePos.y) {
+			barPos.x = basePos.x;
+			barPos.y += 32;
+		}
+		displayPlayerFrameFlag(textureOffset, barPos, reverse);
+		rectangle.setSize({200 * value / max, 24});
+		rectangle.setBorderColor(DxSokuColor::Black);
+		rectangle.setFillColor(DxSokuColor::Red);
+		if (reverse)
+			rectangle.setPosition({static_cast<int>(200 * value / max - barPos.x), barPos.y + 4});
+		else
+			rectangle.setPosition({barPos.x, barPos.y + 4});
+		rectangle.draw();
+	}
+
+	static unsigned getMaxSuperArmor(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes)
+	{
+		if (character == SokuLib::CHARACTER_SUIKA) {
+			if (manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_B)
+				switch (manager.skillLevels[0]) {
+				case 0:
+					return 0;
+				case 1:
+				case 2:
+					return 250;
+				case 3:
+					return 500;
+				default:
+					return 750;
+				}
+			else if (manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_C)
+				switch (manager.skillLevels[0]) {
+				case 0:
+				case 1:
+				case 2:
+					return 250;
+				case 3:
+					return 500;
+				default:
+					return 750;
+				}
+		}
+		if (character == SokuLib::CHARACTER_SANAE)
+			if (manager.objectBase.action == SokuLib::ACTION_USING_SC_ID_210)
+				return 2500;
+		return 0;
+	}
+
+	static void displayPlayerFrameFlags(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse)
+	{
+		auto basePos = barPos;
 		auto &base = manager.objectBase;
 		auto &flags = base.frameData.frameFlags;
+		auto maxSuperArmor = getMaxSuperArmor(manager, character, maxAttributes);
 
 		if (flags.graze)
 			displayPlayerFrameFlag(GRAZE_SPRITE_OFF, barPos, reverse);
@@ -176,25 +233,38 @@ namespace Practice
 			displayPlayerFrameFlag(MELEE_INVUL_SPRITE_OFF, barPos, reverse);
 		if (flags.guardAvailable)
 			displayPlayerFrameFlag(CAN_BLOCK_SPRITE_OFF, barPos, reverse);
+		if (manager.noSuperArmor == 0 || flags.superArmor) {
+			if (maxSuperArmor)
+				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, maxSuperArmor - manager.objectBase.superarmorDamageTaken, maxSuperArmor, reverse);
+			else
+				displayPlayerFrameFlag(SUPERARMOR_SPRITE_OFF, barPos, reverse);
+		}
+		if (manager.dropInvulTimeLeft) {
+			maxAttributes.drop = max(maxAttributes.drop, manager.dropInvulTimeLeft);
+			displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, manager.dropInvulTimeLeft, maxAttributes.drop, reverse);
+		} else
+			maxAttributes.drop = 0;
 	}
 
-	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, Vector2<int> barPos, bool reverse)
+	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse)
 	{
 		drawCollisionBox(manager.objectBase);
 		drawHurtBoxes(manager.objectBase);
 		drawHitBoxes(manager.objectBase);
 		drawPositionBox(manager.objectBase);
-		displayPlayerFrameFlags(manager, barPos, reverse);
+		displayPlayerFrameFlags(manager, character, maxAttributes, barPos, reverse);
 
 		auto array = manager.objects.list.vector();
 
-		for (const auto elem : array) {
-			if ((elem->isActive && elem->hitCount > 0) || elem->frameData.attackFlags.value > 0) {
-				drawCollisionBox(*elem);
-				drawHurtBoxes(*elem);
-				drawHitBoxes(*elem);
-				drawPositionBox(*elem);
-				displayObjectFrameFlags(*elem);
+		for (const auto _elem : array) {
+			auto elem = reinterpret_cast<const SokuLib::ProjectileManager *>(_elem);
+
+			if ((elem->isActive && elem->objectBase.hitCount > 0) || elem->objectBase.frameData.attackFlags.value > 0) {
+				drawCollisionBox(elem->objectBase);
+				drawHurtBoxes(elem->objectBase);
+				drawHitBoxes(elem->objectBase);
+				drawPositionBox(elem->objectBase);
+				displayObjectFrameFlags(elem->objectBase);
 			}
 		}
 	}
@@ -203,7 +273,7 @@ namespace Practice
 	{
 		auto &battle = SokuLib::getBattleMgr();
 
-		drawPlayerBoxes(battle.leftCharacterManager,  {20, 70}, false);
-		drawPlayerBoxes(battle.rightCharacterManager, {620, 70}, true);
+		drawPlayerBoxes(battle.leftCharacterManager,  SokuLib::leftChar,  allMaxAttributes.first,  {20, 70}, false);
+		drawPlayerBoxes(battle.rightCharacterManager, SokuLib::rightChar, allMaxAttributes.second, {620, 70}, true);
 	}
 }
