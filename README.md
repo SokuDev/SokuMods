@@ -181,7 +181,7 @@ Available patches:
 
 *By default, the game is in normal state. When ending a game/spectate/replay during mountain vapor, the game goes in Mountain Vapor state and stays this way until the next game starts. When joining, spectating, or watching a replay that does not correspond to your state, you will be desynced.*
 
-*The mod allows you to manually set your state before joining/spectating/watching a replay to match the state of your peer/replay.*
+*The mod allows you to automatically resync some replays (currently, those downloaded from sokureplays) and manually set your weather state if needed.*
 
 ### shady-loader
 

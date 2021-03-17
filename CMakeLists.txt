@@ -294,9 +294,10 @@ module(ReplayDnD Default)
 target_sources(ReplayDnD PRIVATE modules/ReplayDnD/ReplayDnD.cpp)
 target_link_libraries(ReplayDnD detours shlwapi shell32)
 
-module(ReplayReSync)
+module(ReplayReSync Default)
 target_sources(ReplayReSync PRIVATE
         modules/ReplayReSync/ReplayReSync.cpp)
+target_link_libraries(ReplayReSync detours shlwapi shell32)
 
 module(ReplayInputView+)
 target_sources(ReplayInputView+ PRIVATE
