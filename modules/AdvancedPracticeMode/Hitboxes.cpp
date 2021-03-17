@@ -28,6 +28,7 @@ namespace Practice
 
 	struct MaxAttributes {
 		unsigned short drop;
+		unsigned short star;
 	};
 
 	static RectangleShape rectangle;
@@ -158,13 +159,14 @@ namespace Practice
 		rectangle.setBorderColor(DxSokuColor::Transparent);
 		rectangle.setFillColor(DxSokuColor::White * 0.5);
 		rectangle.draw();
+		flagsSprite.setSize({32, 32});
 		flagsSprite.setPosition(barPos);
 		flagsSprite.draw();
 		if (!reverse)
 			barPos.x += 32;
 	}
 
-	static void displayPlayerBar(Vector2<int> textureOffset, Vector2<int> &barPos, Vector2<int> basePos, unsigned value, unsigned max, bool reverse)
+	static void displayPlayerBar(Vector2<int> textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, bool reverse, DxSokuColor color)
 	{
 		if (barPos.x != basePos.x || barPos.y != basePos.y) {
 			barPos.x = basePos.x;
@@ -173,12 +175,70 @@ namespace Practice
 		displayPlayerFrameFlag(textureOffset, barPos, reverse);
 		rectangle.setSize({200 * value / max, 24});
 		rectangle.setBorderColor(DxSokuColor::Black);
-		rectangle.setFillColor(DxSokuColor::Red);
+		rectangle.setFillColor(color);
 		if (reverse)
 			rectangle.setPosition({static_cast<int>(200 * value / max - barPos.x), barPos.y + 4});
 		else
 			rectangle.setPosition({barPos.x, barPos.y + 4});
 		rectangle.draw();
+	}
+
+	static void displayObjectFrameFlag(Vector2<int> textureOffset, Vector2<int> &barPos)
+	{
+		auto scaled = 32 * SokuLib::camera.scale;
+
+		flagsSprite.rect.width = 32;
+		flagsSprite.rect.left = textureOffset.x;
+		flagsSprite.rect.top = textureOffset.y;
+		rectangle.setPosition(barPos);
+		rectangle.setSize({
+			static_cast<unsigned int>(scaled),
+			static_cast<unsigned int>(scaled)
+		});
+		rectangle.setBorderColor(DxSokuColor::Transparent);
+		rectangle.setFillColor(DxSokuColor::White * 0.5);
+		rectangle.draw();
+		flagsSprite.setSize({
+			static_cast<unsigned int>(scaled),
+			static_cast<unsigned int>(scaled)
+		 });
+		flagsSprite.setPosition(barPos);
+		flagsSprite.draw();
+		barPos.x += scaled;
+	}
+
+	static void displayObjectBar(Vector2<int> textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, DxSokuColor color)
+	{
+		if (barPos.x != basePos.x || barPos.y != basePos.y) {
+			barPos.x = basePos.x;
+			barPos.y += 32 * SokuLib::camera.scale;
+		}
+		displayObjectFrameFlag(textureOffset, barPos);
+		rectangle.setSize({
+			static_cast<unsigned int>(100 * SokuLib::camera.scale * value / max),
+			static_cast<unsigned int>(24 * SokuLib::camera.scale)
+		});
+		rectangle.setBorderColor(DxSokuColor::Black);
+		rectangle.setFillColor(color);
+		rectangle.setPosition({
+			static_cast<int>(barPos.x * SokuLib::camera.scale),
+			static_cast<int>((barPos.y + 4) * SokuLib::camera.scale)
+		});
+		rectangle.draw();
+	}
+
+	static float getSuperArmorRatio(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes)
+	{
+		if (character == SokuLib::CHARACTER_PATCHOULI) {
+			if (manager.diamondHardEffectLeft)
+				return manager.diamondHardEffectLeft / 720.f;
+		}
+		if (manager.dragonStarTimeLeft) {
+			maxAttributes.star = max(maxAttributes.star, manager.dragonStarTimeLeft);
+			return manager.dragonStarTimeLeft / static_cast<float>(maxAttributes.star);
+		} else
+			maxAttributes.star = 0;
+		return 0;
 	}
 
 	static unsigned getMaxSuperArmor(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes)
@@ -199,6 +259,7 @@ namespace Practice
 			else if (manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_C)
 				switch (manager.skillLevels[0]) {
 				case 0:
+					return 0;
 				case 1:
 				case 2:
 					return 250;
@@ -219,6 +280,7 @@ namespace Practice
 		auto basePos = barPos;
 		auto &base = manager.objectBase;
 		auto &flags = base.frameData.frameFlags;
+		auto superArmorRatio = getSuperArmorRatio(manager, character, maxAttributes);
 		auto maxSuperArmor = getMaxSuperArmor(manager, character, maxAttributes);
 
 		if (flags.graze)
@@ -233,17 +295,112 @@ namespace Practice
 			displayPlayerFrameFlag(MELEE_INVUL_SPRITE_OFF, barPos, reverse);
 		if (flags.guardAvailable)
 			displayPlayerFrameFlag(CAN_BLOCK_SPRITE_OFF, barPos, reverse);
-		if (manager.noSuperArmor == 0 || flags.superArmor) {
-			if (maxSuperArmor)
-				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, maxSuperArmor - manager.objectBase.superarmorDamageTaken, maxSuperArmor, reverse);
+		if (superArmorRatio || manager.noSuperArmor == 0 || flags.superArmor) {
+			if (superArmorRatio > 0)
+				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, 10000 * superArmorRatio, 10000, reverse, DxSokuColor::Blue);
+			else if (maxSuperArmor)
+				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, maxSuperArmor - manager.objectBase.superarmorDamageTaken, maxSuperArmor, reverse, DxSokuColor::Red);
 			else
 				displayPlayerFrameFlag(SUPERARMOR_SPRITE_OFF, barPos, reverse);
 		}
 		if (manager.dropInvulTimeLeft) {
 			maxAttributes.drop = max(maxAttributes.drop, manager.dropInvulTimeLeft);
-			displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, manager.dropInvulTimeLeft, maxAttributes.drop, reverse);
+			displayPlayerBar(DROP_SPRITE_OFF, basePos, barPos, manager.dropInvulTimeLeft, maxAttributes.drop, reverse, DxSokuColor::Red);
 		} else
 			maxAttributes.drop = 0;
+	}
+
+	static void displayHitProperties(const SokuLib::ObjectManager &manager, bool showHp = false)
+	{
+		int maxX = 640 - (32 + 50) * SokuLib::camera.scale;
+		int maxY = 480 - 32 * SokuLib::camera.scale;
+		Vector2<int> leftBound = {maxX, 0};
+		Vector2<int> base;
+		int rightBound = 0;
+		auto &attack = manager.frameData.attackFlags;
+		Rect<Vector2<float>> rect;
+
+		for (int i = 0; i < manager.hurtBoxCount; i++) {
+			auto &box = manager.hurtBoxes[i];
+			auto rotation = manager.hurtBoxesRotation[i];
+
+			rect.x1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left);
+			rect.x1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top);
+			if (!rotation) {
+				rect.x2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.right);
+				rect.x2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top);
+
+				rect.y1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left);
+				rect.y1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.bottom);
+
+				rect.y2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.right);
+				rect.y2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.bottom);
+			} else {
+				rect.y1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left + rotation->pt1.x);
+				rect.y1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top +  rotation->pt1.y);
+
+				rect.x2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left + rotation->pt1.x + rotation->pt2.x);
+				rect.x2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top +  rotation->pt1.y + rotation->pt2.y);
+
+				rect.y2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left + rotation->pt2.x);
+				rect.y2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top +  rotation->pt2.y);
+			}
+			rightBound  = min(maxX, max(rightBound, max(rect.x1.x, max(rect.x2.x, max(rect.y1.x, rect.x2.x)))));
+			leftBound.x = max(0, min(leftBound.x, min(rect.x1.x, min(rect.x2.x, min(rect.y1.x, rect.x2.x)))));
+			leftBound.y = min(maxY, max(leftBound.y, max(rect.x1.y, max(rect.x2.y, max(rect.y1.y, rect.x2.y)))));
+		}
+
+		for (int i = 0; i < manager.hitBoxCount; i++) {
+			auto &box = manager.hitBoxes[i];
+			auto rotation = manager.hitBoxesRotation[i];
+
+			rect.x1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left);
+			rect.x1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top);
+			if (!rotation) {
+				rect.x2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.right);
+				rect.x2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top);
+
+				rect.y1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left);
+				rect.y1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.bottom);
+
+				rect.y2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.right);
+				rect.y2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.bottom);
+			} else {
+				rect.y1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left + rotation->pt1.x);
+				rect.y1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top +  rotation->pt1.y);
+
+				rect.x2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left + rotation->pt1.x + rotation->pt2.x);
+				rect.x2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top +  rotation->pt1.y + rotation->pt2.y);
+
+				rect.y2.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left + rotation->pt2.x);
+				rect.y2.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top +  rotation->pt2.y);
+			}
+			rightBound = min(maxX, max(rightBound, max(rect.x1.x, max(rect.x2.x, max(rect.y1.x, rect.x2.x)))));
+			leftBound.x = max(0, min(leftBound.x, min(rect.x1.x, min(rect.x2.x, min(rect.y1.x, rect.x2.x)))));
+			leftBound.y = min(maxY, max(leftBound.y, max(rect.x1.y, max(rect.x2.y, max(rect.y1.y, rect.x2.y)))));
+		}
+
+		if (!manager.hurtBoxCount && !manager.hitBoxCount)
+			leftBound = Vector2<int>{
+				static_cast<int>(manager.position.x),
+				static_cast<int>(manager.position.y)
+			};
+
+		base = leftBound;
+		if (manager.hitBoxCount) {
+			if (attack.grab)
+				displayObjectFrameFlag(GRAB_SPRITE_OFF, base);
+			else if (attack.unblockable)
+				displayObjectFrameFlag(UNBLOCKABLE_SPRITE_OFF, base);
+			else if (!attack.airBlockable)
+				displayObjectFrameFlag(AUB_SPRITE_OFF, base);
+			if (attack.grazable)
+				displayObjectFrameFlag(GRAZABLE_SPRITE_OFF, base);
+		}
+		if (manager.hurtBoxCount) {
+			if (showHp && manager.hp > 1)
+				displayObjectBar(HEALTH_SPRITE_OFF, leftBound, base, manager.hp, 10000, DxSokuColor::Green);
+		}
 	}
 
 	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse)
@@ -253,6 +410,7 @@ namespace Practice
 		drawHitBoxes(manager.objectBase);
 		drawPositionBox(manager.objectBase);
 		displayPlayerFrameFlags(manager, character, maxAttributes, barPos, reverse);
+		displayHitProperties(manager.objectBase);
 
 		auto array = manager.objects.list.vector();
 
@@ -265,6 +423,7 @@ namespace Practice
 				drawHitBoxes(elem->objectBase);
 				drawPositionBox(elem->objectBase);
 				displayObjectFrameFlags(elem->objectBase);
+				displayHitProperties(elem->objectBase, true);
 			}
 		}
 	}
