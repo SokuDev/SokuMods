@@ -45,7 +45,7 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) 
 	::PathRemoveFileSpec(s_profilePath);
 	::PathAppend(s_profilePath, "SWRSokuRoll.ini");
 
-	SokuRollParams.change_title = ::GetPrivateProfileInt("Parameters", "ChangeTitle", 0, s_profilePath);
+	SokuRollParams.change_title = ::GetPrivateProfileInt("Parameters", "ChangeTitle", 1, s_profilePath);
 	SokuRollParams.initial_delay = ::GetPrivateProfileInt("Parameters", "InitialDelay", 4, s_profilePath);
 	SokuRollParams.maximum_rollback = ::GetPrivateProfileInt("Parameters", "MaximumRollback", 4, s_profilePath);
 	SokuRollParams.debug = ::GetPrivateProfileInt("Parameters", "Debug", 0, s_profilePath);
