@@ -4,8 +4,11 @@
 #include <shlwapi.h>
 #include <swrs.h>
 
+#define WINDOW_HANDLE 0x0089FF90
 #define ADDR_AFTER_HEADER 0x42E520
 #define ADDR_REPLAY_HEADER_HINT 0x898805
+
+byte *scene_id = (byte *)0x008A0044;
 
 DWORD mountainVaporAddress = 0x008971C0;
 char newValue[4];
@@ -50,21 +53,23 @@ void SetMountainVapor(void *unused) {
 	}
 
 	while (true) {
-		if (hotkeyMV && GetAsyncKeyState(hotkeyMV)) {
-			if (!disableAlert) {
-				MessageBoxW(NULL, L"Mountain Vapor state is now set", L"ReplayReSync", MB_SETFOREGROUND);
+		if (*scene_id == 2 && (void *)GetForegroundWindow() == *(void **)WINDOW_HANDLE) {
+			if (hotkeyMV && GetAsyncKeyState(hotkeyMV)) {
+				if (!disableAlert) {
+					MessageBoxW(NULL, L"Mountain Vapor state is now set", L"ReplayReSync", MB_SETFOREGROUND);
+				}
+				*newValue = 11;
+				MemoryWrite(mountainVaporAddress, newValue, sizeof(newValue));
 			}
-			*newValue = 11;
-			MemoryWrite(mountainVaporAddress, newValue, sizeof(newValue));
-		}
-		if (hotkeyNorm && GetAsyncKeyState(hotkeyNorm)) {
-			if (!disableAlert) {
-				MessageBoxW(NULL, L"Normal state is now set", L"ReplayReSync", MB_SETFOREGROUND);
+			if (hotkeyNorm && GetAsyncKeyState(hotkeyNorm)) {
+				if (!disableAlert) {
+					MessageBoxW(NULL, L"Normal state is now set", L"ReplayReSync", MB_SETFOREGROUND);
+				}
+				*newValue = 0;
+				MemoryWrite(mountainVaporAddress, newValue, sizeof(newValue));
 			}
-			*newValue = 0;
-			MemoryWrite(mountainVaporAddress, newValue, sizeof(newValue));
 		}
-		Sleep(100);
+		Sleep(60);
 	}
 }
 
