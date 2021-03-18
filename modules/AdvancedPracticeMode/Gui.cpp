@@ -49,7 +49,6 @@ namespace Practice
 
 	void init(LPCSTR profilePath)
 	{
-		settings = Settings(settings.activated);
 #ifdef NDEBUG
 		if (!skillsTextures.empty())
 #endif

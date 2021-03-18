@@ -38,6 +38,10 @@ namespace Practice
 	};
 
 	struct CharacterState {
+	private:
+		SokuLib::Character _chr;
+
+	public:
 		unsigned hp = 10000;
 		unsigned maxCurrentSpirit = 1000;
 		bool HPInstantRegen = true;
@@ -51,29 +55,8 @@ namespace Practice
 		unsigned char fanLevel = 0;
 		unsigned char specialValue = 0;
 
-		CharacterState(SokuLib::Character chr) :
-			skillMap{
-				{0x00, false},
-				{0x00, false},
-				{0x00, false},
-				{0x00, false},
-				{
-					static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
-					chr != SokuLib::CHARACTER_PATCHOULI
-				},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-			}
-		{
-		}
+		void save(bool isLeft) const;
+		void load(SokuLib::Character chr, bool isLeft);
 	};
 
 	struct HitBoxParams {
@@ -90,8 +73,8 @@ namespace Practice
 	};
 
 	struct Settings {
-		bool realisticInputs = true;
 		bool activated;
+		bool realisticInputs = true;
 		bool controlDummy = false;
 		bool forceWeather = true;
 		bool weatherResetRequest = false;
@@ -110,11 +93,10 @@ namespace Practice
 		CharacterState leftState;
 		CharacterState rightState;
 
-		Settings(bool activated = false) :
-			activated(activated),
-			leftState(SokuLib::leftChar),
-			rightState(SokuLib::rightChar)
-		{};
+		Settings(bool activated = false);
+		void load();
+		void save() const;
+		~Settings();
 	};
 
 	extern std::map<std::string, std::vector<unsigned short>> characterSpellCards;

@@ -2,12 +2,16 @@
 // Created by PinkySmile on 23/02/2021.
 //
 
+#include <fstream>
+#include <iostream>
+#include <direct.h>
 #include "State.hpp"
 #include "Gui.hpp"
 #include "Logic.hpp"
 #include "Inputs.hpp"
 #include "Hitboxes.hpp"
 
+#define mkdir _mkdir
 #define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45E
 #define PAYLOAD_NEXT_INSTR_GET_INPUTS (PAYLOAD_ADDRESS_GET_INPUTS + 4)
 
@@ -117,6 +121,7 @@ namespace Practice
 		if (sfmlWindow)
 			return;
 
+		settings.load();
 		puts("Opening window");
 		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
 		puts("Window opened");
@@ -156,8 +161,111 @@ namespace Practice
 		if (!sfmlWindow)
 			return;
 
+		settings.save();
 		delete sfmlWindow;
 		sfmlWindow = nullptr;
 		removeHooks();
+	}
+
+	Settings::Settings(bool activated) :
+		activated(activated)
+	{
+	}
+
+	void Settings::load()
+	{
+		this->leftState.load(SokuLib::leftChar, true);
+		this->rightState.load(SokuLib::rightChar, false);
+
+		std::cout << "Loading settings from APMSettings/APMLastSession.dat" << std::endl;
+
+		std::ifstream stream{"APMSettings/APMLastSession.dat"};
+
+		if (!stream) {
+			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": " << strerror(errno) << std::endl;
+			return;
+		}
+		stream.read(reinterpret_cast<char *>(&this->activated + 1), sizeof(*this) - sizeof(this->activated) - sizeof(CharacterState) * 2);
+	}
+
+	void Settings::save() const
+	{
+		std::cout << "Saving settings to APMSettings/APMLastSession.dat" << std::endl;
+		mkdir("APMSettings");
+
+		std::ofstream stream{"APMSettings/APMLastSession.dat"};
+
+		if (!stream) {
+			std::cerr << "Error: Couldn't save settings to \"APMSettings/APMLastSession.dat\": " << strerror(errno) << std::endl;
+			MessageBoxA(SokuLib::window, ("Error: Couldn't save file to \"APMSettings/APMLastSession.dat\": " + std::string(strerror(errno))).c_str(), "Cannot save settings.", MB_ICONERROR);
+			return;
+		}
+		stream.write(reinterpret_cast<const char *>(&this->activated + 1), sizeof(*this) - sizeof(this->activated) - sizeof(CharacterState) * 2);
+		this->leftState.save(true);
+		this->rightState.save(false);
+	}
+
+	Settings::~Settings()
+	{
+		if (this->activated)
+			this->save();
+	}
+
+	void CharacterState::save(bool isLeft) const
+	{
+		std::string path = "APMSettings/APMLastSession" + std::string(isLeft ? ("Player") : ("Dummy")) + SokuLib::charactersName[this->_chr] + ".dat";
+
+		for (size_t pos = path.find(' '); pos != std::string::npos; pos = path.find(' '))
+			path.erase(path.begin() + pos);
+		std::cout << "Saving character state to " << path << std::endl;
+
+		std::ofstream stream{path};
+
+		if (!stream) {
+			std::cerr << "Error: Couldn't save file from \"" << path << "\": " << strerror(errno) << std::endl;
+			MessageBoxA(SokuLib::window, ("Error: Couldn't save file to \"" + path + "\": " + strerror(errno)).c_str(), "Cannot save settings.", MB_ICONERROR);
+			return;
+		}
+		stream.write(reinterpret_cast<const char *>(this), sizeof(*this));
+	}
+
+	void CharacterState::load(SokuLib::Character chr, bool isLeft)
+	{
+		this->_chr = chr;
+		std::string path = "APMSettings/APMLastSession" + std::string(isLeft ? ("Player") : ("Dummy")) + SokuLib::charactersName[chr] + ".dat";
+
+		for (size_t pos = path.find(' '); pos != std::string::npos; pos = path.find(' '))
+			path.erase(path.begin() + pos);
+		std::cout << "Loading character state from " << path << std::endl;
+
+		std::ifstream stream{path};
+
+		if (!stream) {
+			SokuLib::Skill buffer[15] = {
+				{0x00, false},
+				{0x00, false},
+				{0x00, false},
+				{0x00, false},
+				{
+				 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
+				       chr != SokuLib::CHARACTER_PATCHOULI
+				},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+			};
+
+			std::cerr << "Error: Couldn't load file to \"" << path << "\": " << strerror(errno) << std::endl;
+			memcpy(&this->skillMap, &buffer, sizeof(buffer));
+			return;
+		}
+		stream.read(reinterpret_cast<char *>(this), sizeof(*this));
 	}
 }

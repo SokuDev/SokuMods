@@ -76,7 +76,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
-	freopen_s(&_, "CONERR$", "w", stderr);
+	freopen_s(&_, "CONOUT$", "w", stderr);
 	puts("Hello !");
 	//port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 }
@@ -147,5 +147,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 {
+	if (fdwReason == DLL_PROCESS_DETACH && Practice::settings.activated)
+		Practice::settings.save();
 	return TRUE;
 }
