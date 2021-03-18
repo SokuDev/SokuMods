@@ -347,16 +347,82 @@ namespace Practice
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/state.gui");
 
+		auto checkFct = [](bool &val, bool b){
+			val = b;
+		};
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
 		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
+		auto leftHurtBoxes        = panel->get<tgui::CheckBox>("LeftHurtBoxes");
+		auto leftHitBoxes         = panel->get<tgui::CheckBox>("LeftHitBoxes");
+		auto leftPosBox           = panel->get<tgui::CheckBox>("LeftPosBox");
+		auto leftCollisionBox     = panel->get<tgui::CheckBox>("LeftCollisionBox");
+		auto leftBuff             = panel->get<tgui::CheckBox>("LeftBuff");
+		auto leftHitProperties    = panel->get<tgui::CheckBox>("LeftHitProperties");
+		auto leftSubObjHurtBoxes  = panel->get<tgui::CheckBox>("LeftSubObjHurtBoxes");
+		auto leftSubObjHitBoxes   = panel->get<tgui::CheckBox>("LeftSubObjHitBoxes");
+		auto leftSubObjPosBox     = panel->get<tgui::CheckBox>("LeftSubObjPosBox");
+		auto leftSubObjProperties = panel->get<tgui::CheckBox>("LeftSubObjProperties");
+		auto rightHurtBoxes       = panel->get<tgui::CheckBox>("RightHurtBoxes");
+		auto rightHitBoxes        = panel->get<tgui::CheckBox>("RightHitBoxes");
+		auto rightPosBox          = panel->get<tgui::CheckBox>("RightPosBox");
+		auto rightCollisionBox    = panel->get<tgui::CheckBox>("RightCollisionBox");
+		auto rightBuff            = panel->get<tgui::CheckBox>("RightBuff");
+		auto rightHitProperties   = panel->get<tgui::CheckBox>("RightHitProperties");
+		auto rightSubObjHurtBoxes = panel->get<tgui::CheckBox>("RightSubObjHurtBoxes");
+		auto rightSubObjHitBoxes  = panel->get<tgui::CheckBox>("RightSubObjHitBoxes");
+		auto rightSubObjPosBox    = panel->get<tgui::CheckBox>("RightSubObjPosBox");
+		auto rightSubObjProperties= panel->get<tgui::CheckBox>("RightSubObjProperties");
+
+		leftHurtBoxes->setChecked(settings.leftHitboxSettings.showHurtboxes);
+		leftHitBoxes->setChecked(settings.leftHitboxSettings.showHitboxes);
+		leftPosBox->setChecked(settings.leftHitboxSettings.showPosition);
+		leftCollisionBox->setChecked(settings.leftHitboxSettings.showCollisionBox);
+		leftBuff->setChecked(settings.leftHitboxSettings.showBuffProperties);
+		leftHitProperties->setChecked(settings.leftHitboxSettings.showHitProperties);
+		leftSubObjHurtBoxes->setChecked(settings.leftHitboxSettings.showSubObjectHurtboxes);
+		leftSubObjHitBoxes->setChecked(settings.leftHitboxSettings.showSubObjectHitboxes);
+		leftSubObjPosBox->setChecked(settings.leftHitboxSettings.showSubObjectPosition);
+		leftSubObjProperties->setChecked(settings.leftHitboxSettings.showSubObjectProperties);
+		rightHurtBoxes->setChecked(settings.rightHitboxSettings.showHurtboxes);
+		rightHitBoxes->setChecked(settings.rightHitboxSettings.showHitboxes);
+		rightPosBox->setChecked(settings.rightHitboxSettings.showPosition);
+		rightCollisionBox->setChecked(settings.rightHitboxSettings.showCollisionBox);
+		rightBuff->setChecked(settings.rightHitboxSettings.showBuffProperties);
+		rightHitProperties->setChecked(settings.rightHitboxSettings.showHitProperties);
+		rightSubObjHurtBoxes->setChecked(settings.rightHitboxSettings.showSubObjectHurtboxes);
+		rightSubObjHitBoxes->setChecked(settings.rightHitboxSettings.showSubObjectHitboxes);
+		rightSubObjPosBox->setChecked(settings.rightHitboxSettings.showSubObjectPosition);
+		rightSubObjProperties->setChecked(settings.rightHitboxSettings.showSubObjectProperties);
+
+		leftHurtBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showHurtboxes));
+		leftHitBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showHitboxes));
+		leftPosBox->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showPosition));
+		leftCollisionBox->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showCollisionBox));
+		leftBuff->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showBuffProperties));
+		leftHitProperties->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showHitProperties));
+		leftSubObjHurtBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectHurtboxes));
+		leftSubObjHitBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectHitboxes));
+		leftSubObjPosBox->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectPosition));
+		leftSubObjProperties->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectProperties));
+		rightHurtBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showHurtboxes));
+		rightHitBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showHitboxes));
+		rightPosBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showPosition));
+		rightCollisionBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showCollisionBox));
+		rightBuff->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showBuffProperties));
+		rightHitProperties->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showHitProperties));
+		rightSubObjHurtBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectHurtboxes));
+		rightSubObjHitBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectHitboxes));
+		rightSubObjPosBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectPosition));
+		rightSubObjProperties->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectProperties));
+
+		std::string editTimerStr = std::to_string(settings.weatherTime / 10) + "." + std::to_string(settings.weatherTime % 10);
+		editTimer->setText(editTimerStr);
 
 		editTimer->connect("TextChanged", [](std::string time) {
 			settings.weatherTime = !time.empty() ? atof(time.c_str()) * 10 : 999;
 		});
 
-		std::string editTimerStr = std::to_string(settings.weatherTime / 10) + "." + std::to_string(settings.weatherTime % 10);
-		editTimer->setText(editTimerStr);
 		force->setChecked(settings.forceWeather);
 		force->connect("Changed", [weather](bool newValue){
 			settings.forceWeather = newValue;

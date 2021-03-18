@@ -76,6 +76,19 @@ namespace Practice
 		}
 	};
 
+	struct HitBoxParams {
+		bool showPosition = true;
+		bool showHitboxes = true;
+		bool showHurtboxes = true;
+		bool showCollisionBox = true;
+		bool showHitProperties = true;
+		bool showBuffProperties = true;
+		bool showSubObjectPosition = true;
+		bool showSubObjectHitboxes = true;
+		bool showSubObjectHurtboxes = true;
+		bool showSubObjectProperties = true;
+	};
+
 	struct Settings {
 		bool realisticInputs = true;
 		bool activated;
@@ -92,6 +105,8 @@ namespace Practice
 		bool showEmptyInputs = false;
 		bool showLeftInputBox = true;
 		bool showRightInputBox = true;
+		HitBoxParams leftHitboxSettings;
+		HitBoxParams rightHitboxSettings;
 		CharacterState leftState;
 		CharacterState rightState;
 

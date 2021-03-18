@@ -6,6 +6,7 @@
 #include <cmath>
 #include "DrawUtils.hpp"
 #include "Hitboxes.hpp"
+#include "State.hpp"
 #include <list>
 
 namespace Practice
@@ -137,10 +138,6 @@ namespace Practice
 
 		for (int i = 0; i < manager.hitBoxCount; i++)
 			drawBox(manager.hitBoxes[i], manager.hitBoxesRotation[i], DxSokuColor::Red, DxSokuColor::Red * BOXES_ALPHA);
-	}
-
-	static void displayObjectFrameFlags(const SokuLib::ObjectManager &manager)
-	{
 	}
 
 	static void displayPlayerFrameFlag(Vector2<int> textureOffset, Vector2<int> &barPos, bool reverse)
@@ -443,14 +440,20 @@ namespace Practice
 		}
 	}
 
-	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse)
+	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse, const HitBoxParams &params)
 	{
-		drawCollisionBox(manager.objectBase);
-		drawHurtBoxes(manager.objectBase);
-		drawHitBoxes(manager.objectBase);
-		drawPositionBox(manager.objectBase);
-		displayPlayerStatusFlags(manager, character, maxAttributes, barPos, reverse);
-		displayHitProperties(character, manager.objectBase, false);
+		if (params.showCollisionBox)
+			drawCollisionBox(manager.objectBase);
+		if (params.showHurtboxes)
+			drawHurtBoxes(manager.objectBase);
+		if (params.showHitboxes)
+			drawHitBoxes(manager.objectBase);
+		if (params.showPosition)
+			drawPositionBox(manager.objectBase);
+		if (params.showBuffProperties)
+			displayPlayerStatusFlags(manager, character, maxAttributes, barPos, reverse);
+		if (params.showHitProperties)
+			displayHitProperties(character, manager.objectBase, false);
 
 		auto array = manager.objects.list.vector();
 
@@ -458,12 +461,14 @@ namespace Practice
 			auto elem = reinterpret_cast<const SokuLib::ProjectileManager *>(_elem);
 
 			if ((elem->isActive && elem->objectBase.hitCount > 0) || elem->objectBase.frameData.attackFlags.value > 0) {
-				drawCollisionBox(elem->objectBase);
-				drawHurtBoxes(elem->objectBase);
-				drawHitBoxes(elem->objectBase);
-				drawPositionBox(elem->objectBase);
-				displayObjectFrameFlags(elem->objectBase);
-				displayHitProperties(character, elem->objectBase, true);
+				if (params.showSubObjectHurtboxes)
+					drawHurtBoxes(elem->objectBase);
+				if (params.showSubObjectHitboxes)
+					drawHitBoxes(elem->objectBase);
+				if (params.showSubObjectPosition)
+					drawPositionBox(elem->objectBase);
+				if (params.showSubObjectProperties)
+					displayHitProperties(character, elem->objectBase, true);
 			}
 		}
 	}
@@ -472,7 +477,7 @@ namespace Practice
 	{
 		auto &battle = SokuLib::getBattleMgr();
 
-		drawPlayerBoxes(battle.leftCharacterManager,  SokuLib::leftChar,  allMaxAttributes.first,  {20, 70}, false);
-		drawPlayerBoxes(battle.rightCharacterManager, SokuLib::rightChar, allMaxAttributes.second, {620, 70}, true);
+		drawPlayerBoxes(battle.leftCharacterManager,  SokuLib::leftChar,  allMaxAttributes.first,  {20, 70}, false, settings.leftHitboxSettings);
+		drawPlayerBoxes(battle.rightCharacterManager, SokuLib::rightChar, allMaxAttributes.second, {620, 70}, true, settings.rightHitboxSettings);
 	}
 }
