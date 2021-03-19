@@ -1,4 +1,21 @@
 Renderer.1 {
+    arrowbackgroundcolor = #F5F5F5;
+    arrowbackgroundcolorhover = white;
+    arrowcolor = #3C3C3C;
+    arrowcolorhover = black;
+    backgroundcolor = #F5F5F5;
+    bordercolor = black;
+    borders = (1, 1, 1, 1);
+    padding = (0, 0, 0, 0);
+    textcolor = #3C3C3C;
+    texturearrow = None;
+    texturearrowdisabled = None;
+    texturearrowhover = None;
+    texturebackground = None;
+    texturebackgrounddisabled = None;
+}
+
+Renderer.2 {
     bordercolor = #3C3C3C;
     bordercolorhover = black;
     borders = (1, 1, 1, 1);
@@ -12,7 +29,7 @@ Renderer.1 {
     trackcolorhover = white;
 }
 
-Renderer.2 {
+Renderer.3 {
     backgroundcolor = #F5F5F5;
     backgroundcolordisabled = #E6E6E6;
     backgroundcolorhover = white;
@@ -38,7 +55,7 @@ Renderer.2 {
     textureuncheckedhover = None;
 }
 
-Renderer.3 {
+Renderer.4 {
     backgroundcolor = transparent;
     bordercolor = #3C3C3C;
     borders = (0, 0, 0, 0);
@@ -46,29 +63,12 @@ Renderer.3 {
     texturebackground = None;
 }
 
-Renderer.4 {
-    arrowbackgroundcolor = #F5F5F5;
-    arrowbackgroundcolorhover = white;
-    arrowcolor = #3C3C3C;
-    arrowcolorhover = black;
-    backgroundcolor = #F5F5F5;
-    bordercolor = black;
-    borders = (1, 1, 1, 1);
-    padding = (0, 0, 0, 0);
-    textcolor = #3C3C3C;
-    texturearrow = None;
-    texturearrowdisabled = None;
-    texturearrowhover = None;
-    texturebackground = None;
-    texturebackgrounddisabled = None;
-}
-
 CheckBox.Normal {
     Position = (10, 440);
     Size = (18, 18);
     Text = "Normal practice features enabled";
     TextSize = 13;
-    renderer = &2;
+    renderer = &3;
 }
 
 Panel.Breaking {
@@ -85,7 +85,7 @@ Panel.Breaking {
         Size = (18, 18);
         Text = "Take control of dummy";
         TextSize = 13;
-        renderer = &2;
+        renderer = &3;
     }
 
     Slider.X {
@@ -97,7 +97,7 @@ Panel.Breaking {
         Size = (200, 16);
         Step = 1;
         Value = 40;
-        renderer = &1;
+        renderer = &2;
     }
 
     Label.Label1 {
@@ -107,7 +107,7 @@ Panel.Breaking {
         Size = (66.2, 18);
         Text = "X position";
         TextSize = 13;
-        renderer = &3;
+        renderer = &4;
     }
 
     Slider.Y {
@@ -119,7 +119,7 @@ Panel.Breaking {
         Size = (200, 16);
         Step = 1;
         Value = 0;
-        renderer = &1;
+        renderer = &2;
     }
 
     Label.Label2 {
@@ -129,7 +129,7 @@ Panel.Breaking {
         Size = (65.2, 18);
         Text = "Y position";
         TextSize = 13;
-        renderer = &3;
+        renderer = &4;
     }
 
     ComboBox.Tech {
@@ -142,7 +142,7 @@ Panel.Breaking {
         SelectedItemIndex = 0;
         Size = (140, 22);
         TextSize = 13;
-        renderer = &4;
+        renderer = &1;
     }
 
     ComboBox.Airtech {
@@ -155,7 +155,7 @@ Panel.Breaking {
         SelectedItemIndex = 0;
         Size = (140, 22);
         TextSize = 13;
-        renderer = &4;
+        renderer = &1;
     }
 
     Button.Button1 {
@@ -189,14 +189,14 @@ Panel.Breaking {
     ComboBox.Block {
         ChangeItemOnScroll = true;
         ExpandDirection = Down;
-        Items = ["No block", Block, "Keep blocking", "High block", "Keep high blocking", "Low block", "Keep low blocking", "Random height", "Keep random blocking"];
-        ItemsToDisplay = 4;
+        Items = ["No block", Block, "High block", "Low block", "Random height", "Block after 1 hit", "Block first hit"];
+        ItemsToDisplay = 7;
         MaximumItems = 0;
         Position = (10, 210);
         SelectedItemIndex = 0;
         Size = (140, 22);
         TextSize = 13;
-        renderer = &4;
+        renderer = &1;
     }
 }
 
@@ -204,5 +204,5 @@ CheckBox.XEnabled {
     Position = (80, 40);
     Size = (18, 18);
     TextSize = 13;
-    renderer = &2;
+    renderer = &3;
 }

@@ -10,6 +10,7 @@
 #include "Logic.hpp"
 #include "Inputs.hpp"
 #include "Hitboxes.hpp"
+#include "Dummy.hpp"
 
 #define mkdir _mkdir
 #define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45E
@@ -92,6 +93,17 @@ namespace Practice
 	char profilePath[1024 + MAX_PATH];
 	char profileParent[1024 + MAX_PATH];
 	SokuLib::KeyInput lastPlayerInputs;
+	int idleCounter = 0;
+	int dummyHitCounter = 0;
+	static int (SokuLib::CharacterManager::*original_onHit)(int param);
+
+	static int __fastcall onHit(SokuLib::CharacterManager &This, int, int param)
+	{
+		if (&This == &SokuLib::getBattleMgr().rightCharacterManager)
+			dummyBeforeHit((unsigned char)~param >> 1 & 1);
+
+		return (This.*original_onHit)(param);
+	}
 
 	void placeHooks()
 	{
@@ -113,6 +125,11 @@ namespace Practice
 		s_origKeymapManager_SetInputs = SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(*(int *)PAYLOAD_ADDRESS_GET_INPUTS + PAYLOAD_NEXT_INSTR_GET_INPUTS);
 		*(int *)PAYLOAD_ADDRESS_GET_INPUTS = newOffset;
 
+		VirtualProtect((PVOID)0x47c5aa, 4, PAGE_EXECUTE_WRITECOPY, &old);
+		original_onHit = SokuLib::union_cast<int (SokuLib::CharacterManager::*)(int)>(SokuLib::TamperNearJmpOpr(0x47c5a9, reinterpret_cast<DWORD>(onHit)));
+		VirtualProtect((PVOID)0x47c5aa, 4, old, &old);
+
+		//This forces the dummy to have an input device (probably keyboard ?)
 		((unsigned *)0x00898680)[1] = 0x008986A8;
 	}
 
@@ -150,6 +167,10 @@ namespace Practice
 		for (unsigned i = 0; i < sizeof(patchCode); i++)
 			((unsigned char *)0x42A331)[i] = originalCode[i];
 		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), old, &old);
+
+		VirtualProtect((PVOID)0x47c5aa, 4, PAGE_EXECUTE_WRITECOPY, &old);
+		SokuLib::TamperNearJmpOpr(0x47c5a9, SokuLib::union_cast<DWORD>(original_onHit));
+		VirtualProtect((PVOID)0x47c5aa, 4, old, &old);
 
 		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, PAGE_EXECUTE_WRITECOPY, &old);
 		*(int *)PAYLOAD_ADDRESS_GET_INPUTS = SokuLib::union_cast<int>(s_origKeymapManager_SetInputs) - PAYLOAD_NEXT_INSTR_GET_INPUTS;

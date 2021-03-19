@@ -87,20 +87,20 @@ namespace Practice
 
 	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager, SokuLib::Character character)
 	{
-		if (manager.objectBase.action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
+		if (!idleCounter)
 		{
 			if (state.HPInstantRegen)
 				manager.objectBase.hp = state.hp;
 
 			if (state.SPInstantRegen)
 				manager.currentSpirit = state.maxCurrentSpirit;
-		}
 
-		if (manager.currentSpirit >= state.maxCurrentSpirit)
-			manager.currentSpirit = state.maxCurrentSpirit;
-		
-		manager.maxSpirit = 1000 - state.brokenOrbs * 200;
-		manager.timeWithBrokenOrb = 0;
+			manager.maxSpirit = 1000 - state.brokenOrbs * 200;
+
+			if (manager.currentSpirit >= state.maxCurrentSpirit)
+				manager.currentSpirit = state.maxCurrentSpirit;
+			manager.timeWithBrokenOrb = 0;
+		}
 
 		memcpy(&manager.skillMap, &state.skillMap, sizeof(state.skillMap));
 		manager.controlRod = state.rodLevel;
@@ -135,10 +135,29 @@ namespace Practice
 			return;
 
 		if (settings.activated) {
+			auto &battle = SokuLib::getBattleMgr();
+			auto leftAction = battle.leftCharacterManager.objectBase.action;
+			auto rightAction = battle.rightCharacterManager.objectBase.action;
+
+			if (idleCounter)
+				idleCounter--;
+			if (dummyHitCounter)
+				dummyHitCounter--;
+
+			if (
+				leftAction  > SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN ||
+				rightAction > SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN
+			)
+				idleCounter = 20;
+			if (
+				rightAction >= SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN &&
+				rightAction < SokuLib::ACTION_FORWARD_AIRTECH
+			)
+				dummyHitCounter = 20;
 			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
 			weatherControl();
-			applyCharacterState(settings.leftState,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar);
-			applyCharacterState(settings.rightState, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar);
+			applyCharacterState(settings.leftState,  battle.leftCharacterManager,  SokuLib::leftChar);
+			applyCharacterState(settings.rightState, battle.rightCharacterManager, SokuLib::rightChar);
 		}
 	}
 }

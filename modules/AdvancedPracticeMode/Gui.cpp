@@ -269,6 +269,7 @@ namespace Practice
 		panel->loadWidgetsFromFile(profile + "/assets/dummy.gui");
 		panel->get<tgui::CheckBox>("Control")->setChecked(settings.controlDummy);
 
+		auto block = panel->get<tgui::ComboBox>("Block");
 		auto airtech = panel->get<tgui::ComboBox>("Airtech");
 		auto tech = panel->get<tgui::ComboBox>("Tech");
 		auto breaking = panel->get<tgui::Panel>("Breaking");
@@ -308,8 +309,12 @@ namespace Practice
 			settings.posY = v;
 		});
 
+		block->setSelectedItemByIndex(settings.block);
 		airtech->setSelectedItemByIndex(settings.airtech);
 		tech->setSelectedItemByIndex(settings.tech);
+		block->connect("ItemSelected", [](int item){
+			settings.block = static_cast<BlockingSide>(item);
+		});
 		airtech->connect("ItemSelected", [](int item){
 			settings.airtech = static_cast<AirTechDirection>(item);
 		});

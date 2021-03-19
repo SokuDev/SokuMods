@@ -34,7 +34,9 @@ namespace Practice
 		BLOCK,
 		HIGH_BLOCKING,
 		LOW_BLOCKING,
-		RANDOM_HEIGHT_BLOCKING
+		RANDOM_HEIGHT_BLOCKING,
+		BLOCK_AFTER_FIRST_HIT,
+		BLOCK_FIRST_HIT,
 	};
 
 	struct CharacterState {
@@ -99,6 +101,8 @@ namespace Practice
 		~Settings();
 	};
 
+	extern int idleCounter;
+	extern int dummyHitCounter;
 	extern std::map<std::string, std::vector<unsigned short>> characterSpellCards;
 	extern sf::RenderWindow *sfmlWindow;
 	extern char profilePath[1024 + MAX_PATH];

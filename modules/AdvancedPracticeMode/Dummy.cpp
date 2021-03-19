@@ -8,7 +8,6 @@
 
 namespace Practice
 {
-	static int counter = 0;
 	static std::vector<SokuLib::KeyInput> nextDummyInputs;
 
 	static void handleAirTech(SokuLib::CharacterManager &player, SokuLib::CharacterManager &dummy, SokuLib::KeymapManager &manager)
@@ -110,6 +109,48 @@ namespace Practice
 		for (auto &str : sequenceStrs)
 			printf("%s\n", str.c_str());
 		return sequenceStrs;
+	}
+
+	void dummyBeforeHit(bool isHigh)
+	{
+		auto &battle = SokuLib::getBattleMgr();
+		auto &player = battle.leftCharacterManager;
+		auto &dummy = battle.rightCharacterManager;
+		auto direction = (player.objectBase.position.x < dummy.objectBase.position.x ? -1 : 1);
+
+		switch (settings.block) {
+		case BLOCK:
+			dummy.keyMap.horizontalAxis = -direction;
+			dummy.keyMap.verticalAxis = isHigh;
+			break;
+		case HIGH_BLOCKING:
+			dummy.keyMap.horizontalAxis = -direction;
+			dummy.keyMap.verticalAxis = 0;
+			break;
+		case LOW_BLOCKING:
+			dummy.keyMap.horizontalAxis = -direction;
+			dummy.keyMap.verticalAxis = 1;
+			break;
+		case RANDOM_HEIGHT_BLOCKING:
+			dummy.keyMap.horizontalAxis = -direction;
+			dummy.keyMap.verticalAxis = rand() % 2;
+			break;
+		case BLOCK_AFTER_FIRST_HIT:
+			if (dummyHitCounter) {
+				dummy.keyMap.horizontalAxis = -direction;
+				dummy.keyMap.verticalAxis = isHigh;
+			}
+			break;
+		case BLOCK_FIRST_HIT:
+			if (!dummyHitCounter) {
+				dummy.keyMap.horizontalAxis = -direction;
+				dummy.keyMap.verticalAxis = isHigh;
+			}
+			break;
+		default:
+			dummy.keyMap.horizontalAxis = 0;
+			break;
+		}
 	}
 
 	std::vector<SokuLib::KeyInput> moveNameToSequence(const std::vector<std::string> &strs)

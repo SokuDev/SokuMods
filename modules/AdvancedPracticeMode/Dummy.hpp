@@ -20,6 +20,7 @@ namespace Practice
 	void addNextInput(const SokuLib::KeyInput &input);
 	void addNextInput(const std::string &input);
 	void moveDummy(SokuLib::KeymapManager &manager);
+	void dummyBeforeHit(bool isHigh);
 }
 
 
