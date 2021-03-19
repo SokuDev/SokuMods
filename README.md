@@ -21,7 +21,7 @@ The code in this repository comes from various contributors:
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
 - *Fear Nagae*, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
 - *Nepoke* made ReDelay
-- *[delthas](https://github.com/delthas)* made Autopunch, GetIP, as well as all the plumbing: adding CMake, CI, formatting, ...
+- *[delthas](https://github.com/delthas)* made Autopunch, GetIP, SokuReplays, as well as all the plumbing: adding CMake, CI, formatting, ...
 
 If you have made an SWRSToys or SokuEngine module, do contact us either on GitHub or with a PM on Discord to `cc#6439` so we can add it here, with proper credits!
 
@@ -194,6 +194,10 @@ Available patches:
 ### SkipIntro
 
 **Skip the game intro screen, automatically enter a menu or a custom practice preset on start.**
+
+### SokuReplays
+
+**Helps [SokuReplays](https://sokureplays.delthas.fr/) track your games, even accross IP changes.**
 
 ### SokuStreaming
 

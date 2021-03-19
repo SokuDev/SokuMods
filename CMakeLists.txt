@@ -309,6 +309,11 @@ module(SkipIntro)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
+module(SokuReplays Default)
+target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
+target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
+target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
+
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)
     module(SokuStreaming)
