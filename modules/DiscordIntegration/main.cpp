@@ -439,6 +439,12 @@ void tick() {
 	updateActivity(index, party);
 }
 
+volatile long long discord_id;
+
+extern "C" __declspec(dllexport) long long DiscordId() {
+	return discord_id;
+}
+
 class MyThread {
 private:
 	bool _done = false;
@@ -447,6 +453,13 @@ private:
 public:
 	bool isDone() const {
 		return this->_done;
+	}
+
+	static void onCurrentUserUpdate() {
+		discord::User current;
+		if (state.core->UserManager().GetCurrentUser(&current) == discord::Result::Ok) {
+			discord_id = current.GetId();
+		}
 	}
 
 	static void onActivityJoin(const char *sec) {
@@ -494,6 +507,7 @@ public:
 			}
 		} while (result != discord::Result::Ok);
 		logMessage("Connected !\n");
+		state.core->UserManager().OnCurrentUserUpdate.Connect(MyThread::onCurrentUserUpdate);
 		state.core->ActivityManager().OnActivityJoin.Connect(MyThread::onActivityJoin);
 	}
 
