@@ -285,7 +285,7 @@ target_link_libraries(NetBellChanger winmm)
 module(NetProfileView)
 target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 
-module(ReDelay)
+module(ReDelay Default)
 target_sources(ReDelay PRIVATE
         modules/ReDelay/ReDelay.cpp)
 target_link_libraries(ReDelay SokuLib)
