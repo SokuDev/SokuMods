@@ -1,5 +1,7 @@
 #pragma once
 
+#include "stdafx.h"
+
 #define RET_BOOL_IF_FALSE(Func, res) \
 	res = Func; \
 	if (!res) { \
@@ -10,6 +12,10 @@
 	if (!Func) { \
 		return; \
 	}
+
+extern bool enable_practice;
+extern bool enable_versus;
+extern bool enable_replays;
 
 class PlayerImpl {
 public:

@@ -212,6 +212,10 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) 
 	PathRemoveFileSpec(s_profilePath);
 	PathAppend(s_profilePath, "LabTool.ini");
 
+	enable_practice = ::GetPrivateProfileInt("Modes", "show_practice", 1, s_profilePath);
+	enable_versus = ::GetPrivateProfileInt("Modes", "show_versus", 1, s_profilePath);
+	enable_replays = ::GetPrivateProfileInt("Modes", "show_replays", 1, s_profilePath);
+
 	if (!LoadLibrary("dinput8.dll")) {
 		return true;
 	}

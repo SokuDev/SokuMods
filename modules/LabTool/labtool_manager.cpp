@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "labtool_manager.h"
 
 #include "functions.h"
@@ -8,6 +6,10 @@
 #define ADDR_BMGR_P2 0x10
 
 Keys savestate_keys;
+
+bool enable_practice;
+bool enable_versus;
+bool enable_replays;
 
 LabToolManager &LabToolManager::getInstance() {
 	static LabToolManager s_manager;
@@ -49,7 +51,8 @@ void LabToolManager::destruct() {
 }
 
 bool LabToolManager::isValidMode() const {
-	return _currentMode == EMode::ePractice || _currentMode == EMode::eVsPlayer || _currentMode == EMode::eReplay;
+	return (_currentMode == EMode::ePractice && enable_practice) || (_currentMode == EMode::eVsPlayer && enable_versus)
+		|| (_currentMode == EMode::eReplay && enable_replays);
 }
 
 const PlayerImplPtr &LabToolManager::getPlayerMain() {

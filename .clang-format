@@ -32,18 +32,21 @@ Cpp11BracedListStyle: true
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex:           '^<windows\.h>'
+  - Regex:           '^\"stdafx\.h\"'
     Priority:        1
     SortPriority:    1
-  - Regex:           '^<winsock2\.h>'
+  - Regex:           '^<windows\.h>'
     Priority:        1
     SortPriority:    2
-  - Regex:           '^<initguid\.h>'
+  - Regex:           '^<winsock2\.h>'
     Priority:        1
     SortPriority:    3
-  - Regex:           '.*'
+  - Regex:           '^<initguid\.h>'
     Priority:        1
     SortPriority:    4
+  - Regex:           '.*'
+    Priority:        1
+    SortPriority:    5
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth: 2
