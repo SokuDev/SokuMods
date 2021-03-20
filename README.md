@@ -163,9 +163,9 @@ Available patches:
 
 ### ReplayDnD
 
-**Drag and drop a replay file to the game executable file to watch it immediately.**
+**Run replay files easily from Windows.**
 
-*Dragging a replay to a running game window does not work; you need to drag it to the game exacutable file in Windows Explorer.*
+*This associates .rep with Soku for easy watching in one click. You can also drag replays or folders containing replays to the th123.exe file (not th123e.exe!).*
 
 ### ReplayInputView+
 

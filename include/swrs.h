@@ -33,6 +33,7 @@
 #define ADDR_INPUT_MANAGER_CLUSTER 0x0089A248
 #define ADDR_SET_BATTLE_MODE 0x0043E9A0
 #define ADDR_VTBL_LOGO 0x00857740
+#define ADDR_VTBL_TITLE 0x00857FAC
 #define ADDR_VTBL_BATTLE 0x008574A0
 #define ADDR_SCENE_ID_NEW 0x008a0040
 #define ADDR_SCENE_ID 0x008a0044
@@ -416,7 +417,9 @@ actual 1.10a argc and argv values, but might conflict with existing mods
 /*
 #define vtbl_Opening              0x008467D4
 #define vtbl_CLoading             0x0084665C
-#define vtbl_CTitle               0x00846FA4
+*/
+#define vtbl_CTitle ADDR_VTBL_TITLE
+/*
 #define vtbl_CSelect              0x00846D18
 #define vtbl_CSelectScenario      0x00846DD0
 */

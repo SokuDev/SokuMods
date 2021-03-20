@@ -5,8 +5,10 @@
 #include <process.h>
 #include <shlobj.h>
 #include <shlwapi.h>
+#include <sys/stat.h>
 
 #define CLogo_Process(p) Ccall(p, s_origCLogo_OnProcess, int, ())()
+#define CTitle_Process(p) Ccall(p, s_origCTitle_OnProcess, int, ())()
 #define CBattle_Process(p) Ccall(p, s_origCBattle_OnProcess, int, ())()
 
 #define ADDR_SET_VOLUME 0x00403D10
@@ -32,7 +34,7 @@ void CDetour::SetVolume(float volume) {
 
 void (CDetour::*CDetour::ActualSetVolume)(float) = union_cast<void (CDetour::*)(float)>(ADDR_SET_VOLUME);
 
-char *replay_path_pointer_fake;
+char replay_path_pointer_fake[MAX_PATH];
 wchar_t *replay_path_pointer_actual;
 
 HANDLE(__stdcall *actual_CreateFileA)
@@ -42,49 +44,93 @@ HANDLE(__stdcall *actual_CreateFileA)
 
 HANDLE __stdcall my_CreateFileA(char *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes,
 	DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) {
-	if (lpFileName && replay_path_pointer_fake && !strcmp(lpFileName, replay_path_pointer_fake)) {
+	if (lpFileName && !strcmp(lpFileName, replay_path_pointer_fake)) {
 		return CreateFileW(
 			replay_path_pointer_actual, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 	}
 	return actual_CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 }
 
+wchar_t **wargv;
+
 static DWORD s_origCLogo_OnProcess;
+static DWORD s_origCTitle_OnProcess;
 static DWORD s_origCBattle_OnProcess;
 
-static bool s_swrapt;
+static wchar_t next_file[MAX_PATH];
+static HANDLE dir_it = INVALID_HANDLE_VALUE;
+static bool dir_last;
+
 static bool s_autoShutdown;
 static bool s_muteMusic;
 
 int __fastcall CLogo_OnProcess(void *This) {
-	static bool loaded = false;
-	if (!loaded) {
-		loaded = true;
-		replay_path_pointer_fake = __argv[1];
-		int _;
-		wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &_);
-		replay_path_pointer_actual = wargv[1];
+	if (next_file[0]) {
+		replay_path_pointer_actual = next_file;
+		WideCharToMultiByte(CP_ACP, 0, replay_path_pointer_actual, -1, replay_path_pointer_fake, MAX_PATH, NULL, NULL);
 		if (CInputManager_ReadReplay(g_inputMgr, replay_path_pointer_fake)) {
-			s_swrapt = true;
 			// 入力があったように見せかける。END
 			*(BYTE *)((DWORD)g_inputMgrs + 0x74) = 0xFF;
 			// リプモードにチェンジ
 			SetBattleMode(3, 2);
+
+			if (dir_it != INVALID_HANDLE_VALUE) {
+				WIN32_FIND_DATAW find_data;
+				if (FindNextFileW(dir_it, &find_data)) {
+					StrCpyW(next_file, wargv[1]);
+					StrCatW(next_file, L"\\");
+					StrCatW(next_file, find_data.cFileName);
+				} else {
+					dir_last = true;
+				}
+			}
 			return 6;
 		} else {
-			WARN(L"Failed loading %s", replay_path_pointer_actual);
+			WARN(L"Failed loading %s", next_file);
 		}
 	}
 	return CLogo_Process(This);
 }
 
+int __fastcall CTitle_OnProcess(void *This) {
+	if (next_file[0]) {
+		replay_path_pointer_actual = next_file;
+		WideCharToMultiByte(CP_ACP, 0, replay_path_pointer_actual, -1, replay_path_pointer_fake, MAX_PATH, NULL, NULL);
+		if (CInputManager_ReadReplay(g_inputMgr, replay_path_pointer_fake)) {
+			// 入力があったように見せかける。END
+			*(BYTE *)((DWORD)g_inputMgrs + 0x74) = 0xFF;
+			// リプモードにチェンジ
+			SetBattleMode(3, 2);
+
+			if (dir_it != INVALID_HANDLE_VALUE) {
+				WIN32_FIND_DATAW find_data;
+				if (FindNextFileW(dir_it, &find_data)) {
+					StrCpyW(next_file, wargv[1]);
+					StrCatW(next_file, L"\\");
+					StrCatW(next_file, find_data.cFileName);
+				} else {
+					dir_last = true;
+				}
+			}
+			return 6;
+		} else {
+			WARN(L"Failed loading %s", next_file);
+		}
+	}
+	return CTitle_Process(This);
+}
+
 int __fastcall CBattle_OnProcess(void *This) {
 	int ret = CBattle_Process(This);
-	if (s_swrapt && ret != 5) {
-		s_swrapt = false;
-		if (s_autoShutdown) {
-			// 落とす
-			ret = -1;
+	if (next_file[0] && ret != 5) {
+		if (dir_last || dir_it == INVALID_HANDLE_VALUE) {
+			if (s_autoShutdown) {
+				// 落とす
+				ret = -1;
+			}
+			next_file[0] = '\0';
+		} else {
+			ret = SWRSSCENE_TITLE;
 		}
 	}
 	return ret;
@@ -158,7 +204,32 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	_beginthread(load_thread, 0, NULL);
 
-	if (__argc != 2 || !StrStrI(__argv[1], "rep")) {
+	if (__argc != 2) {
+		return true;
+	}
+
+	int _;
+	wargv = CommandLineToArgvW(GetCommandLineW(), &_);
+
+	struct _stat64 s;
+	if (_wstat64(wargv[1], &s)) {
+		return true;
+	}
+	if (s.st_mode & S_IFDIR) {
+		WIN32_FIND_DATAW find_data;
+		wchar_t buf[MAX_PATH];
+		StrCpyW(buf, wargv[1]);
+		StrCatW(buf, L"\\*.rep");
+		dir_it = FindFirstFileW(buf, &find_data);
+		if (dir_it == INVALID_HANDLE_VALUE) {
+			return true;
+		}
+		StrCpyW(next_file, wargv[1]);
+		StrCatW(next_file, L"\\");
+		StrCatW(next_file, find_data.cFileName);
+	} else if (StrStrIW(wargv[1], L".rep")) {
+		StrCpyW(next_file, wargv[1]);
+	} else {
 		return true;
 	}
 
@@ -172,6 +243,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	DWORD old;
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origCLogo_OnProcess = TamperDword(vtbl_CLogo + 4, (DWORD)CLogo_OnProcess);
+	s_origCTitle_OnProcess = TamperDword(vtbl_CTitle + 4, (DWORD)CTitle_OnProcess);
 	s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
 	::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 
