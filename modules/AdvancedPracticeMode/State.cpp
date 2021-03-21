@@ -207,6 +207,11 @@ namespace Practice
 			return;
 		}
 		stream.read(reinterpret_cast<char *>(&this->activated + 1), sizeof(*this) - sizeof(this->activated) - sizeof(CharacterState) * 2);
+		if (MAGIC_NUMBER != this->magicNumber) {
+			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": ";
+			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number " << MAGIC_NUMBER << std::endl;
+			*this = Settings();
+		}
 	}
 
 	void Settings::save() const
@@ -283,10 +288,38 @@ namespace Practice
 				{0x7F, true},
 			};
 
-			std::cerr << "Error: Couldn't load file to \"" << path << "\": " << strerror(errno) << std::endl;
+			std::cerr << "Error: Couldn't load file from \"" << path << "\": " << strerror(errno) << std::endl;
+			*this = CharacterState();
 			memcpy(&this->skillMap, &buffer, sizeof(buffer));
 			return;
 		}
 		stream.read(reinterpret_cast<char *>(this), sizeof(*this));
+		if (MAGIC_NUMBER_CHR != this->magicNumber) {
+			SokuLib::Skill buffer[15] = {
+				{0x00, false},
+				{0x00, false},
+				{0x00, false},
+				{0x00, false},
+				{
+				 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
+				       chr != SokuLib::CHARACTER_PATCHOULI
+				},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+				{0x7F, true},
+			};
+
+			std::cerr << "Error: Couldn't load file from \"" << path << "\": ";
+			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number " << MAGIC_NUMBER_CHR << std::endl;
+			*this = CharacterState();
+			memcpy(&this->skillMap, &buffer, sizeof(buffer));
+		}
 	}
 }

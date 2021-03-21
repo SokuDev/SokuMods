@@ -13,11 +13,12 @@
 struct Title {};
 struct Select {};
 struct Loading {};
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Process)();
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
-int (__thiscall Loading::*s_origCLoading_Process)();
-int (__thiscall Select::*s_origCSelect_Process)();
-int (__thiscall Title::*s_origCTitle_Process)();
+static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Process)();
+static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
+static int (__thiscall Loading::*s_origCLoading_Process)();
+static int (__thiscall Select::*s_origCSelect_Process)();
+static int (__thiscall Title::*s_origCTitle_Process)();
+float frameCounter = 0;
 
 
 
@@ -57,13 +58,28 @@ int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
-	// super
-	auto result = (This->*s_origCBattleManager_Process)();
+	int result = SokuLib::sceneId;
 
-	if (Practice::sfmlWindow)
-		Practice::update();
+	if (Practice::sfmlWindow);
 	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE || SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
 		Practice::activate();
+	else
+		return (This->*s_origCBattleManager_Process)();
+
+	frameCounter += Practice::settings.requestedFrameRate / 60.f;
+	while (frameCounter >= 1) {
+		// super
+		result = (This->*s_origCBattleManager_Process)();
+
+		if (result > 0 && result < 4) {
+			printf("CBattleManager_Process returned %i\n", result);
+			frameCounter = 0;
+			break;
+		}
+
+		Practice::update();
+		frameCounter--;
+	}
 	return result;
 }
 

@@ -357,6 +357,8 @@ namespace Practice
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
 		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
+		auto frameRate = panel->get<tgui::EditBox>("FPS");
+		auto frameStep = panel->get<tgui::Button>("Step");
 		auto leftHurtBoxes        = panel->get<tgui::CheckBox>("LeftHurtBoxes");
 		auto leftHitBoxes         = panel->get<tgui::CheckBox>("LeftHitBoxes");
 		auto leftPosBox           = panel->get<tgui::CheckBox>("LeftPosBox");
@@ -419,6 +421,24 @@ namespace Practice
 		rightSubObjHitBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectHitboxes));
 		rightSubObjPosBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectPosition));
 		rightSubObjProperties->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectProperties));
+
+		frameRate->setText(std::to_string(settings.requestedFrameRate));
+		auto fct = [](std::weak_ptr<tgui::EditBox> boxWeak){
+			auto box = boxWeak.lock();
+
+			if (box->getText().isEmpty())
+				return;
+			settings.requestedFrameRate = std::stoul(box->getText().toAnsiString());
+		};
+		frameRate->connect("TextChanged", fct, std::weak_ptr<tgui::EditBox>(frameRate));
+		frameRate->connect("ReturnKeyPressed", fct, std::weak_ptr<tgui::EditBox>(frameRate));
+		frameStep->connect("Clicked", [frameRate]{
+			extern float frameCounter;
+			if (frameRate->getText() != "0")
+				frameRate->setText("0");
+			else
+				frameCounter++;
+		});
 
 		std::string editTimerStr = std::to_string(settings.weatherTime / 10) + "." + std::to_string(settings.weatherTime % 10);
 		editTimer->setText(editTimerStr);

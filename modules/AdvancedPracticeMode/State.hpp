@@ -12,6 +12,8 @@
 
 namespace Practice
 {
+#define MAGIC_NUMBER 0x01020304
+#define MAGIC_NUMBER_CHR 0x01020304
 #define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
 #define PAYLOAD_NEXT_INSTR_DECK_INFOS (PAYLOAD_ADDRESS_DECK_INFOS + 4)
 
@@ -44,6 +46,7 @@ namespace Practice
 		SokuLib::Character _chr;
 
 	public:
+		unsigned magicNumber = MAGIC_NUMBER_CHR;
 		unsigned hp = 10000;
 		unsigned maxCurrentSpirit = 1000;
 		bool HPInstantRegen = true;
@@ -76,11 +79,13 @@ namespace Practice
 
 	struct Settings {
 		bool activated;
+		unsigned magicNumber = MAGIC_NUMBER;
 		bool realisticInputs = true;
 		bool controlDummy = false;
 		bool forceWeather = true;
 		bool weatherResetRequest = false;
 		int weatherTime = 999;
+		int requestedFrameRate = 60;
 		BlockingSide block = NO_BLOCKING;
 		TechDirection tech = NEUTRAL_TECH;
 		AirTechDirection airtech = NO_AIRTECH;
