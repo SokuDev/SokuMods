@@ -95,6 +95,8 @@ namespace Practice
 		bool showEmptyInputs = false;
 		bool showLeftInputBox = true;
 		bool showRightInputBox = true;
+		bool showLeftJoypad = true;
+		bool showRightJoypad = true;
 		HitBoxParams leftHitboxSettings;
 		HitBoxParams rightHitboxSettings;
 		CharacterState leftState;

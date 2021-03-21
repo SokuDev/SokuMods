@@ -71,13 +71,29 @@ CheckBox.RawInputs {
     Size = (18, 18);
     Text = "Show raw inputs";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 CheckBox.Empty {
-    Position = (10, 100);
+    Position = (150, 70);
     Size = (18, 18);
     Text = "Show empty inputs";
+    TextSize = 13;
+    renderer = &1;
+}
+
+CheckBox.LeftJoypad {
+    Position = (150, 10);
+    Size = (18, 18);
+    Text = "Show left joypad";
+    TextSize = 13;
+    renderer = &2;
+}
+
+CheckBox.RightJoypad {
+    Position = (150, 40);
+    Size = (18, 18);
+    Text = "Show right joypad";
     TextSize = 13;
     renderer = &2;
 }

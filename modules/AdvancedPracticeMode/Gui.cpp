@@ -470,6 +470,8 @@ namespace Practice
 
 		auto leftBox = panel->get<tgui::CheckBox>("LeftInputs");
 		auto rightBox = panel->get<tgui::CheckBox>("RightInputs");
+		auto leftJoypad = panel->get<tgui::CheckBox>("LeftJoypad");
+		auto rightJoypad = panel->get<tgui::CheckBox>("RightJoypad");
 		auto rawBox = panel->get<tgui::CheckBox>("RawInputs");
 		auto emptyBox = panel->get<tgui::CheckBox>("Empty");
 
@@ -481,6 +483,16 @@ namespace Practice
 		rightBox->setChecked(settings.showRightInputBox);
 		rightBox->connect("Changed", [](bool b){
 			settings.showRightInputBox = b;
+		});
+
+		leftJoypad->setChecked(settings.showLeftJoypad);
+		leftJoypad->connect("Changed", [](bool b){
+			settings.showLeftJoypad = b;
+		});
+
+		rightJoypad->setChecked(settings.showRightJoypad);
+		rightJoypad->connect("Changed", [](bool b){
+			settings.showRightJoypad = b;
 		});
 
 		rawBox->setChecked(settings.showRawInputs);
