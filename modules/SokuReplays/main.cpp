@@ -70,6 +70,7 @@ void loop_thread(void *unused) {
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 10000L);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 	curl_easy_perform(curl);
 	free(url_utf8);
 	curl_easy_cleanup(curl);
