@@ -357,6 +357,7 @@ namespace Practice
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
 		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
+		auto counter = panel->get<tgui::ComboBox>("Counter");
 		auto frameRate = panel->get<tgui::EditBox>("FPS");
 		auto frameStep = panel->get<tgui::Button>("Step");
 		auto leftHurtBoxes        = panel->get<tgui::CheckBox>("LeftHurtBoxes");
@@ -445,6 +446,11 @@ namespace Practice
 
 		editTimer->connect("TextChanged", [](std::string time) {
 			settings.weatherTime = !time.empty() ? atof(time.c_str()) * 10 : 999;
+		});
+
+		counter->setSelectedItemByIndex(settings.counter);
+		counter->connect("ItemSelected", [](int item){
+			settings.counter = static_cast<Counter>(item);
 		});
 
 		force->setChecked(settings.forceWeather);

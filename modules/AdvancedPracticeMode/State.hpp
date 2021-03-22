@@ -41,6 +41,12 @@ namespace Practice
 		BLOCK_FIRST_HIT,
 	};
 
+	enum Counter {
+		COUNTER_OFF,
+		COUNTER_ON,
+		COUNTER_RANDOM,
+	};
+
 	struct CharacterState {
 	private:
 		SokuLib::Character _chr;
@@ -86,6 +92,7 @@ namespace Practice
 		bool weatherResetRequest = false;
 		int weatherTime = 999;
 		int requestedFrameRate = 60;
+		Counter counter = COUNTER_OFF;
 		BlockingSide block = NO_BLOCKING;
 		TechDirection tech = NEUTRAL_TECH;
 		AirTechDirection airtech = NO_AIRTECH;

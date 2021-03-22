@@ -195,15 +195,14 @@ namespace Practice
 
 	void Settings::load()
 	{
-		this->leftState.load(SokuLib::leftChar, true);
-		this->rightState.load(SokuLib::rightChar, false);
-
 		std::cout << "Loading settings from APMSettings/APMLastSession.dat" << std::endl;
 
 		std::ifstream stream{"APMSettings/APMLastSession.dat"};
 
 		if (!stream) {
 			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": " << strerror(errno) << std::endl;
+			this->leftState.load(SokuLib::leftChar, true);
+			this->rightState.load(SokuLib::rightChar, false);
 			return;
 		}
 		stream.read(reinterpret_cast<char *>(&this->activated + 1), sizeof(*this) - sizeof(this->activated) - sizeof(CharacterState) * 2);
@@ -212,6 +211,8 @@ namespace Practice
 			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number " << MAGIC_NUMBER << std::endl;
 			*this = Settings();
 		}
+		this->leftState.load(SokuLib::leftChar, true);
+		this->rightState.load(SokuLib::rightChar, false);
 	}
 
 	void Settings::save() const

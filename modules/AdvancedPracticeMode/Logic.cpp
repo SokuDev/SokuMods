@@ -158,6 +158,18 @@ namespace Practice
 			weatherControl();
 			applyCharacterState(settings.leftState,  battle.leftCharacterManager,  SokuLib::leftChar);
 			applyCharacterState(settings.rightState, battle.rightCharacterManager, SokuLib::rightChar);
+
+			switch (settings.counter) {
+			case COUNTER_OFF:
+				SokuLib::practiceSettings->counter = SokuLib::COUNTER_OFF;
+				break;
+			case COUNTER_ON:
+				SokuLib::practiceSettings->counter = SokuLib::COUNTER_ON;
+				break;
+			case COUNTER_RANDOM:
+				SokuLib::practiceSettings->counter = rand() % 2 ? SokuLib::COUNTER_ON : SokuLib::COUNTER_OFF;
+				break;
+			}
 		}
 	}
 }
