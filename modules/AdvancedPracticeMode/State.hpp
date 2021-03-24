@@ -12,7 +12,7 @@
 
 namespace Practice
 {
-#define MAGIC_NUMBER 0x01020304
+#define MAGIC_NUMBER     0x01020305
 #define MAGIC_NUMBER_CHR 0x01020304
 #define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
 #define PAYLOAD_NEXT_INSTR_DECK_INFOS (PAYLOAD_ADDRESS_DECK_INFOS + 4)
@@ -84,7 +84,6 @@ namespace Practice
 	};
 
 	struct Settings {
-		bool activated;
 		unsigned magicNumber = MAGIC_NUMBER;
 		bool realisticInputs = true;
 		bool controlDummy = false;
@@ -106,8 +105,11 @@ namespace Practice
 		bool showRightJoypad = true;
 		HitBoxParams leftHitboxSettings;
 		HitBoxParams rightHitboxSettings;
-		CharacterState leftState;
-		CharacterState rightState;
+		struct NonSavedElements{
+			bool activated;
+			CharacterState leftState;
+			CharacterState rightState;
+		} nonSaved;
 
 		Settings(bool activated = false);
 		void load();

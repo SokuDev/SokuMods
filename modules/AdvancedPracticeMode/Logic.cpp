@@ -134,7 +134,7 @@ namespace Practice
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE)
 			return;
 
-		if (settings.activated) {
+		if (settings.nonSaved.activated) {
 			auto &battle = SokuLib::getBattleMgr();
 			auto leftAction = battle.leftCharacterManager.objectBase.action;
 			auto rightAction = battle.rightCharacterManager.objectBase.action;
@@ -156,8 +156,8 @@ namespace Practice
 				dummyHitCounter = 20;
 			SokuLib::practiceSettings->state = SokuLib::DUMMY_STATE_2P_CONTROL;
 			weatherControl();
-			applyCharacterState(settings.leftState,  battle.leftCharacterManager,  SokuLib::leftChar);
-			applyCharacterState(settings.rightState, battle.rightCharacterManager, SokuLib::rightChar);
+			applyCharacterState(settings.nonSaved.leftState,  battle.leftCharacterManager,  SokuLib::leftChar);
+			applyCharacterState(settings.nonSaved.rightState, battle.rightCharacterManager, SokuLib::rightChar);
 
 			switch (settings.counter) {
 			case COUNTER_OFF:

@@ -110,10 +110,10 @@ namespace Practice
 		DWORD old;
 		int newOffset;
 
-		if (settings.activated)
+		if (settings.nonSaved.activated)
 			return;
 		puts("Placing hooks");
-		settings.activated = true;
+		settings.nonSaved.activated = true;
 		//Bypass the basic practice features by skipping most of the function.
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		for (unsigned i = 0; i < sizeof(patchCode); i++) {
@@ -159,10 +159,10 @@ namespace Practice
 	{
 		DWORD old;
 
-		if (!settings.activated)
+		if (!settings.nonSaved.activated)
 			return;
 		puts("Removing hooks");
-		settings.activated = false;
+		settings.nonSaved.activated = false;
 		VirtualProtect((PVOID)0x42A331, sizeof(patchCode), PAGE_EXECUTE_WRITECOPY, &old);
 		for (unsigned i = 0; i < sizeof(patchCode); i++)
 			((unsigned char *)0x42A331)[i] = originalCode[i];
@@ -189,7 +189,7 @@ namespace Practice
 	}
 
 	Settings::Settings(bool activated) :
-		activated(activated)
+		nonSaved{activated}
 	{
 	}
 
@@ -201,18 +201,18 @@ namespace Practice
 
 		if (!stream) {
 			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": " << strerror(errno) << std::endl;
-			this->leftState.load(SokuLib::leftChar, true);
-			this->rightState.load(SokuLib::rightChar, false);
+			this->nonSaved.leftState.load(SokuLib::leftChar, true);
+			this->nonSaved.rightState.load(SokuLib::rightChar, false);
 			return;
 		}
-		stream.read(reinterpret_cast<char *>(&this->activated + 1), sizeof(*this) - sizeof(this->activated) - sizeof(CharacterState) * 2);
+		stream.read(reinterpret_cast<char *>(this), sizeof(*this) - sizeof(NonSavedElements));
 		if (MAGIC_NUMBER != this->magicNumber) {
 			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": ";
 			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number " << MAGIC_NUMBER << std::endl;
 			*this = Settings();
 		}
-		this->leftState.load(SokuLib::leftChar, true);
-		this->rightState.load(SokuLib::rightChar, false);
+		this->nonSaved.leftState.load(SokuLib::leftChar, true);
+		this->nonSaved.rightState.load(SokuLib::rightChar, false);
 	}
 
 	void Settings::save() const
@@ -227,14 +227,14 @@ namespace Practice
 			MessageBoxA(SokuLib::window, ("Error: Couldn't save file to \"APMSettings/APMLastSession.dat\": " + std::string(strerror(errno))).c_str(), "Cannot save settings.", MB_ICONERROR);
 			return;
 		}
-		stream.write(reinterpret_cast<const char *>(&this->activated + 1), sizeof(*this) - sizeof(this->activated) - sizeof(CharacterState) * 2);
-		this->leftState.save(true);
-		this->rightState.save(false);
+		stream.write(reinterpret_cast<const char *>(this), sizeof(*this) - sizeof(NonSavedElements));
+		this->nonSaved.leftState.save(true);
+		this->nonSaved.rightState.save(false);
 	}
 
 	Settings::~Settings()
 	{
-		if (this->activated)
+		if (this->nonSaved.activated)
 			this->save();
 	}
 

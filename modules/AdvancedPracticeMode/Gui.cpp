@@ -254,8 +254,8 @@ namespace Practice
 		tgui::Panel::Ptr leftPanel = panel->get<tgui::Panel>("Left");
 		tgui::Panel::Ptr rightPanel = panel->get<tgui::Panel>("Right");
 
-		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.leftState);
-		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.rightState);
+		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
+		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
 		updateGuiState();
 	}
 
@@ -279,7 +279,7 @@ namespace Practice
 		auto xen = panel->get<tgui::CheckBox>("XEnabled");
 		auto fct = [breaking]{
 			for (auto &widget : breaking->getWidgets())
-				widget->setEnabled(settings.activated);
+				widget->setEnabled(settings.nonSaved.activated);
 		};
 
 		panel->get<tgui::Button>("Button1")->connect("Clicked", []{
@@ -322,7 +322,7 @@ namespace Practice
 			settings.tech = static_cast<TechDirection>(item);
 		});
 		fct();
-		normal->setChecked(!settings.activated);
+		normal->setChecked(!settings.nonSaved.activated);
 		normal->connect("Changed", [fct](bool b){
 			if (b)
 				removeHooks();
@@ -512,6 +512,11 @@ namespace Practice
 		});
 	}
 
+	void displayMacroPanel(const std::string &profile)
+	{
+		panel->loadWidgetsFromFile(profile + "/assets/macro.gui");
+	}
+
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
 #ifndef NDEBUG
@@ -530,6 +535,8 @@ namespace Practice
 				return displayDummyPanel(profile);
 			case 2:
 				return displayStatePanel(profile);
+			case 3:
+				return displayMacroPanel(profile);
 			case 4:
 				return displayMiscPanel(profile);
 			default:
@@ -556,8 +563,8 @@ namespace Practice
 #endif
 		switch (tab->getSelectedIndex()) {
 		case 0:
-			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar, settings.leftState);
-			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.rightState);
+			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
+			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
 			break;
 		case 1:
 			updateDummyPanel();

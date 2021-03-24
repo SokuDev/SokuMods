@@ -163,7 +163,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 {
-	if (fdwReason == DLL_PROCESS_DETACH && Practice::settings.activated)
+	if (fdwReason == DLL_PROCESS_DETACH && Practice::settings.nonSaved.activated)
 		Practice::settings.save();
 	return TRUE;
 }
