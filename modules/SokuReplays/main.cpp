@@ -30,7 +30,7 @@ void loop_thread(void *unused) {
 			std::mt19937_64 gen(rd());
 			std::uniform_int_distribution<unsigned long long> dis;
 			uid = dis(gen) >> 1; // let's only keep 63-bits, positive values to avoid any sign quirk...
-			RegSetKeyValueW(key, NULL, L"SokuReplaysID", REG_QWORD, &uid, size);
+			RegSetValueExW(key, L"SokuReplaysID", 0, REG_QWORD, (BYTE*)&uid, size);
 		}
 		RegCloseKey(key);
 	}

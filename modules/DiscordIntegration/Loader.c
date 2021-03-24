@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <VersionHelpers.h>
 #include <shlwapi.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -6,6 +7,10 @@
 HANDLE self;
 
 bool load() {
+	if (!IsWindows7OrGreater()) {
+		return true;
+	}
+
 	wchar_t dll_path[MAX_PATH];
 	wchar_t sdk_path[MAX_PATH];
 	if (!GetModuleFileNameW(self, dll_path, sizeof(dll_path))) {

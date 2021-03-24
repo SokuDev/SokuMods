@@ -148,24 +148,24 @@ void load_thread(void *unused) {
 	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\.rep", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, L"SokuReplay", sizeof(L"SokuReplay"))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)L"SokuReplay", sizeof(L"SokuReplay"))) {
 		return;
 	}
 	RegCloseKey(key);
 	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, L"Soku Replay", sizeof(L"Soku Replay"))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)L"Soku Replay", sizeof(L"Soku Replay"))) {
 		return;
 	}
-	if (RegSetKeyValueW(key, NULL, L"AlwaysShowExt", REG_SZ, L"1", sizeof(L"1"))) {
+	if (RegSetValueExW(key, L"AlwaysShowExt", 0, REG_SZ, (BYTE*)L"1", sizeof(L"1"))) {
 		return;
 	}
 	RegCloseKey(key);
 	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\Shell\\Open", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, L"Watch in Soku", sizeof(L"Watch in Soku"))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)L"Watch in Soku", sizeof(L"Watch in Soku"))) {
 		return;
 	}
 	RegCloseKey(key);
@@ -179,7 +179,7 @@ void load_thread(void *unused) {
 				HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\DefaultIcon", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, &disposition)) {
 		return;
 	}
-	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, &exe_path[1], 2 * (wcslen(exe_path) + 1))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)(&exe_path[1]), 2 * (wcslen(exe_path) + 1))) {
 		return;
 	}
 	RegCloseKey(key);
@@ -188,7 +188,7 @@ void load_thread(void *unused) {
 		return;
 	}
 	StrCatW(exe_path, L"\" \"%1\"");
-	if (RegSetKeyValueW(key, NULL, NULL, REG_SZ, exe_path, 2 * (wcslen(exe_path) + 1))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)exe_path, 2 * (wcslen(exe_path) + 1))) {
 		return;
 	}
 	RegCloseKey(key);
