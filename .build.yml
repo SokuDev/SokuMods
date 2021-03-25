@@ -3,7 +3,7 @@ packages:
   - curl
   - unzip
   - zip
-  - cmake-git
+  - cmake
   - clang
   - llvm
   - lld
