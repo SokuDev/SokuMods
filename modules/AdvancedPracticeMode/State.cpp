@@ -189,7 +189,7 @@ namespace Practice
 	}
 
 	Settings::Settings(bool activated) :
-		nonSaved{activated}
+		nonSaved{activated, false, false, false}
 	{
 	}
 
@@ -208,11 +208,12 @@ namespace Practice
 		stream.read(reinterpret_cast<char *>(this), sizeof(*this) - sizeof(NonSavedElements));
 		if (MAGIC_NUMBER != this->magicNumber) {
 			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": ";
-			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number " << MAGIC_NUMBER << std::endl;
+			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number 0x" << MAGIC_NUMBER << std::endl;
 			*this = Settings();
 		}
 		this->nonSaved.leftState.load(SokuLib::leftChar, true);
 		this->nonSaved.rightState.load(SokuLib::rightChar, false);
+		this->nonSaved.macros.load();
 	}
 
 	void Settings::save() const
@@ -230,6 +231,7 @@ namespace Practice
 		stream.write(reinterpret_cast<const char *>(this), sizeof(*this) - sizeof(NonSavedElements));
 		this->nonSaved.leftState.save(true);
 		this->nonSaved.rightState.save(false);
+		this->nonSaved.macros.save();
 	}
 
 	Settings::~Settings()
@@ -291,6 +293,7 @@ namespace Practice
 
 			std::cerr << "Error: Couldn't load file from \"" << path << "\": " << strerror(errno) << std::endl;
 			*this = CharacterState();
+			this->_chr = chr;
 			memcpy(&this->skillMap, &buffer, sizeof(buffer));
 			return;
 		}
@@ -318,9 +321,126 @@ namespace Practice
 			};
 
 			std::cerr << "Error: Couldn't load file from \"" << path << "\": ";
-			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number " << MAGIC_NUMBER_CHR << std::endl;
+			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number 0x" << MAGIC_NUMBER_CHR << std::endl;
 			*this = CharacterState();
+			this->_chr = chr;
 			memcpy(&this->skillMap, &buffer, sizeof(buffer));
 		}
+	}
+
+	void MacroManager::load()
+	{
+		this->load("APMSettings/APMMacros.dat");
+	}
+
+	bool MacroManager::load(const std::string &path)
+	{
+		std::ifstream stream{path};
+
+		std::cout << "Loading macros from " << path << std::endl;
+		if (!stream) {
+			std::cerr << "Error: Couldn't load macro file from \"" << path << "\": " << strerror(errno) << std::endl;
+			return false;
+		}
+
+		unsigned magic;
+		int i = 0;
+
+		stream.read(reinterpret_cast<char *>(&magic), sizeof(magic));
+		if (magic != MAGIC_NUMBER_MACRO) {
+			std::cerr << "Error: Couldn't load file from \"" << path << "\": ";
+			std::cerr << "Magic number 0x" << std::hex << magic << " doesn't match expected magic number 0x" << MAGIC_NUMBER_MACRO << std::endl;
+			return false;
+		}
+
+		for (auto &macroArray : this->macros) {
+			unsigned short length;
+
+			stream.read(reinterpret_cast<char *>(&length), sizeof(length));
+			std::cout << "Macro array for " << SokuLib::charactersName[i++] << " has " << length << " entry/entries at load time" << std::endl;
+			if (length >= 4096) {
+				MessageBoxA(
+					SokuLib::window,
+					("There are more than 4096 macros entry (" +
+					std::to_string(length) +
+					").\nThe macro file might be corrupted. The mod might crash if you have too many macros.\n"
+     					"Please remove unused macros.\nDo you want to remove the file ?").c_str(),
+					"Suspicious amount of macros in file.", MB_ICONWARNING | MB_YESNO
+				);
+				//TODO: Actually remove the file
+			}
+			macroArray.reserve(length);
+			for (int j = length; j; j--)
+				stream >> (macroArray.emplace_back(), macroArray.back());
+		}
+		return true;
+	}
+
+	void MacroManager::save() const
+	{
+		std::ofstream stream{"APMSettings/APMMacros.dat"};
+		unsigned magic = MAGIC_NUMBER_MACRO;
+		int i = 0;
+
+		std::cout << "Saving macros to APMSettings/APMMacros.dat" << std::endl;
+		if (!stream) {
+			std::cerr << "Error: Couldn't save macro file to \"APMSettings/APMMacros.dat\": " << strerror(errno) << std::endl;
+			return;
+		}
+
+		stream.write(reinterpret_cast<char *>(&magic), sizeof(magic));
+		for (auto &macroArray : this->macros) {
+			unsigned short length = macroArray.size();
+
+			std::cout << "Macro array for " << SokuLib::charactersName[i++] << " has " << length << " entry/entries at save time" << std::endl;
+			stream.write(reinterpret_cast<char *>(&length), sizeof(length));
+			for (const auto &macro : macroArray)
+				stream << macro;
+		}
+	}
+
+	bool MacroManager::import(const std::string &path)
+	{
+		MacroManager alternate;
+
+		if (!alternate.load(path))
+			return false;
+		for (int i = 0; i < this->macros.size(); i++)
+			this->macros[i].insert(this->macros[i].end(), alternate.macros[i].begin(), alternate.macros[i].end());
+		return true;
+	}
+
+	std::ostream &operator<<(std::ostream &stream, const Macro &macro)
+	{
+		unsigned short length;
+
+		length = macro.name.size();
+		stream.write(reinterpret_cast<char *>(&length), sizeof(length));
+		stream.write(macro.name.c_str(), length);
+
+		length = macro.macroElems.size();
+		stream.write(reinterpret_cast<char *>(&length), sizeof(length));
+		stream.write(reinterpret_cast<const char *>(macro.macroElems.data()), length * sizeof(macro.macroElems[0]));
+		return stream;
+	}
+
+	std::istream &operator>>(std::istream &stream, Macro &macro)
+	{
+		unsigned short length;
+		char *buffer;
+		std::pair<SokuLib::KeyInput, unsigned> *buffer2;
+
+		stream.read(reinterpret_cast<char *>(&length), sizeof(length));
+		buffer = new char[length];
+		stream.read(buffer, length);
+		macro.name = std::string(buffer, buffer + length);
+		delete[] buffer;
+
+		stream.read(reinterpret_cast<char *>(&length), sizeof(length));
+		buffer2 = new std::pair<SokuLib::KeyInput, unsigned>[length];
+		stream.read(reinterpret_cast<char *>(buffer2), length * sizeof(*buffer));
+		macro.macroElems = std::vector<std::pair<SokuLib::KeyInput, unsigned>>(buffer2, buffer2 + length);
+		delete[] buffer2;
+		return stream;
 	}
 }

@@ -58,7 +58,7 @@ int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
-	int result = SokuLib::sceneId;
+	int result = 0;
 
 	if (Practice::sfmlWindow);
 	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE || SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
@@ -69,7 +69,8 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	frameCounter += Practice::settings.requestedFrameRate / 60.f;
 	while (frameCounter >= 1) {
 		// super
-		result = (This->*s_origCBattleManager_Process)();
+		if (!Practice::settings.nonSaved.recordingMacro || GetForegroundWindow() == SokuLib::window)
+			result = (This->*s_origCBattleManager_Process)();
 
 		if (result > 0 && result < 4) {
 			printf("CBattleManager_Process returned %i\n", result);

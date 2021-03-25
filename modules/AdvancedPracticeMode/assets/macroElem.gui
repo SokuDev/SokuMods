@@ -1,0 +1,214 @@
+Renderer.1 {
+    bordercolor = #3C3C3C;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    texturethumb = None;
+    texturethumbhover = None;
+    texturetrack = None;
+    texturetrackhover = None;
+    thumbcolor = #F5F5F5;
+    thumbcolorhover = white;
+    trackcolor = #F5F5F5;
+    trackcolorhover = white;
+}
+
+Renderer.2 {
+    backgroundcolor = transparent;
+    bordercolor = #3C3C3C;
+    borders = (0, 0, 0, 0);
+    textcolor = #3C3C3C;
+    texturebackground = None;
+}
+
+Renderer.3 {
+    backgroundcolor = #F5F5F5;
+    backgroundcolordisabled = #E6E6E6;
+    backgroundcolorhover = white;
+    bordercolor = #3C3C3C;
+    bordercolordisabled = #7D7D7D;
+    bordercolorfocused = #1E1EB4;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    checkcolor = #3C3C3C;
+    checkcolordisabled = #7D7D7D;
+    checkcolorhover = black;
+    textcolor = #3C3C3C;
+    textcolordisabled = #7D7D7D;
+    textcolorhover = black;
+    textdistanceratio = 0.2;
+    texturechecked = None;
+    texturecheckeddisabled = None;
+    texturecheckedfocused = None;
+    texturecheckedhover = None;
+    textureunchecked = None;
+    textureuncheckeddisabled = None;
+    textureuncheckedfocused = None;
+    textureuncheckedhover = None;
+}
+
+Button.Remove {
+    Size = (22, 22);
+    Text = X;
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolordown = #EBEBEB;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolordown = black;
+        bordercolorfocused = #1E1EB4;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        textcolor = #3C3C3C;
+        textcolordisabled = #7D7D7D;
+        textcolordown = black;
+        textcolorhover = black;
+        texture = None;
+        texturedisabled = None;
+        texturedown = None;
+        texturefocused = None;
+        texturehover = None;
+    }
+}
+
+CheckBox.A {
+    Position = (32, 2);
+    Size = (18, 18);
+    Text = A;
+    TextSize = 13;
+    renderer = &3;
+}
+
+CheckBox.B {
+    Position = (68, 2);
+    Size = (18, 18);
+    Text = B;
+    TextSize = 13;
+    renderer = &3;
+}
+
+CheckBox.C {
+    Position = (104, 2);
+    Size = (18, 18);
+    Text = C;
+    TextSize = 13;
+    renderer = &3;
+}
+
+CheckBox.D {
+    Position = (140, 2);
+    Size = (18, 18);
+    Text = D;
+    TextSize = 13;
+    renderer = &3;
+}
+
+CheckBox.SC {
+    Position = (176, 2);
+    Size = (18, 18);
+    Text = SC;
+    TextSize = 13;
+    renderer = &3;
+}
+
+CheckBox.CH {
+    Position = (222, 2);
+    Size = (18, 18);
+    Text = CH;
+    TextSize = 13;
+    renderer = &3;
+}
+
+Slider.H {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 1;
+    Minimum = -1;
+    Position = (270, 6);
+    Size = (70, 10);
+    Step = 1;
+    Value = 0;
+    renderer = &1;
+}
+
+Slider.V {
+    ChangeValueOnScroll = true;
+    InvertedDirection = false;
+    Maximum = 1;
+    Minimum = -1;
+    Position = (390, 6);
+    Size = (70, 10);
+    Step = 1;
+    Value = 0;
+    renderer = &1;
+}
+
+Label.Label1 {
+    AutoSize = true;
+    Position = (340, 2);
+    ScrollbarPolicy = Never;
+    Size = (43.2, 18);
+    Text = "H Axis";
+    TextSize = 13;
+    renderer = &2;
+}
+
+Label.Label2 {
+    AutoSize = true;
+    Position = (460, 2);
+    ScrollbarPolicy = Never;
+    Size = (43.2, 18);
+    Text = "V Axis";
+    TextSize = 13;
+    renderer = &2;
+}
+
+EditBox.Duration {
+    InputValidator = UInt;
+    Position = (510, 0);
+    Size = (40, 20);
+    Text = 120;
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        caretcolor = black;
+        caretwidth = 1;
+        defaulttextcolor = #A0A0A0;
+        padding = (0, 0, 0, 0);
+        selectedtextbackgroundcolor = #006EFF;
+        selectedtextcolor = white;
+        textcolor = #3C3C3C;
+        textcolordisabled = #7D7D7D;
+        texture = None;
+        texturedisabled = None;
+        texturefocused = None;
+        texturehover = None;
+    }
+}
+
+Label.Label3 {
+    AutoSize = true;
+    Position = (550, 2);
+    ScrollbarPolicy = Never;
+    Size = (58.2, 18);
+    Text = Duration;
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        bordercolor = #3C3C3C;
+        borders = (0, 0, 0, 0);
+        textcolor = #3C3C3C;
+        texturebackground = None;
+    }
+}

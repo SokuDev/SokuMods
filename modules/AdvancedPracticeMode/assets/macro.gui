@@ -40,17 +40,17 @@ Renderer.2 {
 ComboBox.Macros {
     ChangeItemOnScroll = true;
     ExpandDirection = Down;
-    ItemsToDisplay = 0;
-    MaximumItems = 10;
-    Position = (10, 10);
-    Size = (160, 22);
+    ItemsToDisplay = 15;
+    MaximumItems = 0;
+    Position = (210, 70);
+    Size = (220, 22);
     TextSize = 13;
     renderer = &1;
 }
 
 EditBox.Name {
-    Position = (180, 10);
-    Size = (160, 22);
+    Position = (10, 70);
+    Size = (190, 22);
     TextSize = 13;
 
     Renderer {
@@ -76,125 +76,134 @@ EditBox.Name {
     }
 }
 
-ScrollablePanel.ScrollablePanel1 {
+ScrollablePanel.InputPanel {
     ContentSize = (0, 0);
     Position = (10, 130);
-    Size = (330, 250);
+    Size = (620, 320);
 
     Renderer {
         backgroundcolor = white;
         bordercolor = black;
+        borders = (1, 1, 1, 1);
         texturebackground = None;
     }
 }
 
 Button.New {
-    Position = (10, 40);
-    Size = (160, 22);
+    Position = (210, 10);
+    Size = (220, 22);
     Text = "New macro";
     TextSize = 13;
-
-    Renderer {
-        backgroundcolor = #F5F5F5;
-        backgroundcolordisabled = #E6E6E6;
-        backgroundcolordown = #EBEBEB;
-        backgroundcolorhover = white;
-        bordercolor = #3C3C3C;
-        bordercolordisabled = #7D7D7D;
-        bordercolordown = black;
-        bordercolorfocused = #1E1EB4;
-        bordercolorhover = black;
-        borders = (1, 1, 1, 1);
-        textcolor = #3C3C3C;
-        textcolordisabled = #7D7D7D;
-        textcolordown = black;
-        textcolorhover = black;
-        texture = None;
-        texturedisabled = None;
-        texturedown = None;
-        texturefocused = None;
-        texturehover = None;
-    }
+    renderer = &2;
 }
 
 Button.Delete {
-    Position = (180, 40);
-    Size = (160, 22);
+    Position = (440, 10);
+    Size = (190, 22);
     Text = "Delete macro";
     TextSize = 13;
-
-    Renderer {
-        backgroundcolor = #F5F5F5;
-        backgroundcolordisabled = #E6E6E6;
-        backgroundcolordown = #EBEBEB;
-        backgroundcolorhover = white;
-        bordercolor = #3C3C3C;
-        bordercolordisabled = #7D7D7D;
-        bordercolordown = black;
-        bordercolorfocused = #1E1EB4;
-        bordercolorhover = black;
-        borders = (1, 1, 1, 1);
-        textcolor = #3C3C3C;
-        textcolordisabled = #7D7D7D;
-        textcolordown = black;
-        textcolorhover = black;
-        texture = None;
-        texturedisabled = None;
-        texturedown = None;
-        texturefocused = None;
-        texturehover = None;
-    }
+    renderer = &2;
 }
 
-Button.Play1 {
-    Position = (10, 70);
-    Size = (160, 22);
-    Text = "Play macro (dummy)";
+Button.Play {
+    Position = (80, 40);
+    Size = (120, 22);
+    Text = "Play macro";
     TextSize = 13;
     renderer = &2;
 }
 
 Button.Record1 {
-    Position = (180, 70);
-    Size = (160, 22);
-    Text = "Record macro (dummy)";
+    Position = (440, 40);
+    Size = (190, 22);
+    Text = "Record macro from dummy";
     TextSize = 13;
     renderer = &2;
 }
 
 Button.AddInput {
-    Position = (10, 390);
-    Size = (330, 22);
-    Text = "Add new input field";
+    Position = (440, 70);
+    Size = (190, 22);
+    Text = "Add new element";
     TextSize = 13;
     renderer = &2;
 }
 
 ComboBox.Character {
     ChangeItemOnScroll = true;
-    ExpandDirection = Up;
+    ExpandDirection = Down;
     Items = ["Reimu Hakurei", "Marisa Kirisame", "Sakuya Izayoi", "Alice Margatroid", "Patchouli Knowledge", "Youmu Konpaku", "Remilia Scarlet", "Yuyuko Saigyouji", "Yukari Yakumo", "Suika Ibuki", "Reisen Undongein Inaba", "Aya Shameimaru", "Komachi Onozuka", "Iku Nagae", "Tenshi Hinanawi", "Sanae Kochiya", Cirno, "Hong Meiling", "Utsuho Reiuji", "Suwako Moriya"];
     ItemsToDisplay = 0;
     MaximumItems = 0;
-    Position = (10, 420);
-    SelectedItemIndex = 0;
-    Size = (330, 22);
+    Position = (10, 10);
+    SelectedItemIndex = 10;
+    Size = (190, 22);
     TextSize = 13;
     renderer = &1;
 }
 
-Button.Play2 {
-    Position = (10, 100);
-    Size = (160, 22);
-    Text = "Play macro (player)";
+Button.Record2 {
+    Position = (210, 40);
+    Size = (220, 22);
+    Text = "Record macro from player";
     TextSize = 13;
     renderer = &2;
 }
 
-Button.Record2 {
-    Position = (180, 100);
-    Size = (160, 22);
-    Text = "Record macro (player)";
+CheckBox.Loop {
+    Position = (10, 40);
+    Size = (22, 22);
+    Text = Loop;
     TextSize = 13;
-    renderer = &2;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorfocused = #1E1EB4;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        checkcolor = #3C3C3C;
+        checkcolordisabled = #7D7D7D;
+        checkcolorhover = black;
+        textcolor = #3C3C3C;
+        textcolordisabled = #7D7D7D;
+        textcolorhover = black;
+        textdistanceratio = 0.2;
+        texturechecked = None;
+        texturecheckeddisabled = None;
+        texturecheckedfocused = None;
+        texturecheckedhover = None;
+        textureunchecked = None;
+        textureuncheckeddisabled = None;
+        textureuncheckedfocused = None;
+        textureuncheckedhover = None;
+    }
+}
+
+TextBox.Queue {
+    Enabled = false;
+    HorizontalScrollbarPolicy = Never;
+    MaximumCharacters = 0;
+    Position = (10, 100);
+    ReadOnly = true;
+    Size = (618, 25);
+    Text = "";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = white;
+        bordercolor = black;
+        borders = (1, 1, 1, 1);
+        caretcolor = black;
+        caretwidth = 1;
+        defaulttextcolor = #A0A0A0;
+        padding = (0, 0, 0, 0);
+        selectedtextbackgroundcolor = #006EFF;
+        selectedtextcolor = white;
+        textcolor = #3C3C3C;
+        texturebackground = None;
+    }
 }

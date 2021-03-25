@@ -12,8 +12,9 @@
 
 namespace Practice
 {
-#define MAGIC_NUMBER     0x01020305
-#define MAGIC_NUMBER_CHR 0x01020304
+#define MAGIC_NUMBER       0x01020305
+#define MAGIC_NUMBER_CHR   0x01020304
+#define MAGIC_NUMBER_MACRO 0x01020304
 #define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
 #define PAYLOAD_NEXT_INSTR_DECK_INFOS (PAYLOAD_ADDRESS_DECK_INFOS + 4)
 
@@ -83,6 +84,25 @@ namespace Practice
 		bool showSubObjectProperties = true;
 	};
 
+	typedef std::vector<std::pair<SokuLib::KeyInput, unsigned>> MacroData;
+
+	struct Macro {
+		std::string name;
+		MacroData macroElems;
+	};
+
+	std::ostream &operator<<(std::ostream &stream, const Macro &macro);
+	std::istream &operator>>(std::istream &stream, Macro &macro);
+
+	struct MacroManager {
+		std::array<std::vector<Macro>, 20> macros;
+
+		void save() const;
+		void load();
+		bool load(const std::string &path);
+		bool import(const std::string &path);
+	};
+
 	struct Settings {
 		unsigned magicNumber = MAGIC_NUMBER;
 		bool realisticInputs = true;
@@ -107,8 +127,13 @@ namespace Practice
 		HitBoxParams rightHitboxSettings;
 		struct NonSavedElements{
 			bool activated;
+			bool recordingStarted : 1;
+			bool recordingMacro : 1;
+			bool recordForDummy : 1;
+			MacroData *recordBuffer = nullptr;
 			CharacterState leftState;
 			CharacterState rightState;
+			MacroManager macros;
 		} nonSaved;
 
 		Settings(bool activated = false);

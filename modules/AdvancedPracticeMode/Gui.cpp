@@ -515,13 +515,125 @@ namespace Practice
 	void displayMacroPanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/macro.gui");
+
+		auto macros = panel->get<tgui::ComboBox>("Macros");
+		auto character = panel->get<tgui::ComboBox>("Character");
+		auto name = panel->get<tgui::EditBox>("Name");
+		auto inputPanel = panel->get<tgui::ScrollablePanel>("InputPanel");
+		auto newMacro = panel->get<tgui::Button>("New");
+		auto deleteMacro = panel->get<tgui::Button>("Delete");
+		auto play = panel->get<tgui::Button>("Play");
+		auto record1 = panel->get<tgui::Button>("Record1");
+		auto addInput = panel->get<tgui::Button>("AddInput");
+		auto record2 = panel->get<tgui::Button>("Record2");
+		std::function<void()> showMacroInputs = [&showMacroInputs, inputPanel, macros, character, profile]{
+			if (character->getSelectedItemIndex() < 0 || character->getSelectedItemIndex() >= settings.nonSaved.macros.macros.size())
+				return;
+
+			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+			auto &elems = allMacros[macros->getSelectedItemIndex()].macroElems;
+			int i = 0;
+
+			inputPanel->removeAllWidgets();
+			for (auto &elem : elems) {
+				auto panel = tgui::Panel::create({620, 20});
+
+				panel->loadWidgetsFromFile(profile + "/assets/macroElem.gui");
+
+				auto A = panel->get<tgui::CheckBox>("A");
+				auto B = panel->get<tgui::CheckBox>("B");
+				auto C = panel->get<tgui::CheckBox>("C");
+				auto D = panel->get<tgui::CheckBox>("D");
+				auto SC = panel->get<tgui::CheckBox>("SC");
+				auto CH = panel->get<tgui::CheckBox>("CH");
+				auto H = panel->get<tgui::Slider>("H");
+				auto V = panel->get<tgui::Slider>("V");
+				auto duration = panel->get<tgui::EditBox>("Duration");
+				auto remove = panel->get<tgui::EditBox>("Remove");
+
+				A->setChecked(elem.first.a);
+				B->setChecked(elem.first.b);
+				C->setChecked(elem.first.c);
+				D->setChecked(elem.first.d);
+				SC->setChecked(elem.first.spellcard);
+				CH->setChecked(elem.first.changeCard);
+				H->setValue(elem.first.horizontalAxis);
+				V->setValue(elem.first.verticalAxis);
+				duration->setText(std::to_string(elem.second));
+
+				A->connect("Changed", [&elem](bool b){
+					elem.first.a = b;
+				});
+				B->connect("Changed", [&elem](bool b){
+					elem.first.b = b;
+				});
+				C->connect("Changed", [&elem](bool b){
+					elem.first.c = b;
+				});
+				D->connect("Changed", [&elem](bool b){
+					elem.first.d = b;
+				});
+				SC->connect("Changed", [&elem](bool b){
+					elem.first.spellcard = b;
+				});
+				CH->connect("Changed", [&elem](bool b){
+					elem.first.changeCard = b;
+				});
+				H->connect("ValueChanged", [&elem](float v){
+					elem.first.horizontalAxis = v;
+				});
+				V->connect("ValueChanged", [&elem](float v){
+					elem.first.verticalAxis = v;
+				});
+				duration->connect("TextChanged", [&elem](const std::string &text){
+					if (text.empty())
+						return;
+					try {
+						elem.second = std::stoul(text);
+					} catch (...) {}
+				});
+				remove->connect("Clicked", [&showMacroInputs, i, &elems]{
+					elems.erase(elems.begin() + i);
+					showMacroInputs();
+				});
+
+				panel->setPosition(0, i);
+				i += 30;
+			}
+		};
+		auto loadMacros = [macros, name](int character){
+			const auto &allMacros = settings.nonSaved.macros.macros[character];
+
+			macros->removeAllItems();
+			for (auto &macro : allMacros)
+				macros->addItem(macro.name);
+			macros->setSelectedItemByIndex(0);
+			if (allMacros.empty())
+				name->setEnabled(false);
+			else {
+				name->setText(allMacros.front().name);
+				name->setEnabled(true);
+			}
+		};
+
+		character->setSelectedItemByIndex(SokuLib::rightChar);
+		character->connect("ItemSelected", loadMacros);
+		loadMacros(SokuLib::rightChar);
+		showMacroInputs();
+
+		macros->connect("ItemSelected", showMacroInputs);
+		//inputPanel->;
+		//newMacro->;
+		//deleteMacro->;
+		//play->;
+		//record1->;
+		//addInput->;
+		//record2->;
+		character->setSelectedItemByIndex(SokuLib::rightChar);
 	}
 
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
-#ifndef NDEBUG
-		return;
-#endif
 		std::string profile = profilePath;
 
 		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
@@ -558,9 +670,7 @@ namespace Practice
 
 	void updateGuiState()
 	{
-#ifndef NDEBUG
 		return;
-#endif
 		switch (tab->getSelectedIndex()) {
 		case 0:
 			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);

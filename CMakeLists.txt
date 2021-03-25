@@ -400,9 +400,21 @@ target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x
 target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
 target_link_directories("AdvancedPracticeMode" PRIVATE lib)
 if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
-    set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
+    set(TGUILIB "${TGUI_DIR}/lib/tgui-d.lib")
+    set(
+            SFMLLIBS
+            "${SFML_DIR}/lib/sfml-graphics-d.lib"
+            "${SFML_DIR}/lib/sfml-system-d.lib"
+            "${SFML_DIR}/lib/sfml-window-d.lib"
+    )
 else ()
     set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
+    set(
+        SFMLLIBS
+        "${SFML_DIR}/lib/sfml-graphics.lib"
+        "${SFML_DIR}/lib/sfml-system.lib"
+        "${SFML_DIR}/lib/sfml-window.lib"
+    )
 endif ()
 target_link_libraries(
         AdvancedPracticeMode
@@ -410,13 +422,12 @@ target_link_libraries(
         shlwapi
         ws2_32
         user32
-        "${SFML_DIR}/lib/sfml-graphics.lib"
-        "${SFML_DIR}/lib/sfml-system.lib"
-        "${SFML_DIR}/lib/sfml-window.lib"
+        ${SFMLLIBS}
         "${TGUILIB}"
         "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
 message(${TGUILIB})
+message(${SFMLLIBS})
 install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SWRSToys/modules/AdvancedPracticeMode/")
 install(TARGETS "AdvancedPracticeMode" LIBRARY DESTINATION "SokuEngine/modules/AdvancedPracticeMode/")
