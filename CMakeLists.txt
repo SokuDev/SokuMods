@@ -140,16 +140,16 @@ function(module name)
                 REGEX "modules/${name}/[^/.]+(/|$)" EXCLUDE
                 PATTERN "*.ini")
         if(Default)
-            set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
+            set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}${name}=modules/${name}/${name}.dll\r\n" PARENT_SCOPE)
         else()
-            set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; ${name}=modules/${name}/${name}.dll\n" PARENT_SCOPE)
+            set(SWRSTOYS_MODULE_PATHS "${SWRSTOYS_MODULE_PATHS}; ${name}=modules/${name}/${name}.dll\r\n" PARENT_SCOPE)
         endif()
     endif()
     install(DIRECTORY "modules/${name}" DESTINATION "SokuEngine/modules"
             FILES_MATCHING
             REGEX "modules/${name}/[^/.]+(/|$)" EXCLUDE
             PATTERN "*.ini")
-    set(SOKUENGINE_MODULE_PATHS "${SOKUENGINE_MODULE_PATHS}${name} = ${Default}\n" PARENT_SCOPE)
+    set(SOKUENGINE_MODULE_PATHS "${SOKUENGINE_MODULE_PATHS}${name} = ${Default}\r\n" PARENT_SCOPE)
 endfunction()
 
 module(Autopunch Default)
