@@ -256,12 +256,14 @@ target_sources(InGameHostlist PRIVATE
         modules/InGameHostlist/imgui/imgui_widgets.cpp)
 target_compile_definitions(InGameHostlist PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> _HAS_STD_BYTE=0)
 target_include_directories(InGameHostlist PRIVATE include include/directx modules/InGameHostlist/include)
-target_link_libraries(InGameHostlist CURL::libcurl d3dx9 "${CMAKE_SOURCE_DIR}/lib/XInput.lib" SokuEngineLib ws2_32 advapi32 shlwapi)
+target_link_libraries(InGameHostlist CURL::libcurl d3dx9 "${CMAKE_SOURCE_DIR}/lib/XInput.lib" winmm SokuEngineLib ws2_32 advapi32 shlwapi)
 
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/romanan.ttf DESTINATION "SokuEngine/modules/InGameHostlist")
+install(FILES modules/InGameHostlist/NewHostSFX.wav DESTINATION "SWRSToys/modules/InGameHostlist")
+install(FILES modules/InGameHostlist/NewHostSFX.wav DESTINATION "SokuEngine/modules/InGameHostlist")
 
 module(LabTool)
 target_sources(LabTool PRIVATE
