@@ -58,6 +58,7 @@ namespace Practice
 			printf("Loading file %s\n", (std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png").c_str());
 			skillsTextures[i].loadFromFile(std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png");
 		}
+		puts("Init done");
 	}
 
 	static bool makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
@@ -527,10 +528,11 @@ namespace Practice
 		auto addInput = panel->get<tgui::Button>("AddInput");
 		auto record2 = panel->get<tgui::Button>("Record2");
 		std::function<void()> showMacroInputs = [&showMacroInputs, inputPanel, macros, character, profile]{
-			if (character->getSelectedItemIndex() < 0 || character->getSelectedItemIndex() >= settings.nonSaved.macros.macros.size())
+			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+
+			if (character->getSelectedItemIndex() < 0 || character->getSelectedItemIndex() >= allMacros.size())
 				return;
 
-			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 			auto &elems = allMacros[macros->getSelectedItemIndex()].macroElems;
 			int i = 0;
 
@@ -549,7 +551,7 @@ namespace Practice
 				auto H = panel->get<tgui::Slider>("H");
 				auto V = panel->get<tgui::Slider>("V");
 				auto duration = panel->get<tgui::EditBox>("Duration");
-				auto remove = panel->get<tgui::EditBox>("Remove");
+				auto remove = panel->get<tgui::Button>("Remove");
 
 				A->setChecked(elem.first.a);
 				B->setChecked(elem.first.b);
@@ -634,6 +636,8 @@ namespace Practice
 
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
+		puts("Loading GUI...");
+
 		std::string profile = profilePath;
 
 		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
@@ -655,7 +659,9 @@ namespace Practice
 				return panel->removeAllWidgets();
 			}
 		});
+		puts("Display skills");
 		displaySkillsPanel(profile);
+		puts("GUI loaded");
 	}
 
 	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
