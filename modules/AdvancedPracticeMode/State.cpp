@@ -438,7 +438,7 @@ namespace Practice
 
 		stream.read(reinterpret_cast<char *>(&length), sizeof(length));
 		buffer2 = new std::pair<SokuLib::KeyInput, unsigned>[length];
-		stream.read(reinterpret_cast<char *>(buffer2), length * sizeof(*buffer));
+		stream.read(reinterpret_cast<char *>(buffer2), length * sizeof(*buffer2));
 		macro.macroElems = std::vector<std::pair<SokuLib::KeyInput, unsigned>>(buffer2, buffer2 + length);
 		delete[] buffer2;
 		return stream;

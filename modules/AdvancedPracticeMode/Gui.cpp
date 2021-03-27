@@ -513,6 +513,93 @@ namespace Practice
 		});
 	}
 
+	static void showMacroInputs(const std::string &profile, std::weak_ptr<tgui::ComboBox> macrosWeak, tgui::EditBox::Ptr name, tgui::ScrollablePanel::Ptr inputPanel, tgui::ComboBox::Ptr character)
+	{
+		auto macros = macrosWeak.lock();
+		auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+
+		if (macros->getSelectedItemIndex() < 0 || macros->getSelectedItemIndex() >= allMacros.size())
+			return;
+
+		auto &selected = allMacros[macros->getSelectedItemIndex()];
+		auto &elems = selected.macroElems;
+		int i = 0;
+
+		name->setText(selected.name);
+		inputPanel->removeAllWidgets();
+		for (auto &elem : elems) {
+			auto pan = tgui::Panel::create({615, 22});
+
+			pan->loadWidgetsFromFile(profile + "/assets/macroElem.gui");
+
+			auto A = pan->get<tgui::CheckBox>("A");
+			auto B = pan->get<tgui::CheckBox>("B");
+			auto C = pan->get<tgui::CheckBox>("C");
+			auto D = pan->get<tgui::CheckBox>("D");
+			auto SC = pan->get<tgui::CheckBox>("SC");
+			auto CH = pan->get<tgui::CheckBox>("CH");
+			auto H = pan->get<tgui::Slider>("H");
+			auto V = pan->get<tgui::Slider>("V");
+			auto duration = pan->get<tgui::EditBox>("Duration");
+			auto remove = pan->get<tgui::Button>("Remove");
+
+			A->setChecked(elem.first.a);
+			B->setChecked(elem.first.b);
+			C->setChecked(elem.first.c);
+			D->setChecked(elem.first.d);
+			SC->setChecked(elem.first.spellcard);
+			CH->setChecked(elem.first.changeCard);
+			H->setValue(elem.first.horizontalAxis);
+			V->setValue(elem.first.verticalAxis);
+			duration->setText(std::to_string(elem.second));
+
+			A->connect("Changed", [&elem](bool b){
+				elem.first.a = b;
+			});
+			B->connect("Changed", [&elem](bool b){
+				elem.first.b = b;
+			});
+			C->connect("Changed", [&elem](bool b){
+				elem.first.c = b;
+			});
+			D->connect("Changed", [&elem](bool b){
+				elem.first.d = b;
+			});
+			SC->connect("Changed", [&elem](bool b){
+				elem.first.spellcard = b;
+			});
+			CH->connect("Changed", [&elem](bool b){
+				elem.first.changeCard = b;
+			});
+			H->connect("ValueChanged", [&elem](float v){
+				elem.first.horizontalAxis = v;
+			});
+			V->connect("ValueChanged", [&elem](float v){
+				elem.first.verticalAxis = v;
+			});
+			duration->connect("TextChanged", [&elem](const std::string &text){
+				if (text.empty())
+					return;
+				try {
+					elem.second = std::stoul(text);
+				} catch (...) {}
+			});
+			remove->connect("Clicked", [profile, macros, name, inputPanel, character, i, &elems]{
+				elems.erase(elems.begin() + i);
+				showMacroInputs(profile, macros, name, inputPanel, character);
+			});
+
+			pan->setPosition(0, i * 30);
+			i++;
+			inputPanel->add(pan);
+		}
+		auto lab = tgui::Label::create();
+
+		lab->setSize({20, 20});
+		lab->setPosition(0, i * 30);
+		inputPanel->add(lab);
+	}
+
 	void displayMacroPanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/macro.gui");
@@ -527,111 +614,94 @@ namespace Practice
 		auto record1 = panel->get<tgui::Button>("Record1");
 		auto addInput = panel->get<tgui::Button>("AddInput");
 		auto record2 = panel->get<tgui::Button>("Record2");
-		std::function<void()> showMacroInputs = [&showMacroInputs, inputPanel, macros, character, profile]{
-			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
-
-			if (character->getSelectedItemIndex() < 0 || character->getSelectedItemIndex() >= allMacros.size())
-				return;
-
-			auto &elems = allMacros[macros->getSelectedItemIndex()].macroElems;
-			int i = 0;
-
-			inputPanel->removeAllWidgets();
-			for (auto &elem : elems) {
-				auto panel = tgui::Panel::create({620, 20});
-
-				panel->loadWidgetsFromFile(profile + "/assets/macroElem.gui");
-
-				auto A = panel->get<tgui::CheckBox>("A");
-				auto B = panel->get<tgui::CheckBox>("B");
-				auto C = panel->get<tgui::CheckBox>("C");
-				auto D = panel->get<tgui::CheckBox>("D");
-				auto SC = panel->get<tgui::CheckBox>("SC");
-				auto CH = panel->get<tgui::CheckBox>("CH");
-				auto H = panel->get<tgui::Slider>("H");
-				auto V = panel->get<tgui::Slider>("V");
-				auto duration = panel->get<tgui::EditBox>("Duration");
-				auto remove = panel->get<tgui::Button>("Remove");
-
-				A->setChecked(elem.first.a);
-				B->setChecked(elem.first.b);
-				C->setChecked(elem.first.c);
-				D->setChecked(elem.first.d);
-				SC->setChecked(elem.first.spellcard);
-				CH->setChecked(elem.first.changeCard);
-				H->setValue(elem.first.horizontalAxis);
-				V->setValue(elem.first.verticalAxis);
-				duration->setText(std::to_string(elem.second));
-
-				A->connect("Changed", [&elem](bool b){
-					elem.first.a = b;
-				});
-				B->connect("Changed", [&elem](bool b){
-					elem.first.b = b;
-				});
-				C->connect("Changed", [&elem](bool b){
-					elem.first.c = b;
-				});
-				D->connect("Changed", [&elem](bool b){
-					elem.first.d = b;
-				});
-				SC->connect("Changed", [&elem](bool b){
-					elem.first.spellcard = b;
-				});
-				CH->connect("Changed", [&elem](bool b){
-					elem.first.changeCard = b;
-				});
-				H->connect("ValueChanged", [&elem](float v){
-					elem.first.horizontalAxis = v;
-				});
-				V->connect("ValueChanged", [&elem](float v){
-					elem.first.verticalAxis = v;
-				});
-				duration->connect("TextChanged", [&elem](const std::string &text){
-					if (text.empty())
-						return;
-					try {
-						elem.second = std::stoul(text);
-					} catch (...) {}
-				});
-				remove->connect("Clicked", [&showMacroInputs, i, &elems]{
-					elems.erase(elems.begin() + i);
-					showMacroInputs();
-				});
-
-				panel->setPosition(0, i);
-				i += 30;
-			}
-		};
-		auto loadMacros = [macros, name](int character){
+		auto loadMacros = [macros, name, deleteMacro, play, record1, addInput, record2](int character){
 			const auto &allMacros = settings.nonSaved.macros.macros[character];
+			auto isEmpty = allMacros.empty();
 
 			macros->removeAllItems();
 			for (auto &macro : allMacros)
 				macros->addItem(macro.name);
 			macros->setSelectedItemByIndex(0);
-			if (allMacros.empty())
-				name->setEnabled(false);
-			else {
+			if (!isEmpty)
 				name->setText(allMacros.front().name);
-				name->setEnabled(true);
-			}
+			name->setEnabled(!isEmpty);
+			deleteMacro->setEnabled(!isEmpty);
+			play->setEnabled(!isEmpty);
+			record1->setEnabled(!isEmpty);
+			addInput->setEnabled(!isEmpty);
+			record2->setEnabled(!isEmpty);
 		};
 
 		character->setSelectedItemByIndex(SokuLib::rightChar);
 		character->connect("ItemSelected", loadMacros);
 		loadMacros(SokuLib::rightChar);
-		showMacroInputs();
+		showMacroInputs(profile, macros, name, inputPanel, character);
 
-		macros->connect("ItemSelected", showMacroInputs);
-		//inputPanel->;
-		//newMacro->;
-		//deleteMacro->;
-		//play->;
+		macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
+		newMacro->connect("Clicked", [name, inputPanel, macros, character, deleteMacro, play, record1, addInput, record2]{
+			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+			auto macroName = "Untitled macro " + std::to_string(allMacros.size() + 1);
+
+			allMacros.push_back({macroName, {}});
+			macros->addItem(macroName);
+			macros->setSelectedItemByIndex(allMacros.size() - 1);
+			name->setText(allMacros.front().name);
+			name->setEnabled(true);
+			deleteMacro->setEnabled(true);
+			play->setEnabled(true);
+			record1->setEnabled(true);
+			addInput->setEnabled(true);
+			record2->setEnabled(true);
+			inputPanel->removeAllWidgets();
+		});
+		name->connect("TextChanged", [character, macros, profile, name, inputPanel](std::string newName){
+			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+			auto selected = macros->getSelectedItemIndex();
+			auto &changedMacro = allMacros[selected];
+
+			changedMacro.name.swap(newName);
+			macros->disconnectAll();
+			macros->removeAllItems();
+			for (auto &macro : allMacros)
+				macros->addItem(macro.name);
+			macros->setSelectedItemByIndex(selected);
+			macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
+		});
+		deleteMacro->connect("Clicked", [macros, character, name, play, record1, addInput, record2](std::weak_ptr<tgui::Button> self){
+			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+			auto index = macros->getSelectedItemIndex();
+			auto isEmpty = allMacros.size() == 1;
+
+			name->setEnabled(!isEmpty);
+			self.lock()->setEnabled(!isEmpty);
+			play->setEnabled(!isEmpty);
+			record1->setEnabled(!isEmpty);
+			addInput->setEnabled(!isEmpty);
+			record2->setEnabled(!isEmpty);
+			macros->removeItemByIndex(index);
+			allMacros.erase(allMacros.begin() + index);
+		}, std::weak_ptr<tgui::Button>(deleteMacro));
+		play->connect("Clicked", [character, macros]{
+			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
+			std::vector<SokuLib::KeyInput> sequence;
+
+			for (auto &elem : macro.macroElems)
+				for (int i = 0; i < elem.second; i++)
+					sequence.push_back(elem.first);
+			addInputSequence(sequence);
+		});
 		//record1->;
-		//addInput->;
 		//record2->;
-		character->setSelectedItemByIndex(SokuLib::rightChar);
+		addInput->connect("Clicked", [character, profile, macros, name, inputPanel]{
+			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
+
+			if (macro.macroElems.empty())
+				macro.macroElems.emplace_back();
+			else
+				macro.macroElems.push_back(macro.macroElems.back());
+			macro.macroElems.back().second = 1;
+			showMacroInputs(profile, macros, name, inputPanel, character);
+		});
 	}
 
 	void loadAllGuiElements(LPCSTR profilePath)
