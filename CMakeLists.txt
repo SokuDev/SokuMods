@@ -384,3 +384,14 @@ install(FILES README.md DESTINATION "SWRSToys"
         RENAME "SokuMods.txt")
 install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
+
+# th123e loader
+
+add_executable(th123eloader)
+target_sources(th123eloader PRIVATE
+        th123eloader/th123eloader.c
+        th123eloader/th123e.rc)
+target_link_libraries(th123eloader shlwapi user32)
+set_target_properties(th123eloader PROPERTIES
+        OUTPUT_NAME th123e)
+install(TARGETS th123eloader RUNTIME DESTINATION ".")
