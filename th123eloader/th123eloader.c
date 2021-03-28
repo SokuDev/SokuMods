@@ -26,13 +26,13 @@ int hook() {
 	lstrcatW(dat_path, L"\\th123a.dat");
 
 	if (GetFileAttributesExW(exe_path, GetFileExInfoStandard, &exe_info) == 0) {
-		MessageBox(0, "Could not open th123 files.\n\nth123e.exe should be contained in the\nsame folder as th123.exe and th123a.dat.", "th123e error", MB_OK);
+		MessageBoxW(0, L"Could not open th123 files.\n\nth123e.exe should be contained in the\nsame folder as th123.exe and th123a.dat.", L"th123e error", MB_OK);
 		// don't print normal error
 		return 1;
 	}
 
 	if (GetFileAttributesExW(dat_path, GetFileExInfoStandard, &dat_info) == 0) {
-		MessageBox(0, "Could not open th123a.dat.\n\nDid you install the patch and nothing else?\nBecause you still need the full game.", "th123e error", MB_OK);
+		MessageBoxW(0, L"Could not open th123a.dat.\n\nDid you install the patch and nothing else?\nBecause you still need the full game.", L"th123e error", MB_OK);
 		return 1;
 	}
 
@@ -40,13 +40,13 @@ int hook() {
 	lstrcatW(dat_path, L"\\th123c.dat");
 
 	if (GetFileAttributesExW(dat_path, GetFileExInfoStandard, &dat_info) == 0) {
-		MessageBox(0, "Hisoutensoku is not patched!\n\nThe patch may be downloaded from\nhttp://tasofro.net/arc/index.html", "th123e error", MB_OK);
+		MessageBoxW(0, L"Hisoutensoku is not patched!\n\nThe patch may be downloaded from\nhttp://tasofro.net/arc/index.html", L"th123e error", MB_OK);
 		return 1;
 	}
 
 	if (exe_info.nFileSizeLow != 4816896 || dat_info.nFileSizeLow != 59554674) {
-		MessageBox(0, "This requires Hisoutensoku v1.10a, please patch to that version.\n\nThe patch may be downloaded from\nhttp://tasofro.net/arc/index.html",
-			"th123e error", MB_OK);
+		MessageBoxW(0, L"This requires Hisoutensoku v1.10a, please patch to that version.\n\nThe patch may be downloaded from\nhttp://tasofro.net/arc/index.html",
+			L"th123e error", MB_OK);
 		return 1;
 	}
 
@@ -56,13 +56,13 @@ int hook() {
 	lstrcatW(dll_path, L"\\th123e.dll");
 
 	if (GetFileAttributesExW(dll_path, GetFileExInfoStandard, &dat_info) == 0) {
-		MessageBox(0, "Could not find th123e.dll", "th123e error", MB_OK);
+		MessageBoxW(0, L"Could not find th123e.dll", L"th123e error", MB_OK);
 
 		return 1;
 	}
 
 	if (!CreateProcessW(exe_path, GetCommandLineW(), 0, 0, TRUE, CREATE_SUSPENDED, NULL, current_dir, &si, &pi)) {
-		MessageBox(0, "Could not create process", "th123e error", MB_OK);
+		MessageBoxW(0, L"Could not create process", L"th123e error", MB_OK);
 		return 1;
 	}
 
@@ -92,14 +92,14 @@ int hook() {
 
 		if (!GetThreadContext(pi.hThread, &ct)) {
 			Sleep(100);
-			MessageBox(0, "Could not get thread context", "th123e error", MB_OK);
+			MessageBoxW(0, L"Could not get thread context", L"th123e error", MB_OK);
 			TerminateProcess(pi.hProcess, -1);
 			return 1;
 		}
 	} while (ct.Eip != (DWORD)address);
 
 	// Alright, hook in the new dll.
-	HMODULE hKernel32 = GetModuleHandle("Kernel32");
+	HMODULE hKernel32 = GetModuleHandleW(L"Kernel32");
 	LPTHREAD_START_ROUTINE pLoadLibrary = (LPTHREAD_START_ROUTINE)GetProcAddress(hKernel32, "LoadLibraryW");
 
 	void *dll_addr = VirtualAllocEx(pi.hProcess, 0, 2048, MEM_COMMIT, PAGE_READWRITE);
@@ -107,7 +107,7 @@ int hook() {
 
 	HANDLE hThread = CreateRemoteThread(pi.hProcess, 0, 0, pLoadLibrary, dll_addr, 0, NULL);
 	if (!hThread) {
-		MessageBox(0, "Could not get remote loading thread", "th123e error", MB_OK);
+		MessageBoxW(0, L"Could not get remote loading thread", L"th123e error", MB_OK);
 		VirtualFreeEx(pi.hProcess, dll_addr, 0, MEM_RELEASE);
 		TerminateProcess(pi.hProcess, -1);
 		return 1;
@@ -123,7 +123,7 @@ int hook() {
 	VirtualFreeEx(pi.hProcess, dll_addr, 0, MEM_RELEASE);
 
 	if (!hookedDLL) {
-		MessageBox(0, "DLL loading failed", "th123e error", MB_OK);
+		MessageBoxW(0, L"DLL loading failed", L"th123e error", MB_OK);
 		TerminateProcess(pi.hProcess, -1);
 		return 1;
 	}
@@ -142,9 +142,7 @@ int hook() {
 int main(int argc, char **argv) {
 	// Create process and hook library.
 	if (!hook()) {
-		MessageBox(0, "Could not hook into th123.exe\n\nDo you have GameGuard or something running?", "th123e error", MB_OK);
-		return 0;
+		MessageBoxW(0, L"Could not hook into th123.exe\n\nDo you have GameGuard or something running?", L"th123e error", MB_OK);
 	}
-
 	return 0;
 }
