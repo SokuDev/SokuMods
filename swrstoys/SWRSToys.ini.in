@@ -1,2 +1,15 @@
 [Module]
+; MODS FOR HISOUTENSOKU
+; Each line below corresponds to a mod.
+; To disable a mod, add a semicolon at the beginning of its line:     ; Example = modules/Example/Example.dll
+; To enable a mod, remove any semicolon at the begininng of its line: Example = modules/Example/Example.dll
+; For more info, read SokuMods.txt.
+
 @SWRSTOYS_MODULE_PATHS@
+
+; SOKUENGINE
+; The following mods require the SokuEngine mod below.
+; SokuEngine=modules/SokuEngine/SokuEngine.dll
+; If you are using SokuEngine, disable every mod but SokuEngine and then enable them in-game in the ConfigEx menu.
+; LocaleEmulator=modules/LocaleEmulator/LocaleEmulator.dll
+; PracticeEx=modules/PracticeEx/PracticeEx.dll
