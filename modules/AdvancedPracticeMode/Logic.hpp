@@ -10,6 +10,7 @@
 
 namespace Practice
 {
+	bool compareKeyInputs(const SokuLib::KeyInput &input1, const SokuLib::KeyInput &input2);
 	void handleInput(SokuLib::KeymapManager &manager);
 	void render();
 	void update();

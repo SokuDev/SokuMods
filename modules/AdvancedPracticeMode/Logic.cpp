@@ -13,13 +13,36 @@ namespace Practice
 {
 	static int useCard = -1;
 
+	bool compareKeyInputs(const SokuLib::KeyInput &input1, const SokuLib::KeyInput &input2)
+	{
+		return	!input1.a == !input2.a &&
+			!input1.b == !input2.b &&
+			!input1.c == !input2.c &&
+			!input1.d == !input2.d &&
+			!input1.changeCard == !input2.changeCard &&
+			!input1.spellcard == !input2.spellcard &&
+			!copysign(input1.horizontalAxis, abs(input1.horizontalAxis)) == !copysign(input2.horizontalAxis, abs(input2.horizontalAxis)) &&
+			!copysign(input1.verticalAxis,   abs(input1.verticalAxis))   == !copysign(input2.verticalAxis,   abs(input2.verticalAxis));
+	}
+
 	void playerUseCard(int handSize)
 	{
 		useCard = handSize;
 	}
 
+	static void addInputToMacro(const SokuLib::KeyInput &input)
+	{
+		if (!settings.nonSaved.recordBuffer->empty() && compareKeyInputs(settings.nonSaved.recordBuffer->back().first, input))
+			settings.nonSaved.recordBuffer->back().second++;
+		else
+			settings.nonSaved.recordBuffer->push_back({input, 1});
+	}
+
 	void handlePlayerInput(SokuLib::KeymapManager &manager)
 	{
+		if (settings.nonSaved.recordingMacro && !settings.nonSaved.recordForDummy)
+			addInputToMacro(manager.input);
+
 		if (useCard != -1) {
 			memset(&manager.input, 0, sizeof(manager.input));
 			manager.input.changeCard = useCard;
@@ -47,6 +70,8 @@ namespace Practice
 
 	void handleDummyInput(SokuLib::KeymapManager &manager)
 	{
+		if (settings.nonSaved.recordingMacro && settings.nonSaved.recordForDummy)
+			addInputToMacro(lastPlayerInputs);
 		if (settings.nonSaved.controlDummy || (settings.nonSaved.recordingMacro && settings.nonSaved.recordForDummy))
 			memcpy(&manager.input, &lastPlayerInputs, sizeof(manager.input));
 		else

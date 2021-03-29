@@ -6,6 +6,7 @@
 #include "Moves.hpp"
 #include "State.hpp"
 #include "Dummy.hpp"
+#include "Logic.hpp"
 
 namespace Practice
 {
@@ -619,12 +620,16 @@ namespace Practice
 		auto exportButton = panel->get<tgui::Button>("Export");
 		auto import = panel->get<tgui::Button>("Import");
 		auto loop = panel->get<tgui::CheckBox>("Loop");
-		auto recorderCommon = [deleteMacro, macros, newMacro, character, addInput, exportButton, import](std::weak_ptr<tgui::Button> me, std::weak_ptr<tgui::Button> other, bool recordAsDummy){
+		auto recorderCommon = [deleteMacro, macros, newMacro, character, addInput, exportButton, import, profile, name, inputPanel](std::weak_ptr<tgui::Button> me, std::weak_ptr<tgui::Button> other, bool recordAsDummy){
 			const auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 			auto isEmpty = allMacros.empty();
+			SokuLib::KeyInput empty;
 
 			if (settings.nonSaved.recordingMacro) {
+				memset(&empty, 0, sizeof(empty));
 				settings.nonSaved.recordingMacro = false;
+				if (!settings.nonSaved.recordBuffer->empty() && compareKeyInputs(empty, settings.nonSaved.recordBuffer->front().first))
+					settings.nonSaved.recordBuffer->erase(settings.nonSaved.recordBuffer->begin());
 				character->setEnabled(true);
 				deleteMacro->setEnabled(true);
 				macros->setEnabled(true);
@@ -634,6 +639,7 @@ namespace Practice
 				addInput->setEnabled(true);
 				import->setEnabled(true);
 				exportButton->setEnabled(true);
+				showMacroInputs(profile, macros, name, inputPanel, character);
 			} else if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
 				settings.nonSaved.recordingMacro = true;
 				settings.nonSaved.recordForDummy = recordAsDummy;
