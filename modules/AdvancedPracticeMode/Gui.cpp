@@ -619,13 +619,47 @@ namespace Practice
 		auto exportButton = panel->get<tgui::Button>("Export");
 		auto import = panel->get<tgui::Button>("Import");
 		auto loop = panel->get<tgui::CheckBox>("Loop");
-		auto loadMacros = [macros, name, deleteMacro, play, record1, addInput, record2](int character){
+		auto recorderCommon = [deleteMacro, macros, newMacro, character, addInput, exportButton, import](std::weak_ptr<tgui::Button> me, std::weak_ptr<tgui::Button> other, bool recordAsDummy){
+			const auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+			auto isEmpty = allMacros.empty();
+
+			if (settings.nonSaved.recordingMacro) {
+				settings.nonSaved.recordingMacro = false;
+				character->setEnabled(true);
+				deleteMacro->setEnabled(true);
+				macros->setEnabled(true);
+				me.lock()->setEnabled(!isEmpty);
+				other.lock()->setEnabled(true);
+				newMacro->setEnabled(true);
+				addInput->setEnabled(true);
+				import->setEnabled(true);
+				exportButton->setEnabled(true);
+			} else if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
+				settings.nonSaved.recordingMacro = true;
+				settings.nonSaved.recordForDummy = recordAsDummy;
+				settings.nonSaved.recordingStarted = false;
+				character->setEnabled(false);
+				other.lock()->setEnabled(false);
+				deleteMacro->setEnabled(false);
+				newMacro->setEnabled(false);
+				macros->setEnabled(false);
+				addInput->setEnabled(false);
+				import->setEnabled(false);
+				exportButton->setEnabled(false);
+				me.lock()->setText("Stop recording");
+				settings.nonSaved.recordBuffer = &settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()].macroElems;
+			} else
+				return false;
+			return true;
+		};
+		auto loadMacros = [macros, name, deleteMacro, inputPanel, play, record1, addInput, record2, exportButton](int character){
 			const auto &allMacros = settings.nonSaved.macros.macros[character];
 			auto isEmpty = allMacros.empty();
 
 			macros->removeAllItems();
 			for (auto &macro : allMacros)
 				macros->addItem(macro.name);
+			inputPanel->removeAllWidgets();
 			macros->setSelectedItemByIndex(0);
 			if (!isEmpty)
 				name->setText(allMacros.front().name);
@@ -635,15 +669,20 @@ namespace Practice
 			record1->setEnabled(!isEmpty);
 			addInput->setEnabled(!isEmpty);
 			record2->setEnabled(!isEmpty);
+			exportButton->setEnabled(!isEmpty);
 		};
 
 		character->setSelectedItemByIndex(SokuLib::rightChar);
 		character->connect("ItemSelected", loadMacros);
 		loadMacros(SokuLib::rightChar);
 		showMacroInputs(profile, macros, name, inputPanel, character);
+		if (!settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()){
+			record1->setText("Pause macro");
+			record2->setText("Stop macro");
+		}
 
 		macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
-		newMacro->connect("Clicked", [name, inputPanel, macros, character, deleteMacro, play, record1, addInput, record2]{
+		newMacro->connect("Clicked", [name, inputPanel, macros, character, deleteMacro, play, record1, addInput, record2, exportButton]{
 			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 			auto macroName = "Untitled macro " + std::to_string(allMacros.size() + 1);
 
@@ -657,6 +696,7 @@ namespace Practice
 			record1->setEnabled(true);
 			addInput->setEnabled(true);
 			record2->setEnabled(true);
+			exportButton->setEnabled(true);
 			inputPanel->removeAllWidgets();
 		});
 		name->connect("TextChanged", [character, macros, profile, name, inputPanel](std::string newName){
@@ -672,7 +712,7 @@ namespace Practice
 			macros->setSelectedItemByIndex(selected);
 			macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
 		});
-		deleteMacro->connect("Clicked", [macros, character, name, play, record1, addInput, record2](std::weak_ptr<tgui::Button> self){
+		deleteMacro->connect("Clicked", [macros, character, name, play, record1, addInput, record2, exportButton](std::weak_ptr<tgui::Button> self){
 			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 			auto index = macros->getSelectedItemIndex();
 			auto isEmpty = allMacros.size() == 1;
@@ -683,6 +723,7 @@ namespace Practice
 			record1->setEnabled(!isEmpty);
 			addInput->setEnabled(!isEmpty);
 			record2->setEnabled(!isEmpty);
+			exportButton->setEnabled(!isEmpty);
 
 			allMacros.erase(allMacros.begin() + index);
 			macros->removeItemByIndex(index);
@@ -700,28 +741,18 @@ namespace Practice
 			record1->setText("Pause macro");
 			record2->setText("Stop macro");
 		});
-		if (!settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()){
-			record1->setText("Pause macro");
-			record2->setText("Stop macro");
-		}
-		record1->connect("Clicked", []{
-			if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
-
-			} else
+		record1->connect("Clicked", [recorderCommon](std::weak_ptr<tgui::Button> me, std::weak_ptr<tgui::Button> other){
+			if (!recorderCommon(std::move(me), std::move(other), true))
 				settings.nonSaved.playingMacro = !settings.nonSaved.playingMacro;
-		});
-		record2->connect("Clicked", []{
-			if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
-
-			} else {
+		}, std::weak_ptr<tgui::Button>(record1), std::weak_ptr<tgui::Button>(record2));
+		record2->connect("Clicked", [recorderCommon](std::weak_ptr<tgui::Button> me, std::weak_ptr<tgui::Button> other){
+			if (!recorderCommon(std::move(me), std::move(other), false)) {
 				settings.nonSaved.playingMacro = false;
 				settings.nonSaved.playList.clear();
 				settings.nonSaved.playingMacroBuffer.name.clear();
 				settings.nonSaved.playingMacroBuffer.macroElems.clear();
 			}
-		});
-		//exportButton->
-		//import->
+		}, std::weak_ptr<tgui::Button>(record2), std::weak_ptr<tgui::Button>(record1));
 		addInput->connect("Clicked", [character, profile, macros, name, inputPanel]{
 			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
 
@@ -732,6 +763,28 @@ namespace Practice
 			macro.macroElems.back().second = 1;
 			showMacroInputs(profile, macros, name, inputPanel, character);
 		});
+		//exportButton->
+		//import->
+
+		if (settings.nonSaved.recordingMacro) {
+			for (int i = 0; i < settings.nonSaved.macros.macros.size(); i++)
+				for (int j = 0; j < settings.nonSaved.macros.macros[i].size(); j++)
+					if (settings.nonSaved.recordBuffer == &settings.nonSaved.macros.macros[i][j].macroElems) {
+						character->setSelectedItemByIndex(i);
+						macros->setSelectedItemByIndex(j);
+					}
+
+			(settings.nonSaved.recordForDummy ? record2 : record1)->setEnabled(false);
+			(settings.nonSaved.recordForDummy ? record1 : record2)->setEnabled(true);
+			(settings.nonSaved.recordForDummy ? record1 : record2)->setText("Stop recording");
+			deleteMacro->setEnabled(false);
+			newMacro->setEnabled(false);
+			macros->setEnabled(false);
+			character->setEnabled(false);
+			addInput->setEnabled(false);
+			import->setEnabled(false);
+			exportButton->setEnabled(false);
+		}
 	}
 	int yolo = 0;
 
@@ -785,9 +838,12 @@ namespace Practice
 		auto record1 = panel->get<tgui::Button>("Record1");
 		auto record2 = panel->get<tgui::Button>("Record2");
 
-		if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
+		if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty() && !settings.nonSaved.recordingMacro) {
 			record1->setText("Record macro from dummy");
 			record2->setText("Record macro from player");
+		}
+		if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
+			queue->setText("");
 		} else {
 			size_t size = 3 * settings.nonSaved.playList.size();
 			std::string text;
