@@ -9,10 +9,11 @@
 #include <windows.h>
 #include <SokuLib.hpp>
 #include <SFML/Graphics.hpp>
+#include <list>
 
 namespace Practice
 {
-#define MAGIC_NUMBER       0x01020305
+#define MAGIC_NUMBER       0x01020306
 #define MAGIC_NUMBER_CHR   0x01020304
 #define MAGIC_NUMBER_MACRO 0x01020304
 #define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
@@ -105,10 +106,6 @@ namespace Practice
 
 	struct Settings {
 		unsigned magicNumber = MAGIC_NUMBER;
-		bool realisticInputs = true;
-		bool controlDummy = false;
-		bool forceWeather = true;
-		bool weatherResetRequest = false;
 		int weatherTime = 999;
 		int requestedFrameRate = 60;
 		Counter counter = COUNTER_OFF;
@@ -117,19 +114,27 @@ namespace Practice
 		AirTechDirection airtech = NO_AIRTECH;
 		float posX = 0;
 		float posY = 0;
-		bool showRawInputs = false;
-		bool showEmptyInputs = false;
-		bool showLeftInputBox = true;
-		bool showRightInputBox = true;
-		bool showLeftJoypad = true;
-		bool showRightJoypad = true;
+		bool showRawInputs : 1;
+		bool showEmptyInputs : 1;
+		bool showLeftInputBox : 1;
+		bool showRightInputBox : 1;
+		bool showLeftJoypad : 1;
+		bool showRightJoypad : 1;
+		bool realisticInputs : 1;
+		bool forceWeather : 1;
+		bool weatherResetRequest : 1;
 		HitBoxParams leftHitboxSettings;
 		HitBoxParams rightHitboxSettings;
 		struct NonSavedElements{
-			bool activated;
+			bool activated : 1;
 			bool recordingStarted : 1;
 			bool recordingMacro : 1;
 			bool recordForDummy : 1;
+			bool loopMacros : 1;
+			bool playingMacro : 1;
+			bool controlDummy : 1;
+			std::list<Macro> playList;
+			Macro playingMacroBuffer;
 			MacroData *recordBuffer = nullptr;
 			CharacterState leftState;
 			CharacterState rightState;

@@ -261,6 +261,29 @@ namespace Practice
 		auto &dummy = battle.rightCharacterManager;
 		auto direction = (player.objectBase.position.x < dummy.objectBase.position.x ? -1 : 1);
 
+		if (settings.nonSaved.playingMacro) {
+			while (!settings.nonSaved.playingMacroBuffer.macroElems.empty() && !settings.nonSaved.playingMacroBuffer.macroElems.front().second)
+				settings.nonSaved.playingMacroBuffer.macroElems.erase(settings.nonSaved.playingMacroBuffer.macroElems.begin());
+			if (!settings.nonSaved.playingMacroBuffer.macroElems.empty()) {
+				auto &next = settings.nonSaved.playingMacroBuffer.macroElems.front();
+				auto input = next.first;
+
+				input.horizontalAxis *= direction;
+				memcpy(&manager.input, &input, sizeof(manager.input));
+				next.second--;
+				return;
+			}
+			if (!settings.nonSaved.playList.empty()) {
+				if (settings.nonSaved.loopMacros)
+					settings.nonSaved.playList.push_back(settings.nonSaved.playList.front());
+				settings.nonSaved.playingMacroBuffer = settings.nonSaved.playList.front();
+				settings.nonSaved.playList.pop_front();
+				puts("Done !");
+				return;
+			}
+			settings.nonSaved.playingMacro = false;
+			puts("Done !");
+		}
 		if (!nextDummyInputs.empty()) {
 			auto &next = nextDummyInputs.front();
 

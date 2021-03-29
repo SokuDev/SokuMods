@@ -189,8 +189,17 @@ namespace Practice
 	}
 
 	Settings::Settings(bool activated) :
-		nonSaved{activated, false, false, false}
+		nonSaved{activated, false, false, false, false, false, false}
 	{
+		this->showRawInputs = false;
+		this->showEmptyInputs = false;
+		this->showLeftInputBox = true;
+		this->showRightInputBox = true;
+		this->showLeftJoypad = true;
+		this->showRightJoypad = true;
+		this->realisticInputs = true;
+		this->forceWeather = true;
+		this->weatherResetRequest = false;
 	}
 
 	void Settings::load()
@@ -369,6 +378,7 @@ namespace Practice
 				);
 				//TODO: Actually remove the file
 			}
+			macroArray.clear();
 			macroArray.reserve(length);
 			for (int j = length; j; j--)
 				stream >> (macroArray.emplace_back(), macroArray.back());

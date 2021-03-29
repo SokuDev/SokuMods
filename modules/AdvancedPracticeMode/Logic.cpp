@@ -28,7 +28,7 @@ namespace Practice
 			return;
 		}
 
-		if (!settings.controlDummy)
+		if (!settings.nonSaved.controlDummy)
 			return;
 
 		auto arraySrc = reinterpret_cast<int *>(&manager.input);
@@ -47,7 +47,7 @@ namespace Practice
 
 	void handleDummyInput(SokuLib::KeymapManager &manager)
 	{
-		if (settings.controlDummy)
+		if (settings.nonSaved.controlDummy)
 			memcpy(&manager.input, &lastPlayerInputs, sizeof(manager.input));
 		else
 			moveDummy(manager);

@@ -262,13 +262,13 @@ namespace Practice
 
 	static void updateDummyPanel()
 	{
-		settings.controlDummy = panel->get<tgui::CheckBox>("Control")->isChecked();
+		settings.nonSaved.controlDummy = panel->get<tgui::CheckBox>("Control")->isChecked();
 	}
 
 	static void displayDummyPanel(const std::string &profile)
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/dummy.gui");
-		panel->get<tgui::CheckBox>("Control")->setChecked(settings.controlDummy);
+		panel->get<tgui::CheckBox>("Control")->setChecked(settings.nonSaved.controlDummy);
 
 		auto block = panel->get<tgui::ComboBox>("Block");
 		auto airtech = panel->get<tgui::ComboBox>("Airtech");
@@ -518,7 +518,10 @@ namespace Practice
 		auto macros = macrosWeak.lock();
 		auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 
-		if (macros->getSelectedItemIndex() < 0 || macros->getSelectedItemIndex() >= allMacros.size())
+		inputPanel->removeAllWidgets();
+		if (macros->getSelectedItemIndex() >= allMacros.size())
+			macros->setSelectedItemByIndex(allMacros.size() - 1);
+		if (macros->getSelectedItemIndex() < 0)
 			return;
 
 		auto &selected = allMacros[macros->getSelectedItemIndex()];
@@ -526,7 +529,6 @@ namespace Practice
 		int i = 0;
 
 		name->setText(selected.name);
-		inputPanel->removeAllWidgets();
 		for (auto &elem : elems) {
 			auto pan = tgui::Panel::create({615, 22});
 
@@ -611,9 +613,12 @@ namespace Practice
 		auto newMacro = panel->get<tgui::Button>("New");
 		auto deleteMacro = panel->get<tgui::Button>("Delete");
 		auto play = panel->get<tgui::Button>("Play");
-		auto record1 = panel->get<tgui::Button>("Record1");
 		auto addInput = panel->get<tgui::Button>("AddInput");
+		auto record1 = panel->get<tgui::Button>("Record1");
 		auto record2 = panel->get<tgui::Button>("Record2");
+		auto exportButton = panel->get<tgui::Button>("Export");
+		auto import = panel->get<tgui::Button>("Import");
+		auto loop = panel->get<tgui::CheckBox>("Loop");
 		auto loadMacros = [macros, name, deleteMacro, play, record1, addInput, record2](int character){
 			const auto &allMacros = settings.nonSaved.macros.macros[character];
 			auto isEmpty = allMacros.empty();
@@ -645,7 +650,7 @@ namespace Practice
 			allMacros.push_back({macroName, {}});
 			macros->addItem(macroName);
 			macros->setSelectedItemByIndex(allMacros.size() - 1);
-			name->setText(allMacros.front().name);
+			name->setText(macroName);
 			name->setEnabled(true);
 			deleteMacro->setEnabled(true);
 			play->setEnabled(true);
@@ -678,20 +683,45 @@ namespace Practice
 			record1->setEnabled(!isEmpty);
 			addInput->setEnabled(!isEmpty);
 			record2->setEnabled(!isEmpty);
-			macros->removeItemByIndex(index);
-			allMacros.erase(allMacros.begin() + index);
-		}, std::weak_ptr<tgui::Button>(deleteMacro));
-		play->connect("Clicked", [character, macros]{
-			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
-			std::vector<SokuLib::KeyInput> sequence;
 
-			for (auto &elem : macro.macroElems)
-				for (int i = 0; i < elem.second; i++)
-					sequence.push_back(elem.first);
-			addInputSequence(sequence);
+			allMacros.erase(allMacros.begin() + index);
+			macros->removeItemByIndex(index);
+			if (index < allMacros.size())
+				macros->setSelectedItemByIndex(index);
+			else if (index)
+				macros->setSelectedItemByIndex(index - 1);
+		}, std::weak_ptr<tgui::Button>(deleteMacro));
+		play->connect("Clicked", [character, macros, record1, record2]{
+			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
+
+			if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty())
+				settings.nonSaved.playingMacro = true;
+			settings.nonSaved.playList.push_back(macro);
+			record1->setText("Pause macro");
+			record2->setText("Stop macro");
 		});
-		//record1->;
-		//record2->;
+		if (!settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()){
+			record1->setText("Pause macro");
+			record2->setText("Stop macro");
+		}
+		record1->connect("Clicked", []{
+			if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
+
+			} else
+				settings.nonSaved.playingMacro = !settings.nonSaved.playingMacro;
+		});
+		record2->connect("Clicked", []{
+			if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
+
+			} else {
+				settings.nonSaved.playingMacro = false;
+				settings.nonSaved.playList.clear();
+				settings.nonSaved.playingMacroBuffer.name.clear();
+				settings.nonSaved.playingMacroBuffer.macroElems.clear();
+			}
+		});
+		//exportButton->
+		//import->
 		addInput->connect("Clicked", [character, profile, macros, name, inputPanel]{
 			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
 
@@ -703,9 +733,14 @@ namespace Practice
 			showMacroInputs(profile, macros, name, inputPanel, character);
 		});
 	}
+	int yolo = 0;
 
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
+#ifndef NDEBUG
+		yolo = 0;
+		return;
+#endif
 		puts("Loading GUI...");
 
 		std::string profile = profilePath;
@@ -744,9 +779,45 @@ namespace Practice
 	{
 	}
 
+	static void updateMacroPanel()
+	{
+		auto queue = panel->get<tgui::TextBox>("Queue");
+		auto record1 = panel->get<tgui::Button>("Record1");
+		auto record2 = panel->get<tgui::Button>("Record2");
+
+		if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()) {
+			record1->setText("Record macro from dummy");
+			record2->setText("Record macro from player");
+		} else {
+			size_t size = 3 * settings.nonSaved.playList.size();
+			std::string text;
+
+			for (auto &elem : settings.nonSaved.playList)
+				size += elem.name.size();
+			text.reserve(size + settings.nonSaved.playingMacroBuffer.name.size());
+			text = settings.nonSaved.playingMacroBuffer.name;
+			for (auto &elem : settings.nonSaved.playList) {
+				text += " -> ";
+				text += elem.name;
+			}
+			queue->setText(text);
+		}
+	}
+
 	void updateGuiState()
 	{
+#ifndef NDEBUG
+		static int y = 0;
+
+		if (y++ != 200)
+			return;
+		auto &macro = settings.nonSaved.macros.macros[SokuLib::CHARACTER_REMILIA][0];
+
+		settings.nonSaved.playingMacro = true;
+		settings.nonSaved.playingMacroBuffer.clear();
+		settings.nonSaved.playList.push_back(macro);
 		return;
+#endif
 		switch (tab->getSelectedIndex()) {
 		case 0:
 			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
@@ -757,6 +828,9 @@ namespace Practice
 			break;
 		case 2:
 			updateStatePanel();
+			break;
+		case 3:
+			updateMacroPanel();
 			break;
 		case 4:
 			updateMiscPanel();
