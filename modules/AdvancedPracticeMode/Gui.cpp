@@ -72,7 +72,8 @@ namespace Practice
 			auto &input = elem.first;
 			auto dir = 5 + (input.horizontalAxis > 0) - (input.horizontalAxis < 0) + ((input.verticalAxis < 0) - (input.verticalAxis > 0)) * 3;
 
-			stream << dir;
+			if (dir != 5 || (!input.a && !input.b && !input.c && !input.d && !input.spellcard && !input.changeCard))
+				stream << dir;
 			if (input.a)
 				stream << "A";
 			if (input.b)
@@ -85,9 +86,72 @@ namespace Practice
 				stream << "S";
 			if (input.changeCard)
 				stream << "s";
-			stream << ' ' << elem.second << '\n';
+			if (elem.second != 1)
+				stream << ' ' << elem.second << '\n';
 		}
 		return stream.str();
+	}
+
+	static Macro importMacroFromString(const std::string &str)
+	{
+		Macro macro;
+		std::stringstream buffer{str};
+		std::string line;
+
+		std::getline(buffer, macro.name);
+		while (std::getline(buffer, line)) {
+			std::string command;
+			std::stringstream buffer2{line};
+			std::pair<SokuLib::KeyInput, unsigned> elem;
+
+			buffer2 >> command;
+			if (buffer2.fail() || command.empty())
+				continue;
+
+			buffer2 >> elem.second;
+			if (buffer2.fail())
+				elem.second = 1;
+
+			if (isdigit(command[0])) {
+				char v = command[0] - '1';
+
+				elem.first.verticalAxis = -(v / 3 - 1);
+				elem.first.horizontalAxis = v % 3 - 1;
+			}
+			while (!command.empty() && isdigit(command[0]))
+				command.erase(command.begin());
+
+			for (auto c : command) {
+				switch (c) {
+				case 'A':
+				case 'a':
+					elem.first.a = 1;
+					break;
+				case 'B':
+				case 'b':
+					elem.first.b = 1;
+					break;
+				case 'C':
+				case 'c':
+					elem.first.c = 1;
+					break;
+				case 'D':
+				case 'd':
+					elem.first.d = 1;
+					break;
+				case 'S':
+					elem.first.spellcard = 1;
+					break;
+				case 's':
+					elem.first.changeCard = 1;
+					break;
+				default:
+					break;
+				}
+			}
+			macro.macroElems.push_back(elem);
+		}
+		return macro;
 	}
 
 	static bool makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
@@ -686,6 +750,23 @@ namespace Practice
 				return false;
 			return true;
 		};
+		auto createEmptyMacro = [name, inputPanel, macros, character, deleteMacro, play, record1, addInput, record2, exportButton]{
+			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+			auto macroName = "Untitled macro " + std::to_string(allMacros.size() + 1);
+
+			allMacros.push_back({macroName, {}});
+			macros->addItem(macroName);
+			macros->setSelectedItemByIndex(allMacros.size() - 1);
+			name->setText(macroName);
+			name->setEnabled(true);
+			deleteMacro->setEnabled(true);
+			play->setEnabled(true);
+			record1->setEnabled(true);
+			addInput->setEnabled(true);
+			record2->setEnabled(true);
+			exportButton->setEnabled(true);
+			inputPanel->removeAllWidgets();
+		};
 		auto loadMacros = [macros, name, deleteMacro, inputPanel, play, record1, addInput, record2, exportButton](int character){
 			const auto &allMacros = settings.nonSaved.macros.macros[character];
 			auto isEmpty = allMacros.empty();
@@ -716,23 +797,7 @@ namespace Practice
 		}
 
 		macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
-		newMacro->connect("Clicked", [name, inputPanel, macros, character, deleteMacro, play, record1, addInput, record2, exportButton]{
-			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
-			auto macroName = "Untitled macro " + std::to_string(allMacros.size() + 1);
-
-			allMacros.push_back({macroName, {}});
-			macros->addItem(macroName);
-			macros->setSelectedItemByIndex(allMacros.size() - 1);
-			name->setText(macroName);
-			name->setEnabled(true);
-			deleteMacro->setEnabled(true);
-			play->setEnabled(true);
-			record1->setEnabled(true);
-			addInput->setEnabled(true);
-			record2->setEnabled(true);
-			exportButton->setEnabled(true);
-			inputPanel->removeAllWidgets();
-		});
+		newMacro->connect("Clicked", createEmptyMacro);
 		name->connect("TextChanged", [character, macros, profile, name, inputPanel](std::string newName){
 			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 			auto selected = macros->getSelectedItemIndex();
@@ -746,7 +811,7 @@ namespace Practice
 			macros->setSelectedItemByIndex(selected);
 			macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
 		});
-		deleteMacro->connect("Clicked", [macros, character, name, play, record1, addInput, record2, exportButton](std::weak_ptr<tgui::Button> self){
+		deleteMacro->connect("Clicked", [inputPanel, macros, character, name, play, record1, addInput, record2, exportButton](std::weak_ptr<tgui::Button> self){
 			auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
 			auto index = macros->getSelectedItemIndex();
 			auto isEmpty = allMacros.size() == 1;
@@ -765,6 +830,8 @@ namespace Practice
 				macros->setSelectedItemByIndex(index);
 			else if (index)
 				macros->setSelectedItemByIndex(index - 1);
+			if (allMacros.empty())
+				inputPanel->removeAllWidgets();
 		}, std::weak_ptr<tgui::Button>(deleteMacro));
 		play->connect("Clicked", [character, macros, record1, record2]{
 			auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
@@ -842,7 +909,7 @@ namespace Practice
 			gui.add(fakePanel);
 			gui.add(pan);
 		}, std::weak_ptr<tgui::Button>(exportButton));
-		import->connect("Clicked", [profile](std::weak_ptr<tgui::Button> button, tgui::Vector2f pos){
+		import->connect("Clicked", [profile, character, macros, name, deleteMacro, play, record1, addInput, record2, exportButton, inputPanel](std::weak_ptr<tgui::Button> button, tgui::Vector2f pos){
 			auto fakePanel = tgui::Panel::create({"100%", "100%"});
 			auto pan = tgui::Panel::create({110, 40});
 			auto close = [pan](std::weak_ptr<tgui::Panel> fakePanel){
@@ -850,8 +917,57 @@ namespace Practice
 				gui.remove(fakePanel.lock());
 			};
 
-			pan->getRenderer()->setBackgroundColor({0xAA, 0xAA, 0xAA});
 			pan->loadWidgetsFromFile(profile + "/assets/context_import.gui");
+
+			auto str = pan->get<tgui::Button>("Str");
+			auto file = pan->get<tgui::Button>("File");
+
+			str->connect("Clicked", [profile, character, macros, name, deleteMacro, play, record1, addInput, record2, exportButton, inputPanel]{
+				auto fakePanel = tgui::Panel::create({"100%", "100%"});
+				auto text = tgui::TextBox::create();
+				auto ok = tgui::Button::create("OK");
+				auto cancel = tgui::Button::create("Cancel");
+				auto close = [text, ok, cancel](std::weak_ptr<tgui::Panel> fakePanel){
+					gui.remove(ok);
+					gui.remove(text);
+					gui.remove(cancel);
+					gui.remove(fakePanel.lock());
+				};
+
+				ok->connect("Clicked", [profile, text, character, macros, name, deleteMacro, play, record1, addInput, record2, exportButton, inputPanel]{
+					auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+					auto macro = importMacroFromString(text->getText());
+
+					allMacros.push_back(macro);
+					macros->addItem(macro.name);
+					macros->setSelectedItemByIndex(allMacros.size() - 1);
+					name->setText(macro.name);
+					name->setEnabled(true);
+					deleteMacro->setEnabled(true);
+					play->setEnabled(true);
+					record1->setEnabled(true);
+					addInput->setEnabled(true);
+					record2->setEnabled(true);
+					exportButton->setEnabled(true);
+					showMacroInputs(profile, macros, name, inputPanel, character);
+				});
+				ok->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
+				cancel->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
+
+				ok->setPosition("Text.x + Text.w - w", "Text.y + Text.h + 2");
+				cancel->setPosition("Text.x + Text.w - OKButton.w - w - 10", "Text.y + Text.h + 2");
+				text->setSize({"&.w / 2 - 100", "&.h / 2 - 100"});
+				text->setDefaultText("Exported string");
+				text->setPosition({"(&.w - w) / 2", "(&.h - h) / 2"});
+				fakePanel->getRenderer()->setBackgroundColor({0x00, 0x00, 0x00, 0x80});
+				fakePanel->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
+				gui.add(fakePanel);
+				gui.add(text, "Text");
+				gui.add(ok, "OKButton");
+				gui.add(cancel, "CancelButton");
+			});
+
+			pan->getRenderer()->setBackgroundColor({0xAA, 0xAA, 0xAA});
 			fakePanel->getRenderer()->setBackgroundColor({0, 0, 0, 0});
 			fakePanel->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
 			for (auto &wid : pan->getWidgets())
@@ -862,7 +978,6 @@ namespace Practice
 			gui.add(fakePanel);
 			gui.add(pan);
 		}, std::weak_ptr<tgui::Button>(import));
-		//import->
 
 		if (settings.nonSaved.recordingMacro) {
 			for (int i = 0; i < settings.nonSaved.macros.macros.size(); i++)
