@@ -30,8 +30,9 @@ namespace Practice
 		useCard = handSize;
 	}
 
-	static void addInputToMacro(const SokuLib::KeyInput &input)
+	static void addInputToMacro(SokuLib::KeyInput input, SokuLib::Direction direction)
 	{
+		input.horizontalAxis *= direction;
 		if (!settings.nonSaved.recordBuffer->empty() && compareKeyInputs(settings.nonSaved.recordBuffer->back().first, input))
 			settings.nonSaved.recordBuffer->back().second++;
 		else
@@ -41,7 +42,7 @@ namespace Practice
 	void handlePlayerInput(SokuLib::KeymapManager &manager)
 	{
 		if (settings.nonSaved.recordingMacro && !settings.nonSaved.recordForDummy)
-			addInputToMacro(manager.input);
+			addInputToMacro(manager.input, SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction);
 
 		if (useCard != -1) {
 			memset(&manager.input, 0, sizeof(manager.input));
@@ -71,7 +72,7 @@ namespace Practice
 	void handleDummyInput(SokuLib::KeymapManager &manager)
 	{
 		if (settings.nonSaved.recordingMacro && settings.nonSaved.recordForDummy)
-			addInputToMacro(lastPlayerInputs);
+			addInputToMacro(lastPlayerInputs, SokuLib::getBattleMgr().rightCharacterManager.objectBase.direction);
 		if (settings.nonSaved.controlDummy || (settings.nonSaved.recordingMacro && settings.nonSaved.recordForDummy))
 			memcpy(&manager.input, &lastPlayerInputs, sizeof(manager.input));
 		else
