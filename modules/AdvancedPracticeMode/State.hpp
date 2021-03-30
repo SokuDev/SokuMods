@@ -13,9 +13,12 @@
 
 namespace Practice
 {
-#define MAGIC_NUMBER       0x01020306
-#define MAGIC_NUMBER_CHR   0x01020304
-#define MAGIC_NUMBER_MACRO 0x01020304
+#define MAGIC_NUMBER                       0x01020306
+#define MAGIC_NUMBER_CHR                   0x01020304
+#define MAGIC_NUMBER_MACRO                 0x01020304
+#define MAGIC_NUMBER_MACRO_SINGLE_MACRO    0x11121314
+#define MAGIC_NUMBER_MACRO_WHOLE_CHARACTER 0x21222324
+
 #define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
 #define PAYLOAD_NEXT_INSTR_DECK_INFOS (PAYLOAD_ADDRESS_DECK_INFOS + 4)
 
@@ -99,9 +102,12 @@ namespace Practice
 		std::array<std::vector<Macro>, 20> macros;
 
 		void save() const;
+		bool save(const std::string &path) const;
+		bool save(std::ofstream &stream, const std::string &path) const;
 		void load();
 		bool load(const std::string &path);
-		bool import(const std::string &path);
+		bool load(std::ifstream &stream, const std::string &path = "", bool needMagic = true);
+		void import(const MacroManager &other);
 	};
 
 	struct Settings {

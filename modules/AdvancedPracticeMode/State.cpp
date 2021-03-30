@@ -352,14 +352,21 @@ namespace Practice
 			return false;
 		}
 
+		return this->load(stream, path);
+	}
+
+	bool MacroManager::load(std::ifstream &stream, const std::string &path, bool needMagic)
+	{
 		unsigned magic;
 		int i = 0;
 
-		stream.read(reinterpret_cast<char *>(&magic), sizeof(magic));
-		if (magic != MAGIC_NUMBER_MACRO) {
-			std::cerr << "Error: Couldn't load file from \"" << path << "\": ";
-			std::cerr << "Magic number 0x" << std::hex << magic << " doesn't match expected magic number 0x" << MAGIC_NUMBER_MACRO << std::endl;
-			return false;
+		if (needMagic) {
+			stream.read(reinterpret_cast<char *>(&magic), sizeof(magic));
+			if (magic != MAGIC_NUMBER_MACRO) {
+				std::cerr << "Error: Couldn't load file from \"" << path << "\": ";
+				std::cerr << "Magic number 0x" << std::hex << magic << " doesn't match expected magic number 0x" << MAGIC_NUMBER_MACRO << std::endl;
+				return false;
+			}
 		}
 
 		for (auto &macroArray : this->macros) {
@@ -371,9 +378,9 @@ namespace Practice
 				MessageBoxA(
 					SokuLib::window,
 					("There are more than 4096 macros entry (" +
-					std::to_string(length) +
-					").\nThe macro file might be corrupted. The mod might crash if you have too many macros.\n"
-     					"Please remove unused macros.\nDo you want to remove the file ?").c_str(),
+					 std::to_string(length) +
+					 ").\nThe macro file might be corrupted. The mod might crash if you have too many macros.\n"
+					 "Please remove unused macros.\nDo you want to remove the file ?").c_str(),
 					"Suspicious amount of macros in file.", MB_ICONWARNING | MB_YESNO
 				);
 				//TODO: Actually remove the file
@@ -388,15 +395,25 @@ namespace Practice
 
 	void MacroManager::save() const
 	{
-		std::ofstream stream{"APMSettings/APMMacros.dat"};
+		this->save("APMSettings/APMMacros.dat");
+	}
+
+	bool MacroManager::save(const std::string &path) const
+	{
+		std::ofstream stream{path};
+
+		std::cout << "Saving macros to \"" << path << '"' << std::endl;
+		if (!stream) {
+			std::cerr << "Error: Couldn't save macro file to \"" << path << "\": " << strerror(errno) << std::endl;
+			return false;
+		}
+		return this->save(stream, path);
+	}
+
+	bool MacroManager::save(std::ofstream &stream, const std::string &path) const
+	{
 		unsigned magic = MAGIC_NUMBER_MACRO;
 		int i = 0;
-
-		std::cout << "Saving macros to APMSettings/APMMacros.dat" << std::endl;
-		if (!stream) {
-			std::cerr << "Error: Couldn't save macro file to \"APMSettings/APMMacros.dat\": " << strerror(errno) << std::endl;
-			return;
-		}
 
 		stream.write(reinterpret_cast<char *>(&magic), sizeof(magic));
 		for (auto &macroArray : this->macros) {
@@ -407,17 +424,13 @@ namespace Practice
 			for (const auto &macro : macroArray)
 				stream << macro;
 		}
+		return !stream.fail();
 	}
 
-	bool MacroManager::import(const std::string &path)
+	void MacroManager::import(const MacroManager &alternate)
 	{
-		MacroManager alternate;
-
-		if (!alternate.load(path))
-			return false;
 		for (int i = 0; i < this->macros.size(); i++)
 			this->macros[i].insert(this->macros[i].end(), alternate.macros[i].begin(), alternate.macros[i].end());
-		return true;
 	}
 
 	std::ostream &operator<<(std::ostream &stream, const Macro &macro)

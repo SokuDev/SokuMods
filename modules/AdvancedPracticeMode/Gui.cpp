@@ -1,6 +1,8 @@
 //
 // Created by PinkySmile on 18/02/2021.
 //
+
+#include <fstream>
 #include <SokuLib.hpp>
 #include "Gui.hpp"
 #include "Moves.hpp"
@@ -60,6 +62,68 @@ namespace Practice
 			skillsTextures[i].loadFromFile(std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png");
 		}
 		puts("Init done");
+	}
+
+	static void exportMacrosToFile(const MacroManager &macros, const std::string &file)
+	{
+		if (!macros.save(file))
+			MessageBoxA(SokuLib::window, ("Cannot save macros to file " + file).c_str(), "Saving error", MB_ICONERROR);
+	}
+
+	static void exportMacrosToFile(const std::vector<Macro> &macros, const std::string &file)
+	{
+		std::ofstream stream{file};
+		unsigned magic = MAGIC_NUMBER_MACRO_WHOLE_CHARACTER;
+		int i = 0;
+		unsigned short length = macros.size();
+
+		if (stream.fail()) {
+			MessageBoxA(
+				SokuLib::window,
+				(
+					"Cannot save macros to file " + file +
+					"\n\nPlease check permissions and disk space.\n\n" +
+					file + ": " + strerror(errno)
+				).c_str(),
+				"Saving error",
+				MB_ICONERROR
+			);
+			return;
+		}
+
+		stream.write(reinterpret_cast<char *>(&magic), sizeof(magic));
+		stream.write(reinterpret_cast<char *>(&length), sizeof(length));
+		for (const auto &macro : macros)
+			stream << macro;
+
+		if (stream.fail())
+			MessageBoxA(SokuLib::window, ("Cannot save macros to file " + file + "\n\nPlease check permissions and disk space.").c_str(), "Saving error", MB_ICONERROR);
+	}
+
+	static void exportMacroToFile(const Macro &macro, const std::string &file)
+	{
+		std::ofstream stream{file};
+		unsigned magic = MAGIC_NUMBER_MACRO_SINGLE_MACRO;
+		int i = 0;
+
+		if (stream.fail()) {
+			MessageBoxA(
+				SokuLib::window,
+				(
+					"Cannot save macros to file " + file +
+					"\n\nPlease check permissions and disk space.\n\n" +
+					file + ": " + strerror(errno)
+				).c_str(),
+				"Saving error",
+				MB_ICONERROR
+			);
+			return;
+		}
+		stream.write(reinterpret_cast<char *>(&magic), sizeof(magic));
+		stream << macro;
+
+		if (stream.fail())
+			MessageBoxA(SokuLib::window, ("Cannot save macro to file " + file + "\n\nPlease check permissions and disk space.").c_str(), "Saving error", MB_ICONERROR);
 	}
 
 	static std::string exportMacroToString(const Macro &macro)
@@ -152,6 +216,66 @@ namespace Practice
 			macro.macroElems.push_back(elem);
 		}
 		return macro;
+	}
+
+	static void importMacrosFromFile(std::array<std::vector<Macro>, 20> &buffer, int selectedCharacter, const std::string &file)
+	{
+		std::ifstream stream{file};
+		unsigned magic;
+		unsigned short length;
+		MacroManager alternate;
+		Macro temp;
+
+		if (stream.fail()) {
+			MessageBoxA(
+				SokuLib::window,
+				(
+					"Cannot load macro(s) from file " + file +
+					"\n\nPlease check permissions and file path.\n\n" +
+					file + ": " + strerror(errno)
+				).c_str(),
+				"Loading error",
+				MB_ICONERROR
+			);
+			return;
+		}
+
+		stream.read(reinterpret_cast<char *>(&magic), sizeof(magic));
+		switch (magic) {
+		case MAGIC_NUMBER_MACRO_WHOLE_CHARACTER:
+			stream.read(reinterpret_cast<char *>(&length), sizeof(length));
+			for (int i = 0; i < length; i++) {
+				stream >> temp;
+				buffer[selectedCharacter].push_back(temp);
+			}
+			break;
+		case MAGIC_NUMBER_MACRO_SINGLE_MACRO:
+			stream >> temp;
+			buffer[selectedCharacter].push_back(temp);
+			break;
+		case MAGIC_NUMBER_MACRO:
+			if (!alternate.load(stream, file, false)) {
+				MessageBoxA(SokuLib::window, (
+					"Cannot load macro(s) from file " + file +
+					"\n\nTbh, it is my bad. Please report this error and attach the file you are trying to load." +
+					file + ": " + strerror(errno)
+				).c_str(), "Loading error", MB_ICONERROR);
+				return;
+			}
+			settings.nonSaved.macros.import(alternate);
+			break;
+		default:
+			MessageBoxA(
+				SokuLib::window,
+				(
+					"Cannot load macro(s) from file " + file +
+					"\n\nPlease check file path." +
+					file + ": The magic number doesn't match any known exported macro file type."
+				).c_str(),
+				"Loading error",
+				MB_ICONERROR
+			);
+		}
 	}
 
 	static bool makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
@@ -687,12 +811,45 @@ namespace Practice
 			pan->setPosition(0, i * 30);
 			i++;
 			inputPanel->add(pan);
+			if (i >= 50) {
+				MessageBoxA(
+					SokuLib::window,
+					("List has been trimmed because this macro has more than 50 input entries (" +
+					std::to_string(elems.size()) + ") entries.\nIf you think this macro is corrupted, please remove it.").c_str(),
+					"Corrupted macro ?",
+					MB_ICONWARNING
+				);
+				break;
+			}
 		}
 		auto lab = tgui::Label::create();
 
 		lab->setSize({20, 20});
 		lab->setPosition(0, i * 30);
 		inputPanel->add(lab);
+	}
+
+	static std::string exploreFile(const std::string &title, const std::string &basePath, bool save)
+	{
+		OPENFILENAMEA ofn;
+		char buffer[MAX_PATH];
+
+		std::memset(buffer, 0, sizeof(buffer));
+		std::memset(&ofn, 0, sizeof(ofn));
+		ofn.lStructSize = sizeof(OPENFILENAMEA);
+		ofn.hwndOwner = SokuLib::window;
+		ofn.lpstrFile = buffer;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = save ? (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN) : OFN_FILEMUSTEXIST;
+		ofn.lpstrFilter = "Macro files\0*.macros\0\0";
+		ofn.lpstrCustomFilter = nullptr;
+		ofn.nFilterIndex = 0;
+		ofn.lpstrFileTitle = nullptr;
+		ofn.lpstrInitialDir = basePath.c_str();
+		ofn.lpstrTitle = title.c_str();
+		ofn.lpstrDefExt = "macros";
+		save ? GetSaveFileNameA(&ofn) : GetOpenFileNameA(&ofn);
+		return buffer;
 	}
 
 	void displayMacroPanel(const std::string &profile)
@@ -879,6 +1036,29 @@ namespace Practice
 			auto exportChrToFile = pan->get<tgui::Button>("ChrFile");
 			auto exportAllToFile = pan->get<tgui::Button>("AllFile");
 
+			exportThisToFile->connect("Clicked", [character, macros, profile]{
+				auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
+				std::string path = exploreFile("Save macro file", profile, true);
+
+				if (path.empty())
+					return;
+				exportMacroToFile(macro, path);
+			});
+			exportChrToFile->connect("Clicked", [character, profile]{
+				auto &macros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+				std::string path = exploreFile("Save macro file", profile, true);
+
+				if (path.empty())
+					return;
+				exportMacrosToFile(macros, path);
+			});
+			exportAllToFile->connect("Clicked", [profile]{
+				std::string path = exploreFile("Save macro file", profile, true);
+
+				if (path.empty())
+					return;
+				exportMacrosToFile(settings.nonSaved.macros, path);
+			});
 			exportStr->connect("Clicked", [character, macros, close]{
 				auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
 				auto fakePanel = tgui::Panel::create({"100%", "100%"});
@@ -922,6 +1102,17 @@ namespace Practice
 			auto str = pan->get<tgui::Button>("Str");
 			auto file = pan->get<tgui::Button>("File");
 
+			file->connect("Clicked", [character, macros, profile]{
+				std::string path = exploreFile("Load macro file", profile, false);
+
+				if (path.empty())
+					return;
+				importMacrosFromFile(settings.nonSaved.macros.macros, character->getSelectedItemIndex(), path);
+				displayMacroPanel(profile);
+
+				panel->get<tgui::ComboBox>("Character")->setSelectedItemByIndex(character->getSelectedItemIndex());
+				panel->get<tgui::ComboBox>("Macros")->setSelectedItemByIndex(macros->getItemCount() + 1);
+			});
 			str->connect("Clicked", [profile, character, macros, name, deleteMacro, play, record1, addInput, record2, exportButton, inputPanel]{
 				auto fakePanel = tgui::Panel::create({"100%", "100%"});
 				auto text = tgui::TextBox::create();
