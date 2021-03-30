@@ -1,26 +1,4 @@
 Renderer.1 {
-    backgroundcolor = #F5F5F5;
-    backgroundcolordisabled = #E6E6E6;
-    backgroundcolordown = #EBEBEB;
-    backgroundcolorhover = white;
-    bordercolor = #3C3C3C;
-    bordercolordisabled = #7D7D7D;
-    bordercolordown = black;
-    bordercolorfocused = #1E1EB4;
-    bordercolorhover = black;
-    borders = (1, 1, 1, 1);
-    textcolor = #3C3C3C;
-    textcolordisabled = #7D7D7D;
-    textcolordown = black;
-    textcolorhover = black;
-    texture = None;
-    texturedisabled = None;
-    texturedown = None;
-    texturefocused = None;
-    texturehover = None;
-}
-
-Renderer.2 {
     arrowbackgroundcolor = #F5F5F5;
     arrowbackgroundcolorhover = white;
     arrowcolor = #3C3C3C;
@@ -37,7 +15,7 @@ Renderer.2 {
     texturebackgrounddisabled = None;
 }
 
-Renderer.3 {
+Renderer.2 {
     backgroundcolor = #F5F5F5;
     backgroundcolordisabled = #E6E6E6;
     backgroundcolordown = #EBEBEB;
@@ -67,10 +45,11 @@ ComboBox.Macros {
     Position = (210, 70);
     Size = (220, 22);
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 EditBox.Name {
+    InputValidator = "[^\\[\\]]*";
     MaximumCharacters = 65535;
     Position = (10, 70);
     Size = (190, 22);
@@ -117,7 +96,7 @@ Button.New {
     Size = (100, 22);
     Text = "New macro";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Button.Delete {
@@ -125,7 +104,7 @@ Button.Delete {
     Size = (110, 22);
     Text = "Delete macro";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Button.Play {
@@ -133,7 +112,7 @@ Button.Play {
     Size = (120, 22);
     Text = "Play macro";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Button.Record1 {
@@ -141,7 +120,7 @@ Button.Record1 {
     Size = (190, 22);
     Text = "Record macro from dummy";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Button.AddInput {
@@ -149,7 +128,7 @@ Button.AddInput {
     Size = (190, 22);
     Text = "Add new element";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 ComboBox.Character {
@@ -162,7 +141,7 @@ ComboBox.Character {
     SelectedItemIndex = 10;
     Size = (190, 22);
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.Record2 {
@@ -170,7 +149,7 @@ Button.Record2 {
     Size = (220, 22);
     Text = "Record macro from player";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 CheckBox.Loop {
@@ -234,15 +213,15 @@ TextBox.Queue {
 Button.Import {
     Position = (440, 10);
     Size = (90, 22);
-    Text = Import;
+    Text = "Import...";
     TextSize = 13;
-    renderer = &3;
+    renderer = &2;
 }
 
 Button.Export {
     Position = (540, 10);
     Size = (90, 22);
-    Text = Export;
+    Text = "Export...";
     TextSize = 13;
-    renderer = &3;
+    renderer = &2;
 }

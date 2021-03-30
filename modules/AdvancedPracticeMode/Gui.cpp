@@ -62,6 +62,34 @@ namespace Practice
 		puts("Init done");
 	}
 
+	static std::string exportMacroToString(const Macro &macro)
+	{
+		std::stringstream stream;
+		bool invalid = macro.name.find('\n') != std::string::npos;
+
+		stream << (invalid ? "Invalid macro name" : macro.name) << '\n';
+		for (auto &elem : macro.macroElems) {
+			auto &input = elem.first;
+			auto dir = 5 + (input.horizontalAxis > 0) - (input.horizontalAxis < 0) + ((input.verticalAxis < 0) - (input.verticalAxis > 0)) * 3;
+
+			stream << dir;
+			if (input.a)
+				stream << "A";
+			if (input.b)
+				stream << "B";
+			if (input.c)
+				stream << "C";
+			if (input.d)
+				stream << "D";
+			if (input.spellcard)
+				stream << "S";
+			if (input.changeCard)
+				stream << "s";
+			stream << ' ' << elem.second << '\n';
+		}
+		return stream.str();
+	}
+
 	static bool makeFakeCard(SokuLib::CharacterManager &manager, unsigned short id)
 	{
 		printf("Insert card %i\n", id);
@@ -769,7 +797,71 @@ namespace Practice
 			macro.macroElems.back().second = 1;
 			showMacroInputs(profile, macros, name, inputPanel, character);
 		});
-		//exportButton->
+		exportButton->connect("Clicked", [character, macros, profile](std::weak_ptr<tgui::Button> button, tgui::Vector2f pos){
+			auto fakePanel = tgui::Panel::create({"100%", "100%"});
+			auto pan = tgui::Panel::create({150, 90});
+			auto close = [pan](std::weak_ptr<tgui::Panel> fakePanel){
+				gui.remove(pan);
+				gui.remove(fakePanel.lock());
+			};
+
+			pan->loadWidgetsFromFile(profile + "/assets/context_export.gui");
+
+			auto exportStr = pan->get<tgui::Button>("ThisStr");
+			auto exportThisToFile = pan->get<tgui::Button>("ThisFile");
+			auto exportChrToFile = pan->get<tgui::Button>("ChrFile");
+			auto exportAllToFile = pan->get<tgui::Button>("AllFile");
+
+			exportStr->connect("Clicked", [character, macros, close]{
+				auto &macro = settings.nonSaved.macros.macros[character->getSelectedItemIndex()][macros->getSelectedItemIndex()];
+				auto fakePanel = tgui::Panel::create({"100%", "100%"});
+				auto text = tgui::TextBox::create();
+				auto close = [text](std::weak_ptr<tgui::Panel> fakePanel){
+					gui.remove(text);
+					gui.remove(fakePanel.lock());
+				};
+
+				text->setReadOnly();
+				text->setSize({"&.w / 2 - 100", "&.h / 2 - 100"});
+				text->setPosition({"(&.w - w) / 2", "(&.h - h) / 2"});
+				text->setText(exportMacroToString(macro));
+				fakePanel->getRenderer()->setBackgroundColor({0x00, 0x00, 0x00, 0x80});
+				fakePanel->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
+				gui.add(fakePanel);
+				gui.add(text);
+			});
+
+			pan->getRenderer()->setBackgroundColor({0xAA, 0xAA, 0xAA});
+			fakePanel->getRenderer()->setBackgroundColor({0, 0, 0, 0});
+			fakePanel->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
+			for (auto &wid : pan->getWidgets())
+				wid->connect("Pressed", close, std::weak_ptr<tgui::Panel>(fakePanel));
+			pos.x += button.lock()->getPosition().x + panel->getPosition().x - 150;
+			pos.y += button.lock()->getPosition().y + panel->getPosition().y;
+			pan->setPosition(pos);
+			gui.add(fakePanel);
+			gui.add(pan);
+		}, std::weak_ptr<tgui::Button>(exportButton));
+		import->connect("Clicked", [profile](std::weak_ptr<tgui::Button> button, tgui::Vector2f pos){
+			auto fakePanel = tgui::Panel::create({"100%", "100%"});
+			auto pan = tgui::Panel::create({110, 40});
+			auto close = [pan](std::weak_ptr<tgui::Panel> fakePanel){
+				gui.remove(pan);
+				gui.remove(fakePanel.lock());
+			};
+
+			pan->getRenderer()->setBackgroundColor({0xAA, 0xAA, 0xAA});
+			pan->loadWidgetsFromFile(profile + "/assets/context_import.gui");
+			fakePanel->getRenderer()->setBackgroundColor({0, 0, 0, 0});
+			fakePanel->connect("Clicked", close, std::weak_ptr<tgui::Panel>(fakePanel));
+			for (auto &wid : pan->getWidgets())
+				wid->connect("Pressed", close, std::weak_ptr<tgui::Panel>(fakePanel));
+			pos.x += button.lock()->getPosition().x + panel->getPosition().x - 110;
+			pos.y += button.lock()->getPosition().y + panel->getPosition().y;
+			pan->setPosition(pos);
+			gui.add(fakePanel);
+			gui.add(pan);
+		}, std::weak_ptr<tgui::Button>(import));
 		//import->
 
 		if (settings.nonSaved.recordingMacro) {

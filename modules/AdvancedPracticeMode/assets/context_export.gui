@@ -1,0 +1,79 @@
+Renderer.1 {
+    backgroundcolor = transparent;
+    backgroundcolordisabled = transparent;
+    backgroundcolordown = rgba(150, 150, 255, 255);
+    backgroundcolorhover = blue;
+    borders = (0, 0, 0, 0);
+    textcolor = black;
+    textcolordisabled = #EEEEEE;
+    textcolordown = black;
+    textcolorhover = white;
+    texture = None;
+    texturedisabled = None;
+    texturedown = None;
+    texturefocused = None;
+    texturehover = None;
+}
+
+Button.ThisStr {
+    Size = (150, 20);
+    Text = "...this macro as string";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        backgroundcolordisabled = transparent;
+        backgroundcolordown = rgba(150, 150, 255, 255);
+        backgroundcolorhover = blue;
+        borders = (0, 0, 0, 0);
+        textcolor = black;
+        textcolordisabled = #EEEEEE;
+        textcolordown = black;
+        textcolorhover = white;
+        texture = None;
+        texturedisabled = None;
+        texturedown = None;
+        texturefocused = None;
+        texturehover = None;
+    }
+}
+
+Button.ThisFile {
+    Position = (0, 20);
+    Size = (150, 20);
+    Text = "...this macro to file";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.ChrFile {
+    Position = (0, 40);
+    Size = (150, 30);
+    Text = "...all this character's\n      macros to file";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.AllFile {
+    Position = (0, 70);
+    Size = (150, 20);
+    Text = "...all macros to file";
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = transparent;
+        backgroundcolordisabled = transparent;
+        backgroundcolordown = rgba(150, 150, 255, 255);
+        backgroundcolorhover = blue;
+        borders = (0, 0, 0, 0);
+        textcolor = black;
+        textcolordisabled = #EEEEEE;
+        textcolordown = black;
+        textcolorhover = white;
+        texture = None;
+        texturedisabled = None;
+        texturedown = None;
+        texturefocused = None;
+        texturehover = None;
+    }
+}

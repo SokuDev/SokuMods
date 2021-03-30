@@ -1,0 +1,31 @@
+Renderer.1 {
+    backgroundcolor = transparent;
+    backgroundcolordisabled = transparent;
+    backgroundcolordown = rgba(150, 150, 255, 255);
+    backgroundcolorhover = blue;
+    borders = (0, 0, 0, 0);
+    textcolor = black;
+    textcolordisabled = #EEEEEE;
+    textcolordown = black;
+    textcolorhover = white;
+    texture = None;
+    texturedisabled = None;
+    texturedown = None;
+    texturefocused = None;
+    texturehover = None;
+}
+
+Button.Str {
+    Size = (110, 20);
+    Text = "...from string";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.File {
+    Position = (0, 20);
+    Size = (110, 20);
+    Text = "...from file";
+    TextSize = 13;
+    renderer = &1;
+}
