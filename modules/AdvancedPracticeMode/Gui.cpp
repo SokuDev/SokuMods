@@ -953,6 +953,9 @@ namespace Practice
 			record2->setText("Stop macro");
 		}
 
+		loop->connect("Changed", [](bool b){
+			settings.nonSaved.loopMacros = b;
+		});
 		macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
 		newMacro->connect("Clicked", createEmptyMacro);
 		name->connect("TextChanged", [character, macros, profile, name, inputPanel](std::string newName){
