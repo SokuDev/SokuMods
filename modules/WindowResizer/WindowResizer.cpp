@@ -132,17 +132,19 @@ BOOL __stdcall mySetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int
 
 HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight,
 	HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
-	if (s_sizeEnabled) {
-		dwStyle = WS_OVERLAPPED | WS_GROUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
-		RECT rct = {0, 0, s_sizeWidth, s_sizeHeight};
-		::AdjustWindowRectEx(&rct, dwStyle, FALSE, dwExStyle);
-		nWidth = s_sizeWindowWidth = rct.right - rct.left;
-		nHeight = s_sizeWindowHeight = rct.bottom - rct.top;
-	}
-
-	if (s_posEnabled) {
-		x = s_posX;
-		y = s_posY;
+	if (!(dwStyle & WS_POPUP)) {
+		if (s_sizeEnabled) {
+			dwStyle = WS_OVERLAPPED | WS_GROUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
+			RECT rct = {0, 0, s_sizeWidth, s_sizeHeight};
+			::AdjustWindowRectEx(&rct, dwStyle, FALSE, dwExStyle);
+			nWidth = s_sizeWindowWidth = rct.right - rct.left;
+			nHeight = s_sizeWindowHeight = rct.bottom - rct.top;
+		}
+		
+		if (s_posEnabled) {
+			x = s_posX;
+			y = s_posY;
+		}
 	}
 
 	return oldCreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
