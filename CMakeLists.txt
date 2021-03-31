@@ -277,7 +277,7 @@ target_link_libraries(LabTool dinput8 shlwapi user32)
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)
 
-module(NetBattleCounter)
+module(NetBattleCounter Default)
 target_sources(NetBattleCounter PRIVATE modules/NetBattleCounter/NetBattleCounter.cpp)
 target_link_libraries(NetBattleCounter winmm)
 

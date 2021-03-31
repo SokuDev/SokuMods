@@ -66,14 +66,14 @@ void *__fastcall CSelectCommon_OnCreate(void *This) {
 	SWRFont_Create(font);
 
 	SWRFONTDESC sfdesc;
-	strcpy(sfdesc.FaceName, "ＭＳ ゴシック");
-	sfdesc.R1 = 0xFF;
-	sfdesc.R2 = 0xA0;
-	sfdesc.G1 = 0xFF;
-	sfdesc.G2 = 0xA0;
-	sfdesc.B1 = 0xFF;
-	sfdesc.B2 = 0xFF;
-	sfdesc.Height = 0x20;
+	strcpy(sfdesc.FaceName, "Impact");
+	sfdesc.R1 = 0xEE;
+	sfdesc.G1 = 0xEE;
+	sfdesc.B1 = 0xEE;
+	sfdesc.R2 = 0xEE;
+	sfdesc.G2 = 0xEE;
+	sfdesc.B2 = 0xEE;
+	sfdesc.Height = 28;
 	sfdesc.Weight = 300;
 	sfdesc.Italic = 0;
 	sfdesc.Shadow = 1;
@@ -86,7 +86,16 @@ void *__fastcall CSelectCommon_OnCreate(void *This) {
 	SWRFont_SetIndirect(font, &sfdesc);
 
 	char dispString[64];
-	wsprintf(dispString, "%d戦目", s_seq++);
+	if(s_seq == 1) {
+		wsprintf(dispString, "1st duel");
+	} else if(s_seq == 2) {
+		wsprintf(dispString, "2nd duel");
+	} else if(s_seq == 3) {
+		wsprintf(dispString, "3rd duel");
+	} else {
+		wsprintf(dispString, "%dth duel", s_seq);
+	}
+	s_seq++;
 	CTextureManager_CreateTextTexture(g_textureMgr, &m_texID, dispString, font, 200, 50, NULL, NULL);
 
 	SWRFont_Destruct(font);
@@ -118,10 +127,10 @@ void __fastcall CSelectCommon_OnRender(void *This) {
 			{0.0f, 50.0f, 0.0f, 1.0f, 0xffffffff, 0.0f, 1.0f},
 		};
 		static const SWRVERTEX vertices2[] = {
-			{0.0f, 0.0f, 0.0f, 1.0f, 0x60000000, 0.0f, 0.0f},
-			{200.0f, 0.0f, 0.0f, 1.0f, 0x60000000, 1.0f, 0.0f},
-			{200.0f, 40.0f, 0.0f, 1.0f, 0x60000000, 1.0f, 1.0f},
-			{0.0f, 40.0f, 0.0f, 1.0f, 0x60000000, 0.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f, 0x40000000, 0.0f, 0.0f},
+			{100.0f, 0.0f, 0.0f, 1.0f, 0x40000000, 1.0f, 0.0f},
+			{100.0f, 32.0f, 0.0f, 1.0f, 0x40000000, 1.0f, 1.0f},
+			{0.0f, 32.0f, 0.0f, 1.0f, 0x40000000, 0.0f, 1.0f},
 		};
 
 		CTextureManager_SetTexture(g_textureMgr, NULL, 0);
