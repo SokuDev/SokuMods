@@ -8,7 +8,7 @@
 
 const wchar_t *dll_name = L"autopunch.dat";
 const wchar_t *dll_tmp_name = L"autopunch.dat.tmp";
-const wchar_t *fetch_base_url = L"http://autopunch-update.delthas.fr/update?version=";
+const wchar_t *fetch_base_url = L"https://autopunch-update.delthas.fr/update?version=";
 
 HANDLE self;
 
