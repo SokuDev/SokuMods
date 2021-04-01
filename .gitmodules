@@ -16,3 +16,6 @@
 [submodule "modules/InGameHostlist"]
 	path = modules/InGameHostlist
 	url = https://github.com/SokuDev/InGameHostlist.git
+[submodule "mbedtls"]
+	path = mbedtls
+	url = https://github.com/ARMmbed/mbedtls.git

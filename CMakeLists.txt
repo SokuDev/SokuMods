@@ -30,6 +30,35 @@ set_target_properties(swrstoys PROPERTIES
 install(TARGETS swrstoys LIBRARY DESTINATION "SWRSToys/")
 install(TARGETS swrstoys LIBRARY DESTINATION "SokuEngine/")
 
+# mbedTLS
+
+option(ENABLE_PROGRAMS "" OFF)
+option(INSTALL_MBEDTLS_HEADERS "" OFF)
+option(MBEDTLS_FATAL_WARNINGS "" OFF)
+add_subdirectory(mbedtls EXCLUDE_FROM_ALL)
+
+add_library(mbedtls_shim INTERFACE)
+target_link_libraries(mbedtls_shim INTERFACE mbedtls mbedx509 mbedcrypto)
+
+# workaround for curl: link against our local mbedtls rather than search for it
+function(find_package)
+    if(ARGV0 STREQUAL "MbedTLS")
+        set(MBEDTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/mbedtls/include" CACHE STRING "")
+        set(MBEDTLS_LIBRARIES "mbedtls_shim" CACHE STRING "")
+        mark_as_advanced(MBEDTLS_INCLUDE_DIRS MBEDTLS_LIBRARIES)
+    else()
+        _find_package(${ARGV})
+    endif()
+endfunction()
+
+# workaround for curl: don't try installing any export files
+function(install)
+    if(ARGV0 STREQUAL "EXPORT")
+    else()
+        _install(${ARGV})
+    endif()
+endfunction()
+
 # cURL
 
 option(BUILD_CURL_EXE "" OFF)
@@ -41,6 +70,7 @@ option(HTTP_ONLY "" ON)
 option(CURL_DISABLE_CRYPTO_AUTH "" ON)
 option(ENABLE_MANUAL "" OFF)
 option(CMAKE_USE_OPENSSL "" OFF)
+option(CMAKE_USE_MBEDTLS "" ON)
 option(CURL_DISABLE_LDAP "" ON)
 option(CURL_ZLIB "" OFF)
 option(CMAKE_USE_LIBSSH2 "" OFF)
