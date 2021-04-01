@@ -265,7 +265,7 @@ If you're running Visual Studio 2017 or newer: import the directory in Visual St
 
 If you're running Visual Studio 2015 or older: you will need to install CMake and run:
 ```
-cmake .
+cmake -A Win32 .
 ```
 
 MinGW and Cygwin are not supported (`__thiscall` is needed in order to be compatible with the base game, which only the Visual C++ Build Tools supports).
