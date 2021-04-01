@@ -59,7 +59,7 @@ void loop_thread(void *unused) {
 	CURL *curl = curl_easy_init();
 
 	wchar_t buf[1024];
-	const wchar_t *url_template = L"http://sokureplaysback.delthas.fr/mod/ip?uid=%" PRIu64 "&discord_id=%" PRIu64;
+	const wchar_t *url_template = L"https://sokureplaysback.delthas.fr/mod/ip?uid=%" PRIu64 "&discord_id=%" PRIu64;
 	_snwprintf(buf, sizeof(buf), url_template, uid, discord_id);
 	char *url_utf8;
 	url_utf8 = to_utf8(buf);
