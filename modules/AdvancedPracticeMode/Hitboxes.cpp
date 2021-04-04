@@ -250,19 +250,7 @@ namespace Practice
 	static unsigned getMaxSuperArmor(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes)
 	{
 		if (character == SokuLib::CHARACTER_SUIKA) {
-			if (manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_B)
-				switch (manager.skillLevels[0]) {
-				case 0:
-					return 0;
-				case 1:
-				case 2:
-					return 250;
-				case 3:
-					return 500;
-				default:
-					return 750;
-				}
-			else if (manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_C)
+			if (manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_B || manager.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL1_C)
 				switch (manager.skillLevels[0]) {
 				case 0:
 					return 0;
