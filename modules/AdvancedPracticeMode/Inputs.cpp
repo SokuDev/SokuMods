@@ -85,20 +85,20 @@ namespace Practice
 #define FAKE_ACTION_jSC209 static_cast<SokuLib::Action>(1144)
 #define FAKE_ACTION_uSC212 static_cast<SokuLib::Action>(1145)
 
-#define A_SPRITE_POS           Vector2<int>{0,   32}
-#define B_SPRITE_POS           Vector2<int>{32,  32}
-#define C_SPRITE_POS           Vector2<int>{64,  32}
-#define D_SPRITE_POS           Vector2<int>{96,  32}
-#define CH_SPRITE_POS          Vector2<int>{128, 32}
-#define SC_SPRITE_POS          Vector2<int>{160, 32}
-#define UP_SPRITE_POS          Vector2<int>{0,   0}
-#define DOWN_SPRITE_POS        Vector2<int>{32,  0}
-#define LEFT_SPRITE_POS        Vector2<int>{64,  0}
-#define RIGHT_SPRITE_POS       Vector2<int>{96,  0}
-#define LEFTUP_SPRITE_POS      Vector2<int>{128, 0}
-#define RIGHTUP_SPRITE_POS     Vector2<int>{160, 0}
-#define RIGHTDOWN_SPRITE_POS   Vector2<int>{192, 0}
-#define LEFTDOWN_SPRITE_POS    Vector2<int>{224, 0}
+#define A_SPRITE_POS           Vector2<int>{0,   36}
+#define B_SPRITE_POS           Vector2<int>{32,  36}
+#define C_SPRITE_POS           Vector2<int>{64,  36}
+#define D_SPRITE_POS           Vector2<int>{96,  36}
+#define CH_SPRITE_POS          Vector2<int>{128, 36}
+#define SC_SPRITE_POS          Vector2<int>{160, 36}
+#define UP_SPRITE_POS          Vector2<int>{0,   4}
+#define DOWN_SPRITE_POS        Vector2<int>{32,  4}
+#define LEFT_SPRITE_POS        Vector2<int>{64,  4}
+#define RIGHT_SPRITE_POS       Vector2<int>{96,  4}
+#define LEFTUP_SPRITE_POS      Vector2<int>{128, 4}
+#define RIGHTUP_SPRITE_POS     Vector2<int>{160, 4}
+#define RIGHTDOWN_SPRITE_POS   Vector2<int>{192, 4}
+#define LEFTDOWN_SPRITE_POS    Vector2<int>{224, 4}
 #define BE_SPRITE_POS          Vector2<int>{192, 32}
 #define HJ_SPRITE_POS          Vector2<int>{224, 36}
 #define AIR_SPRITE_POS         Vector2<int>{256, 4}
@@ -426,7 +426,10 @@ namespace Practice
 		{
 			this->_sprite.setSize(size);
 			this->_sprite.tint = DxSokuColor::White * alpha;
-			this->_sprite2.setSize(size);
+			if (action >= SokuLib::ACTION_SKILL_CARD)
+				this->_sprite2.setSize({41 * SPRITE_SIZE / 65, SPRITE_SIZE});
+			else
+				this->_sprite2.setSize(size);
 			this->_sprite2.tint = (action == FAKE_ACTION_LILIPAD_DESPAWN ? DxSokuColor::Red : DxSokuColor::White) * alpha;
 			//TODO: Find a more elegant way to do this
 			if (
@@ -466,15 +469,15 @@ namespace Practice
 	}
 
 	static const Vector2<int> dirSheetOffset[9]{
-		{32 * 7, 0},
-		{32 * 1, 0},
-		{32 * 6, 0},
-		{32 * 2, 0},
-		{   -32, 0},
-		{32 * 3, 0},
-		{32 * 4, 0},
-		{32 * 0, 0},
-		{32 * 5, 0},
+		LEFTDOWN_SPRITE_POS,
+		DOWN_SPRITE_POS,
+		RIGHTDOWN_SPRITE_POS,
+		LEFT_SPRITE_POS,
+		{-32, 0},
+		RIGHT_SPRITE_POS,
+		LEFTUP_SPRITE_POS,
+		UP_SPRITE_POS,
+		RIGHTUP_SPRITE_POS,
 	};
 	static GradiantRect leftBox;
 	static GradiantRect rightBox;
@@ -1097,6 +1100,13 @@ namespace Practice
 		{ SokuLib::ACTION_USING_SC_ID_217, { inputSheet, SC_SPRITE_POS, {24, 32} } },
 		{ SokuLib::ACTION_USING_SC_ID_218, { inputSheet, SC_SPRITE_POS, {24, 32} } },
 		{ SokuLib::ACTION_USING_SC_ID_219, { inputSheet, SC_SPRITE_POS, {24, 32} } },
+		{ SokuLib::ACTION_SKILL_CARD, {
+			inputSheet,
+			systemsSheet,
+			{Vector2<int>{41 * 22, 0}, SC_SPRITE_POS},
+			{24, 32},
+			{41, 65}
+		} },
 		{ SokuLib::ACTION_SYSTEM_CARD, {
 			inputSheet,
 			systemsSheet,
@@ -1752,12 +1762,12 @@ namespace Practice
 
 			inputSheet.tint = DxSokuColor::White * alpha;
 			showInput(dir != 5, offset, dirSheetOffset[dir - 1], reversed);
-			showInput(input.input.a, offset, {0, 36}, reversed);
-			showInput(input.input.b, offset, {32, 36}, reversed);
-			showInput(input.input.c, offset, {64, 36}, reversed);
-			showInput(input.input.d, offset, {96, 36}, reversed);
-			showInput(input.input.changeCard, offset, {128, 36}, reversed);
-			showInput(input.input.spellcard, offset, {160, 36}, reversed);
+			showInput(input.input.a, offset, A_SPRITE_POS, reversed);
+			showInput(input.input.b, offset, B_SPRITE_POS, reversed);
+			showInput(input.input.c, offset, C_SPRITE_POS, reversed);
+			showInput(input.input.d, offset, D_SPRITE_POS, reversed);
+			showInput(input.input.changeCard, offset, CH_SPRITE_POS, reversed);
+			showInput(input.input.spellcard, offset, SC_SPRITE_POS, reversed);
 
 			auto it = moveSprites.find(input.action);
 
