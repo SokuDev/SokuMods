@@ -423,7 +423,24 @@ namespace Practice
 					realHp += 3000;
 					maxHp = 3000;
 				}
-				if (realHp > 1)
+
+				if ( //This is Alice's doll (C)
+					baseCharacter == SokuLib::CHARACTER_ALICE &&
+					manager.action == 805 &&
+					(manager.image.number >= 304 && manager.image.number <= 313)
+				) {
+					realHp += 600;
+					maxHp = 600;
+				}
+				if ( //This is Alice's doll (d22)
+					baseCharacter == SokuLib::CHARACTER_ALICE &&
+					manager.action == 825 &&
+					(manager.image.number >= 322 && manager.image.number <= 325)
+				) {
+					realHp += 700;
+					maxHp = 700;
+				}
+				if (realHp && maxHp > 1)
 					displayObjectBar(HEALTH_SPRITE_OFF, leftBound, base, realHp, maxHp, DxSokuColor::Green);
 			}
 		}
