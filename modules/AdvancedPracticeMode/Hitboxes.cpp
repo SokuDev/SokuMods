@@ -175,7 +175,7 @@ namespace Practice
 		rectangle.setBorderColor(DxSokuColor::Black);
 		rectangle.setFillColor({0x88, 0x88, 0x88, 0xFF});
 		if (reverse)
-			rectangle.setPosition({200 - barPos.x, barPos.y + 4});
+			rectangle.setPosition({barPos.x - 201, barPos.y + 4});
 		else
 			rectangle.setPosition({barPos.x, barPos.y + 4});
 
@@ -183,7 +183,7 @@ namespace Practice
 		rectangle.setBorderColor(DxSokuColor::Black);
 		rectangle.setFillColor(color);
 		if (reverse)
-			rectangle.setPosition({static_cast<int>(200 * value / max - barPos.x), barPos.y + 4});
+			rectangle.setPosition({static_cast<int>(barPos.x - 200 * value / max) - 1, barPos.y + 4});
 		else
 			rectangle.setPosition({barPos.x, barPos.y + 4});
 		rectangle.draw();
