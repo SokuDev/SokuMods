@@ -432,6 +432,7 @@ namespace Practice
 					realHp += 600;
 					maxHp = 600;
 				}
+
 				if ( //This is Alice's doll (d22)
 					baseCharacter == SokuLib::CHARACTER_ALICE &&
 					manager.action == 825 &&
@@ -440,6 +441,7 @@ namespace Practice
 					realHp += 700;
 					maxHp = 700;
 				}
+
 				if (realHp && maxHp > 1)
 					displayObjectBar(HEALTH_SPRITE_OFF, leftBound, base, realHp, maxHp, DxSokuColor::Green);
 			}
