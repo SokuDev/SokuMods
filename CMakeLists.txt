@@ -394,7 +394,7 @@ add_library(
         modules/AdvancedPracticeMode/Inputs.hpp
         modules/AdvancedPracticeMode/Hitboxes.cpp
         modules/AdvancedPracticeMode/Hitboxes.hpp
-)
+        modules/AdvancedPracticeMode/Gap.cpp modules/AdvancedPracticeMode/Gap.hpp)
 target_compile_options(AdvancedPracticeMode PRIVATE /Zi)
 target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")

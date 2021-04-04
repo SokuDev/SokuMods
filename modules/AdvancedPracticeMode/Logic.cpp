@@ -8,6 +8,7 @@
 #include "Dummy.hpp"
 #include "Inputs.hpp"
 #include "Hitboxes.hpp"
+#include "Gap.hpp"
 
 namespace Practice
 {
@@ -109,6 +110,7 @@ namespace Practice
 		sfmlWindow->display();
 		drawAllBoxes();
 		displayInputs();
+		displayFrameStuff();
 	}
 
 	void applyCharacterState(const CharacterState &state, SokuLib::CharacterManager &manager, SokuLib::Character character)
