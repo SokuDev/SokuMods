@@ -178,6 +178,7 @@ namespace Practice
 			rectangle.setPosition({barPos.x - 201, barPos.y + 4});
 		else
 			rectangle.setPosition({barPos.x, barPos.y + 4});
+		rectangle.draw();
 
 		rectangle.setSize({200 * value / max, 24});
 		rectangle.setBorderColor(DxSokuColor::Black);
