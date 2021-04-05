@@ -12,6 +12,7 @@ namespace Practice
 {
 	void initBoxDisplay(LPCSTR profilePath);
 	void drawAllBoxes();
+	void onUpdate();
 }
 
 

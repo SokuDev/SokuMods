@@ -144,7 +144,8 @@ namespace Practice
 			manager.resurrectionButterfliesUsed = state.specialValue;
 	}
 
-	void weatherControl() {
+	void weatherControl()
+	{
 		if (settings.forceWeather) {
 			if (settings.weatherResetRequest) {
 				settings.weatherResetRequest = SokuLib::activeWeather != SokuLib::WEATHER_CLEAR;
@@ -159,6 +160,7 @@ namespace Practice
 	void update()
 	{
 		updateInputLists();
+		onUpdate();
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE)
 			return;
 

@@ -41,6 +41,7 @@ namespace Practice
 		unsigned short drop;
 		unsigned short star;
 		unsigned short clones;
+		unsigned short stopWatch;
 	};
 
 	static RectangleShape rectangle;
@@ -298,6 +299,8 @@ namespace Practice
 			displayPlayerFrameFlag(MELEE_INVUL_SPRITE_OFF, barPos, reverse);
 		if (flags.guardAvailable)
 			displayPlayerFrameFlag(CAN_BLOCK_SPRITE_OFF, barPos, reverse);
+		if (!maxAttributes.stopWatch && manager.timeStop && (character != SokuLib::CHARACTER_SAKUYA || !manager.sakuyasWorldTime))
+			displayPlayerFrameFlag(STOP_WATCH_SPRITE_OFF, barPos, reverse);
 		if (superArmorRatio || manager.noSuperArmor == 0 || flags.superArmor) {
 			if (superArmorRatio > 0)
 				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, 10000 * superArmorRatio, 10000, reverse, DxSokuColor::Blue);
@@ -311,10 +314,14 @@ namespace Practice
 			displayPlayerBar(DROP_SPRITE_OFF, basePos, barPos, manager.dropInvulTimeLeft, maxAttributes.drop, reverse, DxSokuColor::Red);
 		} else
 			maxAttributes.drop = 0;
-		if (manager.magicPotionTimeLeft)
+		if (manager.magicPotionTimeLeft != 0)
 			displayPlayerBar(MAGIC_POTION_SPRITE_OFF, basePos, barPos, manager.magicPotionTimeLeft, 360, reverse, DxSokuColor::Blue);
 		if (manager.healingCharmTimeLeft)
 			displayPlayerBar(HEALING_CHARM_SPRITE_OFF, basePos, barPos, manager.healingCharmTimeLeft, 250, reverse, DxSokuColor::Cyan);
+		if (character == SokuLib::CHARACTER_SAKUYA && manager.sakuyasWorldTime)
+			displayPlayerBar(STOP_WATCH_SPRITE_OFF, basePos, barPos, manager.sakuyasWorldTime, 300, reverse, DxSokuColor{0x44, 0x44, 0x44, 0xFF});
+		else if (maxAttributes.stopWatch)
+			displayPlayerBar(STOP_WATCH_SPRITE_OFF, basePos, barPos, 51 - maxAttributes.stopWatch, 50, reverse, DxSokuColor{0x44, 0x44, 0x44, 0xFF});
 
 		switch (character) {
 		case SokuLib::CHARACTER_PATCHOULI:
@@ -506,5 +513,19 @@ namespace Practice
 
 		drawPlayerBoxes(battle.leftCharacterManager,  SokuLib::leftChar,  allMaxAttributes.first,  {20, 70}, false, settings.leftHitboxSettings);
 		drawPlayerBoxes(battle.rightCharacterManager, SokuLib::rightChar, allMaxAttributes.second, {620, 70}, true, settings.rightHitboxSettings);
+	}
+
+	void updateCharacter(const SokuLib::CharacterManager &manager, MaxAttributes &maxAttributes)
+	{
+		if (manager.timeStop && (manager.objectBase.action < SokuLib::ACTION_USING_SC_ID_200 || manager.objectBase.action > SokuLib::ACTION_SC_ID_219_ALT_EFFECT))
+			maxAttributes.stopWatch++;
+		else
+			maxAttributes.stopWatch = 0;
+	}
+
+	void onUpdate()
+	{
+		updateCharacter(SokuLib::getBattleMgr().leftCharacterManager, allMaxAttributes.first);
+		updateCharacter(SokuLib::getBattleMgr().rightCharacterManager, allMaxAttributes.second);
 	}
 }
