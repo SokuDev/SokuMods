@@ -29,10 +29,18 @@ namespace Practice
 #define FANTASY_HEAVEN_SPRITE_OFF {224, 0}
 #define PHILOSOPHERS_STONE_OFF    {224, 32}
 #define TIME_SPRITE_OFF           {256, 0}
+#define CLONES_SPRITE_OFF         {256, 32}
+#define HEALING_CHARM_SPRITE_OFF  {288, 0}
+#define STOP_WATCH_SPRITE_OFF     {288, 32}
+#define MAGIC_POTION_SPRITE_OFF   {320, 0}
+#define TIME_STOP_SPRITE_OFF      {320, 32}
+#define _SPRITE_OFF           {352, 0}
+#define _SPRITE_OFF           {352, 32}
 
 	struct MaxAttributes {
 		unsigned short drop;
 		unsigned short star;
+		unsigned short clones;
 	};
 
 	static RectangleShape rectangle;
@@ -303,6 +311,10 @@ namespace Practice
 			displayPlayerBar(DROP_SPRITE_OFF, basePos, barPos, manager.dropInvulTimeLeft, maxAttributes.drop, reverse, DxSokuColor::Red);
 		} else
 			maxAttributes.drop = 0;
+		if (manager.magicPotionTimeLeft)
+			displayPlayerBar(MAGIC_POTION_SPRITE_OFF, basePos, barPos, manager.magicPotionTimeLeft, 360, reverse, DxSokuColor::Blue);
+		if (manager.healingCharmTimeLeft)
+			displayPlayerBar(HEALING_CHARM_SPRITE_OFF, basePos, barPos, manager.healingCharmTimeLeft, 250, reverse, DxSokuColor::Cyan);
 
 		switch (character) {
 		case SokuLib::CHARACTER_PATCHOULI:
@@ -312,6 +324,13 @@ namespace Practice
 		case SokuLib::CHARACTER_REMILIA:
 			if (manager.milleniumVampireTime)
 				displayPlayerBar(MILLENIUM_SPRITE_OFF, basePos, barPos, manager.milleniumVampireTime, 600, reverse, DxSokuColor::Red);
+			break;
+		case SokuLib::CHARACTER_YOUMU:
+			if (manager.youmuCloneTimeLeft) {
+				maxAttributes.clones = max(maxAttributes.clones, manager.youmuCloneTimeLeft);
+				displayPlayerBar(CLONES_SPRITE_OFF, basePos, barPos, manager.youmuCloneTimeLeft, maxAttributes.clones, reverse, DxSokuColor{0xAA, 0xAA, 0xAA, 0xFF});
+			} else
+				maxAttributes.clones = 0;
 			break;
 		case SokuLib::CHARACTER_REIMU:
 			if (manager.fantasyHeavenTimeLeft)

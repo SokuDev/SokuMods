@@ -116,23 +116,6 @@ namespace Practice
 		font.setIndirect(desc);
 	}
 
-	static void drawSprite(int texid, float x, float y, float cx, float cy) {
-		const struct {
-			float x, y, z;
-			float rhw;
-			unsigned color;
-			float u, v;
-		} vertices[] = {
-			{x, y, 0.0f, 1.0f, 0xffffffff, 0.0f, 0.0f},
-			{x + cx, y, 0.0f, 1.0f, 0xffffffff, 1.0f, 0.0f},
-			{x + cx, y + cy, 0.0f, 1.0f, 0xffffffff, 1.0f, 1.0f},
-			{x, y + cy, 0.0f, 1.0f, 0xffffffff, 0.0f, 1.0f},
-		};
-
-		SokuLib::textureMgr.setTexture(texid, 0);
-		SokuLib::pd3dDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertices, sizeof(*vertices));
-	}
-
 	void showGap(int val, int x, float alpha)
 	{
 		int text;

@@ -138,7 +138,22 @@ namespace Practice
 		LPDIRECT3DTEXTURE9 *pphandle = SokuLib::textureMgr.allocate(&handle);
 
 		*pphandle = nullptr;
-		if (FAILED(result = D3DXCreateTextureFromFileA(SokuLib::pd3dDev, path, pphandle))) {
+		if (FAILED(result = D3DXCreateTextureFromFileExA(
+			SokuLib::pd3dDev,
+			path,
+			info.Width,
+			info.Height,
+			info.MipLevels,
+			D3DUSAGE_RENDERTARGET,
+			info.Format,
+			D3DPOOL_DEFAULT,
+			D3DX_DEFAULT,
+			D3DX_DEFAULT,
+			0,
+			&info,
+			nullptr,
+			pphandle
+		))) {
 			fprintf(stderr, "D3DXCreateTextureFromFile(%p, \"%s\", %p) failed with code %li.\n", SokuLib::pd3dDev, path, pphandle, result);
 			SokuLib::textureMgr.deallocate(handle);
 			return false;
@@ -280,6 +295,8 @@ namespace Practice
 
 		for (int i = 0; i < 4; i++) {
 			vertexs[i] = this->_vertex[i];
+			vertexs[i].x -= 0.5;
+			vertexs[i].y -= 0.5;
 			vertexs[i].color = this->tint;
 		}
 
@@ -295,6 +312,10 @@ namespace Practice
 			vertexs[2].u = vertexs[1].u = right;
 			vertexs[1].v = vertexs[0].v = top;
 			vertexs[2].v = vertexs[3].v = bottom;
+			vertexs[2].x++;
+			vertexs[1].x++;
+			vertexs[2].y++;
+			vertexs[3].y++;
 		}
 		this->texture.activate();
 		SokuLib::pd3dDev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertexs, sizeof(*vertexs));
