@@ -2,6 +2,7 @@
 // Created by PinkySmile on 05/04/2021.
 //
 
+#include <list>
 #include "Gap.hpp"
 #include "DrawUtils.hpp"
 
@@ -22,11 +23,28 @@
 
 namespace Practice
 {
+	struct GapElem {
+		int timer;
+		int gap;
+		Sprite sprite;
+
+		GapElem() = default;
+		GapElem(GapElem &other) :
+			timer(other.timer),
+			gap(other.gap)
+		{
+			this->sprite.texture.swap(other.sprite.texture);
+		}
+		GapElem(int timer, int gap): timer(timer), gap(gap) {};
+	};
 	static bool loaded = false;
 	static SokuLib::SWRFont font;
 	static RectangleShape rect;
-	static std::pair<int, int> gaps;
+	static std::pair<int, int> fas;
+	static Sprite leftFass;
+	static Sprite rightFass;
 	static std::pair<unsigned, unsigned> timers = {400, 400};
+	static std::pair<std::list<GapElem>, std::list<GapElem>> gaps;
 
 	std::map<SokuLib::Action, unsigned char> blockStun{
 		{ SokuLib::ACTION_AIR_GUARD,                        AIR_BLOCK_TIME },
@@ -89,12 +107,36 @@ namespace Practice
 		return val;
 	}
 
+	static bool canMash(const SokuLib::CharacterManager &manager)
+	{
+		auto it = blockStun.find(manager.objectBase.action);
+
+		if (it == blockStun.end())
+			return false;
+		return it->second - 1 <= manager.objectBase.frameCount;
+	}
+
+	std::optional<int> getGap(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state)
+	{
+		std::optional<int> val;
+
+		if (state.wasBlocking) {
+			if (state.gapCounter >= 0 && state.gapCounter <= 30)
+				val = state.gapCounter;
+			state.gapCounter = -1;
+		}
+		if (!state.wasBlocking || canMash(blocker))
+			state.gapCounter++;
+		return val;
+	}
+
 	void initFont()
 	{
 		SokuLib::FontDescription desc;
 
 		if (loaded)
 			return;
+		rect.setSize({102, 18});
 		loaded = true;
 		desc.r1 = 205;
 		desc.r2 = 205;
@@ -116,51 +158,122 @@ namespace Practice
 		font.setIndirect(desc);
 	}
 
-	void showGap(int val, int x, float alpha)
+	void showFrameAdvantageOrGapBox(Sprite &sprite, int x, int &y, float alpha, DxSokuColor color)
 	{
-		int text;
-		char buffer[30];
-		Sprite sprite;
-
 		if (alpha == 0)
 			return;
-		sprintf(buffer, "Adv: %+i", val);
-		SokuLib::textureMgr.createTextTexture(&text, buffer, font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr);
-		sprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
 		rect.setBorderColor(DxSokuColor::Black * alpha);
 		rect.setFillColor((DxSokuColor::Black + DxSokuColor::White) * alpha);
-		sprite.setPosition({x, 416});
-		rect.setPosition({x, 416});
-		sprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
-		rect.setSize({88, 18});
-		sprite.tint = (val < 0 ? DxSokuColor::Red : DxSokuColor::Green) * alpha;
-		sprite.rect = {
-			0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
-		};
+		sprite.setPosition({x, y});
+		rect.setPosition({x, y});
+		y -= 20;
+		sprite.tint = color * alpha;
 		rect.draw();
 		sprite.draw();
 	}
 
+	static float getAlpha(unsigned timer)
+	{
+		if (timer < 5)
+			return timer / 5.f;
+		if (timer > 180)
+			return 1 - (timer - 180) / 60.f;
+		return 1.f;
+	}
+
+	void drawGap(GapElem &gap, int x, int &y)
+	{
+		DxSokuColor color;
+
+		if (gap.gap < 7)
+			color = DxSokuColor::Green;
+		else if (gap.gap < 12)
+			color = DxSokuColor::Yellow;
+		else if (gap.gap < 16)
+			color = DxSokuColor{0xFF, 0x80, 0x00, 0xFF};
+		else
+			color = DxSokuColor::Red;
+		showFrameAdvantageOrGapBox(gap.sprite, x, y, getAlpha(gap.timer), color);
+	}
+
 	void displayFrameStuff()
+	{
+		int yLeft = 416;
+		int yRight = 416;
+
+		if (timers.first < 240)
+			showFrameAdvantageOrGapBox(leftFass,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+		if (timers.second < 240)
+			showFrameAdvantageOrGapBox(rightFass, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+
+		for (auto &gap : gaps.first)
+			drawGap(gap, 348, yLeft);
+		for (auto &gap : gaps.second)
+			drawGap(gap, 202, yRight);
+	}
+
+	static void generateTextSprite(Sprite &sprite, const char *buffer)
+	{
+		int text;
+
+		SokuLib::textureMgr.createTextTexture(&text, buffer, font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr);
+		sprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+		sprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+		sprite.rect = {
+			0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+		};
+	}
+
+	static void addGap(int val, std::list<GapElem> &gaps)
+	{
+		char buffer[30];
+
+		if (!val)
+			sprintf(buffer, "Gap: %iF (mash.)", val);
+		else
+			sprintf(buffer, "Gap: %iF", val);
+		gaps.push_front({0, val});
+		generateTextSprite(gaps.front().sprite, buffer);
+	}
+
+	void updatedFrameStuff()
 	{
 		static BlockingState left;
 		static BlockingState right;
 		auto &battle = SokuLib::getBattleMgr();
 		auto padv = getFrameAdvantage(battle.leftCharacterManager, battle.rightCharacterManager, left);
 		auto dadv = getFrameAdvantage(battle.rightCharacterManager, battle.leftCharacterManager, right);
+		auto pgap = getGap(battle.leftCharacterManager, battle.rightCharacterManager, left);
+		auto dgap = getGap(battle.rightCharacterManager, battle.leftCharacterManager, right);
+		char buffer[30];
 
 		initFont();
 		if (padv) {
 			timers.first = 0;
-			gaps.first = *padv;
+			fas.first = *padv;
+			sprintf(buffer, "Adv: %+i", *padv);
+			generateTextSprite(leftFass, buffer);
 		}
 		if (dadv) {
 			timers.second = 0;
-			gaps.second = *dadv;
+			fas.second = *dadv;
+			sprintf(buffer, "Adv: %+i", *dadv);
+			generateTextSprite(rightFass, buffer);
 		}
-		showGap(gaps.first,  348, 1 - max(0, min(1, (timers.first - 120.f) / 60)));
-		showGap(gaps.second, 202, 1 - max(0, min(1, (timers.second - 120.f) / 60)));
+
 		timers.first++;
 		timers.second++;
+		if (pgap)
+			addGap(*pgap, gaps.first);
+		if (dgap)
+			addGap(*dgap, gaps.second);
+		while (!gaps.first.empty() && gaps.first.back().timer >= 240)
+			gaps.first.pop_back();
+		while (!gaps.second.empty() && gaps.second.back().timer >= 240)
+			gaps.second.pop_back();
+		for (auto &gap : gaps.first)
+			gap.timer++;
+		for (auto &gap : gaps.second)
+			gap.timer++;
 	}
 }

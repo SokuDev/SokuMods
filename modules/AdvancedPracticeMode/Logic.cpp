@@ -95,8 +95,6 @@ namespace Practice
 
 	void render()
 	{
-		sf::Event event;
-
 		sfmlWindow->clear(sf::Color(0xAA, 0xAA, 0xAA));
 		try {
 			Practice::updateGuiState();
@@ -104,8 +102,6 @@ namespace Practice
 			puts(e.what());
 			throw;
 		}
-		while (sfmlWindow->pollEvent(event))
-			Practice::gui.handleEvent(event);
 		Practice::gui.draw();
 		sfmlWindow->display();
 		drawAllBoxes();
@@ -159,8 +155,13 @@ namespace Practice
 
 	void update()
 	{
+		sf::Event event;
+
+		while (sfmlWindow->pollEvent(event))
+			Practice::gui.handleEvent(event);
 		updateInputLists();
 		onUpdate();
+		updatedFrameStuff();
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE)
 			return;
 

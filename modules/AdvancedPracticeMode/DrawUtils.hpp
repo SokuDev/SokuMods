@@ -94,6 +94,7 @@ namespace Practice
 			unsigned color;
 		};
 
+		DxSokuColor() = default;
 		DxSokuColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept;
 		DxSokuColor(unsigned color) noexcept;
 

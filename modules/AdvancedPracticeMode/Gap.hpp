@@ -15,6 +15,7 @@ namespace Practice
 	struct BlockingState
 	{
 		unsigned timer = 0;
+		int gapCounter = -1;
 		bool wasBlocking = false;
 		bool wasAttacking = false;
 		bool started = false;
@@ -24,6 +25,7 @@ namespace Practice
 
 	std::optional<int> getFrameAdvantage(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state);
 	void displayFrameStuff();
+	void updatedFrameStuff();
 }
 
 
