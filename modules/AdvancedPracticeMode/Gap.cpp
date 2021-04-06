@@ -219,6 +219,7 @@ namespace Practice
 	static void drawBars(const SokuLib::CharacterManager &manager, const BlockingState &state)
 	{
 		auto it = hitStun.find(manager.objectBase.action);
+		auto it2 = blockStun.find(manager.objectBase.action);
 		unsigned actual;
 
 		if (it != hitStun.end()) {
@@ -237,6 +238,38 @@ namespace Practice
 			});
 			bar.setBorderColor(DxSokuColor::Black);
 			bar.setFillColor(DxSokuColor::Red);
+			bar.draw();
+		} else if (it2 != blockStun.end()) {
+			actual = it2->second - manager.objectBase.frameCount;
+			bar.setPosition({
+				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.x - actual + SokuLib::camera.translate.x)),
+				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.y + 5 + SokuLib::camera.translate.y))
+			});
+			bar.setSize({
+				actual * 2 + 1,
+				5
+			});
+			bar.setBorderColor(DxSokuColor::Black);
+			bar.setFillColor(DxSokuColor::White);
+			bar.draw();
+		} else if (
+			!manager.damageLimited &&
+			manager.untech &&
+			manager.objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
+			manager.objectBase.action < SokuLib::ACTION_RIGHTBLOCK_HIGH_SMALL_BLOCKSTUN &&
+			manager.objectBase.action != SokuLib::ACTION_KNOCKED_DOWN &&
+			manager.objectBase.action != SokuLib::ACTION_KNOCKED_DOWN_STATIC
+		) {
+			bar.setPosition({
+				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.x - manager.untech / 2 + SokuLib::camera.translate.x)),
+				static_cast<int>(SokuLib::camera.scale * (-manager.objectBase.position.y + 5 + SokuLib::camera.translate.y))
+			});
+			bar.setSize({
+				 static_cast<unsigned int>(manager.untech + 1),
+				5
+			});
+			bar.setBorderColor(DxSokuColor::Black);
+			bar.setFillColor(DxSokuColor{0xFF, 0x80, 0x00, 0xFF});
 			bar.draw();
 		}
 	}
