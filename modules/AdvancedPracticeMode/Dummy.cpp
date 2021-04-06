@@ -79,7 +79,7 @@ namespace Practice
 
 	static bool isIdle(SokuLib::Action action)
 	{
-		if (action < SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN)
+		if (action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN)
 			return true;
 		if (action >= SokuLib::ACTION_FORWARD_DASH && action < SokuLib::ACTION_5A)
 			return true;

@@ -9,6 +9,7 @@
 #include <dinput.h>
 #include "Logic.hpp"
 #include "State.hpp"
+#include "Gui.hpp"
 
 struct Title {};
 struct Select {};
@@ -66,6 +67,10 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	else
 		return (This->*s_origCBattleManager_Process)();
 
+	sf::Event event;
+
+	while (Practice::sfmlWindow->pollEvent(event))
+		Practice::gui.handleEvent(event);
 	frameCounter += Practice::settings.requestedFrameRate / 60.f;
 	while (frameCounter >= 1) {
 		// super

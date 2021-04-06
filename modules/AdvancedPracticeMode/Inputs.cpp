@@ -1693,7 +1693,6 @@ namespace Practice
 			return;
 
 		if (moveSprites.find(realAction) != moveSprites.end()) {
-			printf("%i: action %i|block %i|frame %i|subanim %i|subframe %i\n", realAction, character.objectBase.action, character.objectBase.actionBlockId, character.objectBase.frameCount, character.objectBase.animationCounter, character.objectBase.animationSubFrame);
 			if (isCancelableBy(last.action, realAction) && isStartOfMove(realAction, character, characterId)) {
 				if (front->action) {
 					list.push_front(list.front());

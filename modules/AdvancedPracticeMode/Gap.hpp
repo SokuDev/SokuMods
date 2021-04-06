@@ -14,6 +14,9 @@ namespace Practice
 {
 	struct BlockingState
 	{
+		int lastFrame;
+		SokuLib::Action lastAction;
+		unsigned hitTimer = 0;
 		unsigned timer = 0;
 		int gapCounter = -1;
 		bool wasBlocking = false;
@@ -21,6 +24,7 @@ namespace Practice
 		bool started = false;
 	};
 
+	extern std::map<SokuLib::Action, unsigned char> hitStun;
 	extern std::map<SokuLib::Action, unsigned char> blockStun;
 
 	std::optional<int> getFrameAdvantage(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state);

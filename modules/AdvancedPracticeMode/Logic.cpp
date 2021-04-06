@@ -155,10 +155,6 @@ namespace Practice
 
 	void update()
 	{
-		sf::Event event;
-
-		while (sfmlWindow->pollEvent(event))
-			Practice::gui.handleEvent(event);
 		updateInputLists();
 		onUpdate();
 		updatedFrameStuff();
@@ -176,12 +172,12 @@ namespace Practice
 				dummyHitCounter--;
 
 			if (
-				leftAction  > SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN ||
-				rightAction > SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN
+				leftAction  > SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN ||
+				rightAction > SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN
 			)
 				idleCounter = 20;
 			if (
-				rightAction >= SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN &&
+				rightAction >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
 				rightAction < SokuLib::ACTION_FORWARD_AIRTECH
 			)
 				dummyHitCounter = 20;

@@ -19,6 +19,11 @@
 #define BIG_WRONG_BLOCK_TIME 28
 #define HUGE_WRONG_BLOCK_TIME 32
 
+#define SMALL_HIT_TIME 11
+#define MEDIUM_HIT_TIME 18
+#define BIG_HIT_TIME 25
+#define HUGE_HIT_TIME 35
+
 #define AIR_BLOCK_TIME 20
 
 namespace Practice
@@ -40,9 +45,12 @@ namespace Practice
 	static bool loaded = false;
 	static SokuLib::SWRFont font;
 	static RectangleShape rect;
+	static RectangleShape bar;
 	static std::pair<int, int> fas;
 	static Sprite leftFass;
 	static Sprite rightFass;
+	static BlockingState left;
+	static BlockingState right;
 	static std::pair<unsigned, unsigned> timers = {400, 400};
 	static std::pair<std::list<GapElem>, std::list<GapElem>> gaps;
 
@@ -69,6 +77,18 @@ namespace Practice
 		{ SokuLib::ACTION_WRONGBLOCK_HIGH_HUGE_BLOCKSTUN,   HUGE_WRONG_BLOCK_TIME },
 		{ SokuLib::ACTION_WRONGBLOCK_LOW_HUGE_BLOCKSTUN,    HUGE_WRONG_BLOCK_TIME }
 	};
+	std::map<SokuLib::Action, unsigned char> hitStun{
+		/*  50 */ { SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN,   SMALL_HIT_TIME },
+		/*  51 */ { SokuLib::ACTION_STAND_GROUND_HIT_MEDIUM_HITSTUN,  MEDIUM_HIT_TIME },
+		/*  52 */ { SokuLib::ACTION_STAND_GROUND_HIT_BIG_HITSTUN,     BIG_HIT_TIME },
+		/*  53 */ { SokuLib::ACTION_STAND_GROUND_HIT_HUGE_HITSTUN,    HUGE_HIT_TIME },
+		/*  56 */ { SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN_2, SMALL_HIT_TIME },
+		/*  57 */ { SokuLib::ACTION_STAND_GROUND_HIT_MEDIUM_HITSTUN_2,MEDIUM_HIT_TIME },
+		/*  58 */ { SokuLib::ACTION_STAND_GROUND_HIT_BIG_HITSTUN_2,   BIG_HIT_TIME },
+		/*  62 */ { SokuLib::ACTION_CROUCH_GROUND_HIT_SMALL_HITSTUN,  SMALL_HIT_TIME },
+		/*  63 */ { SokuLib::ACTION_CROUCH_GROUND_HIT_MEDIUM_HITSTUN, MEDIUM_HIT_TIME },
+		/*  64 */ { SokuLib::ACTION_CROUCH_GROUND_HIT_BIG_HITSTUN,    BIG_HIT_TIME },
+	};
 
 	static bool isAttacking(const SokuLib::CharacterManager &character)
 	{
@@ -78,7 +98,7 @@ namespace Practice
 	static bool isBlocking(const SokuLib::CharacterManager &character)
 	{
 		return (
-			character.objectBase.action >= SokuLib::ACTION_GROUND_HIT_SMALL_HITSTUN &&
+			character.objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
 			character.objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH
 		) && (
 			!character.objectBase.frameData.frameFlags.guardAvailable ||
@@ -196,8 +216,34 @@ namespace Practice
 		showFrameAdvantageOrGapBox(gap.sprite, x, y, getAlpha(gap.timer), color);
 	}
 
+	static void drawBars(const SokuLib::CharacterManager &manager, const BlockingState &state)
+	{
+		auto it = hitStun.find(manager.objectBase.action);
+		unsigned actual;
+
+		if (it != hitStun.end()) {
+			if (manager.objectBase.action == SokuLib::ACTION_STAND_GROUND_HIT_HUGE_HITSTUN)
+				actual = state.hitTimer;
+			else
+				actual = manager.objectBase.frameCount;
+			actual = it->second - actual;
+			bar.setPosition({
+				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.x - actual + SokuLib::camera.translate.x)),
+				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.y + 5 + SokuLib::camera.translate.y))
+			});
+			bar.setSize({
+				actual * 2 + 1,
+				5
+			});
+			bar.setBorderColor(DxSokuColor::Black);
+			bar.setFillColor(DxSokuColor::Red);
+			bar.draw();
+		}
+	}
+
 	void displayFrameStuff()
 	{
+		auto &battle = SokuLib::getBattleMgr();
 		int yLeft = 416;
 		int yRight = 416;
 
@@ -210,6 +256,8 @@ namespace Practice
 			drawGap(gap, 348, yLeft);
 		for (auto &gap : gaps.second)
 			drawGap(gap, 202, yRight);
+		drawBars(battle.leftCharacterManager,  left);
+		drawBars(battle.rightCharacterManager, right);
 	}
 
 	static void generateTextSprite(Sprite &sprite, const char *buffer)
@@ -236,10 +284,23 @@ namespace Practice
 		generateTextSprite(gaps.front().sprite, buffer);
 	}
 
+	static void updateBars(const SokuLib::CharacterManager &manager, BlockingState &state)
+	{
+		if (
+			manager.objectBase.action == SokuLib::ACTION_STAND_GROUND_HIT_HUGE_HITSTUN && (
+				state.lastFrame != manager.objectBase.frameCount ||
+				manager.objectBase.action != state.lastAction
+			)
+		)
+			state.hitTimer++;
+		else
+			state.hitTimer = 0;
+		state.lastAction = manager.objectBase.action;
+		state.lastFrame = manager.objectBase.frameCount;
+	}
+
 	void updatedFrameStuff()
 	{
-		static BlockingState left;
-		static BlockingState right;
 		auto &battle = SokuLib::getBattleMgr();
 		auto padv = getFrameAdvantage(battle.leftCharacterManager, battle.rightCharacterManager, left);
 		auto dadv = getFrameAdvantage(battle.rightCharacterManager, battle.leftCharacterManager, right);
@@ -275,5 +336,7 @@ namespace Practice
 			gap.timer++;
 		for (auto &gap : gaps.second)
 			gap.timer++;
+		updateBars(battle.leftCharacterManager,  left);
+		updateBars(battle.rightCharacterManager, right);
 	}
 }
