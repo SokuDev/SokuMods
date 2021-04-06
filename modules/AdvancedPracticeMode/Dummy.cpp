@@ -69,7 +69,8 @@ namespace Practice
 		if (diff == 0)
 			return;
 		dummy.airdashCount = 0;
-		dummy.currentSpirit = 1000;
+		if (dummy.objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN || dummy.objectBase.action >= SokuLib::ACTION_FORWARD_DASH)
+			dummy.currentSpirit = max(min(settings.nonSaved.rightState.maxCurrentSpirit, 200 * (5 - settings.nonSaved.rightState.brokenOrbs)), 1);
 		if (diff > 0) {
 			manager.input.d = 1;
 			manager.input.verticalAxis = -1;
