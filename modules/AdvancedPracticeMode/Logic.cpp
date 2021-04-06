@@ -119,13 +119,12 @@ namespace Practice
 			if (state.SPInstantRegen)
 				manager.currentSpirit = state.maxCurrentSpirit;
 
-			manager.maxSpirit = 1000 - state.brokenOrbs * 200;
-
 			if (manager.currentSpirit >= state.maxCurrentSpirit)
 				manager.currentSpirit = state.maxCurrentSpirit;
-			manager.timeWithBrokenOrb = 0;
 		}
 
+		manager.maxSpirit = 1000 - state.brokenOrbs * 200;
+		manager.timeWithBrokenOrb = 0;
 		memcpy(&manager.skillMap, &state.skillMap, sizeof(state.skillMap));
 		manager.controlRod = state.rodLevel;
 		manager.sacrificialDolls = state.dollLevel;
