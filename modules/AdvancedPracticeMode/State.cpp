@@ -201,6 +201,11 @@ namespace Practice
 		this->realisticInputs = true;
 		this->forceWeather = true;
 		this->weatherResetRequest = false;
+		this->showUntech = true;
+		this->showBlockstun = true;
+		this->showHitstun = true;
+		this->showGaps = true;
+		this->showFrameAdvantage = true;
 	}
 
 	void Settings::load()

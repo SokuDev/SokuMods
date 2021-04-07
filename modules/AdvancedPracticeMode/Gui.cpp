@@ -569,9 +569,6 @@ namespace Practice
 	{
 		panel->loadWidgetsFromFile(profile + "/assets/state.gui");
 
-		auto checkFct = [](bool &val, bool b){
-			val = b;
-		};
 		auto force = panel->get<tgui::CheckBox>("ForceWeather");
 		auto weather = panel->get<tgui::ComboBox>("Weather");
 		auto editTimer = panel->get<tgui::EditBox>("EditTimer");
@@ -620,26 +617,66 @@ namespace Practice
 		rightSubObjPosBox->setChecked(settings.rightHitboxSettings.showSubObjectPosition);
 		rightSubObjProperties->setChecked(settings.rightHitboxSettings.showSubObjectProperties);
 
-		leftHurtBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showHurtboxes));
-		leftHitBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showHitboxes));
-		leftPosBox->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showPosition));
-		leftCollisionBox->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showCollisionBox));
-		leftBuff->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showBuffProperties));
-		leftHitProperties->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showHitProperties));
-		leftSubObjHurtBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectHurtboxes));
-		leftSubObjHitBoxes->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectHitboxes));
-		leftSubObjPosBox->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectPosition));
-		leftSubObjProperties->connect("Changed", checkFct, std::ref(settings.leftHitboxSettings.showSubObjectProperties));
-		rightHurtBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showHurtboxes));
-		rightHitBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showHitboxes));
-		rightPosBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showPosition));
-		rightCollisionBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showCollisionBox));
-		rightBuff->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showBuffProperties));
-		rightHitProperties->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showHitProperties));
-		rightSubObjHurtBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectHurtboxes));
-		rightSubObjHitBoxes->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectHitboxes));
-		rightSubObjPosBox->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectPosition));
-		rightSubObjProperties->connect("Changed", checkFct, std::ref(settings.rightHitboxSettings.showSubObjectProperties));
+		leftHurtBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showHurtboxes = b;
+		});
+		leftHitBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showHitboxes = b;
+		});
+		leftPosBox->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showPosition = b;
+		});
+		leftCollisionBox->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showCollisionBox = b;
+		});
+		leftBuff->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showBuffProperties = b;
+		});
+		leftHitProperties->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showHitProperties = b;
+		});
+		leftSubObjHurtBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectHurtboxes = b;
+		});
+		leftSubObjHitBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectHitboxes = b;
+		});
+		leftSubObjPosBox->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectPosition = b;
+		});
+		leftSubObjProperties->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectProperties = b;
+		});
+		rightHurtBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showHurtboxes = b;
+		});
+		rightHitBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showHitboxes = b;
+		});
+		rightPosBox->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showPosition = b;
+		});
+		rightCollisionBox->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showCollisionBox = b;
+		});
+		rightBuff->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showBuffProperties = b;
+		});
+		rightHitProperties->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showHitProperties = b;
+		});
+		rightSubObjHurtBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectHurtboxes = b;
+		});
+		rightSubObjHitBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectHitboxes = b;
+		});
+		rightSubObjPosBox->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectPosition = b;
+		});
+		rightSubObjProperties->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectProperties = b;
+		});
 
 		frameRate->setText(std::to_string(settings.requestedFrameRate));
 		auto fct = [](std::weak_ptr<tgui::EditBox> boxWeak){
@@ -698,6 +735,11 @@ namespace Practice
 		auto rightJoypad = panel->get<tgui::CheckBox>("RightJoypad");
 		auto rawBox = panel->get<tgui::CheckBox>("RawInputs");
 		auto emptyBox = panel->get<tgui::CheckBox>("Empty");
+		auto untech = panel->get<tgui::CheckBox>("Untech");
+		auto gap = panel->get<tgui::CheckBox>("Gaps");
+		auto frameadv = panel->get<tgui::CheckBox>("FrameAdvantage");
+		auto blockstun = panel->get<tgui::CheckBox>("Blockstun");
+		auto hitstun = panel->get<tgui::CheckBox>("Hitstun");
 
 		leftBox->setChecked(settings.showLeftInputBox);
 		leftBox->connect("Changed", [](bool b){
@@ -727,6 +769,31 @@ namespace Practice
 		emptyBox->setChecked(settings.showEmptyInputs);
 		emptyBox->connect("Changed", [](bool b){
 			settings.showEmptyInputs = b;
+		});
+
+		untech->setChecked(settings.showUntech);
+		untech->connect("Changed", [](bool b){
+			settings.showUntech = b;
+		});
+
+		gap->setChecked(settings.showGaps);
+		gap->connect("Changed", [](bool b){
+			settings.showGaps = b;
+		});
+
+		frameadv->setChecked(settings.showFrameAdvantage);
+		frameadv->connect("Changed", [](bool b){
+			settings.showFrameAdvantage = b;
+		});
+
+		blockstun->setChecked(settings.showBlockstun);
+		blockstun->connect("Changed", [](bool b){
+			settings.showBlockstun = b;
+		});
+
+		hitstun->setChecked(settings.showHitstun);
+		hitstun->connect("Changed", [](bool b){
+			settings.showHitstun = b;
 		});
 	}
 

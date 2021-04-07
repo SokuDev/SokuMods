@@ -5,6 +5,7 @@
 #include <list>
 #include "Gap.hpp"
 #include "DrawUtils.hpp"
+#include "State.hpp"
 
 #define FONT_HEIGHT 14
 #define TEXTURE_SIZE 0x100
@@ -223,6 +224,8 @@ namespace Practice
 		unsigned actual;
 
 		if (it != hitStun.end()) {
+			if (!settings.showHitstun)
+				return;
 			if (manager.objectBase.action == SokuLib::ACTION_STAND_GROUND_HIT_HUGE_HITSTUN)
 				actual = state.hitTimer;
 			else
@@ -240,6 +243,8 @@ namespace Practice
 			bar.setFillColor(DxSokuColor::Red);
 			bar.draw();
 		} else if (it2 != blockStun.end()) {
+			if (!settings.showBlockstun)
+				return;
 			actual = it2->second - manager.objectBase.frameCount;
 			bar.setPosition({
 				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.x - actual + SokuLib::camera.translate.x)),
@@ -260,6 +265,8 @@ namespace Practice
 			manager.objectBase.action != SokuLib::ACTION_KNOCKED_DOWN &&
 			manager.objectBase.action != SokuLib::ACTION_KNOCKED_DOWN_STATIC
 		) {
+			if (!settings.showUntech)
+				return;
 			bar.setPosition({
 				static_cast<int>(SokuLib::camera.scale * (manager.objectBase.position.x - manager.untech / 2 + SokuLib::camera.translate.x)),
 				static_cast<int>(SokuLib::camera.scale * (-manager.objectBase.position.y + 5 + SokuLib::camera.translate.y))
@@ -280,15 +287,19 @@ namespace Practice
 		int yLeft = 416;
 		int yRight = 416;
 
-		if (timers.first < 240)
-			showFrameAdvantageOrGapBox(leftFass,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? DxSokuColor::Red : DxSokuColor::Green));
-		if (timers.second < 240)
-			showFrameAdvantageOrGapBox(rightFass, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+		if (settings.showFrameAdvantage) {
+			if (timers.first < 240)
+				showFrameAdvantageOrGapBox(leftFass,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+			if (timers.second < 240)
+				showFrameAdvantageOrGapBox(rightFass, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+		}
 
-		for (auto &gap : gaps.first)
-			drawGap(gap, 348, yLeft);
-		for (auto &gap : gaps.second)
-			drawGap(gap, 202, yRight);
+		if (settings.showGaps) {
+			for (auto &gap : gaps.first)
+				drawGap(gap, 348, yLeft);
+			for (auto &gap : gaps.second)
+				drawGap(gap, 202, yRight);
+		}
 		drawBars(battle.leftCharacterManager,  left);
 		drawBars(battle.rightCharacterManager, right);
 	}

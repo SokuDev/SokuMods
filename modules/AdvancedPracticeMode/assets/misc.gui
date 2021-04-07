@@ -87,13 +87,53 @@ CheckBox.LeftJoypad {
     Size = (18, 18);
     Text = "Show left joypad";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 CheckBox.RightJoypad {
     Position = (150, 40);
     Size = (18, 18);
     Text = "Show right joypad";
+    TextSize = 13;
+    renderer = &1;
+}
+
+CheckBox.Blockstun {
+    Position = (300, 40);
+    Size = (18, 18);
+    Text = "Show blockstun bars";
+    TextSize = 13;
+    renderer = &1;
+}
+
+CheckBox.Untech {
+    Position = (300, 10);
+    Size = (18, 18);
+    Text = "Show untech bars";
+    TextSize = 13;
+    renderer = &1;
+}
+
+CheckBox.Hitstun {
+    Position = (300, 70);
+    Size = (18, 18);
+    Text = "Show hitstun bars";
+    TextSize = 13;
+    renderer = &1;
+}
+
+CheckBox.Gaps {
+    Position = (460, 10);
+    Size = (18, 18);
+    Text = "Show gaps";
+    TextSize = 13;
+    renderer = &2;
+}
+
+CheckBox.FrameAdvantage {
+    Position = (460, 40);
+    Size = (18, 18);
+    Text = "Show frame advantage";
     TextSize = 13;
     renderer = &2;
 }

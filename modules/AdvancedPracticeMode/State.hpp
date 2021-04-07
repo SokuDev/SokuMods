@@ -13,7 +13,7 @@
 
 namespace Practice
 {
-#define MAGIC_NUMBER                       0x01020306
+#define MAGIC_NUMBER                       0x01020307
 #define MAGIC_NUMBER_CHR                   0x01020304
 #define MAGIC_NUMBER_MACRO                 0x01020304
 #define MAGIC_NUMBER_MACRO_SINGLE_MACRO    0x11121314
@@ -76,16 +76,29 @@ namespace Practice
 	};
 
 	struct HitBoxParams {
-		bool showPosition = true;
-		bool showHitboxes = true;
-		bool showHurtboxes = true;
-		bool showCollisionBox = true;
-		bool showHitProperties = true;
-		bool showBuffProperties = true;
-		bool showSubObjectPosition = true;
-		bool showSubObjectHitboxes = true;
-		bool showSubObjectHurtboxes = true;
-		bool showSubObjectProperties = true;
+		bool showPosition : 1;
+		bool showHitboxes : 1;
+		bool showHurtboxes : 1;
+		bool showCollisionBox : 1;
+		bool showHitProperties : 1;
+		bool showBuffProperties : 1;
+		bool showSubObjectPosition : 1;
+		bool showSubObjectHitboxes : 1;
+		bool showSubObjectHurtboxes : 1;
+		bool showSubObjectProperties : 1;
+
+		HitBoxParams() {
+			this->showPosition = true;
+			this->showHitboxes = true;
+			this->showHurtboxes = true;
+			this->showCollisionBox = true;
+			this->showHitProperties = true;
+			this->showBuffProperties = true;
+			this->showSubObjectPosition = true;
+			this->showSubObjectHitboxes = true;
+			this->showSubObjectHurtboxes = true;
+			this->showSubObjectProperties = true;
+		}
 	};
 
 	typedef std::vector<std::pair<SokuLib::KeyInput, unsigned>> MacroData;
@@ -129,6 +142,11 @@ namespace Practice
 		bool realisticInputs : 1;
 		bool forceWeather : 1;
 		bool weatherResetRequest : 1;
+		bool showUntech : 1;
+		bool showBlockstun : 1;
+		bool showHitstun : 1;
+		bool showGaps : 1;
+		bool showFrameAdvantage : 1;
 		HitBoxParams leftHitboxSettings;
 		HitBoxParams rightHitboxSettings;
 		struct NonSavedElements{
