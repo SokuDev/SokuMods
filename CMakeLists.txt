@@ -16,6 +16,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" S
     # work around this undefined behaviour by setting a global codepage for all RC files
     SET(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} /C 1252")
 endif ()
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /Brepro")
+SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /Brepro")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /Brepro")
 
 add_library(swrstoys MODULE
         swrstoys/d3d9.def
