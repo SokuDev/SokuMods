@@ -1262,40 +1262,6 @@ namespace Practice
 	}
 	int yolo = 0;
 
-	void loadAllGuiElements(LPCSTR profilePath)
-	{
-#ifndef NDEBUG
-		yolo = 0;
-		return;
-#endif
-		puts("Loading GUI...");
-
-		std::string profile = profilePath;
-
-		gui.loadWidgetsFromFile(profile + "/assets/main.gui");
-		panel = gui.get<tgui::Panel>("Panel");
-		tab = gui.get<tgui::Tabs>("Tabs");
-		tab->connect("TabSelected", [profile]{
-			switch (tab->getSelectedIndex()) {
-			case 0:
-				return displaySkillsPanel(profile);
-			case 1:
-				return displayDummyPanel(profile);
-			case 2:
-				return displayStatePanel(profile);
-			case 3:
-				return displayMacroPanel(profile);
-			case 4:
-				return displayMiscPanel(profile);
-			default:
-				return panel->removeAllWidgets();
-			}
-		});
-		puts("Display skills");
-		displaySkillsPanel(profile);
-		puts("GUI loaded");
-	}
-
 	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
 		state.HPInstantRegen = panel->get<tgui::CheckBox>("HPInstantRegen")->isChecked();
@@ -1334,6 +1300,53 @@ namespace Practice
 		}
 	}
 
+	static const std::map<std::string, std::function<void (const std::string &)>> creaters{
+		{ "Characters", displaySkillsPanel },
+		{ "Macros",  displayMacroPanel },
+		{ "Dummy",  displayDummyPanel },
+		{ "State",  displayStatePanel },
+		{ "Misc",   displayMiscPanel }
+	};
+	static const std::map<std::string, std::function<void ()>> updaters{
+		{ "Characters", []{
+			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
+			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
+		} },
+		{ "Macros",  updateMacroPanel },
+		{ "Dummy",  updateDummyPanel },
+		{ "State",  updateStatePanel },
+		{ "Misc",   updateMiscPanel }
+	};
+	static const std::map<SokuLib::Scene, std::string> files{
+		{ SokuLib::SCENE_BATTLE, "/assets/main.gui" }
+	};
+
+	void loadAllGuiElements(LPCSTR profilePath)
+	{
+#ifndef NDEBUG
+		yolo = 0;
+		return;
+#endif
+		puts("Loading GUI...");
+
+		std::string profile = profilePath;
+
+		gui.loadWidgetsFromFile(profile + files.at(SokuLib::sceneId));
+		panel = gui.get<tgui::Panel>("Panel");
+		tab = gui.get<tgui::Tabs>("Tabs");
+		tab->connect("TabSelected", [profile]{
+			auto it = creaters.find(tab->getSelected());
+
+			if (it != creaters.end())
+				it->second(profile);
+			else
+				panel->removeAllWidgets();
+		});
+		puts("Display skills");
+		displaySkillsPanel(profile);
+		puts("GUI loaded");
+	}
+
 	void updateGuiState()
 	{
 #ifndef NDEBUG
@@ -1348,25 +1361,9 @@ namespace Practice
 		settings.nonSaved.playList.push_back(macro);
 		return;
 #endif
-		switch (tab->getSelectedIndex()) {
-		case 0:
-			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
-			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
-			break;
-		case 1:
-			updateDummyPanel();
-			break;
-		case 2:
-			updateStatePanel();
-			break;
-		case 3:
-			updateMacroPanel();
-			break;
-		case 4:
-			updateMiscPanel();
-			break;
-		default:
-			break;
-		}
+		auto it = updaters.find(tab->getSelected());
+
+		if (it != updaters.end())
+			it->second();
 	}
 }

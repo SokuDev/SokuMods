@@ -22,6 +22,9 @@ static int (__thiscall Title::*s_origCTitle_Process)();
 float frameCounter = 0;
 
 
+//sendto:   0x0081F6C6
+//recvfrom: 0x0081F6E4
+
 
 int __fastcall CTitle_OnProcess(Title *This)
 {

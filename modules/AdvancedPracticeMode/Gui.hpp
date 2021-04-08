@@ -13,9 +13,17 @@ namespace Practice
 	extern std::array<std::string, SokuLib::CHARACTER_RANDOM> names;
 	extern tgui::Gui gui;
 
+	union ElemProperty {
+		float value;
+		int selected;
+		bool checked;
+		char text[4];
+	};
+
 	void loadAllGuiElements(LPCSTR profilePath);
 	void updateGuiState();
 	void init(LPCSTR profilePath);
+	void setElem(const std::string &elem, const ElemProperty &property);
 }
 
 
