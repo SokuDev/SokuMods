@@ -131,7 +131,8 @@ namespace Practice
 		VirtualProtect((PVOID)0x47c5aa, 4, old, &old);
 
 		//This forces the dummy to have an input device (probably keyboard ?)
-		((unsigned *)0x00898680)[1] = 0x008986A8;
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
+			((unsigned *)0x00898680)[1] = 0x008986A8;
 	}
 
 	void activate()

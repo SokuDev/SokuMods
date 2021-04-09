@@ -7,23 +7,19 @@
 
 
 #include <TGUI/TGUI.hpp>
+#include <SokuLib.hpp>
 
 namespace Practice
 {
 	extern std::array<std::string, SokuLib::CHARACTER_RANDOM> names;
 	extern tgui::Gui gui;
-
-	union ElemProperty {
-		float value;
-		int selected;
-		bool checked;
-		char text[4];
-	};
+	extern tgui::Panel::Ptr panel;
+	extern tgui::Tabs::Ptr tab;
 
 	void loadAllGuiElements(LPCSTR profilePath);
 	void updateGuiState();
 	void init(LPCSTR profilePath);
-	void setElem(const std::string &elem, const ElemProperty &property);
+	void setElem(const std::string &elem, const SokuLib::ElemProperty &property);
 }
 
 

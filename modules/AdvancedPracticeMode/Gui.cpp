@@ -9,6 +9,7 @@
 #include "State.hpp"
 #include "Dummy.hpp"
 #include "Logic.hpp"
+#include "Network.hpp"
 
 namespace Practice
 {
@@ -36,8 +37,8 @@ namespace Practice
 		"suwako",
 	};
 	std::vector<sf::Texture> skillsTextures;
-	static tgui::Panel::Ptr panel;
-	static tgui::Tabs::Ptr tab;
+	tgui::Panel::Ptr panel;
+	tgui::Tabs::Ptr tab;
 
 	inline void getSkillMap(SokuLib::Skill *skillMap, char (&skills)[5], SokuLib::Character character)
 	{
@@ -291,39 +292,39 @@ namespace Practice
 		return false;
 	}
 
-	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
+	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr pan, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
 		// Levels
 		char nbSkills = 4;
 
-		panel->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
+		pan->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
 
-		auto spePic = panel->get<tgui::Picture>("SpecialPic");
-		auto speLvl = panel->get<tgui::ComboBox>("SpecialLevel");
+		auto spePic = pan->get<tgui::Picture>("SpecialPic");
+		auto speLvl = pan->get<tgui::ComboBox>("SpecialLevel");
 
-		auto dollPic = panel->get<tgui::Picture>("DollPic");
-		auto dollLvl = panel->get<tgui::ComboBox>("DollLvl");
+		auto dollPic = pan->get<tgui::Picture>("DollPic");
+		auto dollLvl = pan->get<tgui::ComboBox>("DollLvl");
 
-		auto dropPic = panel->get<tgui::Picture>("DropPic");
-		auto dropLvl = panel->get<tgui::ComboBox>("DropLvl");
+		auto dropPic = pan->get<tgui::Picture>("DropPic");
+		auto dropLvl = pan->get<tgui::ComboBox>("DropLvl");
 
-		auto rodPic = panel->get<tgui::Picture>("RodPic");
-		auto rodLvl = panel->get<tgui::ComboBox>("RodLvl");
+		auto rodPic = pan->get<tgui::Picture>("RodPic");
+		auto rodLvl = pan->get<tgui::ComboBox>("RodLvl");
 
-		auto grimPic = panel->get<tgui::Picture>("GrimPic");
-		auto grimLvl = panel->get<tgui::ComboBox>("GrimLvl");
+		auto grimPic = pan->get<tgui::Picture>("GrimPic");
+		auto grimLvl = pan->get<tgui::ComboBox>("GrimLvl");
 
-		auto fanPic = panel->get<tgui::Picture>("FanPic");
-		auto fanLvl = panel->get<tgui::ComboBox>("FanLvl");
+		auto fanPic = pan->get<tgui::Picture>("FanPic");
+		auto fanLvl = pan->get<tgui::ComboBox>("FanLvl");
 
 		char skills[5];
 
 		getSkillMap(state.skillMap, skills, character);
 		if (character == SokuLib::CHARACTER_PATCHOULI) {
 			nbSkills = 5;
-			panel->get<tgui::Widget>("Skill4Lvl")->setVisible(true);
-			panel->get<tgui::Widget>("Skill4Img")->setVisible(true);
-			panel->get<tgui::Widget>("Skill4Id")->setVisible(true);
+			pan->get<tgui::Widget>("Skill4Lvl")->setVisible(true);
+			pan->get<tgui::Widget>("Skill4Img")->setVisible(true);
+			pan->get<tgui::Widget>("Skill4Id")->setVisible(true);
 		}
 		if (character == SokuLib::CHARACTER_REISEN) {
 			spePic->setVisible(true);
@@ -368,19 +369,38 @@ namespace Practice
 		});
 
 		for (int i = 0; i < nbSkills; i++) {
-			auto img = panel->get<tgui::Picture>("Skill" + std::to_string(i) + "Img");
-			auto lvl = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Lvl");
-			auto id = panel->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Id");
+			auto img = pan->get<tgui::Picture>("Skill" + std::to_string(i) + "Img");
+			auto lvl = pan->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Lvl");
+			auto id = pan->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Id");
+			auto callback = std::make_shared<unsigned>(0);
+
+			lvl->removeAllItems();
+			for (int j = skills[i] != 0; j < 5; j++)
+				lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
+			lvl->setSelectedItemByIndex(state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
+			*callback = lvl->connect("ItemSelected", [&state, i, nbSkills](std::weak_ptr<tgui::ComboBox> skill, int item){
+				auto index = skill.lock()->getSelectedItemIndex();
+
+				for (int j = 0; j < 3; j++) {
+					if (j == index) {
+						state.skillMap[j * nbSkills + i].notUsed = false;
+						state.skillMap[j * nbSkills + i].level = item + (index != 0);
+					} else {
+						state.skillMap[j * nbSkills + i].notUsed = true;
+						state.skillMap[j * nbSkills + i].level = 0x7F;
+					}
+				}
+			}, std::weak_ptr<tgui::ComboBox>(id));
 
 			for (int j = 0; j < 3; j++)
 				id->addItem(movesNames[character][i + j * nbSkills]);
 			id->setSelectedItemByIndex(skills[i]);
-			id->connect("ItemSelected", [lvl, img, &state, nbSkills, i, character](std::weak_ptr<tgui::ComboBox> skill, int item){
-				lvl->disconnectAll("ItemSelected");
+			id->connect("ItemSelected", [lvl, img, &state, nbSkills, i, character, callback](std::weak_ptr<tgui::ComboBox> skill, int item){
+				lvl->disconnect(*callback);
 				lvl->removeAllItems();
 				for (int j = item != 0; j < 5; j++)
 					lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
-				lvl->connect("ItemSelected", [&state, i, nbSkills, skill](int item){
+				*callback = lvl->connect("ItemSelected", [&state, i, nbSkills, skill](int item){
 					auto index = skill.lock()->getSelectedItemIndex();
 
 					for (int j = 0; j < 3; j++) {
@@ -403,25 +423,6 @@ namespace Practice
 				);
 			}, std::weak_ptr<tgui::ComboBox>(id));
 
-			lvl->disconnectAll("ItemSelected");
-			lvl->removeAllItems();
-			for (int j = skills[i] != 0; j < 5; j++)
-				lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
-			lvl->setSelectedItemByIndex(state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
-			lvl->connect("ItemSelected", [&state, i, nbSkills](std::weak_ptr<tgui::ComboBox> skill, int item){
-				auto index = skill.lock()->getSelectedItemIndex();
-
-				for (int j = 0; j < 3; j++) {
-					if (j == index) {
-						state.skillMap[j * nbSkills + i].notUsed = false;
-						state.skillMap[j * nbSkills + i].level = item + (index != 0);
-					} else {
-						state.skillMap[j * nbSkills + i].notUsed = true;
-						state.skillMap[j * nbSkills + i].level = 0x7F;
-					}
-				}
-			}, std::weak_ptr<tgui::ComboBox>(id));
-
 			img->getRenderer()->setTexture(
 				tgui::Texture(
 					skillsTextures[character],
@@ -430,7 +431,7 @@ namespace Practice
 			);
 		}
 
-		panel->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
+		pan->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
 			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
 			const char *brokenNames[] = {
 				"reimu", "marisa", "sakuya", "alice", "patchouli", "youmu", "remilia", "yuyuko", "yukari",
@@ -451,9 +452,9 @@ namespace Practice
 		});
 
 		// HP and SP
-		auto HP = panel->get<tgui::Slider>("HP");
-		auto SP = panel->get<tgui::Slider>("SP");
-		auto brokenOrbs = panel->get<tgui::Slider>("BrokenOrbs");
+		auto HP = pan->get<tgui::Slider>("HP");
+		auto SP = pan->get<tgui::Slider>("SP");
+		auto brokenOrbs = pan->get<tgui::Slider>("BrokenOrbs");
 		HP->connect("ValueChanged", [&state](float newValue) { state.hp = newValue; });
 		SP->connect("ValueChanged", [&state](float newValue) { state.maxCurrentSpirit = newValue; });
 		brokenOrbs->connect("ValueChanged", [&state](float newValue) { state.brokenOrbs = newValue; });
@@ -461,8 +462,8 @@ namespace Practice
 		SP->setValue(state.maxCurrentSpirit);
 		brokenOrbs->setValue(state.brokenOrbs);
 
-		panel->get<tgui::CheckBox>("HPInstantRegen")->setChecked(state.HPInstantRegen);
-		panel->get<tgui::CheckBox>("SPInstantRegen")->setChecked(state.SPInstantRegen);
+		pan->get<tgui::CheckBox>("HPInstantRegen")->setChecked(state.HPInstantRegen);
+		pan->get<tgui::CheckBox>("SPInstantRegen")->setChecked(state.SPInstantRegen);
 	}
 
 	static void displaySkillsPanel(const std::string &profile)
@@ -1262,7 +1263,7 @@ namespace Practice
 	}
 	int yolo = 0;
 
-	static void updateCharacterPanel(tgui::Panel::Ptr panel, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
+	static void updateCharacterPanel(tgui::Panel::Ptr pan, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
 		state.HPInstantRegen = panel->get<tgui::CheckBox>("HPInstantRegen")->isChecked();
 		state.SPInstantRegen = panel->get<tgui::CheckBox>("SPInstantRegen")->isChecked();
@@ -1300,6 +1301,7 @@ namespace Practice
 		}
 	}
 
+	static int tabChangeRequest = -1;
 	static const std::map<std::string, std::function<void (const std::string &)>> creaters{
 		{ "Characters", displaySkillsPanel },
 		{ "Macros",  displayMacroPanel },
@@ -1323,12 +1325,48 @@ namespace Practice
 		{ SokuLib::SCENE_BATTLESV, "/assets/networkMain.gui" },
 	};
 
+	void connectOnChangeCallback(const tgui::Widget::Ptr &widget, const std::string &base = "")
+	{
+		std::string name = (base.empty() ? "" : base + ".") + widget->getWidgetName();
+		auto asButton = widget->cast<tgui::Button>();
+		auto asEdit = widget->cast<tgui::EditBox>();
+		auto asCombo = widget->cast<tgui::ComboBox>();
+		auto asCheck = widget->cast<tgui::CheckBox>();
+		auto asSlider = widget->cast<tgui::Slider>();
+		auto asPanel = widget->cast<tgui::Panel>();
+
+		if (name.empty()) {
+			printf("Warning: Element without name found of type %s\n", widget->getWidgetType().c_str());
+			return;
+		}
+
+		if (asButton)
+			asButton->connect("Clicked", [name]{
+				onElemChanged(name, 0);
+			});
+		else if (asEdit)
+			asEdit->connect("TextChanged", [name](const std::string &text){
+				onElemChanged(name, text);
+			});
+		else if (asCombo)
+			asCombo->connect("ItemSelected", [name](std::weak_ptr<tgui::ComboBox> me, int index){
+				onElemChanged(name, me.lock()->getSelectedItemIndex());
+			}, std::weak_ptr<tgui::ComboBox>(asCombo));
+		else if (asCheck)
+			asCheck->connect("Changed", [name](bool b){
+				onElemChanged(name, b);
+			});
+		else if (asSlider)
+			asSlider->connect("ValueChanged", [name](float v){
+				onElemChanged(name, v);
+			});
+		else if (asPanel)
+			for (auto &wid : asPanel->getWidgets())
+				connectOnChangeCallback(wid, name);
+	}
+
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
-#ifndef NDEBUG
-		yolo = 0;
-		return;
-#endif
 		puts("Loading GUI...");
 
 		std::string profile = profilePath;
@@ -1343,29 +1381,91 @@ namespace Practice
 				it->second(profile);
 			else
 				panel->removeAllWidgets();
+			if (settings.nonSaved.enabled)
+				for (auto &widget : panel->getWidgets()) {
+					if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+						widget->setEnabled(false);
+					else
+						connectOnChangeCallback(widget);
+				}
 		});
 		puts("Display skills");
 		displaySkillsPanel(profile);
+		if (settings.nonSaved.enabled) {
+			for (auto &widget : panel->getWidgets()) {
+				if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+					widget->setEnabled(false);
+				else
+					connectOnChangeCallback(widget);
+			}
+			if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
+				tab->connect("TabSelected", []{
+					onElemChanged("", tab->getSelectedIndex());
+				});
+		}
+		tab->setEnabled(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER);
+		printf("%p\n", panel->get<tgui::Button>("Left.Button1").get());
 		puts("GUI loaded");
 	}
 
 	void updateGuiState()
 	{
-#ifndef NDEBUG
-		static int y = 0;
-
-		if (y++ != 200)
-			return;
-		auto &macro = settings.nonSaved.macros.macros[SokuLib::CHARACTER_REMILIA][0];
-
-		settings.nonSaved.playingMacro = true;
-		settings.nonSaved.playingMacroBuffer.clear();
-		settings.nonSaved.playList.push_back(macro);
-		return;
-#endif
 		auto it = updaters.find(tab->getSelected());
 
 		if (it != updaters.end())
 			it->second();
+		if (tabChangeRequest != -1) {
+			bool enabled = tab->isEnabled();
+
+			tab->setEnabled(true);
+			tab->select(tabChangeRequest);
+			tab->setEnabled(enabled);
+			tabChangeRequest = -1;
+		}
+	}
+
+	tgui::Widget::Ptr fetchWidget(const std::string &name, const tgui::Panel::Ptr &basePanel)
+	{
+		auto pos = name.find('.');
+
+		if (pos != std::string::npos)
+			return fetchWidget(name.substr(pos + 1), basePanel->get<tgui::Panel>(name.substr(0, pos)));
+		return basePanel->get<tgui::Widget>(name);
+	}
+
+	void setElem(const std::string &elem, const SokuLib::ElemProperty &property)
+	{
+		if (elem.empty()) {
+			tabChangeRequest = property.selected;
+			return;
+		}
+
+		auto widget = fetchWidget(elem, panel);
+
+		if (!widget) {
+			MessageBoxA(SokuLib::window, ("Cannot find widget " + elem + ".").c_str(), "Invalid widget", MB_ICONERROR);
+			exit(1);
+		}
+
+		auto asButton = widget->cast<tgui::Button>();
+		auto asEdit = widget->cast<tgui::EditBox>();
+		auto asCombo = widget->cast<tgui::ComboBox>();
+		auto asCheck = widget->cast<tgui::CheckBox>();
+		auto asSlider = widget->cast<tgui::Slider>();
+
+		if (asButton)
+			asButton->onClick.emit(asButton.get(), {0, 0});
+		else if (asEdit) {
+			char buffer[5];
+
+			strncpy(buffer, property.text, 4);
+			buffer[4] = 0;
+			asEdit->setText(buffer);
+		} else if (asCombo)
+			asCombo->setSelectedItemByIndex(property.selected);
+		else if (asCheck)
+			asCheck->setChecked(property.checked);
+		else if (asSlider)
+			asSlider->setValue(property.value);
 	}
 }
