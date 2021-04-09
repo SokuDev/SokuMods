@@ -114,6 +114,9 @@ namespace Practice
 
 	void dummyBeforeHit(bool isHigh)
 	{
+		if (settings.nonSaved.enabled)
+			return;
+
 		auto &battle = SokuLib::getBattleMgr();
 		auto &player = battle.leftCharacterManager;
 		auto &dummy = battle.rightCharacterManager;

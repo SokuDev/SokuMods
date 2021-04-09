@@ -32,15 +32,14 @@ namespace Practice
 	struct GapElem {
 		int timer;
 		int gap;
-		Sprite sprite;
 
 		GapElem() = default;
-		GapElem(GapElem &other) :
-			timer(other.timer),
-			gap(other.gap)
-		{
-			this->sprite.texture.swap(other.sprite.texture);
-		}
+		//GapElem(GapElem &other) :
+		//	timer(other.timer),
+		//	gap(other.gap)
+		//{
+		//	this->sprite.texture.swap(other.sprite.texture);
+		//}
 		GapElem(int timer, int gap): timer(timer), gap(gap) {};
 	};
 	static bool loaded = false;
@@ -48,8 +47,6 @@ namespace Practice
 	static RectangleShape rect;
 	static RectangleShape bar;
 	static std::pair<int, int> fas;
-	static Sprite leftFass;
-	static Sprite rightFass;
 	static BlockingState left;
 	static BlockingState right;
 	static std::pair<unsigned, unsigned> timers = {400, 400};
@@ -179,18 +176,37 @@ namespace Practice
 		font.setIndirect(desc);
 	}
 
-	void showFrameAdvantageOrGapBox(Sprite &sprite, int x, int &y, float alpha, DxSokuColor color)
+	void showFrameAdvantageOrGapBox(const char *fmt, int v, int x, int &y, float alpha, DxSokuColor color)
 	{
+		Sprite sprite;
+		char buffer[32];
+		int text;
+
 		if (alpha == 0)
 			return;
+
 		rect.setBorderColor(DxSokuColor::Black * alpha);
 		rect.setFillColor((DxSokuColor::Black + DxSokuColor::White) * alpha);
-		sprite.setPosition({x, y});
 		rect.setPosition({x, y});
-		y -= 20;
-		sprite.tint = color * alpha;
 		rect.draw();
+
+		sprintf(buffer, fmt, v);
+		if (!SokuLib::textureMgr.createTextTexture(&text, buffer, font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
+			puts("C'est vraiment pas de chance");
+			y -= 20;
+			return;
+		}
+
+		sprite.setPosition({x, y});
+		sprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+		sprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+		sprite.rect = {
+			0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+		};
+		sprite.tint = color * alpha;
 		sprite.draw();
+
+		y -= 20;
 	}
 
 	static float getAlpha(unsigned timer)
@@ -214,7 +230,10 @@ namespace Practice
 			color = DxSokuColor{0xFF, 0x80, 0x00, 0xFF};
 		else
 			color = DxSokuColor::Red;
-		showFrameAdvantageOrGapBox(gap.sprite, x, y, getAlpha(gap.timer), color);
+		if (gap.gap)
+			showFrameAdvantageOrGapBox("Gap: %iF", gap.gap, x, y, getAlpha(gap.timer), color);
+		else
+			showFrameAdvantageOrGapBox("Gap: %iF (mash.)", gap.gap, x, y, getAlpha(gap.timer), color);
 	}
 
 	static void drawBars(const SokuLib::CharacterManager &manager, const BlockingState &state)
@@ -287,14 +306,14 @@ namespace Practice
 		int yLeft = 416;
 		int yRight = 416;
 
-		if (settings.showFrameAdvantage) {
+		if (!settings.nonSaved.enabled && settings.showFrameAdvantage) {
 			if (timers.first < 240)
-				showFrameAdvantageOrGapBox(leftFass,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+				showFrameAdvantageOrGapBox("Adv: %+i", fas.first,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? DxSokuColor::Red : DxSokuColor::Green));
 			if (timers.second < 240)
-				showFrameAdvantageOrGapBox(rightFass, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+				showFrameAdvantageOrGapBox("Adv: %+i", fas.second, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? DxSokuColor::Red : DxSokuColor::Green));
 		}
 
-		if (settings.showGaps) {
+		if (!settings.nonSaved.enabled && settings.showGaps) {
 			for (auto &gap : gaps.first)
 				drawGap(gap, 348, yLeft);
 			for (auto &gap : gaps.second)
@@ -320,12 +339,12 @@ namespace Practice
 	{
 		char buffer[30];
 
-		if (!val)
-			sprintf(buffer, "Gap: %iF (mash.)", val);
-		else
-			sprintf(buffer, "Gap: %iF", val);
+		//if (!val)
+		//	sprintf(buffer, "Gap: %iF (mash.)", val);
+		//else
+		//	sprintf(buffer, "Gap: %iF", val);
 		gaps.push_front({0, val});
-		generateTextSprite(gaps.front().sprite, buffer);
+		//generateTextSprite(gaps.front().sprite, buffer);
 	}
 
 	static void updateBars(const SokuLib::CharacterManager &manager, BlockingState &state)
@@ -356,14 +375,14 @@ namespace Practice
 		if (padv) {
 			timers.first = 0;
 			fas.first = *padv;
-			sprintf(buffer, "Adv: %+i", *padv);
-			generateTextSprite(leftFass, buffer);
+			//sprintf(buffer, "Adv: %+i", *padv);
+			//generateTextSprite(leftFass, buffer);
 		}
 		if (dadv) {
 			timers.second = 0;
 			fas.second = *dadv;
-			sprintf(buffer, "Adv: %+i", *dadv);
-			generateTextSprite(rightFass, buffer);
+			//sprintf(buffer, "Adv: %+i", *dadv);
+			//generateTextSprite(rightFass, buffer);
 		}
 
 		timers.first++;
