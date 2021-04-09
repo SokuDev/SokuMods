@@ -1318,7 +1318,9 @@ namespace Practice
 		{ "Misc",   updateMiscPanel }
 	};
 	static const std::map<SokuLib::Scene, std::string> files{
-		{ SokuLib::SCENE_BATTLE, "/assets/main.gui" }
+		{ SokuLib::SCENE_BATTLE, "/assets/main.gui" },
+		{ SokuLib::SCENE_BATTLECL, "/assets/networkMain.gui" },
+		{ SokuLib::SCENE_BATTLESV, "/assets/networkMain.gui" },
 	};
 
 	void loadAllGuiElements(LPCSTR profilePath)

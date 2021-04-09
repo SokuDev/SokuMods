@@ -157,8 +157,10 @@ namespace Practice
 		updateInputLists();
 		onUpdate();
 		updatedFrameStuff();
-		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE)
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE && !settings.nonSaved.enabled) {
+			printf("Skipped because %i != %i && !%s\n", SokuLib::mainMode, SokuLib::BATTLE_MODE_PRACTICE, settings.nonSaved.enabled ? "true" : "false");
 			return;
+		}
 
 		if (settings.nonSaved.activated) {
 			auto &battle = SokuLib::getBattleMgr();
@@ -196,6 +198,7 @@ namespace Practice
 				SokuLib::practiceSettings->counter = rand() % 2 ? SokuLib::COUNTER_ON : SokuLib::COUNTER_OFF;
 				break;
 			}
-		}
+		} else
+			puts("Skipped cause not activated");
 	}
 }

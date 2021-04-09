@@ -71,6 +71,8 @@ namespace Practice
 		unsigned char fanLevel = 0;
 		unsigned char specialValue = 0;
 
+		CharacterState() = default;
+		CharacterState(SokuLib::Character chr);
 		void save(bool isLeft) const;
 		void load(SokuLib::Character chr, bool isLeft);
 	};
@@ -157,6 +159,7 @@ namespace Practice
 			bool loopMacros : 1;
 			bool playingMacro : 1;
 			bool controlDummy : 1;
+			bool enabled : 1;
 			std::list<Macro> playList;
 			Macro playingMacroBuffer;
 			MacroData *recordBuffer = nullptr;
@@ -165,8 +168,9 @@ namespace Practice
 			MacroManager macros;
 		} nonSaved;
 
-		Settings(bool activated = false);
+		Settings(bool activated = false, bool enabled = false);
 		void load();
+		void reset();
 		void save() const;
 		~Settings();
 	};

@@ -10,26 +10,60 @@
 #include "Logic.hpp"
 #include "State.hpp"
 #include "Gui.hpp"
+#include "Network.hpp"
 
 struct Title {};
 struct Select {};
+struct SelectSV {};
+struct SelectCL {};
 struct Loading {};
+struct LoadingSV {};
+struct LoadingCL {};
+static int (__stdcall *original_recvfrom)(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen);
 static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Process)();
 static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
 static int (__thiscall Loading::*s_origCLoading_Process)();
+static int (__thiscall SelectSV::*s_origCSelectSV_Process)();
+static int (__thiscall SelectCL::*s_origCSelectCL_Process)();
 static int (__thiscall Select::*s_origCSelect_Process)();
 static int (__thiscall Title::*s_origCTitle_Process)();
 float frameCounter = 0;
 
 
-//sendto:   0x0081F6C6
-//recvfrom: 0x0081F6E4
+//sendto:   0x00857290
+#define RECVFROM_JUMP_ADDR 0x00857280
 
+int __stdcall myRecvfrom(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen)
+{
+	int bytes;
+
+	do {
+		bytes = original_recvfrom(s, buf, len, flags, from, fromlen);
+		if (from)
+			memcpy(&Practice::peer, from, sizeof(Practice::peer));
+		Practice::socket = s;
+	} while (Practice::processPacket(buf, bytes));
+	return bytes;
+}
+
+void networkSelectCommon()
+{
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT && SokuLib::checkKeyOneshot(DIK_F12, 0, 0, 0)) {
+		auto res = MessageBoxA(SokuLib::window, (std::string("Do you want to start a training session against ") + SokuLib::getNetObject().profile2name + " ?").c_str(), "Start practice ?", MB_ICONQUESTION | MB_YESNO);
+
+		if (res == IDYES) {
+			SokuLib::PacketType packet = SokuLib::APM_START_SESSION_REQUEST;
+
+			sendto(Practice::socket, reinterpret_cast<const char *>(&packet), 2, 0, reinterpret_cast<sockaddr *>(&Practice::peer), sizeof(Practice::peer));
+		}
+	}
+}
 
 int __fastcall CTitle_OnProcess(Title *This)
 {
 	Practice::deactivate();
 
+	Practice::settings.nonSaved.enabled = false;
 	// super
 	return (This->*s_origCTitle_Process)();
 }
@@ -40,6 +74,24 @@ int __fastcall CSelect_OnProcess(Select *This)
 
 	// super
 	return (This->*s_origCSelect_Process)();
+}
+
+int __fastcall CSelectCL_OnProcess(SelectCL *This)
+{
+	Practice::deactivate();
+	networkSelectCommon();
+
+	// super
+	return (This->*s_origCSelectCL_Process)();
+}
+
+int __fastcall CSelectSV_OnProcess(SelectSV *This)
+{
+	Practice::deactivate();
+	networkSelectCommon();
+
+	// super
+	return (This->*s_origCSelectSV_Process)();
 }
 
 int __fastcall CLoading_OnProcess(Loading *This)
@@ -65,7 +117,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	int result = 0;
 
 	if (Practice::sfmlWindow);
-	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE || SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
+	else if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE || SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY || Practice::settings.nonSaved.enabled)
 		Practice::activate();
 	else
 		return (This->*s_origCBattleManager_Process)();
@@ -124,6 +176,18 @@ void hookFunctions()
 			reinterpret_cast<DWORD>(CSelect_OnProcess)
 		)
 	);
+	s_origCSelectSV_Process = SokuLib::union_cast<int (SelectSV::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CSelectSV + SokuLib::OFFSET_ON_PROCESS,
+			reinterpret_cast<DWORD>(CSelectSV_OnProcess)
+		)
+	);
+	s_origCSelectCL_Process = SokuLib::union_cast<int (SelectCL::*)()>(
+		SokuLib::TamperDword(
+			SokuLib::vtbl_CSelectCL + SokuLib::OFFSET_ON_PROCESS,
+			reinterpret_cast<DWORD>(CSelectCL_OnProcess)
+		)
+	);
 	s_origCLoading_Process = SokuLib::union_cast<int (Loading::*)()>(
 		SokuLib::TamperDword(
 			SokuLib::vtbl_CLoading + SokuLib::OFFSET_ON_PROCESS,
@@ -144,7 +208,11 @@ void hookFunctions()
 	);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
-	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+	VirtualProtect((PVOID)RECVFROM_JUMP_ADDR, 6, PAGE_EXECUTE_WRITECOPY, &old);
+	original_recvfrom = reinterpret_cast<int (__stdcall *)(SOCKET, char *, int, int, sockaddr *, int *)>(SokuLib::TamperDword(RECVFROM_JUMP_ADDR, reinterpret_cast<DWORD>(myRecvfrom)));
+	VirtualProtect((PVOID)RECVFROM_JUMP_ADDR, 6, old, &old);
+
+	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	int newOffset = reinterpret_cast<int>(Practice::loadDeckData) - PAYLOAD_NEXT_INSTR_DECK_INFOS;
 	Practice::s_origLoadDeckData = SokuLib::union_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &)>(*(int *)PAYLOAD_ADDRESS_DECK_INFOS + PAYLOAD_NEXT_INSTR_DECK_INFOS);
 	*(int *)PAYLOAD_ADDRESS_DECK_INFOS = newOffset;

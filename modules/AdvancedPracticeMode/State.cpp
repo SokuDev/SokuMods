@@ -139,7 +139,10 @@ namespace Practice
 		if (sfmlWindow)
 			return;
 
-		settings.load();
+		if (settings.nonSaved.enabled)
+			settings.reset();
+		else
+			settings.load();
 		puts("Opening window");
 		sfmlWindow = new sf::RenderWindow{{640, 480}, "Advanced Practice Mode", sf::Style::Titlebar};
 		puts("Window opened");
@@ -183,14 +186,15 @@ namespace Practice
 		if (!sfmlWindow)
 			return;
 
-		settings.save();
+		if (!settings.nonSaved.enabled)
+			settings.save();
 		delete sfmlWindow;
 		sfmlWindow = nullptr;
 		removeHooks();
 	}
 
-	Settings::Settings(bool activated) :
-		nonSaved{activated, false, false, false, false, false, false}
+	Settings::Settings(bool activated, bool enabled) :
+		nonSaved{activated, false, false, false, false, false, false, enabled}
 	{
 		this->showRawInputs = false;
 		this->showEmptyInputs = false;
@@ -224,7 +228,7 @@ namespace Practice
 		if (MAGIC_NUMBER != this->magicNumber) {
 			std::cerr << "Error: Couldn't load settings from \"APMSettings/APMLastSession.dat\": ";
 			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number 0x" << MAGIC_NUMBER << std::endl;
-			*this = Settings();
+			*this = Settings(this->nonSaved.activated, this->nonSaved.enabled);
 		}
 		this->nonSaved.leftState.load(SokuLib::leftChar, true);
 		this->nonSaved.rightState.load(SokuLib::rightChar, false);
@@ -251,8 +255,15 @@ namespace Practice
 
 	Settings::~Settings()
 	{
-		if (this->nonSaved.activated)
+		if (this->nonSaved.activated && !this->nonSaved.enabled)
 			this->save();
+	}
+
+	void Settings::reset()
+	{
+		*this = Settings(this->nonSaved.activated, this->nonSaved.enabled);
+		this->nonSaved.leftState  = CharacterState(SokuLib::leftChar);
+		this->nonSaved.rightState = CharacterState(SokuLib::rightChar);
 	}
 
 	void CharacterState::save(bool isLeft) const
@@ -285,62 +296,43 @@ namespace Practice
 		std::ifstream stream{path};
 
 		if (!stream) {
-			SokuLib::Skill buffer[15] = {
-				{0x00, false},
-				{0x00, false},
-				{0x00, false},
-				{0x00, false},
-				{
-				 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
-				       chr != SokuLib::CHARACTER_PATCHOULI
-				},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-			};
-
 			std::cerr << "Error: Couldn't load file from \"" << path << "\": " << strerror(errno) << std::endl;
-			*this = CharacterState();
-			this->_chr = chr;
-			memcpy(&this->skillMap, &buffer, sizeof(buffer));
+			*this = CharacterState(chr);
 			return;
 		}
 		stream.read(reinterpret_cast<char *>(this), sizeof(*this));
 		if (MAGIC_NUMBER_CHR != this->magicNumber) {
-			SokuLib::Skill buffer[15] = {
-				{0x00, false},
-				{0x00, false},
-				{0x00, false},
-				{0x00, false},
-				{
-				 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
-				       chr != SokuLib::CHARACTER_PATCHOULI
-				},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-				{0x7F, true},
-			};
-
 			std::cerr << "Error: Couldn't load file from \"" << path << "\": ";
 			std::cerr << "Magic number 0x" << std::hex << this->magicNumber << " doesn't match expected magic number 0x" << MAGIC_NUMBER_CHR << std::endl;
-			*this = CharacterState();
-			this->_chr = chr;
-			memcpy(&this->skillMap, &buffer, sizeof(buffer));
+			*this = CharacterState(chr);
 		}
+	}
+
+	CharacterState::CharacterState(SokuLib::Character chr)
+	{
+		SokuLib::Skill buffer[15] = {
+			{0x00, false},
+			{0x00, false},
+			{0x00, false},
+			{0x00, false},
+			{
+			 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
+			       chr != SokuLib::CHARACTER_PATCHOULI
+			},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+			{0x7F, true},
+		};
+
+		this->_chr = chr;
+		memcpy(&this->skillMap, &buffer, sizeof(buffer));
 	}
 
 	void MacroManager::load()

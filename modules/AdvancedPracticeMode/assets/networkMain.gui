@@ -11,9 +11,8 @@ Panel.Panel {
 
 Tabs.Tabs {
     AutoSize = 0;
-    Selected = 0;
     Size = (&.w, 20);
-    Tabs = [Characters, Dummy, State, Macros, Misc];
+    Tabs = [Characters, Network, State, Misc];
     TextSize = 13;
 
     Renderer {
