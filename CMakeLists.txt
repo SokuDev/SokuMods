@@ -48,7 +48,7 @@ option(ENABLE_UNIX_SOCKETS "" OFF)
 option(CURL_CA_BUNDLE "" none)
 option(CURL_CA_PATH "" none)
 option(CURL_WINDOWS_SSPI "" OFF)
-add_subdirectory(curl EXCLUDE_FROM_ALL)
+#add_subdirectory(curl EXCLUDE_FROM_ALL)
 
 # detours
 
@@ -152,15 +152,15 @@ function(module name)
     set(SOKUENGINE_MODULE_PATHS "${SOKUENGINE_MODULE_PATHS}${name} = ${Default}\r\n" PARENT_SCOPE)
 endfunction()
 
-module(Autopunch Default)
-target_sources(Autopunch PRIVATE modules/Autopunch/Autopunch.c)
-target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
-set(INSTALL_AUTOPUNCH_DAT false CACHE BOOL "Whether to pre-install the current Autopunch dat")
-if(INSTALL_AUTOPUNCH_DAT)
-    file(DOWNLOAD "http://autopunch-update.delthas.fr/update" "${CMAKE_BINARY_DIR}/autopunch.dat")
-    install(FILES "${CMAKE_BINARY_DIR}/autopunch.dat" DESTINATION "SWRSToys/modules/Autopunch/")
-    install(FILES "${CMAKE_BINARY_DIR}/autopunch.dat" DESTINATION "SokuEngine/modules/Autopunch/")
-endif()
+#module(Autopunch Default)
+#target_sources(Autopunch PRIVATE modules/Autopunch/Autopunch.c)
+#target_link_libraries(Autopunch CURL::libcurl shlwapi version user32 ws2_32)
+#set(INSTALL_AUTOPUNCH_DAT false CACHE BOOL "Whether to pre-install the current Autopunch dat")
+#if(INSTALL_AUTOPUNCH_DAT)
+#    file(DOWNLOAD "http://autopunch-update.delthas.fr/update" "${CMAKE_BINARY_DIR}/autopunch.dat")
+#    install(FILES "${CMAKE_BINARY_DIR}/autopunch.dat" DESTINATION "SWRSToys/modules/Autopunch/")
+#    install(FILES "${CMAKE_BINARY_DIR}/autopunch.dat" DESTINATION "SokuEngine/modules/Autopunch/")
+#endif()
 
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
@@ -239,24 +239,24 @@ module(FixMeiling236 Default)
 target_sources(FixMeiling236 PRIVATE
         modules/FixMeiling236/main.cpp)
 
-module(GetIP)
-target_sources(GetIP PRIVATE modules/GetIP/main.c)
-target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
+#module(GetIP)
+#target_sources(GetIP PRIVATE modules/GetIP/main.c)
+#target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
 
-module(InGameHostlist Default)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
-    target_compile_options(InGameHostlist PRIVATE /EHsc)
-endif ()
-target_sources(InGameHostlist PRIVATE
-        modules/InGameHostlist/src/dllmain.cpp
-        modules/InGameHostlist/imgui/imgui.cpp
-        modules/InGameHostlist/imgui/imgui_draw.cpp
-        modules/InGameHostlist/imgui/imgui_impl_dx9.cpp
-        modules/InGameHostlist/imgui/imgui_impl_win32.cpp
-        modules/InGameHostlist/imgui/imgui_widgets.cpp)
-target_compile_definitions(InGameHostlist PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> _HAS_STD_BYTE=0)
-target_include_directories(InGameHostlist PRIVATE include include/directx modules/InGameHostlist/include)
-target_link_libraries(InGameHostlist CURL::libcurl d3dx9 "${CMAKE_SOURCE_DIR}/lib/XInput.lib" winmm SokuEngineLib ws2_32 advapi32 shlwapi)
+#module(InGameHostlist Default)
+#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
+#    target_compile_options(InGameHostlist PRIVATE /EHsc)
+#endif ()
+#target_sources(InGameHostlist PRIVATE
+#        modules/InGameHostlist/src/dllmain.cpp
+#        modules/InGameHostlist/imgui/imgui.cpp
+#        modules/InGameHostlist/imgui/imgui_draw.cpp
+#        modules/InGameHostlist/imgui/imgui_impl_dx9.cpp
+#        modules/InGameHostlist/imgui/imgui_impl_win32.cpp
+#        modules/InGameHostlist/imgui/imgui_widgets.cpp)
+#target_compile_definitions(InGameHostlist PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> _HAS_STD_BYTE=0)
+#target_include_directories(InGameHostlist PRIVATE include include/directx modules/InGameHostlist/include)
+#target_link_libraries(InGameHostlist CURL::libcurl d3dx9 "${CMAKE_SOURCE_DIR}/lib/XInput.lib" winmm SokuEngineLib ws2_32 advapi32 shlwapi)
 
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SWRSToys/modules/InGameHostlist")
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SokuEngine/modules/InGameHostlist")
@@ -312,10 +312,10 @@ module(SkipIntro)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
-module(SokuReplays Default)
-target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
-target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
-target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
+#module(SokuReplays Default)
+#target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
+#target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
+#target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
 
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)
@@ -384,3 +384,25 @@ install(FILES README.md DESTINATION "SWRSToys"
         RENAME "SokuMods.txt")
 install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
+
+
+# WIP Module
+
+add_library(
+        "InfiniteDecks"
+        MODULE
+        modules/InfiniteDecks/main.cpp
+)
+target_compile_options(InfiniteDecks PRIVATE /Zi)
+target_compile_definitions("InfiniteDecks" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("InfiniteDecks" PRIVATE include include/directx "modules/InfiniteDecks/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
+target_link_directories("InfiniteDecks" PRIVATE lib)
+target_link_libraries(
+        InfiniteDecks
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+)
+install(TARGETS "InfiniteDecks" LIBRARY DESTINATION "SWRSToys/modules/InfiniteDecks/")
+install(TARGETS "InfiniteDecks" LIBRARY DESTINATION "SokuEngine/modules/InfiniteDecks/")
