@@ -371,7 +371,6 @@ install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
 
 
-
 # WIP Module
 
 add_library(
@@ -394,9 +393,16 @@ add_library(
         modules/AdvancedPracticeMode/Inputs.hpp
         modules/AdvancedPracticeMode/Hitboxes.cpp
         modules/AdvancedPracticeMode/Hitboxes.hpp
-        modules/AdvancedPracticeMode/Gap.cpp modules/AdvancedPracticeMode/Gap.hpp modules/AdvancedPracticeMode/Network.cpp modules/AdvancedPracticeMode/Network.hpp)
+        modules/AdvancedPracticeMode/Gap.cpp
+        modules/AdvancedPracticeMode/Gap.hpp
+        modules/AdvancedPracticeMode/Network.cpp
+        modules/AdvancedPracticeMode/Network.hpp
+)
 target_compile_options(AdvancedPracticeMode PRIVATE /Zi)
-target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+if (DEFINED NET)
+    set(NET APMNET=1)
+endif ()
+target_compile_definitions("AdvancedPracticeMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
 target_include_directories("AdvancedPracticeMode" PRIVATE include include/directx "modules/AdvancedPracticeMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
 target_link_directories("AdvancedPracticeMode" PRIVATE lib)
 if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)

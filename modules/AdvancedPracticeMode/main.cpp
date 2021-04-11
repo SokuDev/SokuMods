@@ -79,7 +79,9 @@ int __fastcall CSelect_OnProcess(Select *This)
 int __fastcall CSelectCL_OnProcess(SelectCL *This)
 {
 	Practice::deactivate();
+#ifdef APMNET
 	networkSelectCommon();
+#endif
 
 	// super
 	return (This->*s_origCSelectCL_Process)();
@@ -88,7 +90,9 @@ int __fastcall CSelectCL_OnProcess(SelectCL *This)
 int __fastcall CSelectSV_OnProcess(SelectSV *This)
 {
 	Practice::deactivate();
+#ifdef APMNET
 	networkSelectCommon();
+#endif
 
 	// super
 	return (This->*s_origCSelectSV_Process)();
@@ -208,9 +212,11 @@ void hookFunctions()
 	);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
+#ifdef APMNET
 	VirtualProtect((PVOID)RECVFROM_JUMP_ADDR, 6, PAGE_EXECUTE_WRITECOPY, &old);
 	original_recvfrom = reinterpret_cast<int (__stdcall *)(SOCKET, char *, int, int, sockaddr *, int *)>(SokuLib::TamperDword(RECVFROM_JUMP_ADDR, reinterpret_cast<DWORD>(myRecvfrom)));
 	VirtualProtect((PVOID)RECVFROM_JUMP_ADDR, 6, old, &old);
+#endif
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	int newOffset = reinterpret_cast<int>(Practice::loadDeckData) - PAYLOAD_NEXT_INSTR_DECK_INFOS;
