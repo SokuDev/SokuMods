@@ -1,4 +1,12 @@
 Renderer.1 {
+    backgroundcolor = transparent;
+    bordercolor = #3C3C3C;
+    borders = (0, 0, 0, 0);
+    textcolor = #3C3C3C;
+    texturebackground = None;
+}
+
+Renderer.2 {
     backgroundcolor = #F5F5F5;
     backgroundcolordisabled = #E6E6E6;
     backgroundcolorhover = white;
@@ -20,44 +28,21 @@ Renderer.1 {
     texturehover = None;
 }
 
-Renderer.2 {
-    backgroundcolor = transparent;
-    bordercolor = #3C3C3C;
-    borders = (0, 0, 0, 0);
-    textcolor = #3C3C3C;
-    texturebackground = None;
-}
-
 Renderer.3 {
+    arrowbackgroundcolor = #F5F5F5;
+    arrowbackgroundcolorhover = white;
+    arrowcolor = #3C3C3C;
+    arrowcolorhover = black;
     backgroundcolor = #F5F5F5;
-    backgroundcolordisabled = #E6E6E6;
-    backgroundcolorhover = white;
-    bordercolor = #3C3C3C;
-    bordercolordisabled = #7D7D7D;
-    bordercolorfocused = #1E1EB4;
-    bordercolorhover = black;
-    borders = (1, 1, 1, 1);
-    checkcolor = #3C3C3C;
-    checkcolordisabled = #7D7D7D;
-    checkcolorhover = black;
-    textcolor = #3C3C3C;
-    textcolordisabled = #7D7D7D;
-    textcolorhover = black;
-    textdistanceratio = 0.2;
-    texturechecked = None;
-    texturecheckeddisabled = None;
-    texturecheckedfocused = None;
-    texturecheckedhover = None;
-    textureunchecked = None;
-    textureuncheckeddisabled = None;
-    textureuncheckedfocused = None;
-    textureuncheckedhover = None;
-}
-
-Renderer.4 {
-    backgroundcolor = transparent;
     bordercolor = black;
+    borders = (1, 1, 1, 1);
+    padding = (0, 0, 0, 0);
+    textcolor = #3C3C3C;
+    texturearrow = None;
+    texturearrowdisabled = None;
+    texturearrowhover = None;
     texturebackground = None;
+    texturebackgrounddisabled = None;
 }
 
 ComboBox.Weather {
@@ -70,23 +55,7 @@ ComboBox.Weather {
     SelectedItemIndex = 21;
     Size = (130, 22);
     TextSize = 13;
-
-    Renderer {
-        arrowbackgroundcolor = #F5F5F5;
-        arrowbackgroundcolorhover = white;
-        arrowcolor = #3C3C3C;
-        arrowcolorhover = black;
-        backgroundcolor = #F5F5F5;
-        bordercolor = black;
-        borders = (1, 1, 1, 1);
-        padding = (0, 0, 0, 0);
-        textcolor = #3C3C3C;
-        texturearrow = None;
-        texturearrowdisabled = None;
-        texturearrowhover = None;
-        texturebackground = None;
-        texturebackgrounddisabled = None;
-    }
+    renderer = &3;
 }
 
 CheckBox.ForceWeather {
@@ -95,7 +64,32 @@ CheckBox.ForceWeather {
     Size = (18, 18);
     Text = "Force weather at";
     TextSize = 13;
-    renderer = &3;
+
+    Renderer {
+        backgroundcolor = #F5F5F5;
+        backgroundcolordisabled = #E6E6E6;
+        backgroundcolorhover = white;
+        bordercolor = #3C3C3C;
+        bordercolordisabled = #7D7D7D;
+        bordercolorfocused = #1E1EB4;
+        bordercolorhover = black;
+        borders = (1, 1, 1, 1);
+        checkcolor = #3C3C3C;
+        checkcolordisabled = #7D7D7D;
+        checkcolorhover = black;
+        textcolor = #3C3C3C;
+        textcolordisabled = #7D7D7D;
+        textcolorhover = black;
+        textdistanceratio = 0.2;
+        texturechecked = None;
+        texturecheckeddisabled = None;
+        texturecheckedfocused = None;
+        texturecheckedhover = None;
+        textureunchecked = None;
+        textureuncheckeddisabled = None;
+        textureuncheckedfocused = None;
+        textureuncheckedhover = None;
+    }
 }
 
 EditBox.EditTimer {
@@ -106,7 +100,7 @@ EditBox.EditTimer {
     Size = (40, 20);
     Text = "99.9";
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Label.Label1 {
@@ -116,177 +110,7 @@ Label.Label1 {
     Size = (117.2, 18);
     Text = "(from 2.0 to 99.9)";
     TextSize = 13;
-    renderer = &2;
-}
-
-Panel.LeftBoxesPanel {
-    Position = (10, 100);
-    Size = (240, 290);
-    renderer = &4;
-
-    CheckBox.LeftHurtBoxes {
-        Size = (18, 18);
-        Text = "Show left hurtboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftHitBoxes {
-        Position = (0, 30);
-        Size = (18, 18);
-        Text = "Show left hitboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftPosBox {
-        Position = (0, 60);
-        Size = (18, 18);
-        Text = "Show left position box";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftCollisionBox {
-        Position = (0, 90);
-        Size = (18, 18);
-        Text = "Show left collision box";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftBuff {
-        Position = (0, 120);
-        Size = (18, 18);
-        Text = "Show left flag properties";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftHitProperties {
-        Position = (0, 150);
-        Size = (18, 18);
-        Text = "Show left hit properties";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftSubObjHurtBoxes {
-        Position = (0, 180);
-        Size = (18, 18);
-        Text = "Show left subobjects hurtboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftSubObjHitBoxes {
-        Position = (0, 210);
-        Size = (18, 18);
-        Text = "Show left subobjects hitboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftSubObjPosBox {
-        Position = (0, 240);
-        Size = (18, 18);
-        Text = "Show left subobjects position box";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.LeftSubObjProperties {
-        Position = (0, 270);
-        Size = (18, 18);
-        Text = "Show left subobjects properties";
-        TextSize = 13;
-        renderer = &3;
-    }
-}
-
-Panel.RightBoxesPanel {
-    Position = (270, 100);
-    Size = (250, 290);
-    renderer = &4;
-
-    CheckBox.RightHurtBoxes {
-        Size = (18, 18);
-        Text = "Show right hurtboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightHitBoxes {
-        Position = (0, 30);
-        Size = (18, 18);
-        Text = "Show right hitboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightPosBox {
-        Position = (0, 60);
-        Size = (18, 18);
-        Text = "Show right position box";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightCollisionBox {
-        Position = (0, 90);
-        Size = (18, 18);
-        Text = "Show right collision box";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightBuff {
-        Position = (0, 120);
-        Size = (18, 18);
-        Text = "Show right flag properties";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightHitProperties {
-        Position = (0, 150);
-        Size = (18, 18);
-        Text = "Show right hit properties";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightSubObjHurtBoxes {
-        Position = (0, 180);
-        Size = (18, 18);
-        Text = "Show right subobjects hurtboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightSubObjHitBoxes {
-        Position = (0, 210);
-        Size = (18, 18);
-        Text = "Show right subobjects hitboxes";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightSubObjPosBox {
-        Position = (0, 240);
-        Size = (18, 18);
-        Text = "Show right subobjects position box";
-        TextSize = 13;
-        renderer = &3;
-    }
-
-    CheckBox.RightSubObjProperties {
-        Position = (0, 270);
-        Size = (18, 18);
-        Text = "Show right subobjects properties";
-        TextSize = 13;
-        renderer = &3;
-    }
+    renderer = &1;
 }
 
 EditBox.FPS {
@@ -296,7 +120,7 @@ EditBox.FPS {
     Size = (30, 22);
     Text = 60;
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Label.Label2 {
@@ -306,7 +130,7 @@ Label.Label2 {
     Size = (70.2, 18);
     Text = Framerate;
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.Step {
@@ -343,25 +167,9 @@ ComboBox.Counter {
     Items = ["Normal counter hits", "Always counter hits", "Randomly counter hits"];
     ItemsToDisplay = 20;
     MaximumItems = 0;
-    Position = (10, 400);
+    Position = (10, 100);
     SelectedItemIndex = 0;
     Size = (160, 22);
     TextSize = 13;
-
-    Renderer {
-        arrowbackgroundcolor = #F5F5F5;
-        arrowbackgroundcolorhover = white;
-        arrowcolor = #3C3C3C;
-        arrowcolorhover = black;
-        backgroundcolor = #F5F5F5;
-        bordercolor = black;
-        borders = (1, 1, 1, 1);
-        padding = (0, 0, 0, 0);
-        textcolor = #3C3C3C;
-        texturearrow = None;
-        texturearrowdisabled = None;
-        texturearrowhover = None;
-        texturebackground = None;
-        texturebackgrounddisabled = None;
-    }
+    renderer = &3;
 }

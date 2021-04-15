@@ -408,10 +408,10 @@ target_link_directories("AdvancedPracticeMode" PRIVATE lib)
 if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
     set(TGUILIB "${TGUI_DIR}/lib/tgui-d.lib")
     set(
-            SFMLLIBS
-            "${SFML_DIR}/lib/sfml-graphics-d.lib"
-            "${SFML_DIR}/lib/sfml-system-d.lib"
-            "${SFML_DIR}/lib/sfml-window-d.lib"
+        SFMLLIBS
+        "${SFML_DIR}/lib/sfml-graphics-d.lib"
+        "${SFML_DIR}/lib/sfml-system-d.lib"
+        "${SFML_DIR}/lib/sfml-window-d.lib"
     )
 else ()
     set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")

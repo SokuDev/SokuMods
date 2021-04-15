@@ -1,0 +1,367 @@
+Renderer.1 {
+    backgroundcolor = #F5F5F5;
+    backgroundcolordisabled = #E6E6E6;
+    backgroundcolordown = #EBEBEB;
+    backgroundcolorhover = white;
+    bordercolor = #3C3C3C;
+    bordercolordisabled = #7D7D7D;
+    bordercolordown = black;
+    bordercolorfocused = #1E1EB4;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    textcolor = #3C3C3C;
+    textcolordisabled = #7D7D7D;
+    textcolordown = black;
+    textcolorhover = black;
+    texture = None;
+    texturedisabled = None;
+    texturedown = None;
+    texturefocused = None;
+    texturehover = None;
+}
+
+Renderer.2 {
+    backgroundcolor = #F5F5F5;
+    backgroundcolordisabled = #E6E6E6;
+    backgroundcolorhover = white;
+    bordercolor = #3C3C3C;
+    bordercolordisabled = #7D7D7D;
+    bordercolorfocused = #1E1EB4;
+    bordercolorhover = black;
+    borders = (1, 1, 1, 1);
+    checkcolor = #3C3C3C;
+    checkcolordisabled = #7D7D7D;
+    checkcolorhover = black;
+    textcolor = #3C3C3C;
+    textcolordisabled = #7D7D7D;
+    textcolorhover = black;
+    textdistanceratio = 0.2;
+    texturechecked = None;
+    texturecheckeddisabled = None;
+    texturecheckedfocused = None;
+    texturecheckedhover = None;
+    textureunchecked = None;
+    textureuncheckeddisabled = None;
+    textureuncheckedfocused = None;
+    textureuncheckedhover = None;
+}
+
+Renderer.3 {
+    backgroundcolor = transparent;
+    bordercolor = black;
+    texturebackground = None;
+}
+
+Panel.LeftBoxesPanel {
+    Position = (10, 10);
+    Size = (240, 290);
+    renderer = &3;
+
+    CheckBox.LeftHurtBoxes {
+        Size = (18, 18);
+        Text = "Show left hurtboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftHitBoxes {
+        Position = (0, 30);
+        Size = (18, 18);
+        Text = "Show left hitboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftPosBox {
+        Position = (0, 60);
+        Size = (18, 18);
+        Text = "Show left position box";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftCollisionBox {
+        Position = (0, 90);
+        Size = (18, 18);
+        Text = "Show left collision box";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftBuff {
+        Position = (0, 120);
+        Size = (18, 18);
+        Text = "Show left flag properties";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftHitProperties {
+        Position = (0, 150);
+        Size = (18, 18);
+        Text = "Show left hit properties";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftSubObjHurtBoxes {
+        Position = (0, 180);
+        Size = (18, 18);
+        Text = "Show left subobjects hurtboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftSubObjHitBoxes {
+        Position = (0, 210);
+        Size = (18, 18);
+        Text = "Show left subobjects hitboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftSubObjPosBox {
+        Position = (0, 240);
+        Size = (18, 18);
+        Text = "Show left subobjects position box";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.LeftSubObjProperties {
+        Position = (0, 270);
+        Size = (18, 18);
+        Text = "Show left subobjects properties";
+        TextSize = 13;
+        renderer = &2;
+    }
+}
+
+Panel.RightBoxesPanel {
+    Position = (270, 10);
+    Size = (250, 290);
+    renderer = &3;
+
+    CheckBox.RightHurtBoxes {
+        Size = (18, 18);
+        Text = "Show right hurtboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightHitBoxes {
+        Position = (0, 30);
+        Size = (18, 18);
+        Text = "Show right hitboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightPosBox {
+        Position = (0, 60);
+        Size = (18, 18);
+        Text = "Show right position box";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightCollisionBox {
+        Position = (0, 90);
+        Size = (18, 18);
+        Text = "Show right collision box";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightBuff {
+        Position = (0, 120);
+        Size = (18, 18);
+        Text = "Show right flag properties";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightHitProperties {
+        Position = (0, 150);
+        Size = (18, 18);
+        Text = "Show right hit properties";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightSubObjHurtBoxes {
+        Position = (0, 180);
+        Size = (18, 18);
+        Text = "Show right subobjects hurtboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightSubObjHitBoxes {
+        Position = (0, 210);
+        Size = (18, 18);
+        Text = "Show right subobjects hitboxes";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightSubObjPosBox {
+        Position = (0, 240);
+        Size = (18, 18);
+        Text = "Show right subobjects position box";
+        TextSize = 13;
+        renderer = &2;
+    }
+
+    CheckBox.RightSubObjProperties {
+        Position = (0, 270);
+        Size = (18, 18);
+        Text = "Show right subobjects properties";
+        TextSize = 13;
+        renderer = &2;
+    }
+}
+
+Button.Off {
+    Position = (10, 310);
+    Size = (155, 22);
+    Text = "Turn off everything";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.On {
+    Position = (10, 340);
+    Size = (155, 22);
+    Text = "Turn on everything";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.LeftOn {
+    Position = (170, 340);
+    Size = (175, 22);
+    Text = "Turn on all left boxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.LeftOff {
+    Position = (170, 310);
+    Size = (175, 22);
+    Text = "Turn off all left boxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.RightOff {
+    Position = (350, 310);
+    Size = (185, 22);
+    Text = "Turn off all right boxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.RightOn {
+    Position = (350, 340);
+    Size = (185, 22);
+    Text = "Turn on all right boxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.SubobjOff {
+    Position = (10, 370);
+    Size = (155, 22);
+    Text = "Turn off all subobjects";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.LeftSubobjOff {
+    Position = (170, 370);
+    Size = (175, 22);
+    Text = "Turn off all left subobjects";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.RightSubobjOff {
+    Position = (350, 370);
+    Size = (185, 22);
+    Text = "Turn off all right subobjects";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.SubobjOn {
+    Position = (10, 400);
+    Size = (155, 22);
+    Text = "Turn on all subobjects";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.LeftSubobjOn {
+    Position = (170, 400);
+    Size = (175, 22);
+    Text = "Turn on all left subobjects";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.RightSubobjOn {
+    Position = (350, 400);
+    Size = (185, 22);
+    Text = "Turn on all right subobjects";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.PropOff {
+    Position = (300, 430);
+    Size = (165, 22);
+    Text = "Turn off all properties";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.HitOff {
+    Position = (10, 430);
+    Size = (135, 22);
+    Text = "Turn off all hitboxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.HurtOn {
+    Position = (540, 310);
+    Size = (95, 52);
+    Text = "Turn off all\n hurtboxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.HitOn {
+    Position = (150, 430);
+    Size = (145, 22);
+    Text = "Turn on all hitboxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.HurtOff {
+    Position = (540, 370);
+    Size = (95, 52);
+    Text = "Turn on all\nhurtboxes";
+    TextSize = 13;
+    renderer = &1;
+}
+
+Button.PropOn {
+    Position = (470, 430);
+    Size = (165, 22);
+    Text = "Turn on all properties";
+    TextSize = 13;
+    renderer = &1;
+}

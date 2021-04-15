@@ -576,108 +576,6 @@ namespace Practice
 		auto counter = panel->get<tgui::ComboBox>("Counter");
 		auto frameRate = panel->get<tgui::EditBox>("FPS");
 		auto frameStep = panel->get<tgui::Button>("Step");
-		auto leftHurtBoxes        = panel->get<tgui::CheckBox>("LeftHurtBoxes");
-		auto leftHitBoxes         = panel->get<tgui::CheckBox>("LeftHitBoxes");
-		auto leftPosBox           = panel->get<tgui::CheckBox>("LeftPosBox");
-		auto leftCollisionBox     = panel->get<tgui::CheckBox>("LeftCollisionBox");
-		auto leftBuff             = panel->get<tgui::CheckBox>("LeftBuff");
-		auto leftHitProperties    = panel->get<tgui::CheckBox>("LeftHitProperties");
-		auto leftSubObjHurtBoxes  = panel->get<tgui::CheckBox>("LeftSubObjHurtBoxes");
-		auto leftSubObjHitBoxes   = panel->get<tgui::CheckBox>("LeftSubObjHitBoxes");
-		auto leftSubObjPosBox     = panel->get<tgui::CheckBox>("LeftSubObjPosBox");
-		auto leftSubObjProperties = panel->get<tgui::CheckBox>("LeftSubObjProperties");
-		auto rightHurtBoxes       = panel->get<tgui::CheckBox>("RightHurtBoxes");
-		auto rightHitBoxes        = panel->get<tgui::CheckBox>("RightHitBoxes");
-		auto rightPosBox          = panel->get<tgui::CheckBox>("RightPosBox");
-		auto rightCollisionBox    = panel->get<tgui::CheckBox>("RightCollisionBox");
-		auto rightBuff            = panel->get<tgui::CheckBox>("RightBuff");
-		auto rightHitProperties   = panel->get<tgui::CheckBox>("RightHitProperties");
-		auto rightSubObjHurtBoxes = panel->get<tgui::CheckBox>("RightSubObjHurtBoxes");
-		auto rightSubObjHitBoxes  = panel->get<tgui::CheckBox>("RightSubObjHitBoxes");
-		auto rightSubObjPosBox    = panel->get<tgui::CheckBox>("RightSubObjPosBox");
-		auto rightSubObjProperties= panel->get<tgui::CheckBox>("RightSubObjProperties");
-
-		leftHurtBoxes->setChecked(settings.leftHitboxSettings.showHurtboxes);
-		leftHitBoxes->setChecked(settings.leftHitboxSettings.showHitboxes);
-		leftPosBox->setChecked(settings.leftHitboxSettings.showPosition);
-		leftCollisionBox->setChecked(settings.leftHitboxSettings.showCollisionBox);
-		leftBuff->setChecked(settings.leftHitboxSettings.showBuffProperties);
-		leftHitProperties->setChecked(settings.leftHitboxSettings.showHitProperties);
-		leftSubObjHurtBoxes->setChecked(settings.leftHitboxSettings.showSubObjectHurtboxes);
-		leftSubObjHitBoxes->setChecked(settings.leftHitboxSettings.showSubObjectHitboxes);
-		leftSubObjPosBox->setChecked(settings.leftHitboxSettings.showSubObjectPosition);
-		leftSubObjProperties->setChecked(settings.leftHitboxSettings.showSubObjectProperties);
-		rightHurtBoxes->setChecked(settings.rightHitboxSettings.showHurtboxes);
-		rightHitBoxes->setChecked(settings.rightHitboxSettings.showHitboxes);
-		rightPosBox->setChecked(settings.rightHitboxSettings.showPosition);
-		rightCollisionBox->setChecked(settings.rightHitboxSettings.showCollisionBox);
-		rightBuff->setChecked(settings.rightHitboxSettings.showBuffProperties);
-		rightHitProperties->setChecked(settings.rightHitboxSettings.showHitProperties);
-		rightSubObjHurtBoxes->setChecked(settings.rightHitboxSettings.showSubObjectHurtboxes);
-		rightSubObjHitBoxes->setChecked(settings.rightHitboxSettings.showSubObjectHitboxes);
-		rightSubObjPosBox->setChecked(settings.rightHitboxSettings.showSubObjectPosition);
-		rightSubObjProperties->setChecked(settings.rightHitboxSettings.showSubObjectProperties);
-
-		leftHurtBoxes->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showHurtboxes = b;
-		});
-		leftHitBoxes->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showHitboxes = b;
-		});
-		leftPosBox->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showPosition = b;
-		});
-		leftCollisionBox->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showCollisionBox = b;
-		});
-		leftBuff->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showBuffProperties = b;
-		});
-		leftHitProperties->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showHitProperties = b;
-		});
-		leftSubObjHurtBoxes->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showSubObjectHurtboxes = b;
-		});
-		leftSubObjHitBoxes->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showSubObjectHitboxes = b;
-		});
-		leftSubObjPosBox->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showSubObjectPosition = b;
-		});
-		leftSubObjProperties->connect("Changed", [](bool b){
-			settings.leftHitboxSettings.showSubObjectProperties = b;
-		});
-		rightHurtBoxes->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showHurtboxes = b;
-		});
-		rightHitBoxes->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showHitboxes = b;
-		});
-		rightPosBox->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showPosition = b;
-		});
-		rightCollisionBox->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showCollisionBox = b;
-		});
-		rightBuff->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showBuffProperties = b;
-		});
-		rightHitProperties->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showHitProperties = b;
-		});
-		rightSubObjHurtBoxes->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showSubObjectHurtboxes = b;
-		});
-		rightSubObjHitBoxes->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showSubObjectHitboxes = b;
-		});
-		rightSubObjPosBox->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showSubObjectPosition = b;
-		});
-		rightSubObjProperties->connect("Changed", [](bool b){
-			settings.rightHitboxSettings.showSubObjectProperties = b;
-		});
 
 		frameRate->setText(std::to_string(settings.requestedFrameRate));
 		auto fct = [](std::weak_ptr<tgui::EditBox> boxWeak){
@@ -1301,23 +1199,297 @@ namespace Practice
 		}
 	}
 
+	static void displayHitboxesPanel(const std::string &profile)
+	{
+		panel->loadWidgetsFromFile(profile + "/assets/hitboxes.gui");
+
+		auto leftHurtBoxes        = panel->get<tgui::CheckBox>("LeftHurtBoxes");
+		auto leftHitBoxes         = panel->get<tgui::CheckBox>("LeftHitBoxes");
+		auto leftPosBox           = panel->get<tgui::CheckBox>("LeftPosBox");
+		auto leftCollisionBox     = panel->get<tgui::CheckBox>("LeftCollisionBox");
+		auto leftBuff             = panel->get<tgui::CheckBox>("LeftBuff");
+		auto leftHitProperties    = panel->get<tgui::CheckBox>("LeftHitProperties");
+		auto leftSubObjHurtBoxes  = panel->get<tgui::CheckBox>("LeftSubObjHurtBoxes");
+		auto leftSubObjHitBoxes   = panel->get<tgui::CheckBox>("LeftSubObjHitBoxes");
+		auto leftSubObjPosBox     = panel->get<tgui::CheckBox>("LeftSubObjPosBox");
+		auto leftSubObjProperties = panel->get<tgui::CheckBox>("LeftSubObjProperties");
+		auto rightHurtBoxes       = panel->get<tgui::CheckBox>("RightHurtBoxes");
+		auto rightHitBoxes        = panel->get<tgui::CheckBox>("RightHitBoxes");
+		auto rightPosBox          = panel->get<tgui::CheckBox>("RightPosBox");
+		auto rightCollisionBox    = panel->get<tgui::CheckBox>("RightCollisionBox");
+		auto rightBuff            = panel->get<tgui::CheckBox>("RightBuff");
+		auto rightHitProperties   = panel->get<tgui::CheckBox>("RightHitProperties");
+		auto rightSubObjHurtBoxes = panel->get<tgui::CheckBox>("RightSubObjHurtBoxes");
+		auto rightSubObjHitBoxes  = panel->get<tgui::CheckBox>("RightSubObjHitBoxes");
+		auto rightSubObjPosBox    = panel->get<tgui::CheckBox>("RightSubObjPosBox");
+		auto rightSubObjProperties= panel->get<tgui::CheckBox>("RightSubObjProperties");
+		auto onAll = panel->get<tgui::Button>("On");
+		auto offAll = panel->get<tgui::Button>("Off");
+		auto onAllLeft = panel->get<tgui::Button>("LeftOn");
+		auto offAllLeft = panel->get<tgui::Button>("LeftOff");
+		auto onAllRight = panel->get<tgui::Button>("RightOn");
+		auto offAllRight = panel->get<tgui::Button>("RightOff");
+		auto onAllSubObj = panel->get<tgui::Button>("SubobjOn");
+		auto offAllSubObj = panel->get<tgui::Button>("SubobjOff");
+		auto onAllLeftSubObj = panel->get<tgui::Button>("LeftSubobjOn");
+		auto offAllLeftSubObj = panel->get<tgui::Button>("LeftSubobjOff");
+		auto onAllRightSubObj = panel->get<tgui::Button>("RightSubobjOn");
+		auto offAllRightSubObj = panel->get<tgui::Button>("RightSubobjOff");
+		auto onAllHitBoxes = panel->get<tgui::Button>("HitOn");
+		auto offAllHitBoxes = panel->get<tgui::Button>("HitOff");
+		auto onAllHurtBoxes = panel->get<tgui::Button>("HurtOn");
+		auto offAllHurtBoxes = panel->get<tgui::Button>("HurtOff");
+		auto onAllProperties = panel->get<tgui::Button>("PropOn");
+		auto offAllProperties = panel->get<tgui::Button>("PropOff");
+		std::vector<tgui::CheckBox::Ptr> lsubObjs{
+			leftSubObjHurtBoxes,
+			leftSubObjHitBoxes,
+			leftSubObjPosBox,
+			leftSubObjProperties
+		};
+		std::vector<tgui::CheckBox::Ptr> rsubObjs{
+			rightSubObjHurtBoxes,
+			rightSubObjHitBoxes,
+			rightSubObjPosBox,
+			rightSubObjProperties
+		};
+
+		leftHurtBoxes->setChecked(settings.leftHitboxSettings.showHurtboxes);
+		leftHitBoxes->setChecked(settings.leftHitboxSettings.showHitboxes);
+		leftPosBox->setChecked(settings.leftHitboxSettings.showPosition);
+		leftCollisionBox->setChecked(settings.leftHitboxSettings.showCollisionBox);
+		leftBuff->setChecked(settings.leftHitboxSettings.showBuffProperties);
+		leftHitProperties->setChecked(settings.leftHitboxSettings.showHitProperties);
+		leftSubObjHurtBoxes->setChecked(settings.leftHitboxSettings.showSubObjectHurtboxes);
+		leftSubObjHitBoxes->setChecked(settings.leftHitboxSettings.showSubObjectHitboxes);
+		leftSubObjPosBox->setChecked(settings.leftHitboxSettings.showSubObjectPosition);
+		leftSubObjProperties->setChecked(settings.leftHitboxSettings.showSubObjectProperties);
+		rightHurtBoxes->setChecked(settings.rightHitboxSettings.showHurtboxes);
+		rightHitBoxes->setChecked(settings.rightHitboxSettings.showHitboxes);
+		rightPosBox->setChecked(settings.rightHitboxSettings.showPosition);
+		rightCollisionBox->setChecked(settings.rightHitboxSettings.showCollisionBox);
+		rightBuff->setChecked(settings.rightHitboxSettings.showBuffProperties);
+		rightHitProperties->setChecked(settings.rightHitboxSettings.showHitProperties);
+		rightSubObjHurtBoxes->setChecked(settings.rightHitboxSettings.showSubObjectHurtboxes);
+		rightSubObjHitBoxes->setChecked(settings.rightHitboxSettings.showSubObjectHitboxes);
+		rightSubObjPosBox->setChecked(settings.rightHitboxSettings.showSubObjectPosition);
+		rightSubObjProperties->setChecked(settings.rightHitboxSettings.showSubObjectProperties);
+
+		leftHurtBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showHurtboxes = b;
+		});
+		leftHitBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showHitboxes = b;
+		});
+		leftPosBox->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showPosition = b;
+		});
+		leftCollisionBox->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showCollisionBox = b;
+		});
+		leftBuff->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showBuffProperties = b;
+		});
+		leftHitProperties->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showHitProperties = b;
+		});
+		leftSubObjHurtBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectHurtboxes = b;
+		});
+		leftSubObjHitBoxes->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectHitboxes = b;
+		});
+		leftSubObjPosBox->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectPosition = b;
+		});
+		leftSubObjProperties->connect("Changed", [](bool b){
+			settings.leftHitboxSettings.showSubObjectProperties = b;
+		});
+		rightHurtBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showHurtboxes = b;
+		});
+		rightHitBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showHitboxes = b;
+		});
+		rightPosBox->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showPosition = b;
+		});
+		rightCollisionBox->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showCollisionBox = b;
+		});
+		rightBuff->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showBuffProperties = b;
+		});
+		rightHitProperties->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showHitProperties = b;
+		});
+		rightSubObjHurtBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectHurtboxes = b;
+		});
+		rightSubObjHitBoxes->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectHitboxes = b;
+		});
+		rightSubObjPosBox->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectPosition = b;
+		});
+		rightSubObjProperties->connect("Changed", [](bool b){
+			settings.rightHitboxSettings.showSubObjectProperties = b;
+		});
+
+		onAll->connect("Clicked", []{
+			for (auto &widget : panel->get<tgui::Panel>("LeftBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(true);
+			}
+			for (auto &widget : panel->get<tgui::Panel>("RightBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(true);
+			}
+		});
+		offAll->connect("Clicked", []{
+			for (auto &widget : panel->get<tgui::Panel>("LeftBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(false);
+			}
+			for (auto &widget : panel->get<tgui::Panel>("RightBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(false);
+			}
+		});
+		onAllLeft->connect("Clicked", []{
+			for (auto &widget : panel->get<tgui::Panel>("LeftBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(true);
+			}
+		});
+		offAllLeft->connect("Clicked", []{
+			for (auto &widget : panel->get<tgui::Panel>("LeftBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(false);
+			}
+		});
+		onAllRight->connect("Clicked", []{
+			for (auto &widget : panel->get<tgui::Panel>("RightBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(true);
+			}
+		});
+		offAllRight->connect("Clicked", []{
+			for (auto &widget : panel->get<tgui::Panel>("RightBoxesPanel")->getWidgets()) {
+				auto check = widget->cast<tgui::CheckBox>();
+
+				if (check)
+					check->setChecked(false);
+			}
+		});
+		onAllSubObj->connect("Clicked", [lsubObjs, rsubObjs]{
+			for (auto &w : lsubObjs)
+				w->setChecked(true);
+			for (auto &w : rsubObjs)
+				w->setChecked(true);
+		});
+		offAllSubObj->connect("Clicked", [lsubObjs, rsubObjs]{
+			for (auto &w : lsubObjs)
+				w->setChecked(false);
+			for (auto &w : rsubObjs)
+				w->setChecked(false);
+		});
+		onAllLeftSubObj->connect("Clicked", [lsubObjs]{
+			for (auto &w : lsubObjs)
+				w->setChecked(true);
+		});
+		offAllLeftSubObj->connect("Clicked", [lsubObjs]{
+			for (auto &w : lsubObjs)
+				w->setChecked(false);
+		});
+		onAllRightSubObj->connect("Clicked", [rsubObjs]{
+			for (auto &w : rsubObjs)
+				w->setChecked(true);
+		});
+		offAllRightSubObj->connect("Clicked", [rsubObjs]{
+			for (auto &w : rsubObjs)
+				w->setChecked(false);
+		});
+		onAllHitBoxes->connect("Clicked", [leftSubObjHitBoxes, rightSubObjHitBoxes, leftHitBoxes, rightHitBoxes]{
+			leftSubObjHitBoxes->setChecked(true);
+			rightSubObjHitBoxes->setChecked(true);
+			leftHitBoxes->setChecked(true);
+			rightHitBoxes->setChecked(true);
+
+		});
+		offAllHitBoxes->connect("Clicked", [leftSubObjHitBoxes, rightSubObjHitBoxes, leftHitBoxes, rightHitBoxes]{
+			leftSubObjHitBoxes->setChecked(false);
+			rightSubObjHitBoxes->setChecked(false);
+			leftHitBoxes->setChecked(false);
+			rightHitBoxes->setChecked(false);
+		});
+		onAllHurtBoxes->connect("Clicked", [leftSubObjHurtBoxes, rightSubObjHurtBoxes, leftHurtBoxes, rightHurtBoxes]{
+			leftSubObjHurtBoxes->setChecked(false);
+			rightSubObjHurtBoxes->setChecked(false);
+			leftHurtBoxes->setChecked(false);
+			rightHurtBoxes->setChecked(false);
+		});
+		offAllHurtBoxes->connect("Clicked", [leftSubObjHurtBoxes, rightSubObjHurtBoxes, leftHurtBoxes, rightHurtBoxes]{
+			leftSubObjHurtBoxes->setChecked(true);
+			rightSubObjHurtBoxes->setChecked(true);
+			leftHurtBoxes->setChecked(true);
+			rightHurtBoxes->setChecked(true);
+		});
+		onAllProperties->connect("Clicked", [leftSubObjProperties, rightSubObjProperties, leftHitProperties, rightHitProperties, leftBuff, rightBuff]{
+			leftSubObjProperties->setChecked(true);
+			rightSubObjProperties->setChecked(true);
+			leftHitProperties->setChecked(true);
+			rightHitProperties->setChecked(true);
+			leftBuff->setChecked(true);
+			rightBuff->setChecked(true);
+		});
+		offAllProperties->connect("Clicked", [leftSubObjProperties, rightSubObjProperties, leftHitProperties, rightHitProperties, leftBuff, rightBuff]{
+			leftSubObjProperties->setChecked(false);
+			rightSubObjProperties->setChecked(false);
+			leftHitProperties->setChecked(false);
+			rightHitProperties->setChecked(false);
+			leftBuff->setChecked(false);
+			rightBuff->setChecked(false);
+		});
+	}
+
+	static void updateHitboxesPanel()
+	{
+	}
+
 	static int tabChangeRequest = -1;
 	static const std::map<std::string, std::function<void (const std::string &)>> creaters{
 		{ "Characters", displaySkillsPanel },
-		{ "Macros",  displayMacroPanel },
-		{ "Dummy",  displayDummyPanel },
-		{ "State",  displayStatePanel },
-		{ "Misc",   displayMiscPanel }
+		{ "Hitboxes",   displayHitboxesPanel },
+		{ "Macros",     displayMacroPanel },
+		{ "Dummy",      displayDummyPanel },
+		{ "State",      displayStatePanel },
+		{ "Misc",       displayMiscPanel }
 	};
 	static const std::map<std::string, std::function<void ()>> updaters{
 		{ "Characters", []{
 			updateCharacterPanel(panel->get<tgui::Panel>("Left"),  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
 			updateCharacterPanel(panel->get<tgui::Panel>("Right"), SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
 		} },
-		{ "Macros",  updateMacroPanel },
-		{ "Dummy",  updateDummyPanel },
-		{ "State",  updateStatePanel },
-		{ "Misc",   updateMiscPanel }
+		{ "Hitboxes", updateHitboxesPanel },
+		{ "Macros",   updateMacroPanel },
+		{ "Dummy",    updateDummyPanel },
+		{ "State",    updateStatePanel },
+		{ "Misc",     updateMiscPanel }
 	};
 	static const std::map<SokuLib::Scene, std::string> files{
 		{ SokuLib::SCENE_BATTLE, "/assets/main.gui" },
@@ -1367,10 +1539,9 @@ namespace Practice
 
 	void loadAllGuiElements(LPCSTR profilePath)
 	{
-		puts("Loading GUI...");
-
 		std::string profile = profilePath;
 
+		printf("Loading GUI from file %s\n", (profile + files.at(SokuLib::sceneId)).c_str());
 		gui.loadWidgetsFromFile(profile + files.at(SokuLib::sceneId));
 		panel = gui.get<tgui::Panel>("Panel");
 		tab = gui.get<tgui::Tabs>("Tabs");
