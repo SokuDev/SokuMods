@@ -93,6 +93,27 @@ bool getSWRSHash(BYTE retVal[16]) {
 	return true;
 }
 
+LPWSTR GetLastErrorAsString(DWORD errorMessageID)
+{
+	if (errorMessageID == 0) {
+		return nullptr;
+	}
+
+	LPWSTR messageBuffer = nullptr;
+
+	FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr,
+		errorMessageID,
+		MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+		(LPWSTR)&messageBuffer,
+		0,
+		nullptr
+	);
+
+	return messageBuffer;
+}
+
 bool Hook(HMODULE this_module) {
 	BYTE hash[16];
 	if (!getSWRSHash(hash)) {
@@ -142,8 +163,10 @@ bool Hook(HMODULE this_module) {
 
 		HMODULE module = LoadLibraryW(module_path);
 		if (module == NULL) {
+			DWORD err = GetLastError();
+
 			if (warn) {
-				WARN(L"Failed loading %s: loading failed: %x", moduleValue, GetLastError())
+				WARN(L"Failed loading %s: GetLastError() 0x%x: %s", moduleValue, err, GetLastErrorAsString(err))
 			}
 			continue;
 		}
