@@ -110,6 +110,7 @@ namespace Practice
 #define FAR_SPRITE_POS         Vector2<int>{288, 36}
 #define UNDERGROUND_SPRITE_POS Vector2<int>{320, 4}
 #define REIMU_SPRITE_POS       Vector2<int>{320, 36}
+#define CHARGED_SPRITE_POS     Vector2<int>{484, 4}
 
 	struct MoveState {
 		SokuLib::Action action;
@@ -121,6 +122,7 @@ namespace Practice
 	struct Input {
 		SokuLib::KeyInput input;
 		unsigned duration;
+		unsigned charged;
 		SokuLib::Action action;
 	};
 
@@ -1729,6 +1731,7 @@ namespace Practice
 						list.pop_back();
 					front = &list.front();
 					front->duration = 0;
+					front->charged = 0;
 				}
 				last.action = front->action = realAction;
 			}
@@ -1739,6 +1742,14 @@ namespace Practice
 			last.action = SokuLib::ACTION_IDLE;
 			if (realAction >= 300)
 				printf("Unknown action %i\n", realAction);
+		}
+		if (character.objectBase.action < SokuLib::ACTION_5A)
+			character.chargedAttack = 0;
+		for (auto &elem : list) {
+			if (elem.action) {
+				elem.charged += character.chargedAttack;
+				break;
+			}
 		}
 		front->duration++;
 	}
@@ -1828,8 +1839,19 @@ namespace Practice
 
 			auto it = moveSprites.find(input.action);
 
-			if (it != moveSprites.end())
-				it->second.draw(skills, spells, {border, offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
+			if (it != moveSprites.end()) {
+				if (input.charged >= 16) {
+					inputSheet.setPosition({border, offset.y});
+					inputSheet.setSize({SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE});
+					inputSheet.rect.top = CHARGED_SPRITE_POS.y;
+					inputSheet.rect.left = CHARGED_SPRITE_POS.x;
+					inputSheet.rect.width = 24;
+					inputSheet.rect.height = 32;
+					inputSheet.tint = DxSokuColor::White * alpha;
+					inputSheet.draw();
+				}
+				it->second.draw(skills, spells, {border - (input.charged >= 16 ? SPRITE_SIZE - (SPRITE_SIZE / 4) : 0), offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
+			}
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 			i++;
 			if (i > (BOX_HEIGHT / (SPRITE_SIZE + (SPRITE_SIZE / 3))))
@@ -1860,6 +1882,20 @@ namespace Practice
 			offset.y -= SPRITE_SIZE + (SPRITE_SIZE / 3);
 			offset.x = baseX;
 
+			if (input.charged >= 16) {
+				inputSheet.setPosition(offset);
+				inputSheet.setSize({SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE});
+				inputSheet.rect.top = CHARGED_SPRITE_POS.y;
+				inputSheet.rect.left = CHARGED_SPRITE_POS.x;
+				inputSheet.rect.width = 24;
+				inputSheet.rect.height = 32;
+				inputSheet.tint = DxSokuColor::White * alpha;
+				inputSheet.draw();
+				if (reversed)
+					offset.x -= SPRITE_SIZE - (SPRITE_SIZE / 4);
+				else
+					offset.x += SPRITE_SIZE - (SPRITE_SIZE / 4);
+			}
 			it->second.draw(skills, spells, offset, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, reversed, character, input.action, alpha);
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 
