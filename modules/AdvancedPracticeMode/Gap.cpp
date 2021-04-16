@@ -148,7 +148,7 @@ namespace Practice
 		return val;
 	}
 
-	void initFont()
+	static void initFont()
 	{
 		SokuLib::FontDescription desc;
 

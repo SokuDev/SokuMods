@@ -14,6 +14,9 @@
 
 namespace Practice
 {
+#define FONT_HEIGHT 20
+#define TEXTURE_SIZE 0x100
+
 #define BOX_WIDTH 170
 #define BOX_WIDTH2 116
 #define BOX_HEIGHT 354
@@ -479,6 +482,7 @@ namespace Practice
 		UP_SPRITE_POS,
 		RIGHTUP_SPRITE_POS,
 	};
+	static SokuLib::SWRFont font;
 	static GradiantRect leftBox;
 	static GradiantRect rightBox;
 	static std::vector<Vector2<float>> leftLastInputList;
@@ -1450,10 +1454,35 @@ namespace Practice
 		} }
 	};
 
+	static void initFont()
+	{
+		SokuLib::FontDescription desc;
+
+		desc.r1 = 205;
+		desc.r2 = 205;
+		desc.g1 = 205;
+		desc.g2 = 205;
+		desc.b1 = 205;
+		desc.height = FONT_HEIGHT;
+		desc.weight = FW_BOLD;
+		desc.italic = 0;
+		desc.shadow = 2;
+		desc.bufferSize = 1000000;
+		desc.charSpaceX = 0;
+		desc.charSpaceY = 0;
+		desc.offsetX = 0;
+		desc.offsetY = 0;
+		desc.useOffset = 0;
+		strcpy(desc.faceName, "Tahoma");
+		font.create();
+		font.setIndirect(desc);
+	}
+
 	void initInputDisplay(LPCSTR profilePath)
 	{
 		std::string profile = profilePath;
 
+		initFont();
 		leftInputList.clear();
 		rightInputList.clear();
 		leftLastInputList.clear();
@@ -1736,6 +1765,34 @@ namespace Practice
 			pos.x += SPRITE_SIZE;
 	}
 
+	void showDuration(unsigned int value, Vector2<int> &pos, bool goLeft)
+	{
+		Sprite sprite;
+		char buffer[20];
+		int text;
+
+		sprintf(buffer, "%i", value);
+		if (!SokuLib::textureMgr.createTextTexture(&text, buffer, font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
+			puts("C'est vraiment pas de chance");
+			return;
+		}
+
+		if (goLeft)
+			pos.x -= (strlen(buffer) - 2) * 10;
+		sprite.setPosition(pos);
+		sprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+		sprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+		sprite.rect = {
+			0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+		};
+		sprite.tint = DxSokuColor::White;
+		sprite.draw();
+		if (!goLeft)
+			pos.x += strlen(buffer) * 10;
+		else
+			pos.x -= 20;
+	}
+
 	//TODO: Pass a struct instead of this never-ending argument list
 	void drawInputList(Sprite &skills, Sprite &spells, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
 	{
@@ -1767,6 +1824,7 @@ namespace Practice
 			showInput(input.input.d, offset, D_SPRITE_POS, reversed);
 			showInput(input.input.changeCard, offset, CH_SPRITE_POS, reversed);
 			showInput(input.input.spellcard, offset, SC_SPRITE_POS, reversed);
+			showDuration(input.duration, offset, reversed);
 
 			auto it = moveSprites.find(input.action);
 
