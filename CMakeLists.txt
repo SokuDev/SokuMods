@@ -392,6 +392,8 @@ add_library(
         "InfiniteDecks"
         MODULE
         modules/InfiniteDecks/main.cpp
+        modules/InfiniteDecks/DrawUtils.cpp
+        modules/InfiniteDecks/DrawUtils.hpp
 )
 target_compile_options(InfiniteDecks PRIVATE /Zi)
 target_compile_definitions("InfiniteDecks" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
@@ -403,6 +405,8 @@ target_link_libraries(
         shlwapi
         ws2_32
         user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
 install(TARGETS "InfiniteDecks" LIBRARY DESTINATION "SWRSToys/modules/InfiniteDecks/")
 install(TARGETS "InfiniteDecks" LIBRARY DESTINATION "SokuEngine/modules/InfiniteDecks/")
