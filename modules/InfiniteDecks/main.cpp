@@ -88,10 +88,24 @@ static bool side = false;
 
 #define SENDTO_JUMP_ADDR 0x00857290
 
+unsigned short getRandomCard(const std::vector<unsigned short> &list, const std::map<unsigned short, unsigned char> &other)
+{
+	unsigned short card;
+
+	try {
+		do
+			card = list[rand() % list.size()];
+		while (other.at(card) >= 4);
+	} catch (std::out_of_range &) {}
+	return card;
+}
+
 void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const std::array<unsigned short, 20> *base, std::array<unsigned short, 20> &buffer)
 {
 	unsigned last = 100 + 3 * (4 + (chr == SokuLib::CHARACTER_PATCHOULI));
+	std::map<unsigned short, unsigned char> used;
 	std::vector<unsigned short> cards;
+	unsigned char c = 0;
 
 	for (int i = 0; i < 21; i++)
 		cards.push_back(i);
@@ -100,14 +114,31 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const 
 	for (auto &card : characterSpellCards[chr])
 		cards.push_back(card);
 
-	if (!base) {
-		for (int i = 0; i < 20; i++)
-			buffer[i] = cards[rand() % cards.size()];
-		return;
-	}
+	if (base) {
+		int index = 0;
 
-	for (int i = 0; i < 20; i++)
-		buffer[i] = (*base)[i] != 21 ? (*base)[i] : cards[rand() % cards.size()];
+		for (int i = 0; i < 20; i++)
+			if ((*base)[i] == 21)
+				c++;
+			else {
+				buffer[index] = (*base)[i];
+				if (used.find(buffer[index]) == used.end())
+					used[buffer[index]] = 1;
+				else
+					used[buffer[index]]++;
+				index++;
+			}
+		return;
+	} else
+		c = 20;
+
+	while (c--) {
+		buffer[19 - c] = getRandomCard(cards, used);
+		if (used.find(buffer[19 - c]) == used.end())
+			used[buffer[19 - c]] = 1;
+		else
+			used[buffer[19 - c]]++;
+	}
 }
 
 void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsigned id, const std::vector<Deck> &bases, std::array<unsigned short, 20> &buffer)
