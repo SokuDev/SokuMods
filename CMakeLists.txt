@@ -410,3 +410,9 @@ target_link_libraries(
 )
 install(TARGETS "InfiniteDecks" LIBRARY DESTINATION "SWRSToys/modules/InfiniteDecks/")
 install(TARGETS "InfiniteDecks" LIBRARY DESTINATION "SokuEngine/modules/InfiniteDecks/")
+
+add_executable(
+        ProfileConverter
+        modules/InfiniteDecks/ProfileConverter.c
+)
+target_link_libraries(ProfileConverter shlwapi)
