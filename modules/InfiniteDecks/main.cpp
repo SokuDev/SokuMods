@@ -251,8 +251,9 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 	return sendto(s, buf, len, flags, to, tolen);
 }
 
-static void handleProfileChange(int This, char *arg)
+static void handleProfileChange(int This, SokuLib::String *str)
 {
+	char *arg = *str;
 	std::string profile{arg, strstr(arg, ".pf")};
 	int index = 2;
 
@@ -363,8 +364,8 @@ static void onProfileChanged()
 	__asm mov arg, esp;
 
 	arg = *(char **)(arg + 0x28);
-	arg += 0x20;
-	handleProfileChange(This, arg);
+	arg += 0x1C;
+	handleProfileChange(This, reinterpret_cast<SokuLib::String *>(arg));
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos)
@@ -579,13 +580,17 @@ int __fastcall myGetInput(Select *This) {
 
 	if (reinterpret_cast<int>(This) == scene + 0x150) {
 		index = 0;
-		*(int *)(scene + 0x15C) = 0;
-		*(int *)(scene + 0x160) = 0;
+		if (SokuLib::sceneId == SokuLib::SCENE_SELECT) {
+			*(int *)(scene + 0x15C) = 0;
+			*(int *)(scene + 0x160) = 0;
+		}
 		keys = reinterpret_cast<SokuLib::KeyManager *>(scene + 0x10);
 	} else if (reinterpret_cast<int>(This) == scene + 0x178) {
 		index = 1;
-		*(int *)(scene + 0x184) = 0;
-		*(int *)(scene + 0x188) = 0;
+		if (SokuLib::sceneId == SokuLib::SCENE_SELECT) {
+			*(int *)(scene + 0x184) = 0;
+			*(int *)(scene + 0x188) = 0;
+		}
 		keys = reinterpret_cast<SokuLib::KeyManager *>(scene + 0x14);
 	}
 	if (ret) {
