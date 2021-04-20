@@ -517,28 +517,25 @@ int renderingCommon(int ret)
 	initFont();
 
 	std::string name;
-	auto stageUp = *reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C0);
-	auto stageDown = *reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C1);
-	auto &randUp = *reinterpret_cast<bool *>(*(int *)0x8a000c + 0x22C2);
-	auto &randDown = *reinterpret_cast<bool *>(*(int *)0x8a000c + 0x22C3);
+	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
-	if (randUp) {
-		randUp = false;
+	if (scene.leftRandomDeck) {
+		scene.leftRandomDeck = false;
 		upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 3;
 	}
-	if (randDown) {
-		randDown = false;
+	if (scene.rightRandomDeck) {
+		scene.rightRandomDeck = false;
 		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
 	}
 
 	if (
-		stageUp == 1 &&
+		scene.leftSelectionStage == 1 &&
 		SokuLib::leftChar != SokuLib::CHARACTER_RANDOM &&
 		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
 	)
 		renderDeck(SokuLib::leftChar,  upSelectedDeck,   loadedDecks[0][SokuLib::leftChar],  {28, 98});
 	if (
-		stageDown == 1 &&
+		scene.rightSelectionStage == 1 &&
 		SokuLib::rightChar != SokuLib::CHARACTER_RANDOM &&
 		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
 	)
@@ -592,10 +589,9 @@ static void loadCardAssets()
 
 static int selectProcessCommon(int v)
 {
-	auto stageUp = *reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C0);
-	auto stageDown = *reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C1);
+	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
-	if (stageUp == 3 && stageDown == 3) {
+	if (scene.leftSelectionStage == 3 && scene.rightSelectionStage == 3) {
 		if (counter < 60)
 			counter++;
 	} else {
@@ -603,7 +599,7 @@ static int selectProcessCommon(int v)
 		generated = false;
 	}
 
-	if (stageUp != 3 || stageDown != 3 || counter < 30) {
+	if (scene.leftSelectionStage != 3 || scene.rightSelectionStage != 3 || counter < 30) {
 		if (lastLeft != SokuLib::leftChar)
 			upSelectedDeck = 0;
 		lastLeft = SokuLib::leftChar;
@@ -657,33 +653,18 @@ static void handleInput(const SokuLib::KeyInput &inputs, int index)
 
 int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
 	int ret = (This->*s_originalInputMgrGet)();
-	auto scene = *(int *)0x8a000c;
-	SokuLib::KeyManager *keys;
+	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 	auto &battle = SokuLib::getBattleMgr();
-	int index = 0;
 
-	if (reinterpret_cast<int>(This) == scene + 0x150) {
-		index = 0;
-		if (SokuLib::sceneId == SokuLib::SCENE_SELECT) {
-			*(int *)(scene + 0x15C) = 0;
-			*(int *)(scene + 0x160) = 0;
-		}
-		keys = reinterpret_cast<SokuLib::KeyManager *>(scene + 0x10);
-	} else if (reinterpret_cast<int>(This) == scene + 0x178) {
-		index = SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER;
-		if (SokuLib::sceneId == SokuLib::SCENE_SELECT) {
-			*(int *)(scene + 0x184) = 0;
-			*(int *)(scene + 0x188) = 0;
-		}
-		keys = reinterpret_cast<SokuLib::KeyManager *>(scene + 0x14);
-	}
+	if (SokuLib::sceneId == SokuLib::SCENE_SELECT)
+		This->deck = 0;
 	if (ret) {
-		int a = abs(keys->keymapManager->input.horizontalAxis);
+		int a = abs(This->keys->horizontalAxis);
 
 		if (a != 1 && (a < 36 || a % 6 != 0))
 			return ret;
 		SokuLib::playSEWaveBuffer(0x27);
-		handleInput(keys->keymapManager->input, index);
+		handleInput(*This->keys, This != &scene.leftSelect && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER);
 		return 0;
 	}
 	return ret;
