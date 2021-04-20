@@ -9,17 +9,15 @@
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x100
 
-struct Select {};
-
 static bool firstLoad = true;
 static bool loaded = false;
-static int (Select::*s_originalSelectOnProcess)();
-static int (Select::*s_originalSelectCLOnProcess)();
-static int (Select::*s_originalSelectSVOnProcess)();
-static int (Select::*s_originalSelectOnRender)();
-static int (Select::*s_originalSelectCLOnRender)();
-static int (Select::*s_originalSelectSVOnRender)();
-static int (Select::*s_originalInputMgrGet)();
+static int (SokuLib::Select::*s_originalSelectOnProcess)();
+static int (SokuLib::SelectClient::*s_originalSelectCLOnProcess)();
+static int (SokuLib::SelectServer::*s_originalSelectSVOnProcess)();
+static int (SokuLib::Select::*s_originalSelectOnRender)();
+static int (SokuLib::SelectClient::*s_originalSelectCLOnRender)();
+static int (SokuLib::SelectServer::*s_originalSelectSVOnRender)();
+static int (SokuLib::ObjectSelect::*s_originalInputMgrGet)();
 void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &);
 
 std::array<std::map<unsigned short, DrawUtils::Sprite>, SokuLib::CHARACTER_RANDOM + 1> cardsTextures;
@@ -171,7 +169,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 	std::array<unsigned short, 20> randomDeck{21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21};
 
 	if (lastChr == SokuLib::CHARACTER_RANDOM)
-		return generateFakeDeck(chr, lastChr, &randomDeck, buffer);
+		return generateFakeDeck(chr, chr, rand() % (bases.size() + 1), bases, buffer);
 	if (id == bases.size())
 		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
 	if (id == bases.size() + 1)
@@ -188,7 +186,7 @@ void generateFakeDecks()
 	if (generated)
 		return;
 	generated = true;
-	generateFakeDeck(SokuLib::leftChar, lastLeft, upSelectedDeck, loadedDecks[0][SokuLib::leftChar], fakeLeftDeck);
+	generateFakeDeck(SokuLib::leftChar,  lastLeft,  upSelectedDeck,  loadedDecks[0][SokuLib::leftChar], fakeLeftDeck);
 	generateFakeDeck(SokuLib::rightChar, lastRight, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], fakeRightDeck);
 }
 
@@ -532,15 +530,6 @@ int renderingCommon(int ret)
 		randDown = false;
 		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
 	}
-	if (stageUp == 3 && stageDown == 3) {
-		if (counter >= 60)
-			return ret;
-		else
-			counter++;
-	} else {
-		counter = 0;
-		generated = false;
-	}
 
 	if (
 		stageUp == 1 &&
@@ -557,15 +546,15 @@ int renderingCommon(int ret)
 	return ret;
 }
 
-int __fastcall CSelectCL_OnRender(Select *This) {
+int __fastcall CSelectCL_OnRender(SokuLib::SelectClient *This) {
 	return renderingCommon((This->*s_originalSelectCLOnRender)());
 }
 
-int __fastcall CSelectSV_OnRender(Select *This) {
+int __fastcall CSelectSV_OnRender(SokuLib::SelectServer *This) {
 	return renderingCommon((This->*s_originalSelectSVOnRender)());
 }
 
-int __fastcall CSelect_OnRender(Select *This) {
+int __fastcall CSelect_OnRender(SokuLib::Select *This) {
 	return renderingCommon((This->*s_originalSelectOnRender)());
 }
 
@@ -603,7 +592,18 @@ static void loadCardAssets()
 
 static int selectProcessCommon(int v)
 {
-	if (counter < 60) {
+	auto stageUp = *reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C0);
+	auto stageDown = *reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C1);
+
+	if (stageUp == 3 && stageDown == 3) {
+		if (counter < 60)
+			counter++;
+	} else {
+		counter = 0;
+		generated = false;
+	}
+
+	if (stageUp != 3 || stageDown != 3 || counter < 30) {
 		if (lastLeft != SokuLib::leftChar)
 			upSelectedDeck = 0;
 		lastLeft = SokuLib::leftChar;
@@ -624,15 +624,15 @@ static int selectProcessCommon(int v)
 	return v;
 }
 
-int __fastcall CSelectCL_OnProcess(Select *This) {
+int __fastcall CSelectCL_OnProcess(SokuLib::SelectClient *This) {
 	return selectProcessCommon((This->*s_originalSelectCLOnProcess)());
 }
 
-int __fastcall CSelectSV_OnProcess(Select *This) {
+int __fastcall CSelectSV_OnProcess(SokuLib::SelectServer *This) {
 	return selectProcessCommon((This->*s_originalSelectSVOnProcess)());
 }
 
-int __fastcall CSelect_OnProcess(Select *This) {
+int __fastcall CSelect_OnProcess(SokuLib::Select *This) {
 	return selectProcessCommon((This->*s_originalSelectOnProcess)());
 }
 
@@ -655,7 +655,7 @@ static void handleInput(const SokuLib::KeyInput &inputs, int index)
 	}
 }
 
-int __fastcall myGetInput(Select *This) {
+int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
 	int ret = (This->*s_originalInputMgrGet)();
 	auto scene = *(int *)0x8a000c;
 	SokuLib::KeyManager *keys;
@@ -703,39 +703,21 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen_s(&_, "CONOUT$", "w", stderr);
 	puts("Hey !");
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_originalSelectCLOnProcess = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperDword(
-		SokuLib::vtbl_CSelectCL + SokuLib::OFFSET_ON_PROCESS,
-		reinterpret_cast<DWORD>(CSelectCL_OnProcess)
-	));
-	s_originalSelectSVOnProcess = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperDword(
-		SokuLib::vtbl_CSelectSV + SokuLib::OFFSET_ON_PROCESS,
-		reinterpret_cast<DWORD>(CSelectSV_OnProcess)
-	));
-	s_originalSelectOnProcess = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperDword(
-		SokuLib::vtbl_CSelect + SokuLib::OFFSET_ON_PROCESS,
-		reinterpret_cast<DWORD>(CSelect_OnProcess)
-	));
-	s_originalSelectCLOnRender = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperDword(
-		SokuLib::vtbl_CSelectCL + SokuLib::OFFSET_ON_RENDER,
-		reinterpret_cast<DWORD>(CSelectCL_OnRender)
-	));
-	s_originalSelectSVOnRender = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperDword(
-		SokuLib::vtbl_CSelectSV + SokuLib::OFFSET_ON_RENDER,
-		reinterpret_cast<DWORD>(CSelectSV_OnRender)
-	));
-	s_originalSelectOnRender = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperDword(
-		SokuLib::vtbl_CSelect + SokuLib::OFFSET_ON_RENDER,
-		reinterpret_cast<DWORD>(CSelect_OnRender)
-	));
-	SokuLib::TamperDword(SENDTO_JUMP_ADDR, reinterpret_cast<DWORD>(mySendTo));
+	s_originalSelectCLOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, CSelectCL_OnProcess);
+	s_originalSelectSVOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, CSelectSV_OnProcess);
+	s_originalSelectOnProcess   = SokuLib::TamperDword(&SokuLib::VTable_Select.onProcess, CSelect_OnProcess);
+	s_originalSelectCLOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onRender, CSelectCL_OnRender);
+	s_originalSelectSVOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender, CSelectSV_OnRender);
+	s_originalSelectOnRender    = SokuLib::TamperDword(&SokuLib::VTable_Select.onRender, CSelect_OnRender);
+	SokuLib::TamperDword(SENDTO_JUMP_ADDR, mySendTo);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	//Force deck icon to be hidden
 	*(unsigned char *)0x4210e2 = 0xEB;
-	s_originalInputMgrGet = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, reinterpret_cast<DWORD>(myGetInput)));
+	s_originalInputMgrGet = SokuLib::union_cast<int (SokuLib::ObjectSelect::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, myGetInput));
 	s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
-		SokuLib::TamperNearJmpOpr(0x437D23, reinterpret_cast<DWORD>(loadDeckData))
+		SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
 	);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
