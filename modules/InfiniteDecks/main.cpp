@@ -251,6 +251,31 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 	return sendto(s, buf, len, flags, to, tolen);
 }
 
+static void sanitizeDeck(SokuLib::Character chr, Deck &deck)
+{
+	unsigned last = 100 + 3 * (4 + (chr == SokuLib::CHARACTER_PATCHOULI));
+	std::map<unsigned short, unsigned char> used;
+	std::vector<unsigned short> cards;
+
+	for (int i = 0; i <= 21; i++)
+		cards.push_back(i);
+	for (int i = 100; i < last; i++)
+		cards.push_back(i);
+	for (auto &card : characterSpellCards[chr])
+		cards.push_back(card);
+	for (int i = 0; i < 20; i++) {
+		auto &card = deck.cards[i];
+
+		if (card == 21)
+			continue;
+		if (std::find(cards.begin(), cards.end(), card) == cards.end() || used[card] >= 4) {
+			card = 21;
+			continue;
+		}
+		used[card]++;
+	}
+}
+
 static void handleProfileChange(int This, SokuLib::String *str)
 {
 	char *arg = *str;
@@ -308,6 +333,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 			else
 				deck.name = elem["name"];
 			memcpy(deck.cards.data(), elem["cards"].get<std::vector<unsigned short>>().data(), sizeof(*deck.cards.data()) * deck.cards.size());
+			sanitizeDeck(static_cast<SokuLib::Character>(i), deck);
 			std::sort(deck.cards.begin(), deck.cards.end());
 			arr[i].push_back(deck);
 		}
