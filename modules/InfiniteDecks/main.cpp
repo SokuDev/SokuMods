@@ -168,21 +168,19 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const 
 
 void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsigned id, const std::vector<Deck> &bases, std::unique_ptr<std::array<unsigned short, 20>> &buffer)
 {
-	if (lastChr == SokuLib::CHARACTER_RANDOM)
-		return generateFakeDeck(chr, lastChr, nullptr, buffer);
-
 	std::array<unsigned short, 20> randomDeck{21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21};
 
+	if (lastChr == SokuLib::CHARACTER_RANDOM)
+		return generateFakeDeck(chr, lastChr, &randomDeck, buffer);
 	if (id == bases.size())
 		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
-	else if (id == bases.size() + 1)
+	if (id == bases.size() + 1)
 		return generateFakeDeck(chr, lastChr, nullptr, buffer);
-	else if (id == bases.size() + 2)
+	if (id == bases.size() + 2)
 		return generateFakeDeck(chr, lastChr, &randomDeck, buffer);
-	else if (id == bases.size() + 3)
+	if (id == bases.size() + 3)
 		return generateFakeDeck(chr, lastChr, rand() % (bases.size() + 1), bases, buffer);
-	else
-		return generateFakeDeck(chr, lastChr, &bases[id].cards, buffer);
+	return generateFakeDeck(chr, lastChr, &bases[id].cards, buffer);
 }
 
 void generateFakeDecks()
@@ -528,11 +526,11 @@ int renderingCommon(int ret)
 
 	if (randUp) {
 		randUp = false;
-		upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 1;
+		upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 3;
 	}
 	if (randDown) {
 		randDown = false;
-		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 1;
+		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
 	}
 	if (stageUp == 3 && stageDown == 3) {
 		if (counter >= 60)
