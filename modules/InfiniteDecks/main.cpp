@@ -122,10 +122,32 @@ unsigned short getRandomCard(const std::vector<unsigned short> &list, const std:
 
 void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const std::array<unsigned short, 20> *base, std::unique_ptr<std::array<unsigned short, 20>> &buffer)
 {
+	if (!base) {
+		buffer.reset();
+		return;
+	}
+
 	unsigned last = 100 + 3 * (4 + (chr == SokuLib::CHARACTER_PATCHOULI));
 	std::map<unsigned short, unsigned char> used;
-	std::vector<unsigned short> cards;
 	unsigned char c = 0;
+	int index = 0;
+
+	buffer = std::make_unique<std::array<unsigned short, 20>>();
+	for (int i = 0; i < 20; i++)
+		if ((*base)[i] == 21)
+			c++;
+		else {
+			(*buffer)[index] = (*base)[i];
+			if (used.find((*buffer)[index]) == used.end())
+				used[(*buffer)[index]] = 1;
+			else
+				used[(*buffer)[index]]++;
+			index++;
+		}
+	if (!c)
+		return;
+
+	std::vector<unsigned short> cards;
 
 	for (int i = 0; i < 21; i++)
 		cards.push_back(i);
@@ -133,27 +155,6 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const 
 		cards.push_back(i);
 	for (auto &card : characterSpellCards[chr])
 		cards.push_back(card);
-
-	if (base) {
-		int index = 0;
-
-		buffer = std::make_unique<std::array<unsigned short, 20>>();
-		for (int i = 0; i < 20; i++)
-			if ((*base)[i] == 21)
-				c++;
-			else {
-				(*buffer)[index] = (*base)[i];
-				if (used.find((*buffer)[index]) == used.end())
-					used[(*buffer)[index]] = 1;
-				else
-					used[(*buffer)[index]]++;
-				index++;
-			}
-		return;
-	} else {
-		buffer.reset();
-		return;
-	}
 
 	while (c--) {
 		(*buffer)[19 - c] = getRandomCard(cards, used);
@@ -656,7 +657,10 @@ int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 	auto &battle = SokuLib::getBattleMgr();
 
-	if (SokuLib::sceneId == SokuLib::SCENE_SELECT)
+	if (
+		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && This == &scene.leftSelect) ||
+		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT && This == &scene.rightSelect)
+	)
 		This->deck = 0;
 	if (ret) {
 		int a = abs(This->keys->horizontalAxis);
