@@ -20,7 +20,7 @@ static int (Select::*s_originalSelectOnRender)();
 static int (Select::*s_originalSelectCLOnRender)();
 static int (Select::*s_originalSelectSVOnRender)();
 static int (Select::*s_originalInputMgrGet)();
-void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &);
+void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &);
 
 std::array<std::map<unsigned short, DrawUtils::Sprite>, SokuLib::CHARACTER_RANDOM + 1> cardsTextures;
 std::map<SokuLib::Character, std::vector<unsigned short>> characterSpellCards{
@@ -104,8 +104,8 @@ static SokuLib::Trampoline *profileTrampoline;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
 static bool generated = false;
-static std::array<unsigned short, 20> fakeLeftDeck;
-static std::array<unsigned short, 20> fakeRightDeck;
+static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
+static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
 static bool side = false;
 
 #define SENDTO_JUMP_ADDR 0x00857290
@@ -122,7 +122,7 @@ unsigned short getRandomCard(const std::vector<unsigned short> &list, const std:
 	return card;
 }
 
-void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const std::array<unsigned short, 20> *base, std::array<unsigned short, 20> &buffer)
+void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const std::array<unsigned short, 20> *base, std::unique_ptr<std::array<unsigned short, 20>> &buffer)
 {
 	unsigned last = 100 + 3 * (4 + (chr == SokuLib::CHARACTER_PATCHOULI));
 	std::map<unsigned short, unsigned char> used;
@@ -139,41 +139,48 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const 
 	if (base) {
 		int index = 0;
 
+		buffer = std::make_unique<std::array<unsigned short, 20>>();
 		for (int i = 0; i < 20; i++)
 			if ((*base)[i] == 21)
 				c++;
 			else {
-				buffer[index] = (*base)[i];
-				if (used.find(buffer[index]) == used.end())
-					used[buffer[index]] = 1;
+				(*buffer)[index] = (*base)[i];
+				if (used.find((*buffer)[index]) == used.end())
+					used[(*buffer)[index]] = 1;
 				else
-					used[buffer[index]]++;
+					used[(*buffer)[index]]++;
 				index++;
 			}
 		return;
-	} else
-		c = 20;
+	} else {
+		buffer.reset();
+		return;
+	}
 
 	while (c--) {
-		buffer[19 - c] = getRandomCard(cards, used);
-		if (used.find(buffer[19 - c]) == used.end())
-			used[buffer[19 - c]] = 1;
+		(*buffer)[19 - c] = getRandomCard(cards, used);
+		if (used.find((*buffer)[19 - c]) == used.end())
+			used[(*buffer)[19 - c]] = 1;
 		else
-			used[buffer[19 - c]]++;
+			used[(*buffer)[19 - c]]++;
 	}
 }
 
-void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsigned id, const std::vector<Deck> &bases, std::array<unsigned short, 20> &buffer)
+void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsigned id, const std::vector<Deck> &bases, std::unique_ptr<std::array<unsigned short, 20>> &buffer)
 {
 	if (lastChr == SokuLib::CHARACTER_RANDOM)
 		return generateFakeDeck(chr, lastChr, nullptr, buffer);
-//#error kkk
-	if (id == bases.size() + 1) {
-		if (bases.empty())
-			return generateFakeDeck(chr, lastChr, nullptr, buffer);
-		return generateFakeDeck(chr, lastChr, rand() % bases.size(), bases, buffer);
-	} else if (id == bases.size())
+
+	std::array<unsigned short, 20> randomDeck{21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21};
+
+	if (id == bases.size())
+		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
+	else if (id == bases.size() + 1)
 		return generateFakeDeck(chr, lastChr, nullptr, buffer);
+	else if (id == bases.size() + 2)
+		return generateFakeDeck(chr, lastChr, &randomDeck, buffer);
+	else if (id == bases.size() + 3)
+		return generateFakeDeck(chr, lastChr, rand() % (bases.size() + 1), bases, buffer);
 	else
 		return generateFakeDeck(chr, lastChr, &bases[id].cards, buffer);
 }
@@ -184,19 +191,27 @@ void generateFakeDecks()
 		return;
 	generated = true;
 	generateFakeDeck(SokuLib::leftChar, lastLeft, upSelectedDeck, loadedDecks[0][SokuLib::leftChar], fakeLeftDeck);
-	generateFakeDeck(SokuLib::rightChar, lastRight, downSelectedDeck, loadedDecks[0][SokuLib::rightChar], fakeRightDeck);
+	generateFakeDeck(SokuLib::rightChar, lastRight, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], fakeRightDeck);
 }
 
-void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<short> &newDeck)
+void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<unsigned short> &newDeck)
 {
 	generateFakeDecks();
 	side = !side;
-	if (side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) //Left
-		for (int i = 0; i < 20; i++)
-			newDeck[i] = fakeLeftDeck[i];
-	else if (!side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) //Right
-		for (int i = 0; i < 20; i++)
-			newDeck[i] = fakeRightDeck[i];
+	newDeck.size = 20;
+	if (side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) { //Left
+		if (fakeLeftDeck)
+			for (int i = 0; i < 20; i++)
+				newDeck[i] = (*fakeLeftDeck)[i];
+		else
+			newDeck.size = 0;
+	} else if (!side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {//Right
+		if (fakeRightDeck)
+			for (int i = 0; i < 20; i++)
+				newDeck[i] = (*fakeRightDeck)[i];
+		else
+			newDeck.size = 0;
+	}
 	s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
 }
 
@@ -215,7 +230,10 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 			auto &fake = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? fakeLeftDeck : fakeRightDeck);
 			auto &replace = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? packet->game.event.match.host : packet->game.event.match.client());
 
-			memcpy(replace.cards, fake.data(), fake.size() * sizeof(*fake.data()));
+			if (fake)
+				memcpy(replace.cards, fake->data(), fake->size() * sizeof(*fake->data()));
+			else //We just send an invalid deck over if we want no decks
+				memset(replace.cards, 0, 40);
 		}
 		if (packet->game.event.type == SokuLib::GAME_INPUT && packet->game.event.input.sceneId == SokuLib::SCENEID_CHARACTER_SELECT) {
 			if (*reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C0) != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
@@ -224,7 +242,7 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 				return sendto(s, buf, len, flags, to, tolen);
 
 			if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && SokuLib::rightChar != SokuLib::CHARACTER_RANDOM) {
-				auto &decks = loadedDecks[1][SokuLib::rightChar];
+				auto &decks = loadedDecks[0][SokuLib::rightChar];
 
 				if (packet->game.event.input.inputs[0].charSelect.left)
 					left++;
@@ -262,7 +280,10 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 			packet = reinterpret_cast<SokuLib::Packet *>(buffer);
 			//Me changing deck ? I would never do that !
 			for (int i = 0; i < packet->game.event.input.inputCount; i++) {
-				packet->game.event.input.inputs[i].charSelect.left = packet->game.event.input.inputs[i].charSelect.right = false;
+				packet->game.event.input.inputs[i].charSelect.left = false;
+				packet->game.event.input.inputs[i].charSelect.right = false;
+				packet->game.event.input.inputs[i].charSelect.X |= packet->game.event.input.inputs[i].charSelect.A;
+				packet->game.event.input.inputs[i].charSelect.A = false;
 			}
 
 			int bytes = sendto(s, buffer, len, flags, to, tolen);
@@ -423,12 +444,18 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 	std::string name;
 	DrawUtils::Vector2<int> base = pos;
 
-//#error lll
 	if (select == decks.size()) {
-		name = "Randomize deck";
+		name = "Default deck";
 		deck.resize(20, 21);
-	} else if (select == decks.size() + 1)
-		return renderDeck(chr, weirdRand((int)&decks, 3) % (decks.empty() ? 1 : decks.size()), decks, pos, "Any deck");
+		memcpy(deck.data(), defaultDecks[chr].data(), 40);
+	} else if (select == decks.size() + 1) {
+		name = "No deck";
+		deck.resize(0);
+	} else if (select == decks.size() + 2) {
+		name = "Randomized deck";
+		deck.resize(20, 21);
+	} else if (select == decks.size() + 3)
+		return renderDeck(chr, weirdRand((int)&decks, 3) % (decks.size() + 1), decks, pos, "Any deck");
 	else {
 		name = decks[select].name;
 		deck = {decks[select].cards.begin(), decks[select].cards.end()};
@@ -505,7 +532,7 @@ int renderingCommon(int ret)
 	}
 	if (randDown) {
 		randDown = false;
-		downSelectedDeck = loadedDecks[1][SokuLib::rightChar].size() + 1;
+		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 1;
 	}
 	if (stageUp == 3 && stageDown == 3) {
 		if (counter >= 60)
@@ -517,10 +544,18 @@ int renderingCommon(int ret)
 		generated = false;
 	}
 
-	if (stageUp == 1   && SokuLib::leftChar  != SokuLib::CHARACTER_RANDOM && (SokuLib::sceneId == SokuLib::SCENE_SELECT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT))
+	if (
+		stageUp == 1 &&
+		SokuLib::leftChar != SokuLib::CHARACTER_RANDOM &&
+		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
+	)
 		renderDeck(SokuLib::leftChar,  upSelectedDeck,   loadedDecks[0][SokuLib::leftChar],  {28, 98});
-	if (stageDown == 1 && SokuLib::rightChar != SokuLib::CHARACTER_RANDOM && (SokuLib::sceneId == SokuLib::SCENE_SELECT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER))
-		renderDeck(SokuLib::rightChar, downSelectedDeck, loadedDecks[1][SokuLib::rightChar], {28, 384});
+	if (
+		stageDown == 1 &&
+		SokuLib::rightChar != SokuLib::CHARACTER_RANDOM &&
+		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+	)
+		renderDeck(SokuLib::rightChar, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], {28, 384});
 	return ret;
 }
 
@@ -544,7 +579,6 @@ static void loadTexture(DrawUtils::Sprite &container, const char *path, DrawUtil
 		MessageBoxA(SokuLib::window, ("Cannot load " + std::string(path)).c_str(), "Fatal error", MB_ICONERROR);
 		abort();
 	}
-	printf("%s: %i\n", path, text);
 	container.texture.setHandle(text, size);
 }
 
@@ -606,21 +640,20 @@ int __fastcall CSelect_OnProcess(Select *This) {
 
 static void handleInput(const SokuLib::KeyInput &inputs, int index)
 {
-	auto &selectedDeck = (index == 0 ? upSelectedDeck : downSelectedDeck);
-	auto &decks = loadedDecks[index][index == 0 ? SokuLib::leftChar : SokuLib::rightChar];
+	bool isRight = index == 1 || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER;
+	auto &selectedDeck = (isRight ? downSelectedDeck : upSelectedDeck);
+	auto &decks = loadedDecks[index][isRight ? SokuLib::rightChar : SokuLib::leftChar];
 
 	if (inputs.horizontalAxis < 0) {
-		if (selectedDeck == 0) {
-			selectedDeck = decks.size() + 1;
-		} else {
+		if (selectedDeck == 0)
+			selectedDeck = decks.size() + 3;
+		else
 			selectedDeck--;
-		}
 	} else {
-		if (selectedDeck == decks.size() + 1) {
+		if (selectedDeck == decks.size() + 3)
 			selectedDeck = 0;
-		} else {
+		else
 			selectedDeck++;
-		}
 	}
 }
 
@@ -639,7 +672,7 @@ int __fastcall myGetInput(Select *This) {
 		}
 		keys = reinterpret_cast<SokuLib::KeyManager *>(scene + 0x10);
 	} else if (reinterpret_cast<int>(This) == scene + 0x178) {
-		index = 1;
+		index = SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER;
 		if (SokuLib::sceneId == SokuLib::SCENE_SELECT) {
 			*(int *)(scene + 0x184) = 0;
 			*(int *)(scene + 0x188) = 0;
@@ -660,7 +693,7 @@ int __fastcall myGetInput(Select *This) {
 
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
-	return true;
+	return memcmp(hash, SokuLib::targetHash, 16) == 0;
 }
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
@@ -703,7 +736,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	//Force deck icon to be hidden
 	*(unsigned char *)0x4210e2 = 0xEB;
 	s_originalInputMgrGet = SokuLib::union_cast<int (Select::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, reinterpret_cast<DWORD>(myGetInput)));
-	s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &)>(
+	s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
 		SokuLib::TamperNearJmpOpr(0x437D23, reinterpret_cast<DWORD>(loadDeckData))
 	);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
