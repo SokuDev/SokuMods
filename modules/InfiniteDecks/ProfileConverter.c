@@ -53,6 +53,7 @@ void convertDeck(const wchar_t *path)
 	if (json) {
 		fclose(json);
 		wprintf(L"%s already exists... Ignoring.\n", buffer);
+		return;
 	}
 
 	profile = _wfopen(path, L"r");
