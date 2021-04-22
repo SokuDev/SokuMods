@@ -559,11 +559,12 @@ int __fastcall CSelect_OnRender(SokuLib::Select *This) {
 	return renderingCommon((This->*s_originalSelectOnRender)());
 }
 
-static void loadTexture(DrawUtils::Sprite &container, const char *path, DrawUtils::Vector2<unsigned> size)
+static void loadTexture(DrawUtils::Sprite &container, const char *path)
 {
 	int text;
+	DrawUtils::Vector2<unsigned> size;
 
-	if (!SokuLib::textureMgr.loadTexture(&text, path, nullptr, nullptr) || !text) {
+	if (!SokuLib::textureMgr.loadTexture(&text, path, &size.x, &size.y) || !text) {
 		MessageBoxA(SokuLib::window, ("Cannot load " + std::string(path)).c_str(), "Fatal error", MB_ICONERROR);
 		abort();
 	}
@@ -574,19 +575,20 @@ static void loadCardAssets()
 {
 	char buffer[128];
 
+	puts("Loading card assets");
 	for (int i = 0; i <= 20; i++) {
 		sprintf(buffer, "data/card/common/card%03i.bmp", i);
-		loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][i], buffer, {41, 65});
+		loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][i], buffer);
 	}
-	loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][21], "data/battle/cardFaceDown.bmp", {41, 65});
+	loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][21], "data/battle/cardFaceDown.bmp");
 	for (int j = 0; j < 20; j++) {
 		for (int i = (j == SokuLib::CHARACTER_PATCHOULI ? 15 : 12); i; i--) {
 			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j], 99 + i);
-			loadTexture(cardsTextures[j][99 + i], buffer, {41, 65});
+			loadTexture(cardsTextures[j][99 + i], buffer);
 		}
 		for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
 			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j], card);
-			loadTexture(cardsTextures[j][card], buffer, {41, 65});
+			loadTexture(cardsTextures[j][card], buffer);
 		}
 	}
 }
@@ -679,21 +681,29 @@ int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
 
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 {
-	if (firstLoad)
-		loadCardAssets();
-	firstLoad = false;
-
-	for (auto chain : This->editedDeck->vector())
-		printf("There is %i card %i\n", chain->second, chain->first);
-	printf("\n");
 
 	return (This->*s_originalCProfileDeckEdit_OnProcess)();
 }
 
 int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 {
-	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
+	if (firstLoad)
+		loadCardAssets();
+	firstLoad = false;
 
+	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
+	DrawUtils::Sprite &sprite = cardsTextures[SokuLib::CHARACTER_RANDOM][21];
+
+	loadTexture(sprite, "data/battle/cardFaceDown.bmp");
+	sprite.rect.top = sprite.rect.width = 0;
+	sprite.rect.width = sprite.texture.getSize().x;
+	sprite.rect.height = sprite.texture.getSize().y;
+	sprite.tint = DrawUtils::DxSokuColor::White;
+	sprite.setSize({20, 32});
+	for (int i = 20; i > This->displayedNumberOfCards; i--) {
+		sprite.setPosition({304 + 24 * ((i - 1) % 10), 260 + 38 * ((i - 1) / 10)});
+		sprite.draw();
+	}
 	return ret;
 }
 
@@ -728,8 +738,10 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	//Force deck icon to be hidden
+	//Force deck icon to be hidden in character select
 	*(unsigned char *)0x4210e2 = 0xEB;
+	//Force deck icon to be hidden in deck construction
+	memset((void *)0x0044E4ED, 0x90, 35);
 	s_originalInputMgrGet = SokuLib::union_cast<int (SokuLib::ObjectSelect::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, myGetInput));
 	s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
 		SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
