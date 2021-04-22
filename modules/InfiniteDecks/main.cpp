@@ -11,6 +11,7 @@
 
 static bool firstLoad = true;
 static bool loaded = false;
+static int (SokuLib::Title::*s_originalTitleOnProcess)();
 static int (SokuLib::Select::*s_originalSelectOnProcess)();
 static int (SokuLib::SelectClient::*s_originalSelectCLOnProcess)();
 static int (SokuLib::SelectServer::*s_originalSelectSVOnProcess)();
@@ -18,6 +19,8 @@ static int (SokuLib::Select::*s_originalSelectOnRender)();
 static int (SokuLib::SelectClient::*s_originalSelectCLOnRender)();
 static int (SokuLib::SelectServer::*s_originalSelectSVOnRender)();
 static int (SokuLib::ObjectSelect::*s_originalInputMgrGet)();
+static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnProcess)();
+static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnRender)();
 void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &);
 
 std::array<std::map<unsigned short, DrawUtils::Sprite>, SokuLib::CHARACTER_RANDOM + 1> cardsTextures;
@@ -674,6 +677,30 @@ int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
 	return ret;
 }
 
+int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
+{
+	if (firstLoad)
+		loadCardAssets();
+	firstLoad = false;
+
+	for (auto chain : This->editedDeck->vector())
+		printf("There is %i card %i\n", chain->second, chain->first);
+	printf("\n");
+
+	return (This->*s_originalCProfileDeckEdit_OnProcess)();
+}
+
+int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
+{
+	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
+
+	return ret;
+}
+
+int __fastcall CTitle_OnProcess(SokuLib::Title *This)
+{
+	return (This->*s_originalTitleOnProcess)();
+}
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(hash, SokuLib::targetHash, 16) == 0;
@@ -688,12 +715,15 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen_s(&_, "CONOUT$", "w", stderr);
 	puts("Hey !");
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_originalSelectCLOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, CSelectCL_OnProcess);
-	s_originalSelectSVOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, CSelectSV_OnProcess);
-	s_originalSelectOnProcess   = SokuLib::TamperDword(&SokuLib::VTable_Select.onProcess, CSelect_OnProcess);
-	s_originalSelectCLOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onRender, CSelectCL_OnRender);
-	s_originalSelectSVOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender, CSelectSV_OnRender);
-	s_originalSelectOnRender    = SokuLib::TamperDword(&SokuLib::VTable_Select.onRender, CSelect_OnRender);
+	s_originalSelectCLOnProcess          = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, CSelectCL_OnProcess);
+	s_originalSelectSVOnProcess          = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, CSelectSV_OnProcess);
+	s_originalSelectOnProcess            = SokuLib::TamperDword(&SokuLib::VTable_Select.onProcess, CSelect_OnProcess);
+	s_originalSelectCLOnRender           = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onRender, CSelectCL_OnRender);
+	s_originalSelectSVOnRender           = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender, CSelectSV_OnRender);
+	s_originalSelectOnRender             = SokuLib::TamperDword(&SokuLib::VTable_Select.onRender, CSelect_OnRender);
+	s_originalTitleOnProcess             = SokuLib::TamperDword(&SokuLib::VTable_Title.onRender, CTitle_OnProcess);
+	s_originalCProfileDeckEdit_OnProcess = SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onProcess, CProfileDeckEdit_OnProcess);
+	s_originalCProfileDeckEdit_OnRender  = SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onRender, CProfileDeckEdit_OnRender);
 	SokuLib::TamperDword(SENDTO_JUMP_ADDR, mySendTo);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
