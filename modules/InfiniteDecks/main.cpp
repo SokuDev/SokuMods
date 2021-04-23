@@ -9,8 +9,6 @@
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x100
 
-static bool firstLoad = true;
-static bool loaded = false;
 static int (SokuLib::Title::*s_originalTitleOnProcess)();
 static int (SokuLib::Select::*s_originalSelectOnProcess)();
 static int (SokuLib::SelectClient::*s_originalSelectCLOnProcess)();
@@ -21,6 +19,7 @@ static int (SokuLib::SelectServer::*s_originalSelectSVOnRender)();
 static int (SokuLib::ObjectSelect::*s_originalInputMgrGet)();
 static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnProcess)();
 static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnRender)();
+static void (*s_originalDrawGradiantBar)(float param1, float param2, float param3);
 void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &);
 
 std::array<std::map<unsigned short, DrawUtils::Sprite>, SokuLib::CHARACTER_RANDOM + 1> cardsTextures;
@@ -101,13 +100,20 @@ static SokuLib::SWRFont font;
 static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
 static unsigned upSelectedDeck = 0;
 static unsigned downSelectedDeck = 0;
+static unsigned errorCounter = 0;
+static std::string lastLoadedProfile;
 static SokuLib::Trampoline *profileTrampoline;
+static SokuLib::Trampoline *deckSavedTrampoline;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
+static DrawUtils::Sprite arrowSprite;
 static bool generated = false;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
 static bool side = false;
+static bool firstConstructLoad = true;
+static bool firstLoad = true;
+static bool loaded = false;
 
 #define SENDTO_JUMP_ADDR 0x00857290
 
@@ -381,7 +387,10 @@ static void handleProfileChange(int This, SokuLib::String *str)
 			std::sort(deck.cards.begin(), deck.cards.end());
 			arr[i].push_back(deck);
 		}
+		if (index == 2)
+			arr[i].push_back({"Create new deck", defaultDecks[i]});
 	}
+	lastLoadedProfile = profile;
 }
 
 static int weirdRand(int key, int delay)
@@ -436,6 +445,58 @@ static void onProfileChanged()
 	arg = *(char **)(arg + 0x28);
 	arg += 0x1C;
 	handleProfileChange(This, reinterpret_cast<SokuLib::String *>(arg));
+}
+
+bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This)
+{
+	auto &deck = loadedDecks[2][This->editedCharacter][upSelectedDeck].cards;
+	auto vec = This->editedDeck->vector();
+	unsigned index = 0;
+
+	for (auto pair : vec) {
+		auto i = pair->second;
+
+		while (i) {
+			if (index == 20)
+				return false;
+			deck[index] = pair->first;
+			i--;
+			index++;
+		}
+	}
+	while (index < 20) {
+		deck[index] = 21;
+		index++;
+	}
+	return true;
+}
+
+static void onDeckSaved()
+{
+	auto menu = SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>();
+	nlohmann::json result;
+
+	if (!saveDeckFromGame(menu))
+		return;
+
+	std::ofstream stream{lastLoadedProfile};
+
+	if (stream.fail()) {
+		menu->displayedNumberOfCards = 19;
+		MessageBoxA(SokuLib::window, ("Cannot open \"" + lastLoadedProfile + "\". Please make sure you have proper permissions and enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
+		return;
+	}
+	for (int i = 0; i < 20; i++) {
+		result[i] = nlohmann::json::array();
+		for (int j = 0; j < loadedDecks[2][i].size() - 1; j++) {
+			result[i][j]["name"] = loadedDecks[2][i][j].name;
+			result[i][j]["cards"] = std::vector<unsigned short>{
+				loadedDecks[2][i][j].cards.begin(),
+				loadedDecks[2][i][j].cards.end()
+			};
+		}
+	}
+	stream << result.dump(4).c_str();
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos, const char *overridingName = nullptr)
@@ -591,6 +652,7 @@ static void loadCardAssets()
 			loadTexture(cardsTextures[j][card], buffer);
 		}
 	}
+	loadTexture(arrowSprite, "data/profile/deck2/sayuu.bmp");
 }
 
 static int selectProcessCommon(int v)
@@ -679,20 +741,80 @@ int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
 	return ret;
 }
 
+void drawGradiantBar(float x, float y, float maxY)
+{
+	if (y == 114)
+		y = 90;
+	s_originalDrawGradiantBar(x, y, maxY);
+}
+
+void loadDeckToGame(SokuLib::ProfileDeckEdit *This)
+{
+	auto &deck = loadedDecks[2][This->editedCharacter][upSelectedDeck].cards;
+	int count = 0;
+
+	for (auto pair : This->editedDeck->vector())
+		pair->second = 0;
+	for (int i = 0; i < 20; i++)
+		if (deck[i] != 21) {
+			This->editedDeck->operator[](deck[i])++;
+			count++;
+		}
+	This->displayedNumberOfCards = count;
+}
+
+void __fastcall CProfileDeckEdit_SwitchCurrentDeck(SokuLib::ProfileDeckEdit *This, int, int DeckID)
+{
+	This->selectedDeck = 0;
+	if (!saveDeckFromGame(This)) {
+		errorCounter = 120;
+		return;
+	}
+	if (DeckID == 1) {
+		if (upSelectedDeck == loadedDecks[2][This->editedCharacter].size() - 1)
+			upSelectedDeck = 0;
+		else
+			upSelectedDeck++;
+	} else {
+		if (upSelectedDeck == 0)
+			upSelectedDeck = loadedDecks[2][This->editedCharacter].size() - 1;
+		else
+			upSelectedDeck--;
+	}
+	loadDeckToGame(This);
+}
+
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 {
+	auto keys = (SokuLib::KeymapManager *)(0x89a394);
 
+	// This hides the deck select arrow
+	((bool ***)This)[0x10][0x2][20] = false;
 	return (This->*s_originalCProfileDeckEdit_OnProcess)();
 }
 
 int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 {
-	if (firstLoad)
-		loadCardAssets();
-	firstLoad = false;
+	if (firstConstructLoad) {
+		errorCounter = 0;
+		upSelectedDeck = 0;
+		loadDeckToGame(This);
+		//loadTexture(sprite, "data/battle/cardFaceDown.bmp");
+	}
 
 	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
 	DrawUtils::Sprite &sprite = cardsTextures[SokuLib::CHARACTER_RANDOM][21];
+	DrawUtils::Sprite textSprite;
+	DrawUtils::Vector2<int> pos{38, 88};
+	int text;
+	int width = 0;
+
+	if (firstLoad) {
+		loadCardAssets();
+		initFont();
+	}
+	firstConstructLoad = false;
+	firstLoad = false;
 
 	loadTexture(sprite, "data/battle/cardFaceDown.bmp");
 	sprite.rect.top = sprite.rect.width = 0;
@@ -704,11 +826,43 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		sprite.setPosition({304 + 24 * ((i - 1) % 10), 260 + 38 * ((i - 1) / 10)});
 		sprite.draw();
 	}
+
+	if (!SokuLib::textureMgr.createTextTexture(&text, loadedDecks[2][This->editedCharacter][upSelectedDeck].name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+		puts("C'est vraiment pas de chance");
+		return ret;
+	}
+
+	pos.x = 153 - width / 2;
+	textSprite.setPosition(pos);
+	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.rect = {
+		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+	};
+	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.draw();
+
+	pos.x -= 32;
+	pos.y -= 6;
+	arrowSprite.rect = {0, 0, 32, 32};
+	arrowSprite.setPosition(pos);
+	arrowSprite.setSize({33, 33});
+	arrowSprite.tint = DrawUtils::DxSokuColor::White;
+	arrowSprite.draw();
+
+	pos.x += 32 + width;
+	arrowSprite.rect.left = 32;
+	arrowSprite.setPosition(pos);
+	arrowSprite.draw();
 	return ret;
 }
 
 int __fastcall CTitle_OnProcess(SokuLib::Title *This)
 {
+	if (SokuLib::menuManager.isInMenu)
+		firstConstructLoad |= *SokuLib::getMenuObj<int>() != SokuLib::ADDR_VTBL_DECK_CONSTRUCTION_CHR_SELECT_MENU;
+	else
+		firstConstructLoad = true;
 	return (This->*s_originalTitleOnProcess)();
 }
 
@@ -742,6 +896,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	*(unsigned char *)0x4210e2 = 0xEB;
 	//Force deck icon to be hidden in deck construction
 	memset((void *)0x0044E4ED, 0x90, 35);
+	SokuLib::TamperNearJmpOpr(0x450230, CProfileDeckEdit_SwitchCurrentDeck);
+	s_originalDrawGradiantBar = reinterpret_cast<void (*)(float, float, float)>(SokuLib::TamperNearJmpOpr(0x44E4C8, drawGradiantBar));
 	s_originalInputMgrGet = SokuLib::union_cast<int (SokuLib::ObjectSelect::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, myGetInput));
 	s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
 		SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
@@ -749,6 +905,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	profileTrampoline = new SokuLib::Trampoline(0x435377, onProfileChanged, 7);
+	deckSavedTrampoline = new SokuLib::Trampoline(0x450121, onDeckSaved, 6);
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	return true;
@@ -758,7 +915,7 @@ extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
 	if (fdwReason == DLL_PROCESS_DETACH) {
 		if (profileTrampoline) {
 			delete profileTrampoline;
-			profileTrampoline = nullptr;
+			delete deckSavedTrampoline;
 		}
 	}
 	return TRUE;
