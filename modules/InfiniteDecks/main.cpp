@@ -7,7 +7,7 @@
 #include "DrawUtils.hpp"
 
 #define FONT_HEIGHT 16
-#define TEXTURE_SIZE 0x100
+#define TEXTURE_SIZE 0x200
 
 static int (SokuLib::Title::*s_originalTitleOnProcess)();
 static int (SokuLib::Select::*s_originalSelectOnProcess)();
@@ -827,11 +827,37 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		sprite.draw();
 	}
 
+	if (errorCounter) {
+		float alpha = min(1.f, errorCounter / 30.f);
+
+		errorCounter--;
+		if (!SokuLib::textureMgr.createTextTexture(&text, "Please keep the number of cards in the deck at or below 20", font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+			puts("C'est vraiment pas de chance");
+			return ret;
+		}
+
+		auto realX = 53;
+
+		if (errorCounter >= 105) {
+			realX += rand() % 31 - 15;
+			if (errorCounter >= 115)
+				alpha = 1 - (errorCounter - 115.f) / 5;
+		}
+
+		textSprite.setPosition({realX, pos.y - 20});
+		textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+		textSprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+		textSprite.rect = {
+			0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+		};
+		textSprite.tint = DrawUtils::DxSokuColor::Red * alpha;
+		textSprite.draw();
+	}
+
 	if (!SokuLib::textureMgr.createTextTexture(&text, loadedDecks[2][This->editedCharacter][upSelectedDeck].name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
 		puts("C'est vraiment pas de chance");
 		return ret;
 	}
-
 	pos.x = 153 - width / 2;
 	textSprite.setPosition(pos);
 	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
