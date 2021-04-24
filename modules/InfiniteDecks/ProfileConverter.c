@@ -155,7 +155,7 @@ LPWSTR GetLastErrorAsString(DWORD errorMessageID)
 }
 
 
-void convertDecks(const wchar_t *path)
+int convertDecks(const wchar_t *path)
 {
 	wchar_t buffer[MAX_PATH];
 	wchar_t buffer2[MAX_PATH];
@@ -175,7 +175,7 @@ void convertDecks(const wchar_t *path)
 		swprintf(buffer3, 1024, L"FindFirstFileW: %s (%lu)\n", GetLastErrorAsString(err), err);
 		printf("Error in FindFirstFileW : %lu\n", err);
 		MessageBoxW(NULL, buffer3, L"Error", MB_ICONERROR);
-		return;
+		return EXIT_FAILURE;
 	}
 
 	wcscpy(buffer, path);
@@ -187,6 +187,7 @@ void convertDecks(const wchar_t *path)
 		convertDeck(buffer2);
 	} while (FindNextFileW(hFind, &data));
 	MessageBoxA(NULL, "All profiles has been treated !", "All done", MB_ICONINFORMATION);
+	return EXIT_SUCCESS;
 }
 
 int main()
@@ -194,8 +195,10 @@ int main()
 	wchar_t buffer[MAX_PATH];
 
 	exploreFile(buffer, sizeof buffer, L"Select game path", L".");
-	if (!*buffer || !wcsstr(buffer, L"th123.exe") || wcsstr(buffer, L"th123.exe")[strlen("th123.exe")])
+	if (!*buffer || !wcsstr(buffer, L"th123.exe") || wcsstr(buffer, L"th123.exe")[strlen("th123.exe")]) {
 		MessageBoxA(NULL, "Please specify th123.exe location", "Invalid location", MB_ICONERROR);
+		return EXIT_FAILURE;
+	}
 	PathRemoveFileSpecW(buffer);
-	convertDecks(buffer);
+	return convertDecks(buffer);
 }
