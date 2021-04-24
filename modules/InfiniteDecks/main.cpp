@@ -108,6 +108,8 @@ static SokuLib::Trampoline *profileTrampoline;
 static SokuLib::Trampoline *deckSavedTrampoline;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
+static std::string leftLoadedProfile;
+static std::string rightLoadedProfile;
 static DrawUtils::Sprite arrowSprite;
 static bool generated = false;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
@@ -365,9 +367,11 @@ static void handleProfileChange(int This, SokuLib::String *str)
 	if (This == 0x898868) {
 		//P1
 		index = 0;
+		leftLoadedProfile = profile;
 	} else if (This == 0x899054) {
 		//P2
 		index = 1;
+		rightLoadedProfile = profile;
 	} //Else is deck construct
 
 	auto &arr = loadedDecks[index];
@@ -470,6 +474,7 @@ bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This)
 		deck[index] = 21;
 		index++;
 	}
+	std::sort(deck.begin(), deck.end());
 	return true;
 }
 
@@ -477,11 +482,19 @@ static void onDeckSaved()
 {
 	auto menu = SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>();
 	nlohmann::json result;
+	std::string path;
 
 	if (!saveDeckFromGame(menu))
 		return;
 
-	std::ofstream stream{lastLoadedProfile};
+	if (editSelectedProfile != 2) {
+		loadedDecks[editSelectedProfile] = loadedDecks[2];
+		path = editSelectedProfile == 0 ? leftLoadedProfile : rightLoadedProfile;
+	} else
+		path = lastLoadedProfile;
+	printf("Saving to %s\n", path.c_str());
+
+	std::ofstream stream{path};
 
 	if (stream.fail()) {
 		menu->displayedNumberOfCards = 19;
