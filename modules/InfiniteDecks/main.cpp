@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <dinput.h>
 #include "DrawUtils.hpp"
 
 #define FONT_HEIGHT 16
@@ -97,6 +98,10 @@ struct Deck {
 	std::array<unsigned short, 20> cards;
 };
 
+static char editingBoxObject[0x164];
+static bool escPressed = false;
+static bool renameBoxDisplayed = false;
+static bool editBoxDisplayed = false;
 static bool generated = false;
 static bool saveError = false;
 static bool side = false;
@@ -104,20 +109,30 @@ static bool firstConstructLoad = true;
 static bool firstLoad = true;
 static bool loaded = false;
 static bool created = false;
+static char nameBuffer[64];
+static unsigned char editBoxSelectedItem = 0;
+static unsigned char renameBoxSelectedItem = 0;
+static unsigned char errorCounter = 0;
 static unsigned upSelectedDeck = 0;
 static unsigned downSelectedDeck = 0;
 static unsigned editSelectedDeck = 0;
 static unsigned editSelectedProfile = 0;
-static unsigned errorCounter = 0;
 static std::string lastLoadedProfile;
 static std::string leftLoadedProfile;
 static std::string rightLoadedProfile;
 static SokuLib::SWRFont font;
+static SokuLib::SWRFont defaultFont;
 static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
 static std::vector<Deck> editedDecks;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
 static DrawUtils::Sprite arrowSprite;
+static DrawUtils::Sprite baseSprite;
+static DrawUtils::Sprite nameSprite;
+static DrawUtils::Sprite noSprite;
+static DrawUtils::Sprite noSelectedSprite;
+static DrawUtils::Sprite yesSprite;
+static DrawUtils::Sprite yesSelectedSprite;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
 
@@ -445,6 +460,9 @@ static void initFont() {
 	strcpy(desc.faceName, "Tahoma");
 	font.create();
 	font.setIndirect(desc);
+	strcpy(desc.faceName, SokuLib::defaultFontName);
+	defaultFont.create();
+	defaultFont.setIndirect(desc);
 }
 
 static void onProfileChanged()
@@ -490,7 +508,7 @@ static void onDeckSaved()
 	nlohmann::json result;
 	std::string path;
 
-	if (!saveDeckFromGame(menu, loadedDecks[2][menu->editedCharacter][editSelectedDeck].cards))
+	if (!saveDeckFromGame(menu, editedDecks[editSelectedDeck].cards))
 		return;
 
 	loadedDecks[2][menu->editedCharacter] = editedDecks;
@@ -691,7 +709,13 @@ static void loadCardAssets()
 			loadTexture(cardsTextures[j][card], buffer);
 		}
 	}
-	loadTexture(arrowSprite, "data/profile/deck2/sayuu.bmp");
+	loadTexture(baseSprite,        "data/menu/21_Base.bmp");
+	loadTexture(nameSprite,        "data/profile/20_Name.bmp");
+	loadTexture(arrowSprite,       "data/profile/deck2/sayuu.bmp");
+	loadTexture(noSprite,          "data/menu/23a_No.bmp");
+	loadTexture(noSelectedSprite,  "data/menu/23b_No.bmp");
+	loadTexture(yesSprite,         "data/menu/22a_Yes.bmp");
+	loadTexture(yesSelectedSprite, "data/menu/22b_Yes.bmp");
 }
 
 static int selectProcessCommon(int v)
@@ -838,10 +862,106 @@ void __fastcall CProfileDeckEdit_SwitchCurrentDeck(SokuLib::ProfileDeckEdit *Thi
 	(This->*FUN_0044f930)('\0');
 }
 
+void renameBoxRender()
+{
+	int text;
+	int width;
+	DrawUtils::Sprite textSprite;
+	DrawUtils::RectangleShape rect;
+
+	nameSprite.setPosition({160, 192});
+	nameSprite.setSize(nameSprite.texture.getSize());
+	nameSprite.rect = {
+		0, 0,
+		static_cast<int>(nameSprite.texture.getSize().x),
+		static_cast<int>(nameSprite.texture.getSize().y)
+	};
+	nameSprite.tint = DrawUtils::DxSokuColor::White;
+	nameSprite.draw();
+
+	if (!SokuLib::textureMgr.createTextTexture(&text, nameBuffer, font, TEXTURE_SIZE, 18, &width, nullptr)) {
+		puts("C'est vraiment pas de chance");
+		return;
+	}
+	auto render = (int(__thiscall*) (void*, float, float))0x42a050;
+
+	render(editingBoxObject, 276, 217);
+}
+
+void openRenameBox(SokuLib::ProfileDeckEdit *This)
+{
+	auto setup_global = (int(__thiscall*) (void*, bool))0x40ea10;
+	auto init_fun = (void(__thiscall*) (void*, int, int))0x429e70;
+
+	SokuLib::playSEWaveBuffer(0x28);
+	if (editSelectedDeck == editedDecks.size() - 1) {
+		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
+		editedDecks.push_back({"Create new deck", defaultDecks[This->editedCharacter]});
+	}
+
+	//:magic_wand:
+	init_fun(editingBoxObject, 0x89A4F8, 24);
+	setup_global((void*)0x8A02F0, true);
+	strncpy((char *)0x8A02F8, editedDecks[editSelectedDeck].name.c_str(), 24);
+	renameBoxDisplayed = true;
+}
+
+void renameBoxUpdate(SokuLib::KeyManager *keys)
+{
+	auto update = (char (__thiscall*) (void*))0x429F00;
+
+	renameBoxDisplayed = *(bool *)0x8A0CFF;
+	if (!renameBoxDisplayed)
+		SokuLib::playSEWaveBuffer(0x29);
+	else if (update(editingBoxObject) == 1) {
+		SokuLib::playSEWaveBuffer(0x28);
+		editedDecks[editSelectedDeck].name = (char *)0x8A02F8;
+		renameBoxDisplayed = false;
+	}
+}
+
+void editBoxRender()
+{
+	baseSprite.setPosition({160, 192});
+	baseSprite.setSize(baseSprite.texture.getSize());
+	baseSprite.rect = {
+		0, 0,
+		static_cast<int>(baseSprite.texture.getSize().x),
+		static_cast<int>(baseSprite.texture.getSize().y)
+	};
+	baseSprite.tint = DrawUtils::DxSokuColor::White;
+	baseSprite.draw();
+}
+
+void editBoxUpdate(SokuLib::KeyManager *keys)
+{
+
+}
+
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 {
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89a394);
+	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
+	bool editBox = editBoxDisplayed;
+	bool renameBox = renameBoxDisplayed;
 
+	if (renameBox)
+		renameBoxUpdate(keys);
+	else if (editBox)
+		editBoxUpdate(keys);
+	else if (keys->keymapManager->input.c && This->cursorOnDeckChangeBox) {
+		//editBoxDisplayed = true;
+		//editBoxSelectedItem = 0;
+		openRenameBox(This);
+	}
+	if (renameBox || editBox) {
+		escPressed = ((int *)0x8998D8)[1];
+		((int *)0x8998D8)[1] = 0;
+		((int *)0x8998D8)[DIK_F1] = 0;
+		memset(&keys->keymapManager->input, 0, sizeof(keys->keymapManager->input));
+	} else if (escPressed) {
+		escPressed = ((int *)0x8998D8)[1];
+		((int *)0x8998D8)[1] = 0;
+	}
 	if (editSelectedDeck == editedDecks.size() - 1 && (This->displayedNumberOfCards != 20 || (keys->keymapManager->input.a && This->cursorOnDeckChangeBox))) {
 		SokuLib::playSEWaveBuffer(0x28);
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
@@ -949,6 +1069,11 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 	arrowSprite.rect.left = 32;
 	arrowSprite.setPosition(pos);
 	arrowSprite.draw();
+
+	if (renameBoxDisplayed)
+		renameBoxRender();
+	else if (editBoxDisplayed)
+		editBoxRender();
 	return ret;
 }
 
