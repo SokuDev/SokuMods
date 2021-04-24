@@ -100,6 +100,8 @@ static SokuLib::SWRFont font;
 static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
 static unsigned upSelectedDeck = 0;
 static unsigned downSelectedDeck = 0;
+static unsigned editSelectedDeck = 0;
+static unsigned editSelectedProfile = 0;
 static unsigned errorCounter = 0;
 static std::string lastLoadedProfile;
 static SokuLib::Trampoline *profileTrampoline;
@@ -449,7 +451,7 @@ static void onProfileChanged()
 
 bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This)
 {
-	auto &deck = loadedDecks[2][This->editedCharacter][upSelectedDeck].cards;
+	auto &deck = loadedDecks[2][This->editedCharacter][editSelectedDeck].cards;
 	auto vec = This->editedDeck->vector();
 	unsigned index = 0;
 
@@ -697,6 +699,17 @@ int __fastcall CSelectSV_OnProcess(SokuLib::SelectServer *This) {
 }
 
 int __fastcall CSelect_OnProcess(SokuLib::Select *This) {
+	if (SokuLib::menuManager.isInMenu && *SokuLib::getMenuObj<int>() == 0x859820) {
+		auto obj = SokuLib::getMenuObj<int>();
+		auto selected = obj[0x1A];
+
+		if (selected >= 2 && selected <= 3)
+			editSelectedProfile = selected - 2;
+		else
+			editSelectedProfile = 2;
+	}
+	if (!SokuLib::menuManager.isInMenu || *SokuLib::getMenuObj<int>() != SokuLib::ADDR_VTBL_DECK_CONSTRUCTION_CHR_SELECT_MENU)
+		firstConstructLoad = true;
 	return selectProcessCommon((This->*s_originalSelectOnProcess)());
 }
 
@@ -719,7 +732,8 @@ static void handleInput(const SokuLib::KeyInput &inputs, int index)
 	}
 }
 
-int __fastcall myGetInput(SokuLib::ObjectSelect *This) {
+int __fastcall myGetInput(SokuLib::ObjectSelect *This)
+{
 	int ret = (This->*s_originalInputMgrGet)();
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 	auto &battle = SokuLib::getBattleMgr();
@@ -750,7 +764,7 @@ void drawGradiantBar(float x, float y, float maxY)
 
 void loadDeckToGame(SokuLib::ProfileDeckEdit *This)
 {
-	auto &deck = loadedDecks[2][This->editedCharacter][upSelectedDeck].cards;
+	auto &deck = loadedDecks[2][This->editedCharacter][editSelectedDeck].cards;
 	int count = 0;
 
 	for (auto pair : This->editedDeck->vector())
@@ -771,15 +785,15 @@ void __fastcall CProfileDeckEdit_SwitchCurrentDeck(SokuLib::ProfileDeckEdit *Thi
 		return;
 	}
 	if (DeckID == 1) {
-		if (upSelectedDeck == loadedDecks[2][This->editedCharacter].size() - 1)
-			upSelectedDeck = 0;
+		if (editSelectedDeck == loadedDecks[2][This->editedCharacter].size() - 1)
+			editSelectedDeck = 0;
 		else
-			upSelectedDeck++;
+			editSelectedDeck++;
 	} else {
-		if (upSelectedDeck == 0)
-			upSelectedDeck = loadedDecks[2][This->editedCharacter].size() - 1;
+		if (editSelectedDeck == 0)
+			editSelectedDeck = loadedDecks[2][This->editedCharacter].size() - 1;
 		else
-			upSelectedDeck--;
+			editSelectedDeck--;
 	}
 	loadDeckToGame(This);
 }
@@ -797,9 +811,13 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 {
 	if (firstConstructLoad) {
 		errorCounter = 0;
-		upSelectedDeck = 0;
+		editSelectedDeck = 0;
+		if (editSelectedProfile != 2) {
+			loadedDecks[2] = loadedDecks[editSelectedProfile];
+			for (int i = 0; i < 20; i++)
+				loadedDecks[2][i].push_back({"Create new deck", defaultDecks[i]});
+		}
 		loadDeckToGame(This);
-		//loadTexture(sprite, "data/battle/cardFaceDown.bmp");
 	}
 
 	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
@@ -854,7 +872,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		textSprite.draw();
 	}
 
-	if (!SokuLib::textureMgr.createTextTexture(&text, loadedDecks[2][This->editedCharacter][upSelectedDeck].name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+	if (!SokuLib::textureMgr.createTextTexture(&text, loadedDecks[2][This->editedCharacter][editSelectedDeck].name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
 		puts("C'est vraiment pas de chance");
 		return ret;
 	}
@@ -885,10 +903,10 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 
 int __fastcall CTitle_OnProcess(SokuLib::Title *This)
 {
-	if (SokuLib::menuManager.isInMenu)
-		firstConstructLoad |= *SokuLib::getMenuObj<int>() != SokuLib::ADDR_VTBL_DECK_CONSTRUCTION_CHR_SELECT_MENU;
-	else
+	if (!SokuLib::menuManager.isInMenu || *SokuLib::getMenuObj<int>() != SokuLib::ADDR_VTBL_DECK_CONSTRUCTION_CHR_SELECT_MENU) {
 		firstConstructLoad = true;
+		editSelectedProfile = 2;
+	}
 	return (This->*s_originalTitleOnProcess)();
 }
 
