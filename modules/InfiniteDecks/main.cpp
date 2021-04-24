@@ -112,6 +112,7 @@ static std::string leftLoadedProfile;
 static std::string rightLoadedProfile;
 static DrawUtils::Sprite arrowSprite;
 static bool generated = false;
+static bool saveError = false;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
 static bool side = false;
@@ -339,10 +340,24 @@ static void handleProfileChange(int This, SokuLib::String *str)
 	profile = "profile/" + profile + ".json";
 	std::cout << "Loading " << profile << std::endl;
 
+	if (This == 0x898868) {
+		//P1
+		index = 0;
+		leftLoadedProfile = profile;
+	} else if (This == 0x899054) {
+		//P2
+		index = 1;
+		rightLoadedProfile = profile;
+	} //Else is deck construct
+
+	auto &arr = loadedDecks[index];
 	std::ifstream stream{profile};
 
 	if (!stream) {
 		std::cout << "Failed to open file: " << strerror(errno) << std::endl;
+		for (int i = 0; i < 20; i++)
+			if (index == 2)
+				arr[i].push_back({"Create new deck", defaultDecks[i]});
 		return;
 	}
 
@@ -363,18 +378,6 @@ static void handleProfileChange(int This, SokuLib::String *str)
 		MessageBoxA(SokuLib::window, e.what(), "Fatal error", MB_ICONERROR);
 		throw;
 	}
-
-	if (This == 0x898868) {
-		//P1
-		index = 0;
-		leftLoadedProfile = profile;
-	} else if (This == 0x899054) {
-		//P2
-		index = 1;
-		rightLoadedProfile = profile;
-	} //Else is deck construct
-
-	auto &arr = loadedDecks[index];
 
 	for (int i = 0; i < 20; i++) {
 		auto &array = json[i];
@@ -496,8 +499,11 @@ static void onDeckSaved()
 
 	std::ofstream stream{path};
 
-	if (stream.fail()) {
-		menu->displayedNumberOfCards = 19;
+	if (!stream.fail()) {
+		if (menu->displayedNumberOfCards == 20) {
+			menu->editedDeck->vector()[0]->second++;
+			saveError = true;
+		}
 		MessageBoxA(SokuLib::window, ("Cannot open \"" + lastLoadedProfile + "\". Please make sure you have proper permissions and enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
 		return;
 	}
@@ -512,6 +518,20 @@ static void onDeckSaved()
 		}
 	}
 	stream << result.dump(4).c_str();
+	if (stream.fail()) {
+		if (menu->displayedNumberOfCards == 20) {
+			menu->editedDeck->vector()[0]->second++;
+			saveError = true;
+		}
+		MessageBoxA(SokuLib::window, ("Cannot write to \"" + lastLoadedProfile + "\". Please make sure you have proper enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
+		return;
+	}
+
+	auto cards = menu->editedDeck->vector();
+
+	for (auto card : cards)
+		card->second = 0;
+	cards[0]->second = 20;
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos, const char *overridingName = nullptr)
@@ -831,6 +851,11 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 				loadedDecks[2][i].push_back({"Create new deck", defaultDecks[i]});
 		}
 		loadDeckToGame(This);
+	}
+
+	if (saveError) {
+		saveError = false;
+		This->editedDeck->vector()[0]--;
 	}
 
 	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
