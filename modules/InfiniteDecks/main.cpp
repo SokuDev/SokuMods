@@ -98,6 +98,7 @@ struct Deck {
 static bool created = false;
 static SokuLib::SWRFont font;
 static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
+static std::vector<Deck> editedDecks;
 static unsigned upSelectedDeck = 0;
 static unsigned downSelectedDeck = 0;
 static unsigned editSelectedDeck = 0;
@@ -354,10 +355,13 @@ static void handleProfileChange(int This, SokuLib::String *str)
 	std::ifstream stream{profile};
 
 	if (!stream) {
+		lastLoadedProfile = profile;
 		std::cout << "Failed to open file: " << strerror(errno) << std::endl;
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 20; i++) {
+			arr[i].clear();
 			if (index == 2)
 				arr[i].push_back({"Create new deck", defaultDecks[i]});
+		}
 		return;
 	}
 
@@ -456,9 +460,8 @@ static void onProfileChanged()
 	handleProfileChange(This, reinterpret_cast<SokuLib::String *>(arg));
 }
 
-bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This)
+bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This, std::array<unsigned short, 20> &deck)
 {
-	auto &deck = loadedDecks[2][This->editedCharacter][editSelectedDeck].cards;
 	auto vec = This->editedDeck->vector();
 	unsigned index = 0;
 
@@ -487,9 +490,10 @@ static void onDeckSaved()
 	nlohmann::json result;
 	std::string path;
 
-	if (!saveDeckFromGame(menu))
+	if (!saveDeckFromGame(menu, loadedDecks[2][menu->editedCharacter][editSelectedDeck].cards))
 		return;
 
+	loadedDecks[2][menu->editedCharacter] = editedDecks;
 	if (editSelectedProfile != 2) {
 		loadedDecks[editSelectedProfile] = loadedDecks[2];
 		path = editSelectedProfile == 0 ? leftLoadedProfile : rightLoadedProfile;
@@ -797,7 +801,7 @@ void drawGradiantBar(float x, float y, float maxY)
 
 void loadDeckToGame(SokuLib::ProfileDeckEdit *This)
 {
-	auto &deck = loadedDecks[2][This->editedCharacter][editSelectedDeck].cards;
+	auto &deck = editedDecks[editSelectedDeck].cards;
 	int count = 0;
 
 	for (auto pair : This->editedDeck->vector())
@@ -812,29 +816,38 @@ void loadDeckToGame(SokuLib::ProfileDeckEdit *This)
 
 void __fastcall CProfileDeckEdit_SwitchCurrentDeck(SokuLib::ProfileDeckEdit *This, int, int DeckID)
 {
+	auto FUN_0044f930 = SokuLib::union_cast<void (SokuLib::ProfileDeckEdit::*)(char param_1)>(0x44F930);
+
 	This->selectedDeck = 0;
-	if (!saveDeckFromGame(This)) {
+	if (!saveDeckFromGame(This, editedDecks[editSelectedDeck].cards)) {
 		errorCounter = 120;
 		return;
 	}
 	if (DeckID == 1) {
-		if (editSelectedDeck == loadedDecks[2][This->editedCharacter].size() - 1)
+		if (editSelectedDeck == editedDecks.size() - 1)
 			editSelectedDeck = 0;
 		else
 			editSelectedDeck++;
 	} else {
 		if (editSelectedDeck == 0)
-			editSelectedDeck = loadedDecks[2][This->editedCharacter].size() - 1;
+			editSelectedDeck = editedDecks.size() - 1;
 		else
 			editSelectedDeck--;
 	}
 	loadDeckToGame(This);
+	(This->*FUN_0044f930)('\0');
 }
 
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 {
-	auto keys = (SokuLib::KeymapManager *)(0x89a394);
+	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89a394);
 
+	if (editSelectedDeck == editedDecks.size() - 1 && (This->displayedNumberOfCards != 20 || (keys->keymapManager->input.a && This->cursorOnDeckChangeBox))) {
+		SokuLib::playSEWaveBuffer(0x28);
+		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
+		editedDecks.push_back({"Create new deck", defaultDecks[This->editedCharacter]});
+	}
+	//4F4
 	// This hides the deck select arrow
 	((bool ***)This)[0x10][0x2][20] = false;
 	return (This->*s_originalCProfileDeckEdit_OnProcess)();
@@ -850,6 +863,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 			for (int i = 0; i < 20; i++)
 				loadedDecks[2][i].push_back({"Create new deck", defaultDecks[i]});
 		}
+		editedDecks = loadedDecks[2][This->editedCharacter];
 		loadDeckToGame(This);
 	}
 
@@ -910,7 +924,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		textSprite.draw();
 	}
 
-	if (!SokuLib::textureMgr.createTextTexture(&text, loadedDecks[2][This->editedCharacter][editSelectedDeck].name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+	if (!SokuLib::textureMgr.createTextTexture(&text, editedDecks[editSelectedDeck].name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
 		puts("C'est vraiment pas de chance");
 		return ret;
 	}
