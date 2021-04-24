@@ -9,6 +9,8 @@
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x200
 
+static SokuLib::Trampoline *profileTrampoline;
+static SokuLib::Trampoline *deckSavedTrampoline;
 static int (SokuLib::Title::*s_originalTitleOnProcess)();
 static int (SokuLib::Select::*s_originalSelectOnProcess)();
 static int (SokuLib::SelectClient::*s_originalSelectCLOnProcess)();
@@ -95,31 +97,29 @@ struct Deck {
 	std::array<unsigned short, 20> cards;
 };
 
+static bool generated = false;
+static bool saveError = false;
+static bool side = false;
+static bool firstConstructLoad = true;
+static bool firstLoad = true;
+static bool loaded = false;
 static bool created = false;
-static SokuLib::SWRFont font;
-static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
-static std::vector<Deck> editedDecks;
 static unsigned upSelectedDeck = 0;
 static unsigned downSelectedDeck = 0;
 static unsigned editSelectedDeck = 0;
 static unsigned editSelectedProfile = 0;
 static unsigned errorCounter = 0;
 static std::string lastLoadedProfile;
-static SokuLib::Trampoline *profileTrampoline;
-static SokuLib::Trampoline *deckSavedTrampoline;
-static SokuLib::Character lastLeft;
-static SokuLib::Character lastRight;
 static std::string leftLoadedProfile;
 static std::string rightLoadedProfile;
+static SokuLib::SWRFont font;
+static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
+static std::vector<Deck> editedDecks;
+static SokuLib::Character lastLeft;
+static SokuLib::Character lastRight;
 static DrawUtils::Sprite arrowSprite;
-static bool generated = false;
-static bool saveError = false;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
-static bool side = false;
-static bool firstConstructLoad = true;
-static bool firstLoad = true;
-static bool loaded = false;
 
 #define SENDTO_JUMP_ADDR 0x00857290
 
@@ -847,7 +847,6 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
 		editedDecks.push_back({"Create new deck", defaultDecks[This->editedCharacter]});
 	}
-	//4F4
 	// This hides the deck select arrow
 	((bool ***)This)[0x10][0x2][20] = false;
 	return (This->*s_originalCProfileDeckEdit_OnProcess)();
