@@ -499,7 +499,7 @@ static void onDeckSaved()
 
 	std::ofstream stream{path};
 
-	if (!stream.fail()) {
+	if (stream.fail()) {
 		if (menu->displayedNumberOfCards == 20) {
 			menu->editedDeck->vector()[0]->second++;
 			saveError = true;
