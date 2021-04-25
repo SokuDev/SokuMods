@@ -10,6 +10,17 @@
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x200
 
+#ifdef _DEBUG
+#define _DEBUG_BUILD
+#endif
+
+//#define _DEBUG
+
+#ifndef _DEBUG
+#define puts(x)
+#define printf(...)
+#endif
+
 static SokuLib::Trampoline *profileTrampoline;
 static SokuLib::Trampoline *deckSavedTrampoline;
 static int (SokuLib::Title::*s_originalTitleOnProcess)();
@@ -362,7 +373,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 	int index = 2;
 
 	profile = "profile/" + profile + ".json";
-	std::cout << "Loading " << profile << std::endl;
+	printf("Loading %s\n", profile.c_str());
 
 	if (This == 0x898868) {
 		//P1
@@ -379,7 +390,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 
 	if (!stream) {
 		lastLoadedProfile = profile;
-		std::cout << "Failed to open file: " << strerror(errno) << std::endl;
+		printf("Failed to open file: %s\n", strerror(errno));
 		for (int i = 0; i < 20; i++) {
 			arr[i].clear();
 			if (index == 2)
@@ -481,7 +492,11 @@ static void onProfileChanged()
 	__asm mov This, esi;
 	__asm mov arg, esp;
 
+#ifdef _DEBUG_BUILD
 	arg = *(char **)(arg + 0x28);
+#else
+	arg = *(char **)(arg + 0x24);
+#endif
 	arg += 0x1C;
 	handleProfileChange(This, reinterpret_cast<SokuLib::String *>(arg));
 }
@@ -1280,9 +1295,11 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	DWORD old;
 	FILE *_;
 
+#ifdef _DEBUG
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
 	freopen_s(&_, "CONOUT$", "w", stderr);
+#endif
 	puts("Hey !");
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_originalSelectCLOnProcess          = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, CSelectCL_OnProcess);
