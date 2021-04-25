@@ -930,6 +930,14 @@ void renameBoxUpdate(SokuLib::KeyManager *keys)
 
 void deleteBoxRender()
 {
+	int text;
+	DrawUtils::Sprite textSprite;
+	DrawUtils::Sprite &yes = deleteBoxSelectedItem ? yesSelectedSprite : yesSprite;
+	DrawUtils::Sprite &no  = deleteBoxSelectedItem ? noSprite : noSelectedSprite;
+
+	if (deleteBoxSelectedItem == 2)
+		return;
+
 	baseSprite.setPosition({160, 192});
 	baseSprite.setSize(baseSprite.texture.getSize());
 	baseSprite.rect = {
@@ -939,17 +947,74 @@ void deleteBoxRender()
 	};
 	baseSprite.tint = DrawUtils::DxSokuColor::White;
 	baseSprite.draw();
+
+	yes.setPosition({242, 228});
+	yes.setSize(yes.texture.getSize());
+	yes.rect = {
+		0, 0,
+		static_cast<int>(yes.texture.getSize().x),
+		static_cast<int>(yes.texture.getSize().y)
+	};
+	yes.tint = DrawUtils::DxSokuColor::White;
+	yes.draw();
+
+	no.setPosition({338, 228});
+	no.setSize(no.texture.getSize());
+	no.rect = {
+		0, 0,
+		static_cast<int>(no.texture.getSize().x),
+		static_cast<int>(no.texture.getSize().y)
+	};
+	no.tint = DrawUtils::DxSokuColor::White;
+	no.draw();
+
+	if (!SokuLib::textureMgr.createTextTexture(&text, ("Delete deck " + editedDecks[editSelectedDeck].name + " ?").c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
+		puts("C'est vraiment pas de chance");
+		return;
+	}
+	textSprite.setPosition({164, 202});
+	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.rect = {
+		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+	};
+	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.draw();
 }
 
 void openDeleteBox()
 {
-	//editBoxDisplayed = true;
-	//editBoxSelectedItem = 0;
+	SokuLib::playSEWaveBuffer(0x28);
+	deleteBoxDisplayed = true;
+	deleteBoxSelectedItem = 0;
 }
 
 void deleteBoxUpdate(SokuLib::KeyManager *keys)
 {
+	auto horizontal = abs(keys->keymapManager->input.horizontalAxis);
 
+	if (deleteBoxSelectedItem == 2) {
+		if (!keys->keymapManager->input.a)
+			deleteBoxDisplayed = false;
+		return;
+	}
+	if (keys->keymapManager->input.b || SokuLib::checkKeyOneshot(1, false, false, false)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		deleteBoxDisplayed = false;
+	}
+	if (horizontal == 1 || (horizontal >= 36 && horizontal % 6 == 0)) {
+		deleteBoxSelectedItem = !deleteBoxSelectedItem;
+		SokuLib::playSEWaveBuffer(0x27);
+	}
+	if (keys->keymapManager->input.a == 1) {
+		if (deleteBoxSelectedItem) {
+			editedDecks.erase(editedDecks.begin() + editSelectedDeck);
+			loadDeckToGame(SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>(), editedDecks[editSelectedDeck].cards);
+			SokuLib::playSEWaveBuffer(0x28);
+		} else
+			SokuLib::playSEWaveBuffer(0x29);
+		deleteBoxSelectedItem = 2;
+	}
 }
 
 void copyBoxRender()
@@ -968,30 +1033,44 @@ void copyBoxRender()
 	baseSprite.tint = DrawUtils::DxSokuColor::White;
 	baseSprite.draw();
 
-	//163,195 / 316x60
-	arrowSprite.setPosition({289, 195});
-	arrowSprite.setSize(arrowSprite.texture.getSize());
-	arrowSprite.rect = {
-		0, 0,
-		static_cast<int>(arrowSprite.texture.getSize().x),
-		static_cast<int>(arrowSprite.texture.getSize().y)
-	};
-	arrowSprite.tint = DrawUtils::DxSokuColor::White;
-	arrowSprite.draw();
-
 	const std::string &name = copyBoxSelectedItem == editedDecks.size() - 1 ? "Default deck" : editedDecks[copyBoxSelectedItem].name;
 
 	if (!SokuLib::textureMgr.createTextTexture(&text, name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
 		puts("C'est vraiment pas de chance");
 		return;
 	}
-	textSprite.setPosition({321 - width / 2, 235});
+
+	constexpr float increase = 1;
+	DrawUtils::Vector2<int> pos{static_cast<int>(321 - (width / 2) * increase), 230};
+
+	textSprite.setPosition(pos);
 	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
-	textSprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.setSize({static_cast<unsigned>(TEXTURE_SIZE * increase), static_cast<unsigned>((FONT_HEIGHT + 18) * increase)});
 	textSprite.rect = {
 		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 	};
 	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.draw();
+
+	pos.x -= 32 * increase;
+	pos.y -= 6 * increase;
+	arrowSprite.rect = {0, 0, 32, 32};
+	arrowSprite.setPosition(pos);
+	arrowSprite.setSize({static_cast<unsigned>(32 * increase + 1), static_cast<unsigned>(32 * increase + 1)});
+	arrowSprite.tint = DrawUtils::DxSokuColor::White;
+	arrowSprite.draw();
+
+	pos.x += 32 * increase + width * increase;
+	arrowSprite.rect.left = 32;
+	arrowSprite.setPosition(pos);
+	arrowSprite.draw();
+
+	if (!SokuLib::textureMgr.createTextTexture(&text, "Choose a deck to copy", font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+		puts("C'est vraiment pas de chance");
+		return;
+	}
+	textSprite.setPosition({166, 200});
+	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
 	textSprite.draw();
 }
 
@@ -1049,7 +1128,7 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 		deleteBoxUpdate(keys);
 	else if (copyBox)
 		copyBoxUpdate(keys);
-	else if (keys->keymapManager->input.a && This->cursorOnDeckChangeBox) {
+	else if (keys->keymapManager->input.a == 1 && This->cursorOnDeckChangeBox) {
 		if (editSelectedDeck == editedDecks.size() - 1)
 			openCopyBox(This);
 		else
@@ -1064,8 +1143,7 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 	} else if (escPressed) {
 		escPressed = ((int *)0x8998D8)[1];
 		((int *)0x8998D8)[1] = 0;
-	}
-	if (editSelectedDeck == editedDecks.size() - 1 && This->displayedNumberOfCards != 0) {
+	} else if (editSelectedDeck == editedDecks.size() - 1 && This->displayedNumberOfCards != 0) {
 		SokuLib::playSEWaveBuffer(0x28);
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
 		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
