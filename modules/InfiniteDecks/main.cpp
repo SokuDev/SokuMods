@@ -383,7 +383,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 		for (int i = 0; i < 20; i++) {
 			arr[i].clear();
 			if (index == 2)
-				arr[i].push_back({"Create new deck", defaultDecks[i]});
+				arr[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 		}
 		return;
 	}
@@ -424,7 +424,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 			arr[i].push_back(deck);
 		}
 		if (index == 2)
-			arr[i].push_back({"Create new deck", defaultDecks[i]});
+			arr[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
 	lastLoadedProfile = profile;
 }
@@ -662,13 +662,13 @@ int renderingCommon(int ret)
 	if (
 		scene.leftSelectionStage == 1 &&
 		SokuLib::leftChar != SokuLib::CHARACTER_RANDOM &&
-		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
+		SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER
 	)
 		renderDeck(SokuLib::leftChar,  upSelectedDeck,   loadedDecks[0][SokuLib::leftChar],  {28, 98});
 	if (
 		scene.rightSelectionStage == 1 &&
 		SokuLib::rightChar != SokuLib::CHARACTER_RANDOM &&
-		(SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+		SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT
 	)
 		renderDeck(SokuLib::rightChar, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], {28, 384});
 	return ret;
@@ -832,9 +832,8 @@ void drawGradiantBar(float x, float y, float maxY)
 	s_originalDrawGradiantBar(x, y, maxY);
 }
 
-void loadDeckToGame(SokuLib::ProfileDeckEdit *This)
+void loadDeckToGame(SokuLib::ProfileDeckEdit *This, const std::array<unsigned short, 20> &deck)
 {
-	auto &deck = editedDecks[editSelectedDeck].cards;
 	int count = 0;
 
 	for (auto pair : This->editedDeck->vector())
@@ -867,7 +866,7 @@ void __fastcall CProfileDeckEdit_SwitchCurrentDeck(SokuLib::ProfileDeckEdit *Thi
 		else
 			editSelectedDeck--;
 	}
-	loadDeckToGame(This);
+	loadDeckToGame(This, editedDecks[editSelectedDeck].cards);
 	(This->*FUN_0044f930)('\0');
 }
 
@@ -905,7 +904,7 @@ void openRenameBox(SokuLib::ProfileDeckEdit *This)
 	SokuLib::playSEWaveBuffer(0x28);
 	if (editSelectedDeck == editedDecks.size() - 1) {
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
-		editedDecks.push_back({"Create new deck", defaultDecks[This->editedCharacter]});
+		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
 
 	//:magic_wand:
@@ -955,6 +954,10 @@ void deleteBoxUpdate(SokuLib::KeyManager *keys)
 
 void copyBoxRender()
 {
+	int text;
+	int width;
+	DrawUtils::Sprite textSprite;
+
 	baseSprite.setPosition({160, 192});
 	baseSprite.setSize(baseSprite.texture.getSize());
 	baseSprite.rect = {
@@ -966,18 +969,71 @@ void copyBoxRender()
 	baseSprite.draw();
 
 	//163,195 / 316x60
+	arrowSprite.setPosition({289, 195});
+	arrowSprite.setSize(arrowSprite.texture.getSize());
+	arrowSprite.rect = {
+		0, 0,
+		static_cast<int>(arrowSprite.texture.getSize().x),
+		static_cast<int>(arrowSprite.texture.getSize().y)
+	};
+	arrowSprite.tint = DrawUtils::DxSokuColor::White;
+	arrowSprite.draw();
 
+	const std::string &name = copyBoxSelectedItem == editedDecks.size() - 1 ? "Default deck" : editedDecks[copyBoxSelectedItem].name;
+
+	if (!SokuLib::textureMgr.createTextTexture(&text, name.c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+		puts("C'est vraiment pas de chance");
+		return;
+	}
+	textSprite.setPosition({321 - width / 2, 235});
+	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.rect = {
+		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
+	};
+	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.draw();
 }
 
 void openCopyBox(SokuLib::ProfileDeckEdit *This)
 {
+	SokuLib::playSEWaveBuffer(0x28);
 	copyBoxDisplayed = true;
 	copyBoxSelectedItem = 0;
 }
 
 void copyBoxUpdate(SokuLib::KeyManager *keys)
 {
+	if (keys->keymapManager->input.b || SokuLib::checkKeyOneshot(1, false, false, false)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		copyBoxDisplayed = false;
+	}
 
+	auto horizontal = abs(keys->keymapManager->input.horizontalAxis);
+
+	if (horizontal == 1 || (horizontal >= 36 && horizontal % 6 == 0)) {
+		if (keys->keymapManager->input.horizontalAxis < 0) {
+			if (copyBoxSelectedItem == 0)
+				copyBoxSelectedItem = editedDecks.size() - 1;
+			else
+				copyBoxSelectedItem--;
+		} else {
+			if (copyBoxSelectedItem == editedDecks.size() - 1)
+				copyBoxSelectedItem = 0;
+			else
+				copyBoxSelectedItem++;
+		}
+		SokuLib::playSEWaveBuffer(0x27);
+	}
+	if (keys->keymapManager->input.a == 1) {
+		auto menu = SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>();
+
+		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
+		loadDeckToGame(SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>(), copyBoxSelectedItem == editedDecks.size() - 1 ? defaultDecks[menu->editedCharacter] : editedDecks[copyBoxSelectedItem].cards);
+		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+		copyBoxDisplayed = false;
+		openRenameBox(menu);
+	}
 }
 
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
@@ -1009,10 +1065,10 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 		escPressed = ((int *)0x8998D8)[1];
 		((int *)0x8998D8)[1] = 0;
 	}
-	if (editSelectedDeck == editedDecks.size() - 1 && This->displayedNumberOfCards != 20) {
+	if (editSelectedDeck == editedDecks.size() - 1 && This->displayedNumberOfCards != 0) {
 		SokuLib::playSEWaveBuffer(0x28);
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
-		editedDecks.push_back({"Create new deck", defaultDecks[This->editedCharacter]});
+		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
 	// This hides the deck select arrow
 	((bool ***)This)[0x10][0x2][20] = false;
@@ -1027,10 +1083,10 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		if (editSelectedProfile != 2) {
 			loadedDecks[2] = loadedDecks[editSelectedProfile];
 			for (int i = 0; i < 20; i++)
-				loadedDecks[2][i].push_back({"Create new deck", defaultDecks[i]});
+				loadedDecks[2][i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 		}
 		editedDecks = loadedDecks[2][This->editedCharacter];
-		loadDeckToGame(This);
+		loadDeckToGame(This, editedDecks[editSelectedDeck].cards);
 		deleteBoxDisplayed = false;
 		renameBoxDisplayed = false;
 		copyBoxDisplayed = false;
