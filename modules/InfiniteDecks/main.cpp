@@ -100,8 +100,9 @@ struct Deck {
 
 static char editingBoxObject[0x164];
 static bool escPressed = false;
+static bool copyBoxDisplayed = false;
 static bool renameBoxDisplayed = false;
-static bool editBoxDisplayed = false;
+static bool deleteBoxDisplayed = false;
 static bool generated = false;
 static bool saveError = false;
 static bool side = false;
@@ -110,7 +111,8 @@ static bool firstLoad = true;
 static bool loaded = false;
 static bool created = false;
 static char nameBuffer[64];
-static unsigned char editBoxSelectedItem = 0;
+static unsigned char copyBoxSelectedItem = 0;
+static unsigned char deleteBoxSelectedItem = 0;
 static unsigned char renameBoxSelectedItem = 0;
 static unsigned char errorCounter = 0;
 static unsigned upSelectedDeck = 0;
@@ -518,6 +520,16 @@ static void onDeckSaved()
 	} else
 		path = lastLoadedProfile;
 	printf("Saving to %s\n", path.c_str());
+	for (int i = 0; i < 20; i++) {
+		result[i] = nlohmann::json::array();
+		for (int j = 0; j < loadedDecks[2][i].size() - 1; j++) {
+			result[i][j]["name"] = loadedDecks[2][i][j].name;
+			result[i][j]["cards"] = std::vector<unsigned short>{
+				loadedDecks[2][i][j].cards.begin(),
+				loadedDecks[2][i][j].cards.end()
+			};
+		}
+	}
 
 	std::ofstream stream{path};
 
@@ -528,16 +540,6 @@ static void onDeckSaved()
 		}
 		MessageBoxA(SokuLib::window, ("Cannot open \"" + lastLoadedProfile + "\". Please make sure you have proper permissions and enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
 		return;
-	}
-	for (int i = 0; i < 20; i++) {
-		result[i] = nlohmann::json::array();
-		for (int j = 0; j < loadedDecks[2][i].size() - 1; j++) {
-			result[i][j]["name"] = loadedDecks[2][i][j].name;
-			result[i][j]["cards"] = std::vector<unsigned short>{
-				loadedDecks[2][i][j].cards.begin(),
-				loadedDecks[2][i][j].cards.end()
-			};
-		}
 	}
 	stream << result.dump(4).c_str();
 	if (stream.fail()) {
@@ -920,7 +922,7 @@ void renameBoxUpdate(SokuLib::KeyManager *keys)
 	}
 }
 
-void editBoxRender()
+void deleteBoxRender()
 {
 	baseSprite.setPosition({160, 192});
 	baseSprite.setSize(baseSprite.texture.getSize());
@@ -933,7 +935,36 @@ void editBoxRender()
 	baseSprite.draw();
 }
 
-void editBoxUpdate(SokuLib::KeyManager *keys)
+void openDeleteBox()
+{
+	//editBoxDisplayed = true;
+	//editBoxSelectedItem = 0;
+}
+
+void deleteBoxUpdate(SokuLib::KeyManager *keys)
+{
+
+}
+
+void copyBoxRender()
+{
+	baseSprite.setPosition({160, 192});
+	baseSprite.setSize(baseSprite.texture.getSize());
+	baseSprite.rect = {
+		0, 0,
+		static_cast<int>(baseSprite.texture.getSize().x),
+		static_cast<int>(baseSprite.texture.getSize().y)
+	};
+	baseSprite.tint = DrawUtils::DxSokuColor::White;
+	baseSprite.draw();
+}
+
+void openCopyBox(SokuLib::ProfileDeckEdit *This)
+{
+
+}
+
+void copyBoxUpdate(SokuLib::KeyManager *keys)
 {
 
 }
@@ -941,19 +972,24 @@ void editBoxUpdate(SokuLib::KeyManager *keys)
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 {
 	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-	bool editBox = editBoxDisplayed;
+	bool deleteBox = deleteBoxDisplayed;
 	bool renameBox = renameBoxDisplayed;
+	bool copyBox = copyBoxDisplayed;
 
 	if (renameBox)
 		renameBoxUpdate(keys);
-	else if (editBox)
-		editBoxUpdate(keys);
-	else if (keys->keymapManager->input.c && This->cursorOnDeckChangeBox) {
-		//editBoxDisplayed = true;
-		//editBoxSelectedItem = 0;
-		openRenameBox(This);
+	else if (deleteBox)
+		deleteBoxUpdate(keys);
+	else if (copyBox)
+		copyBoxUpdate(keys);
+	else if (keys->keymapManager->input.a && This->cursorOnDeckChangeBox) {
+		if (editSelectedDeck == editedDecks.size() - 1)
+			openCopyBox(This);
+		else
+			openRenameBox(This);
+	} else if (keys->keymapManager->input.c && This->cursorOnDeckChangeBox && editSelectedDeck != editedDecks.size() - 1) {
 	}
-	if (renameBox || editBox) {
+	if (renameBox || deleteBox || copyBox) {
 		escPressed = ((int *)0x8998D8)[1];
 		((int *)0x8998D8)[1] = 0;
 		((int *)0x8998D8)[DIK_F1] = 0;
@@ -962,7 +998,7 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 		escPressed = ((int *)0x8998D8)[1];
 		((int *)0x8998D8)[1] = 0;
 	}
-	if (editSelectedDeck == editedDecks.size() - 1 && (This->displayedNumberOfCards != 20 || (keys->keymapManager->input.a && This->cursorOnDeckChangeBox))) {
+	if (editSelectedDeck == editedDecks.size() - 1 && This->displayedNumberOfCards != 20) {
 		SokuLib::playSEWaveBuffer(0x28);
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
 		editedDecks.push_back({"Create new deck", defaultDecks[This->editedCharacter]});
@@ -984,6 +1020,9 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		}
 		editedDecks = loadedDecks[2][This->editedCharacter];
 		loadDeckToGame(This);
+		deleteBoxDisplayed = false;
+		renameBoxDisplayed = false;
+		copyBoxDisplayed = false;
 	}
 
 	if (saveError) {
@@ -1072,8 +1111,10 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 
 	if (renameBoxDisplayed)
 		renameBoxRender();
-	else if (editBoxDisplayed)
-		editBoxRender();
+	else if (deleteBoxDisplayed)
+		deleteBoxRender();
+	else if (copyBoxDisplayed)
+		copyBoxRender();
 	return ret;
 }
 
