@@ -366,55 +366,29 @@ static void sanitizeDeck(SokuLib::Character chr, Deck &deck)
 	}
 }
 
-static void handleProfileChange(int This, SokuLib::String *str)
+static bool loadProfileFile(std::ifstream &stream, std::array<std::vector<Deck>, 20> &arr, int index)
 {
-	char *arg = *str;
-	std::string profile{arg, strstr(arg, ".pf")};
-	int index = 2;
-
-	profile = "profile/" + profile + ".json";
-	printf("Loading %s\n", profile.c_str());
-
-	if (This == 0x898868) {
-		//P1
-		index = 0;
-		leftLoadedProfile = profile;
-	} else if (This == 0x899054) {
-		//P2
-		index = 1;
-		rightLoadedProfile = profile;
-	} //Else is deck construct
-
-	auto &arr = loadedDecks[index];
-	std::ifstream stream{profile};
-
-	if (!stream) {
-		lastLoadedProfile = profile;
+	if (stream.fail()) {
 		printf("Failed to open file: %s\n", strerror(errno));
 		for (int i = 0; i < 20; i++) {
 			arr[i].clear();
 			if (index == 2)
 				arr[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 		}
-		return;
+		return false;
 	}
 
 	nlohmann::json json;
 
-	try {
-		stream >> json;
-		if (json.size() != 20)
-			throw std::invalid_argument("Not 20 characters");
-		for (auto &arr : json) {
-			for (auto &elem : arr) {
-				elem.contains("name") && (elem["name"].get<std::string>(), true);
-				if (!elem.contains("cards") || elem["cards"].get<std::vector<unsigned short>>().size() != 20)
-					throw std::invalid_argument(elem.dump());
-			}
+	stream >> json;
+	if (json.size() != 20)
+		throw std::invalid_argument("Not 20 characters");
+	for (auto &arr : json) {
+		for (auto &elem : arr) {
+			elem.contains("name") && (elem["name"].get<std::string>(), true);
+			if (!elem.contains("cards") || elem["cards"].get<std::vector<unsigned short>>().size() != 20)
+				throw std::invalid_argument(elem.dump());
 		}
-	} catch (std::exception &e) {
-		MessageBoxA(SokuLib::window, e.what(), "Fatal error", MB_ICONERROR);
-		throw;
 	}
 
 	for (int i = 0; i < 20; i++) {
@@ -437,7 +411,71 @@ static void handleProfileChange(int This, SokuLib::String *str)
 		if (index == 2)
 			arr[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
+	return true;
+}
+
+static void handleProfileChange(int This, SokuLib::String *str)
+{
+	char *arg = *str;
+	std::string profileName{arg, strstr(arg, ".pf")};
+	std::string profile = "profile/" + profileName + ".json";
+	int index = 2;
+	bool hasBackup;
+
+	if (This == 0x898868) {
+		//P1
+		index = 0;
+		leftLoadedProfile = profile;
+	} else if (This == 0x899054) {
+		//P2
+		index = 1;
+		rightLoadedProfile = profile;
+	} //Else is deck construct
+	printf("Loading %s\n", profile.c_str());
+
+	bool result = false;
+	auto &arr = loadedDecks[index];
+	std::ifstream stream{profile + ".bck"};
+
+	hasBackup = !stream.fail();
+	stream.close();
+	if (hasBackup)
+		printf("%s has backup data !\n", profile.c_str());
+
+	stream.open(profile, std::ifstream::in);
+	try {
+		result = loadProfileFile(stream, arr, index);
+	} catch (std::exception &e) {
+		auto answer = IDNO;
+
+		if (!hasBackup)
+			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
+		else
+			answer = MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what() + "\n\nDo you want to load backup file ?").c_str(), "Loading error", MB_ICONERROR | MB_YESNO);
+		if (answer != IDYES)
+			throw;
+	}
+	stream.close();
+
+	if (!result && hasBackup) {
+		try {
+			stream.open(profile + ".bck", std::ifstream::in);
+			printf("Loading %s\n", (profile + ".bck").c_str());
+			result = loadProfileFile(stream, arr, index);
+			stream.close();
+		} catch (std::exception &e) {
+			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ".bck: " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
+			throw;
+		}
+		unlink(profile.c_str());
+		rename((profile + ".bck").c_str(), profile.c_str());
+		lastLoadedProfile = profile;
+		return;
+	}
+
 	lastLoadedProfile = profile;
+	if (hasBackup)
+		unlink((profile + ".bck").c_str());
 }
 
 static int weirdRand(int key, int delay)
@@ -551,7 +589,10 @@ static void onDeckSaved()
 			};
 		}
 	}
+	if (std::ifstream(path + ".bck").fail())
+		rename(path.c_str(), (path + ".bck").c_str());
 
+	auto resultStr = result.dump(4);
 	std::ofstream stream{path};
 
 	if (stream.fail()) {
@@ -562,8 +603,9 @@ static void onDeckSaved()
 		MessageBoxA(SokuLib::window, ("Cannot open \"" + lastLoadedProfile + "\". Please make sure you have proper permissions and enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
 		return;
 	}
-	stream << result.dump(4).c_str();
+	stream << resultStr;
 	if (stream.fail()) {
+		stream.close();
 		if (menu->displayedNumberOfCards == 20) {
 			menu->editedDeck->vector()[0]->second++;
 			saveError = true;
@@ -571,13 +613,15 @@ static void onDeckSaved()
 		MessageBoxA(SokuLib::window, ("Cannot write to \"" + lastLoadedProfile + "\". Please make sure you have proper enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
 		return;
 	}
+	stream.close();
 
 	auto cards = menu->editedDeck->vector();
 
 	for (auto card : cards)
 		card->second = 0;
 	for (int i = 0; i < 5; i++)
-		cards[i]->second = 4;
+		menu->editedDeck->operator[](i) = 4;
+	unlink((path + ".bck").c_str());
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos, const char *overridingName = nullptr)
