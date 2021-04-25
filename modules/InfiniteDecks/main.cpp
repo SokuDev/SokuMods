@@ -262,10 +262,8 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 		if (packet->game.event.type == SokuLib::GAME_MATCH) {
 			generateFakeDecks();
 
-			//char *buffer = new char[sizeof(SokuLib::GameMatchEvent)];
-			//packet = reinterpret_cast<>
 			auto &fake = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? fakeLeftDeck : fakeRightDeck);
-			auto &replace = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? packet->game.event.match.host : packet->game.event.match.client);
+			auto &replace = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? packet->game.event.match.host : packet->game.event.match.client());
 
 			if (fake)
 				memcpy(replace.cards, fake->data(), fake->size() * sizeof(*fake->data()));
@@ -563,7 +561,8 @@ static void onDeckSaved()
 
 	for (auto card : cards)
 		card->second = 0;
-	cards[0]->second = 20;
+	for (int i = 0; i < 5; i++)
+		cards[i]->second = 4;
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos, const char *overridingName = nullptr)
@@ -966,10 +965,8 @@ void copyBoxRender()
 	baseSprite.tint = DrawUtils::DxSokuColor::White;
 	baseSprite.draw();
 
-	//163
+	//163,195 / 316x60
 
-
-	//195
 }
 
 void openCopyBox(SokuLib::ProfileDeckEdit *This)
