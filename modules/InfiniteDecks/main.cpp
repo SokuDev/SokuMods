@@ -109,6 +109,11 @@ struct Deck {
 	std::array<unsigned short, 20> cards;
 };
 
+static char profilePath[1024 + MAX_PATH];
+static int createDeckGuideTexture;
+static int selectDeckGuideTexture;
+static int dialogBoxGuideTexture;
+static int editBoxGuideTexture;
 static char editingBoxObject[0x164];
 static bool escPressed = false;
 static bool copyBoxDisplayed = false;
@@ -139,6 +144,7 @@ static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
 static std::vector<Deck> editedDecks;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
+static bool pickedRandom = false;
 static DrawUtils::Sprite arrowSprite;
 static DrawUtils::Sprite baseSprite;
 static DrawUtils::Sprite nameSprite;
@@ -212,8 +218,12 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 {
 	std::array<unsigned short, 20> randomDeck{21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21};
 
-	if (lastChr == SokuLib::CHARACTER_RANDOM)
-		return generateFakeDeck(chr, chr, rand() % (bases.size() + 1), bases, buffer);
+ 	pickedRandom = false;
+	if (lastChr == SokuLib::CHARACTER_RANDOM) {
+		generateFakeDeck(chr, chr, rand() % (bases.size() + 1), bases, buffer);
+		pickedRandom = true;
+		return;
+	}
 	if (id == bases.size())
 		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
 	if (id == bases.size() + 1)
@@ -258,14 +268,13 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &de
 	}
 	s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
 }
+static bool pressedRandom = false;
 
 int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen)
 {
-	static int left = 0;
-	static int right = 0;
 	auto packet = reinterpret_cast<SokuLib::Packet *>(buf);
 
-	if (SokuLib::sceneId != SokuLib::SCENE_SELECTCL && SokuLib::sceneId != SokuLib::SCENE_SELECTSV)
+	if (SokuLib::sceneId != SokuLib::SCENE_SELECTCL && SokuLib::sceneId != SokuLib::SCENE_SELECTSV && SokuLib::sceneId != SokuLib::SCENE_SELECT)
 		return sendto(s, buf, len, flags, to, tolen);
 	if (packet->type == SokuLib::CLIENT_GAME || packet->type == SokuLib::HOST_GAME) {
 		bool needDelete = false;
@@ -276,61 +285,33 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 			auto &fake = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? fakeLeftDeck : fakeRightDeck);
 			auto &replace = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? packet->game.event.match.host : packet->game.event.match.client());
 
+			replace.deckId = 0;
 			if (fake)
 				memcpy(replace.cards, fake->data(), fake->size() * sizeof(*fake->data()));
 			else //We just send an invalid deck over if we want no decks
 				memset(replace.cards, 0, 40);
 		}
 		if (packet->game.event.type == SokuLib::GAME_INPUT && packet->game.event.input.sceneId == SokuLib::SCENEID_CHARACTER_SELECT) {
-			if (*reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C0) != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
+			auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
+
+			if (scene.leftSelectionStage  != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
 				return sendto(s, buf, len, flags, to, tolen);
-			if (*reinterpret_cast<unsigned char *>(*(int *)0x8a000c + 0x22C1) != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+			if (scene.rightSelectionStage != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
 				return sendto(s, buf, len, flags, to, tolen);
-
-			if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && SokuLib::rightChar != SokuLib::CHARACTER_RANDOM) {
-				auto &decks = loadedDecks[0][SokuLib::rightChar];
-
-				if (packet->game.event.input.inputs[0].charSelect.left)
-					left++;
-				else
-					left = 0;
-
-				if (packet->game.event.input.inputs[0].charSelect.right)
-					right++;
-				else
-					right = 0;
-
-				if (left == 1 || (left >= 36 && left % 6 == 0)) {
-					SokuLib::playSEWaveBuffer(0x27);
-					if (downSelectedDeck == 0) {
-						downSelectedDeck = decks.size() + 1;
-					} else {
-						downSelectedDeck--;
-					}
-				} else if (right == 1 || (right >= 36 && right % 6 == 0)) {
-					SokuLib::playSEWaveBuffer(0x27);
-					if (downSelectedDeck == decks.size() + 1) {
-						downSelectedDeck = 0;
-					} else {
-						downSelectedDeck++;
-					}
-				}
-			} else {
-				left = 0;
-				right = 0;
-			}
 
 			char *buffer = new char[len];
 
 			memcpy(buffer, buf, len);
 			packet = reinterpret_cast<SokuLib::Packet *>(buffer);
 			//Me changing deck ? I would never do that !
+
 			for (int i = 0; i < packet->game.event.input.inputCount; i++) {
 				packet->game.event.input.inputs[i].charSelect.left = false;
-				packet->game.event.input.inputs[i].charSelect.right = false;
-				packet->game.event.input.inputs[i].charSelect.X |= packet->game.event.input.inputs[i].charSelect.A;
+				packet->game.event.input.inputs[i].charSelect.right = pickedRandom;
+				pickedRandom = false;
 				packet->game.event.input.inputs[i].charSelect.A = false;
 			}
+			pressedRandom = packet->game.event.input.inputs[0].charSelect.A;
 
 			int bytes = sendto(s, buffer, len, flags, to, tolen);
 
@@ -709,15 +690,6 @@ int renderingCommon(int ret)
 	std::string name;
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
-	if (scene.leftRandomDeck) {
-		scene.leftRandomDeck = false;
-		upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 3;
-	}
-	if (scene.rightRandomDeck) {
-		scene.rightRandomDeck = false;
-		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
-	}
-
 	if (
 		scene.leftSelectionStage == 1 &&
 		SokuLib::leftChar != SokuLib::CHARACTER_RANDOM &&
@@ -745,7 +717,7 @@ int __fastcall CSelect_OnRender(SokuLib::Select *This) {
 	return renderingCommon((This->*s_originalSelectOnRender)());
 }
 
-static void loadTexture(DrawUtils::Sprite &container, const char *path)
+static void loadTexture(DrawUtils::Texture &container, const char *path)
 {
 	int text;
 	DrawUtils::Vector2<unsigned> size;
@@ -754,12 +726,18 @@ static void loadTexture(DrawUtils::Sprite &container, const char *path)
 		MessageBoxA(SokuLib::window, ("Cannot load " + std::string(path)).c_str(), "Fatal error", MB_ICONERROR);
 		abort();
 	}
-	container.texture.setHandle(text, size);
+	container.setHandle(text, size);
+}
+
+static void loadTexture(DrawUtils::Sprite &container, const char *path)
+{
+	loadTexture(container.texture, path);
 }
 
 static void loadCardAssets()
 {
 	char buffer[128];
+	DrawUtils::Texture tmp;
 
 	puts("Loading card assets");
 	for (int i = 0; i <= 20; i++) {
@@ -784,10 +762,24 @@ static void loadCardAssets()
 	loadTexture(noSelectedSprite,  "data/menu/23b_No.bmp");
 	loadTexture(yesSprite,         "data/menu/22a_Yes.bmp");
 	loadTexture(yesSelectedSprite, "data/menu/22b_Yes.bmp");
+
+	loadTexture(tmp, "data/guide/09.bmp");
+	editBoxGuideTexture = tmp.releaseHandle();
+
+	loadTexture(tmp, "data/guide/02.bmp");
+	dialogBoxGuideTexture = tmp.releaseHandle();
+
+	DrawUtils::Texture::loadFromFile(tmp, (profilePath + std::string("/guides/createDeck.png")).c_str());
+	createDeckGuideTexture = tmp.releaseHandle();
+
+	DrawUtils::Texture::loadFromFile(tmp, (profilePath + std::string("/guides/selectDeck.png")).c_str());
+	selectDeckGuideTexture = tmp.releaseHandle();
 }
 
 static int selectProcessCommon(int v)
 {
+	static int left = 0;
+	static int right = 0;
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
 	if (scene.leftSelectionStage == 3 && scene.rightSelectionStage == 3) {
@@ -798,6 +790,45 @@ static int selectProcessCommon(int v)
 		generated = false;
 	}
 
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && scene.rightSelectionStage == 1) {
+		auto &decks = loadedDecks[0][SokuLib::rightChar];
+		auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
+
+		if (keys->keymapManager->input.horizontalAxis < 0)
+			left++;
+		else
+			left = 0;
+
+		if (keys->keymapManager->input.horizontalAxis > 0)
+			right++;
+		else
+			right = 0;
+
+		if (left == 1 || (left >= 36 && left % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			if (downSelectedDeck == 0) {
+				downSelectedDeck = decks.size() + 3;
+			} else {
+				downSelectedDeck--;
+			}
+		} else if (right == 1 || (right >= 36 && right % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			if (downSelectedDeck == decks.size() + 3) {
+				downSelectedDeck = 0;
+			} else {
+				downSelectedDeck++;
+			}
+		}
+	}
+
+	if (scene.leftRandomDeck && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) {
+		scene.leftRandomDeck = false;
+		upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 3;
+	}
+	if (scene.rightRandomDeck && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
+		scene.rightRandomDeck = false;
+		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
+	}
 	if (scene.leftSelectionStage != 3 || scene.rightSelectionStage != 3 || counter < 30) {
 		if (lastLeft != SokuLib::leftChar)
 			upSelectedDeck = 0;
@@ -844,6 +875,9 @@ int __fastcall CSelect_OnProcess(SokuLib::Select *This) {
 
 static void handleInput(const SokuLib::KeyInput &inputs, int index)
 {
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+		return;
+
 	bool isRight = index == 1 || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER;
 	auto &selectedDeck = (isRight ? downSelectedDeck : upSelectedDeck);
 	auto &decks = loadedDecks[index][isRight ? SokuLib::rightChar : SokuLib::leftChar];
@@ -1339,6 +1373,14 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	DWORD old;
 	FILE *_;
 
+	GetModuleFileName(hMyModule, profilePath, 1024);
+	while (*profilePath && profilePath[strlen(profilePath) - 1] == '\\')
+		profilePath[strlen(profilePath) - 1] = 0;
+
+	auto result = strrchr(profilePath, '\\');
+
+	if (result)
+		*result = 0;
 #ifdef _DEBUG
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
