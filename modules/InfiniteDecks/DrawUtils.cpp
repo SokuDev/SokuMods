@@ -8,6 +8,11 @@
 #include <SokuLib.hpp>
 #include "DrawUtils.hpp"
 
+#ifndef _DEBUG
+#define puts(x)
+#define printf(...)
+#endif
+
 namespace DrawUtils
 {
 	DxSokuColor::DxSokuColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept :
@@ -158,7 +163,7 @@ namespace DrawUtils
 			SokuLib::textureMgr.deallocate(handle);
 			return false;
 		}
-		printf("Texture handle: %i, Size: %ux%u\n", handle, info.Width, info.Height);
+		printf("Texture handle: %x, Size: %ux%u\n", handle, info.Width, info.Height);
 		buffer.setHandle(handle, {info.Width, info.Height});
 		return true;
 	}
