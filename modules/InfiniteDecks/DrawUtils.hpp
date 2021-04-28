@@ -101,6 +101,8 @@ namespace DrawUtils
 		DxSokuColor &operator=(unsigned color);
 		DxSokuColor operator+(const DxSokuColor &other) const;
 		DxSokuColor &operator+=(const DxSokuColor &other);
+		DxSokuColor operator*(const DxSokuColor &other) const;
+		DxSokuColor &operator*=(const DxSokuColor &other);
 
 		template<typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
 		DxSokuColor operator*(T alpha) const
@@ -242,6 +244,7 @@ namespace DrawUtils
 	public:
 		TextureRect rect;
 		DxSokuColor tint = 0xFFFFFFFF;
+		DxSokuColor fillColors[4] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
 		Texture texture;
 
 		void draw() const override;

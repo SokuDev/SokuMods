@@ -56,6 +56,23 @@ namespace DrawUtils
 		return *this;
 	}
 
+	DxSokuColor DxSokuColor::operator*(const DxSokuColor &other) const
+	{
+		DxSokuColor result = *this;
+
+		result *= other;
+		return result;
+	}
+
+	DxSokuColor &DxSokuColor::operator*=(const DxSokuColor &other)
+	{
+		this->a = std::ceil((other.a * this->a) / 255.f);
+		this->r = std::ceil((other.r * this->r) / 255.f);
+		this->g = std::ceil((other.g * this->g) / 255.f);
+		this->b = std::ceil((other.b * this->b) / 255.f);
+		return *this;
+	}
+
 	const DxSokuColor DxSokuColor::White      {0xFF, 0xFF, 0xFF, 0xFF};
 	const DxSokuColor DxSokuColor::Red        {0xFF, 0x00, 0x00, 0xFF};
 	const DxSokuColor DxSokuColor::Blue       {0x00, 0x00, 0xFF, 0xFF};
@@ -302,7 +319,7 @@ namespace DrawUtils
 			vertexs[i] = this->_vertex[i];
 			vertexs[i].x -= 0.5;
 			vertexs[i].y -= 0.5;
-			vertexs[i].color = this->tint;
+			vertexs[i].color = this->fillColors[i] * this->tint;
 		}
 
 		auto size = this->texture.getSize();

@@ -116,11 +116,13 @@ struct Deck {
 	std::array<unsigned short, 20> cards;
 };
 
+struct Guide {
+	bool active = false;
+	DrawUtils::Sprite sprite;
+	unsigned char alpha = 0;
+};
+
 static char profilePath[1024 + MAX_PATH];
-static int createDeckGuideTexture;
-static int selectDeckGuideTexture;
-static int editBoxGuideTexture;
-static int baseDeckEditGuideTexture;
 static char editingBoxObject[0x164];
 static bool escPressed = false;
 static bool copyBoxDisplayed = false;
@@ -129,8 +131,9 @@ static bool deleteBoxDisplayed = false;
 static bool generated = false;
 static bool saveError = false;
 static bool side = false;
-static bool loaded = false;
-static bool created = false;
+static bool fontLoaded = false;
+static bool assetsLoaded = false;
+static bool profileSelectReady = false;
 static char nameBuffer[64];
 static unsigned char copyBoxSelectedItem = 0;
 static unsigned char deleteBoxSelectedItem = 0;
@@ -156,6 +159,9 @@ static DrawUtils::Sprite noSprite;
 static DrawUtils::Sprite noSelectedSprite;
 static DrawUtils::Sprite yesSprite;
 static DrawUtils::Sprite yesSelectedSprite;
+static Guide createDeckGuide;
+static Guide selectDeckGuide;
+static Guide editBoxGuide;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
 
@@ -478,11 +484,15 @@ static int weirdRand(int key, int delay)
 static void initFont() {
 	SokuLib::FontDescription desc;
 
+	if (fontLoaded)
+		return;
+	fontLoaded = true;
 	desc.r1 = 255;
 	desc.r2 = 255;
 	desc.g1 = 255;
 	desc.g2 = 255;
 	desc.b1 = 255;
+	desc.b2 = 255;
 	desc.height = FONT_HEIGHT;
 	desc.weight = FW_BOLD;
 	desc.italic = 0;
@@ -497,6 +507,7 @@ static void initFont() {
 	font.create();
 	font.setIndirect(desc);
 	strcpy(desc.faceName, SokuLib::defaultFontName);
+	desc.weight = FW_REGULAR;
 	defaultFont.create();
 	defaultFont.setIndirect(desc);
 }
@@ -728,9 +739,19 @@ static void loadTexture(DrawUtils::Texture &container, const char *path)
 	container.setHandle(text, size);
 }
 
-static void loadTexture(DrawUtils::Sprite &container, const char *path)
+static inline void loadTexture(DrawUtils::Sprite &container, const char *path)
 {
 	loadTexture(container.texture, path);
+}
+
+static void initGuide(Guide &guide)
+{
+	guide.sprite.setPosition({0, 464});
+	guide.sprite.setSize({640, 16});
+	guide.sprite.rect.width = guide.sprite.getSize().x;
+	guide.sprite.rect.height = guide.sprite.getSize().y;
+	guide.sprite.rect.top = 0;
+	guide.sprite.rect.left = 0;
 }
 
 static void loadCardAssets()
@@ -738,6 +759,9 @@ static void loadCardAssets()
 	char buffer[128];
 	DrawUtils::Texture tmp;
 
+	if (assetsLoaded)
+		return;
+	assetsLoaded = true;
 	puts("Loading card assets");
 	for (int i = 0; i <= 20; i++) {
 		sprintf(buffer, "data/card/common/card%03i.bmp", i);
@@ -754,22 +778,19 @@ static void loadCardAssets()
 			loadTexture(cardsTextures[j][card], buffer);
 		}
 	}
-	loadTexture(baseSprite,        "data/menu/21_Base.bmp");
-	loadTexture(nameSprite,        "data/profile/20_Name.bmp");
-	loadTexture(arrowSprite,       "data/profile/deck2/sayuu.bmp");
-	loadTexture(noSprite,          "data/menu/23a_No.bmp");
-	loadTexture(noSelectedSprite,  "data/menu/23b_No.bmp");
-	loadTexture(yesSprite,         "data/menu/22a_Yes.bmp");
-	loadTexture(yesSelectedSprite, "data/menu/22b_Yes.bmp");
-
-	loadTexture(tmp, "data/guide/09.bmp");
-	editBoxGuideTexture = tmp.releaseHandle();
-
-	DrawUtils::Texture::loadFromFile(tmp, (profilePath + std::string("/guides/createDeck.png")).c_str());
-	createDeckGuideTexture = tmp.releaseHandle();
-
-	DrawUtils::Texture::loadFromFile(tmp, (profilePath + std::string("/guides/selectDeck.png")).c_str());
-	selectDeckGuideTexture = tmp.releaseHandle();
+	loadTexture(baseSprite,         "data/menu/21_Base.bmp");
+	loadTexture(nameSprite,         "data/profile/20_Name.bmp");
+	loadTexture(arrowSprite,        "data/profile/deck2/sayuu.bmp");
+	loadTexture(noSprite,           "data/menu/23a_No.bmp");
+	loadTexture(noSelectedSprite,   "data/menu/23b_No.bmp");
+	loadTexture(yesSprite,          "data/menu/22a_Yes.bmp");
+	loadTexture(yesSelectedSprite,  "data/menu/22b_Yes.bmp");
+	loadTexture(editBoxGuide.sprite,"data/guide/09.bmp");
+	DrawUtils::Texture::loadFromFile(createDeckGuide.sprite.texture, (profilePath + std::string("/guides/createDeck.png")).c_str());
+	DrawUtils::Texture::loadFromFile(selectDeckGuide.sprite.texture, (profilePath + std::string("/guides/selectDeck.png")).c_str());
+	initGuide(createDeckGuide);
+	initGuide(selectDeckGuide);
+	initGuide(editBoxGuide);
 }
 
 static int selectProcessCommon(int v)
@@ -838,7 +859,6 @@ static int selectProcessCommon(int v)
 	if (v != SokuLib::SCENE_SELECT && v != SokuLib::SCENE_SELECTSV && v != SokuLib::SCENE_SELECTCL) {
 		bool pickedRandom = false;
 
-		loaded = false;
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER) {
 			pickedRandom = scene.rightRandomDeck || lastRight == SokuLib::CHARACTER_RANDOM;
 			scene.rightRandomDeck = false;
@@ -1062,7 +1082,7 @@ void deleteBoxRender()
 	no.tint = DrawUtils::DxSokuColor::White;
 	no.draw();
 
-	if (!SokuLib::textureMgr.createTextTexture(&text, ("Delete deck " + editedDecks[editSelectedDeck].name + " ?").c_str(), font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
+	if (!SokuLib::textureMgr.createTextTexture(&text, ("Delete deck " + editedDecks[editSelectedDeck].name + " ?").c_str(), defaultFont, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
 		puts("C'est vraiment pas de chance");
 		return;
 	}
@@ -1073,6 +1093,7 @@ void deleteBoxRender()
 		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 	};
 	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.fillColors[2] = textSprite.fillColors[3] = DrawUtils::DxSokuColor::Blue;
 	textSprite.draw();
 }
 
@@ -1087,6 +1108,7 @@ void deleteBoxUpdate(SokuLib::KeyManager *keys)
 {
 	auto horizontal = abs(keys->keymapManager->input.horizontalAxis);
 
+	SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>()->guideVector[2].active = true;
 	if (deleteBoxSelectedItem == 2) {
 		if (!keys->keymapManager->input.a)
 			deleteBoxDisplayed = false;
@@ -1159,12 +1181,13 @@ void copyBoxRender()
 	arrowSprite.setPosition(pos);
 	arrowSprite.draw();
 
-	if (!SokuLib::textureMgr.createTextTexture(&text, "Choose a deck to copy", font, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
+	if (!SokuLib::textureMgr.createTextTexture(&text, "Choose a deck to copy", defaultFont, TEXTURE_SIZE, FONT_HEIGHT + 18, &width, nullptr)) {
 		puts("C'est vraiment pas de chance");
 		return;
 	}
 	textSprite.setPosition({166, 200});
 	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
+	textSprite.fillColors[2] = textSprite.fillColors[3] = DrawUtils::DxSokuColor::Blue;
 	textSprite.draw();
 }
 
@@ -1184,6 +1207,7 @@ void copyBoxUpdate(SokuLib::KeyManager *keys)
 
 	auto horizontal = abs(keys->keymapManager->input.horizontalAxis);
 
+	SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>()->guideVector[2].active = true;
 	if (horizontal == 1 || (horizontal >= 36 && horizontal % 6 == 0)) {
 		if (keys->keymapManager->input.horizontalAxis < 0) {
 			if (copyBoxSelectedItem == 0)
@@ -1265,6 +1289,9 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckE
 
 	loadCardAssets();
 	initFont();
+	if (profileSelectReady)
+		return ret;
+	profileSelectReady = true;
 	errorCounter = 0;
 	editSelectedDeck = 0;
 	if (editSelectedProfile != 2) {
@@ -1284,14 +1311,43 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckE
 	return ret;
 }
 
+void updateGuide(Guide &guide)
+{
+	if (guide.active && guide.alpha != 255)
+		guide.alpha += 15;
+	else if (!guide.active && guide.alpha)
+		guide.alpha -= 15;
+}
+
+void renderGuide(Guide &guide)
+{
+	guide.sprite.tint.a = guide.alpha;
+	guide.sprite.draw();
+}
+
 int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 {
 	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-	bool deleteBox = deleteBoxDisplayed;
-	bool renameBox = renameBoxDisplayed;
-	bool copyBox = copyBoxDisplayed;
+	bool ogDialogsActive = This->guideVector[3].active || This->guideVector[2].active;
 
-	if (renameBox)
+	profileSelectReady = false;
+	selectDeckGuide.active = This->cursorOnDeckChangeBox && editSelectedDeck != editedDecks.size() - 1 && !ogDialogsActive;
+	createDeckGuide.active = This->cursorOnDeckChangeBox && editSelectedDeck == editedDecks.size() - 1 && !ogDialogsActive;
+	This->guideVector[4].active = false;
+	if (renameBoxDisplayed && ogDialogsActive) {
+		renameBoxDisplayed = false;
+		((int(__thiscall*) (void*, bool))0x40ea10)((void*)0x8A02F0, true);
+	}
+	deleteBoxDisplayed &= !ogDialogsActive;
+	copyBoxDisplayed   &= !ogDialogsActive;
+
+	bool renameBox = renameBoxDisplayed;
+	bool deleteBox = deleteBoxDisplayed;
+	bool copyBox   = copyBoxDisplayed;
+
+	editBoxGuide.active = renameBoxDisplayed;
+	if (ogDialogsActive);
+	else if (renameBox)
 		renameBoxUpdate(keys);
 	else if (deleteBox)
 		deleteBoxUpdate(keys);
@@ -1304,7 +1360,15 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 			openRenameBox(This);
 	} else if (keys->keymapManager->input.c && This->cursorOnDeckChangeBox && editSelectedDeck != editedDecks.size() - 1)
 		openDeleteBox();
+	else if (keys->keymapManager->input.c && This->cursorOnDeckChangeBox) {
+		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
+		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+		openRenameBox(This);
+	}
 	if (renameBox || deleteBox || copyBox) {
+		selectDeckGuide.active = false;
+		createDeckGuide.active = false;
+		This->guideVector[0].active = false;
 		escPressed = ((int *)0x8998D8)[1];
 		((int *)0x8998D8)[1] = 0;
 		((int *)0x8998D8)[DIK_F1] = 0;
@@ -1319,6 +1383,9 @@ int __fastcall CProfileDeckEdit_OnProcess(SokuLib::ProfileDeckEdit *This)
 	}
 	// This hides the deck select arrow
 	((bool ***)This)[0x10][0x2][20] = false;
+	updateGuide(selectDeckGuide);
+	updateGuide(createDeckGuide);
+	updateGuide(editBoxGuide);
 	return (This->*s_originalCProfileDeckEdit_OnProcess)();
 }
 
@@ -1401,6 +1468,9 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 	arrowSprite.setPosition(pos);
 	arrowSprite.draw();
 
+	renderGuide(selectDeckGuide);
+	renderGuide(createDeckGuide);
+	renderGuide(editBoxGuide);
 	if (renameBoxDisplayed)
 		renameBoxRender();
 	else if (deleteBoxDisplayed)
