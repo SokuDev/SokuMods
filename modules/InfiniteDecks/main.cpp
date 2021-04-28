@@ -122,6 +122,7 @@ struct Guide {
 	unsigned char alpha = 0;
 };
 
+static HMODULE myModule;
 static char profilePath[1024 + MAX_PATH];
 static char editingBoxObject[0x164];
 static bool escPressed = false;
@@ -166,6 +167,46 @@ static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
 
 #define SENDTO_JUMP_ADDR 0x00857290
+
+int *CTextureManager_LoadTextureFromResource(int *ret, HMODULE hSrcModule, LPCTSTR pSrcResource) {
+	int id = 0;
+	long int result;
+	D3DXIMAGE_INFO info;
+
+	printf("Loading resource %p from module %p\n", pSrcResource, hSrcModule);
+	if (FAILED(result = D3DXGetImageInfoFromResource(hSrcModule, pSrcResource, &info))) {
+		fprintf(stderr, "D3DXGetImageInfoFromResource(%p, %p, %p) failed with code %li.\n", hSrcModule, pSrcResource, &info, result);
+		*ret = 0;
+		return ret;
+	}
+
+	LPDIRECT3DTEXTURE9 *pphandle = SokuLib::textureMgr.allocate(&id);
+
+	*pphandle = nullptr;
+	if (SUCCEEDED(D3DXCreateTextureFromResourceEx(
+		SokuLib::pd3dDev,
+		hSrcModule,
+		pSrcResource,
+		info.Width,
+		info.Height,
+		info.MipLevels,
+		D3DUSAGE_RENDERTARGET,
+		info.Format,
+		D3DPOOL_DEFAULT,
+		D3DX_DEFAULT,
+		D3DX_DEFAULT,
+		0,
+		&info,
+		nullptr,
+		pphandle
+	))) {
+		*ret = id;
+	} else {
+		SokuLib::textureMgr.deallocate(id);
+		*ret = 0;
+	}
+	return ret;
+}
 
 unsigned short getRandomCard(const std::vector<unsigned short> &list, const std::map<unsigned short, unsigned char> &other)
 {
@@ -756,6 +797,7 @@ static void initGuide(Guide &guide)
 
 static void loadCardAssets()
 {
+	int text;
 	char buffer[128];
 	DrawUtils::Texture tmp;
 
@@ -786,8 +828,10 @@ static void loadCardAssets()
 	loadTexture(yesSprite,          "data/menu/22a_Yes.bmp");
 	loadTexture(yesSelectedSprite,  "data/menu/22b_Yes.bmp");
 	loadTexture(editBoxGuide.sprite,"data/guide/09.bmp");
-	DrawUtils::Texture::loadFromFile(createDeckGuide.sprite.texture, (profilePath + std::string("/guides/createDeck.png")).c_str());
-	DrawUtils::Texture::loadFromFile(selectDeckGuide.sprite.texture, (profilePath + std::string("/guides/selectDeck.png")).c_str());
+	CTextureManager_LoadTextureFromResource(&text, myModule, MAKEINTRESOURCE(4));
+	createDeckGuide.sprite.texture.setHandle(text, {640, 16});
+	CTextureManager_LoadTextureFromResource(&text, myModule, MAKEINTRESOURCE(8));
+	selectDeckGuide.sprite.texture.setHandle(text, {640, 16});
 	initGuide(createDeckGuide);
 	initGuide(selectDeckGuide);
 	initGuide(editBoxGuide);
@@ -1571,6 +1615,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 }
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
+	myModule = hModule;
 	if (fdwReason == DLL_PROCESS_DETACH) {
 		if (profileTrampoline) {
 			delete profileTrampoline;

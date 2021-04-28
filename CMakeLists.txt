@@ -391,6 +391,7 @@ install(FILES README.md DESTINATION "SokuEngine"
 add_library(
         "InfiniteDecks"
         MODULE
+        modules/InfiniteDecks/InfiniteDecks.rc
         modules/InfiniteDecks/main.cpp
         modules/InfiniteDecks/DrawUtils.cpp
         modules/InfiniteDecks/DrawUtils.hpp
