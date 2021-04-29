@@ -8,5 +8,7 @@
 #include <SokuLib.hpp>
 
 std::string LeftChrImgString::getString() const {
-	return charactersImg[SokuLib::leftChar];
+	auto it = charactersImg.find(SokuLib::leftChar);
+
+	return (it == charactersImg.end() ? charactersImg.at(SokuLib::CHARACTER_RANDOM) : it->second);
 }

@@ -17,6 +17,7 @@
 #include <shlwapi.h>
 #include <string>
 #include <thread>
+#include <sstream>
 
 enum StringIndex {
 	STRING_INDEX_LOGO,
@@ -578,6 +579,100 @@ void loadJsonStrings(const std::string &path) {
 	}
 }
 
+void loadSoku2CSV(LPWSTR path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	if (stream.fail()) {
+		logMessagef("%S: %s\n", path, strerror(errno));
+		return;
+	}
+	while (std::getline(stream, line)) {
+		std::stringstream str{line};
+		unsigned id;
+		std::string idStr;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+
+		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		if (str.fail()) {
+			logMessagef("Skipping line %s: Stream failed\n", line.c_str());
+			continue;
+		}
+		try {
+			id = std::stoi(idStr);
+		} catch (...){
+			logMessagef("Skipping line %s: Invalid id\n", line.c_str());
+			continue;
+		}
+		charactersNames[id].first = shortName;
+		charactersNames[id].second = fullName;
+		charactersImg[id] = codeName;
+	}
+}
+
+void loadSoku2Config()
+{
+	logMessage("Looking for Soku2 config...\n");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	logMessagef("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		printf("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, L"\\");
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		printf("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\characters.csv");
+		loadSoku2CSV(module_path);
+	}
+}
+
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath) {
 	int i;
@@ -600,7 +695,8 @@ void LoadSettings(LPCSTR profilePath) {
 	PathRemoveFileSpec(path);
 	PathAppend(path, file);
 
-	logMessagef("ClientID: %llu\nInviteIp: %s\nFile: %s", ClientID, myIp, path);
+	logMessagef("ClientID: %s\nInviteIp: %s\nFile: %s\n", ClientID, myIp, path);
+	loadSoku2Config();
 
 	try {
 		if (ret) {

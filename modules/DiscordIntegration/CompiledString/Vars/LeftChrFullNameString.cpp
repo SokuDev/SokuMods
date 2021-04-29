@@ -8,5 +8,7 @@
 #include <SokuLib.hpp>
 
 std::string LeftChrFullNameString::getString() const {
-	return charactersNames[SokuLib::leftChar].second;
+	auto it = charactersNames.find(SokuLib::leftChar);
+
+	return (it == charactersNames.end() ? "Unknown character" : it->second.second);
 }

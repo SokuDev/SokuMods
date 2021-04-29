@@ -8,10 +8,14 @@
 #include <SokuLib.hpp>
 
 std::string OpponentChrImgString::getString() const {
+	std::map<unsigned int, std::string>::iterator it;
+
 	switch (SokuLib::mainMode) {
-	case SokuLib::BATTLE_MODE_VSSERVER:
-		return charactersImg[SokuLib::leftChar];
-	default:
-		return charactersImg[SokuLib::rightChar];
+		case SokuLib::BATTLE_MODE_VSSERVER:
+			it = charactersImg.find(SokuLib::leftChar);
+			break;
+		default:
+			it = charactersImg.find(SokuLib::rightChar);
 	}
+	return (it == charactersImg.end() ? charactersImg.at(SokuLib::CHARACTER_RANDOM) : it->second);
 }

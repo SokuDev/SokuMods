@@ -176,8 +176,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" S
     target_compile_options(DiscordIntegration PRIVATE /EHsc)
 endif ()
 target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
 set_target_properties(DiscordIntegration PROPERTIES
         SUFFIX ".dat")
+endif ()
 target_sources(DiscordIntegration PRIVATE
         modules/DiscordIntegration/Network/getPublicIp.cpp
         modules/DiscordIntegration/Network/Socket.cpp
@@ -215,6 +217,7 @@ target_sources(DiscordIntegration PRIVATE
 install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SWRSToys/modules/DiscordIntegration")
 install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SokuEngine/modules/DiscordIntegration")
 # DiscordIntegration loader
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
 add_library(DiscordIntegrationLoader MODULE)
 target_sources(DiscordIntegrationLoader PRIVATE
         modules/DiscordIntegration/Loader.c)
@@ -223,6 +226,7 @@ set_target_properties(DiscordIntegrationLoader PROPERTIES
         OUTPUT_NAME "DiscordIntegration")
 install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SWRSToys/modules/DiscordIntegration/")
 install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SokuEngine/modules/DiscordIntegration/")
+endif ()
 # DiscordIntegration Discord sdk
 install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys/modules/DiscordIntegration/")
 install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine/modules/DiscordIntegration/")
