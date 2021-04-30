@@ -111,6 +111,7 @@ struct State {
 	discord::Core *core = nullptr;
 	std::string roomIp;
 	std::pair<unsigned, unsigned> won = {0, 0};
+	discord::Activity lastActivity;
 };
 
 static State state;
@@ -163,6 +164,50 @@ static const std::vector<const char *> discordResultToString{
 	"TransactionAborted",
 };
 
+#define cmpstr(a, b, f)if ((a).f() == (b).f());\
+else if (!(a).f() || !(b).f() || strcmp((a).f(), (b).f()) != 0)\
+return false;
+
+bool operator==(const discord::ActivityAssets &a, const discord::ActivityAssets &b)
+{
+	cmpstr(a, b, GetLargeImage);
+	cmpstr(a, b, GetLargeText);
+	cmpstr(a, b, GetSmallImage);
+	cmpstr(a, b, GetSmallText);
+	return true;
+}
+
+bool operator==(const discord::ActivityTimestamps &a, const discord::ActivityTimestamps &b)
+{
+	return a.GetStart() == b.GetStart() &&
+	       a.GetEnd()   == b.GetEnd();
+}
+
+bool operator==(const discord::ActivityParty &a, const discord::ActivityParty &b)
+{
+	cmpstr(a, b, GetId);
+	return a.GetSize().GetCurrentSize() == b.GetSize().GetCurrentSize() &&
+	       a.GetSize().GetMaxSize() == b.GetSize().GetMaxSize();
+}
+
+bool operator==(const discord::ActivitySecrets &a, const discord::ActivitySecrets &b)
+{
+	cmpstr(a, b, GetMatch);
+	cmpstr(a, b, GetSpectate);
+	cmpstr(a, b, GetJoin);
+	return true;
+}
+
+bool operator==(const discord::Activity &a, const discord::Activity &b)
+{
+	cmpstr(a, b, GetState);
+	cmpstr(a, b, GetDetails);
+	return a.GetTimestamps() == b.GetTimestamps() &&
+	       a.GetAssets()     == b.GetAssets()     &&
+	       a.GetParty()      == b.GetParty()      &&
+	       a.GetSecrets()    == b.GetSecrets();
+}
+
 void updateActivity(StringIndex index, unsigned party) {
 	if (index >= config.strings.size())
 		return;
@@ -206,12 +251,16 @@ void updateActivity(StringIndex index, unsigned party) {
 	if (elem.small_text)
 		assets.SetSmallText(elem.small_text->getString().c_str());
 
+	if (state.lastActivity == activity)
+		return;
+	logMessage("Updating presence...\n");
 	state.core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
 			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
+	state.lastActivity = activity;
 }
 
 void getActivityParams(StringIndex &index, unsigned &party) {
@@ -317,8 +366,10 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		return;
 	case SokuLib::SCENE_SELECTSENARIO:
 		state.host = 0;
-		// STRING_INDEX_SELECT_ARCADE;
-		index = STRING_INDEX_SELECT_STORY;
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_ARCADE)
+			index = STRING_INDEX_SELECT_ARCADE;
+		else
+			index = STRING_INDEX_SELECT_STORY;
 		return;
 	case SokuLib::SCENE_ENDING:
 		state.host = 0;
