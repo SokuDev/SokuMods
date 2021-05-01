@@ -19,6 +19,8 @@
 #include <thread>
 #include <sstream>
 
+static bool hasSoku2 = false;
+
 enum StringIndex {
 	STRING_INDEX_LOGO,
 	STRING_INDEX_OPENING,
@@ -208,6 +210,13 @@ bool operator==(const discord::Activity &a, const discord::Activity &b)
 	       a.GetSecrets()    == b.GetSecrets();
 }
 
+std::string getImageStr(const std::string &str)
+{
+	if (str == "cover" && hasSoku2)
+		return "soku2";
+	return str;
+}
+
 void updateActivity(StringIndex index, unsigned party) {
 	if (index >= config.strings.size())
 		return;
@@ -242,12 +251,12 @@ void updateActivity(StringIndex index, unsigned party) {
 		activity.SetDetails(elem.description->getString().c_str());
 
 	if (elem.large_image)
-		assets.SetLargeImage(elem.large_image->getString().c_str());
+		assets.SetLargeImage(getImageStr(elem.large_image->getString()).c_str());
 	if (elem.large_text)
 		assets.SetLargeText(elem.large_text->getString().c_str());
 
 	if (elem.small_image)
-		assets.SetSmallImage(elem.small_image->getString().c_str());
+		assets.SetSmallImage(getImageStr(elem.small_image->getString()).c_str());
 	if (elem.small_text)
 		assets.SetSmallText(elem.small_text->getString().c_str());
 
@@ -712,6 +721,7 @@ void loadSoku2Config()
 		if (wcscmp(filename, L"soku2.dll") != 0)
 			continue;
 
+		hasSoku2 = true;
 		wcscpy(module_path, app_path);
 		PathAppendW(module_path, L"\\");
 		PathAppendW(module_path, moduleValue);
