@@ -21,8 +21,6 @@
 #define printf(...)
 #endif
 
-static SokuLib::Trampoline *profileTrampoline;
-static SokuLib::Trampoline *deckSavedTrampoline;
 static int (SokuLib::Title::*s_originalTitleOnProcess)();
 static int (SokuLib::Select::*s_originalSelectOnProcess)();
 static int (SokuLib::SelectClient::*s_originalSelectCLOnProcess)();
@@ -289,31 +287,43 @@ void generateFakeDecks()
 	if (generated)
 		return;
 	generated = true;
-	generateFakeDeck(SokuLib::leftChar,  lastLeft,  upSelectedDeck,  loadedDecks[0][SokuLib::leftChar], fakeLeftDeck);
-	generateFakeDeck(SokuLib::rightChar, lastRight, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], fakeRightDeck);
+	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
+		generateFakeDeck(SokuLib::leftChar,  lastLeft,  upSelectedDeck,  loadedDecks[0][SokuLib::leftChar], fakeLeftDeck);
+	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
+		generateFakeDeck(SokuLib::rightChar, lastRight, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], fakeRightDeck);
+}
+
+void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::array<unsigned short, 20> &deck)
+{
+	while (sokuDeck.size < 20) {
+		sokuDeck.data[sokuDeck.size / 8 + 1] = SokuLib::New<unsigned short>(8);
+		sokuDeck.size += 8;
+	}
+	assert(sokuDeck.size >= 16);
+	for (int i = 0; i < 20; i++)
+		sokuDeck[i] = deck[i];
+	sokuDeck.size = 20;
+}
+
+void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::unique_ptr<std::array<unsigned short, 20>> &deck)
+{
+	if (deck)
+		return fillSokuDeck(sokuDeck, *deck);
+	sokuDeck.size = 0;
 }
 
 void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<unsigned short> &newDeck)
 {
 	generateFakeDecks();
 	side = !side;
-	while (newDeck.size < 20) {
-		newDeck.data[newDeck.size / 8 + 1] = SokuLib::New<unsigned short>(8);
-		newDeck.size += 8;
-	}
-	newDeck.size = 20;
-	if (side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) { //Left
-		if (fakeLeftDeck)
-			for (int i = 0; i < 20; i++)
-				newDeck[i] = (*fakeLeftDeck)[i];
-		else
-			newDeck.size = 0;
-	} else if (!side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {//Right
-		if (fakeRightDeck)
-			for (int i = 0; i < 20; i++)
-				newDeck[i] = (*fakeRightDeck)[i];
-		else
-			newDeck.size = 0;
+	printf("Loading deck for character %s (side is %s) -> %p|%p\n", charName, (side ? "left" : "right"), &deck.deck, &newDeck);
+	if (side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) { //Left
+		puts("Replacing left deck");
+		fillSokuDeck(newDeck, fakeLeftDeck);
+	} else if (!side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT && SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) {//Right
+		puts("Replacing right deck");
+		//TODO: Look to see if when both players have the same profile and character this doesn't break
+		fillSokuDeck(newDeck, fakeRightDeck);
 	}
 	s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
 }
@@ -835,6 +845,25 @@ static void loadCardAssets()
 	initGuide(createDeckGuide);
 	initGuide(selectDeckGuide);
 	initGuide(editBoxGuide);
+}
+
+//((SokuLib::mVC9Dequeue<unsigned short> *)(0x898868 + 0x1AC)
+//((SokuLib::mVC9Dequeue<unsigned short> *)(0x899054 + 0x1AC)
+
+void saveDeckToProfile(SokuLib::mVC9Dequeue<unsigned short> &array, const std::unique_ptr<std::array<unsigned short, 20>> &deck)
+{
+	generateFakeDecks();
+	printf("Saving decks to profile (%p | %p (%p))\n", &array, &deck, deck.get());
+	fillSokuDeck(array, deck);
+}
+
+void onStageSelected()
+{
+	puts("All good !?");
+	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
+		saveDeckToProfile(((SokuLib::mVC9Dequeue<unsigned short> *)(0x898868 + 0x1AC))[(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar) * 4], fakeLeftDeck);
+	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
+		saveDeckToProfile(((SokuLib::mVC9Dequeue<unsigned short> *)(0x899054 + 0x1AC))[SokuLib::rightChar * 4], fakeRightDeck);
 }
 
 static int selectProcessCommon(int v)
@@ -1607,8 +1636,9 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	//SokuLib::TamperNearJmpOpr(0x43537E, );
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
-	profileTrampoline = new SokuLib::Trampoline(0x435377, onProfileChanged, 7);
-	deckSavedTrampoline = new SokuLib::Trampoline(0x450121, onDeckSaved, 6);
+	new SokuLib::Trampoline(0x420A1F, onStageSelected, 6);
+	new SokuLib::Trampoline(0x435377, onProfileChanged, 7);
+	new SokuLib::Trampoline(0x450121, onDeckSaved, 6);
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	return true;
@@ -1616,11 +1646,5 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 	myModule = hModule;
-	if (fdwReason == DLL_PROCESS_DETACH) {
-		if (profileTrampoline) {
-			delete profileTrampoline;
-			delete deckSavedTrampoline;
-		}
-	}
 	return TRUE;
 }
