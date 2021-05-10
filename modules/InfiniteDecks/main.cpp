@@ -5,6 +5,8 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <dinput.h>
+#include <Shlwapi.h>
+#include <sstream>
 #include "DrawUtils.hpp"
 
 #define FONT_HEIGHT 16
@@ -39,9 +41,8 @@ static SokuLib::SelectServer *(SokuLib::SelectServer::*og_CSelectSV_Init)();
 static SokuLib::SelectClient *(SokuLib::SelectClient::*og_CSelectCL_Init)();
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_Destructor)(unsigned char param);
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*og_CProfileDeckEdit_Init)(int param_2, int param_3, SokuLib::CSprite *param_4);
-void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &);
 
-std::array<std::map<unsigned short, DrawUtils::Sprite>, SokuLib::CHARACTER_RANDOM + 1> cardsTextures;
+std::map<unsigned char, std::map<unsigned short, DrawUtils::Sprite>> cardsTextures;
 std::map<SokuLib::Character, std::vector<unsigned short>> characterSpellCards{
 	{SokuLib::CHARACTER_ALICE, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
 	{SokuLib::CHARACTER_AYA, {200, 201, 202, 203, 205, 206, 207, 208, 211, 212}},
@@ -86,27 +87,27 @@ std::array<std::array<unsigned short, 20>, 20> defaultDecks = {
 	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 203, 203, 203, 203, 213, 213, 213, 213 },
 	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 201, 204, 204, 204, 204 }
 };
-std::array<const char *, SokuLib::CHARACTER_RANDOM> names{
-	"reimu",
-	"marisa",
-	"sakuya",
-	"alice",
-	"patchouli",
-	"youmu",
-	"remilia",
-	"yuyuko",
-	"yukari",
-	"suika",
-	"udonge",
-	"aya",
-	"komachi",
-	"iku",
-	"tenshi",
-	"sanae",
-	"chirno",
-	"meirin",
-	"utsuho",
-	"suwako",
+std::map<unsigned, std::string> names{
+	{ SokuLib::CHARACTER_REIMU, "reimu" },
+	{ SokuLib::CHARACTER_MARISA, "marisa" },
+	{ SokuLib::CHARACTER_SAKUYA, "sakuya" },
+	{ SokuLib::CHARACTER_ALICE, "alice" },
+	{ SokuLib::CHARACTER_PATCHOULI, "patchouli" },
+	{ SokuLib::CHARACTER_YOUMU, "youmu" },
+	{ SokuLib::CHARACTER_REMILIA, "remilia" },
+	{ SokuLib::CHARACTER_YUYUKO, "yuyuko" },
+	{ SokuLib::CHARACTER_YUKARI, "yukari" },
+	{ SokuLib::CHARACTER_SUIKA, "suika" },
+	{ SokuLib::CHARACTER_REISEN, "udonge" },
+	{ SokuLib::CHARACTER_AYA, "aya" },
+	{ SokuLib::CHARACTER_KOMACHI, "komachi" },
+	{ SokuLib::CHARACTER_IKU, "iku" },
+	{ SokuLib::CHARACTER_TENSHI, "tenshi" },
+	{ SokuLib::CHARACTER_SANAE, "sanae" },
+	{ SokuLib::CHARACTER_CIRNO, "chirno" },
+	{ SokuLib::CHARACTER_MEILING, "meirin" },
+	{ SokuLib::CHARACTER_UTSUHO, "utsuho" },
+	{ SokuLib::CHARACTER_SUWAKO, "suwako" },
 };
 
 struct Deck {
@@ -123,6 +124,7 @@ struct Guide {
 static HMODULE myModule;
 static char profilePath[1024 + MAX_PATH];
 static char editingBoxObject[0x164];
+static bool hasSoku2 = false;
 static bool escPressed = false;
 static bool copyBoxDisplayed = false;
 static bool renameBoxDisplayed = false;
@@ -147,7 +149,29 @@ static std::string leftLoadedProfile;
 static std::string rightLoadedProfile;
 static SokuLib::SWRFont font;
 static SokuLib::SWRFont defaultFont;
-static std::array<std::array<std::vector<Deck>, 20>, 3> loadedDecks;
+static std::map<unsigned char, unsigned> nbSkills{
+	{ SokuLib::CHARACTER_REIMU, 12 },
+	{ SokuLib::CHARACTER_MARISA, 12 },
+	{ SokuLib::CHARACTER_SAKUYA, 12 },
+	{ SokuLib::CHARACTER_ALICE, 12 },
+	{ SokuLib::CHARACTER_PATCHOULI, 15 },
+	{ SokuLib::CHARACTER_YOUMU, 12 },
+	{ SokuLib::CHARACTER_REMILIA, 12 },
+	{ SokuLib::CHARACTER_YUYUKO, 12 },
+	{ SokuLib::CHARACTER_YUKARI, 12 },
+	{ SokuLib::CHARACTER_SUIKA, 12 },
+	{ SokuLib::CHARACTER_REISEN, 12 },
+	{ SokuLib::CHARACTER_AYA, 12 },
+	{ SokuLib::CHARACTER_KOMACHI, 12 },
+	{ SokuLib::CHARACTER_IKU, 12 },
+	{ SokuLib::CHARACTER_TENSHI, 12 },
+	{ SokuLib::CHARACTER_SANAE, 12 },
+	{ SokuLib::CHARACTER_CIRNO, 12 },
+	{ SokuLib::CHARACTER_MEILING, 12 },
+	{ SokuLib::CHARACTER_UTSUHO, 12 },
+	{ SokuLib::CHARACTER_SUWAKO, 12 }
+};
+static std::array<std::map<unsigned char, std::vector<Deck>>, 3> loadedDecks;
 static std::vector<Deck> editedDecks;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
@@ -225,7 +249,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, const 
 		return;
 	}
 
-	unsigned last = 100 + 3 * (4 + (chr == SokuLib::CHARACTER_PATCHOULI));
+	unsigned last = 100 + nbSkills[chr];
 	std::map<unsigned short, unsigned char> used;
 	unsigned char c = 0;
 	int index = 0;
@@ -272,7 +296,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 		return;
 	}
 	if (id == bases.size())
-		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
+		return generateFakeDeck(chr, lastChr, &defaultDecks[chr % 20], buffer);
 	if (id == bases.size() + 1)
 		return generateFakeDeck(chr, lastChr, nullptr, buffer);
 	if (id == bases.size() + 2)
@@ -280,6 +304,105 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 	if (id == bases.size() + 3)
 		return generateFakeDeck(chr, lastChr, rand() % (bases.size() + 1), bases, buffer);
 	return generateFakeDeck(chr, lastChr, &bases[id].cards, buffer);
+}
+
+void loadSoku2CSV(LPWSTR path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	printf("Loading character CSV from %S\n", path);
+	if (stream.fail()) {
+		printf("%S: %s\n", path, strerror(errno));
+		return;
+	}
+	while (std::getline(stream, line)) {
+		std::stringstream str{line};
+		unsigned id;
+		std::string idStr;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+		std::string skills;
+
+		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		std::getline(str, skills, '\n');
+		if (str.fail()) {
+			printf("Skipping line %s: Stream failed\n", line.c_str());
+			continue;
+		}
+		try {
+			id = std::stoi(idStr);
+		} catch (...){
+			printf("Skipping line %s: Invalid id\n", line.c_str());
+			continue;
+		}
+		names[id] = codeName;
+		nbSkills[id] = (std::count(skills.begin(), skills.end(), ',') + 1 - skills.empty()) * 3;
+		printf("%s has %i skills\n", codeName.c_str(), nbSkills[id]);
+	}
+}
+
+void loadSoku2Config()
+{
+	puts("Looking for Soku2 config...");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	printf("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		printf("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		hasSoku2 = true;
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, L"\\");
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		printf("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		loadSoku2CSV(module_path);
+		return;
+	}
 }
 
 void generateFakeDecks()
@@ -295,8 +418,15 @@ void generateFakeDecks()
 
 void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::array<unsigned short, 20> &deck)
 {
+	if (!sokuDeck.data) {
+		sokuDeck.data = SokuLib::New<unsigned short *>(8);
+		memset(sokuDeck.data, 0, 8 * sizeof(*sokuDeck.data));
+		sokuDeck.chunkSize = 8;
+		*sokuDeck.data = SokuLib::New<unsigned short>(8);
+		sokuDeck.size = 8;
+	}
 	while (sokuDeck.size < 20) {
-		sokuDeck.data[sokuDeck.size / 8 + 1] = SokuLib::New<unsigned short>(8);
+		sokuDeck.data[(sokuDeck.size - 1) / 8 + 1] = SokuLib::New<unsigned short>(8);
 		sokuDeck.size += 8;
 	}
 	assert(sokuDeck.size >= 16);
@@ -312,20 +442,47 @@ void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::uni
 	sokuDeck.size = 0;
 }
 
-void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<unsigned short> &newDeck)
+static bool saveProfile(const std::string &path, const std::map<unsigned char, std::vector<Deck>> &profile)
 {
-	generateFakeDecks();
-	side = !side;
-	printf("Loading deck for character %s (side is %s) -> %p|%p\n", charName, (side ? "left" : "right"), &deck.deck, &newDeck);
-	if (side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) { //Left
-		puts("Replacing left deck");
-		fillSokuDeck(newDeck, fakeLeftDeck);
-	} else if (!side && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT && SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) {//Right
-		puts("Replacing right deck");
-		//TODO: Look to see if when both players have the same profile and character this doesn't break
-		fillSokuDeck(newDeck, fakeRightDeck);
+	nlohmann::json result;
+
+	printf("Saving to %s\n", path.c_str());
+	for (auto &elem : profile) {
+		if (elem.second.empty())
+			continue;
+
+		auto &array = result[std::to_string(elem.first)];
+
+		array = nlohmann::json::array();
+		for (auto &deck : elem.second) {
+			array.push_back({
+				{"name", deck.name},
+				{"cards", std::vector<unsigned short>{
+					deck.cards.begin(),
+					deck.cards.end()
+				}}
+			});
+		}
 	}
-	s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+	if (std::ifstream(path + ".bck").fail())
+		rename(path.c_str(), (path + ".bck").c_str());
+
+	auto resultStr = result.dump(4);
+	std::ofstream stream{path};
+
+	if (stream.fail()) {
+		MessageBoxA(SokuLib::window, ("Cannot open \"" + lastLoadedProfile + "\". Please make sure you have proper permissions and enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
+		return false;
+	}
+	stream << resultStr;
+	if (stream.fail()) {
+		stream.close();
+		MessageBoxA(SokuLib::window, ("Cannot write to \"" + lastLoadedProfile + "\". Please make sure you have proper enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
+		return false;
+	}
+	stream.close();
+	unlink((path + ".bck").c_str());
+	return true;
 }
 
 int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen)
@@ -382,10 +539,13 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 
 static void sanitizeDeck(SokuLib::Character chr, Deck &deck)
 {
-	unsigned last = 100 + 3 * (4 + (chr == SokuLib::CHARACTER_PATCHOULI));
+	unsigned last = 100 + nbSkills[chr];
 	std::map<unsigned short, unsigned char> used;
 	std::vector<unsigned short> cards;
+	auto name = names.find(chr);
 
+	if (name == names.end())
+		return;
 	for (int i = 0; i <= 21; i++)
 		cards.push_back(i);
 	for (int i = 100; i < last; i++)
@@ -405,21 +565,8 @@ static void sanitizeDeck(SokuLib::Character chr, Deck &deck)
 	}
 }
 
-static bool loadProfileFile(std::ifstream &stream, std::array<std::vector<Deck>, 20> &arr, int index)
+static bool loadOldProfileFile(nlohmann::json &json, std::map<unsigned char, std::vector<Deck>> &map, int index)
 {
-	if (stream.fail()) {
-		printf("Failed to open file: %s\n", strerror(errno));
-		for (int i = 0; i < 20; i++) {
-			arr[i].clear();
-			if (index == 2)
-				arr[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
-		}
-		return false;
-	}
-
-	nlohmann::json json;
-
-	stream >> json;
 	if (json.size() != 20)
 		throw std::invalid_argument("Not 20 characters");
 	for (auto &arr : json) {
@@ -429,11 +576,11 @@ static bool loadProfileFile(std::ifstream &stream, std::array<std::vector<Deck>,
 				throw std::invalid_argument(elem.dump());
 		}
 	}
-
+	for (auto &elem : map)
+		elem.second.clear();
 	for (int i = 0; i < 20; i++) {
 		auto &array = json[i];
 
-		arr[i].clear();
 		for (int j = 0; j < array.size(); j++) {
 			auto &elem = array[j];
 			Deck deck;
@@ -445,11 +592,70 @@ static bool loadProfileFile(std::ifstream &stream, std::array<std::vector<Deck>,
 			memcpy(deck.cards.data(), elem["cards"].get<std::vector<unsigned short>>().data(), sizeof(*deck.cards.data()) * deck.cards.size());
 			sanitizeDeck(static_cast<SokuLib::Character>(i), deck);
 			std::sort(deck.cards.begin(), deck.cards.end());
-			arr[i].push_back(deck);
+			map[i].push_back(deck);
 		}
 		if (index == 2)
-			arr[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+			map[i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
+	return true;
+}
+
+static bool loadProfileFile(const std::string &path, std::ifstream &stream, std::map<unsigned char, std::vector<Deck>> &map, int index)
+{
+	if (stream.fail()) {
+		printf("Failed to open file %s: %s\n", path.c_str(), strerror(errno));
+		for (auto &elem : names)
+			map[elem.first].clear();
+		if (index == 2)
+			for (auto &elem : map)
+				elem.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+		return false;
+	}
+
+	nlohmann::json json;
+
+	stream >> json;
+	if (json.is_array()) {
+		printf("%s is in the old format. Converting...\n", path.c_str());
+		loadOldProfileFile(json, map, index);
+		stream.close();
+		saveProfile(path, map);
+		return true;
+	}
+	if (!json.is_object())
+		throw std::invalid_argument("JSON is neither an array nor an object");
+	for (auto &arr : json.items()) {
+		std::stoi(arr.key());
+		for (auto &elem : arr.value()) {
+			elem.contains("name") && (elem["name"].get<std::string>(), true);
+			if (!elem.contains("cards") || elem["cards"].get<std::vector<unsigned short>>().size() != 20)
+				throw std::invalid_argument(elem.dump());
+		}
+	}
+	for (auto &elem : names)
+		map[elem.first].clear();
+	for (auto &arr : json.items()) {
+		auto &array = arr.value();
+		auto index = std::stoi(arr.key());
+
+		for (int j = 0; j < array.size(); j++) {
+			auto &elem = array[j];
+			Deck deck;
+
+			if (!elem.contains("name"))
+				deck.name = "Deck #" + std::to_string(j + 1);
+			else
+				deck.name = elem["name"];
+			memcpy(deck.cards.data(), elem["cards"].get<std::vector<unsigned short>>().data(), sizeof(*deck.cards.data()) * deck.cards.size());
+			if (index < 20)
+				sanitizeDeck(static_cast<SokuLib::Character>(index), deck);
+			std::sort(deck.cards.begin(), deck.cards.end());
+			map[index].push_back(deck);
+		}
+	}
+	if (index == 2)
+		for (auto &elem : map)
+				elem.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	return true;
 }
 
@@ -470,7 +676,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 		index = 1;
 		rightLoadedProfile = profile;
 	} //Else is deck construct
-	printf("Loading %s\n", profile.c_str());
+	printf("Loading %s in buffer %i\n", profile.c_str(), index);
 
 	bool result = false;
 	auto &arr = loadedDecks[index];
@@ -483,7 +689,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 
 	stream.open(profile, std::ifstream::in);
 	try {
-		result = loadProfileFile(stream, arr, index);
+		result = loadProfileFile(profile, stream, arr, index);
 	} catch (std::exception &e) {
 		auto answer = IDNO;
 
@@ -500,7 +706,7 @@ static void handleProfileChange(int This, SokuLib::String *str)
 		try {
 			stream.open(profile + ".bck", std::ifstream::in);
 			printf("Loading %s\n", (profile + ".bck").c_str());
-			result = loadProfileFile(stream, arr, index);
+			result = loadProfileFile(profile + ".bck", stream, arr, index);
 			stream.close();
 		} catch (std::exception &e) {
 			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ".bck: " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
@@ -607,7 +813,6 @@ bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This, std::array<unsigned short,
 static void onDeckSaved()
 {
 	auto menu = SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>();
-	nlohmann::json result;
 	std::string path;
 
 	if (!saveDeckFromGame(menu, editedDecks[editSelectedDeck].cards))
@@ -619,42 +824,15 @@ static void onDeckSaved()
 		path = editSelectedProfile == 0 ? leftLoadedProfile : rightLoadedProfile;
 	} else
 		path = lastLoadedProfile;
-	printf("Saving to %s\n", path.c_str());
-	for (int i = 0; i < 20; i++) {
-		result[i] = nlohmann::json::array();
-		for (int j = 0; j < loadedDecks[2][i].size() - 1; j++) {
-			result[i][j]["name"] = loadedDecks[2][i][j].name;
-			result[i][j]["cards"] = std::vector<unsigned short>{
-				loadedDecks[2][i][j].cards.begin(),
-				loadedDecks[2][i][j].cards.end()
-			};
-		}
-	}
-	if (std::ifstream(path + ".bck").fail())
-		rename(path.c_str(), (path + ".bck").c_str());
-
-	auto resultStr = result.dump(4);
-	std::ofstream stream{path};
-
-	if (stream.fail()) {
+	for (auto &elem : loadedDecks[2])
+		elem.second.pop_back();
+	if (!saveProfile(path, loadedDecks[2])) {
 		if (menu->displayedNumberOfCards == 20) {
 			menu->editedDeck->vector()[0]->second++;
 			saveError = true;
 		}
-		MessageBoxA(SokuLib::window, ("Cannot open \"" + lastLoadedProfile + "\". Please make sure you have proper permissions and enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
 		return;
 	}
-	stream << resultStr;
-	if (stream.fail()) {
-		stream.close();
-		if (menu->displayedNumberOfCards == 20) {
-			menu->editedDeck->vector()[0]->second++;
-			saveError = true;
-		}
-		MessageBoxA(SokuLib::window, ("Cannot write to \"" + lastLoadedProfile + "\". Please make sure you have proper enough space on disk.").c_str(), "Saving error", MB_ICONERROR);
-		return;
-	}
-	stream.close();
 
 	auto cards = menu->editedDeck->vector();
 
@@ -662,7 +840,6 @@ static void onDeckSaved()
 		card->second = 0;
 	for (int i = 0; i < 5; i++)
 		menu->editedDeck->operator[](i) = 4;
-	unlink((path + ".bck").c_str());
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos, const char *overridingName = nullptr)
@@ -674,7 +851,7 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 	if (select == decks.size()) {
 		name = "Default deck";
 		deck.resize(20, 21);
-		memcpy(deck.data(), defaultDecks[chr].data(), 40);
+		memcpy(deck.data(), defaultDecks[chr % 20].data(), 40);
 	} else if (select == decks.size() + 1) {
 		name = "No deck";
 		deck.resize(0);
@@ -777,22 +954,26 @@ int __fastcall CSelect_OnRender(SokuLib::Select *This) {
 	return renderingCommon((This->*s_originalSelectOnRender)());
 }
 
-static void loadTexture(DrawUtils::Texture &container, const char *path)
+static void loadTexture(DrawUtils::Texture &container, const char *path, bool shouldExist = true)
 {
 	int text = 0;
 	DrawUtils::Vector2<unsigned> size;
 	int *ret = SokuLib::textureMgr.loadTexture(&text, path, &size.x, &size.y);
 
+	printf("Loading texture %s\n", path);
 	if (!ret || !text) {
-		MessageBoxA(SokuLib::window, ("Cannot load " + std::string(path)).c_str(), "Fatal error", MB_ICONERROR);
-		abort();
+		puts("Couldn't load texture...");
+		if (shouldExist) {
+			MessageBoxA(SokuLib::window, ("Cannot load " + std::string(path)).c_str(), "Fatal error", MB_ICONERROR);
+			abort();
+		}
 	}
 	container.setHandle(text, size);
 }
 
-static inline void loadTexture(DrawUtils::Sprite &container, const char *path)
+static inline void loadTexture(DrawUtils::Sprite &container, const char *path, bool shouldExist = true)
 {
-	loadTexture(container.texture, path);
+	loadTexture(container.texture, path, shouldExist);
 }
 
 static void initGuide(Guide &guide)
@@ -820,15 +1001,23 @@ static void loadCardAssets()
 		loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][i], buffer);
 	}
 	loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][21], "data/battle/cardFaceDown.bmp");
-	for (int j = 0; j < 20; j++) {
-		for (int i = (j == SokuLib::CHARACTER_PATCHOULI ? 15 : 12); i; i--) {
-			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j], 99 + i);
+	for (auto &elem : names) {
+		auto j = elem.first;
+
+		for (int i = nbSkills[j]; i; i--) {
+			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), 99 + i);
 			loadTexture(cardsTextures[j][99 + i], buffer);
 		}
-		for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
-			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j], card);
-			loadTexture(cardsTextures[j][card], buffer);
-		}
+		if (j < characterSpellCards.size())
+			for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
+				sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
+				loadTexture(cardsTextures[j][card], buffer);
+			}
+		else
+			for (unsigned short card = 200; card < 220; card++) {
+				sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
+				loadTexture(cardsTextures[j][card], buffer, false);
+			}
 	}
 	loadTexture(baseSprite,         "data/menu/21_Base.bmp");
 	loadTexture(nameSprite,         "data/profile/20_Name.bmp");
@@ -854,7 +1043,6 @@ void saveDeckToProfile(SokuLib::mVC9Dequeue<unsigned short> &array, const std::u
 {
 	generateFakeDecks();
 	printf("Saving decks to profile (%p | %p (%p))\n", &array, &deck, deck.get());
-	fillSokuDeck(array, deck);
 }
 
 void onStageSelected()
@@ -942,6 +1130,11 @@ static int selectProcessCommon(int v)
 		printf("Picked %srandom deck\n", pickedRandom ? "" : "not ");
 		if (pickedRandom)
 			pickedRandomCounter = 10;
+		generateFakeDecks();
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
+			fillSokuDeck(*(SokuLib::mVC9Dequeue<unsigned short> *)0x899d18, fakeLeftDeck);
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
+			fillSokuDeck(*(SokuLib::mVC9Dequeue<unsigned short> *)0x899d38, fakeRightDeck);
 		return v;
 	}
 	return v;
@@ -1299,7 +1492,7 @@ void copyBoxUpdate(SokuLib::KeyManager *keys)
 		auto menu = SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>();
 
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
-		loadDeckToGame(SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>(), copyBoxSelectedItem == editedDecks.size() - 1 ? defaultDecks[menu->editedCharacter] : editedDecks[copyBoxSelectedItem].cards);
+		loadDeckToGame(SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>(), copyBoxSelectedItem == editedDecks.size() - 1 ? defaultDecks[menu->editedCharacter % 20] : editedDecks[copyBoxSelectedItem].cards);
 		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 		copyBoxDisplayed = false;
 		openRenameBox(menu);
@@ -1369,8 +1562,8 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckE
 	editSelectedDeck = 0;
 	if (editSelectedProfile != 2) {
 		loadedDecks[2] = loadedDecks[editSelectedProfile];
-		for (int i = 0; i < 20; i++)
-			loadedDecks[2][i].push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+		for (auto &val : loadedDecks[2])
+			val.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
 	editedDecks = loadedDecks[2][This->editedCharacter];
 	loadDeckToGame(This, editedDecks[editSelectedDeck].cards);
@@ -1590,6 +1783,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen_s(&_, "CONOUT$", "w", stderr);
 #endif
 	puts("Hey !");
+	loadSoku2Config();
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_originalSelectCLOnProcess          = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, CSelectCL_OnProcess);
 	s_originalSelectSVOnProcess          = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, CSelectSV_OnProcess);
@@ -1612,9 +1806,9 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	SokuLib::TamperNearJmpOpr(0x450230, CProfileDeckEdit_SwitchCurrentDeck);
 	s_originalDrawGradiantBar = reinterpret_cast<void (*)(float, float, float)>(SokuLib::TamperNearJmpOpr(0x44E4C8, drawGradiantBar));
 	s_originalInputMgrGet = SokuLib::union_cast<int (SokuLib::ObjectSelect::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, myGetInput));
-	s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
-		SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
-	);
+	//s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
+	//	SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
+	//);
 	og_CProfileDeckEdit_Init = SokuLib::union_cast<SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*)(int, int, SokuLib::CSprite *)>(
 		SokuLib::TamperNearJmpOpr(0x0044d529, CProfileDeckEdit_Init)
 	);
@@ -1633,7 +1827,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_CSelect_Init_0041e2c3 = SokuLib::union_cast<SokuLib::Select *(SokuLib::Select::*)()>(
 		SokuLib::TamperNearJmpOpr(0x41e2c3, CSelect_Init_0041e2c3)
 	);
-	//SokuLib::TamperNearJmpOpr(0x43537E, );
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	new SokuLib::Trampoline(0x420A1F, onStageSelected, 6);

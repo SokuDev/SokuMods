@@ -711,7 +711,7 @@ void loadSoku2Config()
 
 		wchar_t *filename = wcsrchr(moduleValue, '/');
 
-		printf("Check %S\n", moduleValue);
+		logMessagef("Check %S\n", moduleValue);
 		if (!filename)
 			filename = app_path;
 		else
@@ -728,9 +728,10 @@ void loadSoku2Config()
 		while (auto result = wcschr(module_path, '/'))
 			*result = '\\';
 		PathRemoveFileSpecW(module_path);
-		printf("Found Soku2 module folder at %S\n", module_path);
-		PathAppendW(module_path, L"\\config\\characters.csv");
+		logMessagef("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\info\\characters.csv");
 		loadSoku2CSV(module_path);
+		return;
 	}
 }
 
