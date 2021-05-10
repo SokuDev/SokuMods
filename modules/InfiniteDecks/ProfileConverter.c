@@ -57,6 +57,18 @@ int compare(const void *a, const void *b)
 	return *(unsigned short *)a - *(unsigned short *)b;
 }
 
+bool allDecksDefault(unsigned short (*decks)[4][20], unsigned i)
+{
+	if (i >= 20)
+		return false;
+	for (int j = 0; j < 4; j++) {
+		qsort(decks[i][j], 20, 2, compare);
+		if (memcmp(defaultDecks[i], decks[i][j], sizeof(defaultDecks[i])) != 0)
+			return false;
+	}
+	return true;
+}
+
 void convertDeck(const wchar_t *path)
 {
 	wchar_t buffer[MAX_PATH];
@@ -64,9 +76,9 @@ void convertDeck(const wchar_t *path)
 	unsigned short cards[255];
 	FILE *json;
 	FILE *profile;
-	unsigned short decks[20][4][20];
+	unsigned short (*decks)[4][20] = NULL;
+	int size;
 
-	memset(decks, 0, sizeof(decks));
 	wcscpy(buffer, path);
 	*wcsrchr(buffer, '.') = 0;
 	wcscat(buffer, L".json");
@@ -93,18 +105,19 @@ void convertDeck(const wchar_t *path)
 	}
 
 	fseek(profile, 106, SEEK_SET);
-	for (int i = 0; i < 20; i++) {
+	for (size = 1; !feof(profile); size++) {
+		decks = realloc(decks, sizeof(*decks) * size);
 		for (int k = 0; k < 4; k++) {
 			fread(&length, sizeof(length), 1, profile);
 			fread(cards, sizeof(*cards), length, profile);
 			for (int j = length; j < 20; j++)
 				cards[j] = 21;
-			memcpy(decks[i][k], cards, 40);
+			memcpy(decks[size - 1][k], cards, 40);
 		}
 	}
 	fclose(profile);
 
-	fwrite("[", 1, 1, json);
+	fwrite("{", 1, 1, json);
 
 	const char *deckNames[4] = {
 		"yorokobi",
@@ -113,13 +126,27 @@ void convertDeck(const wchar_t *path)
 		"tanoshii"
 	};
 	bool first = true;
+	bool first2 = true;
+	unsigned i = 0;
 
-	for (int i = 0; i < 20; i++) {
-		fprintf(json, "%s\n\t[", i == 0 ? "" : ",");
+	size -= 2;
+	if (size > 20)
+		size -= 2;
+	printf("There are %i characters...\n", size);
+	while (size--) {
+		if (allDecksDefault(decks, i)) {
+			printf("Character %i has all default decks\n", i);
+			i++;
+			if (i == 20)
+				i += 2;
+			continue;
+		}
+		fprintf(json, "%s\n\t\"%i\": [", first2 ? "" : ",", i);
+		first2 = false;
 		first = true;
 		for (int j = 0; j < 4; j++) {
 			qsort(decks[i][j], 20, 2, compare);
-			if (memcmp(defaultDecks[i], decks[i][j], sizeof(defaultDecks[i])) == 0)
+			if (i < 20 && memcmp(defaultDecks[i], decks[i][j], sizeof(defaultDecks[i])) == 0)
 				continue;
 			fprintf(json, "%s\n\t\t{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"cards\": [", first ? "" : ",", deckNames[j]);
 			first = false;
@@ -128,9 +155,14 @@ void convertDeck(const wchar_t *path)
 			fwrite("]\n\t\t}", 1, 5, json);
 		}
 		fwrite("\n\t]", 1, 3, json);
+		i++;
+		if (i == 20)
+			i += 2;
 	}
-	fwrite("\n]", 1, 2, json);
+	fwrite("\n}", 1, 2, json);
 	fclose(json);
+	free(decks);
+	decks = NULL;
 }
 
 LPWSTR GetLastErrorAsString(DWORD errorMessageID)
