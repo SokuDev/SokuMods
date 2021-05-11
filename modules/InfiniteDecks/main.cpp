@@ -34,6 +34,7 @@ static int (SokuLib::ObjectSelect::*s_originalInputMgrGet)();
 static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnProcess)();
 static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnRender)();
 static void (*s_originalDrawGradiantBar)(float param1, float param2, float param3);
+static int (__stdcall *realSendTo)(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen);
 static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e55f)();
 static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e263)();
 static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e2c3)();
@@ -187,8 +188,6 @@ static Guide selectDeckGuide;
 static Guide editBoxGuide;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeLeftDeck;
 static std::unique_ptr<std::array<unsigned short, 20>> fakeRightDeck;
-
-#define SENDTO_JUMP_ADDR 0x00857290
 
 int *CTextureManager_LoadTextureFromResource(int *ret, HMODULE hSrcModule, LPCTSTR pSrcResource) {
 	int id = 0;
@@ -490,7 +489,7 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 	auto packet = reinterpret_cast<SokuLib::Packet *>(buf);
 
 	if (SokuLib::sceneId != SokuLib::SCENE_SELECTCL && SokuLib::sceneId != SokuLib::SCENE_SELECTSV && SokuLib::sceneId != SokuLib::SCENE_SELECT)
-		return sendto(s, buf, len, flags, to, tolen);
+		return realSendTo(s, buf, len, flags, to, tolen);
 	if (packet->type == SokuLib::CLIENT_GAME || packet->type == SokuLib::HOST_GAME) {
 		bool needDelete = false;
 
@@ -534,7 +533,7 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 			return bytes;
 		}
 	}
-	return sendto(s, buf, len, flags, to, tolen);
+	return realSendTo(s, buf, len, flags, to, tolen);
 }
 
 static void sanitizeDeck(SokuLib::Character chr, Deck &deck)
@@ -659,7 +658,7 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 	return true;
 }
 
-static void handleProfileChange(int This, SokuLib::String *str)
+static void handleProfileChange(SokuLib::Profile *This, SokuLib::String *str)
 {
 	char *arg = *str;
 	std::string profileName{arg, strstr(arg, ".pf")};
@@ -667,11 +666,11 @@ static void handleProfileChange(int This, SokuLib::String *str)
 	int index = 2;
 	bool hasBackup;
 
-	if (This == 0x898868) {
+	if (This == &SokuLib::profile1) {
 		//P1
 		index = 0;
 		leftLoadedProfile = profile;
-	} else if (This == 0x899054) {
+	} else if (This == &SokuLib::profile2) {
 		//P2
 		index = 1;
 		rightLoadedProfile = profile;
@@ -771,7 +770,7 @@ static void initFont() {
 
 static void onProfileChanged()
 {
-	int This;
+	SokuLib::Profile *This;
 	char *arg;
 
 	__asm mov This, esi;
@@ -1045,15 +1044,6 @@ void saveDeckToProfile(SokuLib::mVC9Dequeue<unsigned short> &array, const std::u
 	printf("Saving decks to profile (%p | %p (%p))\n", &array, &deck, deck.get());
 }
 
-void onStageSelected()
-{
-	puts("All good !?");
-	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
-		saveDeckToProfile(((SokuLib::mVC9Dequeue<unsigned short> *)(0x898868 + 0x1AC))[(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar) * 4], fakeLeftDeck);
-	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
-		saveDeckToProfile(((SokuLib::mVC9Dequeue<unsigned short> *)(0x899054 + 0x1AC))[SokuLib::rightChar * 4], fakeRightDeck);
-}
-
 static int selectProcessCommon(int v)
 {
 	static int left = 0;
@@ -1132,9 +1122,9 @@ static int selectProcessCommon(int v)
 			pickedRandomCounter = 10;
 		generateFakeDecks();
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
-			fillSokuDeck(*(SokuLib::mVC9Dequeue<unsigned short> *)0x899d18, fakeLeftDeck);
+			fillSokuDeck(SokuLib::leftPlayerInfo.effectiveDeck, fakeLeftDeck);
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
-			fillSokuDeck(*(SokuLib::mVC9Dequeue<unsigned short> *)0x899d38, fakeRightDeck);
+			fillSokuDeck(SokuLib::rightPlayerInfo.effectiveDeck, fakeRightDeck);
 		return v;
 	}
 	return v;
@@ -1795,7 +1785,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	s_originalCProfileDeckEdit_OnProcess = SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onProcess, CProfileDeckEdit_OnProcess);
 	s_originalCProfileDeckEdit_OnRender  = SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onRender, CProfileDeckEdit_OnRender);
 	s_originalCProfileDeckEdit_Destructor= SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onDestruct, CProfileDeckEdit_Destructor);
-	SokuLib::TamperDword(SENDTO_JUMP_ADDR, mySendTo);
+	realSendTo = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.sendto, &mySendTo);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
@@ -1829,7 +1819,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
-	new SokuLib::Trampoline(0x420A1F, onStageSelected, 6);
 	new SokuLib::Trampoline(0x435377, onProfileChanged, 7);
 	new SokuLib::Trampoline(0x450121, onDeckSaved, 6);
 
