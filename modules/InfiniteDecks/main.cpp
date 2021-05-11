@@ -392,10 +392,10 @@ void loadSoku2Config()
 
 		hasSoku2 = true;
 		wcscpy(module_path, app_path);
-		PathAppendW(module_path, L"\\");
 		PathAppendW(module_path, moduleValue);
 		while (auto result = wcschr(module_path, '/'))
 			*result = '\\';
+		printf("Soku2 dll is at %S\n", module_path);
 		PathRemoveFileSpecW(module_path);
 		printf("Found Soku2 module folder at %S\n", module_path);
 		PathAppendW(module_path, L"\\config\\info\\characters.csv");

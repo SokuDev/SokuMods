@@ -723,7 +723,6 @@ void loadSoku2Config()
 
 		hasSoku2 = true;
 		wcscpy(module_path, app_path);
-		PathAppendW(module_path, L"\\");
 		PathAppendW(module_path, moduleValue);
 		while (auto result = wcschr(module_path, '/'))
 			*result = '\\';
