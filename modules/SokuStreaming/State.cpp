@@ -9,6 +9,7 @@
 #include "Utils/ShiftJISDecoder.hpp"
 #include "nlohmann/json.hpp"
 #include <SokuLib.hpp>
+#include <DeprecatedElements.hpp>
 #include <dinput.h>
 #include <iostream>
 
@@ -204,10 +205,10 @@ void updateCache(bool isMultiplayer) {
 	std::sort(_cache.rightCards.begin(), _cache.rightCards.end());
 
 	// Hands
-	for (int i = 0; i < leftDeck.cardCount; i++)
-		_cache.leftHand.push_back(leftDeck.hand[i].id);
-	for (int i = 0; i < rightDeck.cardCount; i++)
-		_cache.rightHand.push_back(rightDeck.hand[i].id);
+	for (int i = 0; i < battleMgr.leftCharacterManager.cardCount; i++)
+		_cache.leftHand.push_back(battleMgr.leftCharacterManager.hand[i].id);
+	for (int i = 0; i < battleMgr.rightCharacterManager.cardCount; i++)
+		_cache.rightHand.push_back(battleMgr.rightCharacterManager.hand[i].id);
 	std::sort(_cache.leftHand.begin(), _cache.leftHand.end());
 	std::sort(_cache.rightHand.begin(), _cache.rightHand.end());
 

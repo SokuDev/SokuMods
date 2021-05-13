@@ -9,6 +9,7 @@
 #include "Utils/InputBox.hpp"
 #include <Shlwapi.h>
 #include <SokuLib.hpp>
+#include <DeprecatedElements.hpp>
 #include <algorithm>
 #include <dinput.h>
 

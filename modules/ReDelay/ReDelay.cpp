@@ -1,5 +1,6 @@
 #include <Shlwapi.h>
 #include <SokuLib.hpp>
+#include <DeprecatedElements.hpp>
 #include <d3d9.h>
 #include <list>
 
