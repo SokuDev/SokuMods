@@ -41,7 +41,7 @@ static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e2c3)();
 static SokuLib::SelectServer *(SokuLib::SelectServer::*og_CSelectSV_Init)();
 static SokuLib::SelectClient *(SokuLib::SelectClient::*og_CSelectCL_Init)();
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_Destructor)(unsigned char param);
-static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*og_CProfileDeckEdit_Init)(int param_2, int param_3, SokuLib::CSprite *param_4);
+static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*og_CProfileDeckEdit_Init)(int param_2, int param_3, SokuLib::Sprite *param_4);
 
 std::map<unsigned char, std::map<unsigned short, DrawUtils::Sprite>> cardsTextures;
 std::map<SokuLib::Character, std::vector<unsigned short>> characterSpellCards{
@@ -415,7 +415,7 @@ void generateFakeDecks()
 		generateFakeDeck(SokuLib::rightChar, lastRight, downSelectedDeck, loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar], fakeRightDeck);
 }
 
-void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::array<unsigned short, 20> &deck)
+void fillSokuDeck(SokuLib::Dequeue<unsigned short> &sokuDeck, const std::array<unsigned short, 20> &deck)
 {
 	if (!sokuDeck.data) {
 		sokuDeck.data = SokuLib::New<unsigned short *>(8);
@@ -434,7 +434,7 @@ void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::arr
 	sokuDeck.size = 20;
 }
 
-void fillSokuDeck(SokuLib::mVC9Dequeue<unsigned short> &sokuDeck, const std::unique_ptr<std::array<unsigned short, 20>> &deck)
+void fillSokuDeck(SokuLib::Dequeue<unsigned short> &sokuDeck, const std::unique_ptr<std::array<unsigned short, 20>> &deck)
 {
 	if (deck)
 		return fillSokuDeck(sokuDeck, *deck);
@@ -1035,10 +1035,7 @@ static void loadCardAssets()
 	initGuide(editBoxGuide);
 }
 
-//((SokuLib::mVC9Dequeue<unsigned short> *)(0x898868 + 0x1AC)
-//((SokuLib::mVC9Dequeue<unsigned short> *)(0x899054 + 0x1AC)
-
-void saveDeckToProfile(SokuLib::mVC9Dequeue<unsigned short> &array, const std::unique_ptr<std::array<unsigned short, 20>> &deck)
+void saveDeckToProfile(SokuLib::Dequeue<unsigned short> &array, const std::unique_ptr<std::array<unsigned short, 20>> &deck)
 {
 	generateFakeDecks();
 	printf("Saving decks to profile (%p | %p (%p))\n", &array, &deck, deck.get());
@@ -1539,7 +1536,7 @@ SokuLib::Select *__fastcall CSelect_Init_0041e2c3(SokuLib::Select *This)
 	return ret;
 }
 
-SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckEdit *This, int, int param_2, int param_3, SokuLib::CSprite *param_4)
+SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckEdit *This, int, int param_2, int param_3, SokuLib::Sprite *param_4)
 {
 	auto ret = (This->*og_CProfileDeckEdit_Init)(param_2, param_3, param_4);
 
@@ -1799,7 +1796,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	//s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
 	//	SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
 	//);
-	og_CProfileDeckEdit_Init = SokuLib::union_cast<SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*)(int, int, SokuLib::CSprite *)>(
+	og_CProfileDeckEdit_Init = SokuLib::union_cast<SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*)(int, int, SokuLib::Sprite *)>(
 		SokuLib::TamperNearJmpOpr(0x0044d529, CProfileDeckEdit_Init)
 	);
 	og_CSelectSV_Init = SokuLib::union_cast<SokuLib::SelectServer *(SokuLib::SelectServer::*)()>(
