@@ -14,6 +14,6 @@ std::string OpponentProfileNameString::getString() const {
 	case SokuLib::BATTLE_MODE_VSCLIENT:
 		return convertShiftJisToUTF8(SokuLib::getNetObject().profile2name);
 	default:
-		return convertShiftJisToUTF8(SokuLib::player2Profile);
+		return convertShiftJisToUTF8(SokuLib::profile2.name);
 	}
 }

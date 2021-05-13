@@ -373,7 +373,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		index = STRING_INDEX_BATTLE_VSNETWORK;
 		party = 2;
 		return;
-	case SokuLib::SCENE_SELECTSENARIO:
+	case SokuLib::SCENE_SELECTSCENARIO:
 		state.host = 0;
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_ARCADE)
 			index = STRING_INDEX_SELECT_ARCADE;
@@ -463,7 +463,7 @@ void updateState() {
 
 	case SokuLib::SCENE_TITLE:
 		titleScreenStateUpdate();
-	case SokuLib::SCENE_SELECTSENARIO:
+	case SokuLib::SCENE_SELECTSCENARIO:
 	case SokuLib::SCENE_ENDING:
 	case SokuLib::SCENE_LOGO:
 	case SokuLib::SCENE_OPENING:
