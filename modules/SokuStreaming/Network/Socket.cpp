@@ -21,16 +21,16 @@
 typedef fd_set FD_SET;
 #endif
 
-std::string getLastSocketError() {
+std::string getLastSocketError(int err = WSAGetLastError()) {
 #ifdef _WIN32
 	wchar_t *s = nullptr;
 
-	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, WSAGetLastError(),
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, err,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&s, 0, NULL);
 
 	std::stringstream stream;
 
-	stream << "WSAGetLastError " << WSAGetLastError() << ": ";
+	stream << "WSAGetLastError " << err << ": ";
 	for (int i = 0; s[i]; i++)
 		stream << static_cast<char>(s[i]);
 	LocalFree(s);
