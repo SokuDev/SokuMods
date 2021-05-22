@@ -818,14 +818,18 @@ static void onDeckSaved()
 		return;
 
 	loadedDecks[2][menu->editedCharacter] = editedDecks;
+
+	auto toSave = loadedDecks[2];
+
+	for (auto &elem : toSave)
+		elem.second.pop_back();
 	if (editSelectedProfile != 2) {
-		loadedDecks[editSelectedProfile] = loadedDecks[2];
+		loadedDecks[editSelectedProfile] = toSave;
 		path = editSelectedProfile == 0 ? leftLoadedProfile : rightLoadedProfile;
 	} else
 		path = lastLoadedProfile;
-	for (auto &elem : loadedDecks[2])
-		elem.second.pop_back();
-	if (!saveProfile(path, loadedDecks[2])) {
+
+	if (!saveProfile(path, toSave)) {
 		if (menu->displayedNumberOfCards == 20) {
 			menu->editedDeck->vector()[0]->second++;
 			saveError = true;

@@ -129,7 +129,7 @@ namespace DrawUtils
 
 	void Texture::destroy()
 	{
-		if (this->_loaded)
+		if (this->_loaded && SokuLib::pd3dDev)
 			SokuLib::textureMgr.remove(this->_handle);
 		this->_loaded = false;
 	}
