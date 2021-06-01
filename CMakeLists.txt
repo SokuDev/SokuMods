@@ -176,8 +176,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" S
     target_compile_options(DiscordIntegration PRIVATE /EHsc)
 endif ()
 target_link_libraries(DiscordIntegration DiscordSDK SokuLib shlwapi user32 ws2_32)
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
 set_target_properties(DiscordIntegration PROPERTIES
         SUFFIX ".dat")
+endif ()
 target_sources(DiscordIntegration PRIVATE
         modules/DiscordIntegration/Network/getPublicIp.cpp
         modules/DiscordIntegration/Network/Socket.cpp
@@ -215,6 +217,7 @@ target_sources(DiscordIntegration PRIVATE
 install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SWRSToys/modules/DiscordIntegration")
 install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SokuEngine/modules/DiscordIntegration")
 # DiscordIntegration loader
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Debug)
 add_library(DiscordIntegrationLoader MODULE)
 target_sources(DiscordIntegrationLoader PRIVATE
         modules/DiscordIntegration/Loader.c)
@@ -223,6 +226,7 @@ set_target_properties(DiscordIntegrationLoader PROPERTIES
         OUTPUT_NAME "DiscordIntegration")
 install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SWRSToys/modules/DiscordIntegration/")
 install(TARGETS DiscordIntegrationLoader LIBRARY DESTINATION "SokuEngine/modules/DiscordIntegration/")
+endif ()
 # DiscordIntegration Discord sdk
 install(FILES bin/discord_game_sdk.dll DESTINATION "SWRSToys/modules/DiscordIntegration/")
 install(FILES bin/discord_game_sdk.dll DESTINATION "SokuEngine/modules/DiscordIntegration/")
@@ -242,6 +246,30 @@ target_sources(FixMeiling236 PRIVATE
 module(GetIP)
 target_sources(GetIP PRIVATE modules/GetIP/main.c)
 target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
+
+module(InfiniteDecks Default)
+target_sources(
+        "InfiniteDecks" PRIVATE
+        modules/InfiniteDecks/InfiniteDecks.rc
+        modules/InfiniteDecks/main.cpp
+        modules/InfiniteDecks/DrawUtils.cpp
+        modules/InfiniteDecks/DrawUtils.hpp
+)
+target_link_libraries(
+        InfiniteDecks
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+
+add_executable(
+        ProfileConverter
+        modules/InfiniteDecks/ProfileConverter.c
+)
+target_link_libraries(ProfileConverter shlwapi)
 
 module(InGameHostlist Default)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
@@ -312,10 +340,10 @@ module(SkipIntro)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
-module(SokuReplays Default)
-target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
-target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
-target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
+#module(SokuReplays Default)
+#target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
+#target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
+#target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
 
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)
@@ -384,3 +412,6 @@ install(FILES README.md DESTINATION "SWRSToys"
         RENAME "SokuMods.txt")
 install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
+
+
+# WIP Module

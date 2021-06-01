@@ -8,10 +8,14 @@
 #include <SokuLib.hpp>
 
 std::string OpponentChrShortNameString::getString() const {
+	std::map<unsigned int, std::pair<std::string, std::string>>::iterator it;
+
 	switch (SokuLib::mainMode) {
 	case SokuLib::BATTLE_MODE_VSSERVER:
-		return charactersNames[SokuLib::leftChar].first;
+		it = charactersNames.find(SokuLib::leftChar);
+		break;
 	default:
-		return charactersNames[SokuLib::rightChar].first;
+		it = charactersNames.find(SokuLib::rightChar);
 	}
+	return (it == charactersNames.end() ? "Unknown" : it->second.first);
 }

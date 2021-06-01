@@ -7,11 +7,12 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
-extern std::vector<std::pair<std::string, std::string>> charactersNames;
+extern std::map<unsigned int, std::pair<std::string, std::string>> charactersNames;
 extern std::vector<std::string> submenusNames;
 extern std::vector<std::string> stagesNames;
-extern std::vector<std::string> charactersImg;
+extern std::map<unsigned int, std::string> charactersImg;
 extern std::pair<unsigned, unsigned> wins;
 
 #endif // SWRSTOYS_VARS_HPP

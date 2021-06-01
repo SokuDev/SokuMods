@@ -17,6 +17,9 @@
 #include <shlwapi.h>
 #include <string>
 #include <thread>
+#include <sstream>
+
+static bool hasSoku2 = false;
 
 enum StringIndex {
 	STRING_INDEX_LOGO,
@@ -110,6 +113,7 @@ struct State {
 	discord::Core *core = nullptr;
 	std::string roomIp;
 	std::pair<unsigned, unsigned> won = {0, 0};
+	discord::Activity lastActivity;
 };
 
 static State state;
@@ -162,6 +166,57 @@ static const std::vector<const char *> discordResultToString{
 	"TransactionAborted",
 };
 
+#define cmpstr(a, b, f)if ((a).f() == (b).f());\
+else if (!(a).f() || !(b).f() || strcmp((a).f(), (b).f()) != 0)\
+return false;
+
+bool operator==(const discord::ActivityAssets &a, const discord::ActivityAssets &b)
+{
+	cmpstr(a, b, GetLargeImage);
+	cmpstr(a, b, GetLargeText);
+	cmpstr(a, b, GetSmallImage);
+	cmpstr(a, b, GetSmallText);
+	return true;
+}
+
+bool operator==(const discord::ActivityTimestamps &a, const discord::ActivityTimestamps &b)
+{
+	return a.GetStart() == b.GetStart() &&
+	       a.GetEnd()   == b.GetEnd();
+}
+
+bool operator==(const discord::ActivityParty &a, const discord::ActivityParty &b)
+{
+	cmpstr(a, b, GetId);
+	return a.GetSize().GetCurrentSize() == b.GetSize().GetCurrentSize() &&
+	       a.GetSize().GetMaxSize() == b.GetSize().GetMaxSize();
+}
+
+bool operator==(const discord::ActivitySecrets &a, const discord::ActivitySecrets &b)
+{
+	cmpstr(a, b, GetMatch);
+	cmpstr(a, b, GetSpectate);
+	cmpstr(a, b, GetJoin);
+	return true;
+}
+
+bool operator==(const discord::Activity &a, const discord::Activity &b)
+{
+	cmpstr(a, b, GetState);
+	cmpstr(a, b, GetDetails);
+	return a.GetTimestamps() == b.GetTimestamps() &&
+	       a.GetAssets()     == b.GetAssets()     &&
+	       a.GetParty()      == b.GetParty()      &&
+	       a.GetSecrets()    == b.GetSecrets();
+}
+
+std::string getImageStr(const std::string &str)
+{
+	if (str == "cover" && hasSoku2)
+		return "soku2";
+	return str;
+}
+
 void updateActivity(StringIndex index, unsigned party) {
 	if (index >= config.strings.size())
 		return;
@@ -196,21 +251,25 @@ void updateActivity(StringIndex index, unsigned party) {
 		activity.SetDetails(elem.description->getString().c_str());
 
 	if (elem.large_image)
-		assets.SetLargeImage(elem.large_image->getString().c_str());
+		assets.SetLargeImage(getImageStr(elem.large_image->getString()).c_str());
 	if (elem.large_text)
 		assets.SetLargeText(elem.large_text->getString().c_str());
 
 	if (elem.small_image)
-		assets.SetSmallImage(elem.small_image->getString().c_str());
+		assets.SetSmallImage(getImageStr(elem.small_image->getString()).c_str());
 	if (elem.small_text)
 		assets.SetSmallText(elem.small_text->getString().c_str());
 
+	if (state.lastActivity == activity)
+		return;
+	logMessage("Updating presence...\n");
 	state.core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 		auto code = static_cast<unsigned>(result);
 
 		if (code)
 			logMessagef("Error updating presence: %s\n", discordResultToString[code]);
 	});
+	state.lastActivity = activity;
 }
 
 void getActivityParams(StringIndex &index, unsigned &party) {
@@ -314,10 +373,12 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		index = STRING_INDEX_BATTLE_VSNETWORK;
 		party = 2;
 		return;
-	case SokuLib::SCENE_SELECTSENARIO:
+	case SokuLib::SCENE_SELECTSCENARIO:
 		state.host = 0;
-		// STRING_INDEX_SELECT_ARCADE;
-		index = STRING_INDEX_SELECT_STORY;
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_ARCADE)
+			index = STRING_INDEX_SELECT_ARCADE;
+		else
+			index = STRING_INDEX_SELECT_STORY;
 		return;
 	case SokuLib::SCENE_ENDING:
 		state.host = 0;
@@ -402,7 +463,7 @@ void updateState() {
 
 	case SokuLib::SCENE_TITLE:
 		titleScreenStateUpdate();
-	case SokuLib::SCENE_SELECTSENARIO:
+	case SokuLib::SCENE_SELECTSCENARIO:
 	case SokuLib::SCENE_ENDING:
 	case SokuLib::SCENE_LOGO:
 	case SokuLib::SCENE_OPENING:
@@ -578,6 +639,101 @@ void loadJsonStrings(const std::string &path) {
 	}
 }
 
+void loadSoku2CSV(LPWSTR path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	if (stream.fail()) {
+		logMessagef("%S: %s\n", path, strerror(errno));
+		return;
+	}
+	while (std::getline(stream, line)) {
+		std::stringstream str{line};
+		unsigned id;
+		std::string idStr;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+
+		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		if (str.fail()) {
+			logMessagef("Skipping line %s: Stream failed\n", line.c_str());
+			continue;
+		}
+		try {
+			id = std::stoi(idStr);
+		} catch (...){
+			logMessagef("Skipping line %s: Invalid id\n", line.c_str());
+			continue;
+		}
+		charactersNames[id].first = shortName;
+		charactersNames[id].second = fullName;
+		charactersImg[id] = codeName;
+	}
+}
+
+void loadSoku2Config()
+{
+	logMessage("Looking for Soku2 config...\n");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	logMessagef("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		logMessagef("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		hasSoku2 = true;
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		logMessagef("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		loadSoku2CSV(module_path);
+		return;
+	}
+}
+
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath) {
 	int i;
@@ -600,7 +756,8 @@ void LoadSettings(LPCSTR profilePath) {
 	PathRemoveFileSpec(path);
 	PathAppend(path, file);
 
-	logMessagef("ClientID: %llu\nInviteIp: %s\nFile: %s", ClientID, myIp, path);
+	logMessagef("ClientID: %s\nInviteIp: %s\nFile: %s\n", ClientID, myIp, path);
+	loadSoku2Config();
 
 	try {
 		if (ret) {

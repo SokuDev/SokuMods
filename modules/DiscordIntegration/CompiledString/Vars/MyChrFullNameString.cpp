@@ -8,10 +8,14 @@
 #include <SokuLib.hpp>
 
 std::string MyChrFullNameString::getString() const {
+	std::map<unsigned int, std::pair<std::string, std::string>>::iterator it;
+
 	switch (SokuLib::mainMode) {
 	case SokuLib::BATTLE_MODE_VSSERVER:
-		return charactersNames[SokuLib::rightChar].second;
+		it = charactersNames.find(SokuLib::rightChar);
+		break;
 	default:
-		return charactersNames[SokuLib::leftChar].second;
+		it = charactersNames.find(SokuLib::leftChar);
 	}
+	return (it == charactersNames.end() ? "Unknown character" : it->second.second);
 }
