@@ -198,6 +198,10 @@ endif()
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
 
+module(Blacklist)
+target_sources(Blacklist PRIVATE modules/Blacklist/main.cpp)
+target_link_libraries(Blacklist SokuLib shlwapi ws2_32)
+
 module(CharactersInForeground)
 target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/CharactersInForeground.cpp)
 
