@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <dinput.h>
 
-int __fastcall CTitle_OnProcess(Title *This) {
+int __fastcall CTitle_OnProcess(SokuLib::Title *This) {
 	// super
 	int ret = (This->*s_origCTitle_Process)();
 
@@ -22,7 +22,7 @@ int __fastcall CTitle_OnProcess(Title *This) {
 	return ret;
 }
 
-int __fastcall CBattleWatch_OnProcess(BattleWatch *This) {
+int __fastcall CBattleWatch_OnProcess(SokuLib::BattleWatch *This) {
 	// super
 	int ret = (This->*s_origCBattleWatch_Process)();
 
@@ -30,7 +30,7 @@ int __fastcall CBattleWatch_OnProcess(BattleWatch *This) {
 	return ret;
 }
 
-int __fastcall CBattle_OnProcess(Battle *This) {
+int __fastcall CBattle_OnProcess(SokuLib::Battle *This) {
 	// super
 	int ret = (This->*s_origCBattle_Process)();
 
@@ -44,7 +44,7 @@ void loadCommon() {
 	checkKeyInputs();
 }
 
-int __fastcall CLoading_OnProcess(Loading *This) {
+int __fastcall CLoading_OnProcess(SokuLib::Loading *This) {
 	// super
 	int ret = (This->*s_origCLoading_Process)();
 
@@ -52,7 +52,7 @@ int __fastcall CLoading_OnProcess(Loading *This) {
 	return ret;
 }
 
-int __fastcall CLoadingWatch_OnProcess(LoadingWatch *This) {
+int __fastcall CLoadingWatch_OnProcess(SokuLib::LoadingWatch *This) {
 	// super
 	int ret = (This->*s_origCLoadingWatch_Process)();
 
@@ -114,26 +114,13 @@ void hookFunctions() {
 	DWORD old;
 
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCTitle_Process
-		= SokuLib::union_cast<int (Title::*)()>(SokuLib::TamperDword(SokuLib::vtbl_CTitle + SokuLib::OFFSET_ON_PROCESS, reinterpret_cast<DWORD>(CTitle_OnProcess)));
-	s_origCBattleWatch_Process = SokuLib::union_cast<int (BattleWatch::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CBattleWatch + SokuLib::OFFSET_ON_PROCESS, reinterpret_cast<DWORD>(CBattleWatch_OnProcess)));
-	s_origCLoadingWatch_Process = SokuLib::union_cast<int (LoadingWatch::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CLoadingWatch + SokuLib::OFFSET_ON_PROCESS, reinterpret_cast<DWORD>(CLoadingWatch_OnProcess)));
-	s_origCBattle_Process = SokuLib::union_cast<int (Battle::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CBattle + SokuLib::OFFSET_ON_PROCESS, reinterpret_cast<DWORD>(CBattle_OnProcess)));
-	s_origCLoading_Process = SokuLib::union_cast<int (Loading::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CLoading + SokuLib::OFFSET_ON_PROCESS, reinterpret_cast<DWORD>(CLoading_OnProcess)));
-	s_origCBattleManager_Start = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_SAY_START, reinterpret_cast<DWORD>(CBattleManager_Start)));
-	s_origCBattleManager_KO = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_KO, reinterpret_cast<DWORD>(CBattleManager_KO)));
-	/*s_origCBattleManager_Render = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_RENDER,
-			reinterpret_cast<DWORD>(CBattleManager_Render)
-		)
-	);*/
+	s_origCTitle_Process        = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,          CTitle_OnProcess);
+	s_origCBattleWatch_Process  = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onProcess,    CBattleWatch_OnProcess);
+	s_origCLoadingWatch_Process = SokuLib::TamperDword(&SokuLib::VTable_LoadingWatch.onProcess,   CLoadingWatch_OnProcess);
+	s_origCBattle_Process       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,    CBattle_OnProcess);
+	s_origCLoading_Process      = SokuLib::TamperDword(&SokuLib::VTable_Loading.onProcess,        CLoading_OnProcess);
+	s_origCBattleManager_Start  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onSayStart, CBattleManager_Start);
+	s_origCBattleManager_KO     = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onKO,       CBattleManager_KO);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 }
@@ -165,5 +152,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 }
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
+	if(fdwReason == DLL_PROCESS_DETACH)
+		webServer.reset();
 	return TRUE;
 }

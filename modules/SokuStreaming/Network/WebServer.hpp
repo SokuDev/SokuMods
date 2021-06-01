@@ -25,13 +25,14 @@ private:
 	std::function<void(WebSocket &sock)> _onConnect;
 	std::function<void(WebSocket &sock, const std::string &msg)> _onMessage;
 	std::function<void(WebSocket &sock, const std::exception &e)> _onError;
+	uintptr_t _thread = -1;
 	bool _closed = false;
 	Socket _sock;
-	std::thread _thread;
 	std::vector<std::shared_ptr<WebSocketConnection>> _webSocks;
 	std::map<std::string, std::string> _folders;
 	std::map<std::string, std::function<Socket::HttpResponse(const Socket::HttpRequest &request)>> _routes;
 
+	static void _threadFct(WebServer *server);
 	void _serverLoop();
 	void _addWebSocket(Socket &sock, const Socket::HttpRequest &requ);
 	Socket::HttpResponse _checkFolders(const Socket::HttpRequest &request);

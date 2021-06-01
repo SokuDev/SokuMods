@@ -8,12 +8,6 @@
 #include "Network/WebServer.hpp"
 #include <SokuLib.hpp>
 
-struct Title {};
-struct Battle {};
-struct Loading {};
-struct BattleWatch {};
-struct LoadingWatch {};
-
 enum Keys {
 	KEY_DECREASE_L_SCORE,
 	KEY_DECREASE_R_SCORE,
@@ -64,14 +58,14 @@ extern struct CachedMatchData {
 } _cache;
 extern bool needReset;
 extern bool needRefresh;
-extern int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
-extern int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
-extern int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
-extern int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
-extern int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
-extern int (__thiscall Loading::*s_origCLoading_Process)();
-extern int (__thiscall Battle::*s_origCBattle_Process)();
-extern int (__thiscall Title::*s_origCTitle_Process)();
+extern int (SokuLib::BattleManager::*s_origCBattleManager_Render)();
+extern int (SokuLib::BattleManager::*s_origCBattleManager_Start)();
+extern int (SokuLib::BattleManager::*s_origCBattleManager_KO)();
+extern int (SokuLib::LoadingWatch::*s_origCLoadingWatch_Process)();
+extern int (SokuLib::BattleWatch::*s_origCBattleWatch_Process)();
+extern int (SokuLib::Loading::*s_origCLoading_Process)();
+extern int (SokuLib::Battle::*s_origCBattle_Process)();
+extern int (SokuLib::Title::*s_origCTitle_Process)();
 
 void updateCache(bool isMultiplayer);
 std::string generateLeftCardsJson(CachedMatchData cache);

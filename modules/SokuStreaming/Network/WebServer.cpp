@@ -8,6 +8,7 @@
 #include <csignal>
 #include <fstream>
 #include <iostream>
+#include <process.h>
 
 const std::map<std::string, std::string> WebServer::types{
 	{"txt", "text/plain"},
@@ -103,18 +104,27 @@ void WebServer::addStaticFolder(const std::string &&route, const std::string &&p
 	this->_folders[route] = path;
 }
 
+void WebServer::_threadFct(WebServer *server)
+{
+	while (!server->_closed)
+		server->_serverLoop();
+}
+
 void WebServer::start(unsigned short port) {
+	if (this->_thread != -1)
+		return;
 	this->_sock.bind(port);
 	std::cout << "Started server on port " << port << std::endl;
-	this->_thread = std::thread([this] {
-		while (!this->_closed)
-			this->_serverLoop();
-	});
+	this->_closed = false;
+	this->_thread = _beginthread(reinterpret_cast<_beginthread_proc_type>(&_threadFct), 0, this);
 }
 
 void ___(int) {}
 
 void WebServer::stop() {
+	if (this->_thread == -1)
+		return;
+
 	this->_closed = true;
 	auto old = signal(SIGINT, ___);
 
@@ -125,8 +135,8 @@ void WebServer::stop() {
 	});
 	raise(SIGINT); // Interrupt accept
 	signal(SIGINT, old);
-	if (this->_thread.joinable())
-		this->_thread.join();
+	_endthreadex(this->_thread);
+	this->_thread = -1;
 }
 
 WebServer::~WebServer() {
@@ -138,6 +148,7 @@ void WebServer::_serverLoop() {
 	Socket::HttpResponse response;
 	Socket::HttpRequest requ;
 	std::string s;
+	int times = 10;
 
 #ifdef _DEBUG
 	std::cerr << "New connection from " << inet_ntoa(newConnection.getRemote().sin_addr) << ":" << newConnection.getRemote().sin_port << std::endl;
@@ -145,7 +156,8 @@ void WebServer::_serverLoop() {
 	try {
 		try {
 			requ.ip = newConnection.getRemote().sin_addr.s_addr;
-			s = newConnection.readUntilEOF();
+			while (s.empty() && times--)
+				s = newConnection.readUntilEOF();
 			requ = Socket::parseHttpRequest(s);
 			requ.ip = newConnection.getRemote().sin_addr.s_addr;
 			if (requ.httpVer != "HTTP/1.1")

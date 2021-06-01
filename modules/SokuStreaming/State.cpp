@@ -20,14 +20,14 @@ std::unique_ptr<WebServer> webServer;
 struct CachedMatchData _cache;
 bool needReset;
 bool needRefresh;
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Start)();
-int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_KO)();
-int (__thiscall LoadingWatch::*s_origCLoadingWatch_Process)();
-int (__thiscall BattleWatch::*s_origCBattleWatch_Process)();
-int (__thiscall Loading::*s_origCLoading_Process)();
-int (__thiscall Battle::*s_origCBattle_Process)();
-int (__thiscall Title::*s_origCTitle_Process)();
+int (SokuLib::BattleManager::*s_origCBattleManager_Render)();
+int (SokuLib::BattleManager::*s_origCBattleManager_Start)();
+int (SokuLib::BattleManager::*s_origCBattleManager_KO)();
+int (SokuLib::LoadingWatch::*s_origCLoadingWatch_Process)();
+int (SokuLib::BattleWatch::*s_origCBattleWatch_Process)();
+int (SokuLib::Loading::*s_origCLoading_Process)();
+int (SokuLib::Battle::*s_origCBattle_Process)();
+int (SokuLib::Title::*s_origCTitle_Process)();;
 HWND myWindow;
 
 const char *jpTitle = "ôîò√ö±æzôVæÑ ü` Æ┤£WïëâMâjâçâïé╠ôΣé≡Æ╟éª Ver1.10a";
@@ -165,14 +165,13 @@ void updateCache(bool isMultiplayer) {
 				_cache.realLeftName = netObj.profile1name;
 				_cache.realRightName = netObj.profile2name;
 			}
-		} else if (_cache.realLeftName != SokuLib::player1Profile.operator char *() || _cache.realRightName != SokuLib::player2Profile.operator char *()
-			|| SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) {
+		} else if (_cache.realLeftName != SokuLib::profile1.name.operator char *() || _cache.realRightName != SokuLib::profile2.name.operator char *() || SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) {
 			_cache.leftScore = 0;
 			_cache.rightScore = 0;
-			_cache.leftName = SokuLib::player1Profile;
-			_cache.rightName = SokuLib::player2Profile;
-			_cache.realLeftName = SokuLib::player1Profile;
-			_cache.realRightName = SokuLib::player2Profile;
+			_cache.leftName = SokuLib::profile1.name;
+			_cache.rightName = SokuLib::profile2.name;
+			_cache.realLeftName = SokuLib::profile1.name;
+			_cache.realRightName = SokuLib::profile2.name;
 		}
 		needReset = false;
 	}
@@ -186,8 +185,8 @@ void updateCache(bool isMultiplayer) {
 	_cache.leftHand.clear();
 	_cache.rightHand.clear();
 
-	auto &leftDeck = battleMgr.leftCharacterManager.deckInfos;
-	auto &rightDeck = battleMgr.rightCharacterManager.deckInfos;
+	auto &leftDeck = battleMgr.leftCharacterManager.deckInfo;
+	auto &rightDeck = battleMgr.rightCharacterManager.deckInfo;
 
 	// Left remaining cards
 	if (leftDeck.deck.size == 20)
@@ -317,6 +316,7 @@ std::string cacheToJson(CachedMatchData cache) {
 	}
 
 	result["left"] = {
+		{"palette", SokuLib::leftPlayerInfo.palette},
 		{"character", cache.left},
 		{"score", cache.leftScore},
 		{"name", convertShiftJisToUTF8(cache.leftName.c_str())},
@@ -326,6 +326,7 @@ std::string cacheToJson(CachedMatchData cache) {
 		{"stats", statsToJson(cache.leftStats)},
 	};
 	result["right"] = {
+		{"palette", SokuLib::rightPlayerInfo.palette},
 		{"character", cache.right},
 		{"score", cache.rightScore},
 		{"name", convertShiftJisToUTF8(cache.rightName.c_str())},
