@@ -16,6 +16,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" S
     # work around this undefined behaviour by setting a global codepage for all RC files
     SET(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} /C 1252")
 endif ()
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /Brepro")
+SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /Brepro")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /Brepro")
 
 add_library(swrstoys MODULE
         swrstoys/d3d9.def
@@ -30,6 +33,35 @@ set_target_properties(swrstoys PROPERTIES
 install(TARGETS swrstoys LIBRARY DESTINATION "SWRSToys/")
 install(TARGETS swrstoys LIBRARY DESTINATION "SokuEngine/")
 
+# mbedTLS
+
+option(ENABLE_PROGRAMS "" OFF)
+option(INSTALL_MBEDTLS_HEADERS "" OFF)
+option(MBEDTLS_FATAL_WARNINGS "" OFF)
+add_subdirectory(mbedtls EXCLUDE_FROM_ALL)
+
+add_library(mbedtls_shim INTERFACE)
+target_link_libraries(mbedtls_shim INTERFACE mbedtls mbedx509 mbedcrypto)
+
+# workaround for curl: link against our local mbedtls rather than search for it
+function(find_package)
+    if(ARGV0 STREQUAL "MbedTLS")
+        set(MBEDTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/mbedtls/include" CACHE STRING "")
+        set(MBEDTLS_LIBRARIES "mbedtls_shim" CACHE STRING "")
+        mark_as_advanced(MBEDTLS_INCLUDE_DIRS MBEDTLS_LIBRARIES)
+    else()
+        _find_package(${ARGV})
+    endif()
+endfunction()
+
+# workaround for curl: don't try installing any export files
+function(install)
+    if(ARGV0 STREQUAL "EXPORT")
+    else()
+        _install(${ARGV})
+    endif()
+endfunction()
+
 # cURL
 
 option(BUILD_CURL_EXE "" OFF)
@@ -41,6 +73,7 @@ option(HTTP_ONLY "" ON)
 option(CURL_DISABLE_CRYPTO_AUTH "" ON)
 option(ENABLE_MANUAL "" OFF)
 option(CMAKE_USE_OPENSSL "" OFF)
+option(CMAKE_USE_MBEDTLS "" ON)
 option(CURL_DISABLE_LDAP "" ON)
 option(CURL_ZLIB "" OFF)
 option(CMAKE_USE_LIBSSH2 "" OFF)
@@ -305,7 +338,7 @@ target_link_libraries(LabTool dinput8 shlwapi user32)
 module(MemoryPatch)
 target_sources(MemoryPatch PRIVATE modules/MemoryPatch/MemoryPatch.cpp)
 
-module(NetBattleCounter)
+module(NetBattleCounter Default)
 target_sources(NetBattleCounter PRIVATE modules/NetBattleCounter/NetBattleCounter.cpp)
 target_link_libraries(NetBattleCounter winmm)
 
@@ -413,5 +446,13 @@ install(FILES README.md DESTINATION "SWRSToys"
 install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
 
+# th123e loader
 
-# WIP Module
+add_executable(th123eloader)
+target_sources(th123eloader PRIVATE
+        th123eloader/th123eloader.c
+        th123eloader/th123e.rc)
+target_link_libraries(th123eloader shlwapi user32)
+set_target_properties(th123eloader PROPERTIES
+        OUTPUT_NAME th123e)
+install(TARGETS th123eloader RUNTIME DESTINATION ".")

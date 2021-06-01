@@ -148,24 +148,24 @@ void load_thread(void *unused) {
 	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\.rep", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)L"SokuReplay", sizeof(L"SokuReplay"))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE *)L"SokuReplay", sizeof(L"SokuReplay"))) {
 		return;
 	}
 	RegCloseKey(key);
 	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)L"Soku Replay", sizeof(L"Soku Replay"))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE *)L"Soku Replay", sizeof(L"Soku Replay"))) {
 		return;
 	}
-	if (RegSetValueExW(key, L"AlwaysShowExt", 0, REG_SZ, (BYTE*)L"1", sizeof(L"1"))) {
+	if (RegSetValueExW(key, L"AlwaysShowExt", 0, REG_SZ, (BYTE *)L"1", sizeof(L"1"))) {
 		return;
 	}
 	RegCloseKey(key);
 	if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\Shell\\Open", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)L"Watch in Soku", sizeof(L"Watch in Soku"))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE *)L"Watch in Soku", sizeof(L"Watch in Soku"))) {
 		return;
 	}
 	RegCloseKey(key);
@@ -174,12 +174,23 @@ void load_thread(void *unused) {
 	if (!GetModuleFileNameW(NULL, &exe_path[1], MAX_PATH + 1023)) {
 		return;
 	}
+	// if we're using the patched th123e.exe, use that
+	// instead of th123.exe
+	wchar_t exe_e_path[MAX_PATH + 1024];
+	wchar_t *loader_path = exe_path;
+	StrCpyW(exe_e_path, exe_path);
+	WIN32_FILE_ATTRIBUTE_DATA exe_e_info;
+	if (PathRemoveFileSpecW(&exe_e_path[1]) && PathAppendW(&exe_e_path[1], L"th123e.exe")
+		&& GetFileAttributesExW(&exe_e_path[1], GetFileExInfoStandard, &exe_e_info) && exe_e_info.nFileSizeLow != 8192) {
+		loader_path = exe_e_path;
+	}
+
 	DWORD disposition;
 	if (RegCreateKeyExW(
 				HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\DefaultIcon", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, &disposition)) {
 		return;
 	}
-	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)(&exe_path[1]), 2 * (wcslen(exe_path) + 1))) {
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE *)(&loader_path[1]), 2 * (wcslen(loader_path) + 1))) {
 		return;
 	}
 	RegCloseKey(key);
@@ -187,8 +198,8 @@ void load_thread(void *unused) {
 				HKEY_CURRENT_USER, L"Software\\Classes\\SokuReplay\\Shell\\Open\\Command", 0, NULL, 0, KEY_SET_VALUE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
 		return;
 	}
-	StrCatW(exe_path, L"\" \"%1\"");
-	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE*)exe_path, 2 * (wcslen(exe_path) + 1))) {
+	StrCatW(loader_path, L"\" \"%1\"");
+	if (RegSetValueExW(key, NULL, 0, REG_SZ, (BYTE *)loader_path, 2 * (wcslen(loader_path) + 1))) {
 		return;
 	}
 	RegCloseKey(key);
