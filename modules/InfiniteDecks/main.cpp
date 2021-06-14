@@ -686,6 +686,14 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 		saveProfile(path, map);
 		return true;
 	}
+	if (json.is_null()) {
+		for (auto &elem : names)
+			map[elem.first].clear();
+		if (index == 2)
+			for (auto &elem : map)
+				elem.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+		return true;
+	}
 	if (!json.is_object())
 		throw std::invalid_argument("JSON is neither an array nor an object");
 	for (auto &arr : json.items()) {
