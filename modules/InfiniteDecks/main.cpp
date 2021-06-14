@@ -559,10 +559,115 @@ static bool loadOldProfileFile(nlohmann::json &json, std::map<unsigned char, std
 	return true;
 }
 
+bool allDecksDefault(unsigned short (*decks)[4][20], unsigned i)
+{
+	for (int j = 0; j < 4; j++) {
+		std::sort(decks[i][j], decks[i][j] + 20);
+		if (i >= (hasSoku2 ? defaultDecks.size() + 2 : 20) || memcmp(defaultDecks[i].data(), decks[i][j], sizeof(defaultDecks[i])) != 0)
+			return false;
+	}
+	return true;
+}
+
+static void convertProfile(const char *jsonPath)
+{
+	char path[MAX_PATH];
+	unsigned char length;
+	unsigned short cards[255];
+	FILE *json;
+	FILE *profile;
+	unsigned short (*decks)[4][20] = nullptr;
+	int size;
+
+	strcpy(path, jsonPath);
+	*strrchr(path, '.') = 0;
+	strcat(path, ".pf");
+	printf("Loading decks from profile file %s to %s.\n", path, jsonPath);
+
+	profile = fopen(path, "r");
+	if (!profile) {
+		printf("Can't open %s for reading %s\n", path, strerror(errno));
+		return;
+	}
+
+	json = fopen(jsonPath, "w");
+	if (!json) {
+		fclose(profile);
+		printf("Can't open %s for writing %s\n", jsonPath, strerror(errno));
+		return;
+	}
+
+	fseek(profile, 106, SEEK_SET);
+	for (size = 1; !feof(profile); size++) {
+		decks = static_cast<unsigned short (*)[4][20]>(realloc(decks, sizeof(*decks) * size));
+		for (int k = 0; k < 4; k++) {
+			fread(&length, sizeof(length), 1, profile);
+			fread(cards, sizeof(*cards), length, profile);
+			for (int j = length; j < 20; j++)
+				cards[j] = 21;
+			memcpy(decks[size - 1][k], cards, 40);
+		}
+	}
+	fclose(profile);
+
+	fwrite("{", 1, 1, json);
+
+	const char *deckNames[4] = {
+		"yorokobi",
+		"ikari",
+		"ai",
+		"tanoshii"
+	};
+	bool first = true;
+	bool first2 = true;
+	unsigned i = 0;
+
+	size -= 2;
+	if (size > 20)
+		size -= 2;
+	printf("There are %i characters...\n", size);
+	while (size--) {
+		if (allDecksDefault(decks, i)) {
+			printf("Character %i has all default decks\n", i);
+			i++;
+			if (i == 20)
+				i += 2;
+			continue;
+		}
+		fprintf(json, "%s\n\t\"%i\": [", first2 ? "" : ",", i);
+		first2 = false;
+		first = true;
+		for (int j = 0; j < 4; j++) {
+			std::sort(decks[i][j], decks[i][j] + 20);
+			if (i < (hasSoku2 ? defaultDecks.size() + 2 : 20) && memcmp(defaultDecks[i].data(), decks[i][j], sizeof(defaultDecks[i])) == 0)
+				continue;
+			fprintf(json, "%s\n\t\t{\n\t\t\t\"name\": \"%s\",\n\t\t\t\"cards\": [", first ? "" : ",", deckNames[j]);
+			first = false;
+			for (int k = 0; k < 20; k++)
+				fprintf(json, "%s%i", k == 0 ? "" : ", ", decks[i][j][k]);
+			fwrite("]\n\t\t}", 1, 5, json);
+		}
+		fwrite("\n\t]", 1, 3, json);
+		i++;
+		if (i == 20)
+			i += 2;
+	}
+	fwrite("\n}", 1, 2, json);
+	fclose(json);
+	free(decks);
+	decks = nullptr;
+}
+
 static bool loadProfileFile(const std::string &path, std::ifstream &stream, std::map<unsigned char, std::vector<Deck>> &map, int index)
 {
 	if (stream.fail()) {
 		printf("Failed to open file %s: %s\n", path.c_str(), strerror(errno));
+		if (errno == ENOENT) {
+			puts("Let's fix that");
+			convertProfile(path.c_str());
+			stream.open(path);
+			return loadProfileFile(path, stream, map, index);
+		}
 		for (auto &elem : names)
 			map[elem.first].clear();
 		if (index == 2)
