@@ -606,7 +606,7 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 			else
 				deck.name = elem["name"];
 			memcpy(deck.cards.data(), elem["cards"].get<std::vector<unsigned short>>().data(), sizeof(*deck.cards.data()) * deck.cards.size());
-			//sanitizeDeck(static_cast<SokuLib::Character>(index), deck);
+			sanitizeDeck(static_cast<SokuLib::Character>(index), deck);
 			std::sort(deck.cards.begin(), deck.cards.end());
 			map[index].push_back(deck);
 		}
@@ -615,70 +615,6 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 		for (auto &elem : map)
 				elem.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	return true;
-}
-
-static void handleProfileChange(SokuLib::Profile *This, SokuLib::String *str)
-{
-	char *arg = *str;
-	std::string profileName{arg, strstr(arg, ".pf")};
-	std::string profile = "profile/" + profileName + ".json";
-	int index = 2;
-	bool hasBackup;
-
-	if (This == &SokuLib::profile1) {
-		//P1
-		index = 0;
-		leftLoadedProfile = profile;
-	} else if (This == &SokuLib::profile2) {
-		//P2
-		index = 1;
-		rightLoadedProfile = profile;
-	} //Else is deck construct
-	printf("Loading %s in buffer %i\n", profile.c_str(), index);
-
-	bool result = false;
-	auto &arr = loadedDecks[index];
-	std::ifstream stream{profile + ".bck"};
-
-	hasBackup = !stream.fail();
-	stream.close();
-	if (hasBackup)
-		printf("%s has backup data !\n", profile.c_str());
-
-	stream.open(profile, std::ifstream::in);
-	try {
-		result = loadProfileFile(profile, stream, arr, index);
-	} catch (std::exception &e) {
-		auto answer = IDNO;
-
-		if (!hasBackup)
-			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
-		else
-			answer = MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what() + "\n\nDo you want to load backup file ?").c_str(), "Loading error", MB_ICONERROR | MB_YESNO);
-		if (answer != IDYES)
-			throw;
-	}
-	stream.close();
-
-	if (!result && hasBackup) {
-		try {
-			stream.open(profile + ".bck", std::ifstream::in);
-			printf("Loading %s\n", (profile + ".bck").c_str());
-			result = loadProfileFile(profile + ".bck", stream, arr, index);
-			stream.close();
-		} catch (std::exception &e) {
-			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ".bck: " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
-			throw;
-		}
-		unlink(profile.c_str());
-		rename((profile + ".bck").c_str(), profile.c_str());
-		lastLoadedProfile = profile;
-		return;
-	}
-
-	lastLoadedProfile = profile;
-	if (hasBackup)
-		unlink((profile + ".bck").c_str());
 }
 
 static int weirdRand(int key, int delay)
@@ -722,23 +658,6 @@ static void initFont() {
 	desc.weight = FW_REGULAR;
 	defaultFont.create();
 	defaultFont.setIndirect(desc);
-}
-
-static void onProfileChanged()
-{
-	SokuLib::Profile *This;
-	char *arg;
-
-	__asm mov This, esi;
-	__asm mov arg, esp;
-
-#ifdef _DEBUG_BUILD
-	arg = *(char **)(arg + 0x28);
-#else
-	arg = *(char **)(arg + 0x24);
-#endif
-	arg += 0x1C;
-	handleProfileChange(This, reinterpret_cast<SokuLib::String *>(arg));
 }
 
 bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This, std::array<unsigned short, 20> &deck)
@@ -962,16 +881,10 @@ static void loadCardAssets()
 			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), 99 + i);
 			loadTexture(cardsTextures[j][99 + i], buffer);
 		}
-		//if (j < characterSpellCards.size())
-		//	for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
-		//		sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
-		//		loadTexture(cardsTextures[j][card], buffer);
-		//	}
-		//else
-			for (unsigned short card = 200; card < 220; card++) {
-				sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
-				loadTexture(cardsTextures[j][card], buffer, false);
-			}
+		for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
+			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
+			loadTexture(cardsTextures[j][card], buffer);
+		}
 	}
 	loadTexture(baseSprite,         "data/menu/21_Base.bmp");
 	loadTexture(nameSprite,         "data/profile/20_Name.bmp");
@@ -1454,21 +1367,31 @@ static void loadDefaultDecks()
 
 		SokuLib::CSVParser parser{buffer};
 		std::array<unsigned short, 20> deck;
+		auto &cards = characterSpellCards[id];
 
 		for (int i = 0; i < 20; i++) {
 			auto str = parser.getNextCell();
 
 			try {
-				deck[i] = std::stoul(str);
+				auto card = std::stoul(str);
+
+				if (card > 20 && std::find(cards.begin(), cards.end(), card) == cards.end())
+					MessageBoxA(
+						SokuLib::window,
+						("Warning: Default deck for " + name + " contains invalid card " + str).c_str(),
+						"Default deck invalid",
+						MB_ICONWARNING
+					);
+				deck[i] = card;
 			} catch (std::exception &e) {
 				MessageBoxA(
 					SokuLib::window,
-					"Loading default deck failed",
 					(
 						"Fatal error: Cannot load default deck for " + name + ":\n" +
-						"In file " + buffer + ": Cannot parse cell " + std::to_string(i) +
+						"In file " + buffer + ": Cannot parse cell #" + std::to_string(i + 1) +
 						" \"" + str + "\": " + e.what()
 					).c_str(),
+					"Loading default deck failed",
 					MB_ICONERROR
 				);
 				abort();
@@ -1479,9 +1402,40 @@ static void loadDefaultDecks()
 	}
 }
 
-static void loadAllCards()
+static void loadAllExistingCards()
 {
+	char buffer[] = "data/csv/000000000000/spellcard.csv";
 
+	for (auto [id, name] : names) {
+		sprintf(buffer, "data/csv/%s/spellcard.csv", name.c_str());
+		printf("Loading cards from %s\n", buffer);
+
+		SokuLib::CSVParser parser{buffer};
+		std::vector<unsigned short> valid;
+		int i = 0;
+
+		do {
+			auto str = parser.getNextCell();
+
+			i++;
+			try {
+				valid.push_back(std::stoul(str));
+			} catch (std::exception &e) {
+				MessageBoxA(
+					SokuLib::window,
+					(
+						"Fatal error: Cannot load cards list for " + name + ":\n" +
+						"In file " + buffer + ": Cannot parse cell #1 at line #" + std::to_string(i) +
+						" \"" + str + "\": " + e.what()
+					).c_str(),
+					"Loading default deck failed",
+					MB_ICONERROR
+				);
+				abort();
+			}
+		} while (parser.goToNextLine());
+		characterSpellCards[id] = valid;
+	}
 }
 
 static void initAssets()
@@ -1489,62 +1443,99 @@ static void initAssets()
 	if (assetsLoaded)
 		return;
 	assetsLoaded = true;
-	loadCardAssets();
+	loadAllExistingCards();
 	loadDefaultDecks();
-	loadAllCards();
+	loadCardAssets();
 	initFont();
 }
 
-//0041e644
-SokuLib::SelectServer *__fastcall CSelectSV_Init(SokuLib::SelectServer *This)
+static void handleProfileChange(SokuLib::Profile *This, SokuLib::String *str)
 {
-	auto ret = (This->*og_CSelectSV_Init)();
-
 	initAssets();
-	return ret;
+
+	char *arg = *str;
+	std::string profileName{arg, strstr(arg, ".pf")};
+	std::string profile = "profile/" + profileName + ".json";
+	int index = 2;
+	bool hasBackup;
+
+	if (This == &SokuLib::profile1) {
+		//P1
+		index = 0;
+		leftLoadedProfile = profile;
+	} else if (This == &SokuLib::profile2) {
+		//P2
+		index = 1;
+		rightLoadedProfile = profile;
+	} //Else is deck construct
+	printf("Loading %s in buffer %i\n", profile.c_str(), index);
+
+	bool result = false;
+	auto &arr = loadedDecks[index];
+	std::ifstream stream{profile + ".bck"};
+
+	hasBackup = !stream.fail();
+	stream.close();
+	if (hasBackup)
+		printf("%s has backup data !\n", profile.c_str());
+
+	stream.open(profile, std::ifstream::in);
+	try {
+		result = loadProfileFile(profile, stream, arr, index);
+	} catch (std::exception &e) {
+		auto answer = IDNO;
+
+		if (!hasBackup)
+			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
+		else
+			answer = MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what() + "\n\nDo you want to load backup file ?").c_str(), "Loading error", MB_ICONERROR | MB_YESNO);
+		if (answer != IDYES)
+			throw;
+	}
+	stream.close();
+
+	if (!result && hasBackup) {
+		try {
+			stream.open(profile + ".bck", std::ifstream::in);
+			printf("Loading %s\n", (profile + ".bck").c_str());
+			result = loadProfileFile(profile + ".bck", stream, arr, index);
+			stream.close();
+		} catch (std::exception &e) {
+			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ".bck: " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
+			throw;
+		}
+		unlink(profile.c_str());
+		rename((profile + ".bck").c_str(), profile.c_str());
+		lastLoadedProfile = profile;
+		return;
+	}
+
+	lastLoadedProfile = profile;
+	if (hasBackup)
+		unlink((profile + ".bck").c_str());
 }
 
-//0041e6ef
-SokuLib::SelectClient *__fastcall CSelectCL_Init(SokuLib::SelectClient *This)
+static void onProfileChanged()
 {
-	auto ret = (This->*og_CSelectCL_Init)();
+	SokuLib::Profile *This;
+	char *arg;
 
-	initAssets();
-	return ret;
-}
+	__asm mov This, esi;
+	__asm mov arg, esp;
 
-//0041e55f
-SokuLib::Select *__fastcall CSelect_Init_0041e55f(SokuLib::Select *This)
-{
-	auto ret = (This->*og_CSelect_Init_0041e55f)();
-
-	initAssets();
-	return ret;
-}
-
-//0041e263
-SokuLib::Select *__fastcall CSelect_Init_0041e263(SokuLib::Select *This)
-{
-	auto ret = (This->*og_CSelect_Init_0041e263)();
-
-	initAssets();
-	return ret;
-}
-
-//0041e2c3
-SokuLib::Select *__fastcall CSelect_Init_0041e2c3(SokuLib::Select *This)
-{
-	auto ret = (This->*og_CSelect_Init_0041e2c3)();
-
-	initAssets();
-	return ret;
+#ifdef _DEBUG_BUILD
+	arg = *(char **)(arg + 0x28);
+#else
+	arg = *(char **)(arg + 0x24);
+#endif
+	arg += 0x1C;
+	handleProfileChange(This, reinterpret_cast<SokuLib::String *>(arg));
 }
 
 SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckEdit *This, int, int param_2, int param_3, SokuLib::Sprite *param_4)
 {
 	auto ret = (This->*og_CProfileDeckEdit_Init)(param_2, param_3, param_4);
 
-	initAssets();
 	if (profileSelectReady)
 		return ret;
 	profileSelectReady = true;
@@ -1560,10 +1551,6 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckE
 	deleteBoxDisplayed = false;
 	renameBoxDisplayed = false;
 	copyBoxDisplayed = false;
-
-	//This->guideVector[4].imagePtr = (void *)selectDeckGuideTexture;
-	//This->guideVector[4].sprite = selectDeckGuideTexture
-	//This->guideVector[4].sprite.init(editBoxGuideTexture, 0, 0, 640, 16);
 	return ret;
 }
 
@@ -1825,26 +1812,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	SokuLib::TamperNearJmpOpr(0x450230, CProfileDeckEdit_SwitchCurrentDeck);
 	s_originalDrawGradiantBar = reinterpret_cast<void (*)(float, float, float)>(SokuLib::TamperNearJmpOpr(0x44E4C8, drawGradiantBar));
 	s_originalInputMgrGet = SokuLib::union_cast<int (SokuLib::ObjectSelect::*)()>(SokuLib::TamperNearJmpOpr(0x4206B3, myGetInput));
-	//s_origLoadDeckData = reinterpret_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<unsigned short> &)>(
-	//	SokuLib::TamperNearJmpOpr(0x437D23, loadDeckData)
-	//);
 	og_CProfileDeckEdit_Init = SokuLib::union_cast<SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*)(int, int, SokuLib::Sprite *)>(
 		SokuLib::TamperNearJmpOpr(0x0044d529, CProfileDeckEdit_Init)
-	);
-	og_CSelectSV_Init = SokuLib::union_cast<SokuLib::SelectServer *(SokuLib::SelectServer::*)()>(
-		SokuLib::TamperNearJmpOpr(0x41e644, CSelectSV_Init)
-	);
-	og_CSelectCL_Init = SokuLib::union_cast<SokuLib::SelectClient *(SokuLib::SelectClient::*)()>(
-		SokuLib::TamperNearJmpOpr(0x41e6ef, CSelectCL_Init)
-	);
-	og_CSelect_Init_0041e55f = SokuLib::union_cast<SokuLib::Select *(SokuLib::Select::*)()>(
-		SokuLib::TamperNearJmpOpr(0x41e55f, CSelect_Init_0041e55f)
-	);
-	og_CSelect_Init_0041e263 = SokuLib::union_cast<SokuLib::Select *(SokuLib::Select::*)()>(
-		SokuLib::TamperNearJmpOpr(0x41e263, CSelect_Init_0041e263)
-	);
-	og_CSelect_Init_0041e2c3 = SokuLib::union_cast<SokuLib::Select *(SokuLib::Select::*)()>(
-		SokuLib::TamperNearJmpOpr(0x41e2c3, CSelect_Init_0041e2c3)
 	);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
