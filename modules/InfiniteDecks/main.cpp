@@ -45,50 +45,8 @@ static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*s_originalCProfileD
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*og_CProfileDeckEdit_Init)(int param_2, int param_3, SokuLib::Sprite *param_4);
 
 std::map<unsigned char, std::map<unsigned short, DrawUtils::Sprite>> cardsTextures;
-std::map<SokuLib::Character, std::vector<unsigned short>> characterSpellCards{
-	{SokuLib::CHARACTER_ALICE, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
-	{SokuLib::CHARACTER_AYA, {200, 201, 202, 203, 205, 206, 207, 208, 211, 212}},
-	{SokuLib::CHARACTER_CIRNO, {200, 201, 202, 203, 204, 205, 206, 207, 208, 210, 213}},
-	{SokuLib::CHARACTER_IKU, {200, 201, 202, 203, 206, 207, 208, 209, 210, 211}},
-	{SokuLib::CHARACTER_KOMACHI, {200, 201, 202, 203, 204, 205, 206, 207, 211}},
-	{SokuLib::CHARACTER_MARISA, {200, 202, 203, 204, 205, 206, 207, 208, 209, 211, 212, 214, 215, 219}},
-	{SokuLib::CHARACTER_MEILING, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 211}},
-	{SokuLib::CHARACTER_PATCHOULI, {200, 201, 202, 203, 204, 205, 206, 207, 210, 211, 212, 213}},
-	{SokuLib::CHARACTER_REIMU, {200, 201, 204, 206, 207, 208, 209, 210, 214, 219}},
-	{SokuLib::CHARACTER_REMILIA, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209}},
-	{SokuLib::CHARACTER_SAKUYA, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212}},
-	{SokuLib::CHARACTER_SANAE, {200, 201, 202, 203, 204, 205, 206, 207, 210}},
-	{SokuLib::CHARACTER_SUIKA, {200, 201, 202, 203, 204, 205, 206, 207, 208, 212}},
-	{SokuLib::CHARACTER_SUWAKO, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 212}},
-	{SokuLib::CHARACTER_TENSHI, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209}},
-	{SokuLib::CHARACTER_REISEN, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
-	{SokuLib::CHARACTER_UTSUHO, {200, 201, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214}},
-	{SokuLib::CHARACTER_YOUMU, {200, 201, 202, 203, 204, 205, 206, 207, 208, 212}},
-	{SokuLib::CHARACTER_YUKARI, {200, 201, 202, 203, 204, 205, 206, 207, 208, 215}},
-	{SokuLib::CHARACTER_YUYUKO, {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 219}}
-};
-std::array<std::array<unsigned short, 20>, 20> defaultDecks = {
-	std::array<unsigned short, 20>{1, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 208, 208, 208},
-	std::array<unsigned short, 20>{ 0, 1, 1, 1, 1, 100, 100, 101, 101, 102, 103, 200, 200, 200, 202, 202, 208, 208, 208, 208 },
-	std::array<unsigned short, 20>{ 0, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 203, 203 },
-	std::array<unsigned short, 20>{ 0, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 202, 202, 202, 203, 203 },
-	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 104, 104, 200, 200, 200, 200, 201, 201, 201, 202, 202, 202 },
-	std::array<unsigned short, 20>{ 1, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 203, 203 },
-	std::array<unsigned short, 20>{ 1, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 203, 203 },
-	std::array<unsigned short, 20>{ 0, 0, 0, 1, 1, 1, 1, 100, 101, 102, 103, 200, 200, 200, 201, 201, 201, 202, 202, 202 },
-	std::array<unsigned short, 20>{ 1, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 203, 203 },
-	std::array<unsigned short, 20>{ 0, 0, 1, 1, 100, 100, 101, 101, 102, 102, 103, 200, 200, 200, 201, 201, 201, 202, 202, 202 },
-	std::array<unsigned short, 20>{ 0, 0, 0, 1, 1, 1, 1, 100, 101, 102, 103, 200, 200, 200, 202, 202, 202, 206, 206, 206 },
-	std::array<unsigned short, 20>{ 0, 0, 1, 1, 1, 1, 100, 100, 101, 102, 103, 200, 200, 200, 201, 201, 201, 205, 205, 205 },
-	std::array<unsigned short, 20>{ 1, 1, 1, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 202, 202, 202, 205, 205, 205 },
-	std::array<unsigned short, 20>{ 0, 0, 0, 1, 1, 1, 1, 100, 101, 102, 103, 200, 200, 200, 201, 201, 201, 202, 202, 202 },
-	std::array<unsigned short, 20>{ 0, 0, 0, 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 201, 201, 201, 202, 202, 202 },
-	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 201, 203, 203, 203, 203 },
-	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 201, 202, 202, 202, 202 },
-	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 202, 202, 202, 202, 204, 204, 204, 204 },
-	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 203, 203, 203, 203, 213, 213, 213, 213 },
-	std::array<unsigned short, 20>{ 100, 100, 101, 101, 102, 102, 103, 103, 200, 200, 200, 200, 201, 201, 201, 201, 204, 204, 204, 204 }
-};
+std::map<unsigned, std::vector<unsigned short>> characterSpellCards;
+std::map<unsigned, std::array<unsigned short, 20>> defaultDecks;
 std::map<unsigned, std::string> names{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
 	{ SokuLib::CHARACTER_MARISA, "marisa" },
@@ -296,7 +254,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 		return;
 	}
 	if (id == bases.size())
-		return generateFakeDeck(chr, lastChr, &defaultDecks[chr % 20], buffer);
+		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
 	if (id == bases.size() + 1)
 		return generateFakeDeck(chr, lastChr, nullptr, buffer);
 	if (id == bases.size() + 2)
@@ -648,8 +606,7 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 			else
 				deck.name = elem["name"];
 			memcpy(deck.cards.data(), elem["cards"].get<std::vector<unsigned short>>().data(), sizeof(*deck.cards.data()) * deck.cards.size());
-			if (index < 20)
-				sanitizeDeck(static_cast<SokuLib::Character>(index), deck);
+			//sanitizeDeck(static_cast<SokuLib::Character>(index), deck);
 			std::sort(deck.cards.begin(), deck.cards.end());
 			map[index].push_back(deck);
 		}
@@ -742,9 +699,6 @@ static int weirdRand(int key, int delay)
 static void initFont() {
 	SokuLib::FontDescription desc;
 
-	if (fontLoaded)
-		return;
-	fontLoaded = true;
 	desc.r1 = 255;
 	desc.r2 = 255;
 	desc.g1 = 255;
@@ -856,7 +810,7 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 	if (select == decks.size()) {
 		name = "Default deck";
 		deck.resize(20, 21);
-		memcpy(deck.data(), defaultDecks[chr % 20].data(), 40);
+		memcpy(deck.data(), defaultDecks[chr].data(), 40);
 	} else if (select == decks.size() + 1) {
 		name = "No deck";
 		deck.resize(0);
@@ -927,8 +881,6 @@ static int counter = 0;
 
 int renderingCommon(int ret)
 {
-	initFont();
-
 	std::string name;
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
@@ -997,9 +949,6 @@ static void loadCardAssets()
 	char buffer[128];
 	DrawUtils::Texture tmp;
 
-	if (assetsLoaded)
-		return;
-	assetsLoaded = true;
 	puts("Loading card assets");
 	for (int i = 0; i <= 20; i++) {
 		sprintf(buffer, "data/card/common/card%03i.bmp", i);
@@ -1013,12 +962,12 @@ static void loadCardAssets()
 			sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), 99 + i);
 			loadTexture(cardsTextures[j][99 + i], buffer);
 		}
-		if (j < characterSpellCards.size())
-			for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
-				sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
-				loadTexture(cardsTextures[j][card], buffer);
-			}
-		else
+		//if (j < characterSpellCards.size())
+		//	for (auto &card : characterSpellCards.at(static_cast<SokuLib::Character>(j))) {
+		//		sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
+		//		loadTexture(cardsTextures[j][card], buffer);
+		//	}
+		//else
 			for (unsigned short card = 200; card < 220; card++) {
 				sprintf(buffer, "data/card/%s/card%03i.bmp", names[j].c_str(), card);
 				loadTexture(cardsTextures[j][card], buffer, false);
@@ -1488,11 +1437,62 @@ void copyBoxUpdate(SokuLib::KeyManager *keys)
 		auto menu = SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>();
 
 		editedDecks.back().name = "Deck #" + std::to_string(editedDecks.size());
-		loadDeckToGame(SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>(), copyBoxSelectedItem == editedDecks.size() - 1 ? defaultDecks[menu->editedCharacter % 20] : editedDecks[copyBoxSelectedItem].cards);
+		loadDeckToGame(SokuLib::getMenuObj<SokuLib::ProfileDeckEdit>(), copyBoxSelectedItem == editedDecks.size() - 1 ? defaultDecks[menu->editedCharacter] : editedDecks[copyBoxSelectedItem].cards);
 		editedDecks.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 		copyBoxDisplayed = false;
 		openRenameBox(menu);
 	}
+}
+
+static void loadDefaultDecks()
+{
+	char buffer[] = "data/csv/000000000000/deck.csv";
+
+	for (auto [id, name] : names) {
+		sprintf(buffer, "data/csv/%s/deck.csv", name.c_str());
+		printf("Loading default deck %s\n", buffer);
+
+		SokuLib::CSVParser parser{buffer};
+		std::array<unsigned short, 20> deck;
+
+		for (int i = 0; i < 20; i++) {
+			auto str = parser.getNextCell();
+
+			try {
+				deck[i] = std::stoul(str);
+			} catch (std::exception &e) {
+				MessageBoxA(
+					SokuLib::window,
+					"Loading default deck failed",
+					(
+						"Fatal error: Cannot load default deck for " + name + ":\n" +
+						"In file " + buffer + ": Cannot parse cell " + std::to_string(i) +
+						" \"" + str + "\": " + e.what()
+					).c_str(),
+					MB_ICONERROR
+				);
+				abort();
+			}
+		}
+		std::sort(deck.begin(), deck.end());
+		defaultDecks[id] = deck;
+	}
+}
+
+static void loadAllCards()
+{
+
+}
+
+static void initAssets()
+{
+	if (assetsLoaded)
+		return;
+	assetsLoaded = true;
+	loadCardAssets();
+	loadDefaultDecks();
+	loadAllCards();
+	initFont();
 }
 
 //0041e644
@@ -1500,8 +1500,7 @@ SokuLib::SelectServer *__fastcall CSelectSV_Init(SokuLib::SelectServer *This)
 {
 	auto ret = (This->*og_CSelectSV_Init)();
 
-	loadCardAssets();
-	initFont();
+	initAssets();
 	return ret;
 }
 
@@ -1510,8 +1509,7 @@ SokuLib::SelectClient *__fastcall CSelectCL_Init(SokuLib::SelectClient *This)
 {
 	auto ret = (This->*og_CSelectCL_Init)();
 
-	loadCardAssets();
-	initFont();
+	initAssets();
 	return ret;
 }
 
@@ -1520,8 +1518,7 @@ SokuLib::Select *__fastcall CSelect_Init_0041e55f(SokuLib::Select *This)
 {
 	auto ret = (This->*og_CSelect_Init_0041e55f)();
 
-	loadCardAssets();
-	initFont();
+	initAssets();
 	return ret;
 }
 
@@ -1530,8 +1527,7 @@ SokuLib::Select *__fastcall CSelect_Init_0041e263(SokuLib::Select *This)
 {
 	auto ret = (This->*og_CSelect_Init_0041e263)();
 
-	loadCardAssets();
-	initFont();
+	initAssets();
 	return ret;
 }
 
@@ -1540,8 +1536,7 @@ SokuLib::Select *__fastcall CSelect_Init_0041e2c3(SokuLib::Select *This)
 {
 	auto ret = (This->*og_CSelect_Init_0041e2c3)();
 
-	loadCardAssets();
-	initFont();
+	initAssets();
 	return ret;
 }
 
@@ -1549,8 +1544,7 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckE
 {
 	auto ret = (This->*og_CProfileDeckEdit_Init)(param_2, param_3, param_4);
 
-	loadCardAssets();
-	initFont();
+	initAssets();
 	if (profileSelectReady)
 		return ret;
 	profileSelectReady = true;
