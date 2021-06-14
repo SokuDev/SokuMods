@@ -524,6 +524,7 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 				packet->game.event.input.inputs[0].charSelect.right = false;
 			else {
 				packet->game.event.input.inputs[0].charSelect.right = pickedRandomCounter < 10;
+				packet->game.event.input.inputs[0].charSelect.Z = false;
 				pickedRandomCounter--;
 			}
 
@@ -1120,7 +1121,7 @@ static int selectProcessCommon(int v)
 		}
 		printf("Picked %srandom deck\n", pickedRandom ? "" : "not ");
 		if (pickedRandom)
-			pickedRandomCounter = 10;
+			pickedRandomCounter = 15;
 		generateFakeDecks();
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
 			fillSokuDeck(SokuLib::leftPlayerInfo.effectiveDeck, fakeLeftDeck);
@@ -1157,6 +1158,9 @@ static void handleInput(const SokuLib::KeyInput &inputs, int index)
 	bool isRight = index == 1;
 	auto &selectedDeck = (isRight ? downSelectedDeck : upSelectedDeck);
 	auto &decks = loadedDecks[index][isRight ? SokuLib::rightChar : SokuLib::leftChar];
+
+	if (pickedRandomCounter != 0 && (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT))
+		return;
 
 	if (inputs.horizontalAxis < 0) {
 		if (selectedDeck == 0)
