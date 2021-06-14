@@ -35,6 +35,7 @@ static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnProcess)();
 static int (SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_OnRender)();
 static void (*s_originalDrawGradiantBar)(float param1, float param2, float param3);
 static int (__stdcall *realSendTo)(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen);
+static BOOL (__stdcall *realMoveFileA)(LPCSTR lpExistingFileName, LPCSTR lpNewFileName);
 static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e55f)();
 static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e263)();
 static SokuLib::Select *(SokuLib::Select::*og_CSelect_Init_0041e2c3)();
@@ -1756,6 +1757,34 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Destructor(SokuLib::Profil
 	return (This->*s_originalCProfileDeckEdit_Destructor)(param);
 }
 
+BOOL __stdcall myMoveFileA(LPCSTR lpExistingFileName, LPCSTR lpNewFileName)
+{
+	auto len = strlen(lpExistingFileName);
+
+	printf("%s -> %s\n", lpExistingFileName, lpNewFileName);
+	if (
+		strncmp(lpExistingFileName, "profile/", strlen("profile/")) == 0 &&
+		len >= 3 && strcmp(&lpExistingFileName[len - strlen(".pf")], ".pf") == 0
+	) {
+		auto jsonExistingFileName = new char[strlen(lpExistingFileName) + 4];
+		auto jsonNewFileName = new char[strlen(lpNewFileName) + 4];
+
+		strcpy(jsonExistingFileName, lpExistingFileName);
+		strcpy(jsonNewFileName, lpNewFileName);
+		strcpy(&jsonExistingFileName[len - strlen(".pf")], ".json");
+		strcpy(&jsonNewFileName[strlen(lpNewFileName) - strlen(".pf")], ".json");
+		printf("We need to do stuff %s -> %s\n", jsonExistingFileName, jsonNewFileName);
+		if (!realMoveFileA(jsonExistingFileName, jsonNewFileName) && GetLastError() != ERROR_FILE_NOT_FOUND)
+			return FALSE;
+		if (!realMoveFileA(lpExistingFileName, lpNewFileName)) {
+			realMoveFileA(jsonNewFileName, jsonExistingFileName);
+			return FALSE;
+		}
+		return TRUE;
+	}
+	return realMoveFileA(lpExistingFileName, lpNewFileName);
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(hash, SokuLib::targetHash, 16) == 0;
 }
@@ -1791,6 +1820,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	s_originalCProfileDeckEdit_OnRender  = SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onRender, CProfileDeckEdit_OnRender);
 	s_originalCProfileDeckEdit_Destructor= SokuLib::TamperDword(&SokuLib::VTable_ProfileDeckEdit.onDestruct, CProfileDeckEdit_Destructor);
 	realSendTo = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.sendto, &mySendTo);
+	realMoveFileA = SokuLib::TamperDword(&SokuLib::DLL::kernel32.MoveFileA, &myMoveFileA);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
