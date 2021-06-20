@@ -726,7 +726,7 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 	}
 	if (index == 2)
 		for (auto &elem : map)
-				elem.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+			elem.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	return true;
 }
 
