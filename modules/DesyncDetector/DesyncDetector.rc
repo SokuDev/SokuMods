@@ -1,0 +1,8 @@
+4 RCDATA "assets/noBg.png"
+8 RCDATA "assets/gear.png"
+12 RCDATA "assets/gearShadow.png"
+16 RCDATA "assets/noCenter.png"
+20 RCDATA "assets/noCenterShadow.png"
+24 RCDATA "assets/desyncBgGray.png"
+28 RCDATA "assets/desyncBgRed.png"
+32 RCDATA "assets/desyncBgBlue.png"

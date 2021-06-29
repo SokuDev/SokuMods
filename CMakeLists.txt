@@ -205,6 +205,24 @@ target_link_libraries(Blacklist SokuLib shlwapi ws2_32)
 module(CharactersInForeground)
 target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/CharactersInForeground.cpp)
 
+module(DesyncDetector Default)
+target_sources(
+        "DesyncDetector" PRIVATE
+        modules/DesyncDetector/DesyncDetector.rc
+        modules/DesyncDetector/main.cpp
+        modules/DesyncDetector/DrawUtils.hpp
+        modules/DesyncDetector/DrawUtils.cpp
+)
+target_link_libraries(
+        DesyncDetector
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+
 # DiscordIntegration main module
 set(DISCORD_CLIENT_ID "771968286199382056" CACHE STRING "DiscordIntegration mod Discord client ID")
 module(DiscordIntegration Default)
