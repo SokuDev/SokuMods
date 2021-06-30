@@ -40,7 +40,7 @@ namespace Practice
 		{"yukari", {200, 201, 202, 203, 204, 205, 206, 207, 208, 215}},
 		{"yuyuko", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 219}}
 	};
-	void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &);
+	void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &);
 	static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 	static const unsigned char patchCode[] = {
 		0x31, 0xED,                  //xor ebp, ebp
@@ -54,7 +54,7 @@ namespace Practice
 		Practice::handleInput(*This);
 	}
 
-	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<short> &newDeck)
+	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &deck, int param4, SokuLib::Dequeue<short> &newDeck)
 	{
 		bool isPatchy = strcmp(charName, "patchouli") == 0;
 		int number = (4 + isPatchy) * 3;

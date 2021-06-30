@@ -12,21 +12,14 @@
 #include "Gui.hpp"
 #include "Network.hpp"
 
-struct Title {};
-struct Select {};
-struct SelectSV {};
-struct SelectCL {};
-struct Loading {};
-struct LoadingSV {};
-struct LoadingCL {};
 static int (__stdcall *original_recvfrom)(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen);
 static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Process)();
-static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
-static int (__thiscall Loading::*s_origCLoading_Process)();
-static int (__thiscall SelectSV::*s_origCSelectSV_Process)();
-static int (__thiscall SelectCL::*s_origCSelectCL_Process)();
-static int (__thiscall Select::*s_origCSelect_Process)();
-static int (__thiscall Title::*s_origCTitle_Process)();
+static void (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
+static int (__thiscall SokuLib::Loading::*s_origCLoading_Process)();
+static int (__thiscall SokuLib::SelectServer::*s_origCSelectSV_Process)();
+static int (__thiscall SokuLib::SelectClient::*s_origCSelectCL_Process)();
+static int (__thiscall SokuLib::Select::*s_origCSelect_Process)();
+static int (__thiscall SokuLib::Title::*s_origCTitle_Process)();
 float frameCounter = 0;
 
 
@@ -59,7 +52,7 @@ void networkSelectCommon()
 	}
 }
 
-int __fastcall CTitle_OnProcess(Title *This)
+int __fastcall CTitle_OnProcess(SokuLib::Title *This)
 {
 	Practice::deactivate();
 
@@ -68,7 +61,7 @@ int __fastcall CTitle_OnProcess(Title *This)
 	return (This->*s_origCTitle_Process)();
 }
 
-int __fastcall CSelect_OnProcess(Select *This)
+int __fastcall CSelect_OnProcess(SokuLib::Select *This)
 {
 	Practice::deactivate();
 
@@ -76,7 +69,7 @@ int __fastcall CSelect_OnProcess(Select *This)
 	return (This->*s_origCSelect_Process)();
 }
 
-int __fastcall CSelectCL_OnProcess(SelectCL *This)
+int __fastcall CSelectCL_OnProcess(SokuLib::SelectClient *This)
 {
 	Practice::deactivate();
 #ifdef APMNET
@@ -87,7 +80,7 @@ int __fastcall CSelectCL_OnProcess(SelectCL *This)
 	return (This->*s_origCSelectCL_Process)();
 }
 
-int __fastcall CSelectSV_OnProcess(SelectSV *This)
+int __fastcall CSelectSV_OnProcess(SokuLib::SelectServer *This)
 {
 	Practice::deactivate();
 #ifdef APMNET
@@ -98,7 +91,7 @@ int __fastcall CSelectSV_OnProcess(SelectSV *This)
 	return (This->*s_origCSelectSV_Process)();
 }
 
-int __fastcall CLoading_OnProcess(Loading *This)
+int __fastcall CLoading_OnProcess(SokuLib::Loading *This)
 {
 	Practice::deactivate();
 
@@ -106,14 +99,13 @@ int __fastcall CLoading_OnProcess(Loading *This)
 	return (This->*s_origCLoading_Process)();
 }
 
-int __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
+void __fastcall CBattleManager_Render(SokuLib::BattleManager *This)
 {
 	// super
-	int ret = (This->*s_origCBattleManager_Render)();
+	(This->*s_origCBattleManager_Render)();
 
 	if (Practice::sfmlWindow)
 		Practice::render();
-	return ret;
 }
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
@@ -168,48 +160,13 @@ void hookFunctions()
 
 	//Setup hooks
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCTitle_Process = SokuLib::union_cast<int (Title::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CTitle + SokuLib::OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CTitle_OnProcess)
-		)
-	);
-	s_origCSelect_Process = SokuLib::union_cast<int (Select::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CSelect + SokuLib::OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CSelect_OnProcess)
-		)
-	);
-	s_origCSelectSV_Process = SokuLib::union_cast<int (SelectSV::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CSelectSV + SokuLib::OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CSelectSV_OnProcess)
-		)
-	);
-	s_origCSelectCL_Process = SokuLib::union_cast<int (SelectCL::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CSelectCL + SokuLib::OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CSelectCL_OnProcess)
-		)
-	);
-	s_origCLoading_Process = SokuLib::union_cast<int (Loading::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CLoading + SokuLib::OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CLoading_OnProcess)
-		)
-	);
-	s_origCBattleManager_Process = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_PROCESS,
-			reinterpret_cast<DWORD>(CBattleManager_OnProcess)
-		)
-	);
-	s_origCBattleManager_Render = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(
-			SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_RENDER,
-			reinterpret_cast<DWORD>(CBattleManager_Render)
-		)
-	);
+	s_origCTitle_Process = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess, CTitle_OnProcess);
+	s_origCSelect_Process = SokuLib::TamperDword(&SokuLib::VTable_Select.onProcess, CSelect_OnProcess);
+	s_origCSelectSV_Process = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, CSelectSV_OnProcess);
+	s_origCSelectCL_Process = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, CSelectCL_OnProcess);
+	s_origCLoading_Process = SokuLib::TamperDword(&SokuLib::VTable_Loading.onProcess, CLoading_OnProcess);
+	s_origCBattleManager_Process = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, CBattleManager_OnProcess);
+	s_origCBattleManager_Render = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender, CBattleManager_Render);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 #ifdef APMNET
@@ -220,7 +177,7 @@ void hookFunctions()
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	int newOffset = reinterpret_cast<int>(Practice::loadDeckData) - PAYLOAD_NEXT_INSTR_DECK_INFOS;
-	Practice::s_origLoadDeckData = SokuLib::union_cast<void (__stdcall *)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &)>(*(int *)PAYLOAD_ADDRESS_DECK_INFOS + PAYLOAD_NEXT_INSTR_DECK_INFOS);
+	Practice::s_origLoadDeckData = SokuLib::union_cast<void (__stdcall *)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &)>(*(int *)PAYLOAD_ADDRESS_DECK_INFOS + PAYLOAD_NEXT_INSTR_DECK_INFOS);
 	*(int *)PAYLOAD_ADDRESS_DECK_INFOS = newOffset;
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 

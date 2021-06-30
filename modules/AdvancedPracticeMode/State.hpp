@@ -183,9 +183,9 @@ namespace Practice
 	extern char profileParent[1024 + MAX_PATH];
 	extern SokuLib::KeyInput lastPlayerInputs;
 	extern Settings settings;
-	extern void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::deckInfo &, int, SokuLib::mVC9Dequeue<short> &);
+	extern void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &);
 
-	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::deckInfo &deck, int param4, SokuLib::mVC9Dequeue<short> &newDeck);
+	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &deck, int param4, SokuLib::Dequeue<short> &newDeck);
 	void activate();
 	void deactivate();
 	void placeHooks();

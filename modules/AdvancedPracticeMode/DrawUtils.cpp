@@ -51,6 +51,23 @@ namespace Practice
 		return *this;
 	}
 
+	DxSokuColor DxSokuColor::operator*(const DxSokuColor &other) const
+	{
+		DxSokuColor result = *this;
+
+		result *= other;
+		return result;
+	}
+
+	DxSokuColor &DxSokuColor::operator*=(const DxSokuColor &other)
+	{
+		this->a = std::ceil((other.a * this->a) / 255.f);
+		this->r = std::ceil((other.r * this->r) / 255.f);
+		this->g = std::ceil((other.g * this->g) / 255.f);
+		this->b = std::ceil((other.b * this->b) / 255.f);
+		return *this;
+	}
+
 	const DxSokuColor DxSokuColor::White      {0xFF, 0xFF, 0xFF, 0xFF};
 	const DxSokuColor DxSokuColor::Red        {0xFF, 0x00, 0x00, 0xFF};
 	const DxSokuColor DxSokuColor::Blue       {0x00, 0x00, 0xFF, 0xFF};
@@ -107,7 +124,7 @@ namespace Practice
 
 	void Texture::destroy()
 	{
-		if (this->_loaded)
+		if (this->_loaded && SokuLib::pd3dDev)
 			SokuLib::textureMgr.remove(this->_handle);
 		this->_loaded = false;
 	}
@@ -158,7 +175,7 @@ namespace Practice
 			SokuLib::textureMgr.deallocate(handle);
 			return false;
 		}
-		printf("Texture handle: %i, Size: %ux%u\n", handle, info.Width, info.Height);
+		printf("Texture handle: %x, Size: %ux%u\n", handle, info.Width, info.Height);
 		buffer.setHandle(handle, {info.Width, info.Height});
 		return true;
 	}
@@ -297,7 +314,7 @@ namespace Practice
 			vertexs[i] = this->_vertex[i];
 			vertexs[i].x -= 0.5;
 			vertexs[i].y -= 0.5;
-			vertexs[i].color = this->tint;
+			vertexs[i].color = this->fillColors[i] * this->tint;
 		}
 
 		auto size = this->texture.getSize();

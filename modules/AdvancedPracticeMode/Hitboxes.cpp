@@ -12,30 +12,57 @@
 namespace Practice
 {
 #define BOXES_ALPHA 0.5
-#define GRAZE_SPRITE_OFF          {0,   0}
-#define HJC_SPRITE_OFF            {32,  0}
-#define GRAB_INVUL_SPRITE_OFF     {64,  0}
-#define PROJ_INVUL_SPRITE_OFF     {96,  0}
-#define MELEE_INVUL_SPRITE_OFF    {128, 0}
-#define CAN_BLOCK_SPRITE_OFF      {160, 0}
-#define SUPERARMOR_SPRITE_OFF     {192, 0}
-#define GRAZABLE_SPRITE_OFF       {0,   32}
-#define AUB_SPRITE_OFF            {32,  32}
-#define UNBLOCKABLE_SPRITE_OFF    {64,  32}
-#define GRAB_SPRITE_OFF           {96,  32}
-#define MILLENIUM_SPRITE_OFF      {128, 32}
-#define DROP_SPRITE_OFF           {160, 32}
-#define HEALTH_SPRITE_OFF         {192, 32}
-#define FANTASY_HEAVEN_SPRITE_OFF {224, 0}
-#define PHILOSOPHERS_STONE_OFF    {224, 32}
-#define TIME_SPRITE_OFF           {256, 0}
-#define CLONES_SPRITE_OFF         {256, 32}
-#define HEALING_CHARM_SPRITE_OFF  {288, 0}
-#define STOP_WATCH_SPRITE_OFF     {288, 32}
-#define MAGIC_POTION_SPRITE_OFF   {320, 0}
-#define TIME_STOP_SPRITE_OFF      {320, 32}
-#define _SPRITE_OFF           {352, 0}
-#define _SPRITE_OFF           {352, 32}
+
+	enum SpriteOffsets {
+		GRAZE_SPRITE_OFF,
+		GRAZABLE_SPRITE_OFF,
+		HJC_SPRITE_OFF,
+		AUB_SPRITE_OFF,
+		GRAB_INVUL_SPRITE_OFF,
+		UNBLOCKABLE_SPRITE_OFF,
+		PROJ_INVUL_SPRITE_OFF,
+		GRAB_SPRITE_OFF,
+		MELEE_INVUL_SPRITE_OFF,
+		MILLENIUM_SPRITE_OFF,
+		CAN_BLOCK_SPRITE_OFF,
+		DROP_SPRITE_OFF,
+		SUPERARMOR_SPRITE_OFF,
+		HEALTH_SPRITE_OFF,
+		FANTASY_HEAVEN_SPRITE_OFF,
+		PHILOSOPHERS_STONE_OFF,
+		TIME_SPRITE_OFF,
+		CLONES_SPRITE_OFF,
+		HEALING_CHARM_SPRITE_OFF,
+		STOP_WATCH_SPRITE_OFF,
+		MAGIC_POTION_SPRITE_OFF,
+		TIME_STOP_SPRITE_OFF,
+		S_TIER_DENSITY_SPRITE_OFF,
+		A_TIER_DENSITY_SPRITE_OFF,
+		B_TIER_DENSITY_SPRITE_OFF,
+		C_TIER_DENSITY_SPRITE_OFF,
+		TIGER_RELEASE_SPRITE_OFF,
+		GIANT_SUIKA_SPRITE_OFF,
+		FUTURISTIC_DOLL_SPRITE_OFF,
+		AYA_SPEED_BOOST_SPRITE_OFF,
+		CIRNO_ICE_SPRITE_OFF,
+		CONFUSED_DEBUFF_SPRITE_OFF,
+		IKU_HANGEKI_SPRITE_OFF,
+		IKU_STICKLE_SPRITE_OFF,
+		IKU_VEIL_SPRITE_OFF,
+		ORERRIES_SPRITE_OFF,
+		PARASOL_SPRITE_OFF,
+		PARRY_SPRITE_OFF,
+		GREEN_LIGHT_SPRITE_OFF,
+		FARSIGHT_SPRITE_OFF,
+		REISEN_GAS_SPRITE_OFF,
+		ULTRARED_FIELD_SPRITE_OFF,
+		ULTRAVIOLET_FIELD_SPRITE_OFF,
+		XWAVE_SPRITE_OFF,
+		CHAIN_DEBUFF_SPRITE_OFF,
+		ROCK_HARD_SPRITE_OFF,
+		WEATHER_DEBUFF_SPRITE_OFF,
+		TOKAMAK_SPRITE_OFF
+	};
 
 	struct MaxAttributes {
 		unsigned short drop;
@@ -149,17 +176,18 @@ namespace Practice
 			drawBox(manager.hitBoxes[i], manager.hitBoxesRotation[i], DxSokuColor::Red, DxSokuColor::Red * BOXES_ALPHA);
 	}
 
-	static void displayPlayerFrameFlag(Vector2<int> textureOffset, Vector2<int> &barPos, bool reverse)
+	static void displayPlayerFrameFlag(SpriteOffsets textureOffset, Vector2<int> &barPos, bool reverse)
 	{
+		auto size = static_cast<int>(std::ceil(flagsSprite.texture.getSize().x / 32.f));
+
+		flagsSprite.rect.left = textureOffset % size * 32;
+		flagsSprite.rect.top = textureOffset / size * 32;
 		if (reverse) {
 			barPos.x -= 32;
 			flagsSprite.rect.width = -32;
-			flagsSprite.rect.left = textureOffset.x + 32;
-		} else {
+			flagsSprite.rect.left += 32;
+		} else
 			flagsSprite.rect.width = 32;
-			flagsSprite.rect.left = textureOffset.x;
-		}
-		flagsSprite.rect.top = textureOffset.y;
 		rectangle.setPosition(barPos);
 		rectangle.setSize({32, 32});
 		rectangle.setBorderColor(DxSokuColor::Transparent);
@@ -172,7 +200,7 @@ namespace Practice
 			barPos.x += 32;
 	}
 
-	static void displayPlayerBar(Vector2<int> textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, bool reverse, DxSokuColor color)
+	static void displayPlayerBar(SpriteOffsets textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, bool reverse, DxSokuColor color)
 	{
 		if (barPos.x != basePos.x || barPos.y != basePos.y) {
 			barPos.x = basePos.x;
@@ -199,13 +227,14 @@ namespace Practice
 		rectangle.draw();
 	}
 
-	static void displayObjectFrameFlag(Vector2<int> textureOffset, Vector2<int> &barPos)
+	static void displayObjectFrameFlag(SpriteOffsets textureOffset, Vector2<int> &barPos)
 	{
 		auto scaled = 32 * SokuLib::camera.scale;
+		auto size = static_cast<int>(std::ceil(flagsSprite.texture.getSize().x / 32.f));
 
+		flagsSprite.rect.left = textureOffset % size * 32;
+		flagsSprite.rect.top = textureOffset / size * 32;
 		flagsSprite.rect.width = 32;
-		flagsSprite.rect.left = textureOffset.x;
-		flagsSprite.rect.top = textureOffset.y;
 		rectangle.setPosition(barPos);
 		rectangle.setSize({
 			static_cast<unsigned int>(scaled),
@@ -223,7 +252,7 @@ namespace Practice
 		barPos.x += scaled;
 	}
 
-	static void displayObjectBar(Vector2<int> textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, DxSokuColor color)
+	static void displayObjectBar(SpriteOffsets textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, DxSokuColor color)
 	{
 		if (barPos.x != basePos.x || barPos.y != basePos.y) {
 			barPos.x = basePos.x;
