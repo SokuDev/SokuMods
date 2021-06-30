@@ -27,9 +27,10 @@ namespace Practice
 	extern std::map<SokuLib::Action, unsigned char> hitStun;
 	extern std::map<SokuLib::Action, unsigned char> blockStun;
 
-	std::optional<int> getFrameAdvantage(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state);
+	std::unique_ptr<int> getFrameAdvantage(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state);
 	void displayFrameStuff();
 	void updatedFrameStuff();
+	void initGap(LPCSTR profilePath);
 }
 
 

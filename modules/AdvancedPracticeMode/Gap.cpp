@@ -34,17 +34,10 @@ namespace Practice
 		int gap;
 
 		GapElem() = default;
-		//GapElem(GapElem &other) :
-		//	timer(other.timer),
-		//	gap(other.gap)
-		//{
-		//	this->sprite.texture.swap(other.sprite.texture);
-		//}
 		GapElem(int timer, int gap): timer(timer), gap(gap) {};
 	};
-	static bool loaded = false;
 	static SokuLib::SWRFont font;
-	static RectangleShape rect;
+	static Sprite backBox;
 	static RectangleShape bar;
 	static std::pair<int, int> fas;
 	static BlockingState left;
@@ -104,11 +97,11 @@ namespace Practice
 		);
 	}
 
-	std::optional<int> getFrameAdvantage(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state)
+	std::unique_ptr<int> getFrameAdvantage(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state)
 	{
 		bool attacking = isAttacking(attacker);
 		bool blocking = isBlocking(blocker);
-		std::optional<int> val;
+		std::unique_ptr<int> val;
 
 		if (blocking && attacking) {
 			state.started = true;
@@ -116,7 +109,7 @@ namespace Practice
 		}
 		if (!blocking && !attacking && state.started) {
 			state.started = false;
-			val = state.wasBlocking ? state.timer : -state.timer;
+			val.reset(state.wasBlocking ? new int(state.timer) : new int(-state.timer));
 		}
 		if (!attacking || !blocking)
 			state.timer++;
@@ -134,13 +127,13 @@ namespace Practice
 		return it->second - 1 <= manager.objectBase.frameCount;
 	}
 
-	std::optional<int> getGap(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state)
+	std::unique_ptr<int> getGap(const SokuLib::CharacterManager &attacker, const SokuLib::CharacterManager &blocker, BlockingState &state)
 	{
-		std::optional<int> val;
+		std::unique_ptr<int> val;
 
 		if (state.wasBlocking) {
 			if (state.gapCounter >= 0 && state.gapCounter <= 30)
-				val = state.gapCounter;
+				val.reset(new int(state.gapCounter));
 			state.gapCounter = -1;
 		}
 		if (!state.wasBlocking || canMash(blocker))
@@ -148,14 +141,17 @@ namespace Practice
 		return val;
 	}
 
-	static void initFont()
+	void initGap(LPCSTR profilePath)
 	{
 		SokuLib::FontDescription desc;
 
-		if (loaded)
-			return;
-		rect.setSize({102, 18});
-		loaded = true;
+		Texture::loadFromFile(backBox.texture, (std::string(profilePath) + "/assets/infoBar.png").c_str());
+		backBox.setSize({102, 18});
+		backBox.rect.width = backBox.texture.getSize().x;
+		backBox.rect.height = backBox.texture.getSize().y;
+		backBox.rect.top = 0;
+		backBox.rect.left = 0;
+
 		desc.r1 = 205;
 		desc.r2 = 205;
 		desc.g1 = 205;
@@ -185,10 +181,8 @@ namespace Practice
 		if (alpha == 0)
 			return;
 
-		rect.setBorderColor(DxSokuColor::Black * alpha);
-		rect.setFillColor((DxSokuColor::Black + DxSokuColor::White) * alpha);
-		rect.setPosition({x, y});
-		rect.draw();
+		backBox.setPosition({x, y});
+		backBox.draw();
 
 		sprintf(buffer, fmt, v);
 		if (!SokuLib::textureMgr.createTextTexture(&text, buffer, font, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
@@ -197,7 +191,7 @@ namespace Practice
 			return;
 		}
 
-		sprite.setPosition({x, y});
+		sprite.setPosition({x + 2, y});
 		sprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
 		sprite.setSize({TEXTURE_SIZE, FONT_HEIGHT + 18});
 		sprite.rect = {
@@ -369,9 +363,8 @@ namespace Practice
 		auto dadv = getFrameAdvantage(battle.rightCharacterManager, battle.leftCharacterManager, right);
 		auto pgap = getGap(battle.leftCharacterManager, battle.rightCharacterManager, left);
 		auto dgap = getGap(battle.rightCharacterManager, battle.leftCharacterManager, right);
-		char buffer[30];
+//		char buffer[30];
 
-		initFont();
 		if (padv) {
 			timers.first = 0;
 			fas.first = *padv;

@@ -301,6 +301,8 @@ namespace Practice
 	static RectangleShape rectangle;
 	static Sprite flagsSprite;
 	static Sprite borderSprite;
+	static Sprite iconBgSprite;
+	static Sprite iconCoverSprite;
 	static std::unique_ptr<BorderedBar> healthBorder;
 	static std::unique_ptr<BorderedBar> installBorder;
 	static std::pair<MaxAttributes, MaxAttributes> allMaxAttributes;
@@ -316,6 +318,21 @@ namespace Practice
 		Texture::loadFromFile(flagsSprite.texture, (profile + "flags.png").c_str());
 		flagsSprite.setSize({32, 32});
 		flagsSprite.rect.height = 32;
+
+		Texture::loadFromFile(iconBgSprite.texture, (profile + "iconBg.png").c_str());
+		iconBgSprite.setSize({40, 40});
+		iconBgSprite.rect.width = 40;
+		iconBgSprite.rect.height = 40;
+		iconBgSprite.rect.top = 0;
+		iconBgSprite.rect.left = 0;
+
+		Texture::loadFromFile(iconCoverSprite.texture, (profile + "iconCover.png").c_str());
+		iconCoverSprite.setSize({40, 40});
+		iconCoverSprite.rect.width = 40;
+		iconCoverSprite.rect.height = 40;
+		iconCoverSprite.rect.top = 0;
+		iconCoverSprite.rect.left = 0;
+		//iconCoverSprite.tint = DxSokuColor::Transparent;
 
 		Texture::loadFromFile(borderSprite.texture, (profile + "borders.png").c_str());
 		profile += "borders.ini";
@@ -424,23 +441,36 @@ namespace Practice
 			flagsSprite.rect.left += 32;
 		} else
 			flagsSprite.rect.width = 32;
-		rectangle.setPosition(barPos);
-		rectangle.setSize({32, 32});
-		rectangle.setBorderColor(DxSokuColor::Transparent);
-		rectangle.setFillColor(DxSokuColor::White * 0.5);
-		rectangle.draw();
+
+		auto bgPos = barPos;
+
+		bgPos.x -= 4;
+		bgPos.y -= 4;
+		iconBgSprite.setSize({40, 40});
+		iconBgSprite.setPosition(bgPos);
+		iconBgSprite.draw();
+
 		flagsSprite.setSize({32, 32});
 		flagsSprite.setPosition(barPos);
 		flagsSprite.draw();
+
+		iconCoverSprite.setSize({40, 40});
+		iconCoverSprite.setPosition(bgPos);
+		iconCoverSprite.draw();
+
 		if (!reverse)
-			barPos.x += 32;
+			barPos.x += 40;
+		else
+			barPos.x -= 8;
 	}
 
 	static void displayPlayerBar(SpriteOffsets textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, bool reverse, DxSokuColor color)
 	{
+		if (value > max)
+			printf("Showing out of bound box %u / %u\n", value, max);
 		if (barPos.x != basePos.x || barPos.y != basePos.y) {
 			barPos.x = basePos.x;
-			barPos.y += 32;
+			barPos.y += 40;
 		}
 		displayPlayerFrameFlag(textureOffset, barPos, reverse);
 
@@ -453,25 +483,36 @@ namespace Practice
 	static void displayObjectFrameFlag(SpriteOffsets textureOffset, Vector2<int> &barPos)
 	{
 		auto scaled = 32 * SokuLib::camera.scale;
+		auto scaled2 = 40 * SokuLib::camera.scale;
 		auto size = static_cast<int>(std::ceil(flagsSprite.texture.getSize().x / 32.f));
 
 		flagsSprite.rect.left = textureOffset % size * 32;
 		flagsSprite.rect.top = textureOffset / size * 32;
 		flagsSprite.rect.width = 32;
-		rectangle.setPosition(barPos);
-		rectangle.setSize({
-			static_cast<unsigned int>(scaled),
-			static_cast<unsigned int>(scaled)
+		auto bgPos = barPos;
+
+		bgPos.x -= 4 * SokuLib::camera.scale;
+		bgPos.y -= 4 * SokuLib::camera.scale;
+		iconBgSprite.setSize({
+			static_cast<unsigned int>(scaled2),
+			static_cast<unsigned int>(scaled2)
 		});
-		rectangle.setBorderColor(DxSokuColor::Transparent);
-		rectangle.setFillColor(DxSokuColor::White * 0.5);
-		rectangle.draw();
+		iconBgSprite.setPosition(bgPos);
+		iconBgSprite.draw();
+
 		flagsSprite.setSize({
 			static_cast<unsigned int>(scaled),
 			static_cast<unsigned int>(scaled)
-		 });
+		});
 		flagsSprite.setPosition(barPos);
 		flagsSprite.draw();
+
+		iconCoverSprite.setSize({
+			static_cast<unsigned int>(scaled2),
+			static_cast<unsigned int>(scaled2)
+		});
+		iconCoverSprite.setPosition(bgPos);
+		iconCoverSprite.draw();
 		barPos.x += scaled;
 	}
 
@@ -558,7 +599,7 @@ namespace Practice
 			if (superArmorRatio > 0)
 				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, 10000 * superArmorRatio, 10000, reverse, DxSokuColor::Blue);
 			else if (maxSuperArmor)
-				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, maxSuperArmor - manager.objectBase.superarmorDamageTaken, maxSuperArmor, reverse, DxSokuColor::Red);
+				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, max(0, static_cast<int>(maxSuperArmor - manager.objectBase.superarmorDamageTaken)), maxSuperArmor, reverse, DxSokuColor::Red);
 			else
 				displayPlayerFrameFlag(SUPERARMOR_SPRITE_OFF, barPos, reverse);
 		}

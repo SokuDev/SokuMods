@@ -11,6 +11,7 @@
 #include "Inputs.hpp"
 #include "Hitboxes.hpp"
 #include "Dummy.hpp"
+#include "Gap.hpp"
 
 #define mkdir _mkdir
 #define PAYLOAD_ADDRESS_GET_INPUTS 0x40A45E
@@ -149,6 +150,7 @@ namespace Practice
 		puts("Window opened");
 		Practice::initInputDisplay(profileParent);
 		Practice::initBoxDisplay(profileParent);
+		Practice::initGap(profileParent);
 		Practice::init(profileParent);
 		Practice::gui.setTarget(*sfmlWindow);
 		try {
