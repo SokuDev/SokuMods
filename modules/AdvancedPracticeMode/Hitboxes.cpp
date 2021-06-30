@@ -12,6 +12,233 @@
 namespace Practice
 {
 #define BOXES_ALPHA 0.5
+#define CHECK_CONFIG_VAL(var, app, key, path) { \
+	int __ret = GetPrivateProfileInt((app), (key), -1, (path));\
+\
+	if (__ret < 0) {\
+                MessageBox(SokuLib::window, (std::string("File ") + (path) + ": [" + (app) + "]: " + (key) + " either have an a negative value or no value.").c_str(), "Config error", MB_ICONERROR);\
+		abort();\
+        }\
+	(var) = __ret;\
+}
+
+	struct FillerConfig {
+		unsigned short size;
+		unsigned short normalOffset;
+		unsigned short grayedOffset;
+	};
+
+	struct EdgeConfig {
+		unsigned short size;
+		unsigned short offset;
+	};
+
+	struct BarConfig {
+		EdgeConfig fillerStart;
+		FillerConfig filler;
+		EdgeConfig fillerEnd;
+		EdgeConfig borderStart;
+		EdgeConfig border;
+		EdgeConfig borderEnd;
+	};
+
+	class BorderedBar {
+	private:
+		Sprite &_sprite;
+		BarConfig _config;
+
+		void _drawBorder(Vector2<int> pos, Vector2<unsigned> size, bool reversed)
+		{
+			this->_sprite.tint = DxSokuColor::White;
+			this->_sprite.rect.top = 0;
+			this->_sprite.rect.height = this->_sprite.texture.getSize().y;
+
+			if (!reversed) {
+				this->_sprite.setSize({this->_config.borderStart.size, size.y});
+				this->_sprite.setPosition(pos);
+				this->_sprite.rect.left = this->_config.borderStart.offset;
+				this->_sprite.rect.width = this->_config.borderStart.size;
+				this->_sprite.draw();
+
+				pos.x += this->_config.borderStart.size;
+				this->_sprite.setSize({this->_config.border.size, size.y});
+				this->_sprite.rect.left = this->_config.border.offset;
+				this->_sprite.rect.width = this->_config.border.size;
+				while (size.x != 0) {
+					this->_sprite.setPosition(pos);
+					if (size.x < this->_config.border.size) {
+						this->_sprite.setSize(size);
+						this->_sprite.rect.left = this->_config.border.offset;
+						this->_sprite.rect.width = size.x;
+						this->_sprite.draw();
+						break;
+					}
+					size.x -= this->_config.border.size;
+					pos.x += this->_config.border.size;
+					this->_sprite.draw();
+				}
+
+				this->_sprite.setSize({this->_config.borderEnd.size, size.y});
+				this->_sprite.setPosition(pos);
+				this->_sprite.rect.left = this->_config.borderEnd.offset;
+				this->_sprite.rect.width = this->_config.borderEnd.size;
+				this->_sprite.draw();
+				return;
+			}
+
+			pos.x -= this->_config.borderStart.size;
+			pos.x -= this->_config.borderEnd.size;
+			this->_sprite.setSize({this->_config.borderEnd.size, size.y});
+			this->_sprite.setPosition(pos);
+			this->_sprite.rect.left = this->_config.borderEnd.offset + this->_config.borderEnd.size;
+			this->_sprite.rect.width = -this->_config.borderEnd.size;
+			this->_sprite.draw();
+
+			pos.x += this->_config.borderEnd.size;
+			this->_sprite.setSize({this->_config.border.size, size.y});
+			this->_sprite.rect.left = this->_config.border.offset + this->_config.border.size;
+			this->_sprite.rect.width = -this->_config.border.size;
+			while (size.x != 0) {
+				this->_sprite.setPosition(pos);
+				if (size.x < this->_config.border.size) {
+					this->_sprite.setSize(size);
+					this->_sprite.rect.left = this->_config.border.offset + size.x;
+					this->_sprite.rect.width = -size.x;
+					this->_sprite.draw();
+					break;
+				}
+				size.x -= this->_config.border.size;
+				pos.x += this->_config.border.size;
+				this->_sprite.draw();
+			}
+
+			this->_sprite.setSize({this->_config.borderStart.size, size.y});
+			this->_sprite.setPosition(pos);
+			this->_sprite.rect.left = this->_config.borderStart.offset + this->_config.borderStart.size;
+			this->_sprite.rect.width = -this->_config.borderStart.size;
+			this->_sprite.draw();
+		}
+
+		void _drawFiller(Vector2<int> pos, unsigned size, Vector2<unsigned> maxSize, bool reversed, unsigned short offset)
+		{
+			if (reversed) {
+				pos.x -= this->_config.borderEnd.size;
+				pos.x += maxSize.x;
+				this->_sprite.rect.left = this->_config.fillerStart.offset + this->_config.fillerStart.size;
+				if (size <= this->_config.fillerStart.size) {
+					pos.x -= size;
+					this->_sprite.setPosition(pos);
+					this->_sprite.setSize({size, maxSize.y});
+					this->_sprite.rect.width = -size;
+					this->_sprite.draw();
+					return;
+				}
+				pos.x -= this->_config.fillerStart.size;
+				this->_sprite.setPosition(pos);
+				this->_sprite.setSize({this->_config.fillerStart.size, maxSize.y});
+				this->_sprite.rect.width = -this->_config.fillerStart.size;
+				this->_sprite.draw();
+
+				this->_sprite.setSize({this->_config.filler.size, maxSize.y});
+				this->_sprite.rect.left = offset + this->_config.filler.size;
+				this->_sprite.rect.width = -this->_config.filler.size;
+				while (size > this->_config.fillerEnd.size) {
+					if (size < this->_config.fillerEnd.size + this->_config.filler.size) {
+						this->_sprite.setSize({size - this->_config.fillerEnd.size, maxSize.y});
+						this->_sprite.rect.left = this->_config.fillerEnd.offset + size - this->_config.fillerEnd.size;
+						this->_sprite.rect.width = -(size - this->_config.fillerEnd.size);
+						size = this->_config.fillerEnd.size;
+						pos.x -= size - this->_config.fillerEnd.size;
+						this->_sprite.setPosition(pos);
+						this->_sprite.draw();
+						break;
+					}
+					size -= this->_config.filler.size;
+					pos.x -= this->_config.filler.size;
+					this->_sprite.setPosition(pos);
+					this->_sprite.draw();
+				}
+
+				pos.x -= min(this->_config.fillerEnd.size, size);
+				this->_sprite.setSize({min(this->_config.fillerEnd.size, size), maxSize.y});
+				this->_sprite.setPosition(pos);
+				this->_sprite.rect.left = this->_config.fillerEnd.offset - min(this->_config.fillerEnd.size, size);
+				this->_sprite.rect.width = -min(this->_config.fillerEnd.size, size);
+				this->_sprite.draw();
+				return;
+			}
+
+			pos.x += this->_config.borderStart.size;
+			this->_sprite.setPosition(pos);
+			this->_sprite.rect.left = this->_config.fillerStart.offset;
+			if (size <= this->_config.fillerStart.size) {
+				this->_sprite.setSize({size, maxSize.y});
+				this->_sprite.rect.width = size;
+				this->_sprite.draw();
+				return;
+			}
+			this->_sprite.setSize({this->_config.fillerStart.size, maxSize.y});
+			this->_sprite.rect.width = this->_config.fillerStart.size;
+			this->_sprite.draw();
+
+			pos.x += this->_config.fillerStart.size;
+			this->_sprite.setSize({this->_config.filler.size, maxSize.y});
+			this->_sprite.rect.left = offset;
+			this->_sprite.rect.width = this->_config.filler.size;
+			while (size > this->_config.fillerEnd.size) {
+				this->_sprite.setPosition(pos);
+				if (size < this->_config.fillerEnd.size + this->_config.filler.size) {
+					this->_sprite.setSize({size - this->_config.fillerEnd.size, maxSize.y});
+					this->_sprite.rect.left = this->_config.fillerEnd.offset;
+					this->_sprite.rect.width = size - this->_config.fillerEnd.size;
+					this->_sprite.draw();
+					size = this->_config.fillerEnd.size;
+					break;
+				}
+				size -= this->_config.filler.size;
+				pos.x += this->_config.filler.size;
+				this->_sprite.draw();
+			}
+
+			this->_sprite.setSize({min(this->_config.fillerEnd.size, size), maxSize.y});
+			this->_sprite.setPosition(pos);
+			this->_sprite.rect.left = this->_config.fillerEnd.offset;
+			this->_sprite.rect.width = min(this->_config.fillerEnd.size, size);
+			this->_sprite.draw();
+		}
+
+	public:
+		BorderedBar(Sprite &sprite, LPCSTR configPath, LPCSTR configApp) :
+			_sprite(sprite)
+		{
+			CHECK_CONFIG_VAL(this->_config.fillerStart.size,    configApp, "FILLER_START_SIZE",    configPath);
+			CHECK_CONFIG_VAL(this->_config.fillerStart.offset,  configApp, "FILLER_START_OFFSET",  configPath);
+			CHECK_CONFIG_VAL(this->_config.filler.size,         configApp, "FILLER_SIZE",          configPath);
+			CHECK_CONFIG_VAL(this->_config.filler.normalOffset, configApp, "FILLER_NORMAL_OFFSET", configPath);
+			CHECK_CONFIG_VAL(this->_config.filler.grayedOffset, configApp, "FILLER_GRAYED_OFFSET", configPath);
+			CHECK_CONFIG_VAL(this->_config.fillerEnd.offset,    configApp, "FILLER_END_SIZE",      configPath);
+			CHECK_CONFIG_VAL(this->_config.fillerEnd.offset,    configApp, "FILLER_END_OFFSET",    configPath);
+			CHECK_CONFIG_VAL(this->_config.borderStart.size,    configApp, "BORDER_START_SIZE",    configPath);
+			CHECK_CONFIG_VAL(this->_config.borderStart.offset,  configApp, "BORDER_START_OFFSET",  configPath);
+			CHECK_CONFIG_VAL(this->_config.border.size,         configApp, "BORDER_SIZE",          configPath);
+			CHECK_CONFIG_VAL(this->_config.border.offset,       configApp, "BORDER_OFFSET",        configPath);
+			CHECK_CONFIG_VAL(this->_config.borderEnd.size,      configApp, "BORDER_END_SIZE",      configPath);
+			CHECK_CONFIG_VAL(this->_config.borderEnd.offset,    configApp, "BORDER_END_OFFSET",    configPath);
+		}
+
+		void draw(Vector2<int> pos, unsigned size, Vector2<unsigned> maxSize, bool reversed)
+		{
+			this->_drawBorder(pos, maxSize, reversed);
+			this->_drawFiller(pos, size, maxSize, reversed, this->_config.filler.normalOffset);
+		}
+
+		void draw(Vector2<int> pos, unsigned size, Vector2<unsigned> maxSize, bool reversed, DxSokuColor color)
+		{
+			this->_drawBorder(pos, maxSize, reversed);
+			this->_sprite.tint = color;
+			this->_drawFiller(pos, size, maxSize, reversed, this->_config.filler.grayedOffset);
+		}
+	};
 
 	enum SpriteOffsets {
 		GRAZE_SPRITE_OFF,
@@ -73,6 +300,9 @@ namespace Practice
 
 	static RectangleShape rectangle;
 	static Sprite flagsSprite;
+	static Sprite borderSprite;
+	static std::unique_ptr<BorderedBar> healthBorder;
+	static std::unique_ptr<BorderedBar> installBorder;
 	static std::pair<MaxAttributes, MaxAttributes> allMaxAttributes;
 
 	void initBoxDisplay(LPCSTR profilePath)
@@ -82,9 +312,15 @@ namespace Practice
 
 		std::string profile = profilePath;
 
-		Texture::loadFromFile(flagsSprite.texture, (profile + "/assets/flags.png").c_str());
+		profile += "/assets/";
+		Texture::loadFromFile(flagsSprite.texture, (profile + "flags.png").c_str());
 		flagsSprite.setSize({32, 32});
 		flagsSprite.rect.height = 32;
+
+		Texture::loadFromFile(borderSprite.texture, (profile + "borders.png").c_str());
+		profile += "borders.ini";
+		healthBorder .reset(new BorderedBar(borderSprite, profile.c_str(), "HEALTH"));
+		installBorder.reset(new BorderedBar(borderSprite, profile.c_str(), "INSTALL"));
 	}
 
 	static void drawBox(const SokuLib::Box &box, const SokuLib::RotationBox *rotation, DxSokuColor borderColor, DxSokuColor fillColor)
@@ -208,23 +444,10 @@ namespace Practice
 		}
 		displayPlayerFrameFlag(textureOffset, barPos, reverse);
 
-		rectangle.setSize({200, 24});
-		rectangle.setBorderColor(DxSokuColor::Black);
-		rectangle.setFillColor({0x88, 0x88, 0x88, 0xFF});
 		if (reverse)
-			rectangle.setPosition({barPos.x - 201, barPos.y + 4});
+			installBorder->draw({barPos.x - 201, barPos.y + 4}, 200 * value / max, {200, 24}, reverse, color);
 		else
-			rectangle.setPosition({barPos.x, barPos.y + 4});
-		rectangle.draw();
-
-		rectangle.setSize({200 * value / max, 24});
-		rectangle.setBorderColor(DxSokuColor::Black);
-		rectangle.setFillColor(color);
-		if (reverse)
-			rectangle.setPosition({static_cast<int>(barPos.x - 200 * value / max) - 1, barPos.y + 4});
-		else
-			rectangle.setPosition({barPos.x, barPos.y + 4});
-		rectangle.draw();
+			installBorder->draw({barPos.x, barPos.y + 4}, 200 * value / max, {200, 24}, reverse, color);
 	}
 
 	static void displayObjectFrameFlag(SpriteOffsets textureOffset, Vector2<int> &barPos)
@@ -254,22 +477,23 @@ namespace Practice
 
 	static void displayObjectBar(SpriteOffsets textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, DxSokuColor color)
 	{
+		auto &barObj = (textureOffset == HEALTH_SPRITE_OFF || textureOffset == TIME_SPRITE_OFF ? *healthBorder : *installBorder);
+
 		if (barPos.x != basePos.x || barPos.y != basePos.y) {
 			barPos.x = basePos.x;
 			barPos.y += 32 * SokuLib::camera.scale;
 		}
 		displayObjectFrameFlag(textureOffset, barPos);
-		rectangle.setSize({
-			static_cast<unsigned int>(100 * SokuLib::camera.scale * value / max),
-			static_cast<unsigned int>(24 * SokuLib::camera.scale)
-		});
-		rectangle.setBorderColor(DxSokuColor::Black);
-		rectangle.setFillColor(color);
-		rectangle.setPosition({
-			barPos.x,
-			barPos.y + static_cast<int>(4 * SokuLib::camera.scale)
-		});
-		rectangle.draw();
+		barObj.draw(
+			{barPos.x, barPos.y + static_cast<int>(4 * SokuLib::camera.scale)},
+			100 * SokuLib::camera.scale * value / max,
+			{
+				static_cast<unsigned>(200 * SokuLib::camera.scale),
+				static_cast<unsigned>(24 * SokuLib::camera.scale)
+			},
+			false,
+			color
+		);
 	}
 
 	static float getSuperArmorRatio(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes)
@@ -340,10 +564,23 @@ namespace Practice
 		}
 		if (manager.dropInvulTimeLeft) {
 			maxAttributes.drop = max(maxAttributes.drop, manager.dropInvulTimeLeft);
-			displayPlayerBar(DROP_SPRITE_OFF, basePos, barPos, manager.dropInvulTimeLeft, maxAttributes.drop, reverse, DxSokuColor::Red);
+			displayPlayerBar(
+				DROP_SPRITE_OFF,
+				basePos,
+				barPos,
+				manager.dropInvulTimeLeft,
+				maxAttributes.drop,
+				reverse,
+				{
+					manager.objectBase.renderInfos.shaderColor.r,
+					manager.objectBase.renderInfos.shaderColor.g,
+					manager.objectBase.renderInfos.shaderColor.b,
+					0xFF
+				}
+			);
 		} else
 			maxAttributes.drop = 0;
-		if (manager.magicPotionTimeLeft != 0)
+		if (manager.magicPotionTimeLeft && (!manager.dropInvulTimeLeft || manager.magicPotionTimeLeft != 1))
 			displayPlayerBar(MAGIC_POTION_SPRITE_OFF, basePos, barPos, manager.magicPotionTimeLeft, 360, reverse, DxSokuColor::Blue);
 		if (manager.healingCharmTimeLeft)
 			displayPlayerBar(HEALING_CHARM_SPRITE_OFF, basePos, barPos, manager.healingCharmTimeLeft, 250, reverse, DxSokuColor::Cyan);
