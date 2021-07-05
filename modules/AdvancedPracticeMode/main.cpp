@@ -179,6 +179,15 @@ void hookFunctions()
 	int newOffset = reinterpret_cast<int>(Practice::loadDeckData) - PAYLOAD_NEXT_INSTR_DECK_INFOS;
 	Practice::s_origLoadDeckData = SokuLib::union_cast<void (__stdcall *)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &)>(*(int *)PAYLOAD_ADDRESS_DECK_INFOS + PAYLOAD_NEXT_INSTR_DECK_INFOS);
 	*(int *)PAYLOAD_ADDRESS_DECK_INFOS = newOffset;
+
+	//We allow cards to have 0 as cost
+	//This replaces
+	// if (cost < 1)
+	//    cost = 1;
+	//by
+	// if (cost < 1)
+	//    cost = 0;
+	*(char *)0x00469D1E = 0;
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 
