@@ -377,8 +377,6 @@ add_library(
         "AdvancedPracticeMode"
         MODULE
         modules/AdvancedPracticeMode/main.cpp
-	modules/AdvancedPracticeMode/Moves.cpp
-        modules/AdvancedPracticeMode/Moves.hpp
         modules/AdvancedPracticeMode/Gui.cpp
         modules/AdvancedPracticeMode/Gui.hpp
         modules/AdvancedPracticeMode/State.cpp

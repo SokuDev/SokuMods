@@ -5,7 +5,6 @@
 #include <fstream>
 #include <SokuLib.hpp>
 #include "Gui.hpp"
-#include "Moves.hpp"
 #include "State.hpp"
 #include "Dummy.hpp"
 #include "Logic.hpp"
@@ -14,28 +13,6 @@
 namespace Practice
 {
 	tgui::Gui gui;
-	std::array<std::string, SokuLib::CHARACTER_RANDOM> names{
-		"reimu",
-		"marisa",
-		"sakuya",
-		"alice",
-		"patchouli",
-		"youmu",
-		"remilia",
-		"yuyuko",
-		"yukari",
-		"suika",
-		"reisen",
-		"aya",
-		"komachi",
-		"iku",
-		"tenshi",
-		"sanae",
-		"cirno",
-		"meiling",
-		"utsuho",
-		"suwako",
-	};
 	std::vector<sf::Texture> skillsTextures;
 	tgui::Panel::Ptr panel;
 	tgui::Tabs::Ptr tab;
@@ -53,14 +30,18 @@ namespace Practice
 
 	void init(LPCSTR profilePath)
 	{
+		auto maxi = 0;
+
+		for (auto &[id, infos] : characterInfos)
+			maxi = max(maxi, id);
 #ifdef NDEBUG
 		if (!skillsTextures.empty())
 #endif
 			return;
-		skillsTextures.resize(SokuLib::CHARACTER_RANDOM);
-		for (int i = 0; i < SokuLib::CHARACTER_RANDOM; i++) {
-			printf("Loading file %s\n", (std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png").c_str());
-			skillsTextures[i].loadFromFile(std::string(profilePath) + "/assets/skills/" + names[i] + "Skills.png");
+		skillsTextures.resize(maxi + 1);
+		for (auto &[id, infos] : characterInfos) {
+			printf("Loading file %s\n", (std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png").c_str());
+			skillsTextures[id].loadFromFile(std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png");
 		}
 		puts("Init done");
 	}
@@ -295,8 +276,18 @@ namespace Practice
 	static void populateCharacterPanel(const std::string &profilePath, tgui::Panel::Ptr pan, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
 	{
 		// Levels
-		char nbSkills = 4;
+		char nbSkills = 0;
 
+		for (auto &entry : characterInfos[character].cards) {
+			if (entry.first < 200) {
+				nbSkills += 1;
+				printf("Card %s (%i) is a skill\n", entry.second.name.c_str(), entry.first);
+			}
+		}
+		printf("This character (%i) has %i skill cards ", character, nbSkills);
+		nbSkills /= 3;
+		printf("so, %i unique skill\n", nbSkills);
+		printf("Loading GUI file %s/assets/chr.gui\n", profilePath.c_str());
 		pan->loadWidgetsFromFile(profilePath + "/assets/chr.gui");
 
 		auto spePic = pan->get<tgui::Picture>("SpecialPic");
@@ -319,6 +310,7 @@ namespace Practice
 
 		char skills[5];
 
+		puts("Skill map");
 		getSkillMap(state.skillMap, skills, character);
 		if (character == SokuLib::CHARACTER_PATCHOULI) {
 			nbSkills = 5;
@@ -368,12 +360,14 @@ namespace Practice
 			state.specialValue = item;
 		});
 
+		puts("Creating skill panel");
 		for (int i = 0; i < nbSkills; i++) {
 			auto img = pan->get<tgui::Picture>("Skill" + std::to_string(i) + "Img");
 			auto lvl = pan->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Lvl");
 			auto id = pan->get<tgui::ComboBox>("Skill" + std::to_string(i) + "Id");
 			auto callback = std::make_shared<unsigned>(0);
 
+			printf("Adding skill %i\n", i);
 			lvl->removeAllItems();
 			for (int j = skills[i] != 0; j < 5; j++)
 				lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
@@ -381,6 +375,7 @@ namespace Practice
 			*callback = lvl->connect("ItemSelected", [&state, i, nbSkills](std::weak_ptr<tgui::ComboBox> skill, int item){
 				auto index = skill.lock()->getSelectedItemIndex();
 
+				puts("Lvl select");
 				for (int j = 0; j < 3; j++) {
 					if (j == index) {
 						state.skillMap[j * nbSkills + i].notUsed = false;
@@ -390,11 +385,18 @@ namespace Practice
 						state.skillMap[j * nbSkills + i].level = 0x7F;
 					}
 				}
+				puts("Lvl select ret");
 			}, std::weak_ptr<tgui::ComboBox>(id));
 
-			for (int j = 0; j < 3; j++)
-				id->addItem(movesNames[character][i + j * nbSkills]);
+			for (int j = 0; j < 3; j++) {
+				printf("Adding spellcard %i - %i ", character, 100 + i + j * nbSkills);
+				fflush(stdout);
+				printf("(%s)\n", characterInfos[character].cards[100 + i + j * nbSkills].name.c_str());
+				id->addItem(characterInfos[character].cards[100 + i + j * nbSkills].name);
+			}
+			puts("End loop");
 			id->setSelectedItemByIndex(skills[i]);
+			puts("Connect");
 			id->connect("ItemSelected", [lvl, img, &state, nbSkills, i, character, callback](std::weak_ptr<tgui::ComboBox> skill, int item){
 				lvl->disconnect(*callback);
 				lvl->removeAllItems();
@@ -422,6 +424,7 @@ namespace Practice
 					)
 				);
 			}, std::weak_ptr<tgui::ComboBox>(id));
+			puts(".");
 
 			img->getRenderer()->setTexture(
 				tgui::Texture(
@@ -429,25 +432,20 @@ namespace Practice
 					sf::IntRect((skills[i] * nbSkills + i) * 32, 0, 32, 32)
 				)
 			);
+			puts("Back up");
 		}
 
+		puts("Finishing up");
 		pan->get<tgui::Button>("Button1")->connect("Clicked", [&manager, character]{
-			unsigned last = 100 + 3 * (4 + (character == SokuLib::CHARACTER_PATCHOULI));
-			const char *brokenNames[] = {
-				"reimu", "marisa", "sakuya", "alice", "patchouli", "youmu", "remilia", "yuyuko", "yukari",
-				"suika", "udonge", "aya", "komachi", "iku", "tenshi", "sanae", "chirno", "meirin", "utsuho", "suwako"
-			};
 			std::vector<unsigned short> cards;
 
 			for (int i = 0; i < 21; i++)
 				cards.push_back(i);
-			for (int i = 100; i < last; i++)
-				cards.push_back(i);
 
-			auto &entry = characterSpellCards[brokenNames[character]];
+			auto &entry = characterInfos[character].cards;
 
 			for (auto &card : entry)
-				cards.push_back(card);
+				cards.push_back(card.first);
 			makeFakeCard(manager, cards[rand() % cards.size()]);
 		});
 
@@ -468,14 +466,19 @@ namespace Practice
 
 	static void displaySkillsPanel(const std::string &profile)
 	{
+		printf("Loading GUI from %s/assets/skills.gui\n", profile.c_str());
 		panel->loadWidgetsFromFile(profile + "/assets/skills.gui");
 
 		tgui::Panel::Ptr leftPanel = panel->get<tgui::Panel>("Left");
 		tgui::Panel::Ptr rightPanel = panel->get<tgui::Panel>("Right");
 
+		puts("Populate left panel");
 		populateCharacterPanel(profile, leftPanel,  SokuLib::getBattleMgr().leftCharacterManager,  SokuLib::leftChar,  settings.nonSaved.leftState);
+		puts("Populate right panel");
 		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
+		puts("Update state");
 		updateGuiState();
+		puts("All done !");
 	}
 
 	static void updateDummyPanel()

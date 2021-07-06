@@ -7,6 +7,7 @@
 #include <SokuLib.hpp>
 #include <algorithm>
 #include <dinput.h>
+#include <fstream>
 #include "Logic.hpp"
 #include "State.hpp"
 #include "Gui.hpp"
@@ -145,13 +146,117 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 {
-	FILE *_;
-
 	AllocConsole();
-	freopen_s(&_, "CONOUT$", "w", stdout);
-	freopen_s(&_, "CONOUT$", "w", stderr);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 	puts("Hello !");
 	//port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
+}
+
+void loadSoku2CSV(LPWSTR path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	if (stream.fail()) {
+		printf("%S: %s\n", path, strerror(errno));
+		return;
+	}
+	while (std::getline(stream, line)) {
+		std::stringstream str{line};
+		unsigned id;
+		std::string idStr;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+		std::string skillInputs;
+
+		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		std::getline(str, skillInputs, ';');
+		if (str.fail()) {
+			printf("Skipping line %s: Stream failed\n", line.c_str());
+			continue;
+		}
+		try {
+			id = std::stoi(idStr);
+		} catch (...) {
+			printf("Skipping line %s: Invalid id\n", line.c_str());
+			continue;
+		}
+		auto &infos = Practice::characterInfos[static_cast<SokuLib::Character>(id)];
+
+		infos.shortName = shortName;
+		infos.fullName = fullName;
+		infos.codeName = codeName;
+		infos.skills.clear();
+		infos.skills.emplace_back();
+		for (auto c : skillInputs) {
+			if (c == ',')
+				infos.skills.emplace_back();
+			else
+				infos.skills.back() += c;
+		}
+	}
+}
+
+void loadSoku2Config()
+{
+	puts("Looking for Soku2 config...");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	printf("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		printf("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		printf("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		loadSoku2CSV(module_path);
+		return;
+	}
 }
 
 void hookFunctions()
@@ -190,6 +295,7 @@ void hookFunctions()
 	*(char *)0x00469D1E = 0;
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
+	loadSoku2Config();
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }

@@ -19,28 +19,30 @@
 
 namespace Practice
 {
-	std::map<std::string, std::vector<unsigned short>> characterSpellCards{
-		{"alice", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
-		{"aya", {200, 201, 202, 203, 205, 206, 207, 208, 211, 212}},
-		{"chirno", {200, 201, 202, 203, 204, 205, 206, 207, 208, 210, 213}},
-		{"iku", {200, 201, 202, 203, 206, 207, 208, 209, 210, 211}},
-		{"komachi", {200, 201, 202, 203, 204, 205, 206, 207, 211}},
-		{"marisa", {200, 202, 203, 204, 205, 206, 207, 208, 209, 211, 212, 214, 215, 219}},
-		{"meirin", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 211}},
-		{"patchouli", {200, 201, 202, 203, 204, 205, 206, 207, 210, 211, 212, 213}},
-		{"reimu", {200, 201, 204, 206, 207, 208, 209, 210, 214, 219}},
-		{"remilia", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209}},
-		{"sakuya", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212}},
-		{"sanae", {200, 201, 202, 203, 204, 205, 206, 207, 210}},
-		{"suika", {200, 201, 202, 203, 204, 205, 206, 207, 208, 212}},
-		{"suwako", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 212}},
-		{"tenshi", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209}},
-		{"udonge", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211}},
-		{"utsuho", {200, 201, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214}},
-		{"youmu", {200, 201, 202, 203, 204, 205, 206, 207, 208, 212}},
-		{"yukari", {200, 201, 202, 203, 204, 205, 206, 207, 208, 215}},
-		{"yuyuko", {200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 219}}
+	std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
+	std::map<SokuLib::Character, CharacterInfo> characterInfos{
+		{ SokuLib::CHARACTER_REIMU,     { SokuLib::CHARACTER_REIMU,     "reimu",     "Reimu",     "Reimu Hakurei",          {"236", "214", "421", "623"} }},
+		{ SokuLib::CHARACTER_MARISA,    { SokuLib::CHARACTER_MARISA,    "marisa",    "Marisa",    "Marisa Kirisame",        {"214", "623", "22",  "236"} }},
+		{ SokuLib::CHARACTER_SAKUYA,    { SokuLib::CHARACTER_SAKUYA,    "sakuya",    "Sakuya",    "Sakuya Izayoi",          {"623", "214", "236", "22" } }},
+		{ SokuLib::CHARACTER_ALICE,     { SokuLib::CHARACTER_ALICE,     "alice",     "Alice",     "Alice Margatroid",       {"236", "623", "214", "22" } }},
+		{ SokuLib::CHARACTER_PATCHOULI, { SokuLib::CHARACTER_PATCHOULI, "patchouli", "Patchouli", "Patchouli Knowledge",    {"236", "22",  "623", "214", "421"} }},
+		{ SokuLib::CHARACTER_YOUMU,     { SokuLib::CHARACTER_YOUMU,     "youmu",     "Youmu",     "Youmu Konpaku",          {"236", "623", "214", "22" } }},
+		{ SokuLib::CHARACTER_REMILIA,   { SokuLib::CHARACTER_REMILIA,   "remilia",   "Remilia",   "Remilia Scarlet",        {"236", "214", "623", "22" } }},
+		{ SokuLib::CHARACTER_YUYUKO,    { SokuLib::CHARACTER_YUYUKO,    "yuyuko",    "Yuyuko",    "Yuyuko Saigyouji",       {"214", "236", "421", "623"} }},
+		{ SokuLib::CHARACTER_YUKARI,    { SokuLib::CHARACTER_YUKARI,    "yukari",    "Yukari",    "Yukari Yakumo",          {"236", "623", "214", "421"} }},
+		{ SokuLib::CHARACTER_SUIKA,     { SokuLib::CHARACTER_SUIKA,     "suika",     "Suika",     "Suika Ibuki",            {"236", "623", "214", "22" } }},
+		{ SokuLib::CHARACTER_REISEN,    { SokuLib::CHARACTER_REISEN,    "udonge",    "Reisen",    "Reisen Undongein Inaba", {"236", "214", "623", "22" } }},
+		{ SokuLib::CHARACTER_AYA,       { SokuLib::CHARACTER_AYA,       "aya",       "Aya",       "Aya Shameimaru",         {"236", "214", "22",  "421"} }},
+		{ SokuLib::CHARACTER_KOMACHI,   { SokuLib::CHARACTER_KOMACHI,   "komachi",   "Komachi",   "Komachi Onozuka",        {"236", "623", "22",  "214"} }},
+		{ SokuLib::CHARACTER_IKU,       { SokuLib::CHARACTER_IKU,       "iku",       "Iku",       "Iku Nagae",              {"236", "623", "22",  "214"} }},
+		{ SokuLib::CHARACTER_TENSHI,    { SokuLib::CHARACTER_TENSHI,    "tenshi",    "Tenshi",    "Tenshi Hinanawi",        {"214", "22",  "236", "623"} }},
+		{ SokuLib::CHARACTER_SANAE,     { SokuLib::CHARACTER_SANAE,     "sanae",     "Sanae",     "Sanae Kochiya",          {"236", "22",  "623", "214"} }},
+		{ SokuLib::CHARACTER_CIRNO,     { SokuLib::CHARACTER_CIRNO,     "chirno",    "Cirno",     "Cirno",                  {"236", "214", "22",  "623"} }},
+		{ SokuLib::CHARACTER_MEILING,   { SokuLib::CHARACTER_MEILING,   "meirin",    "Meiling",   "Hong Meiling",           {"214", "623", "22",  "236"} }},
+		{ SokuLib::CHARACTER_UTSUHO,    { SokuLib::CHARACTER_UTSUHO,    "utsuho",    "Utsuho",    "Utsuho Reiuji",          {"623", "236", "22",  "214"} }},
+		{ SokuLib::CHARACTER_SUWAKO,    { SokuLib::CHARACTER_SUWAKO,    "suwako",    "Suwako",    "Suwako Moriya",          {"214", "623", "236", "22" } }}
 	};
+	static bool loaded = false;
 	void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &);
 	static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 	static const unsigned char patchCode[] = {
@@ -55,37 +57,98 @@ namespace Practice
 		Practice::handleInput(*This);
 	}
 
+	static void loadAllExistingCards()
+	{
+		char buffer[] = "data/csv/000000000000/spellcard.csv";
+		char bufferCards[] = "data/card/000000000000/card000.bmp";
+
+		puts("Loading cards");
+		for (auto& [id, info] : characterInfos) {
+			sprintf(buffer, "data/csv/%s/spellcard.csv", info.codeName.c_str());
+			printf("Loading cards from %s\n", buffer);
+
+			SokuLib::CSVParser parser{buffer};
+			int i = 0;
+
+			do {
+				auto str = parser.getNextCell();
+
+				i++;
+				try {
+					auto str2 = parser.getNextCell();
+
+					printf("New card %s: %s\n", str.c_str(), str2.c_str());
+
+					auto cardId = std::stoul(str);
+					auto &entry = info.cards[cardId];
+					auto &sprite = cardsTextures[id][cardId];
+
+					sprintf(bufferCards, "data/card/%s/card%03lu.bmp", info.codeName.c_str(), cardId);
+					entry.id = cardId;
+					entry.name = str2;
+					Texture::loadFromGame(sprite.texture, bufferCards);
+				} catch (std::exception &e) {
+					MessageBoxA(
+						SokuLib::window,
+						(
+							"Fatal error: Cannot load cards list for " + info.fullName + ":\n" +
+							"In file " + buffer + ": Cannot parse cell #1 at line #" + std::to_string(i) +
+							" \"" + str + "\": " + e.what()
+						).c_str(),
+						"Loading code infos failed",
+						MB_ICONERROR
+					);
+					abort();
+				}
+			} while (parser.goToNextLine());
+		}
+	}
+
 	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &deck, int param4, SokuLib::Dequeue<short> &newDeck)
 	{
-		bool isPatchy = strcmp(charName, "patchouli") == 0;
-		int number = (4 + isPatchy) * 3;
 		unsigned short originalDeck[20];
 
-		printf("Save old deck of %i cards\n", min(newDeck.size, 20));
-		for (int i = 0; i < min(newDeck.size, 20); i++) {
-			originalDeck[i] = newDeck[i];
+		if (newDeck.size != 20) {
+			MessageBoxA(
+				SokuLib::window,
+				(
+					"Your deck must contain 20 cards (but has " + std::to_string(newDeck.size) + ")."
+					"You won't be able to give yourself cards that are not in your deck."
+				).c_str(),
+				"Invalid deck size",
+				MB_ICONWARNING
+			);
+			s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+			return;
 		}
+		if (characterInfos[SokuLib::CHARACTER_REIMU].cards.empty())
+			loadAllExistingCards();
+		printf("Save old deck of %i cards\n", newDeck.size);
+		for (int i = 0; i < 20; i++)
+			originalDeck[i] = newDeck[i];
 
-		printf("Loading deck for %s (%i skill cards)\n", charName, number);
-		for (int i = 0; i < number; i++)
-			newDeck[i] = 100 + i;
-		newDeck.size = number;
-		puts("Fake deck generated");
-		s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+		auto &entry = std::find_if(characterInfos.begin(), characterInfos.end(), [charName](const auto &m) { return m.second.codeName == charName; })->second.cards;
 
-		auto &entry = characterSpellCards[charName];
+		printf("Loading deck for %s (%i total cards so %0.f fake decks)\n", charName, entry.size(), std::ceil(entry.size() / 20.f));
+		for (int j = 0; j < entry.size(); j += 20) {
+			auto size = j + 20 < entry.size() ? 20 : entry.size() - j;
+			auto it = entry.begin();
 
-		printf("Loading deck for %s (%i spell cards)\n", charName, entry.size());
-		for (int i = 0; i < entry.size(); i++)
-			newDeck[i] = entry[i];
-		puts("Fake deck generated");
-		newDeck.size = entry.size();
-		s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+			printf("Generate deck of %i cards\n", size);
+			for (int i = 0; i < size; i++) {
+				newDeck[i] = it->first;
+				it++;
+			}
+			newDeck.size = size;
+			puts("Fake deck generated");
+			s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+		}
 
 		puts("Placing old deck back");
 		for (int i = 0; i < 20; i++)
 			newDeck[i] = originalDeck[i];
 		newDeck.size = 20;
+		s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
 		puts("Work done !");
 	}
 
@@ -271,10 +334,10 @@ namespace Practice
 
 	void CharacterState::save(bool isLeft) const
 	{
-		std::string path = "APMSettings/APMLastSession" + std::string(isLeft ? ("Player") : ("Dummy")) + SokuLib::charactersName[this->_chr] + ".dat";
+		std::string path = "APMSettings/APMLastSession" + std::string(isLeft ? ("Player") : ("Dummy")) + characterInfos[this->_chr].shortName + ".dat";
 
-		for (size_t pos = path.find(' '); pos != std::string::npos; pos = path.find(' '))
-			path.erase(path.begin() + pos);
+		//for (size_t pos = path.find(' '); pos != std::string::npos; pos = path.find(' '))
+		//	path.erase(path.begin() + pos);
 		std::cout << "Saving character state to " << path << std::endl;
 
 		std::ofstream stream{path};
@@ -290,10 +353,10 @@ namespace Practice
 	void CharacterState::load(SokuLib::Character chr, bool isLeft)
 	{
 		this->_chr = chr;
-		std::string path = "APMSettings/APMLastSession" + std::string(isLeft ? ("Player") : ("Dummy")) + SokuLib::charactersName[chr] + ".dat";
+		std::string path = "APMSettings/APMLastSession" + std::string(isLeft ? ("Player") : ("Dummy")) + characterInfos[chr].shortName + ".dat";
 
-		for (size_t pos = path.find(' '); pos != std::string::npos; pos = path.find(' '))
-			path.erase(path.begin() + pos);
+		//for (size_t pos = path.find(' '); pos != std::string::npos; pos = path.find(' '))
+		//	path.erase(path.begin() + pos);
 		std::cout << "Loading character state from " << path << std::endl;
 
 		std::ifstream stream{path};

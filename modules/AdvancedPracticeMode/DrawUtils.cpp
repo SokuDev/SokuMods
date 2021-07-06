@@ -180,6 +180,21 @@ namespace Practice
 		return true;
 	}
 
+	bool Texture::loadFromGame(Texture &buffer, const char *path)
+	{
+		int text = 0;
+		Vector2<unsigned> size;
+		int *ret = SokuLib::textureMgr.loadTexture(&text, path, &size.x, &size.y);
+
+		printf("Loading texture %s\n", path);
+		if (!ret || !text) {
+			puts("Couldn't load texture...");
+			return false;
+		}
+		buffer.setHandle(text, size);
+		return true;
+	}
+
 	Vector2<unsigned> RectangularRenderingElement::getSize() const
 	{
 		return this->_size;

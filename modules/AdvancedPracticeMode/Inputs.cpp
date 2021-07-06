@@ -129,9 +129,12 @@ namespace Practice
 	struct MoveSpriteDescriptor {
 	private:
 		bool _isSkill = false;
-		std::vector<std::string> _sequences;
+		unsigned char _skillNb = 0;
+		bool _isC;
+		bool _isAir;
 		Sprite &_sprite;
 		Sprite &_sprite2;
+		std::string _sequence;
 		Vector2<int> _startRect;
 		std::vector<Vector2<int>> _rects;
 		Vector2<unsigned> _rectSize;
@@ -282,8 +285,9 @@ namespace Practice
 		{
 			int rectPos = MoveSpriteDescriptor::_getSpriteIndex(action, character);
 			std::vector<Vector2<int>> rects;
+			auto &skill = characterInfos[character].skills;
 
-			for (auto c : this->_sequences[character]) {
+			for (auto c : (this->_skillNb == 0 ? this->_sequence : ((this->_isAir ? "j" : "") + skill[(this->_skillNb - 1) % skill.size()] + (this->_isC ? "c" : "b")))) {
 				switch (c) {
 				case '1':
 					rects.push_back(LEFTDOWN_SPRITE_POS);
@@ -406,9 +410,20 @@ namespace Practice
 		{
 		}
 
-		MoveSpriteDescriptor(Sprite &sprite, std::vector<std::string> sequences, Vector2<unsigned> rectSize) :
+		MoveSpriteDescriptor(Sprite &sprite, const std::string &&sequence, Vector2<unsigned> rectSize) :
 			_isSkill(true),
-			_sequences(std::move(sequences)),
+			_sequence(std::move(sequence)),
+			_sprite(sprite),
+			_sprite2(sprite),
+			_rectSize(rectSize)
+		{
+		}
+
+		MoveSpriteDescriptor(Sprite &sprite, unsigned char skillId, bool isC, bool isAir, Vector2<unsigned> rectSize) :
+			_isSkill(true),
+			_skillNb(skillId + 1),
+			_isC(isC),
+			_isAir(isAir),
 			_sprite(sprite),
 			_sprite2(sprite),
 			_rectSize(rectSize)
@@ -788,302 +803,422 @@ namespace Practice
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL1_B, {
 			inputSheet,
-			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},
+			0,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL1_C, {
 			inputSheet,
-			{"236c", "214c", "623c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "214c", "623c", "214c"},
+			0,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL1_B, {
 			inputSheet,
-			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},
+			0,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL1_C, {
 			inputSheet,
-			{"236c", "214c", "623c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "214c", "623c", "214c"},
+			0,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL1_B, {
 			inputSheet,
-			{"236b", "214b", "623b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "236b", "236b", "236b", "236b", "214b", "236b", "236b", "214b", "623b", "214b"},
+			0,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL1_C, {
 			inputSheet,
-			{"236c", "214c", "623c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "236c", "236c", "236c", "236c", "214c", "236c", "236c", "214c", "623c", "214c"},
+			0,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL2_B, {
 			inputSheet,
-			{"214b", "623b", "214b", "623b", "22b", "623b", "214b", "236b", "623b", "623b", "214b", "214b", "623b", "623b", "22b", "22b", "214b", "623b", "236b", "623b"},
+			1,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL2_C, {
 			inputSheet,
-			{"214c", "623c", "214c", "623c", "22c", "623c", "214c", "236c", "623c", "623c", "214c", "214c", "623c", "623c", "22c", "22c", "214c", "623c", "236c", "623c"},
+			1,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL2_B, {
 			inputSheet,
-			{"214b", "623b", "214b", "623b", "22b", "623b", "214b", "236b", "623b", "623b", "214b", "214b", "623b", "623b", "22b", "22b", "214b", "623b", "236b", "623b"},
+			1,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL2_C, {
 			inputSheet,
-			{"214c", "623c", "214c", "623c", "22c", "623c", "214c", "236c", "623c", "623c", "214c", "214c", "623c", "623c", "22c", "22c", "214c", "623c", "236c", "623c"},
+			1,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL2_B, {
 			inputSheet,
-			{"214b", "623b", "214b", "623b", "22b", "623b", "214b", "236b", "623b", "623b", "214b", "214b", "623b", "623b", "22b", "22b", "214b", "623b", "236b", "623b"},
+			1,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL2_C, {
 			inputSheet,
-			{"214c", "623c", "214c", "623c", "22c", "623c", "214c", "236c", "623c", "623c", "214c", "214c", "623c", "623c", "22c", "22c", "214c", "623c", "236c", "623c"},
+			1,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL3_B, {
 			inputSheet,
-			{"421b", "22b", "236b", "214b", "623b", "214b", "623b", "421b", "214b", "214b", "623b", "22b", "22b", "22b", "236b", "623b", "22b", "22b", "22b", "236b"},
+			2,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL3_C, {
 			inputSheet,
-			{"421c", "22c", "236c", "214c", "623c", "214c", "623c", "421c", "214c", "214c", "623c", "22c", "22c", "22c", "236c", "623c", "22c", "22c", "22c", "236c"},
+			2,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL3_B, {
 			inputSheet,
-			{"421b", "22b", "236b", "214b", "623b", "214b", "623b", "421b", "214b", "214b", "623b", "22b", "22b", "22b", "236b", "623b", "22b", "22b", "22b", "236b"},
+			2,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL3_C, {
 			inputSheet,
-			{"421c", "22c", "236c", "214c", "623c", "214c", "623c", "421c", "214c", "214c", "623c", "22c", "22c", "22c", "236c", "623c", "22c", "22c", "22c", "236c"},
+			2,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL3_B, {
 			inputSheet,
-			{"421b", "22b", "236b", "214b", "623b", "214b", "623b", "421b", "214b", "214b", "623b", "22b", "22b", "22b", "236b", "623b", "22b", "22b", "22b", "236b"},
+			2,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL3_C, {
 			inputSheet,
-			{"421c", "22c", "236c", "214c", "623c", "214c", "623c", "421c", "214c", "214c", "623c", "22c", "22c", "22c", "236c", "623c", "22c", "22c", "22c", "236c"},
+			2,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL4_B, {
 			inputSheet,
-			{"623b", "236b", "22b", "22b", "214b", "22b", "22b", "623b", "421b", "22b", "22b", "421b", "214b", "214b", "623b", "214b", "623b", "236b", "214b", "22b"},
+			3,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL4_C, {
 			inputSheet,
-			{"623c", "236c", "22c", "22c", "214c", "22c", "22c", "623c", "421c", "22c", "22c", "421c", "214c", "214c", "623c", "214c", "623c", "236c", "214c", "22c"},
+			3,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL4_B, {
 			inputSheet,
-			{"623b", "236b", "22b", "22b", "214b", "22b", "22b", "623b", "421b", "22b", "22b", "421b", "214b", "214b", "623b", "214b", "623b", "236b", "214b", "22b"},
+			3,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL4_C, {
 			inputSheet,
-			{"623c", "236c", "22c", "22c", "214c", "22c", "22c", "623c", "421c", "22c", "22c", "421c", "214c", "214c", "623c", "214c", "623c", "236c", "214c", "22c"},
+			3,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL4_B, {
 			inputSheet,
-			{"623b", "236b", "22b", "22b", "214b", "22b", "22b", "623b", "421b", "22b", "22b", "421b", "214b", "214b", "623b", "214b", "623b", "236b", "214b", "22b"},
+			3,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL4_C, {
 			inputSheet,
-			{"623c", "236c", "22c", "22c", "214c", "22c", "22c", "623c", "421c", "22c", "22c", "421c", "214c", "214c", "623c", "214c", "623c", "236c", "214c", "22c"},
+			3,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_B, {
 			inputSheet,
-			{"", "", "", "", "421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_C, {
 			inputSheet,
-			{"", "", "", "", "421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_B, {
 			inputSheet,
-			{"", "", "", "", "421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_C, {
 			inputSheet,
-			{"", "", "", "", "421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_B, {
 			inputSheet,
-			{"", "", "", "", "421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			false,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_C, {
 			inputSheet,
-			{"", "", "", "", "421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			true,
+			false,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL1_AIR_B, {
 			inputSheet,
-			{"j236b", "j214b", "j623b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j214b", "j623b", "j214b"},
+			0,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL1_AIR_C, {
 			inputSheet,
-			{"j236c", "j214c", "j623c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j214c", "j623c", "j214c"},
+			0,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL1_AIR_B, {
 			inputSheet,
-			{"j236b", "j214b", "j623b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j214b", "j623b", "j214b"},
+			0,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL1_AIR_C, {
 			inputSheet,
-			{"j236c", "j214c", "j623c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j214c", "j623c", "j214c"},
+			0,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL1_AIR_B, {
 			inputSheet,
-			{"j236b", "j214b", "j623b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j236b", "j236b", "j236b", "j236b", "j214b", "j236b", "j236b", "j214b", "j623b", "j214b"},
+			0,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL1_AIR_C, {
 			inputSheet,
-			{"j236c", "j214c", "j623c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j236c", "j236c", "j236c", "j236c", "j214c", "j236c", "j236c", "j214c", "j623c", "j214c"},
+			0,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL2_AIR_B, {
 			inputSheet,
-			{"j214b", "j623b", "j214b", "j623b", "j22b", "j623b", "j214b", "j236b", "j623b", "j623b", "j214b", "j214b", "j623b", "j623b", "j22b", "j22b", "j214b", "j623b", "j236b", "j623b"},
+			1,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL2_AIR_C, {
 			inputSheet,
-			{"j214c", "j623c", "j214c", "j623c", "j22c", "j623c", "j214c", "j236c", "j623c", "j623c", "j214c", "j214c", "j623c", "j623c", "j22c", "j22c", "j214c", "j623c", "j236c", "j623c"},
+			1,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL2_AIR_B, {
 			inputSheet,
-			{"j214b", "j623b", "j214b", "j623b", "j22b", "j623b", "j214b", "j236b", "j623b", "j623b", "j214b", "j214b", "j623b", "j623b", "j22b", "j22b", "j214b", "j623b", "j236b", "j623b"},
+			1,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL2_AIR_C, {
 			inputSheet,
-			{"j214c", "j623c", "j214c", "j623c", "j22c", "j623c", "j214c", "j236c", "j623c", "j623c", "j214c", "j214c", "j623c", "j623c", "j22c", "j22c", "j214c", "j623c", "j236c", "j623c"},
+			1,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL2_AIR_B, {
 			inputSheet,
-			{"j214b", "j623b", "j214b", "j623b", "j22b", "j623b", "j214b", "j236b", "j623b", "j623b", "j214b", "j214b", "j623b", "j623b", "j22b", "j22b", "j214b", "j623b", "j236b", "j623b"},
+			1,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL2_AIR_C, {
 			inputSheet,
-			{"j214c", "j623c", "j214c", "j623c", "j22c", "j623c", "j214c", "j236c", "j623c", "j623c", "j214c", "j214c", "j623c", "j623c", "j22c", "j22c", "j214c", "j623c", "j236c", "j623c"},
+			1,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL3_AIR_B, {
 			inputSheet,
-			{"j421b", "j22b", "j236b", "j214b", "j623b", "j214b", "j623b", "j421b", "j214b", "j214b", "j623b", "j22b", "j22b", "j22b", "j236b", "j623b", "j22b", "j22b", "j22b", "j236b"},
+			2,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL3_AIR_C, {
 			inputSheet,
-			{"j421c", "j22c", "j236c", "j214c", "j623c", "j214c", "j623c", "j421c", "j214c", "j214c", "j623c", "j22c", "j22c", "j22c", "j236c", "j623c", "j22c", "j22c", "j22c", "j236c"},
+			2,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL3_AIR_B, {
 			inputSheet,
-			{"j421b", "j22b", "j236b", "j214b", "j623b", "j214b", "j623b", "j421b", "j214b", "j214b", "j623b", "j22b", "j22b", "j22b", "j236b", "j623b", "j22b", "j22b", "j22b", "j236b"},
+			2,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL3_AIR_C, {
 			inputSheet,
-			{"j421c", "j22c", "j236c", "j214c", "j623c", "j214c", "j623c", "j421c", "j214c", "j214c", "j623c", "j22c", "j22c", "j22c", "j236c", "j623c", "j22c", "j22c", "j22c", "j236c"},
+			2,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL3_AIR_B, {
 			inputSheet,
-			{"j421b", "j22b", "j236b", "j214b", "j623b", "j214b", "j623b", "j421b", "j214b", "j214b", "j623b", "j22b", "j22b", "j22b", "j236b", "j623b", "j22b", "j22b", "j22b", "j236b"},
+			2,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL3_AIR_C, {
 			inputSheet,
-			{"j421c", "j22c", "j236c", "j214c", "j623c", "j214c", "j623c", "j421c", "j214c", "j214c", "j623c", "j22c", "j22c", "j22c", "j236c", "j623c", "j22c", "j22c", "j22c", "j236c"},
+			2,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL4_AIR_B, {
 			inputSheet,
-			{"j623b", "j236b", "j22b", "j22b", "j214b", "j22b", "j22b", "j623b", "j421b", "j22b", "j22b", "j421b", "j214b", "j214b", "j623b", "j214b", "j623b", "j236b", "j214b", "j22b"},
+			3,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL4_AIR_C, {
 			inputSheet,
-			{"j623c", "j236c", "j22c", "j22c", "j214c", "j22c", "j22c", "j623c", "j421c", "j22c", "j22c", "j421c", "j214c", "j214c", "j623c", "j214c", "j623c", "j236c", "j214c", "j22c"},
+			3,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL4_AIR_B, {
 			inputSheet,
-			{"j623b", "j236b", "j22b", "j22b", "j214b", "j22b", "j22b", "j623b", "j421b", "j22b", "j22b", "j421b", "j214b", "j214b", "j623b", "j214b", "j623b", "j236b", "j214b", "j22b"},
+			3,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL4_AIR_C, {
 			inputSheet,
-			{"j623c", "j236c", "j22c", "j22c", "j214c", "j22c", "j22c", "j623c", "j421c", "j22c", "j22c", "j421c", "j214c", "j214c", "j623c", "j214c", "j623c", "j236c", "j214c", "j22c"},
+			3,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL4_AIR_B, {
 			inputSheet,
-			{"j623b", "j236b", "j22b", "j22b", "j214b", "j22b", "j22b", "j623b", "j421b", "j22b", "j22b", "j421b", "j214b", "j214b", "j623b", "j214b", "j623b", "j236b", "j214b", "j22b"},
+			3,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL4_AIR_C, {
 			inputSheet,
-			{"j623c", "j236c", "j22c", "j22c", "j214c", "j22c", "j22c", "j623c", "j421c", "j22c", "j22c", "j421c", "j214c", "j214c", "j623c", "j214c", "j623c", "j236c", "j214c", "j22c"},
+			3,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_AIR_B, {
 			inputSheet,
-			{"", "", "", "", "j421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_DEFAULT_SKILL5_AIR_C, {
 			inputSheet,
-			{"", "", "", "", "j421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_AIR_B, {
 			inputSheet,
-			{"", "", "", "", "j421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT1_SKILL5_AIR_C, {
 			inputSheet,
-			{"", "", "", "", "j421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_AIR_B, {
 			inputSheet,
-			{"", "", "", "", "j421b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			false,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_ALT2_SKILL5_AIR_C, {
 			inputSheet,
-			{"", "", "", "", "j421c", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""},
+			4,
+			true,
+			true,
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_USING_SC_ID_200, { inputSheet, SC_SPRITE_POS, {24, 32} } },
@@ -1266,107 +1401,107 @@ namespace Practice
 		} },
 		{ FAKE_ACTION_LILIPAD_DEFAULT_22B, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l22b"},
+			"l22b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_DEFAULT_22C, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l22c"},
+			"l22c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_ALT1_22B, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u22b"},
+			"u22b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_ALT1_22C, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u22c"},
+			"u22c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_DEFAULT_623b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l623b"},
+			"l623b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_DEFAULT_623b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u623b"},
+			"u623b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_DEFAULT_623c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u623c"},
+			"u623c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_ALT1_623b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l623b"},
+			"l623b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_ALT1_623c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l623c"},
+			"l623c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_DEFAULT_236b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236b"},
+			"u236b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_DEFAULT_236c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236c"},
+			"u236c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_ALT1_236b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236b"},
+			"u236b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_ALT1_236c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236c"},
+			"u236c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_ALT2_236b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236b"},
+			"u236b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_ALT2_236c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u236c"},
+			"u236c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_DEFAULT_214b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u214b"},
+			"u214b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_UNDERGROUND_DEFAULT_214c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "u214c"},
+			"u214c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_ALT1_214b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214b"},
+			"l214b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_ALT1_214c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214c"},
+			"l214c",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_ALT2_214b, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214b"},
+			"l214b",
 			{24, 32}
 		} },
 		{ FAKE_ACTION_LILIPAD_ALT2_214c, {
 			inputSheet,
-			{"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "l214c"},
+			"l214c",
 			{24, 32}
 		} },
 		{ SokuLib::ACTION_SUWAKO_j2D, {
@@ -1506,10 +1641,10 @@ namespace Practice
 				D3DXCreateLine(SokuLib::pd3dDev, &line[i]);
 				line[i]->SetWidth(i * 10.f / FRAMES_SIZE);
 			}
-		Texture::loadFromFile(leftSkillSheet.texture,  (profile +  + "/assets/skills/" + names[SokuLib::leftChar]  + "Skills.png").c_str());
-		Texture::loadFromFile(rightSkillSheet.texture, (profile +  + "/assets/skills/" + names[SokuLib::rightChar] + "Skills.png").c_str());
-		Texture::loadFromFile(leftScSheet.texture,     (profile +  + "/assets/cards/"  + names[SokuLib::leftChar]  + "Spells.png").c_str());
-		Texture::loadFromFile(rightScSheet.texture,    (profile +  + "/assets/cards/"  + names[SokuLib::rightChar] + "Spells.png").c_str());
+		Texture::loadFromFile(leftSkillSheet.texture,  (profile +  + "/assets/skills/" + characterInfos[SokuLib::leftChar].shortName  + "Skills.png").c_str());
+		Texture::loadFromFile(rightSkillSheet.texture, (profile +  + "/assets/skills/" + characterInfos[SokuLib::rightChar].shortName + "Skills.png").c_str());
+		Texture::loadFromFile(leftScSheet.texture,     (profile +  + "/assets/cards/"  + characterInfos[SokuLib::leftChar].shortName  + "Spells.png").c_str());
+		Texture::loadFromFile(rightScSheet.texture,    (profile +  + "/assets/cards/"  + characterInfos[SokuLib::rightChar].shortName + "Spells.png").c_str());
 	}
 
 	bool isCancelableBy(SokuLib::Action last, SokuLib::Action action)
@@ -1533,7 +1668,7 @@ namespace Practice
 			return FAKE_ACTION_5AAA6A;
 		if (characterId == SokuLib::CHARACTER_YOUMU && character.objectBase.action == SokuLib::ACTION_DEFAULT_SKILL3_B && character.objectBase.actionBlockId == 6)
 			return SokuLib::ACTION_DEFAULT_SKILL3_C;
-		if (characterId == SokuLib::CHARACTER_REMILIA && character.objectBase.action == SokuLib::ACTION_ALT1_SKILL1_B && character.objectBase.actionBlockId == 3)
+		if ((characterId == SokuLib::CHARACTER_REMILIA || characterId == SokuLib::CHARACTER_FLANDRE) && character.objectBase.action == SokuLib::ACTION_ALT1_SKILL1_B && character.objectBase.actionBlockId == 3)
 			return SokuLib::ACTION_ALT1_SKILL1_C;
 		//My mom says I am special !
 		if (characterId == SokuLib::CHARACTER_SUWAKO)
@@ -1653,7 +1788,7 @@ namespace Practice
 		if (characterId == SokuLib::CHARACTER_AYA && action == SokuLib::ACTION_66B)
 			return character.objectBase.frameCount == 1 && character.objectBase.actionBlockId == 0;
 
-		if (characterId == SokuLib::CHARACTER_REMILIA) {
+		if (characterId == SokuLib::CHARACTER_REMILIA || characterId == SokuLib::CHARACTER_FLANDRE) {
 			if (action == SokuLib::ACTION_ALT1_SKILL1_B || action == SokuLib::ACTION_ALT1_SKILL1_C)
 				return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId < 4;
 		}

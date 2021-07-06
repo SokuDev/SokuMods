@@ -11,7 +11,6 @@
 
 namespace Practice
 {
-	extern std::array<std::string, SokuLib::CHARACTER_RANDOM> names;
 	extern tgui::Gui gui;
 	extern tgui::Panel::Ptr panel;
 	extern tgui::Tabs::Ptr tab;

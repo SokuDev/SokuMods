@@ -142,8 +142,6 @@ namespace Practice
 	public:
 		Texture() noexcept = default;
 		Texture(int handle, const Vector2<unsigned> &size) noexcept;
-		Texture(Texture &) = delete;
-		Texture(Texture &&) = delete;
 		Texture &operator=(Texture &) = delete;
 		Texture &operator=(Texture &&) = delete;
 		~Texture() noexcept;
@@ -158,6 +156,7 @@ namespace Practice
 		int releaseHandle();
 
 		static bool loadFromFile(Texture &buffer, const char *path);
+		static bool loadFromGame(Texture &buffer, const char *path);
 	};
 
 	class RenderingElement {

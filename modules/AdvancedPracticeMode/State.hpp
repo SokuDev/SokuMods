@@ -10,6 +10,7 @@
 #include <SokuLib.hpp>
 #include <SFML/Graphics.hpp>
 #include <list>
+#include "DrawUtils.hpp"
 
 namespace Practice
 {
@@ -21,6 +22,23 @@ namespace Practice
 
 #define PAYLOAD_ADDRESS_DECK_INFOS 0x437D24
 #define PAYLOAD_NEXT_INSTR_DECK_INFOS (PAYLOAD_ADDRESS_DECK_INFOS + 4)
+
+	struct Card {
+		unsigned short id;
+		std::string name;
+	};
+
+	struct CharacterInfo {
+		SokuLib::Character id;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+		std::vector<std::string> skills;
+		std::map<unsigned short, Card> cards;
+	};
+
+	extern std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
+	extern std::map<SokuLib::Character, CharacterInfo> characterInfos;
 
 	enum TechDirection {
 		NEUTRAL_TECH,
@@ -177,7 +195,6 @@ namespace Practice
 
 	extern int idleCounter;
 	extern int dummyHitCounter;
-	extern std::map<std::string, std::vector<unsigned short>> characterSpellCards;
 	extern sf::RenderWindow *sfmlWindow;
 	extern char profilePath[1024 + MAX_PATH];
 	extern char profileParent[1024 + MAX_PATH];
