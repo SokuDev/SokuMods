@@ -37,6 +37,7 @@ namespace Practice
 		std::map<unsigned short, Card> cards;
 	};
 
+	extern std::string soku2Path;
 	extern std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
 	extern std::map<SokuLib::Character, CharacterInfo> characterInfos;
 
@@ -132,7 +133,7 @@ namespace Practice
 	std::istream &operator>>(std::istream &stream, Macro &macro);
 
 	struct MacroManager {
-		std::array<std::vector<Macro>, 20> macros;
+		std::map<SokuLib::Character, std::vector<Macro>> macros;
 
 		void save() const;
 		bool save(const std::string &path) const;

@@ -19,6 +19,7 @@
 
 namespace Practice
 {
+	std::string soku2Path;
 	std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
 	std::map<SokuLib::Character, CharacterInfo> characterInfos{
 		{ SokuLib::CHARACTER_REIMU,     { SokuLib::CHARACTER_REIMU,     "reimu",     "Reimu",     "Reimu Hakurei",          {"236", "214", "421", "623"} }},
@@ -433,11 +434,14 @@ namespace Practice
 			}
 		}
 
-		for (auto &macroArray : this->macros) {
+		for (auto &[id, infos] : characterInfos) {
 			unsigned short length;
+			auto &macroArray = this->macros[id];
 
 			stream.read(reinterpret_cast<char *>(&length), sizeof(length));
-			std::cout << "Macro array for " << SokuLib::charactersName[i++] << " has " << length << " entry/entries at load time" << std::endl;
+			if (stream.fail())
+				break;
+			std::cout << "Macro array for " << infos.fullName << " has " << length << " entry/entries at load time" << std::endl;
 			if (length >= 4096) {
 				MessageBoxA(
 					SokuLib::window,
@@ -477,13 +481,12 @@ namespace Practice
 	bool MacroManager::save(std::ofstream &stream, const std::string &path) const
 	{
 		unsigned magic = MAGIC_NUMBER_MACRO;
-		int i = 0;
 
 		stream.write(reinterpret_cast<char *>(&magic), sizeof(magic));
-		for (auto &macroArray : this->macros) {
+		for (auto &[id, macroArray] : this->macros) {
 			unsigned short length = macroArray.size();
 
-			std::cout << "Macro array for " << SokuLib::charactersName[i++] << " has " << length << " entry/entries at save time" << std::endl;
+			std::cout << "Macro array for " << characterInfos[id].fullName << " has " << length << " entry/entries at save time" << std::endl;
 			stream.write(reinterpret_cast<char *>(&length), sizeof(length));
 			for (const auto &macro : macroArray)
 				stream << macro;
@@ -493,8 +496,8 @@ namespace Practice
 
 	void MacroManager::import(const MacroManager &alternate)
 	{
-		for (int i = 0; i < this->macros.size(); i++)
-			this->macros[i].insert(this->macros[i].end(), alternate.macros[i].begin(), alternate.macros[i].end());
+		for (auto &[id, macros] : alternate.macros)
+			this->macros[id].insert(this->macros[id].end(), macros.begin(), macros.end());
 	}
 
 	std::ostream &operator<<(std::ostream &stream, const Macro &macro)

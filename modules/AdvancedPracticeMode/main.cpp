@@ -253,6 +253,10 @@ void loadSoku2Config()
 			*result = '\\';
 		PathRemoveFileSpecW(module_path);
 		printf("Found Soku2 module folder at %S\n", module_path);
+		Practice::soku2Path = std::string{
+			reinterpret_cast<char *>(module_path),
+			reinterpret_cast<char *>(module_path + wcslen(module_path))
+		};
 		PathAppendW(module_path, L"\\config\\info\\characters.csv");
 		loadSoku2CSV(module_path);
 		return;

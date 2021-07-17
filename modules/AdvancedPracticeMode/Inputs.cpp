@@ -213,12 +213,14 @@ namespace Practice
 			}
 		}
 
-		void _displayOrreriesSpecialStuff(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
+		void _displayOrreriesSpecialStuff(Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
 		{
+			Sprite &spell = cardsTextures[SokuLib::CHARACTER_MARISA][215];
+
 			spell.setSize({41 * size.y / 65, size.y});
 			spell.tint = DxSokuColor::White * alpha;
 			spell.rect.top = 0;
-			spell.rect.left = 15 * 41;
+			spell.rect.left = 0;
 			spell.rect.width = 41;
 			spell.rect.height = 65;
 			if (reverse) {
@@ -254,9 +256,10 @@ namespace Practice
 			}
 		}
 
-		void _drawSpell(Sprite &spell, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
+		void _drawSpell(SokuLib::Character chr, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Action action, float alpha) const
 		{
 			unsigned index = MoveSpriteDescriptor::_getSpellIndex(action);
+			Sprite &spell = cardsTextures[chr][200 + index];
 
 			spell.setSize({41 * size.y / 65, size.y});
 			spell.tint = DxSokuColor::White * alpha;
@@ -265,14 +268,14 @@ namespace Practice
 				pos.x -= size.x;
 				spell.setPosition(pos);
 				spell.rect.top = 0;
-				spell.rect.left = index * 41;
+				spell.rect.left = 0;
 				spell.rect.width = 41;
 				spell.rect.height = 65;
 				spell.draw();
 			} else {
 				spell.setPosition(pos);
 				spell.rect.top = 0;
-				spell.rect.left = index * 41;
+				spell.rect.left = 0;
 				spell.rect.width = 41;
 				spell.rect.height = 65;
 				spell.draw();
@@ -442,7 +445,7 @@ namespace Practice
 		}
 
 		//TODO: Pass a struct instead of this never-ending argument list
-		void draw(Sprite &skills, Sprite &spells, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action, float alpha = 1) const
+		void draw(Sprite &skills, Vector2<int> pos, Vector2<unsigned> size, bool reverse, SokuLib::Character character, SokuLib::Action action, float alpha = 1) const
 		{
 			this->_sprite.setSize(size);
 			this->_sprite.tint = DxSokuColor::White * alpha;
@@ -457,9 +460,9 @@ namespace Practice
 				(action >= FAKE_ACTION_lSC201 && action <= FAKE_ACTION_uSC212) ||
 				(action >= SokuLib::ACTION_SC_ID_200_ALT_EFFECT && action <= SokuLib::ACTION_SC_ID_219_ALT_EFFECT)
 			)
-				return this->_drawSpell(spells, pos, size, reverse, action, alpha);
+				return this->_drawSpell(character, pos, size, reverse, action, alpha);
 			else if (action >= SokuLib::ACTION_ORRERIES_B && action <= FAKE_ACTION_ORRERIES_REACTIVATE)
-				return this->_displayOrreriesSpecialStuff(spells, pos, size, reverse, action, alpha);
+				return this->_displayOrreriesSpecialStuff(pos, size, reverse, action, alpha);
 			else if (this->_isSkill)
 				return this->_drawSkill(skills, pos, size, reverse, character, action);
 			else
@@ -509,8 +512,6 @@ namespace Practice
 	static ID3DXLine *line[FRAMES_SIZE] = {nullptr};
 	static Sprite leftSkillSheet;
 	static Sprite rightSkillSheet;
-	static Sprite leftScSheet;
-	static Sprite rightScSheet;
 	static Sprite inputSheet;
 	static Sprite systemsSheet;
 	static MoveState lastLeftMove;
@@ -1641,10 +1642,16 @@ namespace Practice
 				D3DXCreateLine(SokuLib::pd3dDev, &line[i]);
 				line[i]->SetWidth(i * 10.f / FRAMES_SIZE);
 			}
-		Texture::loadFromFile(leftSkillSheet.texture,  (profile +  + "/assets/skills/" + characterInfos[SokuLib::leftChar].shortName  + "Skills.png").c_str());
-		Texture::loadFromFile(rightSkillSheet.texture, (profile +  + "/assets/skills/" + characterInfos[SokuLib::rightChar].shortName + "Skills.png").c_str());
-		Texture::loadFromFile(leftScSheet.texture,     (profile +  + "/assets/cards/"  + characterInfos[SokuLib::leftChar].shortName  + "Spells.png").c_str());
-		Texture::loadFromFile(rightScSheet.texture,    (profile +  + "/assets/cards/"  + characterInfos[SokuLib::rightChar].shortName + "Spells.png").c_str());
+
+		auto path1 = SokuLib::leftChar < SokuLib::CHARACTER_RANDOM ?
+			(std::string(profilePath) + "/assets/skills/" + characterInfos[SokuLib::leftChar].codeName + "Skills.png") :
+			(soku2Path + "/config/info/images/" + characterInfos[SokuLib::leftChar].codeName + "Skills.png");
+		auto path2 = SokuLib::rightChar < SokuLib::CHARACTER_RANDOM ?
+			(std::string(profilePath) + "/assets/skills/" + characterInfos[SokuLib::rightChar].codeName + "Skills.png") :
+			(soku2Path + "/config/info/images/" + characterInfos[SokuLib::rightChar].codeName + "Skills.png");
+
+		Texture::loadFromFile(leftSkillSheet.texture,  path1.c_str());
+		Texture::loadFromFile(rightSkillSheet.texture, path2.c_str());
 	}
 
 	bool isCancelableBy(SokuLib::Action last, SokuLib::Action action)
@@ -1940,7 +1947,7 @@ namespace Practice
 	}
 
 	//TODO: Pass a struct instead of this never-ending argument list
-	void drawInputList(Sprite &skills, Sprite &spells, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
+	void drawInputList(Sprite &skills, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
 	{
 		int baseX = offset.x;
 		int border = offset.x;
@@ -1985,7 +1992,7 @@ namespace Practice
 					inputSheet.tint = DxSokuColor::White * alpha;
 					inputSheet.draw();
 				}
-				it->second.draw(skills, spells, {border - (input.charged >= 16 ? SPRITE_SIZE - (SPRITE_SIZE / 4) : 0), offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
+				it->second.draw(skills, {border - (input.charged >= 16 ? SPRITE_SIZE - (SPRITE_SIZE / 4) : 0), offset.y}, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, !reversed, character, input.action, alpha);
 			}
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 			i++;
@@ -1994,7 +2001,7 @@ namespace Practice
 		}
 	}
 
-	void drawInputListOnlyMoves(Sprite &skills, Sprite &spells, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
+	void drawInputListOnlyMoves(Sprite &skills, const std::list<Input> &list, Vector2<int> offset, bool reversed, SokuLib::Character character)
 	{
 		int baseX = offset.x;
 		float alpha = MAX_ALPHA;
@@ -2031,7 +2038,7 @@ namespace Practice
 				else
 					offset.x += SPRITE_SIZE - (SPRITE_SIZE / 4);
 			}
-			it->second.draw(skills, spells, offset, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, reversed, character, input.action, alpha);
+			it->second.draw(skills, offset, {SPRITE_SIZE - (SPRITE_SIZE / 4), SPRITE_SIZE}, reversed, character, input.action, alpha);
 			alpha -= (MAX_ALPHA - MIN_ALPHA) / 10;
 
 			i++;
@@ -2115,11 +2122,11 @@ namespace Practice
 			if (settings.showRawInputs) {
 				leftBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 				leftBox.draw();
-				drawInputList(leftSkillSheet, leftScSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
+				drawInputList(leftSkillSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
 			} else {
 				leftBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
 				leftBox.draw();
-				drawInputListOnlyMoves(leftSkillSheet, leftScSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
+				drawInputListOnlyMoves(leftSkillSheet, leftInputList, {0, 0}, false, SokuLib::leftChar);
 			}
 		}
 		if (!leftInputList.empty() && settings.showLeftJoypad)
@@ -2129,12 +2136,12 @@ namespace Practice
 				rightBox.setSize({BOX_WIDTH, BOX_HEIGHT});
 				rightBox.setPosition({640 - BOX_WIDTH, 0});
 				rightBox.draw();
-				drawInputList(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH, 0}, true, SokuLib::rightChar);
+				drawInputList(rightSkillSheet, rightInputList, {640 - BOX_WIDTH, 0}, true, SokuLib::rightChar);
 			} else {
 				rightBox.setSize({BOX_WIDTH2, BOX_HEIGHT});
 				rightBox.setPosition({640 - BOX_WIDTH2, 0});
 				rightBox.draw();
-				drawInputListOnlyMoves(rightSkillSheet, rightScSheet, rightInputList, {640 - BOX_WIDTH2, 0}, true, SokuLib::rightChar);
+				drawInputListOnlyMoves(rightSkillSheet, rightInputList, {640 - BOX_WIDTH2, 0}, true, SokuLib::rightChar);
 			}
 		}
 		if (!rightInputList.empty() && settings.showRightJoypad)
