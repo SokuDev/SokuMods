@@ -480,3 +480,50 @@ target_link_libraries(
 )
 install(TARGETS "HostInBackground" LIBRARY DESTINATION "SWRSToys/modules/HostInBackground/")
 install(TARGETS "HostInBackground" LIBRARY DESTINATION "SokuEngine/modules/HostInBackground/")
+
+# WIP Module
+
+add_library(
+        "TrialMode"
+        MODULE
+        modules/TrialMode/main.cpp
+)
+target_compile_options(TrialMode PRIVATE /Zi)
+if (DEFINED NET)
+    set(NET APMNET=1)
+endif ()
+target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
+target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
+target_link_directories("TrialMode" PRIVATE lib)
+if ("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
+    set(TGUILIB "${TGUI_DIR}/lib/tgui-d.lib")
+    set(
+            SFMLLIBS
+            "${SFML_DIR}/lib/sfml-graphics-d.lib"
+            "${SFML_DIR}/lib/sfml-system-d.lib"
+            "${SFML_DIR}/lib/sfml-window-d.lib"
+    )
+else ()
+    set(TGUILIB "${TGUI_DIR}/lib/tgui.lib")
+    set(
+            SFMLLIBS
+            "${SFML_DIR}/lib/sfml-graphics.lib"
+            "${SFML_DIR}/lib/sfml-system.lib"
+            "${SFML_DIR}/lib/sfml-window.lib"
+    )
+endif ()
+target_link_libraries(
+        TrialMode
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        ${SFMLLIBS}
+        "${TGUILIB}"
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+message(${TGUILIB})
+message(${SFMLLIBS})
+install(TARGETS "TrialMode" LIBRARY DESTINATION "SWRSToys/modules/TrialMode/")
+install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
