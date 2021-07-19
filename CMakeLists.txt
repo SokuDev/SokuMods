@@ -486,7 +486,10 @@ install(TARGETS "HostInBackground" LIBRARY DESTINATION "SokuEngine/modules/HostI
 add_library(
         "TrialMode"
         MODULE
+        modules/TrialMode/TrialMode.rc
         modules/TrialMode/main.cpp
+	modules/TrialMode/Menu.cpp
+        modules/TrialMode/Menu.hpp
 )
 target_compile_options(TrialMode PRIVATE /Zi)
 if (DEFINED NET)

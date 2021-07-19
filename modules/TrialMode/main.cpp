@@ -3,11 +3,11 @@
 //
 
 #include "nlohmann/json.hpp"
+#include "Menu.hpp"
 #include <SokuLib.hpp>
 #include <fstream>
 #include <shlwapi.h>
 #include <string>
-#include <thread>
 #include <sstream>
 #include <dinput.h>
 
@@ -20,6 +20,7 @@ static int (SokuLib::Battle::* ogBattleOnProcess)();
 static int (SokuLib::Battle::* ogBattleOnRender)();
 static int (SokuLib::MenuResult::* ogResultOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnRender)();
+static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
 
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
@@ -176,24 +177,29 @@ int __fastcall myBattleOnRender(SokuLib::Battle *This)
 
 int __fastcall myResultOnProcess(SokuLib::MenuResult *This)
 {
-	auto &scene = SokuLib::currentScene;
-
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		return 0;
 	}
-	return 1;
+	return menuOnProcess(This);
 }
 
 int __fastcall myResultOnRender(SokuLib::MenuResult *This)
 {
+	menuOnRender(This);
 	return 0;
+}
+
+SokuLib::MenuResult *__fastcall myResultOnDestruct(SokuLib::MenuResult *This, int _, unsigned char param)
+{
+	menuUnloadAssets();
+	return (This->*ogResultOnDestruct)(param);
 }
 
 
 
-extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
-	char profilePath[1024 + MAX_PATH];
+extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
+{
 	char profileFolderPath[1024 + MAX_PATH];
 	DWORD old;
 
@@ -218,6 +224,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
 	ogResultOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Result.onRender,  myResultOnRender);
 	ogResultOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Result.onProcess, myResultOnProcess);
+	ogResultOnDestruct= SokuLib::TamperDword(&SokuLib::VTable_Result.onDestruct,myResultOnDestruct);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
@@ -225,6 +232,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	return true;
 }
 
-extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
+extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
+{
+	myModule = hModule;
 	return TRUE;
 }
