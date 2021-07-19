@@ -15,27 +15,27 @@
 #define printf(...)
 #endif
 
-static std::vector<SokuLib::Character> validCharacters{
-	SokuLib::CHARACTER_REIMU,
-	SokuLib::CHARACTER_MARISA,
-	SokuLib::CHARACTER_SAKUYA,
-	SokuLib::CHARACTER_ALICE,
-	SokuLib::CHARACTER_PATCHOULI,
-	SokuLib::CHARACTER_YOUMU,
-	SokuLib::CHARACTER_REMILIA,
-	SokuLib::CHARACTER_YUYUKO,
-	SokuLib::CHARACTER_YUKARI,
-	SokuLib::CHARACTER_SUIKA,
-	SokuLib::CHARACTER_REISEN,
-	SokuLib::CHARACTER_AYA,
-	SokuLib::CHARACTER_KOMACHI,
-	SokuLib::CHARACTER_IKU,
-	SokuLib::CHARACTER_TENSHI,
-	SokuLib::CHARACTER_SANAE,
-	SokuLib::CHARACTER_CIRNO,
-	SokuLib::CHARACTER_MEILING,
-	SokuLib::CHARACTER_UTSUHO,
-	SokuLib::CHARACTER_SUWAKO
+std::map<unsigned, std::string> validCharacters{
+	{ SokuLib::CHARACTER_REIMU, "reimu" },
+	{ SokuLib::CHARACTER_MARISA, "marisa" },
+	{ SokuLib::CHARACTER_SAKUYA, "sakuya" },
+	{ SokuLib::CHARACTER_ALICE, "alice" },
+	{ SokuLib::CHARACTER_PATCHOULI, "patchouli" },
+	{ SokuLib::CHARACTER_YOUMU, "youmu" },
+	{ SokuLib::CHARACTER_REMILIA, "remilia" },
+	{ SokuLib::CHARACTER_YUYUKO, "yuyuko" },
+	{ SokuLib::CHARACTER_YUKARI, "yukari" },
+	{ SokuLib::CHARACTER_SUIKA, "suika" },
+	{ SokuLib::CHARACTER_REISEN, "udonge" },
+	{ SokuLib::CHARACTER_AYA, "aya" },
+	{ SokuLib::CHARACTER_KOMACHI, "komachi" },
+	{ SokuLib::CHARACTER_IKU, "iku" },
+	{ SokuLib::CHARACTER_TENSHI, "tenshi" },
+	{ SokuLib::CHARACTER_SANAE, "sanae" },
+	{ SokuLib::CHARACTER_CIRNO, "chirno" },
+	{ SokuLib::CHARACTER_MEILING, "meirin" },
+	{ SokuLib::CHARACTER_UTSUHO, "utsuho" },
+	{ SokuLib::CHARACTER_SUWAKO, "suwako" },
 };
 
 void loadSoku2CSV(LPWSTR path)
@@ -51,8 +51,10 @@ void loadSoku2CSV(LPWSTR path)
 		std::stringstream str{line};
 		unsigned id;
 		std::string idStr;
+		std::string codeName;
 
 		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
 		if (str.fail()) {
 			printf("Skipping line %s: Stream failed\n", line.c_str());
 			continue;
@@ -63,7 +65,7 @@ void loadSoku2CSV(LPWSTR path)
 			printf("Skipping line %s: Invalid id\n", line.c_str());
 			continue;
 		}
-		validCharacters.push_back(static_cast<SokuLib::Character>(id));
+		validCharacters[id] = codeName;
 	}
 }
 
@@ -165,7 +167,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	GetModuleFileName(hMyModule, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
 	strcpy(profileFolderPath, profilePath);
-	PathAppend(profilePath, "DiscordIntegration.ini");
+	PathAppend(profilePath, "TrialMode.ini");
 	LoadSettings(profilePath, profileFolderPath);
 
 	// DWORD old;
