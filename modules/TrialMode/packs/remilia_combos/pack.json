@@ -1,5 +1,6 @@
 {
-    "name": "Remilia basic combos",
+    "name": "Basic combos",
+    "category": "Remilia Scarlet",
     "characters": [
         "remilia",
         "reimu"
@@ -22,48 +23,56 @@
             "name": "BnB midscreen 1",
             "face": "remilia",
             "file": "bnbmid1.json",
+            "preview": "bnbmid1.png",
             "description": ""
         },
         {
             "name": "BnB midscreen 2",
             "face": "remilia",
             "file": "bnbmid2.json",
+            "preview": "bnbmid2.png",
             "description": ""
         },
         {
             "name": "BnB midscreen 3",
             "face": "remilia",
             "file": "bnbmid3.json",
+            "preview": "bnbmid3.png",
             "description": ""
         },
         {
             "name": "BnB corner 1",
             "face": "remilia",
             "file": "bnbcorn1.json",
+            "preview": "bnbcorn1.png",
             "description": ""
         },
         {
             "name": "BnB corner 2",
             "face": "remilia",
             "file": "bnbcorn2.json",
+            "preview": "bnbcorn2.png",
             "description": ""
         },
         {
             "name": "BnB corner 3",
             "face": "remilia",
             "file": "bnbcorn3.json",
+            "preview": "bnbcorn3.png",
             "description": ""
         },
         {
             "name": "BnB aerial 1",
             "face": "remilia",
             "file": "bnbair1.json",
+            "preview": "bnbair1.png",
             "description": ""
         },
         {
             "name": "BnB aerial 2",
             "face": "remilia",
             "file": "bnbair2.json",
+            "preview": "bnbair2.png",
             "description": ""
         },
         {
