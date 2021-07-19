@@ -15,6 +15,8 @@
 #define printf(...)
 #endif
 
+static int (SokuLib::Battle::* ogBattleOnProcess)();
+
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
 	{ SokuLib::CHARACTER_MARISA, "marisa" },
@@ -146,13 +148,23 @@ void LoadSettings(LPCSTR profilePath, LPCSTR profileFolderPath)
 	loadAllPacks(profilePath, profileFolderPath, buffer);
 }
 
+
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(hash, SokuLib::targetHash, 16) == 0;
+}
+// ToDo Launch Text function
+int __fastcall myBattleOnProcess(SokuLib::Battle *This)
+{
+	int buffer = (This->*ogBattleOnProcess)();
+	SokuLib::textureMgr.;
+	return buffer;
 }
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	char profilePath[1024 + MAX_PATH];
 	char profileFolderPath[1024 + MAX_PATH];
+	DWORD old;
 
 #ifdef _DEBUG
 	FILE *_;
@@ -170,17 +182,11 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	PathAppend(profilePath, "TrialMode.ini");
 	LoadSettings(profilePath, profileFolderPath);
 
-	// DWORD old;
-	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_EXECUTE_WRITECOPY, &old);
-	// s_origCLogo_OnProcess   = TamperDword(vtbl_CLogo   + 4, (DWORD)CLogo_OnProcess);
-	// s_origCBattle_OnProcess = TamperDword(vtbl_CBattle + 4, (DWORD)CBattle_OnProcess);
-	// s_origCBattleSV_OnProcess = TamperDword(vtbl_CBattleSV + 4, (DWORD)CBattleSV_OnProcess);
-	// s_origCBattleCL_OnProcess = TamperDword(vtbl_CBattleCL + 4, (DWORD)CBattleCL_OnProcess);
-	// s_origCTitle_OnProcess  = TamperDword(vtbl_CTitle  + 4, (DWORD)CTitle_OnProcess);
-	// s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
-	//::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
+	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+	ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
+	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
-	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	puts("Done...");
 	return true;
 }
