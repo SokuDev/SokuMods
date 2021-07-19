@@ -9,6 +9,7 @@
 #include <string>
 #include <thread>
 #include <sstream>
+#include <dinput.h>
 
 #ifndef _DEBUG
 #define puts(...)
@@ -17,6 +18,8 @@
 
 static int (SokuLib::Battle::* ogBattleOnProcess)();
 static int (SokuLib::Battle::* ogBattleOnRender)();
+static int (SokuLib::MenuResult::* ogResultOnProcess)();
+static int (SokuLib::MenuResult::* ogResultOnRender)();
 
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
@@ -153,6 +156,9 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(hash, SokuLib::targetHash, 16) == 0;
 }
 
+
+
+
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
@@ -167,6 +173,24 @@ int __fastcall myBattleOnRender(SokuLib::Battle *This)
 
 	return buffer;
 }
+
+int __fastcall myResultOnProcess(SokuLib::MenuResult *This)
+{
+	auto &scene = SokuLib::currentScene;
+
+	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		return 0;
+	}
+	return 1;
+}
+
+int __fastcall myResultOnRender(SokuLib::MenuResult *This)
+{
+	return 0;
+}
+
+
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	char profilePath[1024 + MAX_PATH];
@@ -192,8 +216,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	ogBattleOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Battle.onRender,  myBattleOnRender);
 	ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
-	//ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
-	//ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
+	ogResultOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Result.onRender,  myResultOnRender);
+	ogResultOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Result.onProcess, myResultOnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
