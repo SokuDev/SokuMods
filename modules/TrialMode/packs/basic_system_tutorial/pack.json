@@ -1,0 +1,32 @@
+{
+    "name": "Basic system mechanics",
+    "characters": [
+        "reimu",
+        "marisa",
+        "cirno",
+        "sanae",
+        "meirin",
+        "patchouli"
+    ],
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "/data/character/remilia/face/face000.bmp",
+        "offset": {
+            "x": 0,
+            "y": 0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0
+        }
+    },
+    "scenarios": [
+        {
+            "name": "",
+            "face": "",
+            "file": ".json",
+            "description": ""
+        }
+    ]
+}
