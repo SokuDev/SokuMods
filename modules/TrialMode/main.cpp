@@ -16,6 +16,7 @@
 #endif
 
 static int (SokuLib::Battle::* ogBattleOnProcess)();
+static int (SokuLib::Battle::* ogBattleOnRender)();
 
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
@@ -148,16 +149,22 @@ void LoadSettings(LPCSTR profilePath, LPCSTR profileFolderPath)
 	loadAllPacks(profilePath, profileFolderPath, buffer);
 }
 
-
-
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(hash, SokuLib::targetHash, 16) == 0;
 }
+
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnProcess)();
-	SokuLib::textureMgr.;
+	//SokuLib::textureMgr.;
+	return buffer;
+}
+
+int __fastcall myBattleOnRender(SokuLib::Battle *This)
+{
+	int buffer = (This->*ogBattleOnRender)();
+
 	return buffer;
 }
 
@@ -183,7 +190,10 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	LoadSettings(profilePath, profileFolderPath);
 
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+	ogBattleOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Battle.onRender,  myBattleOnRender);
 	ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
+	//ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
+	//ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
