@@ -3,11 +3,11 @@
 //
 
 #include "nlohmann/json.hpp"
-#include "Menu.hpp"
 #include <SokuLib.hpp>
 #include <fstream>
 #include <shlwapi.h>
 #include <string>
+#include <thread>
 #include <sstream>
 #include <dinput.h>
 
@@ -20,7 +20,8 @@ static int (SokuLib::Battle::* ogBattleOnProcess)();
 static int (SokuLib::Battle::* ogBattleOnRender)();
 static int (SokuLib::MenuResult::* ogResultOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnRender)();
-static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
+static bool stopToRepeat = false;
+static SokuLib::DrawUtils::Sprite sprite;
 
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
@@ -160,46 +161,54 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 
 
 
+
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnProcess)();
-	//SokuLib::textureMgr.;
+
+	if (!stopToRepeat) {
+		sprite.texture.loadFromGame("data/scene/select/character/08b_circle/circle_16.bmp");
+		stopToRepeat = true;
+	}
+
 	return buffer;
 }
+
 
 int __fastcall myBattleOnRender(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnRender)();
+	sprite.setPosition(SokuLib::DrawUtils::Vector2<int>{200, 300});
+	sprite.setSize({128, 128});
+	sprite.rect.top = sprite.rect.width = 0;
+	sprite.rect.width = sprite.texture.getSize().x;
+	sprite.rect.height = sprite.texture.getSize().y;
+	sprite.draw();
 
 	return buffer;
 }
 
 int __fastcall myResultOnProcess(SokuLib::MenuResult *This)
 {
+	auto &scene = SokuLib::currentScene;
+
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		return 0;
 	}
-	return menuOnProcess(This);
+	return 1;
 }
 
 int __fastcall myResultOnRender(SokuLib::MenuResult *This)
 {
-	menuOnRender(This);
 	return 0;
 }
 
-SokuLib::MenuResult *__fastcall myResultOnDestruct(SokuLib::MenuResult *This, int _, unsigned char param)
-{
-	menuUnloadAssets();
-	return (This->*ogResultOnDestruct)(param);
-}
 
 
-
-extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
-{
+extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
+	char profilePath[1024 + MAX_PATH];
 	char profileFolderPath[1024 + MAX_PATH];
 	DWORD old;
 
@@ -224,7 +233,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	ogBattleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess, myBattleOnProcess);
 	ogResultOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Result.onRender,  myResultOnRender);
 	ogResultOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Result.onProcess, myResultOnProcess);
-	ogResultOnDestruct= SokuLib::TamperDword(&SokuLib::VTable_Result.onDestruct,myResultOnDestruct);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
@@ -232,8 +240,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	return true;
 }
 
-extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
-{
-	myModule = hModule;
+extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 	return TRUE;
 }
