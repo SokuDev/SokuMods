@@ -1,0 +1,76 @@
+{
+    "name": "Remilia basic combos",
+    "characters": [
+        "remilia",
+        "reimu"
+    ],
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "/data/character/remilia/face/face000.bmp",
+        "offset": {
+            "x": 0,
+            "y": 0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0
+        }
+    },
+    "scenarios": [
+        {
+            "name": "BnB midscreen 1",
+            "face": "remilia",
+            "file": "bnbmid1.json",
+            "description": ""
+        },
+        {
+            "name": "BnB midscreen 2",
+            "face": "remilia",
+            "file": "bnbmid2.json",
+            "description": ""
+        },
+        {
+            "name": "BnB midscreen 3",
+            "face": "remilia",
+            "file": "bnbmid3.json",
+            "description": ""
+        },
+        {
+            "name": "BnB corner 1",
+            "face": "remilia",
+            "file": "bnbcorn1.json",
+            "description": ""
+        },
+        {
+            "name": "BnB corner 2",
+            "face": "remilia",
+            "file": "bnbcorn2.json",
+            "description": ""
+        },
+        {
+            "name": "BnB corner 3",
+            "face": "remilia",
+            "file": "bnbcorn3.json",
+            "description": ""
+        },
+        {
+            "name": "BnB aerial 1",
+            "face": "remilia",
+            "file": "bnbair1.json",
+            "description": ""
+        },
+        {
+            "name": "BnB aerial 2",
+            "face": "remilia",
+            "file": "bnbair2.json",
+            "description": ""
+        },
+        {
+            "name": "BnB aerial 3",
+            "face": "remilia",
+            "file": "bnbair3.json",
+            "description": ""
+        }
+    ]
+}
