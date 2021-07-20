@@ -3,12 +3,13 @@
 //
 
 #include "Menu.hpp"
+#include "Pack.hpp"
 
 static bool loaded = false;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
 
-HMODULE myModule = NULL;
+HMODULE myModule;
 char profilePath[1024 + MAX_PATH];
 
 void menuLoadAssets()
@@ -26,10 +27,14 @@ void menuLoadAssets()
 	};
 	previewContainer.setPosition({310, 92});
 	previewContainer.setSize({365, 345});
-	previewContainer.tint = SokuLib::DrawUtils::DxSokuColor::White;
-	//previewContainer.;
 
 	packContainer.texture.loadFromResource(myModule, MAKEINTRESOURCE(4));
+	packContainer.rect = {
+		0, 0,
+		static_cast<int>(previewContainer.texture.getSize().x),
+		static_cast<int>(previewContainer.texture.getSize().y),
+	};
+	packContainer.setSize(packContainer.texture.getSize());
 }
 
 void menuUnloadAssets()
@@ -57,5 +62,5 @@ int menuOnProcess(SokuLib::MenuResult *This)
 
 void menuOnRender(SokuLib::MenuResult *This)
 {
-
+	previewContainer.draw();
 }
