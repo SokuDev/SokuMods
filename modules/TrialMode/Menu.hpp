@@ -9,7 +9,11 @@
 #include <SokuLib.hpp>
 
 extern char profilePath[1024 + MAX_PATH];
+extern char profileFolderPath[1024 + MAX_PATH];
 extern HMODULE myModule;
+extern SokuLib::SWRFont defaultFont8;
+extern SokuLib::SWRFont defaultFont10;
+extern SokuLib::SWRFont defaultFont16;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);

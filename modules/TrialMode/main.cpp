@@ -4,6 +4,7 @@
 
 #include "nlohmann/json.hpp"
 #include "Menu.hpp"
+#include "Pack.hpp"
 #include <SokuLib.hpp>
 #include <fstream>
 #include <shlwapi.h>
@@ -23,29 +24,6 @@ static int (SokuLib::MenuResult::* ogResultOnRender)();
 static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
 static bool stopToRepeat = false;
 static SokuLib::DrawUtils::Sprite sprite;
-
-std::map<unsigned, std::string> validCharacters{
-	{ SokuLib::CHARACTER_REIMU, "reimu" },
-	{ SokuLib::CHARACTER_MARISA, "marisa" },
-	{ SokuLib::CHARACTER_SAKUYA, "sakuya" },
-	{ SokuLib::CHARACTER_ALICE, "alice" },
-	{ SokuLib::CHARACTER_PATCHOULI, "patchouli" },
-	{ SokuLib::CHARACTER_YOUMU, "youmu" },
-	{ SokuLib::CHARACTER_REMILIA, "remilia" },
-	{ SokuLib::CHARACTER_YUYUKO, "yuyuko" },
-	{ SokuLib::CHARACTER_YUKARI, "yukari" },
-	{ SokuLib::CHARACTER_SUIKA, "suika" },
-	{ SokuLib::CHARACTER_REISEN, "udonge" },
-	{ SokuLib::CHARACTER_AYA, "aya" },
-	{ SokuLib::CHARACTER_KOMACHI, "komachi" },
-	{ SokuLib::CHARACTER_IKU, "iku" },
-	{ SokuLib::CHARACTER_TENSHI, "tenshi" },
-	{ SokuLib::CHARACTER_SANAE, "sanae" },
-	{ SokuLib::CHARACTER_CIRNO, "chirno" },
-	{ SokuLib::CHARACTER_MEILING, "meirin" },
-	{ SokuLib::CHARACTER_UTSUHO, "utsuho" },
-	{ SokuLib::CHARACTER_SUWAKO, "suwako" },
-};
 
 void loadSoku2CSV(LPWSTR path)
 {
@@ -123,6 +101,7 @@ void loadSoku2Config()
 		if (wcscmp(filename, L"soku2.dll") != 0)
 			continue;
 
+		hasSoku2 = true;
 		wcscpy(module_path, app_path);
 		PathAppendW(module_path, moduleValue);
 		while (auto result = wcschr(module_path, '/'))
@@ -135,24 +114,20 @@ void loadSoku2Config()
 	}
 }
 
-void loadPack(char *path)
-{
-
-}
-
-void loadAllPacks(LPCSTR profilePath, LPCSTR profileFolderPath, char *path)
-{
-
-}
-
 // �ݒ胍�[�h
-void LoadSettings(LPCSTR profilePath, LPCSTR profileFolderPath)
+void LoadSettings()
 {
 	char buffer[MAX_PATH];
 
 	puts("Loading settings...");
-	GetPrivateProfileStringA("TrialMode", "RefreshTime", "packs", buffer, sizeof(buffer), profilePath);
-	loadAllPacks(profilePath, profileFolderPath, buffer);
+	*packsLocation = 0;
+	if (GetPrivateProfileInt("TrialMode", "IsPathAbsolute", 1, profilePath)) {
+		strcpy(packsLocation, profileFolderPath);
+		strcat(packsLocation, "\\");
+	}
+	GetPrivateProfileString("TrialMode", "PackLocation", "packs", buffer, sizeof(buffer), profilePath);
+	strcat(packsLocation, buffer);
+	strcat(packsLocation, "\\*");
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
@@ -215,7 +190,6 @@ SokuLib::MenuResult *__fastcall myResultOnDestruct(SokuLib::MenuResult *This, in
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 {
-	char profileFolderPath[1024 + MAX_PATH];
 	DWORD old;
 
 #ifdef _DEBUG
@@ -232,7 +206,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	PathRemoveFileSpec(profilePath);
 	strcpy(profileFolderPath, profilePath);
 	PathAppend(profilePath, "TrialMode.ini");
-	LoadSettings(profilePath, profileFolderPath);
+	LoadSettings();
 
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	ogBattleOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Battle.onRender,  myBattleOnRender);

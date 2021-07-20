@@ -8,7 +8,7 @@
     "author": "PinkySmile",
     "icon": {
         "isPath": false,
-        "path": "/data/character/remilia/face/face000.bmp",
+        "path": "data/character/remilia/face/face000.bmp",
         "offset": {
             "x": 0,
             "y": 0

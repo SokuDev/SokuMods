@@ -12,7 +12,7 @@
     "author": "PinkySmile",
     "icon": {
         "isPath": false,
-        "path": "/data/scene/select/character/08b_circle/circle_16.bmp",
+        "path": "data/scene/select/character/08b_circle/circle_16.bmp",
         "offset": {
             "x": 0,
             "y": 0
