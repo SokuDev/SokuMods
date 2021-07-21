@@ -2,15 +2,16 @@
 // Created by Gegel85 on 31/10/2020
 //
 
-#include "nlohmann/json.hpp"
-#include "Menu.hpp"
-#include "Pack.hpp"
 #include <SokuLib.hpp>
 #include <fstream>
 #include <shlwapi.h>
 #include <string>
 #include <sstream>
 #include <dinput.h>
+#include "BattleAnimation.hpp"
+#include "nlohmann/json.hpp"
+#include "Menu.hpp"
+#include "Pack.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -22,8 +23,6 @@ static int (SokuLib::Battle::* ogBattleOnRender)();
 static int (SokuLib::MenuResult::* ogResultOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnRender)();
 static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
-static bool stopToRepeat = false;
-static SokuLib::DrawUtils::Sprite sprite;
 
 void loadSoku2CSV(LPWSTR path)
 {
@@ -143,24 +142,12 @@ int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnProcess)();
 
-	if (!stopToRepeat) {
-		sprite.texture.loadFromGame("data/scene/select/character/08b_circle/circle_16.bmp");
-		stopToRepeat = true;
-	}
-
 	return buffer;
 }
-
 
 int __fastcall myBattleOnRender(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnRender)();
-	sprite.setPosition(SokuLib::Vector2<int>{200, 300});
-	sprite.setSize({128, 128});
-	sprite.rect.top = sprite.rect.width = 0;
-	sprite.rect.width = sprite.texture.getSize().x;
-	sprite.rect.height = sprite.texture.getSize().y;
-	sprite.draw();
 
 	return buffer;
 }

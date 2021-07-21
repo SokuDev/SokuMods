@@ -490,7 +490,7 @@ add_library(
         modules/TrialMode/main.cpp
 	modules/TrialMode/Menu.cpp
         modules/TrialMode/Menu.hpp
-)
+        modules/TrialMode/Pack.cpp modules/TrialMode/Pack.hpp modules/TrialMode/BattleAnimation.cpp modules/TrialMode/BattleAnimation.hpp)
 target_compile_options(TrialMode PRIVATE /Zi)
 if (DEFINED NET)
     set(NET APMNET=1)
