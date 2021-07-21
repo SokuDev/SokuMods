@@ -16,14 +16,18 @@
 #endif
 
 struct Icon {
+	SokuLib::Vector2f translate = {0, 0};
 	SokuLib::DrawUtils::Sprite sprite;
-	SokuLib::DrawUtils::Vector2<int> offset = {0, 0};
-	SokuLib::DrawUtils::Vector2<float> scale = {0, 0};
 
 	Icon(const std::string &path, const nlohmann::json &object);
 };
 
-struct Scenario {
+class Scenario {
+private:
+	std::string _name;
+	std::string _description;
+
+public:
 	std::string file;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite preview;
@@ -32,7 +36,13 @@ struct Scenario {
 	Scenario(int i, const std::string &path, const nlohmann::json &object);
 };
 
-struct Pack {
+class Pack {
+private:
+	std::string _name;
+	std::string _error;
+	std::string _author;
+
+public:
 	std::string category;
 	std::unique_ptr<Icon> icon;
 	std::vector<std::unique_ptr<Scenario>> scenarios;
@@ -43,7 +53,8 @@ struct Pack {
 	Pack(const std::string &path, const nlohmann::json &object);
 };
 
-extern std::vector<std::unique_ptr<Pack>> loadedPacks;
+extern std::vector<std::string> uniqueCategories;
+extern std::vector<std::shared_ptr<Pack>> loadedPacks;
 extern std::map<unsigned, std::string> validCharacters;
 extern const std::map<unsigned, std::string> swrCharacters;
 extern bool hasSoku2;
