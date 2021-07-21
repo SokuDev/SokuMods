@@ -11,7 +11,7 @@
 extern char profilePath[1024 + MAX_PATH];
 extern char profileFolderPath[1024 + MAX_PATH];
 extern HMODULE myModule;
-extern SokuLib::SWRFont defaultFont8;
+extern SokuLib::SWRFont defaultFont10;
 extern SokuLib::SWRFont defaultFont12;
 extern SokuLib::SWRFont defaultFont16;
 

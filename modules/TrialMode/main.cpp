@@ -2,14 +2,15 @@
 // Created by Gegel85 on 31/10/2020
 //
 
-#include <SokuLib.hpp>
 #include <fstream>
-#include <shlwapi.h>
 #include <string>
 #include <sstream>
+#include <ctime>
+#include <shlwapi.h>
 #include <dinput.h>
+#include <nlohmann/json.hpp>
+#include <SokuLib.hpp>
 #include "BattleAnimation.hpp"
-#include "nlohmann/json.hpp"
 #include "Menu.hpp"
 #include "Pack.hpp"
 
@@ -205,6 +206,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	puts("Done...");
+	srand(time(nullptr));
 	return true;
 }
 

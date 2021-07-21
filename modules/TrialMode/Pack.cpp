@@ -38,6 +38,22 @@ const std::map<unsigned, std::string> swrCharacters{
 };
 char packsLocation[1024 + MAX_PATH];
 
+static std::vector<std::string> authors{
+	"Baka Cirno",
+	"Illuminated Catfish",
+	"Fun frog that never wakes back up",
+	"Marisa's tongue",
+	"The great wall",
+	"Spinning Ran",
+	"Hieda no Akyuu",
+	"Book stealing rats",
+	"Sakuya the cat",
+	"Insane Marisa",
+	"A scary jelly donut",
+	"The light eater",
+	"Frightened Youmu",
+};
+
 bool isInvalidPath(const std::string &path)
 {
 	if (path.find("/../") != std::string::npos)
@@ -78,28 +94,29 @@ static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::
 
 	if (msg.empty())
 		PANIC;
-	pack.error.texture.createFromText(msg.c_str(), defaultFont8, {0x100, 30});
+	pack.error.texture.createFromText(msg.c_str(), defaultFont10, {0x100, 30});
 	pack.error.setSize(pack.error.texture.getSize());
 	pack.error.rect = {
 		0, 0,
 		static_cast<int>(pack.error.texture.getSize().x),
 		static_cast<int>(pack.error.texture.getSize().y),
 	};
-	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = RED_COLOR;
-	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= RED_COLOR;
+	pack.error.tint = SokuLib::DrawUtils::DxSokuColor::Red;
 	pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = RED_COLOR;
 	pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = RED_COLOR;
 }
 
 static void makeAuthorStr(Pack &pack, const std::string &str)
 {
-	pack.author.texture.createFromText(("By " + str).c_str(), defaultFont8, {0x100, 30});
+	SokuLib::Vector2i size;
+
+	pack.author.texture.createFromText(("By " + str).c_str(), defaultFont10, {0x100, 14}, &size);
 	pack.author.rect = {
 		0, 0,
-		static_cast<int>(pack.author.texture.getSize().x),
-		static_cast<int>(pack.author.texture.getSize().y),
+		static_cast<int>(size.x),
+		static_cast<int>(size.y),
 	};
-	pack.author.setSize(pack.author.texture.getSize());
+	pack.author.setSize((size - 1).to<unsigned>());
 }
 
 Pack::Pack(const std::string &path, const nlohmann::json &object)
@@ -127,11 +144,16 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
 
-	this->_name = object.contains("icon") && object["name"].is_string() ? object["name"].get<std::string>() : path;
-	this->name.texture.createFromText(this->_name.c_str(), defaultFont12, {0x100, 32}, &size);
-	this->name.rect = {0, 0, size.x, size.y,};
+	this->_name = this->category + ": " + (object.contains("icon") && object["name"].is_string() ? object["name"].get<std::string>() : path);
+	this->name.texture.createFromText(this->_name.c_str(), defaultFont12, {0x100, 30}, &size);
+	this->name.rect = {0, 0, size.x, size.y};
 	this->name.setSize((size - 1).to<unsigned>());
-	printf("Resulting size: %u %u\n", this->name.texture.getSize().x, this->name.texture.getSize().y);
+
+	if (object.contains("icon")) {
+		this->icon = std::make_unique<Icon>(path, object["icon"]);
+		if (!this->icon->sprite.texture.hasTexture())
+			this->icon.reset();
+	}
 
 	if (object.contains("characters") && object["characters"].is_array()) {
 		bool swrNeeded = false;
@@ -172,15 +194,15 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 
 		if (!invalidChars.empty() || swrNeeded)
 			generateErrorMsg(*this, swrNeeded, invalidChars);
-		else if (object.contains("author") && object["author"].is_string()) {
-			makeAuthorStr(*this, object["author"]);
+		else {
+			makeAuthorStr(
+				*this,
+				object.contains("author") && object["author"].is_string() ?
+					object["author"].get<std::string>() :
+					authors[rand() % authors.size()]
+			);
 			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = BLUE_COLOR;
 			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = BLUE_COLOR;
-			if (object.contains("icon")) {
-				this->icon = std::make_unique<Icon>(path, object["icon"]);
-				if (!this->icon->sprite.texture.hasTexture())
-					this->icon.reset();
-			}
 		}
 	} else
 		MessageBox(
@@ -204,8 +226,10 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 				"Trial pack warning",
 				MB_ICONWARNING
 			);
-		} else
-			this->scenarios.emplace_back(scene);
+			continue;
+		}
+		this->scenarios.emplace_back(scene);
+		scene->name.tint = SokuLib::DrawUtils::DxSokuColor::Red;
 	}
 	if (this->scenarios.empty()) {
 		MessageBox(
@@ -231,7 +255,7 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 	this->file = object["file"];
 	this->name.texture.createFromText(
 		(object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : "Scenario #" + std::to_string(i)).c_str(),
-		defaultFont8, {0x100, 30}
+		defaultFont10, {0x100, 30}
 	);
 	this->name.rect = {
 		0, 0,
@@ -242,7 +266,7 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 
 	this->description.texture.createFromText(
 		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
-		defaultFont8, {0x100, 30}
+		defaultFont10, {0x100, 14}
 	);
 	this->description.rect = {
 		0, 0,

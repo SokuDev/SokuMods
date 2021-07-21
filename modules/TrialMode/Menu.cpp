@@ -8,10 +8,11 @@
 static unsigned currentPack = 0;
 static unsigned currentEntry = 0;
 static bool loaded = false;
+static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
 
-SokuLib::SWRFont defaultFont8;
+SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
 HMODULE myModule;
@@ -28,7 +29,7 @@ void loadFont()
 	desc.g2 = 255;
 	desc.b1 = 255;
 	desc.b2 = 255;
-	desc.height = 8;
+	desc.height = 10;
 	desc.weight = FW_BOLD;
 	desc.italic = 0;
 	desc.shadow = 2;
@@ -40,8 +41,8 @@ void loadFont()
 	desc.useOffset = 0;
 	strcpy(desc.faceName, SokuLib::defaultFontName);
 	desc.weight = FW_REGULAR;
-	defaultFont8.create();
-	defaultFont8.setIndirect(desc);
+	defaultFont10.create();
+	defaultFont10.setIndirect(desc);
 
 	desc.height = 12;
 	defaultFont12.create();
@@ -75,6 +76,17 @@ void menuLoadAssets()
 		static_cast<int>(packContainer.texture.getSize().y),
 	};
 	packContainer.setSize(packContainer.texture.getSize() - 1);
+
+	missingIcon.texture.loadFromResource(myModule, MAKEINTRESOURCE(8));
+	missingIcon.rect = {
+		0, 0,
+		static_cast<int>(missingIcon.texture.getSize().x),
+		static_cast<int>(missingIcon.texture.getSize().y),
+	};
+	missingIcon.setSize({32, 32});
+	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
+	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
+
 	loadFont();
 	loadPacks();
 	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
@@ -91,7 +103,7 @@ void menuUnloadAssets()
 	loaded = false;
 	puts("Unloading assets");
 
-	defaultFont8.destruct();
+	defaultFont10.destruct();
 	defaultFont12.destruct();
 	defaultFont16.destruct();
 	previewContainer.texture.destroy();
@@ -129,12 +141,33 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 			static_cast<int>(pos.y + 2)
 		} + pack.icon->translate);
 		pack.icon->sprite.draw();
+	} else {
+		missingIcon.setPosition({
+			static_cast<int>(pos.x + 34),
+			static_cast<int>(pos.y - 1)
+		});
+		missingIcon.draw();
 	}
+
 	pack.name.setPosition({
 		static_cast<int>(pos.x + 74),
-		static_cast<int>(pos.y + 3)
+		static_cast<int>(pos.y + 2)
 	});
 	pack.name.draw();
+
+	if (pack.error.texture.hasTexture()) {
+		pack.error.setPosition({
+			static_cast<int>(pos.x + 75),
+			static_cast<int>(pos.y + 17)
+		});
+		pack.error.draw();
+	} else {
+		pack.author.setPosition({
+			static_cast<int>(pos.x + 75),
+			static_cast<int>(pos.y + 17)
+		});
+		pack.author.draw();
+	}
 	pos.y += 40;
 }
 
