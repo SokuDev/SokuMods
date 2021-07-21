@@ -132,20 +132,13 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		);
 		return;
 	}
-	if (!object.contains("scenarios") || !object["scenarios"].is_array()) {
-		MessageBox(
-			SokuLib::window,
-			("Trial pack " + path + " is not valid: pack.json doesn't contain a valid scenarios list").c_str(),
-			"Trial pack loading error",
-			MB_ICONERROR
-		);
-		return;
-	}
 
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
 
-	this->_name = this->category + ": " + (object.contains("icon") && object["name"].is_string() ? object["name"].get<std::string>() : path);
-	this->name.texture.createFromText(this->_name.c_str(), defaultFont12, {0x100, 30}, &size);
+	this->name.texture.createFromText(
+		(this->category + ": " + (object.contains("icon") && object["name"].is_string() ? object["name"].get<std::string>() : path)).c_str(),
+		defaultFont12, {0x100, 30}, &size
+	);
 	this->name.rect = {0, 0, size.x, size.y};
 	this->name.setSize((size - 1).to<unsigned>());
 
@@ -154,6 +147,43 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		if (!this->icon->sprite.texture.hasTexture())
 			this->icon.reset();
 	}
+
+	if (object.contains("stand") && object["stand"].is_object()) {
+		auto &obj = object["stand"];
+
+		if (!obj.contains("path") || !obj["path"].is_string())
+			goto invalidPreview;
+		if (obj.contains("isPath") && obj["isPath"]) {
+			std::string relative = obj["path"];
+
+			if (!isInvalidPath(relative)) {
+				printf("%s is not a valid path\n", relative.c_str());
+				goto invalidPreview;
+			}
+			this->preview.texture.loadFromFile((path + "/" + relative).c_str());
+		} else
+			this->preview.texture.loadFromGame(obj["path"].get<std::string>().c_str());
+		this->preview.rect = {
+			0, 0,
+			static_cast<int>(this->preview.texture.getSize().x),
+			static_cast<int>(this->preview.texture.getSize().y),
+		};
+		this->preview.setPosition({398, 128});
+		this->preview.setSize({200, 150});
+	}
+
+invalidPreview:
+	this->description.texture.createFromText(
+		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
+		defaultFont12, {300, 150}
+	);
+	this->description.rect = {
+		0, 0,
+		static_cast<int>(this->description.texture.getSize().x),
+		static_cast<int>(this->description.texture.getSize().y),
+	};
+	this->description.setPosition({356, 280});
+	this->description.setSize(this->description.texture.getSize());
 
 	if (object.contains("characters") && object["characters"].is_array()) {
 		bool swrNeeded = false;
@@ -213,10 +243,20 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 			MB_ICONWARNING
 		);
 
-	auto &scenarios = object["scenarios"];
+	if (!object.contains("scenarios") || !object["scenarios"].is_array()) {
+		MessageBox(
+			SokuLib::window,
+			("Trial pack " + path + " is not valid: pack.json doesn't contain a valid scenarios list").c_str(),
+			"Trial pack loading error",
+			MB_ICONERROR
+		);
+		return;
+	}
 
-	for (int i = 0; i < scenarios.size(); i++) {
-		auto scene = new Scenario(i, path, scenarios[i]);
+	auto &scenarii = object["scenarios"];
+
+	for (int i = 0; i < scenarii.size(); i++) {
+		auto scene = new Scenario(i, path, scenarii[i]);
 
 		if (scene->file.empty()) {
 			delete scene;
@@ -267,13 +307,14 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 
 	this->description.texture.createFromText(
 		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
-		defaultFont10, {0x100, 14}
+		defaultFont12, {300, 150}
 	);
 	this->description.rect = {
 		0, 0,
 		static_cast<int>(this->description.texture.getSize().x),
 		static_cast<int>(this->description.texture.getSize().y),
 	};
+	this->description.setPosition({356, 280});
 	this->description.setSize(this->description.texture.getSize());
 
 	if (object.contains("preview") && object["preview"].is_string()) {
@@ -283,7 +324,8 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 			static_cast<int>(this->preview.texture.getSize().x),
 			static_cast<int>(this->preview.texture.getSize().y),
 		};
-		this->preview.setSize(this->preview.texture.getSize());
+		this->preview.setPosition({398, 128});
+		this->preview.setSize({200, 150});
 	}
 }
 
@@ -381,8 +423,8 @@ void loadPacks()
 			continue;
 		strcpy(&buffer[starPos], data.cFileName);
 		printf("Looking for pack.json in %s\n", buffer);
-
 		strcat(buffer, "\\pack.json");
+
 		std::ifstream stream{buffer};
 		nlohmann::json val;
 
@@ -391,7 +433,7 @@ void loadPacks()
 			continue;
 		}
 		stream >> val;
-		buffer[starPos] = 0;
+		buffer[strlen(buffer) - 9] = 0;
 
 		auto pack = new Pack(std::string(buffer), val);
 
@@ -401,5 +443,6 @@ void loadPacks()
 			puts("Invalid pack");
 			delete pack;
 		}
+		buffer[starPos] = 0;
 	} while (FindNextFileA(findHandle, &data));
 }

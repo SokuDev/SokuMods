@@ -23,10 +23,6 @@ struct Icon {
 };
 
 class Scenario {
-private:
-	std::string _name;
-	std::string _description;
-
 public:
 	std::string file;
 	SokuLib::DrawUtils::Sprite name;
@@ -37,11 +33,6 @@ public:
 };
 
 class Pack {
-private:
-	std::string _name;
-	std::string _error;
-	std::string _author;
-
 public:
 	std::string category;
 	std::unique_ptr<Icon> icon;
@@ -49,6 +40,8 @@ public:
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite error;
 	SokuLib::DrawUtils::Sprite author;
+	SokuLib::DrawUtils::Sprite preview;
+	SokuLib::DrawUtils::Sprite description;
 
 	Pack(const std::string &path, const nlohmann::json &object);
 };
