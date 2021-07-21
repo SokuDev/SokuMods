@@ -6,7 +6,7 @@
 #include "Pack.hpp"
 
 static unsigned currentPack = 0;
-static int currentEntry = 0;
+static int currentEntry = -1;
 static bool loaded = false;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
@@ -111,6 +111,29 @@ void menuUnloadAssets()
 	loadedPacks.clear();
 }
 
+void handlePlayerInputs(const SokuLib::KeyInput &input)
+{
+	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		if (currentEntry == -1) {
+			currentPack--;
+			if (currentPack == -1)
+				currentPack += loadedPacks.size();
+			currentEntry += loadedPacks[currentPack]->scenarios.size();
+		} else
+			currentEntry--;
+	} else if (input.verticalAxis == 1 || (input.verticalAxis >= 36 && input.verticalAxis % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
+			currentPack++;
+			if (currentPack == loadedPacks.size())
+				currentPack = 0;
+			currentEntry = -1;
+		} else
+			currentEntry++;
+	}
+}
+
 int menuOnProcess(SokuLib::MenuResult *This)
 {
 	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
@@ -120,6 +143,7 @@ int menuOnProcess(SokuLib::MenuResult *This)
 		SokuLib::playSEWaveBuffer(0x29);
 		return 0;
 	}
+	handlePlayerInputs(reinterpret_cast<SokuLib::KeyManager *>(0x89A394)->keymapManager->input);
 	return 1;
 }
 
@@ -163,6 +187,13 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	}
 
 	auto p = pos;
+	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
+
+	sprite.setPosition({
+		static_cast<int>(pos.x + 75),
+		static_cast<int>(pos.y + 17)
+	});
+	sprite.draw();
 
 	if (currentEntry != -1) {
 		p.x += 25;
@@ -176,14 +207,6 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		static_cast<int>(pos.y + 2)
 	});
 	pack.name.draw();
-
-	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
-
-	sprite.setPosition({
-		static_cast<int>(pos.x + 75),
-		static_cast<int>(pos.y + 17)
-	});
-	sprite.draw();
 	pos.y += 35;
 
 	if (!deployed) {
