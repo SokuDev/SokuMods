@@ -5,6 +5,11 @@
         "remilia",
         "reimu"
     ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/remilia.bmp"
+    },
+    "description": "Lorem ipsum dolor sit<br>amet, consectetur adipiscing elit,<br>sed do eiusmod tempor incididunt ut<br>labore et dolore magna aliqua.<br>Ut enim ad minim veniam, quis<br>nostrud exercitation ullamco laboris<br>nisi ut aliquip ex ea commodo consequat.<br>",
     "author": "PinkySmile",
     "icon": {
         "isPath": false,
@@ -22,7 +27,7 @@
             "name": "BnB midscreen 1",
             "file": "bnbmid1.json",
             "preview": "bnbmid1.png",
-            "description": ""
+            "description": "Lorem ipsum dolor sit<br>amet, consectetur adipiscing elit,<br>sed do eiusmod tempor incididunt ut<br>labore et dolore magna aliqua.<br>Ut enim ad minim veniam, quis<br>nostrud exercitation ullamco laboris<br>nisi ut aliquip ex ea commodo consequat.<br>"
         },
         {
             "name": "BnB midscreen 2",

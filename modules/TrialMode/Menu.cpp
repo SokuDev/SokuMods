@@ -164,20 +164,11 @@ void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 {
 	if (pack.icon) {
-		//SokuLib::Sprite sprite;
-		//auto CSprite_Render = (int (__thiscall *)(SokuLib::Sprite *, float, float))0x4066e0;
-		//int handle = pack.icon->sprite.texture.releaseHandle();
-		//pack.icon->sprite.texture.setHandle(handle, pack.icon->sprite.texture.getSize());
-
 		pack.icon->sprite.setPosition(SokuLib::Vector2i{
 			static_cast<int>(pos.x + 4),
 			static_cast<int>(pos.y + 2)
 		} + pack.icon->translate);
 		pack.icon->sprite.draw();
-
-		//sprite.VTable = (void *)SokuLib::ADDR_VTBL_CSPRITE;
-		//sprite.init(handle, 0, 0, pack.icon->sprite.texture.getSize().x, pack.icon->sprite.texture.getSize().y);
-		//CSprite_Render(&sprite, 100, 100);
 	} else {
 		missingIcon.setPosition({
 			static_cast<int>(pos.x + 34),
@@ -236,5 +227,16 @@ void menuOnRender(SokuLib::MenuResult *This)
 	pos = {16, 116};
 	for (int i = 0; i < loadedPacks.size(); i++)
 		renderOnePack(*loadedPacks[i], pos, i == currentPack);
+
 	previewContainer.draw();
+	if (loadedPacks.empty())
+		return;
+
+	auto &preview     = currentEntry == -1 ? loadedPacks[currentPack]->preview     : loadedPacks[currentPack]->scenarios[currentEntry]->preview;
+	auto &description = currentEntry == -1 ? loadedPacks[currentPack]->description : loadedPacks[currentPack]->scenarios[currentEntry]->description;
+
+	if (preview.texture.hasTexture())
+		preview.draw();
+	if (description.texture.hasTexture())
+		description.draw();
 }
