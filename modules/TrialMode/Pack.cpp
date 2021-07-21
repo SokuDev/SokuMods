@@ -6,8 +6,12 @@
 #include "Pack.hpp"
 #include "Menu.hpp"
 
+#define RED_COLOR  SokuLib::DrawUtils::DxSokuColor{0xFF, 0xA0, 0xA0}
+#define BLUE_COLOR SokuLib::DrawUtils::DxSokuColor{0xA0, 0xA0, 0xFF}
+
 bool hasSoku2 = false;
-std::vector<std::unique_ptr<Pack>> loadedPacks;
+std::vector<std::string> uniqueCategories;
+std::vector<std::shared_ptr<Pack>> loadedPacks;
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
 	{ SokuLib::CHARACTER_MARISA, "marisa" },
@@ -81,15 +85,15 @@ static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::
 		static_cast<int>(pack.error.texture.getSize().x),
 		static_cast<int>(pack.error.texture.getSize().y),
 	};
-	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER]    = SokuLib::DrawUtils::DxSokuColor::White + SokuLib::DrawUtils::DxSokuColor::Red;
-	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER]   = SokuLib::DrawUtils::DxSokuColor::White + SokuLib::DrawUtils::DxSokuColor::Red;
-	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::Red;
-	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::Red;
+	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = RED_COLOR;
+	pack.error.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= RED_COLOR;
+	pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = RED_COLOR;
+	pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = RED_COLOR;
 }
 
 static void makeAuthorStr(Pack &pack, const std::string &str)
 {
-	pack.author.texture.createFromText(str.c_str(), defaultFont8, {0x100, 30});
+	pack.author.texture.createFromText(("By " + str).c_str(), defaultFont8, {0x100, 30});
 	pack.author.rect = {
 		0, 0,
 		static_cast<int>(pack.author.texture.getSize().x),
@@ -100,6 +104,8 @@ static void makeAuthorStr(Pack &pack, const std::string &str)
 
 Pack::Pack(const std::string &path, const nlohmann::json &object)
 {
+	SokuLib::Vector2i size;
+
 	if (!object.is_object()) {
 		MessageBox(
 			SokuLib::window,
@@ -120,18 +126,12 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	}
 
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
-	if (object.contains("icon")) {
-		this->icon = std::make_unique<Icon>(path, object["icon"]);
-		if (!this->icon->sprite.texture.hasTexture())
-			this->icon.reset();
-	}
 
-	this->name.texture.createFromText(
-		object.contains("icon") && object["name"].is_string() ?
-			object["name"].get<std::string>().c_str() :
-			path.c_str(),
-		defaultFont10, {0x1000, 32}
-	);
+	this->_name = object.contains("icon") && object["name"].is_string() ? object["name"].get<std::string>() : path;
+	this->name.texture.createFromText(this->_name.c_str(), defaultFont12, {0x100, 32}, &size);
+	this->name.rect = {0, 0, size.x, size.y,};
+	this->name.setSize((size - 1).to<unsigned>());
+	printf("Resulting size: %u %u\n", this->name.texture.getSize().x, this->name.texture.getSize().y);
 
 	if (object.contains("characters") && object["characters"].is_array()) {
 		bool swrNeeded = false;
@@ -172,8 +172,16 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 
 		if (!invalidChars.empty() || swrNeeded)
 			generateErrorMsg(*this, swrNeeded, invalidChars);
-		else if (object.contains("author") && object["author"].is_string())
+		else if (object.contains("author") && object["author"].is_string()) {
 			makeAuthorStr(*this, object["author"]);
+			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = BLUE_COLOR;
+			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = BLUE_COLOR;
+			if (object.contains("icon")) {
+				this->icon = std::make_unique<Icon>(path, object["icon"]);
+				if (!this->icon->sprite.texture.hasTexture())
+					this->icon.reset();
+			}
+		}
 	} else
 		MessageBox(
 			SokuLib::window,
@@ -208,6 +216,9 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		);
 		return;
 	}
+
+	if (std::find(uniqueCategories.begin(), uniqueCategories.end(), this->category) == uniqueCategories.end())
+		uniqueCategories.push_back(this->category);
 }
 
 Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
@@ -253,6 +264,10 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 
 Icon::Icon(const std::string &path, const nlohmann::json &object)
 {
+	float scale = 1;
+	SokuLib::DrawUtils::TextureRect rect = {0, 0, 0, 0};
+	SokuLib::Vector2<bool> mirror{false, false};
+
 	if (!object.is_object())
 		return;
 
@@ -262,18 +277,19 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 		auto &off = object["offset"];
 
 		if (off.contains("x") && off["x"].is_number())
-			this->offset.x = off["x"];
+			this->translate.x = off["x"];
 		if (off.contains("y") && off["y"].is_number())
-			this->offset.y = off["y"];
+			this->translate.y = off["y"];
 	}
-	if (object.contains("scale") && object["scale"].is_object()) {
-		auto &sca = object["scale"];
+	if (object.contains("scale") && object["scale"].is_number())
+		scale = object["scale"];
 
-		if (sca.contains("x") && sca["x"].is_number())
-			this->scale.x = sca["x"];
-		if (sca.contains("y") && sca["y"].is_number())
-			this->scale.y = sca["y"];
-	}
+	if (object.contains("xMirror") && object["xMirror"].is_boolean())
+		mirror.x = object["xMirror"];
+	if (object.contains("yMirror") && object["yMirror"].is_boolean())
+		mirror.y = object["yMirror"];
+
+	this->sprite.setMirroring(mirror.x, mirror.y);
 	if (object.contains("isPath") && object["isPath"]) {
 		std::string relative = object["path"];
 
@@ -289,6 +305,29 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 		this->sprite.texture.loadFromFile((path + "/" + relative).c_str());
 	} else
 		this->sprite.texture.loadFromGame(object["path"].get<std::string>().c_str());
+
+	rect.width = min(68 / scale, this->sprite.texture.getSize().x);
+	rect.height = min(27 / scale, this->sprite.texture.getSize().y);
+	if (object.contains("rect") && object["rect"].is_object()) {
+		auto &rec = object["rect"];
+
+		if (rec.contains("top") && rec["top"].is_number())
+			rect.top = rec["top"];
+		if (rec.contains("left") && rec["left"].is_number())
+			rect.left = rec["left"];
+		if (rec.contains("width") && rec["width"].is_number())
+			rect.width = min(68 / scale, rec["width"].get<float>());
+		if (rec.contains("height") && rec["height"].is_number())
+			rect.height = min(27 / scale, rec["height"].get<float>());
+	}
+
+	this->sprite.setSize({
+		static_cast<unsigned int>(rect.width * scale),
+		static_cast<unsigned int>(rect.height * scale)
+	});
+	this->sprite.rect = rect;
+	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
+	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 }
 
 void loadPacks()

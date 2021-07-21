@@ -5,12 +5,14 @@
 #include "Menu.hpp"
 #include "Pack.hpp"
 
+static unsigned currentPack = 0;
+static unsigned currentEntry = 0;
 static bool loaded = false;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
 
 SokuLib::SWRFont defaultFont8;
-SokuLib::SWRFont defaultFont10;
+SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
 HMODULE myModule;
 char profilePath[1024 + MAX_PATH];
@@ -41,9 +43,9 @@ void loadFont()
 	defaultFont8.create();
 	defaultFont8.setIndirect(desc);
 
-	desc.height = 10;
-	defaultFont10.create();
-	defaultFont10.setIndirect(desc);
+	desc.height = 12;
+	defaultFont12.create();
+	defaultFont12.setIndirect(desc);
 
 	desc.height = 16;
 	defaultFont16.create();
@@ -69,12 +71,17 @@ void menuLoadAssets()
 	packContainer.texture.loadFromResource(myModule, MAKEINTRESOURCE(4));
 	packContainer.rect = {
 		0, 0,
-		static_cast<int>(previewContainer.texture.getSize().x),
-		static_cast<int>(previewContainer.texture.getSize().y),
+		static_cast<int>(packContainer.texture.getSize().x),
+		static_cast<int>(packContainer.texture.getSize().y),
 	};
-	packContainer.setSize(packContainer.texture.getSize());
+	packContainer.setSize(packContainer.texture.getSize() - 1);
 	loadFont();
 	loadPacks();
+	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
+		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
+			return pack2->error.texture.hasTexture();
+		return pack1->category < pack2->category;
+	});
 }
 
 void menuUnloadAssets()
@@ -85,7 +92,7 @@ void menuUnloadAssets()
 	puts("Unloading assets");
 
 	defaultFont8.destruct();
-	defaultFont10.destruct();
+	defaultFont12.destruct();
 	defaultFont16.destruct();
 	previewContainer.texture.destroy();
 	packContainer.texture.destroy();
@@ -104,7 +111,44 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	return 1;
 }
 
+void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
+{
+	packContainer.setPosition({
+		static_cast<int>(pos.x),
+		static_cast<int>(pos.y)
+	});
+	packContainer.draw();
+	pos.y += 40;
+}
+
+void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
+{
+	if (pack.icon) {
+		pack.icon->sprite.setPosition(SokuLib::Vector2i{
+			static_cast<int>(pos.x + 4),
+			static_cast<int>(pos.y + 2)
+		} + pack.icon->translate);
+		pack.icon->sprite.draw();
+	}
+	pack.name.setPosition({
+		static_cast<int>(pos.x + 74),
+		static_cast<int>(pos.y + 3)
+	});
+	pack.name.draw();
+	pos.y += 40;
+}
+
 void menuOnRender(SokuLib::MenuResult *This)
 {
+	SokuLib::Vector2<float> pos{16, 116};
+
+	if (!loaded)
+		return;
+
+	for (int i = 0; i < loadedPacks.size(); i++)
+		renderOnePackBack(*loadedPacks[i], pos, i == currentPack);
+	pos = {16, 116};
+	for (int i = 0; i < loadedPacks.size(); i++)
+		renderOnePack(*loadedPacks[i], pos, i == currentPack);
 	previewContainer.draw();
 }

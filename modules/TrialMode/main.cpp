@@ -155,7 +155,7 @@ int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 int __fastcall myBattleOnRender(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnRender)();
-	sprite.setPosition(SokuLib::DrawUtils::Vector2<int>{200, 300});
+	sprite.setPosition(SokuLib::Vector2<int>{200, 300});
 	sprite.setSize({128, 128});
 	sprite.rect.top = sprite.rect.width = 0;
 	sprite.rect.width = sprite.texture.getSize().x;
