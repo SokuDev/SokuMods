@@ -24,6 +24,7 @@ bool loadBattleAnimationSprite(const char *path,
 		stopRepeat = true;
 	}
 
+	return true;
 }
 
 
@@ -33,12 +34,12 @@ bool renderBattleAnimationSprite(bool characterFollowed,
 				 int rotation)
 {
 	if (characterFollowed == 0) {
-		sprite.setPosition(SokuLib::DrawUtils::Vector2<int>{
+		sprite.setPosition(SokuLib::Vector2<int>{
 			static_cast<int>(SokuLib::getBattleMgr().rightCharacterManager.objectBase.position.x-64+positionOffset.x),
 			static_cast<int>(-SokuLib::getBattleMgr().rightCharacterManager.objectBase.position.y-128+positionOffset.y),
 		});
 	} else{
-		sprite.setPosition(SokuLib::DrawUtils::Vector2<int>{
+		sprite.setPosition(SokuLib::Vector2<int>{
 			static_cast<int>(SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x-64+positionOffset.x),
 			static_cast<int>(-SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.y-128+positionOffset.y),
 		});
@@ -50,4 +51,6 @@ bool renderBattleAnimationSprite(bool characterFollowed,
 	sprite.setRotation(i);
 	sprite.draw();
 	i = i + rotation;
+
+	return true;
 }
