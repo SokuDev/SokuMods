@@ -6,7 +6,7 @@
 #include "Pack.hpp"
 
 static unsigned currentPack = 0;
-static unsigned currentEntry = 0;
+static int currentEntry = 0;
 static bool loaded = false;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
@@ -130,17 +130,30 @@ void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		static_cast<int>(pos.y)
 	});
 	packContainer.draw();
-	pos.y += 40;
+	pos.y += 35;
+	if (deployed)
+		pos.y += 15 * pack.scenarios.size();
+	else
+		pos.y += 5;
 }
 
 void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 {
 	if (pack.icon) {
+		//SokuLib::Sprite sprite;
+		//auto CSprite_Render = (int (__thiscall *)(SokuLib::Sprite *, float, float))0x4066e0;
+		//int handle = pack.icon->sprite.texture.releaseHandle();
+		//pack.icon->sprite.texture.setHandle(handle, pack.icon->sprite.texture.getSize());
+
 		pack.icon->sprite.setPosition(SokuLib::Vector2i{
 			static_cast<int>(pos.x + 4),
 			static_cast<int>(pos.y + 2)
 		} + pack.icon->translate);
 		pack.icon->sprite.draw();
+
+		//sprite.VTable = (void *)SokuLib::ADDR_VTBL_CSPRITE;
+		//sprite.init(handle, 0, 0, pack.icon->sprite.texture.getSize().x, pack.icon->sprite.texture.getSize().y);
+		//CSprite_Render(&sprite, 100, 100);
 	} else {
 		missingIcon.setPosition({
 			static_cast<int>(pos.x + 34),
@@ -149,26 +162,43 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		missingIcon.draw();
 	}
 
+	auto p = pos;
+
+	if (currentEntry != -1) {
+		p.x += 25;
+		p.y += currentEntry * 15 + 33;
+	}
+	if (deployed)
+		((void (*)(float, float, float))0x443a50)(p.x + 70, p.y + 1, 300);
+
 	pack.name.setPosition({
 		static_cast<int>(pos.x + 74),
 		static_cast<int>(pos.y + 2)
 	});
 	pack.name.draw();
 
-	if (pack.error.texture.hasTexture()) {
-		pack.error.setPosition({
-			static_cast<int>(pos.x + 75),
-			static_cast<int>(pos.y + 17)
-		});
-		pack.error.draw();
-	} else {
-		pack.author.setPosition({
-			static_cast<int>(pos.x + 75),
-			static_cast<int>(pos.y + 17)
-		});
-		pack.author.draw();
+	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
+
+	sprite.setPosition({
+		static_cast<int>(pos.x + 75),
+		static_cast<int>(pos.y + 17)
+	});
+	sprite.draw();
+	pos.y += 35;
+
+	if (!deployed) {
+		pos.y += 5;
+		return;
 	}
-	pos.y += 40;
+
+	for (auto &scenario : pack.scenarios) {
+		scenario->name.setPosition({
+			static_cast<int>(pos.x + 100),
+			static_cast<int>(pos.y)
+		});
+		scenario->name.draw();
+		pos.y += 15;
+	};
 }
 
 void menuOnRender(SokuLib::MenuResult *This)
