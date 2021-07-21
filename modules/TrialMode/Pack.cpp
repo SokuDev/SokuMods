@@ -229,7 +229,8 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 			continue;
 		}
 		this->scenarios.emplace_back(scene);
-		scene->name.tint = SokuLib::DrawUtils::DxSokuColor::Red;
+		if (this->error.texture.hasTexture())
+			scene->name.tint = SokuLib::DrawUtils::DxSokuColor::Red;
 	}
 	if (this->scenarios.empty()) {
 		MessageBox(
