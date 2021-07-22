@@ -1,0 +1,26 @@
+{
+    "music": 17,
+    "stage": 16,
+    "player": {
+        "character": "remilia",
+        "palette": 0,
+        "deck": [],
+        "pos": 700
+    },
+    "dummy": {
+        "character": "reimu",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 800,
+            "y": 0
+        }
+    },
+    "type": "combo",
+    "expected": "2a 2c hj9 j5c j66 j8a",
+    "intro": "bnbmid1intro.script",
+    "outro": "bnbmid1outro.script",
+    "hint": [
+
+    ]
+}

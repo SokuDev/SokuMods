@@ -14,6 +14,7 @@ extern HMODULE myModule;
 extern SokuLib::SWRFont defaultFont10;
 extern SokuLib::SWRFont defaultFont12;
 extern SokuLib::SWRFont defaultFont16;
+extern bool loadRequest;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
