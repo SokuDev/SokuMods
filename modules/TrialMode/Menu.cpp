@@ -12,6 +12,7 @@ static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
 
+bool loadRequest;
 SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
@@ -111,8 +112,19 @@ void menuUnloadAssets()
 	loadedPacks.clear();
 }
 
+void prepareGameLoading(const std::string &path)
+{
+
+}
+
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
+	if (input.a && currentEntry != -1) {
+		loadRequest = true;
+		SokuLib::playSEWaveBuffer(0x28);
+		prepareGameLoading(loadedPacks[currentPack]->scenarios[currentEntry]->file);
+		return;
+	}
 	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (currentEntry == -1) {

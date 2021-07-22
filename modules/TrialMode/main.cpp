@@ -21,6 +21,7 @@
 
 static int (SokuLib::Battle::* ogBattleOnProcess)();
 static int (SokuLib::Battle::* ogBattleOnRender)();
+static int (SokuLib::Title::* ogTitleOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnRender)();
 static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
@@ -153,6 +154,17 @@ int __fastcall myBattleOnRender(SokuLib::Battle *This)
 	return buffer;
 }
 
+int __fastcall myTitleOnProcess(SokuLib::Title *This)
+{
+	int buffer = (This->*ogTitleOnProcess)();
+
+	if (loadRequest) {
+		loadRequest = false;
+		return SokuLib::SCENE_LOADING;
+	}
+	return buffer;
+}
+
 int __fastcall myResultOnProcess(SokuLib::MenuResult *This)
 {
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
@@ -202,6 +214,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	ogResultOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Result.onRender,  myResultOnRender);
 	ogResultOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Result.onProcess, myResultOnProcess);
 	ogResultOnDestruct= SokuLib::TamperDword(&SokuLib::VTable_Result.onDestruct,myResultOnDestruct);
+	ogTitleOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,  myTitleOnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
