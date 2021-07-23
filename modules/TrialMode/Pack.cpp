@@ -293,7 +293,7 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 
 	if (!object.contains("file") || !object["file"].is_string())
 		return;
-	this->file = object["file"];
+	this->file = path + "\\" + object["file"].get<std::string>();
 	this->name.texture.createFromText(
 		(object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : "Scenario #" + std::to_string(i)).c_str(),
 		defaultFont10, {0x100, 30}
@@ -432,7 +432,18 @@ void loadPacks()
 			printf("%s -> Not found...", buffer);
 			continue;
 		}
-		stream >> val;
+		try {
+			stream >> val;
+		} catch (std::exception &e) {
+			MessageBox(
+				SokuLib::window,
+				("File " + std::string(buffer) + " is not valid: " + e.what() + ".\n").c_str(),
+				"Trial pack loading error",
+				MB_ICONERROR
+			);
+			buffer[starPos] = 0;
+			continue;
+		}
 		buffer[strlen(buffer) - 9] = 0;
 
 		auto pack = new Pack(std::string(buffer), val);
