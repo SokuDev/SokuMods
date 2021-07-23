@@ -19,6 +19,7 @@
 #define printf(...)
 #endif
 
+static bool goToTitle = false;
 static int (SokuLib::Battle::* ogBattleOnProcess)();
 static int (SokuLib::Battle::* ogBattleOnRender)();
 static int (SokuLib::Title::* ogTitleOnProcess)();
@@ -144,6 +145,9 @@ int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnProcess)();
 
+	goToTitle = buffer == SokuLib::SCENE_TITLE;
+	if (buffer == SokuLib::SCENE_SELECT)
+		return SokuLib::SCENE_TITLE;
 	return buffer;
 }
 
@@ -172,7 +176,7 @@ int __fastcall myResultOnProcess(SokuLib::MenuResult *This)
 		SokuLib::playSEWaveBuffer(0x29);
 		return 0;
 	}
-	return menuOnProcess(This);
+	return menuOnProcess(This) && !goToTitle;
 }
 
 int __fastcall myResultOnRender(SokuLib::MenuResult *This)
@@ -184,6 +188,8 @@ int __fastcall myResultOnRender(SokuLib::MenuResult *This)
 SokuLib::MenuResult *__fastcall myResultOnDestruct(SokuLib::MenuResult *This, int _, unsigned char param)
 {
 	menuUnloadAssets();
+	wasPressed = true;
+	goToTitle = false;
 	return (This->*ogResultOnDestruct)(param);
 }
 

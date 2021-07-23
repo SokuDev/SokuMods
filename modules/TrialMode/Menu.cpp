@@ -259,20 +259,23 @@ bool prepareReplayBuffer(const std::string &path)
 
 void prepareGameLoading(const std::string &path)
 {
-	SokuLib::setBattleMode(SokuLib::BATTLE_MODE_VSPLAYER, SokuLib::BATTLE_SUBMODE_PLAYING2);
+	SokuLib::setBattleMode(SokuLib::BATTLE_MODE_STORY, SokuLib::BATTLE_SUBMODE_PLAYING1);
 	if (!prepareReplayBuffer(path))
 		return;
 	loadRequest = true;
 }
 
+bool wasPressed = false;
+
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
-	if (input.a && currentEntry != -1) {
+	if (!wasPressed && input.a && currentEntry != -1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE) {
 		puts("Start game !");
 		SokuLib::playSEWaveBuffer(0x28);
 		prepareGameLoading(loadedPacks[currentPack]->scenarios[currentEntry]->file);
 		return;
 	}
+	wasPressed = input.a || SokuLib::newSceneId != SokuLib::SCENE_TITLE;
 	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (currentEntry == -1) {
@@ -301,10 +304,12 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	menuLoadAssets();
 	if (keys->keymapManager->input.b) {
 		SokuLib::playSEWaveBuffer(0x29);
-		return 0;
+		return false;
 	}
-	handlePlayerInputs(reinterpret_cast<SokuLib::KeyManager *>(0x89A394)->keymapManager->input);
-	return !loadRequest;
+	handlePlayerInputs(keys->keymapManager->input);
+	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
+	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
+	return true;
 }
 
 void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
