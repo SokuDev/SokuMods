@@ -15,6 +15,7 @@ extern SokuLib::SWRFont defaultFont10;
 extern SokuLib::SWRFont defaultFont12;
 extern SokuLib::SWRFont defaultFont16;
 extern bool loadRequest;
+extern bool wasPressed;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
