@@ -26,7 +26,7 @@ static int (SokuLib::Title::* ogTitleOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnRender)();
 static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
-
+static bool stopRepeat = false;
 void loadSoku2CSV(LPWSTR path)
 {
 	std::ifstream stream{path};
@@ -155,6 +155,8 @@ int __fastcall myBattleOnRender(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnRender)();
 
+	if (!stopRepeat)
+		return buffer;
 	return buffer;
 }
 
