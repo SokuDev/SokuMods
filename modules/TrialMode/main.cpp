@@ -160,6 +160,7 @@ int __fastcall myTitleOnProcess(SokuLib::Title *This)
 
 	if (loadRequest) {
 		loadRequest = false;
+		puts("Moving to LOADING !");
 		return SokuLib::SCENE_LOADING;
 	}
 	return buffer;
