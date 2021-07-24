@@ -166,7 +166,7 @@ int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 	int buffer = !canHaveNextFrame ? SokuLib::SCENE_BATTLE : (This->*ogBattleOnProcess)();
 
 	canHaveNextFrame = true;
-	loadedTrial->update(&canHaveNextFrame);
+	loadedTrial->update(canHaveNextFrame);
 	goToTitle = buffer == SokuLib::SCENE_TITLE;
 	if (buffer != SokuLib::SCENE_BATTLE)
 		loadedTrial.reset();

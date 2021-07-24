@@ -56,8 +56,10 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
-	if (this->_isStart)
+	if (this->_isStart) {
 		this->_initGameStart();
+		return true;
+	}
 	if (this->_disableLimit) {
 		battleMgr.leftCharacterManager.combo.limit = 0;
 		battleMgr.rightCharacterManager.combo.limit = 0;
@@ -74,9 +76,9 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	if (!this->_dummyHit) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
-		battleMgr.rightCharacterManager.objectBase.action = this->_dummyStartPos.y == 0 ? SokuLib::ACTION_IDLE : SokuLib::ACTION_FALLING;
+		if (battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_IDLE && battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_LANDING)
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
 	}
-
 	return false;
 }
 
@@ -104,7 +106,13 @@ void ComboTrial::_initGameStart()
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
-	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
+	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_200;
+	battleMgr.rightCharacterManager.objectBase.actionBlockId = 0;
+	battleMgr.rightCharacterManager.objectBase.frameCount = 0;
+	battleMgr.rightCharacterManager.objectBase.animationSubFrame = 0;
 	battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 	battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
+	battleMgr.rightCharacterManager.objectBase.direction =
+		battleMgr.rightCharacterManager.objectBase.position.x > battleMgr.leftCharacterManager.objectBase.position.x ?
+		SokuLib::LEFT : SokuLib::RIGHT;
 }
