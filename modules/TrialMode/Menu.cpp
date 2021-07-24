@@ -13,6 +13,7 @@ static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
 
+std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
 SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
@@ -251,6 +252,17 @@ bool prepareReplayBuffer(const std::string &path)
 		return false;
 	if (!addCharacterToBuffer("dummy", value["dummy"], SokuLib::rightPlayerInfo, true))
 		return false;
+	try {
+		loadedTrial.reset(Trial::create(SokuLib::leftPlayerInfo.character, value));
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
+			"Trial loading error",
+			MB_ICONERROR
+		);
+		return false;
+	}
 
 	*(char *)0x899D0C = value["stage"].get<char>();
 	*(char *)0x899D0D = value["music"].get<char>();
@@ -259,7 +271,7 @@ bool prepareReplayBuffer(const std::string &path)
 
 void prepareGameLoading(const std::string &path)
 {
-	SokuLib::setBattleMode(SokuLib::BATTLE_MODE_STORY, SokuLib::BATTLE_SUBMODE_PLAYING1);
+	SokuLib::setBattleMode(SokuLib::BATTLE_MODE_VSPLAYER, SokuLib::BATTLE_SUBMODE_PLAYING1);
 	if (!prepareReplayBuffer(path))
 		return;
 	loadRequest = true;
