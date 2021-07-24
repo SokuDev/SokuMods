@@ -9,6 +9,7 @@
 #include <map>
 #include <SokuLib.hpp>
 
+extern const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs;
 extern std::map<SokuLib::Character, std::vector<std::string>> characterSkills;
 extern const std::map<std::string, SokuLib::Action> actionsFromStr;
 

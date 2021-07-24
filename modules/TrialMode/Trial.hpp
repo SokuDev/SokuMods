@@ -16,10 +16,13 @@ private:
 	static const std::map<std::string, std::function<Trial *(SokuLib::Character player, const nlohmann::json &json)>> _factory;
 
 public:
-	virtual ~Trial() = default;
+	Trial();
+	virtual ~Trial();
 	virtual bool update(bool &canHaveNextFrame) = 0;
 	virtual void render() = 0;
 	virtual int getScore() = 0;
+	virtual void editPlayerInputs(SokuLib::KeyInput &originalInputs) = 0;
+	virtual SokuLib::KeyInput getDummyInputs() = 0;
 
 	static Trial *create(SokuLib::Character player, const nlohmann::json &json);
 };

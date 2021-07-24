@@ -5,7 +5,7 @@
         "character": "remilia",
         "palette": 0,
         "deck": [],
-        "pos": 600
+        "pos": 700
     },
     "dummy": {
         "character": "reimu",
@@ -20,18 +20,18 @@
     "outro": "bnbmid1outro.script",
     "type": "combo",
 
-    "expected": "2a 2c hj9 j5c j66 j8a",
-    "counter_hit": false,
+    "expected": "2a 5c hj9 j5c j66 j8a:20",
     "skills": [
         [0, 0],
         [0, 0],
         [0, 0],
         [0, 0]
     ],
+    "weather": 20,
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [0, 0, 0, 0, 0],
-    "play_combo_after_intro": false,
+    "play_combo_after_intro": true,
     "hint": [
 
     ]
