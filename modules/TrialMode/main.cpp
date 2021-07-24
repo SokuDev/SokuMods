@@ -8,11 +8,11 @@
 #include <ctime>
 #include <shlwapi.h>
 #include <dinput.h>
-#include <nlohmann/json.hpp>
 #include <SokuLib.hpp>
 #include "BattleAnimation.hpp"
 #include "Menu.hpp"
 #include "Pack.hpp"
+#include "Actions.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -41,20 +41,37 @@ void loadSoku2CSV(LPWSTR path)
 		unsigned id;
 		std::string idStr;
 		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+		std::string skillInputs;
 
 		std::getline(str, idStr, ';');
 		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		std::getline(str, skillInputs, ';');
 		if (str.fail()) {
 			printf("Skipping line %s: Stream failed\n", line.c_str());
 			continue;
 		}
 		try {
 			id = std::stoi(idStr);
-		} catch (...){
+		} catch (...) {
 			printf("Skipping line %s: Invalid id\n", line.c_str());
 			continue;
 		}
+
+		auto &infos = characterSkills[static_cast<SokuLib::Character>(id)];
+
 		validCharacters[id] = codeName;
+		infos.clear();
+		infos.emplace_back();
+		for (auto c : skillInputs) {
+			if (c == ',')
+				infos.emplace_back();
+			else
+				infos.back() += c;
+		}
 	}
 }
 
@@ -130,22 +147,29 @@ void LoadSettings()
 	GetPrivateProfileString("TrialMode", "PackLocation", "packs", buffer, sizeof(buffer), profilePath);
 	strcat(packsLocation, buffer);
 	strcat(packsLocation, "\\*");
+
+	loadSoku2Config();
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(hash, SokuLib::targetHash, 16) == 0;
 }
 
-
-
-
+static bool canHaveNextFrame = true;
 
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
-	int buffer = (This->*ogBattleOnProcess)();
+	if (!loadedTrial)
+		return (This->*ogBattleOnProcess)();
 
+	int buffer = !canHaveNextFrame ? SokuLib::SCENE_BATTLE : (This->*ogBattleOnProcess)();
+
+	canHaveNextFrame = true;
+	loadedTrial->update(&canHaveNextFrame);
 	goToTitle = buffer == SokuLib::SCENE_TITLE;
+	if (buffer != SokuLib::SCENE_BATTLE)
+		loadedTrial.reset();
 	if (buffer == SokuLib::SCENE_SELECT)
 		return SokuLib::SCENE_TITLE;
 	return buffer;
@@ -155,6 +179,9 @@ int __fastcall myBattleOnRender(SokuLib::Battle *This)
 {
 	int buffer = (This->*ogBattleOnRender)();
 
+	if (!loadedTrial)
+		return buffer;
+	loadedTrial->render();
 	return buffer;
 }
 
