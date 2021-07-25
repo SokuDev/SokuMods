@@ -1,6 +1,6 @@
 {
-    "music": 17,
-    "stage": 16,
+    "music": 36,
+    "stage": 6,
     "player": {
         "character": "remilia",
         "palette": 0,
@@ -8,7 +8,7 @@
         "pos": 550
     },
     "dummy": {
-        "character": "reimu",
+        "character": "suwako",
         "palette": 0,
         "deck": [],
         "pos": {

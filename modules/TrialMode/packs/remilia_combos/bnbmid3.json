@@ -1,18 +1,18 @@
 {
-    "music": 17,
-    "stage": 16,
+    "music": 99,
+    "stage": 38,
     "player": {
         "character": "remilia",
         "palette": 0,
         "deck": [],
-        "pos": 550
+        "pos": 750
     },
     "dummy": {
         "character": "reimu",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 900,
+            "x": 400,
             "y": 0
         }
     },
