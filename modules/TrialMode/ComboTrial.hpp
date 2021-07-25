@@ -50,6 +50,8 @@ private:
 	void _initGameStart();
 	void _loadExpected(const std::string &expected);
 
+	static SokuLib::Action getMoveAction(SokuLib::Character chr, std::string &name);
+
 public:
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 
