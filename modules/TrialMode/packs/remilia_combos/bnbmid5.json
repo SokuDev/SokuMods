@@ -1,6 +1,6 @@
 {
-    "music": 17,
-    "stage": 16,
+    "music": 6,
+    "stage": 5,
     "player": {
         "character": "remilia",
         "palette": 0,
@@ -8,7 +8,7 @@
         "pos": 550
     },
     "dummy": {
-        "character": "reimu",
+        "character": "tenshi",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -20,7 +20,7 @@
     "outro": "bnbmid5outro.script",
     "type": "combo",
 
-    "expected": "3a 2a:50 5c d236b:32",
+    "expected": "3a 2a:55 5c d236b:32",
     "skills": [
         [0, 0],
         [0, 0],
