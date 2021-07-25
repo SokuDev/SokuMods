@@ -38,8 +38,7 @@
         {
             "name": "Ground j2a CH starter",
             "file": "bnbmid3.json",
-            "preview": "bnbmid3.png",
-            "description": "3a 2a 2c d236b"
+            "preview": "bnbmid3.png"
         },
         {
             "name": "Corner 5a starter",
@@ -56,26 +55,7 @@
         {
             "name": "Corner j5aa starter",
             "file": "bnbcorn3.json",
-            "preview": "bnbcorn3.png",
-            "description": ""
-        },
-        {
-            "name": "BnB aerial 1",
-            "file": "bnbair1.json",
-            "preview": "bnbair1.png",
-            "description": ""
-        },
-        {
-            "name": "BnB aerial 2",
-            "file": "bnbair2.json",
-            "preview": "bnbair2.png",
-            "description": ""
-        },
-        {
-            "name": "BnB aerial 3",
-            "file": "bnbair3.json",
-            "preview": "bnbair3.png",
-            "description": ""
+            "preview": "bnbcorn3.png"
         }
     ]
 }

@@ -1,0 +1,33 @@
+{
+    "name": "Basic combos",
+    "category": "Flandre Scarlet",
+    "characters": [
+        "flandre",
+        "reimu"
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/flandre.bmp"
+    },
+    "description": "Flandre's bread and butters",
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "data/character/flandre/face/face000.bmp",
+        "offset": {
+            "x": 1,
+            "y": 0
+        },
+        "scale": 0.60,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "scenarios": [
+        {
+            "name": "Ground j5a starter",
+            "file": "bnbmid1.json",
+            "preview": "bnbmid1.png",
+            "description": "d6 j5aa d6 j5aa 9 j5a j8a"
+        }
+    ]
+}
