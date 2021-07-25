@@ -257,6 +257,38 @@ SokuLib::KeyInput ComboTrial::getDummyInputs()
 	return {0, 0, 0, 0, 0, 0, 0, 0};
 }
 
+SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
+{
+	try {
+		auto act = actionsFromStr.at(name);
+
+		if (act >= SokuLib::ACTION_DEFAULT_SKILL1_B && act <= SokuLib::ACTION_ALT2_SKILL5_AIR_C) {
+			auto input = characterSkills[chr].at(name[name.size() - 3]);
+
+			name = name.substr(0, name.size() - strlen("skillXb")) +
+			       input +
+			       name[name.size() - 1];
+		}
+		return act;
+	} catch (...) {}
+
+	int start = name[0] == 'j';
+	int realStart = (name[start] == 'a' ? 2 : 1) + start;
+	auto move = name.substr(realStart, name.size() - realStart - 1);
+	auto &inputs = characterSkills[chr];
+	auto it = std::find(inputs.begin(), inputs.end(), move);
+
+	if (it == inputs.end())
+		throw std::exception();
+	try {
+		return actionsFromStr.at(name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name[name.size() - 1]);
+	} catch (std::exception &e) {
+		printf("%s\n", (name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name[name.size() - 1]).c_str());
+		assert(false);
+		throw;
+	}
+}
+
 void ComboTrial::SpecialAction::parse()
 {
 	std::string hitsStr;
@@ -288,7 +320,7 @@ void ComboTrial::SpecialAction::parse()
 	}
 	printf("Move %s -> %s (%s) :%s: -> ", this->name.c_str(), this->moveName.c_str(), hitsStr.c_str(), delayStr.c_str());
 	try {
-		this->action = actionsFromStr.at(moveName);
+		this->action = getMoveAction(SokuLib::leftChar, this->moveName);
 		printf("%i ", this->action);
 	} catch (std::exception &) {
 		printf("INVALID\n");
