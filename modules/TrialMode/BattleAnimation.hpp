@@ -9,6 +9,10 @@
 #define SWRSTOYS_BATTLEANIMATION_HPP
 
 
+namespace SokuLib
+{
+	typedef Vector2<bool> Vector2b;
+}
 enum CharacterSide {
 	LEFTCHAR,
 	RIGHTCHAR,

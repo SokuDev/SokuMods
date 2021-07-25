@@ -16,7 +16,9 @@ private:
 		unsigned nbHits;
 		unsigned delay;
 		std::vector<SokuLib::KeyInput> inputs;
+		SokuLib::DrawUtils::Sprite sprite;
 		unsigned int counter = 0;
+		std::string moveName;
 		std::string name;
 
 		void parse();
@@ -25,7 +27,8 @@ private:
 	//Init params
 	float _playerStartPos;
 	SokuLib::Vector2f _dummyStartPos;
-	std::vector<SpecialAction> _exceptedActions;
+	SokuLib::DrawUtils::RectangleShape _rect;
+	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;
 	SokuLib::Weather _weather;
 	SokuLib::Skill _skills[15];
 	bool _disableLimit;
@@ -37,6 +40,7 @@ private:
 	unsigned _waitCounter = 0;
 	unsigned _actionCounter = 0;
 	unsigned _actionWaitCounter = 0;
+	unsigned _timer = 0;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;

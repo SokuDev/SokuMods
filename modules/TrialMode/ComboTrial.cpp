@@ -4,6 +4,7 @@
 
 #include "ComboTrial.hpp"
 #include "Actions.hpp"
+#include "Menu.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -72,6 +73,11 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
 		this->_playIntro();
+	else if (this->_actionCounter != this->_exceptedActions.size() && battleMgr.leftCharacterManager.objectBase.action == this->_exceptedActions[this->_actionCounter]->action) {
+		this->_actionCounter++;
+		if (this->_actionCounter == this->_exceptedActions.size())
+			battleMgr.rightCharacterManager.objectBase.hp = 1;
+	}
 
 	if (this->_disableLimit) {
 		battleMgr.leftCharacterManager.combo.limit = 0;
@@ -83,11 +89,18 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	auto hit = battleMgr.rightCharacterManager.objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
 	           battleMgr.rightCharacterManager.objectBase.action <= SokuLib::ACTION_FORWARD_DASH;
 
+	if (this->_actionCounter && !this->_dummyHit) {
+		this->_timer++;
+	} else
+		this->_timer = 0;
+	this->_isStart = this->_timer >= 60;
+	battleMgr.leftCharacterManager.score = 1;
 	SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
 	if (this->_dummyHit && !hit)
 		this->_isStart = true;
 	this->_dummyHit |= hit;
 	if (!this->_dummyHit) {
+		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 		if (battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_IDLE && battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_LANDING)
@@ -98,7 +111,24 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 void ComboTrial::render()
 {
+	if (this->_actionCounter == this->_exceptedActions.size() && !this->_playingIntro)
+		return;
 
+	SokuLib::Vector2i pos = {120, 60};
+
+	for (int i = 0; i < this->_exceptedActions.size(); i++) {
+		auto &elem = this->_exceptedActions[i];
+
+		if (this->_actionCounter == i)
+			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0xFF, 0x60};
+		else if (this->_actionCounter > i)
+			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0x60, 0x60};
+		else
+			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor::White;
+		elem->sprite.setPosition(pos);
+		elem->sprite.draw();
+		pos.y += elem->sprite.getSize().y;
+	}
 }
 
 int ComboTrial::getScore()
@@ -151,19 +181,19 @@ void ComboTrial::_loadExpected(const std::string &expected)
 	char last = ' ';
 
 	this->_exceptedActions.clear();
-	this->_exceptedActions.emplace_back();
+	this->_exceptedActions.emplace_back(new SpecialAction());
 	for (auto c : expected) {
 		par |= c == '(';
 		par &= c != ')';
 		if (!par && c == ' ') {
 			if (last != ' ')
-				this->_exceptedActions.emplace_back();
+				this->_exceptedActions.emplace_back(new SpecialAction());
 		} else
-			this->_exceptedActions.back().name += c;
+			this->_exceptedActions.back()->name += c;
 		last = c;
 	}
 	for (auto &action : this->_exceptedActions)
-		action.parse();
+		action->parse();
 }
 
 void ComboTrial::_playIntro()
@@ -174,13 +204,13 @@ void ComboTrial::_playIntro()
 	auto &battleMgr = SokuLib::getBattleMgr();
 	auto &arr = this->_exceptedActions[this->_actionCounter];
 
-	if (this->_actionWaitCounter < arr.delay) {
+	if (this->_actionWaitCounter < arr->delay) {
 		this->_actionWaitCounter++;
 		return;
 	}
-	arr.counter = (arr.counter + 1) % arr.inputs.size();
-	if (battleMgr.leftCharacterManager.objectBase.action == arr.action) {
-		arr.counter = 0;
+	arr->counter = (arr->counter + 1) % arr->inputs.size();
+	if (battleMgr.leftCharacterManager.objectBase.action == arr->action) {
+		arr->counter = 0;
 		this->_actionWaitCounter = 0;
 		this->_actionCounter++;
 	}
@@ -193,9 +223,10 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 		if (this->_waitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
-		if (this->_exceptedActions[this->_actionCounter].delay > this->_actionWaitCounter)
+		if (this->_exceptedActions[this->_actionCounter]->delay > this->_actionWaitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
-		originalInputs = this->_exceptedActions[this->_actionCounter].inputs[this->_exceptedActions[this->_actionCounter].counter];
+		originalInputs = this->_exceptedActions[this->_actionCounter]->inputs[this->_exceptedActions[this->_actionCounter]->counter];
+		originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
 		return;
 	}
 }
@@ -207,12 +238,12 @@ SokuLib::KeyInput ComboTrial::getDummyInputs()
 
 void ComboTrial::SpecialAction::parse()
 {
-	std::string moveName;
 	std::string hitsStr;
 	std::string delayStr;
 	bool d = false;
 	bool p = false;
 
+	this->moveName.clear();
 	for (auto c : this->name) {
 		if (c == ':' && !p) {
 			d = !d;
@@ -232,15 +263,15 @@ void ComboTrial::SpecialAction::parse()
 		else if (p)
 			hitsStr += c;
 		else
-			moveName += std::tolower(c);
+			this->moveName += std::tolower(c);
 	}
-	printf("Move %s -> %s (%s) :%s: -> ", this->name.c_str(), moveName.c_str(), hitsStr.c_str(), delayStr.c_str());
+	printf("Move %s -> %s (%s) :%s: -> ", this->name.c_str(), this->moveName.c_str(), hitsStr.c_str(), delayStr.c_str());
 	try {
 		this->action = actionsFromStr.at(moveName);
 		printf("%i ", this->action);
 	} catch (std::exception &) {
 		printf("INVALID\n");
-		throw std::invalid_argument(moveName + " is not a recognized move name");
+		throw std::invalid_argument(this->moveName + " is not a recognized move name");
 	}
 
 	try {
@@ -266,8 +297,15 @@ void ComboTrial::SpecialAction::parse()
 	}
 
 	try {
-		this->inputs = actionStrToInputs.at(moveName);
+		this->inputs = actionStrToInputs.at(this->moveName);
 	} catch (...) {
-		throw std::invalid_argument(moveName + " is not yet implemented");
+		throw std::invalid_argument(this->moveName + " is not yet implemented");
 	}
+
+	SokuLib::Vector2i real;
+
+	this->sprite.texture.createFromText(this->moveName.c_str(), defaultFont16, {100, 20}, &real);
+	this->sprite.setSize(real.to<unsigned>());
+	this->sprite.rect.width = real.x;
+	this->sprite.rect.height = real.y;
 }

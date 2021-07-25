@@ -5,22 +5,22 @@
         "character": "remilia",
         "palette": 0,
         "deck": [],
-        "pos": 700
+        "pos": 1180
     },
     "dummy": {
         "character": "reimu",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 800,
+            "x": 1240,
             "y": 0
         }
     },
-    "intro": "bnbmid1intro.script",
-    "outro": "bnbmid1outro.script",
+    "intro": "bnbcorn1intro.script",
+    "outro": "bnbcorn1outro.script",
     "type": "combo",
 
-    "expected": "2a 5c hj9 j5c j66 j8a:20",
+    "expected": "5aaaa 6a 5c",
     "skills": [
         [0, 0],
         [0, 0],
