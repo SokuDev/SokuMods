@@ -137,6 +137,32 @@ SokuTalking::SokuTalking(std::vector<std::string> dialogLoad) :
 
 //SokuStand function (responsible of making result box including text and stand within)
 
+SokuStand::CharStand SokuStand::sideStand(char c)
+{
+	switch (c) {
+	case ' ':
+		return NOSTAND;
+	case 'H':
+		return HAPPY;
+	case 'E':
+		return EMBARRASSED;
+	case 'S':
+		return SURPRISED;
+	case 'C':
+		return CONFIDENT;
+	case 'A':
+		return ANGRY;
+	case 'D':
+		return DEFEATED;
+	case 'W':
+		return WINNING;
+	case 'c':
+		return CONCERNED;
+	default:
+		return HAPPY2;
+	}
+}
+
 const char *getChrCodeName(SokuLib::Character chr)
 {
 	try {
@@ -150,32 +176,53 @@ const char *getChrCodeName(SokuLib::Character chr)
 	return nullptr;
 }
 
+
+
 SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 {
 	std::string leftChar = getChrCodeName(SokuLib::leftChar);
 	std::string rightChar = getChrCodeName(SokuLib::rightChar);
-	this->StandDBox.setSize({624, 80});
-	this->StandDBox.setPosition({8, 392});
+	this->_standDialogBox.setSize({624, 80});
+	this->_standDialogBox.setPosition({8, 392});
 
-	initBattleAnimation(this->_spriteVec, loadBattleInitSpriteOnce,
-			    ("data/character/" + leftChar + "/stand/è-.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/è¥.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/ï-.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/îê.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/ô{.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/òë.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/òë.bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/ù].bmp").c_str(),
-			    ("data/character/" + leftChar + "/stand/ÿf.bmp").c_str());
-	initBattleAnimation(this->_spriteVec, loadBattleInitSpriteOnce,
-			    ("data/character/" + rightChar + "/stand/è-.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/è¥.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/ï-.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/îê.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/ô{.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/òë.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/òë.bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/ù].bmp").c_str(),
-			    ("data/character/" + rightChar + "/stand/ÿf.bmp").c_str());
-	initBattleAnimation(this->_spriteVec, loadBattleInitTextOnce, dialogLoad);
+	initBattleAnimation(
+		this->_spriteVec, loadBattleInitSpriteOnce,
+		("data/character/" + leftChar + "/stand/è-.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/è¥.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/ï-.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/îê.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/ô{.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/òë.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/òë.bmp").c_str(),
+		("data/character/" + leftChar + "/stand/ù].bmp").c_str(),
+		("data/character/" + leftChar + "/stand/ÿf.bmp").c_str()
+	);
+	initBattleAnimation(
+		this->_spriteVec, loadBattleInitSpriteOnce,
+		("data/character/" + rightChar + "/stand/è-.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/è¥.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/ï-.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/îê.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/ô{.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/òë.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/òë.bmp").c_str(),
+		("data/character/" + rightChar + "/stand/ù].bmp").c_str(),
+		("data/character/" + rightChar + "/stand/ÿf.bmp").c_str()
+	);
+	for (int i = 0; i < dialogLoad.size(); i++) {
+		auto dialog = dialogLoad[i];
+		if (i == 0) {
+			this->_isLeftTalking = (dialog[0] == 'L');
+			this->_left = sideStand(dialog[1]);
+			this->_right = sideStand(dialog[2]);
+		} else
+			this->_metaData.emplace_back(dialog[0] == 'L', sideStand(dialog[1]));
+		loadBattleInitTextOnce(dialog.c_str() + 2 + (i == 0), this->_spriteVec);
+	}
 }
+
+void SokuStand::render(const SokuLib::CharacterManager *)
+{
+
+}
+

@@ -4,6 +4,7 @@
 
 #include <SokuLib.hpp>
 #include <vector>
+#include <list>
 
 #ifndef SWRSTOYS_BATTLEANIMATION_HPP
 #define SWRSTOYS_BATTLEANIMATION_HPP
@@ -86,8 +87,8 @@ protected:
 public:
 	virtual ~Dialog() = default;
 	virtual void update() = 0;
-	virtual void onKeyPress() = 0;
-	virtual const void render(const SokuLib::CharacterManager *charSide) = 0;
+	virtual bool onKeyPress() = 0;
+	virtual void render(const SokuLib::CharacterManager *charSide) = 0;
 };
 
 class SokuDialog : public Dialog {
@@ -113,8 +114,8 @@ public:
 
 class SokuStand : public Dialog {
 private:
-	SokuLib::DrawUtils::RectangleShape StandDBox;
 	enum CharStand {
+		NOSTAND = -1,
 		HAPPY,
 		EMBARRASSED,
 		SURPRISED,
@@ -124,11 +125,25 @@ private:
 		WINNING,
 		HAPPY2,
 		CONCERNED,
+		NB_STANDS
 	};
+	enum SpriteIndex {
+		SPRITE_LEFT_STAND_START,
+		SPRITE_RIGHT_STAND_START = NB_STANDS,
+	};
+
+	bool _isLeftTalking;
+	CharStand _left;
+	CharStand _right;
+	std::list<std::pair<bool, CharStand>> _metaData;
+	SokuLib::DrawUtils::RectangleShape _standDialogBox;
+
+	static SokuStand::CharStand sideStand(char c);
+
 public:
 	SokuStand(std::vector<std::string> dialogLoad);
 	~SokuStand() = default;
-	const void render(const SokuLib::CharacterManager &charSide);
+	void render(const SokuLib::CharacterManager *) override;
 };
 
 #endif //SWRSTOYS_BATTLEANIMATION_HPP
