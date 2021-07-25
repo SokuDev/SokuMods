@@ -9,7 +9,7 @@
         "isPath": false,
         "path": "data/stand/remilia.bmp"
     },
-    "description": "Lorem ipsum dolor sit<br>amet, consectetur adipiscing elit,<br>sed do eiusmod tempor incididunt ut<br>labore et dolore magna aliqua.<br>Ut enim ad minim veniam, quis<br>nostrud exercitation ullamco laboris<br>nisi ut aliquip ex ea commodo consequat.<br>",
+    "description": "Remilia's bread and butters",
     "author": "PinkySmile",
     "icon": {
         "isPath": false,
@@ -24,37 +24,37 @@
     },
     "scenarios": [
         {
-            "name": "BnB midscreen 1",
+            "name": "Ground 2a starter",
             "file": "bnbmid1.json",
             "preview": "bnbmid1.png",
-            "description": "Lorem ipsum dolor sit<br>amet, consectetur adipiscing elit,<br>sed do eiusmod tempor incididunt ut<br>labore et dolore magna aliqua.<br>Ut enim ad minim veniam, quis<br>nostrud exercitation ullamco laboris<br>nisi ut aliquip ex ea commodo consequat.<br>"
+            "description": "2a 5c hjc j5c j66 j8a"
         },
         {
-            "name": "BnB midscreen 2",
+            "name": "Ground j5a starter",
             "file": "bnbmid2.json",
             "preview": "bnbmid2.png",
-            "description": ""
+            "description": "d6 j5aa d6 j5aa d6 j5a j8a"
         },
         {
-            "name": "BnB midscreen 3",
+            "name": "Ground j2a CH starter",
             "file": "bnbmid3.json",
             "preview": "bnbmid3.png",
-            "description": ""
+            "description": "3a 2a 2c d236b"
         },
         {
-            "name": "BnB corner 1",
+            "name": "Corner 5a starter",
             "file": "bnbcorn1.json",
             "preview": "bnbcorn1.png",
-            "description": ""
+            "description": "5aaaa 6a 5c"
         },
         {
-            "name": "BnB corner 2",
+            "name": "Corner 2a starter",
             "file": "bnbcorn2.json",
             "preview": "bnbcorn2.png",
-            "description": ""
+            "description": "2a 2c hj8 j2c j66 j5aa"
         },
         {
-            "name": "BnB corner 3",
+            "name": "Corner j5aa starter",
             "file": "bnbcorn3.json",
             "preview": "bnbcorn3.png",
             "description": ""

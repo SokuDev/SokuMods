@@ -13,14 +13,14 @@
         "deck": [],
         "pos": {
             "x": 800,
-            "y": 0
+            "y": 100
         }
     },
-    "intro": "bnbmid1intro.script",
-    "outro": "bnbmid1outro.script",
+    "intro": "bnbmid2intro.script",
+    "outro": "bnbmid2outro.script",
     "type": "combo",
 
-    "expected": "2a 5c hj9 j5c j66 j8a:20",
+    "expected": "d6 j5aa d6 j5aa d6 j5a:12 j8a",
     "skills": [
         [0, 0],
         [0, 0],
