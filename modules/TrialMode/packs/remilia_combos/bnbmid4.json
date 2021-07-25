@@ -4,23 +4,23 @@
     "player": {
         "character": "remilia",
         "palette": 0,
-        "deck": [],
-        "pos": 700
+        "deck": [204, 204, 204, 204, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4],
+        "pos": 550
     },
     "dummy": {
         "character": "reimu",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 800,
-            "y": 100
+            "x": 600,
+            "y": 0
         }
     },
-    "intro": "bnbmid2intro.script",
-    "outro": "bnbmid2outro.script",
+    "intro": "bnbmid3intro.script",
+    "outro": "bnbmid3outro.script",
     "type": "combo",
 
-    "expected": "d6 j5aa d6 j5aa d6 j5a:12 j8a",
+    "expected": "5aaaa sc204 hj9 j8a:30",
     "skills": [
         [0, 0],
         [0, 0],
@@ -30,7 +30,7 @@
     "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
-    "hand": [],
+    "hand": [204],
     "play_combo_after_intro": true,
     "hint": [
 
