@@ -49,7 +49,20 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 
 	try {
 		this->_hand = json.contains("hand") && json["hand"].is_array() ? json["hand"].get<std::vector<unsigned short>>() : std::vector<unsigned short>{};
-	} catch (...) {}
+	} catch (...) {
+		throw std::invalid_argument("Hand contains invalid values");
+	}
+
+	for (auto card : this->_hand) {
+		if (card <= 20)
+			continue;
+		for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++)
+			if (card == SokuLib::leftPlayerInfo.effectiveDeck[i])
+				goto ok;
+		throw std::invalid_argument("Player deck doesn't have card " + std::to_string(card));
+	ok:
+		continue;
+	}
 
 	this->_weather = json.contains("weather") && json["weather"].is_number() ? static_cast<SokuLib::Weather>(json["weather"].get<int>()) : SokuLib::WEATHER_CLEAR;
 	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() ? json["disable_limit"].get<bool>() : false;
@@ -156,6 +169,14 @@ void ComboTrial::_initGameStart()
 	if (this->_playingIntro)
 		this->_waitCounter += 30;
 
+	battleMgr.leftCharacterManager.cardGauge = 0;
+	battleMgr.leftCharacterManager.hand.size = 0;
+	for (auto card : this->_hand) {
+		auto obj = battleMgr.leftCharacterManager.addCard(card);
+
+		if (this->_uniformCardCost)
+			obj->cost = this->_uniformCardCost;
+	}
 
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
 	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;

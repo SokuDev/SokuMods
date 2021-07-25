@@ -30,7 +30,7 @@
     "weather": 16,
     "disable_limit": false,
     "uniform_card_cost": 1,
-    "hand": [0, 0, 0, 0, 0],
+    "hand": [],
     "play_combo_after_intro": true,
     "hint": [
 
