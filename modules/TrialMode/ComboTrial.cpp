@@ -11,10 +11,15 @@
 #define printf(...)
 #endif
 
+#define dxLockRect(texture, ...) (*((int (__stdcall**)(void*, int, D3DLOCKED_RECT*, int, int))(*(int*)texture + 0x4c)))(texture, __VA_ARGS__)
+#define dxUnlockRect(texture, ...) (*((int (__stdcall**)(void*, int))(*(int*)texture + 0x50)))(texture, __VA_ARGS__)
+
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 
 ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 {
+	int text;
+
 	if (!editorMode) {
 		if (!json.contains("score") || !json["score"].is_array())
 			throw std::invalid_argument("The \"score\" field is not present or invalid.");
@@ -85,6 +90,31 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
 	this->_loadExpected(json["expected"]);
 
+	this->_gear.texture.loadFromResource(myModule, MAKEINTRESOURCE(12));
+	this->_gear.setPosition({559, 70});
+	this->_gear.setSize({64, 64});
+	this->_gear.rect.left = 0;
+	this->_gear.rect.top = 0;
+	this->_gear.rect.width = this->_gear.texture.getSize().x;
+	this->_gear.rect.height = this->_gear.texture.getSize().y;
+
+	this->_gearShadow.texture.loadFromResource(myModule, MAKEINTRESOURCE(16));
+	this->_gearShadow.setPosition({561, 72});
+	this->_gearShadow.setSize({64, 64});
+	this->_gearShadow.rect.left = 0;
+	this->_gearShadow.rect.top = 0;
+	this->_gearShadow.rect.width = this->_gearShadow.texture.getSize().x;
+	this->_gearShadow.rect.height = this->_gearShadow.texture.getSize().y;
+
+	this->_doll.texture.loadFromResource(myModule, MAKEINTRESOURCE(20));
+	this->_doll.setPosition({577, 80});
+	this->_doll.setSize({33, 46});
+	this->_doll.setMirroring(true, false);
+	this->_doll.rect.left = 0;
+	this->_doll.rect.top = 0;
+	this->_doll.rect.width = this->_doll.texture.getSize().x / 4;
+	this->_doll.rect.height = this->_doll.texture.getSize().y;
+
 	ScorePrerequisites *old = nullptr;
 
 	if (!json.contains("score") || !json["score"].is_array() || json["score"].size() != 4)
@@ -103,6 +133,9 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	this->_rotation += 0.025;
+	this->_dollAnim++;
+	this->_dollAnim &= 0b11111;
 	if (this->_freezeCounter) {
 		canHaveNextFrame = this->_freezeCounter % 2;
 		this->_freezeCounter--;
@@ -168,6 +201,16 @@ void ComboTrial::render()
 
 	SokuLib::Vector2i pos = {120, 60};
 
+	if (this->_playingIntro) {
+		this->_gearShadow.setRotation(this->_rotation);
+		this->_gearShadow.draw();
+
+		this->_gear.setRotation(this->_rotation);
+		this->_gear.draw();
+
+		this->_doll.rect.left = (this->_dollAnim >> 3 & 0b11) * this->_doll.texture.getSize().x / 4;
+		this->_doll.draw();
+	}
 	for (int i = 0; i < this->_exceptedActions.size(); i++) {
 		auto &elem = this->_exceptedActions[i];
 

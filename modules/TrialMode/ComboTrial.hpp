@@ -39,6 +39,9 @@ private:
 	//Init params
 	float _playerStartPos;
 	SokuLib::Vector2f _dummyStartPos;
+	SokuLib::DrawUtils::Sprite _doll;
+	SokuLib::DrawUtils::Sprite _gear;
+	SokuLib::DrawUtils::Sprite _gearShadow;
 	SokuLib::DrawUtils::RectangleShape _rect;
 	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;
 	SokuLib::Weather _weather;
@@ -50,12 +53,14 @@ private:
 	bool _playComboAfterIntro;
 
 	//State
+	unsigned char _dollAnim = 0;
 	unsigned _freezeCounter = 0;
 	unsigned _waitCounter = 0;
 	unsigned _actionCounter = 0;
 	unsigned _actionWaitCounter = 0;
 	unsigned _timer = 0;
 	unsigned _attempts = 0;
+	float _rotation = 0;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;
