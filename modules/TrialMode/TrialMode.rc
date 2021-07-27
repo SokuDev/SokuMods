@@ -1,2 +1,5 @@
 4 RCDATA "assets/packBorder.png"
-8 RCDATA "assets/icon_missing.png"
+8 RCDATA "assets/iconMissing.png"
+12 RCDATA "assets/gear.png"
+16 RCDATA "assets/gearShadow.png"
+20 RCDATA "assets/aliceDoll.png"
