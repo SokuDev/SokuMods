@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <dinput.h>
 #include "Menu.hpp"
 #include "Pack.hpp"
 
@@ -58,6 +59,82 @@ std::vector<SokuLib::KeyInput> lastInputs{
 	{0, 0, 0, 0, 0, 0, 0, 0},
 };
 
+ResultMenu::ResultMenu(int score)
+{
+	this->_selected += currentEntry == loadedPacks.size() - 1;
+
+	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
+	this->_resultTop.setPosition({128, 104});
+	this->_resultTop.setSize(this->_resultTop.texture.getSize());
+	this->_resultTop.rect.width = this->_resultTop.texture.getSize().x;
+	this->_resultTop.rect.height = this->_resultTop.texture.getSize().y;
+
+	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+	this->_score.setPosition({378, 174});
+	this->_score.setSize({128, 128});
+	this->_score.rect.left = score * this->_score.texture.getSize().x / 4;
+	this->_score.rect.width = this->_score.texture.getSize().x / 4;
+	this->_score.rect.height = this->_score.texture.getSize().y;
+
+	for (int i = 0; i < Trial::menuActionText.size(); i++) {
+		auto &sprite = this->_text[i];
+
+		sprite.texture.createFromText(Trial::menuActionText[i].c_str(), defaultFont16, {230, 24});
+		sprite.setPosition({128, 192 + i * 24});
+		sprite.setSize(sprite.texture.getSize());
+		sprite.rect.width = sprite.texture.getSize().x;
+		sprite.rect.height = sprite.texture.getSize().y;
+	}
+}
+
+void ResultMenu::_()
+{
+	puts("_ !");
+	*(int *)0x882a94 = 0x16;
+}
+
+int ResultMenu::onProcess()
+{
+	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
+
+	if (keys->keymapManager->input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_selected = Trial::RETURN_TO_TITLE_SCREEN;
+	}
+	if (keys->keymapManager->input.a == 1) {
+		SokuLib::playSEWaveBuffer(0x28);
+		loadedTrial->onMenuClosed(static_cast<Trial::MenuAction>(this->_selected));
+		return false;
+	}
+	if (keys->keymapManager->input.verticalAxis == -1 || (keys->keymapManager->input.verticalAxis <= -36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		this->_selected--;
+		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
+			//this->_selected -= currentEntry == loadedPacks.size() - 1;
+			this->_selected--;
+		this->_selected += Trial::NB_MENU_ACTION;
+		this->_selected %= Trial::NB_MENU_ACTION;
+	} else if (keys->keymapManager->input.verticalAxis == 1 || (keys->keymapManager->input.verticalAxis >= 36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		this->_selected++;
+		if (this->_selected == Trial::NB_MENU_ACTION)
+			//this->_selected += currentEntry == loadedPacks.size() - 1;
+			this->_selected++;
+		this->_selected %= Trial::NB_MENU_ACTION;
+	}
+	return true;
+}
+
+int ResultMenu::onRender()
+{
+	this->_resultTop.draw();
+	this->_score.draw();
+	((void (*)(float, float, float))0x443a50)(128, 194 + this->_selected * 24, 300);
+	for (auto &sprite : this->_text)
+		sprite.draw();
+	return 0;
+}
+
 void loadFont()
 {
 	SokuLib::FontDescription desc;
@@ -71,14 +148,14 @@ void loadFont()
 	desc.height = 10;
 	desc.weight = FW_BOLD;
 	desc.italic = 0;
-	desc.shadow = 2;
+	desc.shadow = 1;
 	desc.bufferSize = 1000000;
 	desc.charSpaceX = 0;
 	desc.charSpaceY = 0;
 	desc.offsetX = 0;
 	desc.offsetY = 0;
 	desc.useOffset = 0;
-	strcpy(desc.faceName, SokuLib::defaultFontName);
+	strcpy(desc.faceName, "MonoSpatialModSWR");
 	desc.weight = FW_REGULAR;
 	defaultFont10.create();
 	defaultFont10.setIndirect(desc);

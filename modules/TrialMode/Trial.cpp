@@ -46,3 +46,10 @@ Trial *Trial::create(SokuLib::Character player, const nlohmann::json &json)
 		return nullptr;
 	return Trial::_factory.at(json["type"])(player, json);
 }
+
+const std::array<std::string, Trial::NB_MENU_ACTION> Trial::menuActionText{
+	"Go to next trial",
+	"Retry",
+	"Return to trial select",
+	"Return to title screen"
+};

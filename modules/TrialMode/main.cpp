@@ -156,6 +156,8 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 }
 
 static bool canHaveNextFrame = true;
+static bool menu = false;
+static bool done = false;
 
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
@@ -163,11 +165,10 @@ int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 	if (!loadedTrial)
 		return (This->*ogBattleOnProcess)();
 
-	int buffer = !canHaveNextFrame ? SokuLib::SCENE_BATTLE : (This->*ogBattleOnProcess)();
+	int buffer = !canHaveNextFrame ? loadedTrial->getNextScene() : (This->*ogBattleOnProcess)();
 
 	canHaveNextFrame = true;
-	if (loadedTrial->update(canHaveNextFrame))
-		buffer = SokuLib::SCENE_SELECT;
+	loadedTrial->update(canHaveNextFrame);
 	goToTitle = buffer == SokuLib::SCENE_TITLE;
 	if (buffer != SokuLib::SCENE_BATTLE)
 		loadedTrial.reset();

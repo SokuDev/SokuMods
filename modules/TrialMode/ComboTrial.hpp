@@ -8,6 +8,7 @@
 
 #include <SokuLib.hpp>
 #include "Trial.hpp"
+#include "Menu.hpp"
 
 class ComboTrial : public Trial {
 private:
@@ -39,10 +40,6 @@ private:
 	//Init params
 	float _playerStartPos;
 	SokuLib::Vector2f _dummyStartPos;
-	SokuLib::DrawUtils::Sprite _doll;
-	SokuLib::DrawUtils::Sprite _gear;
-	SokuLib::DrawUtils::Sprite _gearShadow;
-	SokuLib::DrawUtils::RectangleShape _rect;
 	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;
 	SokuLib::Weather _weather;
 	SokuLib::Skill _skills[15];
@@ -66,6 +63,14 @@ private:
 	bool _dummyHit = false;
 	bool _playingIntro = false;
 	bool _finished = false;
+	SokuLib::Scene _next = SokuLib::SCENE_BATTLE;
+
+	//Render
+	mutable SokuLib::DrawUtils::Sprite _doll;
+	mutable SokuLib::DrawUtils::Sprite _gear;
+	mutable SokuLib::DrawUtils::Sprite _gearShadow;
+	mutable SokuLib::DrawUtils::Sprite _attemptText;
+	mutable SokuLib::DrawUtils::RectangleShape _rect;
 
 	void _playIntro();
 	void _initGameStart();
@@ -74,14 +79,29 @@ private:
 	static SokuLib::Action getMoveAction(SokuLib::Character chr, std::string &name);
 
 public:
-	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
-
-	SokuLib::KeyInput getDummyInputs() override;
-
 	ComboTrial(SokuLib::Character player, const nlohmann::json &json);
+
+	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
+	SokuLib::KeyInput getDummyInputs() override;
 	bool update(bool &canHaveNextFrame) override;
-	void render() override;
+	void render() const override;
 	int getScore() override;
+	void onMenuClosed(MenuAction action) override;
+	SokuLib::Scene getNextScene() override;
+
+	friend class ComboTrialResult;
+};
+
+class ComboTrialResult : public ResultMenu {
+private:
+	ComboTrial &_parent;
+	bool _resultShown = true;
+
+public:
+	ComboTrialResult(ComboTrial &trial);
+	~ComboTrialResult() override = default;
+	int onProcess() override;
+	int onRender() override;
 };
 
 
