@@ -15,6 +15,12 @@ static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 
 ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 {
+	if (!editorMode) {
+		if (!json.contains("score") || !json["score"].is_array())
+			throw std::invalid_argument("The \"score\" field is not present or invalid.");
+		if (json["score"].size() != 4)
+			throw std::invalid_argument("The \"score\" field doesn't have exactly 4 elements.");
+	}
 	if (!json.contains("expected") || !json["expected"].is_string())
 		throw std::invalid_argument("The \"expected\" field is not present or invalid.");
 	if (json.contains("hint") && !json["hint"].is_array())
@@ -33,7 +39,13 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 		for (int i = 0; i < json["skills"].size(); i++) {
 			auto &arr = json["skills"][i];
 
-			if (!arr.is_array() || arr.size() != 2 || arr[0].get<int>() < 0 || arr[0].get<int>() > 2) {
+			if (!arr.is_array() || arr.size() != 2 || !arr[0].is_number() || arr[0].get<int>() < 0 || arr[0].get<int>() > 2 || !arr[1].is_number()) {
+				MessageBox(
+					SokuLib::window,
+					("Element #" + std::to_string(i) + " in the skill array was not valid and will be discarded").c_str(),
+					"Invalid skill array",
+					MB_ICONWARNING
+				);
 				this->_skills[i].notUsed = false;
 				this->_skills[i].level = 0;
 			} else {
@@ -72,11 +84,33 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
 	this->_loadExpected(json["expected"]);
+
+	ScorePrerequisites *old = nullptr;
+
+	if (!json.contains("score") || !json["score"].is_array() || json["score"].size() != 4)
+		for (int i = 0; i < 4; i++)
+			old = &this->_scores.emplace_back(nlohmann::json{}, old);
+	else
+		for (auto &j : json["score"])
+			try {
+				old = &this->_scores.emplace_back(j, old);
+			} catch (std::exception &e) {
+				throw std::invalid_argument("Score element #" + std::to_string(this->_scores.size()) + " is invalid : " + e.what());
+			}
 }
 
 bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
+
+	if (this->_freezeCounter) {
+		canHaveNextFrame = this->_freezeCounter % 2;
+		this->_freezeCounter--;
+		return false;
+	}
+
+	if (this->_finished && !this->_playingIntro)
+		return true;
 
 	if (this->_isStart) {
 		this->_initGameStart();
@@ -86,10 +120,15 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
 		this->_playIntro();
-	else if (this->_actionCounter != this->_exceptedActions.size() && battleMgr.leftCharacterManager.objectBase.action == this->_exceptedActions[this->_actionCounter]->action) {
+	else if (this->_actionCounter != this->_exceptedActions.size() && battleMgr.leftCharacterManager.objectBase.action == this->_exceptedActions[this->_actionCounter]->action)
 		this->_actionCounter++;
-		if (this->_actionCounter == this->_exceptedActions.size())
-			battleMgr.rightCharacterManager.objectBase.hp = 1;
+
+	if (!this->_finished && this->_actionCounter == this->_exceptedActions.size() && this->_scores.front().met(this->_attempts)) {
+		SokuLib::playSEWaveBuffer(44);
+		if (!this->_playingIntro)
+			this->_freezeCounter = 60;
+		this->_finished = true;
+		return false;
 	}
 
 	if (this->_disableLimit) {
@@ -124,7 +163,7 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 void ComboTrial::render()
 {
-	if (this->_actionCounter == this->_exceptedActions.size() && !this->_playingIntro)
+	if (this->_finished && !this->_playingIntro)
 		return;
 
 	SokuLib::Vector2i pos = {120, 60};
@@ -158,10 +197,12 @@ void ComboTrial::_initGameStart()
 		SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
 		SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
 		this->_waitCounter = 180;
-	}
+	} else if (!this->_playingIntro)
+		this->_attempts++;
 
 	this->_isStart = false;
 	this->_dummyHit = false;
+	this->_finished = false;
 	this->_playingIntro = this->_playComboAfterIntro;
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
@@ -361,4 +402,66 @@ void ComboTrial::SpecialAction::parse()
 	this->sprite.setSize(real.to<unsigned>());
 	this->sprite.rect.width = real.x;
 	this->sprite.rect.height = real.y;
+}
+
+ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrial::ScorePrerequisites *other)
+{
+	if (!other) {
+		if (!editorMode) {
+			if (json.contains("max_attempts"))
+				throw std::invalid_argument("First score element shouldn't have the field \"max_attempts\"");
+			if (!json.contains("min_hits"))
+				throw std::invalid_argument("First score element is missing the field \"min_hits\"");
+			if (!json.contains("min_damage"))
+				throw std::invalid_argument("First score element is missing the field \"min_damage\"");
+			if (!json.contains("min_limit"))
+				throw std::invalid_argument("First score element is missing the field \"min_limit\"");
+			if (!json.contains("max_limit"))
+				throw std::invalid_argument("First score element is missing the field \"max_limit\"");
+		}
+	} else
+		*this = *other;
+
+	if (json.contains("max_attempts")) {
+		if (!json["max_attempts"].is_number())
+			throw std::invalid_argument("Field \"max_attempts\" is specified but not a number");
+		this->attempts = json["max_attempts"];
+	}
+	if (json.contains("min_hits")) {
+		if (!json["min_hits"].is_number())
+			throw std::invalid_argument("Field \"min_hits\" is specified but not a number");
+		this->hits = json["min_hits"];
+	}
+	if (json.contains("min_damage")) {
+		if (!json["min_damage"].is_number())
+			throw std::invalid_argument("Field \"min_damage\" is specified but not a number");
+		this->damage = json["min_damage"];
+	}
+	if (json.contains("min_limit")) {
+		if (!json["min_limit"].is_number())
+			throw std::invalid_argument("Field \"min_limit\" is specified but not a number");
+		this->minLimit = json["min_limit"];
+	}
+	if (json.contains("max_limit")) {
+		if (!json["max_limit"].is_number())
+			throw std::invalid_argument("Field \"max_limit\" is specified but not a number");
+		this->maxLimit = json["max_limit"];
+	}
+}
+
+bool ComboTrial::ScorePrerequisites::met(unsigned currentAttempts) const
+{
+	auto &battle = SokuLib::getBattleMgr();
+
+	if (this->attempts < currentAttempts)
+		return false;
+	if (this->hits > battle.leftCharacterManager.combo.nbHits)
+		return false;
+	if (this->damage > battle.leftCharacterManager.combo.damages)
+		return false;
+	if (this->minLimit > battle.leftCharacterManager.combo.limit)
+		return false;
+	if (this->maxLimit < battle.leftCharacterManager.combo.limit)
+		return false;
+	return true;
 }

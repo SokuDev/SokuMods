@@ -20,7 +20,7 @@
     "outro": "bnbcorn3outro.script",
     "type": "combo",
 
-    "expected": "d6 j5aa d6 j5aa 2c:20 hj9 j5aa",
+    "expected": "d6 j5aa d6 j5aa 2c:20 hj9:35 j5aa",
     "skills": [
         [0, 0],
         [0, 0],
@@ -32,6 +32,23 @@
     "uniform_card_cost": 1,
     "hand": [],
     "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 14,
+            "min_damage": 1866,
+            "min_limit": 136,
+            "max_limit": 138
+        },
+        {
+            "max_attempts": 15
+        },
+        {
+            "min_hits": 15
+        },
+        {
+            "max_attempts": 1
+        }
+    ],
     "hint": [
 
     ]
