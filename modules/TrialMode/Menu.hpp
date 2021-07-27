@@ -9,6 +9,21 @@
 #include <SokuLib.hpp>
 #include "Trial.hpp"
 
+class ResultMenu : public SokuLib::IMenu {
+private:
+	int _selected = 1;
+	SokuLib::DrawUtils::Sprite _score;
+	SokuLib::DrawUtils::Sprite _resultTop;
+	std::array<SokuLib::DrawUtils::Sprite, Trial::NB_MENU_ACTION> _text;
+
+public:
+	ResultMenu(int score);
+	~ResultMenu() override = default;
+	void _() override;
+	int onProcess() override;
+	int onRender() override;
+};
+
 extern char profilePath[1024 + MAX_PATH];
 extern char profileFolderPath[1024 + MAX_PATH];
 extern HMODULE myModule;

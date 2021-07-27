@@ -115,6 +115,14 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 	this->_doll.rect.width = this->_doll.texture.getSize().x / 4;
 	this->_doll.rect.height = this->_doll.texture.getSize().y;
 
+	this->_attemptText.texture.createFromText("Attempt #1", defaultFont10, {116, 24});
+	this->_attemptText.setPosition({4, 58});
+	this->_attemptText.setSize(this->_attemptText.texture.getSize());
+	this->_attemptText.rect.left = 0;
+	this->_attemptText.rect.top = 0;
+	this->_attemptText.rect.width = this->_attemptText.texture.getSize().x;
+	this->_attemptText.rect.height = this->_attemptText.texture.getSize().y;
+
 	ScorePrerequisites *old = nullptr;
 
 	if (!json.contains("score") || !json["score"].is_array() || json["score"].size() != 4)
@@ -137,13 +145,17 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	this->_dollAnim++;
 	this->_dollAnim &= 0b11111;
 	if (this->_freezeCounter) {
-		canHaveNextFrame = this->_freezeCounter % 2;
+		canHaveNextFrame = (this->_freezeCounter % max((5 - this->_freezeCounter / 30), 1) == 0);
 		this->_freezeCounter--;
-		return false;
+		if (!this->_freezeCounter)
+			SokuLib::activateMenu(new ComboTrialResult(*this));
+		return !this->_freezeCounter;
 	}
 
-	if (this->_finished && !this->_playingIntro)
+	if (this->_finished && !this->_playingIntro) {
+		canHaveNextFrame = false;
 		return true;
+	}
 
 	if (this->_isStart) {
 		this->_initGameStart();
@@ -159,7 +171,7 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	if (!this->_finished && this->_actionCounter == this->_exceptedActions.size() && this->_scores.front().met(this->_attempts)) {
 		SokuLib::playSEWaveBuffer(44);
 		if (!this->_playingIntro)
-			this->_freezeCounter = 60;
+			this->_freezeCounter = 120;
 		this->_finished = true;
 		return false;
 	}
@@ -173,6 +185,12 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 	auto hit = battleMgr.rightCharacterManager.objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
 	           battleMgr.rightCharacterManager.objectBase.action <= SokuLib::ACTION_FORWARD_DASH;
+
+	if (this->_playComboAfterIntro && !hit && battleMgr.leftCharacterManager.objectBase.action <= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN) {
+		this->_attempts--;
+		this->_initGameStart();
+		return false;
+	}
 
 	if (this->_actionCounter && !this->_dummyHit) {
 		this->_timer++;
@@ -190,11 +208,13 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 		if (battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_IDLE && battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_LANDING)
 			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
+		if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
+			this->_playComboAfterIntro = true;
 	}
 	return false;
 }
 
-void ComboTrial::render()
+void ComboTrial::render() const
 {
 	if (this->_finished && !this->_playingIntro)
 		return;
@@ -210,7 +230,8 @@ void ComboTrial::render()
 
 		this->_doll.rect.left = (this->_dollAnim >> 3 & 0b11) * this->_doll.texture.getSize().x / 4;
 		this->_doll.draw();
-	}
+	} else
+		this->_attemptText.draw();
 	for (int i = 0; i < this->_exceptedActions.size(); i++) {
 		auto &elem = this->_exceptedActions[i];
 
@@ -228,7 +249,11 @@ void ComboTrial::render()
 
 int ComboTrial::getScore()
 {
-	return -1;
+	int index = 0;
+
+	while (index < this->_scores.size() && this->_scores[index].met(this->_attempts))
+		index++;
+	return index - 1;
 }
 
 void ComboTrial::_initGameStart()
@@ -243,6 +268,7 @@ void ComboTrial::_initGameStart()
 	} else if (!this->_playingIntro)
 		this->_attempts++;
 
+	this->_attemptText.texture.createFromText(("Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
@@ -264,6 +290,9 @@ void ComboTrial::_initGameStart()
 
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
 	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
+	battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
+	battleMgr.leftCharacterManager.objectBase.frameCount = 0;
+	battleMgr.leftCharacterManager.objectBase.animationSubFrame = 0;
 	battleMgr.leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	battleMgr.leftCharacterManager.objectBase.position.y = 0;
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
@@ -334,6 +363,10 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 		originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
 		return;
 	}
+	if (this->_playComboAfterIntro) {
+		memset(&originalInputs, 0, sizeof(originalInputs));
+		return;
+	}
 }
 
 SokuLib::KeyInput ComboTrial::getDummyInputs()
@@ -371,6 +404,30 @@ SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &n
 		assert(false);
 		throw;
 	}
+}
+
+void ComboTrial::onMenuClosed(MenuAction action)
+{
+	switch (action) {
+	case RETRY:
+		this->_attempts = 0;
+		this->_playingIntro = true;
+		break;
+	case GO_TO_NEXT_TRIAL:
+		this->_next = SokuLib::SCENE_LOADING;
+		break;
+	case RETURN_TO_TRIAL_SELECT:
+		this->_next = SokuLib::SCENE_SELECT;
+		break;
+	case RETURN_TO_TITLE_SCREEN:
+		this->_next = SokuLib::SCENE_TITLE;
+		break;
+	}
+}
+
+SokuLib::Scene ComboTrial::getNextScene()
+{
+	return this->_next;
 }
 
 void ComboTrial::SpecialAction::parse()
@@ -469,6 +526,8 @@ ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, c
 		if (!json["max_attempts"].is_number())
 			throw std::invalid_argument("Field \"max_attempts\" is specified but not a number");
 		this->attempts = json["max_attempts"];
+		if (!this->attempts)
+			throw std::invalid_argument("It's impossible to win without trying ! THINK MARK ! THINK!");
 	}
 	if (json.contains("min_hits")) {
 		if (!json["min_hits"].is_number())
@@ -496,7 +555,7 @@ bool ComboTrial::ScorePrerequisites::met(unsigned currentAttempts) const
 {
 	auto &battle = SokuLib::getBattleMgr();
 
-	if (this->attempts < currentAttempts)
+	if (this->attempts <= currentAttempts)
 		return false;
 	if (this->hits > battle.leftCharacterManager.combo.nbHits)
 		return false;
@@ -507,4 +566,25 @@ bool ComboTrial::ScorePrerequisites::met(unsigned currentAttempts) const
 	if (this->maxLimit < battle.leftCharacterManager.combo.limit)
 		return false;
 	return true;
+}
+
+ComboTrialResult::ComboTrialResult(ComboTrial &trial) :
+	ResultMenu(trial.getScore()),
+	_parent(trial)
+{
+}
+
+int ComboTrialResult::onProcess()
+{
+	if (this->_resultShown)
+		return ResultMenu::onProcess();
+	return true;
+}
+
+int ComboTrialResult::onRender()
+{
+	if (this->_resultShown) {
+		return ResultMenu::onRender();
+	}
+	return 0;
 }
