@@ -27,11 +27,28 @@
         [0, 0],
         [0, 0]
     ],
-    "weather": 16,
+    "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [205],
     "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 16,
+            "min_damage": 4414,
+            "min_limit": 15,
+            "max_limit": 15
+        },
+        {
+            "max_attempts": 1
+        },
+        {
+            "min_hits": 18
+        },
+        {
+            "min_hits": 19
+        }
+    ],
     "hint": [
 
     ]

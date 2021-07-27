@@ -24,6 +24,18 @@ private:
 		void parse();
 	};
 
+	struct ScorePrerequisites {
+		unsigned attempts = -1;
+		unsigned hits = 0;
+		int damage = INT32_MIN;
+		unsigned minLimit = 0;
+		unsigned maxLimit = -1;
+
+		ScorePrerequisites() = default;
+		ScorePrerequisites(const nlohmann::json &json, const ScorePrerequisites *other);
+		bool met(unsigned currentAttempts) const;
+	};
+
 	//Init params
 	float _playerStartPos;
 	SokuLib::Vector2f _dummyStartPos;
@@ -34,17 +46,21 @@ private:
 	bool _disableLimit;
 	int _uniformCardCost;
 	std::vector<unsigned short> _hand;
+	std::vector<ScorePrerequisites> _scores;
 	bool _playComboAfterIntro;
 
 	//State
+	unsigned _freezeCounter = 0;
 	unsigned _waitCounter = 0;
 	unsigned _actionCounter = 0;
 	unsigned _actionWaitCounter = 0;
 	unsigned _timer = 0;
+	unsigned _attempts = 0;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;
 	bool _playingIntro = false;
+	bool _finished = false;
 
 	void _playIntro();
 	void _initGameStart();

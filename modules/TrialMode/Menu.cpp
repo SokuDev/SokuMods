@@ -19,8 +19,44 @@ SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
 HMODULE myModule;
+bool editorMode = false;
 char profilePath[1024 + MAX_PATH];
 char profileFolderPath[1024 + MAX_PATH];
+std::vector<SokuLib::KeyInput> _debug{
+	{1, 0, 0, 0, 0, 0, 0, 0}, // Right
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 1, 0, 0, 0}, // C
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{-1, 0, 0, 0, 0, 0, 0, 0}, // Left
+	{-1, 0, 0, 0, 0, 1, 0, 0}, // Left D (A on keyboard)
+	{0, 0, 0, 0, 0, 1, 0, 0}, // D (A on keyboard)
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 1, 0, 0, 0, 0, 0, 0}, // Down
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, -1, 0, 0, 0, 0, 0, 0}, // Up
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0}, // CH (S on keyboard)
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 1}, // SC (D on keyboard)
+};
+std::vector<SokuLib::KeyInput> lastInputs{
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0},
+};
 
 void loadFont()
 {
@@ -112,6 +148,9 @@ void menuUnloadAssets()
 	previewContainer.texture.destroy();
 	packContainer.texture.destroy();
 	loadedPacks.clear();
+	currentPack = 0;
+	currentEntry = -1;
+	editorMode = false;
 }
 
 bool checkField(const std::string &field, const nlohmann::json &value, bool (nlohmann::json::*fct)() const noexcept)
@@ -279,8 +318,50 @@ void prepareGameLoading(const std::string &path)
 
 bool wasPressed = false;
 
+static void switchEditorMode()
+{
+	for (auto &pack : loadedPacks) {
+		if (!pack->error.texture.hasTexture()) {
+			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::Green * 0.25;
+			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::Green * 0.25;
+		}
+	}
+	SokuLib::playSEWaveBuffer(48);
+}
+
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
+	if (editorMode)
+		goto nothing;
+	if (
+		lastInputs.back().verticalAxis != ((input.verticalAxis > 0) - (input.verticalAxis < 0)) ||
+		lastInputs.back().horizontalAxis != ((input.horizontalAxis > 0) - (input.horizontalAxis < 0)) ||
+		!lastInputs.back().a != !input.a ||
+		!lastInputs.back().b != !input.b ||
+		!lastInputs.back().c != !input.c ||
+		!lastInputs.back().d != !input.d ||
+		!lastInputs.back().changeCard != !input.changeCard ||
+		!lastInputs.back().spellcard != !input.spellcard
+	) {
+		lastInputs.erase(lastInputs.begin());
+		lastInputs.push_back({
+			(input.horizontalAxis > 0) - (input.horizontalAxis < 0),
+			(input.verticalAxis > 0) - (input.verticalAxis < 0),
+			!!input.a,
+			!!input.b,
+			!!input.c,
+			!!input.d,
+			!!input.changeCard,
+			!!input.spellcard
+		});
+	}
+
+	for (int i = 0; i < _debug.size(); i++)
+		if (memcmp(&_debug[i], &lastInputs[i], sizeof(_debug[i])) != 0)
+			goto nothing;
+	editorMode = true;
+	switchEditorMode();
+nothing:
 	if (!wasPressed && input.a && currentEntry != -1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE) {
 		puts("Start game !");
 		SokuLib::playSEWaveBuffer(0x28);

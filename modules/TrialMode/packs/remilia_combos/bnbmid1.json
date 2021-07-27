@@ -32,6 +32,23 @@
     "uniform_card_cost": 1,
     "hand": [],
     "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 18,
+            "min_damage": 2180,
+            "min_limit": 110,
+            "max_limit": 120
+        },
+        {
+            "max_attempts": 1
+        },
+        {
+            "min_limit": 118
+        },
+        {
+            "min_limit": 120
+        }
+    ],
     "hint": [
 
     ]
