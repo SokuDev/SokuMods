@@ -149,6 +149,8 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "sc218",      SokuLib::ACTION_USING_SC_ID_218 },
 	{ "sc219",      SokuLib::ACTION_USING_SC_ID_219 },
 
+	{ "hjd9",       SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH },
+	{ "hjd8",       SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH },
 	{ "hj9",        SokuLib::ACTION_FORWARD_HIGH_JUMP },
 	{ "hj8",        SokuLib::ACTION_NEUTRAL_HIGH_JUMP },
 	{ "hj7",        SokuLib::ACTION_BACKWARD_HIGH_JUMP },
@@ -241,6 +243,8 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 	{ "sc218",      {{0, 0, 0, 0, 0, 0, 0, 1}} },
 	{ "sc219",      {{0, 0, 0, 0, 0, 0, 0, 1}} },
 
+	{ "hjd9",       {{1, -1, 0, 0, 0, 1, 0, 0}} },
+	{ "hjd8",       {{0, -1, 0, 0, 0, 1, 0, 0}} },
 	{ "hj9",        {{1, -1, 0, 0, 0, 1, 0, 0}} },
 	{ "hj8",        {{0, -1, 0, 0, 0, 1, 0, 0}} },
 	{ "hj7",        {{-1, -1, 0, 0, 0, 1, 0, 0}} },
