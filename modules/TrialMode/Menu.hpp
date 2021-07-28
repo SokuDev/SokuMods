@@ -11,7 +11,7 @@
 
 class ResultMenu : public SokuLib::IMenu {
 private:
-	int _selected = 1;
+	int _selected = 0;
 	SokuLib::DrawUtils::Sprite _score;
 	SokuLib::DrawUtils::Sprite _resultTop;
 	std::array<SokuLib::DrawUtils::Sprite, Trial::NB_MENU_ACTION> _text;

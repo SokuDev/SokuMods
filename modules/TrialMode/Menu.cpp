@@ -10,6 +10,7 @@
 static unsigned currentPack = 0;
 static int currentEntry = -1;
 static bool loaded = false;
+static bool loadNextTrial = false;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
@@ -58,177 +59,6 @@ std::vector<SokuLib::KeyInput> lastInputs{
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
 };
-
-ResultMenu::ResultMenu(int score)
-{
-	this->_selected += currentEntry == loadedPacks.size() - 1;
-
-	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
-	this->_resultTop.setPosition({128, 94});
-	this->_resultTop.setSize(this->_resultTop.texture.getSize());
-	this->_resultTop.rect.width = this->_resultTop.texture.getSize().x;
-	this->_resultTop.rect.height = this->_resultTop.texture.getSize().y;
-
-	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
-	this->_score.setPosition({378, 164});
-	this->_score.setSize({128, 128});
-	this->_score.rect.left = score * this->_score.texture.getSize().x / 4;
-	this->_score.rect.width = this->_score.texture.getSize().x / 4;
-	this->_score.rect.height = this->_score.texture.getSize().y;
-
-	for (int i = 0; i < Trial::menuActionText.size(); i++) {
-		auto &sprite = this->_text[i];
-
-		sprite.texture.createFromText(Trial::menuActionText[i].c_str(), defaultFont16, {230, 24});
-		sprite.setPosition({128, 182 + i * 24});
-		sprite.setSize(sprite.texture.getSize());
-		sprite.rect.width = sprite.texture.getSize().x;
-		sprite.rect.height = sprite.texture.getSize().y;
-	}
-}
-
-void ResultMenu::_()
-{
-	puts("_ !");
-	*(int *)0x882a94 = 0x16;
-}
-
-int ResultMenu::onProcess()
-{
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-
-	if (keys->keymapManager->input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
-		SokuLib::playSEWaveBuffer(0x29);
-		this->_selected = Trial::RETURN_TO_TITLE_SCREEN;
-	}
-	if (keys->keymapManager->input.a == 1) {
-		SokuLib::playSEWaveBuffer(0x28);
-		loadedTrial->onMenuClosed(static_cast<Trial::MenuAction>(this->_selected));
-		return false;
-	}
-	if (keys->keymapManager->input.verticalAxis == -1 || (keys->keymapManager->input.verticalAxis <= -36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
-		this->_selected--;
-		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
-			//this->_selected -= currentEntry == loadedPacks.size() - 1;
-			this->_selected--;
-		this->_selected += Trial::NB_MENU_ACTION;
-		this->_selected %= Trial::NB_MENU_ACTION;
-	} else if (keys->keymapManager->input.verticalAxis == 1 || (keys->keymapManager->input.verticalAxis >= 36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
-		this->_selected++;
-		if (this->_selected == Trial::NB_MENU_ACTION)
-			//this->_selected += currentEntry == loadedPacks.size() - 1;
-			this->_selected++;
-		this->_selected %= Trial::NB_MENU_ACTION;
-	}
-	return true;
-}
-
-int ResultMenu::onRender()
-{
-	this->_resultTop.draw();
-	this->_score.draw();
-	((void (*)(float, float, float))0x443a50)(128, 184 + this->_selected * 24, 300);
-	for (auto &sprite : this->_text)
-		sprite.draw();
-	return 0;
-}
-
-void loadFont()
-{
-	SokuLib::FontDescription desc;
-
-	desc.r1 = 255;
-	desc.r2 = 255;
-	desc.g1 = 255;
-	desc.g2 = 255;
-	desc.b1 = 255;
-	desc.b2 = 255;
-	desc.height = 10;
-	desc.weight = FW_BOLD;
-	desc.italic = 0;
-	desc.shadow = 1;
-	desc.bufferSize = 1000000;
-	desc.charSpaceX = 0;
-	desc.charSpaceY = 0;
-	desc.offsetX = 0;
-	desc.offsetY = 0;
-	desc.useOffset = 0;
-	strcpy(desc.faceName, "MonoSpatialModSWR");
-	desc.weight = FW_REGULAR;
-	defaultFont10.create();
-	defaultFont10.setIndirect(desc);
-
-	desc.height = 12;
-	defaultFont12.create();
-	defaultFont12.setIndirect(desc);
-
-	desc.height = 16;
-	defaultFont16.create();
-	defaultFont16.setIndirect(desc);
-}
-
-void menuLoadAssets()
-{
-	if (loaded)
-		return;
-	loaded = true;
-	puts("Loading assets");
-
-	previewContainer.texture.loadFromGame("data/menu/profile_list_seat.bmp");
-	previewContainer.rect = {
-		0, 0,
-		static_cast<int>(previewContainer.texture.getSize().x),
-		static_cast<int>(previewContainer.texture.getSize().y),
-	};
-	previewContainer.setPosition({310, 92});
-	previewContainer.setSize({365, 345});
-
-	packContainer.texture.loadFromResource(myModule, MAKEINTRESOURCE(4));
-	packContainer.rect = {
-		0, 0,
-		static_cast<int>(packContainer.texture.getSize().x),
-		static_cast<int>(packContainer.texture.getSize().y),
-	};
-	packContainer.setSize(packContainer.texture.getSize() - 1);
-
-	missingIcon.texture.loadFromResource(myModule, MAKEINTRESOURCE(8));
-	missingIcon.rect = {
-		0, 0,
-		static_cast<int>(missingIcon.texture.getSize().x),
-		static_cast<int>(missingIcon.texture.getSize().y),
-	};
-	missingIcon.setSize({32, 32});
-	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
-	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
-
-	loadFont();
-	loadPacks();
-	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
-		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
-			return pack2->error.texture.hasTexture();
-		return pack1->category < pack2->category;
-	});
-}
-
-void menuUnloadAssets()
-{
-	if (!loaded)
-		return;
-	loaded = false;
-	puts("Unloading assets");
-
-	defaultFont10.destruct();
-	defaultFont12.destruct();
-	defaultFont16.destruct();
-	previewContainer.texture.destroy();
-	packContainer.texture.destroy();
-	loadedPacks.clear();
-	currentPack = 0;
-	currentEntry = -1;
-	editorMode = false;
-}
 
 bool checkField(const std::string &field, const nlohmann::json &value, bool (nlohmann::json::*fct)() const noexcept)
 {
@@ -393,6 +223,179 @@ void prepareGameLoading(const std::string &path)
 	loadRequest = true;
 }
 
+ResultMenu::ResultMenu(int score)
+{
+	this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
+
+	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
+	this->_resultTop.setPosition({128, 94});
+	this->_resultTop.setSize(this->_resultTop.texture.getSize());
+	this->_resultTop.rect.width = this->_resultTop.texture.getSize().x;
+	this->_resultTop.rect.height = this->_resultTop.texture.getSize().y;
+
+	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+	this->_score.setPosition({378, 164});
+	this->_score.setSize({128, 128});
+	this->_score.rect.left = score * this->_score.texture.getSize().x / 4;
+	this->_score.rect.width = this->_score.texture.getSize().x / 4;
+	this->_score.rect.height = this->_score.texture.getSize().y;
+
+	for (int i = 0; i < Trial::menuActionText.size(); i++) {
+		auto &sprite = this->_text[i];
+
+		sprite.texture.createFromText(Trial::menuActionText[i].c_str(), defaultFont16, {230, 24});
+		sprite.setPosition({128, 182 + i * 24});
+		sprite.setSize(sprite.texture.getSize());
+		sprite.rect.width = sprite.texture.getSize().x;
+		sprite.rect.height = sprite.texture.getSize().y;
+	}
+	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1)
+		this->_text[0].tint = SokuLib::DrawUtils::DxSokuColor{0x40, 0x40, 0x40};
+}
+
+void ResultMenu::_()
+{
+	puts("_ !");
+	*(int *)0x882a94 = 0x16;
+}
+
+int ResultMenu::onProcess()
+{
+	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
+
+	if (keys->keymapManager->input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_selected = Trial::RETURN_TO_TITLE_SCREEN;
+	}
+	if (keys->keymapManager->input.a == 1) {
+		SokuLib::playSEWaveBuffer(0x28);
+		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
+			loadNextTrial = true;
+		loadedTrial->onMenuClosed(static_cast<Trial::MenuAction>(this->_selected));
+		return false;
+	}
+	if (keys->keymapManager->input.verticalAxis == -1 || (keys->keymapManager->input.verticalAxis <= -36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		this->_selected--;
+		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
+			this->_selected -= currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
+		this->_selected += Trial::NB_MENU_ACTION;
+		this->_selected %= Trial::NB_MENU_ACTION;
+	} else if (keys->keymapManager->input.verticalAxis == 1 || (keys->keymapManager->input.verticalAxis >= 36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		this->_selected++;
+		if (this->_selected == Trial::NB_MENU_ACTION)
+			this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
+		this->_selected %= Trial::NB_MENU_ACTION;
+	}
+	return true;
+}
+
+int ResultMenu::onRender()
+{
+	this->_resultTop.draw();
+	this->_score.draw();
+	((void (*)(float, float, float))0x443a50)(128, 184 + this->_selected * 24, 300);
+	for (auto &sprite : this->_text)
+		sprite.draw();
+	return 0;
+}
+
+void loadFont()
+{
+	SokuLib::FontDescription desc;
+
+	desc.r1 = 255;
+	desc.r2 = 255;
+	desc.g1 = 255;
+	desc.g2 = 255;
+	desc.b1 = 255;
+	desc.b2 = 255;
+	desc.height = 10;
+	desc.weight = FW_BOLD;
+	desc.italic = 0;
+	desc.shadow = 1;
+	desc.bufferSize = 1000000;
+	desc.charSpaceX = 0;
+	desc.charSpaceY = 0;
+	desc.offsetX = 0;
+	desc.offsetY = 0;
+	desc.useOffset = 0;
+	strcpy(desc.faceName, "MonoSpatialModSWR");
+	desc.weight = FW_REGULAR;
+	defaultFont10.create();
+	defaultFont10.setIndirect(desc);
+
+	desc.height = 12;
+	defaultFont12.create();
+	defaultFont12.setIndirect(desc);
+
+	desc.height = 16;
+	defaultFont16.create();
+	defaultFont16.setIndirect(desc);
+}
+
+void menuLoadAssets()
+{
+	if (loaded)
+		return;
+	loaded = true;
+	puts("Loading assets");
+
+	previewContainer.texture.loadFromGame("data/menu/profile_list_seat.bmp");
+	previewContainer.rect = {
+		0, 0,
+		static_cast<int>(previewContainer.texture.getSize().x),
+		static_cast<int>(previewContainer.texture.getSize().y),
+	};
+	previewContainer.setPosition({310, 92});
+	previewContainer.setSize({365, 345});
+
+	packContainer.texture.loadFromResource(myModule, MAKEINTRESOURCE(4));
+	packContainer.rect = {
+		0, 0,
+		static_cast<int>(packContainer.texture.getSize().x),
+		static_cast<int>(packContainer.texture.getSize().y),
+	};
+	packContainer.setSize(packContainer.texture.getSize() - 1);
+
+	missingIcon.texture.loadFromResource(myModule, MAKEINTRESOURCE(8));
+	missingIcon.rect = {
+		0, 0,
+		static_cast<int>(missingIcon.texture.getSize().x),
+		static_cast<int>(missingIcon.texture.getSize().y),
+	};
+	missingIcon.setSize({32, 32});
+	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
+	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
+
+	loadFont();
+	loadPacks();
+	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
+		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
+			return pack2->error.texture.hasTexture();
+		return pack1->category < pack2->category;
+	});
+}
+
+void menuUnloadAssets()
+{
+	if (!loaded)
+		return;
+	loaded = false;
+	puts("Unloading assets");
+
+	defaultFont10.destruct();
+	defaultFont12.destruct();
+	defaultFont16.destruct();
+	previewContainer.texture.destroy();
+	packContainer.texture.destroy();
+	loadedPacks.clear();
+	currentPack = 0;
+	currentEntry = -1;
+	editorMode = false;
+}
+
 bool wasPressed = false;
 
 static void switchEditorMode()
@@ -471,6 +474,12 @@ int menuOnProcess(SokuLib::MenuResult *This)
 {
 	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
 
+	if (loadNextTrial) {
+		loadNextTrial = false;
+		prepareGameLoading(loadedPacks[currentPack]->scenarios[++currentEntry]->file);
+		if (loadRequest)
+			return true;
+	}
 	menuLoadAssets();
 	if (keys->keymapManager->input.b) {
 		SokuLib::playSEWaveBuffer(0x29);

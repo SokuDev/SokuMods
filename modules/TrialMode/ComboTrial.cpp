@@ -414,8 +414,6 @@ void ComboTrial::onMenuClosed(MenuAction action)
 		this->_playingIntro = true;
 		break;
 	case GO_TO_NEXT_TRIAL:
-		this->_next = SokuLib::SCENE_LOADING;
-		break;
 	case RETURN_TO_TRIAL_SELECT:
 		this->_next = SokuLib::SCENE_SELECT;
 		break;
