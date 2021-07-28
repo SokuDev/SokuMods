@@ -572,19 +572,106 @@ ComboTrialResult::ComboTrialResult(ComboTrial &trial) :
 	ResultMenu(trial.getScore()),
 	_parent(trial)
 {
-}
-
-int ComboTrialResult::onProcess()
-{
-	if (this->_resultShown)
-		return ResultMenu::onProcess();
-	return true;
+	for (int i = 0; i < this->_parts.size(); i++)
+		this->_parts[i].load(trial._attempts, trial._scores[i], i);
 }
 
 int ComboTrialResult::onRender()
 {
-	if (this->_resultShown) {
-		return ResultMenu::onRender();
-	}
-	return 0;
+	auto ret = ResultMenu::onRender();
+
+	for (auto &part : this->_parts)
+		part.draw(1);
+	return ret;
+}
+
+#define BOTTOM_POS 332
+#define SIZE 29
+
+void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScorePrerequisites &prerequ, int index)
+{
+	SokuLib::Vector2i size;
+
+	this->_ttlAttempts = ttlattempts;
+	this->_prerequ = prerequ;
+
+	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+	this->_score.setPosition({92 + 141 * index, BOTTOM_POS});
+	this->_score.setSize({32, 32});
+	this->_score.rect.left = index * this->_score.texture.getSize().x / 4;
+	this->_score.rect.width = this->_score.texture.getSize().x / 4;
+	this->_score.rect.height = this->_score.texture.getSize().y;
+
+	this->_attempts.texture.createFromText(
+		prerequ.attempts == -1 ?
+		"Unlimited attempts" :
+		("At most " + std::to_string(prerequ.attempts) + " attempt" + (prerequ.attempts == 1 ? "" : "s")).c_str(),
+		defaultFont12,
+		{130, 14},
+		&size
+	);
+	this->_attempts.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 0});
+	this->_attempts.setSize(this->_attempts.texture.getSize());
+	this->_attempts.rect.width = this->_attempts.texture.getSize().x;
+	this->_attempts.rect.height = this->_attempts.texture.getSize().y;
+
+	this->_hits.texture.createFromText(
+		("At least " + std::to_string(prerequ.hits) + " hit" + (prerequ.hits == 1 ? "" : "s")).c_str(),
+		defaultFont12,
+		{130, 14},
+		&size
+	);
+	this->_hits.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 1});
+	this->_hits.setSize(this->_hits.texture.getSize());
+	this->_hits.rect.width = this->_hits.texture.getSize().x;
+	this->_hits.rect.height = this->_hits.texture.getSize().y;
+
+	this->_damages.texture.createFromText(
+		("At least " + std::to_string(prerequ.damage) + " damage" + (prerequ.damage <= 1 ? "" : "s")).c_str(),
+		defaultFont12,
+		{130, 14},
+		&size
+	);
+	this->_damages.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 2});
+	this->_damages.setSize(this->_damages.texture.getSize());
+	this->_damages.rect.width = this->_damages.texture.getSize().x;
+	this->_damages.rect.height = this->_damages.texture.getSize().y;
+
+	if (prerequ.minLimit == prerequ.maxLimit)
+		this->_limit.texture.createFromText(
+			("Exactly " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
+			defaultFont12,
+			{130, 14},
+			&size
+		);
+	else
+		this->_limit.texture.createFromText(
+			("Between " + std::to_string(prerequ.minLimit) + "% and " + std::to_string(prerequ.maxLimit) + "% limit").c_str(),
+			defaultFont12,
+			{130, 14},
+			&size
+		);
+	this->_limit.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 3});
+	this->_limit.setSize(this->_limit.texture.getSize());
+	this->_limit.rect.width = this->_limit.texture.getSize().x;
+	this->_limit.rect.height = this->_limit.texture.getSize().y;
+}
+
+void ComboTrialResult::ScorePart::draw(float alpha)
+{
+	auto &battle= SokuLib::getBattleMgr();
+	auto white  = SokuLib::DrawUtils::DxSokuColor::White * alpha;
+	auto green  = SokuLib::DrawUtils::DxSokuColor::Green * alpha;
+	auto red    = SokuLib::DrawUtils::DxSokuColor::Red   * alpha;
+
+	this->_score.tint = white;
+	this->_score.draw();
+	this->_attempts.tint = this->_ttlAttempts < this->_prerequ.attempts ? green : red;
+	this->_attempts.draw();
+	this->_damages.tint = battle.leftCharacterManager.combo.damages >= this->_prerequ.damage ? green : red;
+	this->_damages.draw();
+	this->_hits.tint = battle.leftCharacterManager.combo.nbHits >= this->_prerequ.hits ? green : red;
+	this->_hits.draw();
+	this->_limit.tint = battle.leftCharacterManager.combo.limit >= this->_prerequ.minLimit && battle.leftCharacterManager.combo.limit <= this->_prerequ.maxLimit ? green : red;
+	this->_limit.draw();
 }

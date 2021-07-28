@@ -40,9 +40,10 @@
             "max_limit": 120
         },
         {
-            "min_hits": 24
+            "min_hits": 23
         },
         {
+            "min_hits": 24,
             "max_attempts": 50
         },
         {

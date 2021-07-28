@@ -64,13 +64,13 @@ ResultMenu::ResultMenu(int score)
 	this->_selected += currentEntry == loadedPacks.size() - 1;
 
 	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
-	this->_resultTop.setPosition({128, 104});
+	this->_resultTop.setPosition({128, 94});
 	this->_resultTop.setSize(this->_resultTop.texture.getSize());
 	this->_resultTop.rect.width = this->_resultTop.texture.getSize().x;
 	this->_resultTop.rect.height = this->_resultTop.texture.getSize().y;
 
 	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
-	this->_score.setPosition({378, 174});
+	this->_score.setPosition({378, 164});
 	this->_score.setSize({128, 128});
 	this->_score.rect.left = score * this->_score.texture.getSize().x / 4;
 	this->_score.rect.width = this->_score.texture.getSize().x / 4;
@@ -80,7 +80,7 @@ ResultMenu::ResultMenu(int score)
 		auto &sprite = this->_text[i];
 
 		sprite.texture.createFromText(Trial::menuActionText[i].c_str(), defaultFont16, {230, 24});
-		sprite.setPosition({128, 192 + i * 24});
+		sprite.setPosition({128, 182 + i * 24});
 		sprite.setSize(sprite.texture.getSize());
 		sprite.rect.width = sprite.texture.getSize().x;
 		sprite.rect.height = sprite.texture.getSize().y;
@@ -129,7 +129,7 @@ int ResultMenu::onRender()
 {
 	this->_resultTop.draw();
 	this->_score.draw();
-	((void (*)(float, float, float))0x443a50)(128, 194 + this->_selected * 24, 300);
+	((void (*)(float, float, float))0x443a50)(128, 184 + this->_selected * 24, 300);
 	for (auto &sprite : this->_text)
 		sprite.draw();
 	return 0;

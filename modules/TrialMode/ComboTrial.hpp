@@ -94,13 +94,27 @@ public:
 
 class ComboTrialResult : public ResultMenu {
 private:
+	struct ScorePart {
+	private:
+		int _ttlAttempts;
+		SokuLib::DrawUtils::Sprite _score;
+		SokuLib::DrawUtils::Sprite _hits;
+		SokuLib::DrawUtils::Sprite _damages;
+		SokuLib::DrawUtils::Sprite _attempts;
+		SokuLib::DrawUtils::Sprite _limit;
+		ComboTrial::ScorePrerequisites _prerequ;
+
+	public:
+		void load(int ttlattempts, const ComboTrial::ScorePrerequisites &prerequ, int index);
+		void draw(float alpha);
+	};
+
 	ComboTrial &_parent;
-	bool _resultShown = true;
+	std::array<ScorePart, 4> _parts;
 
 public:
 	ComboTrialResult(ComboTrial &trial);
 	~ComboTrialResult() override = default;
-	int onProcess() override;
 	int onRender() override;
 };
 
