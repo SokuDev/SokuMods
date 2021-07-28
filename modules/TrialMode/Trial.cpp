@@ -6,6 +6,7 @@
 #include "ComboTrial.hpp"
 #include "Menu.hpp"
 
+static int hooks = 0;
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 const std::map<std::string, std::function<Trial *(SokuLib::Character player, const nlohmann::json &json)>> Trial::_factory{
 	{ "combo", [](SokuLib::Character player, const nlohmann::json &json){ return new ComboTrial(player, json); } }
@@ -24,6 +25,9 @@ Trial::Trial()
 {
 	DWORD old;
 
+	hooks++;
+	if (hooks != 1)
+		return;
 	puts("Hook !");
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origKeymapManager_SetInputs = SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(0x40A45D, KeymapManagerSetInputs));
@@ -34,6 +38,9 @@ Trial::~Trial()
 {
 	DWORD old;
 
+	hooks--;
+	if (hooks)
+		return;
 	puts("No hook !");
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	SokuLib::TamperNearJmpOpr(0x40A45D, s_origKeymapManager_SetInputs);
