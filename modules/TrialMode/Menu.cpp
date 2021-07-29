@@ -13,6 +13,7 @@ static int currentEntry = -1;
 static bool loaded = false;
 static bool loadNextTrial = false;
 static SokuLib::DrawUtils::Sprite arrow;
+static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
@@ -248,6 +249,11 @@ ResultMenu::ResultMenu(int score)
 	this->_resultTop.rect.width = this->_resultTop.texture.getSize().x;
 	this->_resultTop.rect.height = this->_resultTop.texture.getSize().y;
 
+	this->_title.texture.loadFromGame("data/menu/result/result.bmp");
+	this->_title.setSize(this->_title.texture.getSize());
+	this->_title.rect.width = this->_title.texture.getSize().x;
+	this->_title.rect.height = this->_title.texture.getSize().y;
+
 	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
 	this->_score.setPosition({378, 164});
 	this->_score.setSize({128, 128});
@@ -308,6 +314,7 @@ int ResultMenu::onProcess()
 
 int ResultMenu::onRender()
 {
+	this->_title.draw();
 	this->_resultTop.draw();
 	this->_score.draw();
 	((void (*)(float, float, float))0x443a50)(128, 184 + this->_selected * 24, 300);
@@ -394,6 +401,11 @@ void menuLoadAssets()
 	score.tint = SokuLib::DrawUtils::DxSokuColor::White;
 	score.rect.width = score.texture.getSize().x / 4;
 	score.rect.height = score.texture.getSize().y;
+
+	title.texture.loadFromResource(myModule, MAKEINTRESOURCE(24));
+	title.setSize(title.texture.getSize());
+	title.rect.width = title.texture.getSize().x;
+	title.rect.height = title.texture.getSize().y;
 
 	loadFont();
 	loadPacks();
@@ -600,7 +612,6 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		});
 		sprite.draw();
 
-		//TODO: "data/menu/result/result.bmp";
 		if (hasScore) {
 			int val = sumScore / static_cast<int>(pack.scenarios.size());
 
@@ -674,6 +685,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 	if (!loaded)
 		return;
 
+	title.draw();
 	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
 		// 100 <= y <= 364
 		renderOnePackBack(*loadedPacks[i], pos, i == currentPack);
