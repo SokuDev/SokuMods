@@ -13,6 +13,7 @@ static int currentEntry = -1;
 static bool loaded = false;
 static bool loadNextTrial = false;
 static SokuLib::DrawUtils::Sprite arrow;
+static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
@@ -63,6 +64,14 @@ std::vector<SokuLib::KeyInput> lastInputs{
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
 };
+
+void saveScores()
+{
+	std::ofstream stream{loadedPacks[currentPack]->scorePath, std::ofstream::binary};
+
+	for (auto &scenario : loadedPacks[currentPack]->scenarios)
+		stream.write(&scenario->score, 1);
+}
 
 bool checkField(const std::string &field, const nlohmann::json &value, bool (nlohmann::json::*fct)() const noexcept)
 {
@@ -229,6 +238,8 @@ void prepareGameLoading(const std::string &path)
 
 ResultMenu::ResultMenu(int score)
 {
+	loadedPacks[currentPack]->scenarios[currentEntry]->setScore(max(loadedPacks[currentPack]->scenarios[currentEntry]->score, score));
+	saveScores();
 	this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
 
 	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
@@ -377,6 +388,12 @@ void menuLoadAssets()
 	arrow.setSize(arrow.texture.getSize());
 	arrow.rect.width = arrow.texture.getSize().x;
 	arrow.rect.height = arrow.texture.getSize().y;
+
+	score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+	score.setSize({32, 32});
+	score.tint = SokuLib::DrawUtils::DxSokuColor::White;
+	score.rect.width = score.texture.getSize().x / 4;
+	score.rect.height = score.texture.getSize().y;
 
 	loadFont();
 	loadPacks();
@@ -552,6 +569,14 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 
 	//100 <= y <= 406
 	if (pos.y >= 100) {
+		auto sumScore = 0;
+		bool hasScore = false;
+
+		for (auto &scenario : pack.scenarios) {
+			hasScore |= scenario->score != -1;
+			sumScore += scenario->score;
+		}
+
 		if (pack.icon) {
 			pack.icon->sprite.setPosition(SokuLib::Vector2i{
 				static_cast<int>(pos.x + 4),
@@ -571,6 +596,15 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 			static_cast<int>(pos.y + 17)
 		});
 		sprite.draw();
+
+		if (hasScore) {
+			score.rect.left = max(0, sumScore / pack.scenarios.size()) * score.texture.getSize().x / 4;
+			score.setPosition({
+				static_cast<int>(pos.x + 296),
+				static_cast<int>(pos.y - 8)
+			});
+			score.draw();
+		}
 	}
 
 	if (currentEntry != -1) {
@@ -603,6 +637,11 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 				static_cast<int>(pos.y)
 			});
 			scenario->name.draw();
+			scenario->scoreSprite.setPosition({
+				static_cast<int>(pos.x + 271),
+				static_cast<int>(pos.y - 10)
+			});
+			scenario->scoreSprite.draw();
 		}
 		pos.y += 15;
 		if (pos.y > 379)

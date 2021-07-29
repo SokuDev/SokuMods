@@ -133,6 +133,7 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		return;
 	}
 
+	this->scorePath = path + "/score.dat";
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
 
 	this->name.texture.createFromText(
@@ -254,10 +255,17 @@ invalidPreview:
 	}
 
 	auto &scenarii = object["scenarios"];
+	std::ifstream stream{this->scorePath, std::ifstream::binary};
 
 	for (int i = 0; i < scenarii.size(); i++) {
-		auto scene = new Scenario(i, path, scenarii[i]);
+		char score;
 
+		stream.read(&score, 1);
+
+		auto scene = new Scenario(score, i, path, scenarii[i]);
+
+		if (stream.fail())
+			scene->score = -1;
 		if (scene->file.empty()) {
 			delete scene;
 			MessageBox(
@@ -286,8 +294,9 @@ invalidPreview:
 		uniqueCategories.push_back(this->category);
 }
 
-Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
+Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::json &object)
 {
+	this->setScore(score);
 	if (!object.is_object())
 		return;
 
@@ -327,6 +336,23 @@ Scenario::Scenario(int i, const std::string &path, const nlohmann::json &object)
 		this->preview.setPosition({398, 128});
 		this->preview.setSize({200, 150});
 	}
+}
+
+void Scenario::setScore(char score)
+{
+	if (score == -1)
+		this->scoreSprite.tint = SokuLib::DrawUtils::DxSokuColor::Transparent;
+	else {
+		if (this->score == -1) {
+			this->scoreSprite.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+			this->scoreSprite.setSize({32, 32});
+		}
+		this->scoreSprite.tint = SokuLib::DrawUtils::DxSokuColor::White;
+		this->scoreSprite.rect.left = score * this->scoreSprite.texture.getSize().x / 4;
+		this->scoreSprite.rect.width = this->scoreSprite.texture.getSize().x / 4;
+		this->scoreSprite.rect.height = this->scoreSprite.texture.getSize().y;
+	}
+	this->score = score;
 }
 
 Icon::Icon(const std::string &path, const nlohmann::json &object)
