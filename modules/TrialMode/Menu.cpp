@@ -2,6 +2,7 @@
 // Created by PinkySmile on 19/07/2021.
 //
 
+#define _USE_MATH_DEFINES
 #include <fstream>
 #include <dinput.h>
 #include "Menu.hpp"
@@ -11,11 +12,12 @@ static unsigned currentPack = 0;
 static int currentEntry = -1;
 static bool loaded = false;
 static bool loadNextTrial = false;
+static SokuLib::DrawUtils::Sprite arrow;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
-static SokuLib::Vector2f offsetPos{16, 116};
 static unsigned packStart = 0;
+static unsigned entryStart = 0;
 
 std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
@@ -371,6 +373,11 @@ void menuLoadAssets()
 	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 
+	arrow.texture.loadFromGame("data/profile/deck2/000_Cursor.bmp");
+	arrow.setSize(arrow.texture.getSize());
+	arrow.rect.width = arrow.texture.getSize().x;
+	arrow.rect.height = arrow.texture.getSize().y;
+
 	loadFont();
 	loadPacks();
 	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
@@ -413,31 +420,27 @@ static void switchEditorMode()
 
 void checkScrollUp()
 {
+	if (currentEntry == -1)
+		return;
 	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
 		packStart = max(0, min(currentPack, 1.f * currentPack - (264 - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
-		offsetPos = {
-			16,
-			min(116, 116 - 15 * (currentEntry - 16.f))
-		};
+		if (currentEntry > 15)
+			entryStart = currentEntry - 15;
 		return;
 	}
-	offsetPos = {
-		16,
-		min(116, 116 - 15 * (currentEntry - 16.f))
-	};
+	if (currentEntry < entryStart)
+		entryStart = currentEntry;
 }
 
 void checkScrollDown()
 {
 	if (currentEntry == -1) {
 		packStart = max(0, min(currentPack, 1.f * currentPack - (264 - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
-		offsetPos = {16, 116};
+		entryStart = 0;
 		return;
 	}
-	offsetPos = {
-		16,
-		min(116, 116 - 15 * (currentEntry - 16.f))
-	};
+	if (currentEntry - entryStart > 15)
+		entryStart = currentEntry - 15;
 }
 
 void handlePlayerInputs(const SokuLib::KeyInput &input)
@@ -534,14 +537,16 @@ void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		packContainer.draw();
 	}
 	pos.y += 35;
-	if (deployed)
-		pos.y += 15 * pack.scenarios.size();
-	else
+	if (deployed) {
+		for (int i = entryStart; i < pack.scenarios.size() && pos.y < 379; i++)
+			pos.y += 15;
+	} else
 		pos.y += 5;
 }
 
 void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 {
+	int i;
 	auto p = pos;
 	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
 
@@ -570,7 +575,7 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 
 	if (currentEntry != -1) {
 		p.x += 25;
-		p.y += currentEntry * 15 + 33;
+		p.y += (currentEntry - entryStart) * 15 + 33;
 	}
 	if (deployed)
 		((void (*)(float, float, float))0x443a50)(p.x + 70, p.y + 1, 300);
@@ -589,9 +594,9 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		return;
 	}
 
-	for (auto &scenario : pack.scenarios) {
-		if (pos.y > 406)
-			break;
+	for (i = entryStart; i < pack.scenarios.size(); i++) {
+		auto &scenario = pack.scenarios[i];
+
 		if (pos.y >= 100) {
 			scenario->name.setPosition({
 				static_cast<int>(pos.x + 100),
@@ -600,12 +605,26 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 			scenario->name.draw();
 		}
 		pos.y += 15;
+		if (pos.y > 379)
+			break;
 	};
+	if (entryStart) {
+		arrow.setRotation(-M_PI_2 - 0.063);
+		arrow.setMirroring(false, false);
+		arrow.setPosition({72, 148});
+		arrow.draw();
+	}
+	if (i < pack.scenarios.size() - 1) {
+		arrow.setRotation(M_PI_2 + 0.062);
+		arrow.setMirroring(false, false);
+		arrow.setPosition({72, 372});
+		arrow.draw();
+	}
 }
 
 void menuOnRender(SokuLib::MenuResult *This)
 {
-	SokuLib::Vector2<float> pos = offsetPos;
+	SokuLib::Vector2<float> pos = {16, 116};
 
 	if (!loaded)
 		return;
@@ -616,7 +635,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 		if (pos.y > 394)
 			break;
 	}
-	pos = offsetPos;
+	pos = {16, 116};
 	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
 		// 100 <= y <= 364
 		renderOnePack(*loadedPacks[i], pos, i == currentPack);
