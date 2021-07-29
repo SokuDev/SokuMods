@@ -34,19 +34,22 @@
     "play_combo_after_intro": true,
     "score": [
         {
-            "min_hits": 14,
-            "min_damage": 2180,
-            "min_limit": 110,
+            "min_hits": 12,
+            "min_damage": 1800,
+            "min_limit": 100,
             "max_limit": 120
         },
         {
-            "max_attempts": 1
+            "min_hits": 15,
+            "min_limit": 114
         },
         {
-            "min_hits": 17,
-            "min_limit": 118
+            "max_attempts": 1,
+            "min_hits": 16,
+            "min_limit": 116
         },
         {
+            "max_attempts": 1,
             "min_hits": 18,
             "min_limit": 120
         }

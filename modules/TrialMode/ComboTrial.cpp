@@ -115,7 +115,7 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 	this->_doll.rect.width = this->_doll.texture.getSize().x / 4;
 	this->_doll.rect.height = this->_doll.texture.getSize().y;
 
-	this->_attemptText.texture.createFromText("Attempt #1", defaultFont10, {116, 24});
+	this->_attemptText.texture.createFromText("214a -> Review demo<br>Attempt #1", defaultFont10, {116, 24});
 	this->_attemptText.setPosition({4, 58});
 	this->_attemptText.setSize(this->_attemptText.texture.getSize());
 	this->_attemptText.rect.left = 0;
@@ -126,12 +126,15 @@ ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
 	ScorePrerequisites *old = nullptr;
 
 	if (!json.contains("score") || !json["score"].is_array() || json["score"].size() != 4)
-		for (int i = 0; i < 4; i++)
-			old = &this->_scores.emplace_back(nlohmann::json{}, old);
+		for (int i = 0; i < 4; i++) {
+			this->_scores.emplace_back(nlohmann::json{}, old);
+			old = &this->_scores.back();
+		}
 	else
 		for (auto &j : json["score"])
 			try {
-				old = &this->_scores.emplace_back(j, old);
+				this->_scores.emplace_back(j, old);
+				old = &this->_scores.back();
 			} catch (std::exception &e) {
 				throw std::invalid_argument("Score element #" + std::to_string(this->_scores.size()) + " is invalid : " + e.what());
 			}
@@ -268,7 +271,7 @@ void ComboTrial::_initGameStart()
 	} else if (!this->_playingIntro)
 		this->_attempts++;
 
-	this->_attemptText.texture.createFromText(("Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
+	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
@@ -289,6 +292,8 @@ void ComboTrial::_initGameStart()
 	}
 
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
+	battleMgr.leftCharacterManager.currentSpirit = 10000;
+	battleMgr.leftCharacterManager.maxSpirit = 10000;
 	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
 	battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
 	battleMgr.leftCharacterManager.objectBase.frameCount = 0;
@@ -298,6 +303,8 @@ void ComboTrial::_initGameStart()
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
+	battleMgr.rightCharacterManager.currentSpirit = 10000;
+	battleMgr.rightCharacterManager.maxSpirit = 10000;
 	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_200;
 	battleMgr.rightCharacterManager.objectBase.actionBlockId = 0;
 	battleMgr.rightCharacterManager.objectBase.frameCount = 0;

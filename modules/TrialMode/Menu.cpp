@@ -334,7 +334,7 @@ void loadFont()
 	desc.b1 = 255;
 	desc.b2 = 255;
 	desc.height = 10;
-	desc.weight = FW_BOLD;
+	desc.weight = FW_NORMAL;
 	desc.italic = 0;
 	desc.shadow = 1;
 	desc.bufferSize = 1000000;
