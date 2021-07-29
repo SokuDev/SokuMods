@@ -24,17 +24,21 @@ struct Icon {
 
 class Scenario {
 public:
+	char score = -1;
 	std::string file;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite preview;
 	SokuLib::DrawUtils::Sprite description;
+	SokuLib::DrawUtils::Sprite scoreSprite;
 
-	Scenario(int i, const std::string &path, const nlohmann::json &object);
+	Scenario(char score, int i, const std::string &path, const nlohmann::json &object);
+	void setScore(char score);
 };
 
 class Pack {
 public:
 	std::string category;
+	std::string scorePath;
 	std::unique_ptr<Icon> icon;
 	std::vector<std::unique_ptr<Scenario>> scenarios;
 	SokuLib::DrawUtils::Sprite name;

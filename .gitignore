@@ -3,3 +3,4 @@ build
 .idea
 .vs
 CMakeSettings.json
+score.dat
