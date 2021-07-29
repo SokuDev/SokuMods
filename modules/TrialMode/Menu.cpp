@@ -440,7 +440,7 @@ void checkScrollUp()
 	if (currentEntry == -1)
 		return;
 	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
-		packStart = max(0, min(currentPack, 1.f * currentPack - (264 - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
 		if (currentEntry > 15)
 			entryStart = currentEntry - 15;
 		return;
@@ -452,7 +452,7 @@ void checkScrollUp()
 void checkScrollDown()
 {
 	if (currentEntry == -1) {
-		packStart = max(0, min(currentPack, 1.f * currentPack - (264 - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 25 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
 		entryStart = 0;
 		return;
 	}
@@ -555,8 +555,11 @@ void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	}
 	pos.y += 35;
 	if (deployed) {
-		for (int i = entryStart; i < pack.scenarios.size() && pos.y < 379; i++)
+		for (int i = entryStart; i < pack.scenarios.size(); i++) {
 			pos.y += 15;
+			if (pos.y > 379)
+				break;
+		}
 	} else
 		pos.y += 5;
 }
@@ -597,6 +600,7 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		});
 		sprite.draw();
 
+		//TODO: "data/menu/result/result.bmp";
 		if (hasScore) {
 			int val = sumScore / static_cast<int>(pack.scenarios.size());
 
