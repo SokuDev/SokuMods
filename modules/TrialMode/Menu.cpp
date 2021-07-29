@@ -14,6 +14,8 @@ static bool loadNextTrial = false;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite previewContainer;
+static SokuLib::Vector2f offsetPos{16, 116};
+static unsigned packStart = 0;
 
 std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
@@ -409,6 +411,35 @@ static void switchEditorMode()
 	SokuLib::playSEWaveBuffer(48);
 }
 
+void checkScrollUp()
+{
+	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
+		packStart = max(0, min(currentPack, 1.f * currentPack - (264 - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+		offsetPos = {
+			16,
+			min(116, 116 - 15 * (currentEntry - 16.f))
+		};
+		return;
+	}
+	offsetPos = {
+		16,
+		min(116, 116 - 15 * (currentEntry - 16.f))
+	};
+}
+
+void checkScrollDown()
+{
+	if (currentEntry == -1) {
+		packStart = max(0, min(currentPack, 1.f * currentPack - (264 - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+		offsetPos = {16, 116};
+		return;
+	}
+	offsetPos = {
+		16,
+		min(116, 116 - 15 * (currentEntry - 16.f))
+	};
+}
+
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
 	if (editorMode)
@@ -458,6 +489,7 @@ nothing:
 			currentEntry += loadedPacks[currentPack]->scenarios.size();
 		} else
 			currentEntry--;
+		checkScrollUp();
 	} else if (input.verticalAxis == 1 || (input.verticalAxis >= 36 && input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
@@ -467,6 +499,7 @@ nothing:
 			currentEntry = -1;
 		} else
 			currentEntry++;
+		checkScrollDown();
 	}
 }
 
@@ -493,11 +526,13 @@ int menuOnProcess(SokuLib::MenuResult *This)
 
 void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 {
-	packContainer.setPosition({
-		static_cast<int>(pos.x),
-		static_cast<int>(pos.y)
-	});
-	packContainer.draw();
+	if (pos.y >= 100) {
+		packContainer.setPosition({
+			static_cast<int>(pos.x),
+			static_cast<int>(pos.y)
+		});
+		packContainer.draw();
+	}
 	pos.y += 35;
 	if (deployed)
 		pos.y += 15 * pack.scenarios.size();
@@ -507,28 +542,31 @@ void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 
 void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 {
-	if (pack.icon) {
-		pack.icon->sprite.setPosition(SokuLib::Vector2i{
-			static_cast<int>(pos.x + 4),
-			static_cast<int>(pos.y + 2)
-		} + pack.icon->translate);
-		pack.icon->sprite.draw();
-	} else {
-		missingIcon.setPosition({
-			static_cast<int>(pos.x + 34),
-			static_cast<int>(pos.y - 1)
-		});
-		missingIcon.draw();
-	}
-
 	auto p = pos;
 	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
 
-	sprite.setPosition({
-		static_cast<int>(pos.x + 75),
-		static_cast<int>(pos.y + 17)
-	});
-	sprite.draw();
+	//100 <= y <= 406
+	if (pos.y >= 100) {
+		if (pack.icon) {
+			pack.icon->sprite.setPosition(SokuLib::Vector2i{
+				static_cast<int>(pos.x + 4),
+				static_cast<int>(pos.y + 2)
+			} + pack.icon->translate);
+			pack.icon->sprite.draw();
+		} else {
+			missingIcon.setPosition({
+				static_cast<int>(pos.x + 34),
+				static_cast<int>(pos.y - 1)
+			});
+			missingIcon.draw();
+		}
+
+		sprite.setPosition({
+			static_cast<int>(pos.x + 75),
+			static_cast<int>(pos.y + 17)
+		});
+		sprite.draw();
+	}
 
 	if (currentEntry != -1) {
 		p.x += 25;
@@ -537,11 +575,13 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	if (deployed)
 		((void (*)(float, float, float))0x443a50)(p.x + 70, p.y + 1, 300);
 
-	pack.name.setPosition({
-		static_cast<int>(pos.x + 74),
-		static_cast<int>(pos.y + 2)
-	});
-	pack.name.draw();
+	if (pos.y >= 100 && pos.y <= 406) {
+		pack.name.setPosition({
+			static_cast<int>(pos.x + 74),
+			static_cast<int>(pos.y + 2)
+		});
+		pack.name.draw();
+	}
 	pos.y += 35;
 
 	if (!deployed) {
@@ -550,27 +590,39 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	}
 
 	for (auto &scenario : pack.scenarios) {
-		scenario->name.setPosition({
-			static_cast<int>(pos.x + 100),
-			static_cast<int>(pos.y)
-		});
-		scenario->name.draw();
+		if (pos.y > 406)
+			break;
+		if (pos.y >= 100) {
+			scenario->name.setPosition({
+				static_cast<int>(pos.x + 100),
+				static_cast<int>(pos.y)
+			});
+			scenario->name.draw();
+		}
 		pos.y += 15;
 	};
 }
 
 void menuOnRender(SokuLib::MenuResult *This)
 {
-	SokuLib::Vector2<float> pos{16, 116};
+	SokuLib::Vector2<float> pos = offsetPos;
 
 	if (!loaded)
 		return;
 
-	for (int i = 0; i < loadedPacks.size(); i++)
+	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
+		// 100 <= y <= 364
 		renderOnePackBack(*loadedPacks[i], pos, i == currentPack);
-	pos = {16, 116};
-	for (int i = 0; i < loadedPacks.size(); i++)
+		if (pos.y > 394)
+			break;
+	}
+	pos = offsetPos;
+	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
+		// 100 <= y <= 364
 		renderOnePack(*loadedPacks[i], pos, i == currentPack);
+		if (pos.y > 394)
+			break;
+	}
 
 	previewContainer.draw();
 	if (loadedPacks.empty())
