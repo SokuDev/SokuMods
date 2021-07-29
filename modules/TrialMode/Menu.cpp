@@ -598,7 +598,9 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		sprite.draw();
 
 		if (hasScore) {
-			score.rect.left = max(0, sumScore / pack.scenarios.size()) * score.texture.getSize().x / 4;
+			int val = sumScore / static_cast<int>(pack.scenarios.size());
+
+			score.rect.left = max(0, val) * score.texture.getSize().x / 4;
 			score.setPosition({
 				static_cast<int>(pos.x + 296),
 				static_cast<int>(pos.y - 8)
