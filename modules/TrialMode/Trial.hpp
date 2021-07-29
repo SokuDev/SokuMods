@@ -26,6 +26,8 @@ public:
 
 	static const std::array<std::string, NB_MENU_ACTION> menuActionText;
 
+	static void hook();
+
 	Trial();
 	virtual ~Trial();
 	virtual bool update(bool &canHaveNextFrame) = 0;

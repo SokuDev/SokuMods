@@ -1,12 +1,11 @@
 #include <Shlwapi.h>
 #include <SokuLib.hpp>
-#include <DeprecatedElements.hpp>
 #include <d3d9.h>
 #include <list>
 
 static SokuLib::BattleManager *(SokuLib::BattleManager::*s_origCBattleManager_Create)();
-static int (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
-static void *(__thiscall SokuLib::BattleManager::*s_origCBattleManager_Destruct)(int);
+static void (__thiscall SokuLib::BattleManager::*s_origCBattleManager_Render)();
+static SokuLib::BattleManager *(__thiscall SokuLib::BattleManager::*s_origCBattleManager_Destruct)(char);
 static bool activated = false;
 static bool created = false;
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
@@ -67,14 +66,15 @@ void handleInput(SokuLib::KeymapManager *base) {
 	if (SokuLib::sceneId != SokuLib::SCENE_BATTLE)
 		return;
 
-	auto &mgr = SokuLib::getBattleMgr();
+	if (lastInputsLeft.empty())
+		goto noDelay;
 
-	if (base == mgr.leftCharacterManager.keyManager->keymapManager) {
+	if (base == *(SokuLib::KeymapManager **)0x008989A0) {
 		lastInputsLeft.push_back(base->input);
 		updateInput(lastInputs.first, lastInputsLeft.front());
 		memcpy(&base->input, &lastInputs.first, sizeof(base->input));
 		lastInputsLeft.pop_front();
-	} else if (mgr.rightCharacterManager.keyManager && base == mgr.rightCharacterManager.keyManager->keymapManager) {
+	} else if (base == *(SokuLib::KeymapManager **)0x0089918C) {
 		lastInputsRight.push_back(base->input);
 		updateInput(lastInputs.second, lastInputsRight.front());
 		memcpy(&base->input, &lastInputs.second, sizeof(base->input));
@@ -82,6 +82,7 @@ void handleInput(SokuLib::KeymapManager *base) {
 	} else
 		return;
 
+noDelay:
 	if (GetForegroundWindow() != SokuLib::window)
 		return;
 
@@ -141,10 +142,10 @@ SokuLib::BattleManager *__fastcall CBattleManager_Create(SokuLib::BattleManager 
 	case SokuLib::BATTLE_MODE_VSCOM:
 	case SokuLib::BATTLE_MODE_PRACTICE:
 		activated = true;
-		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-		s_origKeymapManager_SetInputs
-			= SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(PAYLOAD_ADDRESS_GET_INPUTS, (int)KeymapManagerSetInputs));
-		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+		//VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+		//s_origKeymapManager_SetInputs
+		//	= SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(PAYLOAD_ADDRESS_GET_INPUTS, (int)KeymapManagerSetInputs));
+		//VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		initFont();
 		lastInputsLeft.clear();
 	default:
@@ -152,10 +153,9 @@ SokuLib::BattleManager *__fastcall CBattleManager_Create(SokuLib::BattleManager 
 	}
 }
 
-int __fastcall CBattleManager_Render(SokuLib::BattleManager *This) {
+void __fastcall CBattleManager_Render(SokuLib::BattleManager *This) {
 	// super
-	int ret = (This->*s_origCBattleManager_Render)();
-
+	(This->*s_origCBattleManager_Render)();
 	if (activated) {
 		int texture;
 
@@ -163,20 +163,21 @@ int __fastcall CBattleManager_Render(SokuLib::BattleManager *This) {
 		drawSprite(texture, 3, 462, TEXTURE_SIZE, FONT_HEIGHT + 18.0f);
 		SokuLib::textureMgr.remove(texture);
 	}
-	return ret;
 }
 
-void *__fastcall CBattleManager_Destruct(SokuLib::BattleManager *This, int, int dyn) {
+SokuLib::BattleManager *__fastcall CBattleManager_Destruct(SokuLib::BattleManager *This, int, char dyn) {
 	// super
-	void *ret = (This->*s_origCBattleManager_Destruct)(dyn);
+	SokuLib::BattleManager *ret = (This->*s_origCBattleManager_Destruct)(dyn);
 
-	if (activated) {
-		DWORD old;
+	//if (activated) {
+	//	DWORD old;
 
-		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, PAGE_EXECUTE_WRITECOPY, &old);
-		SokuLib::TamperNearJmpOpr(PAYLOAD_ADDRESS_GET_INPUTS, SokuLib::union_cast<DWORD>(s_origKeymapManager_SetInputs));
-		VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, old, &old);
-	}
+	//	VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, PAGE_EXECUTE_WRITECOPY, &old);
+	//	SokuLib::TamperNearJmpOpr(PAYLOAD_ADDRESS_GET_INPUTS, SokuLib::union_cast<DWORD>(s_origKeymapManager_SetInputs));
+	//	VirtualProtect((PVOID)PAYLOAD_ADDRESS_GET_INPUTS, 4, old, &old);
+	//}
+	lastInputsLeft.clear();
+	lastInputsRight.clear();
 	activated = false;
 	return ret;
 }
@@ -186,15 +187,15 @@ void hookFunctions() {
 
 	// Setup hooks
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	s_origCBattleManager_Destruct = SokuLib::union_cast<void *(SokuLib::BattleManager::*)(int)>(
-		SokuLib::TamperDword(SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_DESTRUCT, reinterpret_cast<DWORD>(CBattleManager_Destruct)));
-	s_origCBattleManager_Render = SokuLib::union_cast<int (SokuLib::BattleManager::*)()>(
-		SokuLib::TamperDword(SokuLib::vtbl_CBattleManager + SokuLib::BATTLE_MGR_OFFSET_ON_RENDER, reinterpret_cast<DWORD>(CBattleManager_Render)));
+	s_origCBattleManager_Destruct = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.destructor, CBattleManager_Destruct);
+	s_origCBattleManager_Render   = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender, CBattleManager_Render);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origCBattleManager_Create = SokuLib::union_cast<SokuLib::BattleManager *(SokuLib::BattleManager::*)()>(
 		SokuLib::TamperNearJmpOpr(SokuLib::ADDR_BATTLE_MANAGER_CREATER, reinterpret_cast<DWORD>(CBattleManager_Create)));
+	s_origKeymapManager_SetInputs
+		= SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(PAYLOAD_ADDRESS_GET_INPUTS, (int)KeymapManagerSetInputs));
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);

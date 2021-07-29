@@ -255,6 +255,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	ogTitleOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,  myTitleOnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
+	Trial::hook();
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	puts("Done...");
 	srand(time(nullptr));
