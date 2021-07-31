@@ -516,3 +516,24 @@ target_link_libraries(
 )
 install(TARGETS "TrialMode" LIBRARY DESTINATION "SWRSToys/modules/TrialMode/")
 install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
+
+add_library(
+        "PunishDisplay"
+        MODULE
+        modules/PunishDisplay/main.cpp
+)
+target_compile_options(PunishDisplay PRIVATE /Zi)
+target_compile_definitions("PunishDisplay" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("PunishDisplay" PRIVATE include include/directx "modules/PunishDisplay/")
+target_link_directories("PunishDisplay" PRIVATE lib)
+target_link_libraries(
+        PunishDisplay
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "PunishDisplay" LIBRARY DESTINATION "SWRSToys/modules/PunishDisplay/")
+install(TARGETS "PunishDisplay" LIBRARY DESTINATION "SokuEngine/modules/PunishDisplay/")
