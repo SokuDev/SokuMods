@@ -490,13 +490,20 @@ add_library(
         modules/TrialMode/main.cpp
 	modules/TrialMode/Menu.cpp
         modules/TrialMode/Menu.hpp
-        modules/TrialMode/Pack.cpp modules/TrialMode/Pack.hpp modules/TrialMode/BattleAnimation.cpp modules/TrialMode/BattleAnimation.hpp modules/TrialMode/Trial.cpp modules/TrialMode/Trial.hpp modules/TrialMode/ComboTrial.cpp modules/TrialMode/ComboTrial.hpp modules/TrialMode/Actions.cpp modules/TrialMode/Actions.hpp)
+        modules/TrialMode/Pack.cpp
+        modules/TrialMode/Pack.hpp
+        modules/TrialMode/BattleAnimation.cpp
+        modules/TrialMode/BattleAnimation.hpp
+        modules/TrialMode/Trial.cpp
+        modules/TrialMode/Trial.hpp
+        modules/TrialMode/ComboTrial.cpp
+        modules/TrialMode/ComboTrial.hpp
+        modules/TrialMode/Actions.cpp
+        modules/TrialMode/Actions.hpp
+)
 target_compile_options(TrialMode PRIVATE /Zi)
-if (DEFINED NET)
-    set(NET APMNET=1)
-endif ()
-target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
-target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/" "${SFML_DIR}/include" "${TGUI_DIR}/include")
+target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/")
 target_link_directories("TrialMode" PRIVATE lib)
 target_link_libraries(
         TrialMode
