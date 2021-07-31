@@ -20,7 +20,7 @@
     "outro": "bnbmid3outro.script",
     "type": "combo",
 
-    "expected": "d6 j2a:15 d6:55 j5a:18 hj9 j5a j2c:15 j66 j5c j66 j8a",
+    "expected": "d6 j2a:15 2c:25 hj9 j5c j66 j8a",
     "skills": [
         [0, 0],
         [0, 0],
@@ -34,20 +34,25 @@
     "play_combo_after_intro": true,
     "score": [
         {
-            "min_hits": 22,
-            "min_damage": 2800,
-            "min_limit": 110,
+            "min_hits": 15,
+            "min_damage": 2000,
+            "min_limit": 104,
             "max_limit": 120
         },
         {
-            "min_hits": 23
+            "min_hits": 17,
+            "min_limit": 108
         },
         {
-            "min_hits": 24,
-            "max_attempts": 50
+            "min_hits": 19,
+            "min_limit": 112,
+            "max_attempts": 5
         },
         {
-            "max_attempts": 10
+            "min_hits": 22,
+            "min_damage": 2547,
+            "min_limit": 120,
+            "max_attempts": 1
         }
     ],
     "hint": [
