@@ -12,11 +12,13 @@ static unsigned currentPack = 0;
 static int currentEntry = -1;
 static bool loaded = false;
 static bool loadNextTrial = false;
+static SokuLib::DrawUtils::Sprite lock;
 static SokuLib::DrawUtils::Sprite arrow;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
+static SokuLib::DrawUtils::Sprite questionMarks;
 static SokuLib::DrawUtils::Sprite previewContainer;
 static unsigned packStart = 0;
 static unsigned entryStart = 0;
@@ -364,6 +366,8 @@ void menuLoadAssets()
 	loaded = true;
 	puts("Loading assets");
 
+	loadFont();
+
 	previewContainer.texture.loadFromGame("data/menu/profile_list_seat.bmp");
 	previewContainer.rect = {
 		0, 0,
@@ -407,8 +411,19 @@ void menuLoadAssets()
 	title.rect.width = title.texture.getSize().x;
 	title.rect.height = title.texture.getSize().y;
 
-	loadFont();
+	lock.texture.loadFromResource(myModule, MAKEINTRESOURCE(28));
+	lock.setSize({32, 32});
+	lock.rect.width = lock.texture.getSize().x;
+	lock.rect.height = lock.texture.getSize().y;
+
+	questionMarks.texture.createFromText("????????????????", defaultFont12, {0x100, 15});
+	questionMarks.setSize(questionMarks.texture.getSize());
+	questionMarks.rect.width = questionMarks.texture.getSize().x;
+	questionMarks.rect.height = questionMarks.texture.getSize().y;
+	questionMarks.tint = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0x80};
+
 	loadPacks();
+
 	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
 		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
 			return pack2->error.texture.hasTexture();
@@ -433,8 +448,6 @@ void menuUnloadAssets()
 	currentEntry = -1;
 	editorMode = false;
 }
-
-bool wasPressed = false;
 
 static void switchEditorMode()
 {
@@ -472,6 +485,22 @@ void checkScrollDown()
 		entryStart = currentEntry - 15;
 }
 
+inline bool isCompleted(int entry)
+{
+	if (entry < 0)
+		return true;
+	return loadedPacks[currentPack]->scenarios[entry]->score != -1;
+}
+
+inline bool isLocked(int entry)
+{
+	if (entry <= 0)
+		return false;
+	if (!loadedPacks[currentPack]->scenarios[entry]->canBeLocked)
+		return false;
+	return !isCompleted(entry - 1);
+}
+
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
 	if (editorMode)
@@ -505,13 +534,15 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 	editorMode = true;
 	switchEditorMode();
 nothing:
-	if (!wasPressed && input.a && currentEntry != -1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE) {
-		puts("Start game !");
-		SokuLib::playSEWaveBuffer(0x28);
-		prepareGameLoading(loadedPacks[currentPack]->scenarios[currentEntry]->file);
-		return;
+	if (input.a == 1 && currentEntry != -1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE) {
+		if (!isLocked(currentEntry)) {
+			puts("Start game !");
+			SokuLib::playSEWaveBuffer(0x28);
+			prepareGameLoading(loadedPacks[currentPack]->scenarios[currentEntry]->file);
+			return;
+		}
+		SokuLib::playSEWaveBuffer(0x29);
 	}
-	wasPressed = input.a || SokuLib::newSceneId != SokuLib::SCENE_TITLE;
 	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (currentEntry == -1) {
@@ -547,6 +578,7 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	}
 	menuLoadAssets();
 	if (keys->keymapManager->input.b) {
+		puts("Quit");
 		SokuLib::playSEWaveBuffer(0x29);
 		return false;
 	}
@@ -649,16 +681,43 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		auto &scenario = pack.scenarios[i];
 
 		if (pos.y >= 100) {
-			scenario->name.setPosition({
-				static_cast<int>(pos.x + 100),
-				static_cast<int>(pos.y)
-			});
-			scenario->name.draw();
-			scenario->scoreSprite.setPosition({
-				static_cast<int>(pos.x + 271),
-				static_cast<int>(pos.y - 10)
-			});
-			scenario->scoreSprite.draw();
+			if (isLocked(i)) {
+				lock.setPosition({
+					static_cast<int>(pos.x + 271),
+					static_cast<int>(pos.y - 10)
+				});
+				lock.draw();
+				if (scenario->nameHiddenIfLocked) {
+					questionMarks.setPosition({
+						static_cast<int>(pos.x + 100),
+						static_cast<int>(pos.y)
+					});
+					for (int j = 0; j < 4; j++)
+						questionMarks.fillColors[j] = scenario->name.fillColors[j];
+					questionMarks.draw();
+				} else {
+					scenario->name.setPosition({
+						static_cast<int>(pos.x + 100),
+						static_cast<int>(pos.y)
+					});
+					scenario->name.tint = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0x80};
+					scenario->name.draw();
+				}
+			} else {
+				scenario->name.setPosition({
+					static_cast<int>(pos.x + 100),
+					static_cast<int>(pos.y)
+				});
+				scenario->name.tint = SokuLib::DrawUtils::DxSokuColor::White;
+				scenario->name.draw();
+				if (scenario->score != -1) {
+					scenario->scoreSprite.setPosition({
+						static_cast<int>(pos.x + 271),
+						static_cast<int>(pos.y - 10)
+					});
+					scenario->scoreSprite.draw();
+				}
+			}
 		}
 		pos.y += 15;
 		if (pos.y > 379)

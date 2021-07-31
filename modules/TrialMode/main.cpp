@@ -26,7 +26,9 @@ static int (SokuLib::Title::* ogTitleOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnProcess)();
 static int (SokuLib::MenuResult::* ogResultOnRender)();
 static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
+static int (__fastcall *og_loadTexture )(void *, void *, void *, void *);
 static bool stopRepeat = false;
+
 void loadSoku2CSV(LPWSTR path)
 {
 	std::ifstream stream{path};
@@ -162,11 +164,15 @@ static bool done = false;
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
+	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
+
 	if (!loadedTrial)
 		return (This->*ogBattleOnProcess)();
 
 	int buffer = !canHaveNextFrame ? loadedTrial->getNextScene() : (This->*ogBattleOnProcess)();
 
+	if (keys->keymapManager->input.a)
+		buffer = SokuLib::SCENE_BATTLE;
 	canHaveNextFrame = true;
 	if (buffer == SokuLib::SCENE_LOADING);
 	else if (buffer != SokuLib::SCENE_BATTLE)
@@ -219,9 +225,29 @@ int __fastcall myResultOnRender(SokuLib::MenuResult *This)
 SokuLib::MenuResult *__fastcall myResultOnDestruct(SokuLib::MenuResult *This, int _, unsigned char param)
 {
 	menuUnloadAssets();
-	wasPressed = true;
 	goToTitle = false;
 	return (This->*ogResultOnDestruct)(param);
+}
+
+int __fastcall fakeLoad(SokuLib::TextureManager *puParm1, char *pcParm2, int **param_3, unsigned *param_4)
+{
+	int ret;
+
+	//if (strcmp(pcParm2, "data/scene/title/2_menu_moji1.bmp") == 0) {
+	//	SokuLib::DrawUtils::Texture t;
+
+	//	t.loadFromResource(myModule, MAKEINTRESOURCE(32));
+	//	ret = t.releaseHandle();
+	//} else if (strcmp(pcParm2, "data/scene/title/2_menu_moji2.bmp") == 0) {
+	//	SokuLib::DrawUtils::Texture t;
+
+	//	t.loadFromResource(myModule, MAKEINTRESOURCE(36));
+	//	ret = t.releaseHandle();
+	//} else
+		ret = og_loadTexture(puParm1, pcParm2, param_3, param_4);
+
+	printf("%s -> %i\n", pcParm2, ret);
+	return ret;
 }
 
 
@@ -254,6 +280,10 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	ogResultOnDestruct= SokuLib::TamperDword(&SokuLib::VTable_Result.onDestruct,myResultOnDestruct);
 	ogTitleOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,  myTitleOnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
+
+	//VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+	//og_loadTexture = reinterpret_cast<int (__fastcall *)(void *, void *, void *, void *)>(SokuLib::TamperNearJmpOpr(0x40505c, fakeLoad));
+	//VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	Trial::hook();
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);

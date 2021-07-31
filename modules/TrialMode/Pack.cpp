@@ -336,18 +336,20 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 		this->preview.setPosition({398, 128});
 		this->preview.setSize({200, 150});
 	}
+
+	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())
+		this->canBeLocked = object["may_be_locked"];
+	if (object.contains("name_hidden_when_locked") && object["name_hidden_when_locked"].is_boolean())
+		this->nameHiddenIfLocked = object["name_hidden_when_locked"];
 }
 
 void Scenario::setScore(char score)
 {
-	if (score == -1)
-		this->scoreSprite.tint = SokuLib::DrawUtils::DxSokuColor::Transparent;
-	else {
+	if (score != -1) {
 		if (this->score == -1) {
 			this->scoreSprite.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
 			this->scoreSprite.setSize({32, 32});
 		}
-		this->scoreSprite.tint = SokuLib::DrawUtils::DxSokuColor::White;
 		this->scoreSprite.rect.left = score * this->scoreSprite.texture.getSize().x / 4;
 		this->scoreSprite.rect.width = this->scoreSprite.texture.getSize().x / 4;
 		this->scoreSprite.rect.height = this->scoreSprite.texture.getSize().y;

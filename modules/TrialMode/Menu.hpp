@@ -32,7 +32,6 @@ extern SokuLib::SWRFont defaultFont10;
 extern SokuLib::SWRFont defaultFont12;
 extern SokuLib::SWRFont defaultFont16;
 extern bool loadRequest;
-extern bool wasPressed;
 extern std::unique_ptr<Trial> loadedTrial;
 extern bool editorMode;
 
