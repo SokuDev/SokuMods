@@ -24,6 +24,8 @@ struct Icon {
 
 class Scenario {
 public:
+	bool canBeLocked = true;
+	bool nameHiddenIfLocked = false;
 	char score = -1;
 	std::string file;
 	SokuLib::DrawUtils::Sprite name;
