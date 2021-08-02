@@ -570,6 +570,9 @@ int menuOnProcess(SokuLib::MenuResult *This)
 {
 	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
 
+	if (SokuLib::newSceneId != SokuLib::sceneId)
+		return true;
+
 	if (loadNextTrial) {
 		loadNextTrial = false;
 		prepareGameLoading(loadedPacks[currentPack]->scenarios[++currentEntry]->file);
