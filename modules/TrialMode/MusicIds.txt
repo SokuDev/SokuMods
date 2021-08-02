@@ -1,0 +1,38 @@
+0  -> Ground is Yellow
+1  -> Fragrant Plants
+2  -> Dancing Water Spray
+3  -> Ridiculous Game
+4  -> Crimson in the Black Sea ~ Legendary Fish
+5  -> Catastrophe in Bhava Agra ~ Wonderful Heaven
+6  -> Bhava Agra As Seen Through a Child's Mind
+10 -> Mystical Oriental Love Consultation
+11 -> Vessel of Star ~ Casket of Star
+12 -> Flowering Night
+13 -> Doll Maker of Bucuresti
+14 -> Hiroari Shoots a Strange Bird ~ Till When ?
+15 -> Locked Girl ~ the Girl's Secret Room
+16 -> Bloom nobly, Cherry Blossoms of Sumizome
+17 -> Septette for the Dead Princess
+18 -> Night Falls
+19 -> Broken Moon
+20 -> Lunatic Eyes ~ Invisible Full Moon
+21 -> Wind God Girl
+22 -> Higan Retour ~ Riverside View
+30 -> Faith is for the Transient People
+31 -> Beloved Tomboyish Girl
+32 -> Shanghai Teahouse ~ Chinese Tea
+33 -> Solar Sect of Mystic Wisdom ~ Nuclear Fusion
+34 -> Tomorrow Will Be special; Yesterday Was Not
+35 -> Unknown X ~ Unfound Adventure
+36 -> X, the Floating Object in the Sky
+40 -> Dichromatic Lotus Butterfly ~ Ancients
+41 -> Love-Colored Magic
+42 -> The Grimoire of Alice
+43 -> Voile, the Magic Library
+99 -> Fantasy Heaven round 2 music
+
+7:9    -> Nothing
+23:29  -> Nothing
+37:39  -> Nothing
+44:98  -> Nothing
+100:255-> Nothing

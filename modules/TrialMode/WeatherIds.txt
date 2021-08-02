@@ -1,0 +1,22 @@
+0  -> Sunny
+1  -> Drizzle
+2  -> Cloudy
+3  -> Blue Sky
+4  -> Hail
+5  -> Spring Haze
+6  -> Heavy Fog
+7  -> Snow
+8  -> Sunshower
+9  -> Sprinkle
+10 -> Tempest
+11 -> Mountain Vapor
+12 -> River Mist
+13 -> Typhoon
+14 -> Calm
+15 -> Diamond Dust
+16 -> Dust Storm
+17 -> Scorching Sun
+18 -> Monsoon
+19 -> Aurora
+20 -> Twilight
+21 -> Clear
