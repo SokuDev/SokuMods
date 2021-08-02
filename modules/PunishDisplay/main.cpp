@@ -19,7 +19,7 @@ static int (SokuLib::BattleManager::*og_BattleManagerOnProcess)();
 
 static int (SokuLib::CharacterManager::*original_onHit)(int param);
 
-bool __fastcall isHit(SokuLib::CharacterManager &character, int, int param)
+int __fastcall isHit(SokuLib::CharacterManager &character, int, int param)
 {
 	if (
 		!character.objectBase.frameData.frameFlags.guardAvailable &&
@@ -31,6 +31,7 @@ bool __fastcall isHit(SokuLib::CharacterManager &character, int, int param)
 		else if (&character == &SokuLib::getBattleMgr().rightCharacterManager)
 			dispCtr.first = 0;
 	}
+
 	return (character.*original_onHit)(param);
 }
 
@@ -43,25 +44,25 @@ int __fastcall BattleOnProcess(SokuLib::BattleManager *This)
 
 		desc.r1 = 255;
 		desc.r2 = 255;
-		desc.g1 = 0;
-		desc.g2 = 0;
-		desc.b1 = 0;
-		desc.b2 = 0;
+		desc.g1 = 255;
+		desc.g2 = 255;
+		desc.b1 = 255;
+		desc.b2 = 255;
 		desc.height = 24;
 		desc.weight = FW_BOLD;
 		desc.italic = 0;
-		desc.shadow = 2;
+		desc.shadow = 4;
 		desc.bufferSize = 1000000;
 		desc.charSpaceX = 0;
 		desc.charSpaceY = 0;
 		desc.offsetX = 0;
 		desc.offsetY = 0;
 		desc.useOffset = 0;
-		strcpy(desc.faceName, "Tahoma");
+		strcpy(desc.faceName, "MonoSpatialModSWR");
 		font.create();
 		font.setIndirect(desc);
 
-		punishText.texture.createFromText("Punish !", font, {0x1000, 50});
+		punishText.texture.createFromText("Punish!", font, {0x1000, 50});
 		punishText.setSize(punishText.texture.getSize());
 		punishText.rect.width = punishText.texture.getSize().x;
 		punishText.rect.height = punishText.texture.getSize().y;
@@ -77,10 +78,10 @@ void __fastcall BattleOnRender(SokuLib::BattleManager *This)
 {
 	(This->*og_BattleManagerOnRender)();
 
-	punishText.setPosition({10, 54});
+	punishText.setPosition({17, 67});
 	punishText.tint.a = min(255, max(0, (240 - static_cast<int>(dispCtr.first * 4) + 255)));
 	punishText.draw();
-	punishText.setPosition({532, 54});
+	punishText.setPosition({535, 67});
 	punishText.tint.a = min(255, max(0, (240 - static_cast<int>(dispCtr.second * 4) + 255)));
 	punishText.draw();
 }
