@@ -25,8 +25,6 @@ endif()
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zlib/zlib.h _zlib_h_contents)
 string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*" "\\1" ZLIB_VERSION_STRING ${_zlib_h_contents})
 find_package(ZLIB REQUIRED)
-#set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIRS};${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib")
-#add_dependencies(ZLIB::ZLIB zlibstatic)
 
 # libpng Library
 add_git_module(libpng git://git.code.sf.net/p/libpng/code libpng12)
@@ -49,4 +47,5 @@ target_sources(th123w PRIVATE th123wdll.cpp ioapi.c unzip.c)
 target_link_libraries(th123w zlibstatic png12_static shlwapi)
 target_include_directories(th123w PUBLIC ${TH123E_INCLUDE_DIRS})
 
-#install(TARGETS th123e th123w LIBRARY DESTINATION "SWRSToys/modules/th123e/")
+install(TARGETS th123e th123w LIBRARY DESTINATION "SWRSToys/modules/th123e/")
+install(FILES th123e.zip th123w.zip DESTINATION "SWRSToys/modules/th123e/")
