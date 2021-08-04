@@ -16,8 +16,6 @@
             "y": 0
         }
     },
-    "intro": "bnbcorn3intro.script",
-    "outro": "bnbcorn3outro.script",
     "type": "combo",
 
     "expected": "2a 2c hj8 j2c:15 j66 j5aa",

@@ -58,6 +58,7 @@ private:
 	unsigned _timer = 0;
 	unsigned _attempts = 0;
 	float _rotation = 0;
+	unsigned _firstFirst = 1;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;
@@ -79,7 +80,7 @@ private:
 	static SokuLib::Action getMoveAction(SokuLib::Character chr, std::string &name);
 
 public:
-	ComboTrial(SokuLib::Character player, const nlohmann::json &json);
+	ComboTrial(const char *folder, SokuLib::Character player, const nlohmann::json &json);
 
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 	SokuLib::KeyInput getDummyInputs() override;

@@ -9,7 +9,6 @@
 #include <shlwapi.h>
 #include <dinput.h>
 #include <SokuLib.hpp>
-#include "BattleAnimation.hpp"
 #include "Menu.hpp"
 #include "Pack.hpp"
 #include "Actions.hpp"

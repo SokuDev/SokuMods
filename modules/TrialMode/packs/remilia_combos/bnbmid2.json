@@ -8,7 +8,7 @@
         "pos": 700
     },
     "dummy": {
-        "character": "reimu",
+        "character": "sakuya",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -16,8 +16,6 @@
             "y": 100
         }
     },
-    "intro": "bnbmid2intro.script",
-    "outro": "bnbmid2outro.script",
     "type": "combo",
 
     "expected": "d6 j5aa d6 j5aa d6 j5a:12 j8a",

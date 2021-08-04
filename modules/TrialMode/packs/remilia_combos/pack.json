@@ -24,7 +24,7 @@
     },
     "scenarios": [
         {
-            "name": "Midscreen 2a starter",
+            "name": "The soul capturing intruder",
             "file": "bnbmid1.json",
             "preview": "bnbmid1.png"
         },
@@ -60,7 +60,8 @@
             "name": "Corner 5a starter",
             "file": "bnbcorn1.json",
             "preview": "bnbcorn1.png",
-            "may_be_locked":  false
+            "may_be_locked":  true,
+            "name_hidden_when_locked":  true
         },
         {
             "name": "Corner 2a starter",

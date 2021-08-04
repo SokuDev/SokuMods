@@ -1,6 +1,6 @@
 {
-    "music": 36,
-    "stage": 6,
+    "music": 17,
+    "stage": 16,
     "player": {
         "character": "remilia",
         "palette": 0,
@@ -16,8 +16,6 @@
             "y": 0
         }
     },
-    "intro": "bnbmid4intro.script",
-    "outro": "bnbmid4outro.script",
     "type": "combo",
 
     "expected": "5aaaa sc204 hj9 j8a:30",

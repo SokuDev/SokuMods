@@ -1,6 +1,6 @@
 {
-    "music": 99,
-    "stage": 38,
+    "music": 17,
+    "stage": 16,
     "player": {
         "character": "remilia",
         "palette": 0,
@@ -8,7 +8,7 @@
         "pos": 750
     },
     "dummy": {
-        "character": "reimu",
+        "character": "meirin",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -16,8 +16,6 @@
             "y": 0
         }
     },
-    "intro": "bnbmid3intro.script",
-    "outro": "bnbmid3outro.script",
     "type": "combo",
 
     "expected": "d6 j2a:15 2c:25 hj9 j5c j66 j8a",
