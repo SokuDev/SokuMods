@@ -28,6 +28,7 @@ public:
 	bool nameHiddenIfLocked = false;
 	char score = -1;
 	std::string file;
+	std::string folder;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite preview;
 	SokuLib::DrawUtils::Sprite description;

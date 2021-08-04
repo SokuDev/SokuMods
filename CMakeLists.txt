@@ -492,14 +492,14 @@ add_library(
         modules/TrialMode/Menu.hpp
         modules/TrialMode/Pack.cpp
         modules/TrialMode/Pack.hpp
-        modules/TrialMode/BattleAnimation.cpp
-        modules/TrialMode/BattleAnimation.hpp
         modules/TrialMode/Trial.cpp
         modules/TrialMode/Trial.hpp
         modules/TrialMode/ComboTrial.cpp
         modules/TrialMode/ComboTrial.hpp
         modules/TrialMode/Actions.cpp
         modules/TrialMode/Actions.hpp
+        modules/TrialMode/Animations/BattleAnimation.cpp
+        modules/TrialMode/Animations/BattleAnimation.hpp
 )
 target_compile_options(TrialMode PRIVATE /Zi)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
@@ -516,6 +516,31 @@ target_link_libraries(
 )
 install(TARGETS "TrialMode" LIBRARY DESTINATION "SWRSToys/modules/TrialMode/")
 install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
+
+add_library(
+        "remi_basic_bnbmid1"
+        MODULE
+        modules/TrialMode/Animations/BattleAnimation.cpp
+        modules/TrialMode/Animations/BattleAnimation.hpp
+        modules/TrialMode/Animations/RemiliaBasicCombos/bnbmid1.cpp
+)
+target_compile_options(remi_basic_bnbmid1 PRIVATE /Zi)
+target_compile_definitions("remi_basic_bnbmid1" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("remi_basic_bnbmid1" PRIVATE include include/directx "modules/TrialMode/")
+target_link_directories("remi_basic_bnbmid1" PRIVATE lib)
+target_link_libraries(
+        remi_basic_bnbmid1
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+set_target_properties(remi_basic_bnbmid1 PROPERTIES OUTPUT_NAME bnbmid1)
+set_target_properties(remi_basic_bnbmid1 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_combos" PREFIX "")
+
+add_dependencies(TrialMode remi_basic_bnbmid1)
 
 add_library(
         "PunishDisplay"

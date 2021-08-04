@@ -172,7 +172,7 @@ bool addCharacterToBuffer(const std::string &name, const nlohmann::json &chr, So
 	return true;
 }
 
-bool prepareReplayBuffer(const std::string &path)
+bool prepareReplayBuffer(const std::string &path, const char *folder)
 {
 	std::ifstream stream{path};
 	nlohmann::json value;
@@ -215,7 +215,7 @@ bool prepareReplayBuffer(const std::string &path)
 	if (!addCharacterToBuffer("dummy", value["dummy"], SokuLib::rightPlayerInfo, true))
 		return false;
 	try {
-		loadedTrial.reset(Trial::create(SokuLib::leftPlayerInfo.character, value));
+		loadedTrial.reset(Trial::create(folder, SokuLib::leftPlayerInfo.character, value));
 	} catch (std::exception &e) {
 		MessageBox(
 			SokuLib::window,
@@ -231,10 +231,10 @@ bool prepareReplayBuffer(const std::string &path)
 	return true;
 }
 
-void prepareGameLoading(const std::string &path)
+void prepareGameLoading(const char *folder, const std::string &path)
 {
 	SokuLib::setBattleMode(SokuLib::BATTLE_MODE_VSPLAYER, SokuLib::BATTLE_SUBMODE_PLAYING1);
-	if (!prepareReplayBuffer(path))
+	if (!prepareReplayBuffer(path, folder))
 		return;
 	loadRequest = true;
 }
@@ -538,7 +538,10 @@ nothing:
 		if (!isLocked(currentEntry)) {
 			puts("Start game !");
 			SokuLib::playSEWaveBuffer(0x28);
-			prepareGameLoading(loadedPacks[currentPack]->scenarios[currentEntry]->file);
+			prepareGameLoading(
+				loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
+				loadedPacks[currentPack]->scenarios[currentEntry]->file
+			);
 			return;
 		}
 		SokuLib::playSEWaveBuffer(0x29);
@@ -575,7 +578,11 @@ int menuOnProcess(SokuLib::MenuResult *This)
 
 	if (loadNextTrial) {
 		loadNextTrial = false;
-		prepareGameLoading(loadedPacks[currentPack]->scenarios[++currentEntry]->file);
+		++currentEntry;
+		prepareGameLoading(
+			loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
+			loadedPacks[currentPack]->scenarios[currentEntry]->file
+		);
 		if (loadRequest)
 			return true;
 	}

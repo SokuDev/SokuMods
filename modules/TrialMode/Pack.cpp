@@ -302,7 +302,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 
 	if (!object.contains("file") || !object["file"].is_string())
 		return;
-	this->file = path + "\\" + object["file"].get<std::string>();
+	this->folder = path + "\\";
+	this->file = this->folder + object["file"].get<std::string>();
 	this->name.texture.createFromText(
 		(object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : "Scenario #" + std::to_string(i)).c_str(),
 		defaultFont10, {0x100, 30}

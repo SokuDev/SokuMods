@@ -16,7 +16,8 @@
 
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 
-ComboTrial::ComboTrial(SokuLib::Character player, const nlohmann::json &json)
+ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nlohmann::json &json) :
+	Trial(folder, json)
 {
 	int text;
 
@@ -144,21 +145,48 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	battleMgr.rightCharacterManager.nameHidden = true;
+	if (!this->_introPlayed) {
+		if (this->_firstFirst == 1)
+			(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
+		canHaveNextFrame = this->_firstFirst == 1;
+		if (this->_firstFirst)
+			this->_firstFirst--;
+		else
+			this->_introOnUpdate();
+		return false;
+	}
+
 	this->_rotation += 0.025;
 	this->_dollAnim++;
 	this->_dollAnim &= 0b11111;
 	if (this->_freezeCounter) {
 		canHaveNextFrame = (this->_freezeCounter % max((5 - this->_freezeCounter / 30), 1) == 0);
 		this->_freezeCounter--;
-		if (!this->_freezeCounter)
+		if (!this->_freezeCounter && this->_outroPlayed)
 			SokuLib::activateMenu(new ComboTrialResult(*this));
-		return !this->_freezeCounter;
+		return !this->_freezeCounter && this->_outroPlayed;
 	}
 
-	if (this->_finished && !this->_playingIntro) {
+	if (!this->_outroPlayed && this->_finished) {
+		if (!this->_dummyHit) {
+			if ((*reinterpret_cast<char **>(0x8985E8))[0x494] < 22) {
+				(*reinterpret_cast<char **>(0x8985E8))[0x494]++;
+				return false;
+			}
+			this->_outroOnUpdate();
+			canHaveNextFrame = false;
+			if (this->_outroPlayed)
+				SokuLib::activateMenu(new ComboTrialResult(*this));
+			return false;
+		}
+	} else if (this->_finished && !this->_playingIntro) {
 		canHaveNextFrame = false;
 		return true;
 	}
+
+	if ((*reinterpret_cast<char **>(0x8985E8))[0x494])
+		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
 	if (this->_isStart) {
 		this->_initGameStart();
@@ -202,10 +230,12 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	this->_isStart = this->_timer >= 60;
 	battleMgr.leftCharacterManager.score = 1;
 	SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
-	if (this->_dummyHit && !hit)
+	if (this->_dummyHit && !hit && (!this->_finished || this->_playingIntro))
 		this->_isStart = true;
+	else if (this->_dummyHit && !hit)
+		this->_dummyHit = false;
 	this->_dummyHit |= hit;
-	if (!this->_dummyHit) {
+	if (!this->_dummyHit && !this->_finished) {
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
@@ -219,6 +249,12 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 void ComboTrial::render() const
 {
+	if (!this->_introPlayed)
+		return this->_introOnRender();
+
+	if (this->_finished && !this->_outroPlayed && !this->_dummyHit)
+		return this->_outroOnRender();
+
 	if (this->_finished && !this->_playingIntro)
 		return;
 
@@ -282,6 +318,7 @@ void ComboTrial::_initGameStart()
 	if (this->_playingIntro)
 		this->_waitCounter += 30;
 
+	this->_firstFirst = 0;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
 	for (auto card : this->_hand) {
@@ -370,7 +407,7 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 		originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
 		return;
 	}
-	if (this->_playComboAfterIntro) {
+	if (this->_playComboAfterIntro || this->_finished || this->_firstFirst) {
 		memset(&originalInputs, 0, sizeof(originalInputs));
 		return;
 	}

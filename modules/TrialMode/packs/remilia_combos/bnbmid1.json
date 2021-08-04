@@ -8,7 +8,7 @@
         "pos": 700
     },
     "dummy": {
-        "character": "reimu",
+        "character": "aya",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -16,8 +16,8 @@
             "y": 0
         }
     },
-    "intro": "bnbmid1intro.script",
-    "outro": "bnbmid1outro.script",
+    "intro": "bnbmid1.dll",
+    "outro": "bnbmid1.dll",
     "type": "combo",
 
     "expected": "2a 5c hj9 j5c j66 j8a:20",
