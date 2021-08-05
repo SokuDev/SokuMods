@@ -47,9 +47,9 @@ inline const char *getChrCodeName(SokuLib::Character chr)
 SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 {
 	static const char *stands[] = {
-		"data/character/%s/stand/\x8a=.bmp",
-		"data/character/%s/stand/\x8a+.bmp",
-		"data/character/%s/stand/\x8b-.bmp",
+		"data/character/%s/stand/\x8a\xf0.bmp",
+		"data/character/%s/stand/\x8a\xbe.bmp",
+		"data/character/%s/stand/\x8b\xc1.bmp",
 		"data/character/%s/stand/\x8c\x88.bmp",
 		"data/character/%s/stand/\x93{.bmp",
 		"data/character/%s/stand/\x95\x89.bmp",
@@ -62,13 +62,13 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 	const char *rightChar = getChrCodeName(SokuLib::rightChar);
 	SokuLib::FontDescription desc;
 
-	desc.r1 = 255;
-	desc.r2 = 255;
-	desc.g1 = 255;
-	desc.g2 = 255;
-	desc.b1 = 255;
-	desc.b2 = 255;
-	desc.height = 18;
+	desc.r1 = 0xFF;
+	desc.g1 = 0xFF;
+	desc.b1 = 0xFF;
+	desc.r2 = 0xA0;
+	desc.g2 = 0xA0;
+	desc.b2 = 0xFF;
+	desc.height = 20;
 	desc.weight = FW_NORMAL;
 	desc.italic = 0;
 	desc.shadow = 1;
@@ -79,9 +79,13 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 	desc.offsetY = 0;
 	desc.useOffset = 0;
 	strcpy(desc.faceName, "MonoSpatialModSWR");
-	desc.weight = FW_REGULAR;
-	this->_font16.create();
-	this->_font16.setIndirect(desc);
+	desc.weight = FW_BOLD;
+	this->_lfont.create();
+	this->_lfont.setIndirect(desc);
+	desc.r2 = 0xFF;
+	desc.b2 = 0xA0;
+	this->_rfont.create();
+	this->_rfont.setIndirect(desc);
 
 	this->_standDialogBox.setSize({624, 80});
 	this->_standDialogBox.setPosition({8, 392});
@@ -107,6 +111,7 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 		sprintf(buffer, stand, rightChar);
 		sprite.texture.loadFromGame(buffer);
 		sprite.setSize(sprite.texture.getSize());
+		sprite.setMirroring(true, false);
 		sprite.rect.width = sprite.texture.getSize().x;
 		sprite.rect.height = sprite.texture.getSize().y;
 	}
@@ -118,9 +123,11 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 			this->_isLeftTalking = (dialog[0] == 'L' || dialog[0] == 'l');
 			this->_left = sideStand(dialog[1]);
 			this->_right = sideStand(dialog[2]);
-			this->_text.texture.createFromText(dialog.c_str() + 3, this->_font16, {624, 80});
+			this->_text.texture.createFromText(dialog.c_str() + 3, this->_isLeftTalking ? this->_lfont : this->_rfont, {624, 80});
 			this->_text.setSize(this->_text.texture.getSize());
-			this->_text.setPosition({8, 392});
+			this->_text.setPosition({16, 400});
+			this->_text.rect.width = this->_text.getSize().x;
+			this->_text.rect.height = this->_text.getSize().y;
 			if (this->_isLeftTalking) {
 				if (this->_right != NOSTAND)
 					this->_stands[this->_right + SPRITE_RIGHT_STAND_START]->tint.a = 0xA0;
@@ -268,8 +275,8 @@ bool SokuStand::onKeyPress()
 	}
 	if (this->_metaData.empty())
 		return false;
-	this->_text.texture.createFromText(std::get<0>(this->_metaData.front()).c_str(), this->_font16, this->_text.texture.getSize());
 	this->_isLeftTalking = std::get<1>(this->_metaData.front());
+	this->_text.texture.createFromText(std::get<0>(this->_metaData.front()).c_str(), this->_isLeftTalking ? this->_lfont : this->_rfont, this->_text.texture.getSize());
 	(this->_isLeftTalking ? this->_left : this->_right) = std::get<2>(this->_metaData.front());
 	this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  =
 	this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] =
@@ -289,7 +296,8 @@ unsigned int SokuStand::getCurrentDialog() const
 
 SokuStand::~SokuStand()
 {
-	this->_font16.destruct();
+	this->_lfont.destruct();
+	this->_rfont.destruct();
 }
 
 MovingSprite::MovingSprite(

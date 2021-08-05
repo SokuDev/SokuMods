@@ -147,8 +147,6 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
-		if (this->_firstFirst == 1)
-			(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
 		canHaveNextFrame = this->_firstFirst == 1;
 		if (this->_firstFirst)
 			this->_firstFirst--;
@@ -168,7 +166,7 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		return !this->_freezeCounter && this->_outroPlayed;
 	}
 
-	if (!this->_outroPlayed && this->_finished) {
+	if (!this->_outroPlayed && this->_finished && !this->_playingIntro) {
 		if (!this->_dummyHit) {
 			if ((*reinterpret_cast<char **>(0x8985E8))[0x494] < 22) {
 				(*reinterpret_cast<char **>(0x8985E8))[0x494]++;

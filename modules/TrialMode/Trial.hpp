@@ -14,11 +14,12 @@
 
 class Trial {
 private:
+	std::string music;
 	std::unique_ptr<BattleAnimation> _intro;
-	std::unique_ptr<BattleAnimation> _outro;
 	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _factory;
 
 protected:
+	std::unique_ptr<BattleAnimation> _outro;
 	bool _introPlayed = false;
 	bool _outroPlayed = false;
 
