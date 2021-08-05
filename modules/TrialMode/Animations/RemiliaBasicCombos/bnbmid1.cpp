@@ -11,29 +11,29 @@ char profilePath[1024];
 static const std::vector<std::string> dialogs{
 	"lc Another boring day. Maybe I'll go duel Reimu<br>tonight? If I destroy her shrine, she<br>might get motivated a bit.",
 	//Clic
-	"rh*That should make a good cover. As for the title...*",
-	"lWOh my, an intruder. You are on time!",
-	"rHDon't mind me. I'm not here to invade your<br>privacy or anything.<br>Just here to take a few picture in secret...",
-	"rEWell so long for the secret part...",
-	"lWPatchouli told me she needs a new tengu feather,<br>might as well help her out!",
+	"r h*That should make a good cover. As for the title...*",
+	"lhWOh my, an intruder. You are on time!",
+	"rWHDon't mind me. I'm not here to invade your<br>privacy or anything.<br>Just here to take a few picture in secret...",
+	"rWEWell so long for the secret part...",
+	"lWEPatchouli told me she needs a new tengu feather,<br>might as well help her out!",
 	//one screaming crow and a feather later
-	"lHI'm sure even the vegetative Patchouli<br>shall be grateful.",
-	"rDMy beautiful feather...",
-	"lCAnyway what were you doing here?",
-	"rhI was investigating a rumor that..",
-	"lASurely You are too tough to talk aren't you?",
-	"rANo it's not a se...",
-	"lhRoughing you up shall make you talk.",
+	"lHEI'm sure even the vegetative Patchouli<br>shall be grateful.",
+	"rHDMy beautiful feather...",
+	"lCDAnyway what were you doing here?",
+	"rChI was investigating a rumor that..",
+	"lAhSurely You are too tough to talk aren't you?",
+	"rAANo it's not a se...",
+	"lhARoughing you up shall make you talk.",
 	//Battle here
 };
 static const std::vector<std::string> outroDialogs{
 	"rWDWhy being a journalist is so hard?",
-	"lWI was still pretty soft you know?",
-	"lCNow talk!",
-	"rDI was just investigating the rumor that someone<br>had infiltrated the scarlet manor.",
-	"lcWell it's not anything new...",
-	"rDI meant neither marisa nor me.",
-	"lSNow that is surprising!<br>Sakuya must know something..."
+	"lWDI was still pretty soft you know?",
+	"lCDNow talk!",
+	"rCDI was just investigating the rumor that someone<br>had infiltrated the scarlet manor.",
+	"lcDWell it's not anything new...",
+	"rCDI meant neither marisa nor me.",
+	"lSDNow that is surprising!<br>Sakuya must know something..."
 };
 
 class Intro : public BattleAnimation {
@@ -43,9 +43,9 @@ private:
 	SokuLib::DrawUtils::Sprite _stageBottom;
 	unsigned _ctr = 240;
 	unsigned _currentStage = 0;
-	std::unique_ptr<Dialog> _dialog;
-	bool _dialogHidden = true;
+	std::unique_ptr<SokuStand> _dialog;
 	bool _keyPressed = false;
+	bool _stop = false;
 
 	void stage0()
 	{
@@ -110,8 +110,7 @@ private:
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 			battleMgr.leftCharacterManager.objectBase.animate();
 			this->_currentStage++;
-			this->_dialogHidden = false;
-			this->_dialog->onKeyPress();
+			this->_dialog->setHidden(false);
 		}
 	}
 
@@ -122,7 +121,8 @@ private:
 		battleMgr.leftCharacterManager.objectBase.doAnimation();
 		if (this->_dialog->getCurrentDialog() == dialogs.size() - 2) {
 			this->_currentStage++;
-			this->_dialogHidden = true;
+			this->_dialog->setHidden(true);
+			this->_dialog->finishAnimations();
 			battleMgr.rightCharacterManager.objectBase.position.x = 800;
 			battleMgr.rightCharacterManager.objectBase.actionBlockId = 0;
 			battleMgr.rightCharacterManager.objectBase.animationCounter = 0;
@@ -168,8 +168,8 @@ private:
 		battleMgr.rightCharacterManager.objectBase.doAnimation();
 		if (this->_ctr)
 			this->_ctr--;
-		else
-			this->_dialogHidden = false;
+		else if (!this->_stop)
+			this->_dialog->setHidden(false);
 		if (this->_dialog->getCurrentDialog() == dialogs.size() - 14)
 			this->_currentStage++;
 	}
@@ -216,20 +216,16 @@ public:
 
 	bool update() override
 	{
-		if (!this->_dialogHidden) {
-			this->_dialog->update();
-			if (this->_keyPressed) {
-				if (!this->_dialog->onKeyPress()) {
-					((void (*)(const char *))0x43ff10)("data/bgm/st17.ogg");
-					return false;
-				}
-				this->_keyPressed = false;
-			}
+		this->_dialog->update();
+		if (this->_keyPressed) {
+			this->_stop = !this->_dialog->onKeyPress();
+			if (this->_stop)
+				this->_dialog->setHidden(true);
+			this->_keyPressed = false;
 		}
-		if (this->_currentStage >= this->anims.size())
-			return false;
-		(this->*this->anims[this->_currentStage])();
-		return this->_currentStage < this->anims.size();
+		if (this->_currentStage < this->anims.size())
+			(this->*this->anims[this->_currentStage])();
+		return !this->_stop || !this->_dialog->isAnimationFinished();
 	}
 
 	void render() const override
@@ -239,14 +235,12 @@ public:
 			this->_stageBottom.draw();
 		}
 		this->_flashRect.draw();
-		if (!this->_dialogHidden)
-			this->_dialog->render();
+		this->_dialog->render();
 	}
 
 	void onKeyPressed() override
 	{
-		if (!this->_dialogHidden)
-			this->_keyPressed = true;
+		this->_keyPressed = true;
 	}
 };
 
@@ -262,7 +256,7 @@ public:
 	Outro()
 	{
 		this->_dialog = std::make_unique<SokuStand>(outroDialogs);
-		this->_dialog->onKeyPress();
+		this->_dialog->setHidden(false);
 
 		this->_flashRect.setFillColor(SokuLib::DrawUtils::DxSokuColor{0, 0, 0, 0x0});
 		this->_flashRect.setBorderColor(SokuLib::DrawUtils::DxSokuColor{0, 0, 0, 0});
