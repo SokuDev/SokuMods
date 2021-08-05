@@ -3,19 +3,21 @@
 //
 
 #include <Shlwapi.h>
+
+#include <memory>
 #include "../BattleAnimation.hpp"
 
 char profilePath[1024];
 static const std::vector<std::string> dialogs{
-	"lc Another boring day. Maybe I'll go duel Reimu tonight?<br>If I destroy her shrine, she might get motivated a bit.",
+	"lc Another boring day. Maybe I'll go duel Reimu<br>tonight? If I destroy her shrine, she<br>might get motivated a bit.",
 	//Clic
 	"rh*That should make a good cover. As for the title...*",
 	"lWOh my, an intruder. You are on time!",
-	"rHDon't mind me. I'm not here to invade your privacy or anything.<br>Just here to take a few picture in secret...",
+	"rHDon't mind me. I'm not here to invade your<br>privacy or anything.<br>Just here to take a few picture in secret...",
 	"rEWell so long for the secret part...",
-	"lWPatchouli told me she needs a new tengu feather, might as well help her out!",
+	"lWPatchouli told me she needs a new tengu feather,<br>might as well help her out!",
 	//one screaming crow and a feather later
-	"lHI'm sure even the vegetative Patchouli shall be grateful.",
+	"lHI'm sure even the vegetative Patchouli<br>shall be grateful.",
 	"rDMy beautiful feather...",
 	"lCAnyway what were you doing here?",
 	"rhI was investigating a rumor that..",
@@ -23,10 +25,12 @@ static const std::vector<std::string> dialogs{
 	"rANo it's not a se...",
 	"lhRoughing you up shall make you talk.",
 	//Battle here
-	"rDWhy being a journalist is so hard?",
+};
+static const std::vector<std::string> outroDialogs{
+	"rWDWhy being a journalist is so hard?",
 	"lWI was still pretty soft you know?",
 	"lCNow talk!",
-	"rDI was just investigating the rumor that someone had infiltrated the scarlet manor.",
+	"rDI was just investigating the rumor that someone<br>had infiltrated the scarlet manor.",
 	"lcWell it's not anything new...",
 	"rDI meant neither marisa nor me.",
 	"lSNow that is surprising!<br>Sakuya must know something..."
@@ -41,11 +45,22 @@ private:
 	unsigned _currentStage = 0;
 	std::unique_ptr<Dialog> _dialog;
 	bool _dialogHidden = true;
+	bool _keyPressed = false;
 
 	void stage0()
 	{
 		auto &battleMgr = SokuLib::getBattleMgr();
 
+		if (this->_ctr == 240) {
+			//int local_24;
+			//int local_20 [3];
+			//int local_14 [4];
+
+			//local_24 = ((int (*)(const char *, int))0x409b50)("data/bgm/ta01.ogg",0x11);
+			//printf("%i\n", local_24);
+			//((void (__thiscall *)(int, int *, int *))0x430450)(0x899FA4, local_20, &local_24);
+			((void (*)(const char *))0x43ff10)("data/bgm/ta01.ogg");
+		}
 		SokuLib::camera.translate.y = 820;
 		SokuLib::camera.backgroundTranslate.y = -400;
 		if (this->_ctr < 60) {
@@ -65,6 +80,9 @@ private:
 		if (!this->_ctr) {
 			this->_currentStage++;
 			battleMgr.leftCharacterManager.objectBase.position.x = 400;
+			battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
+			battleMgr.leftCharacterManager.objectBase.animationCounter = 0;
+			battleMgr.leftCharacterManager.objectBase.animationSubFrame = 0;
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_WALK_FORWARD;
 			battleMgr.leftCharacterManager.objectBase.animate();
 			battleMgr.rightCharacterManager.objectBase.position.x = 1200;
@@ -106,9 +124,15 @@ private:
 			this->_currentStage++;
 			this->_dialogHidden = true;
 			battleMgr.rightCharacterManager.objectBase.position.x = 800;
+			battleMgr.rightCharacterManager.objectBase.actionBlockId = 0;
+			battleMgr.rightCharacterManager.objectBase.animationCounter = 0;
+			battleMgr.rightCharacterManager.objectBase.animationSubFrame = 0;
 			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 			battleMgr.rightCharacterManager.objectBase.animate();
-			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN;
+			battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
+			battleMgr.leftCharacterManager.objectBase.animationCounter = 0;
+			battleMgr.leftCharacterManager.objectBase.animationSubFrame = 0;
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_STAND_GROUND_HIT_HUGE_HITSTUN;
 			battleMgr.leftCharacterManager.objectBase.animate();
 			this->_flashRect.setFillColor(SokuLib::DrawUtils::DxSokuColor::White);
 			SokuLib::playSEWaveBuffer(12);
@@ -120,20 +144,18 @@ private:
 		auto &battleMgr = SokuLib::getBattleMgr();
 		auto color = this->_flashRect.getFillColor();
 
-		if (!battleMgr.leftCharacterManager.objectBase.action) {
-			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN;
-			battleMgr.leftCharacterManager.objectBase.animate();
-		}
+		battleMgr.rightCharacterManager.objectBase.doAnimation();
 		if (color.a > 1) {
 			color.a -= 0x2;
 			this->_flashRect.setFillColor(color);
 		} else {
 			this->_flashRect.setFillColor(SokuLib::DrawUtils::DxSokuColor::Transparent);
 			this->_currentStage++;
+			battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
+			battleMgr.leftCharacterManager.objectBase.animationCounter = 0;
+			battleMgr.leftCharacterManager.objectBase.animationSubFrame = 0;
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 			battleMgr.leftCharacterManager.objectBase.animate();
-			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
-			battleMgr.rightCharacterManager.objectBase.animate();
 			this->_ctr = 12;
 		}
 	}
@@ -189,13 +211,21 @@ public:
 		this->_flashRect.setBorderColor(SokuLib::DrawUtils::DxSokuColor::Transparent);
 		this->_flashRect.setFillColor(SokuLib::DrawUtils::DxSokuColor::Transparent);
 
-		this->_dialog.reset(new SokuStand(dialogs));
+		this->_dialog = std::make_unique<SokuStand>(dialogs);
 	}
 
 	bool update() override
 	{
-		if (!this->_dialogHidden)
+		if (!this->_dialogHidden) {
 			this->_dialog->update();
+			if (this->_keyPressed) {
+				if (!this->_dialog->onKeyPress()) {
+					((void (*)(const char *))0x43ff10)("data/bgm/st17.ogg");
+					return false;
+				}
+				this->_keyPressed = false;
+			}
+		}
 		if (this->_currentStage >= this->anims.size())
 			return false;
 		(this->*this->anims[this->_currentStage])();
@@ -216,28 +246,87 @@ public:
 	void onKeyPressed() override
 	{
 		if (!this->_dialogHidden)
-			this->_dialog->onKeyPress();
+			this->_keyPressed = true;
 	}
 };
 
 class Outro : public BattleAnimation {
+private:
+	std::unique_ptr<Dialog> _dialog;
+	bool _pressed = false;
+	bool _side = false;
+	unsigned _ctr = 60;
+	SokuLib::DrawUtils::RectangleShape _flashRect;
+
 public:
+	Outro()
+	{
+		this->_dialog = std::make_unique<SokuStand>(outroDialogs);
+		this->_dialog->onKeyPress();
+
+		this->_flashRect.setFillColor(SokuLib::DrawUtils::DxSokuColor{0, 0, 0, 0x0});
+		this->_flashRect.setBorderColor(SokuLib::DrawUtils::DxSokuColor{0, 0, 0, 0});
+		this->_flashRect.setSize({640, 480});
+	}
+
 	bool update() override
 	{
 		auto &battleMgr = SokuLib::getBattleMgr();
+		auto color = this->_flashRect.getFillColor();
 
-		puts("Outro !");
-		return false;
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
+		if (!color.a && !this->_ctr && this->_side) {
+			this->_dialog->update();
+			if (this->_pressed) {
+				if (!this->_dialog->onKeyPress())
+					return false;
+				this->_pressed = false;
+			}
+		}
+		if (!this->_side) {
+			color.a += 0x11;
+			if (color.a == 0xFF) {
+				this->_side = true;
+				SokuLib::camera.translate.x = -320;
+				SokuLib::camera.translate.y = 420;
+				SokuLib::camera.backgroundTranslate.x = 640;
+				SokuLib::camera.backgroundTranslate.y = 0;
+
+				battleMgr.leftCharacterManager.objectBase.position.x = 400;
+				battleMgr.leftCharacterManager.objectBase.position.y = 0;
+				battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
+				battleMgr.leftCharacterManager.objectBase.animationCounter = 0;
+				battleMgr.leftCharacterManager.objectBase.animationSubFrame = 0;
+				battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+				battleMgr.leftCharacterManager.objectBase.animate();
+
+				battleMgr.rightCharacterManager.objectBase.position.x = 800;
+				battleMgr.rightCharacterManager.objectBase.position.y = -50;
+				battleMgr.rightCharacterManager.objectBase.animationSubFrame = 0;
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_KNOCKED_DOWN;
+				battleMgr.rightCharacterManager.objectBase.animate();
+				while (battleMgr.rightCharacterManager.objectBase.actionBlockId != 3 && battleMgr.rightCharacterManager.objectBase.animationCounter != 2)
+					battleMgr.rightCharacterManager.objectBase.doAnimation();
+			}
+		} else if (this->_flashRect.getFillColor().a)
+			color.a -= 0x11;
+		else if (this->_ctr)
+			this->_ctr--;
+		this->_flashRect.setFillColor(color);
+		return true;
 	}
 
 	void render() const override
 	{
-
+		this->_flashRect.draw();
+		if (!this->_flashRect.getFillColor().a && !this->_ctr && this->_side)
+			this->_dialog->render();
 	}
 
 	void onKeyPressed() override
 	{
-
+		if (!this->_flashRect.getFillColor().a && !this->_ctr && this->_side)
+			this->_pressed = true;
 	}
 };
 

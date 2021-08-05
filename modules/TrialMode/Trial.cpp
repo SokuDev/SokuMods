@@ -26,17 +26,13 @@ static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 
 Trial::Trial(const char *folder, const nlohmann::json &json)
 {
-	if (!json.contains("intro") || !json["intro"].is_string())
-		this->_introPlayed = true;
-	else
+	if (json.contains("intro") && json["intro"].is_string())
 		try {
 			this->_intro.reset(loadBattleAnimation((folder + json["intro"].get<std::string>()).c_str(), true));
 		} catch (std::exception &e) {
 			throw std::invalid_argument("Cannot load intro file \"" + (folder + json["intro"].get<std::string>()) + "\":" + e.what());
 		}
-	if (!json.contains("outro") || !json["outro"].is_string())
-		this->_outroPlayed = true;
-	else
+	if (json.contains("outro") && json["outro"].is_string())
 		try {
 			this->_outro.reset(loadBattleAnimation((folder + json["outro"].get<std::string>()).c_str(), false));
 		} catch (std::exception &e) {
@@ -90,6 +86,7 @@ void Trial::_introOnUpdate()
 {
 	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
 
+	(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22; // Remove HUD
 	if (!this->_intro) {
 		this->_introPlayed = true;
 		return;

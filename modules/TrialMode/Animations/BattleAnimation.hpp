@@ -73,7 +73,8 @@ private:
 		SPRITE_RIGHT_STAND_START = NB_STANDS,
 	};
 
-	SokuLib::SWRFont _font16;
+	SokuLib::SWRFont _lfont;
+	SokuLib::SWRFont _rfont;
 	CharStand _left;
 	CharStand _right;
 	bool _isLeftTalking;
