@@ -38,6 +38,12 @@ Trial::Trial(const char *folder, const nlohmann::json &json)
 		} catch (std::exception &e) {
 			throw std::invalid_argument("Cannot load outro file \"" + (folder + json["outro"].get<std::string>()) + "\":" + e.what());
 		}
+	if (json["music"].is_number()) {
+		unsigned t = json["music"];
+
+		this->music = (t < 10 ? "data/bgm/st0" : "data/bgm/st") + std::to_string(t) + ".ogg";
+	} else
+		this->music = json["music"];
 }
 
 Trial::~Trial()
@@ -89,10 +95,16 @@ void Trial::_introOnUpdate()
 	(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22; // Remove HUD
 	if (!this->_intro) {
 		this->_introPlayed = true;
+		((void (*)(const char *))0x43ff10)(this->music.c_str());
 		return;
 	}
-	this->_introPlayed |= !this->_intro->update();
-	if (keys->keymapManager->input.a == 1)
+
+	auto result = this->_intro->update();
+
+	if (!result && !this->_introPlayed)
+		((void (*)(const char *))0x43ff10)(this->music.c_str());
+	this->_introPlayed |= !result;
+	if (keys->keymapManager->input.a == 1 || keys->keymapManager->input.b)
 		this->_intro->onKeyPressed();
 }
 

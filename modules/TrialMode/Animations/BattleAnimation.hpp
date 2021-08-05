@@ -50,6 +50,7 @@ public:
 	virtual void update() = 0;
 	virtual bool onKeyPress() = 0;
 	virtual void render() const = 0;
+	virtual void setHidden(bool hidden) = 0;
 	virtual unsigned getCurrentDialog() const = 0;
 };
 
@@ -77,12 +78,22 @@ private:
 	SokuLib::SWRFont _rfont;
 	CharStand _left;
 	CharStand _right;
+	SokuLib::Vector2f _leftPos;
+	SokuLib::Vector2f _rightPos;
+	float _leftStep = 1;
+	float _rightStep = 1;
+	SokuLib::Vector2f _leftExpectedPos;
+	SokuLib::Vector2f _rightExpectedPos;
+	unsigned char _leftAlpha = 0xFF;
+	unsigned char _rightAlpha = 0xFF;
+	unsigned char _leftAlphaStep;
+	unsigned char _rightAlphaStep;
 	bool _isLeftTalking;
 	bool _draw = false;
 	SokuLib::DrawUtils::Sprite _text;
-	std::list<std::tuple<std::string, bool, CharStand>> _metaData;
-	SokuLib::DrawUtils::RectangleShape _standDialogBox;
-	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _stands;
+	std::list<std::tuple<std::string, bool, CharStand, CharStand>> _metaData;
+	mutable SokuLib::DrawUtils::RectangleShape _standDialogBox;
+	mutable std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _stands;
 
 	static SokuStand::CharStand sideStand(char c);
 
@@ -92,8 +103,10 @@ public:
 	void render() const override;
 	void update() override;
 	bool onKeyPress() override;
-
+	void setHidden(bool hidden) override;
 	unsigned int getCurrentDialog() const override;
+	bool isAnimationFinished() const;
+	void finishAnimations();
 };
 
 #endif //SWRSTOYS_BATTLEANIMATION_HPP

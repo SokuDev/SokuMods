@@ -205,8 +205,15 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 		return false;
 	if (!checkField("stage", value, &nlohmann::json::is_number))
 		return false;
-	if (!checkField("music", value, &nlohmann::json::is_number))
+	if (!value.contains("music") || (!value["music"].is_number() && !value["music"].is_string())) {
+		MessageBox(
+			SokuLib::window,
+			"The field \"music\" is not valid but is mandatory.",
+			"Loading error",
+			MB_ICONERROR
+		);
 		return false;
+	}
 	if (!checkField("type", value, &nlohmann::json::is_string))
 		return false;
 
@@ -227,7 +234,18 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 	}
 
 	*(char *)0x899D0C = value["stage"].get<char>();
-	*(char *)0x899D0D = value["music"].get<char>();
+	if (value["music"].is_number())
+		*(char *)0x899D0D = value["music"].get<char>();
+	else {
+		char nb = 6;
+		std::string str = value["music"];
+
+		if (str.size() == strlen("data/bgm/st00.ogg") && str.substr(0, 11) == "data/bgm/st" && str.substr(13) == ".ogg")
+			try {
+				nb = std::stoul(str.substr(11, 2));
+			} catch (...) {}
+		*(char *)0x899D0D = nb;
+	}
 	return true;
 }
 
