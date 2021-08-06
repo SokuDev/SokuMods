@@ -520,7 +520,31 @@ target_link_libraries(
 set_target_properties(remi_basic_bnbmid1 PROPERTIES OUTPUT_NAME bnbmid1)
 set_target_properties(remi_basic_bnbmid1 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_combos" PREFIX "")
 
-add_dependencies(TrialMode remi_basic_bnbmid1)
+
+add_library(
+        "remi_basic_bnbmid2"
+        MODULE
+        modules/TrialMode/Animations/BattleAnimation.cpp
+        modules/TrialMode/Animations/BattleAnimation.hpp
+        modules/TrialMode/Animations/RemiliaBasicCombos/bnbmid2.cpp
+)
+target_compile_options(remi_basic_bnbmid2 PRIVATE /Zi)
+target_compile_definitions("remi_basic_bnbmid2" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("remi_basic_bnbmid2" PRIVATE include include/directx "modules/TrialMode/")
+target_link_directories("remi_basic_bnbmid2" PRIVATE lib)
+target_link_libraries(
+        remi_basic_bnbmid2
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+set_target_properties(remi_basic_bnbmid2 PROPERTIES OUTPUT_NAME bnbmid2)
+set_target_properties(remi_basic_bnbmid2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_combos" PREFIX "")
+
+add_dependencies(TrialMode remi_basic_bnbmid1 remi_basic_bnbmid2)
 
 #-----------------------------------------------------#
 add_library(

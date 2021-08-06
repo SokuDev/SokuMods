@@ -24,12 +24,12 @@
     },
     "scenarios": [
         {
-            "name": "The soul capturing intruder",
+            "name": "The Soul Capturing Intruder",
             "file": "bnbmid1.json",
             "preview": "bnbmid1.png"
         },
         {
-            "name": "Midscreen j5a starter",
+            "name": "A Crimson Maid Day-to-Day",
             "file": "bnbmid2.json",
             "preview": "bnbmid2.png",
             "may_be_locked":  true,

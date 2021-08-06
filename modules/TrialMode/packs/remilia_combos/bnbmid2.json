@@ -1,5 +1,5 @@
 {
-    "music": 17,
+    "music": 12,
     "stage": 16,
     "player": {
         "character": "remilia",
@@ -25,6 +25,8 @@
         [0, 0],
         [0, 0]
     ],
+    "intro": "bnbmid2.dll",
+    "outro": "bnbmid2.dll",
     "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
