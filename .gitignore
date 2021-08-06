@@ -4,3 +4,6 @@ build
 .vs
 CMakeSettings.json
 score.dat
+modules/TrialMode/packs/*/*.dll
+modules/TrialMode/packs/*/*.pdb
+modules/TrialMode/packs/*/*.ilk

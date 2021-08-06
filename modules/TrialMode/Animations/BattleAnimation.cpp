@@ -319,12 +319,14 @@ void SokuStand::update()
 
 bool SokuStand::onKeyPress()
 {
+	puts("Press !");
 	if (this->_metaData.empty() && this->isAnimationFinished())
 		return false;
 	if (!this->_draw)
 		return true;
 	if (this->_metaData.empty())
 		return false;
+	puts("Next dialog");
 	this->_isLeftTalking = std::get<1>(this->_metaData.front());
 	this->_text.texture.createFromText(std::get<0>(this->_metaData.front()).c_str(), this->_isLeftTalking ? this->_lfont : this->_rfont, this->_text.texture.getSize());
 	this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  =
