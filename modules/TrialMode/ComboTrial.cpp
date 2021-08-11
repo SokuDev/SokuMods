@@ -226,7 +226,8 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	} else
 		this->_timer = 0;
 	this->_isStart = this->_timer >= 60;
-	battleMgr.leftCharacterManager.score = 1;
+	battleMgr.currentRound = 3;
+	battleMgr.leftCharacterManager.score = 0;
 	SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
 	if (this->_dummyHit && !hit && (!this->_finished || this->_playingIntro))
 		this->_isStart = true;
