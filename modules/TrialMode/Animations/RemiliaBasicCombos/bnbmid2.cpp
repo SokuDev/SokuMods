@@ -77,7 +77,6 @@ private:
 		battleMgr.leftCharacterManager.objectBase.doAnimation();
 		battleMgr.rightCharacterManager.objectBase.doAnimation();
 		if (this->_keyPressed) {
-			this->_dialog->setHidden(true);
 			battleMgr.rightCharacterManager.objectBase.actionBlockId = 0;
 			battleMgr.rightCharacterManager.objectBase.animationCounter = 0;
 			battleMgr.rightCharacterManager.objectBase.animationSubFrame = 0;
@@ -87,6 +86,7 @@ private:
 			battleMgr.rightCharacterManager.objectBase.speed.y = 15;
 			battleMgr.rightCharacterManager.objectBase.position.x = 1240;
 			this->_currentStage++;
+			this->_keyPressed = false;
 		}
 	}
 
@@ -94,6 +94,7 @@ private:
 	{
 		auto &battleMgr = SokuLib::getBattleMgr();
 
+		this->_keyPressed = false;
 		battleMgr.leftCharacterManager.objectBase.doAnimation();
 		battleMgr.rightCharacterManager.objectBase.doAnimation();
 		battleMgr.rightCharacterManager.objectBase.position.x += battleMgr.rightCharacterManager.objectBase.speed.x;
@@ -110,12 +111,7 @@ private:
 			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_LANDING;
 			battleMgr.rightCharacterManager.objectBase.animate();
 			this->_currentStage++;
-			this->_dialog->setHidden(false);
 			this->_dialog->onKeyPress();
-			this->_dialog->finishAnimations();
-			this->_dialog->setHidden(true);
-			this->_dialog->finishAnimations();
-			this->_dialog->setHidden(false);
 		}
 	}
 
