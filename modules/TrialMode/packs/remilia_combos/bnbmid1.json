@@ -16,7 +16,7 @@
             "y": 0
         }
     },
-    "intro": "bnbmid1.dll",
+    "intro": "remibnbmid1intro.lua",
     "outro": "bnbmid1.dll",
     "type": "combo",
 
