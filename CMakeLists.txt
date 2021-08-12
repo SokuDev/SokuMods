@@ -480,8 +480,11 @@ add_library(
         modules/TrialMode/Actions.hpp
         modules/TrialMode/Animations/BattleAnimation.cpp
         modules/TrialMode/Animations/BattleAnimation.hpp
+        modules/TrialMode/Animations/BattleAnimFramework.cpp
+        modules/TrialMode/Animations/LuaBattleAnimation.cpp
+        modules/TrialMode/Animations/LuaBattleAnimation.hpp
 )
-target_compile_options(TrialMode PRIVATE /Zi)
+target_compile_options(TrialMode PRIVATE /Zi /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/")
 target_link_directories("TrialMode" PRIVATE lib)
@@ -491,6 +494,7 @@ target_link_libraries(
         shlwapi
         ws2_32
         user32
+        lua54
         "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
@@ -500,9 +504,9 @@ install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
 add_library(
         "remi_basic_bnbmid1"
         MODULE
-        modules/TrialMode/Animations/BattleAnimation.cpp
         modules/TrialMode/Animations/BattleAnimation.hpp
         modules/TrialMode/Animations/RemiliaBasicCombos/bnbmid1.cpp
+        modules/TrialMode/Animations/BattleAnimFramework.cpp
 )
 target_compile_options(remi_basic_bnbmid1 PRIVATE /Zi)
 target_compile_definitions("remi_basic_bnbmid1" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
@@ -514,6 +518,7 @@ target_link_libraries(
         shlwapi
         ws2_32
         user32
+        lua54
         "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
@@ -524,9 +529,9 @@ set_target_properties(remi_basic_bnbmid1 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${
 add_library(
         "remi_basic_bnbmid2"
         MODULE
-        modules/TrialMode/Animations/BattleAnimation.cpp
         modules/TrialMode/Animations/BattleAnimation.hpp
         modules/TrialMode/Animations/RemiliaBasicCombos/bnbmid2.cpp
+        modules/TrialMode/Animations/BattleAnimFramework.cpp
 )
 target_compile_options(remi_basic_bnbmid2 PRIVATE /Zi)
 target_compile_definitions("remi_basic_bnbmid2" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
@@ -538,6 +543,7 @@ target_link_libraries(
         shlwapi
         ws2_32
         user32
+        lua54
         "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )

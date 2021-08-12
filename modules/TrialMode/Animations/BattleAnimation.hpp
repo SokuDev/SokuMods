@@ -23,7 +23,7 @@ public:
 	void update();
 };
 
-BattleAnimation *loadBattleAnimation(const char *path, bool isIntro);
+BattleAnimation *loadBattleAnimation(const char *packPath, const char *path, bool isIntro);
 
 class MovingSprite : public SokuLib::DrawUtils::Sprite {
 private:
@@ -45,12 +45,16 @@ public:
 };
 
 class Dialog {
+protected:
+	bool _draw = false;
+
 public:
 	virtual ~Dialog() = default;
 	virtual void update() = 0;
 	virtual bool onKeyPress() = 0;
 	virtual void render() const = 0;
 	virtual void setHidden(bool hidden) = 0;
+	bool isHidden() const { return !this->_draw; };
 	virtual unsigned getCurrentDialog() const = 0;
 };
 
@@ -89,7 +93,6 @@ private:
 	unsigned char _leftAlphaStep;
 	unsigned char _rightAlphaStep;
 	bool _isLeftTalking;
-	bool _draw = false;
 	SokuLib::DrawUtils::Sprite _text;
 	std::list<std::tuple<std::string, bool, CharStand, CharStand>> _metaData;
 	mutable SokuLib::DrawUtils::RectangleShape _standDialogBox;
