@@ -18,25 +18,25 @@
 //Suwako stuff
 #define FAKE_ACTION_j1D static_cast<SokuLib::Action>(1100)
 #define FAKE_ACTION_j3D static_cast<SokuLib::Action>(1101)
-#define FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP static_cast<SokuLib::Action>(1102)
-#define FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP static_cast<SokuLib::Action>(1103)
-#define FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP static_cast<SokuLib::Action>(1104)
-#define FAKE_ACTION_LILIPAD_A static_cast<SokuLib::Action>(1105)
-#define FAKE_ACTION_LILIPAD_3A static_cast<SokuLib::Action>(1106)
-#define FAKE_ACTION_LILIPAD_2B static_cast<SokuLib::Action>(1107)
-#define FAKE_ACTION_LILIPAD_6B static_cast<SokuLib::Action>(1108)
-#define FAKE_ACTION_LILIPAD_2C static_cast<SokuLib::Action>(1109)
-#define FAKE_ACTION_LILIPAD_SPAWN static_cast<SokuLib::Action>(1110)
-#define FAKE_ACTION_LILIPAD_DESPAWN static_cast<SokuLib::Action>(1111)
-#define FAKE_ACTION_LILIPAD_DEFAULT_22B static_cast<SokuLib::Action>(1112)
-#define FAKE_ACTION_LILIPAD_DEFAULT_22C static_cast<SokuLib::Action>(1113)
+#define FAKE_ACTION_LILYPAD_NEUTRAL_HIGHJUMP static_cast<SokuLib::Action>(1102)
+#define FAKE_ACTION_LILYPAD_FORWARD_HIGHJUMP static_cast<SokuLib::Action>(1103)
+#define FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP static_cast<SokuLib::Action>(1104)
+#define FAKE_ACTION_LILYPAD_A static_cast<SokuLib::Action>(1105)
+#define FAKE_ACTION_LILYPAD_3A static_cast<SokuLib::Action>(1106)
+#define FAKE_ACTION_LILYPAD_2B static_cast<SokuLib::Action>(1107)
+#define FAKE_ACTION_LILYPAD_6B static_cast<SokuLib::Action>(1108)
+#define FAKE_ACTION_LILYPAD_2C static_cast<SokuLib::Action>(1109)
+#define FAKE_ACTION_LILYPAD_SPAWN static_cast<SokuLib::Action>(1110)
+#define FAKE_ACTION_LILYPAD_DESPAWN static_cast<SokuLib::Action>(1111)
+#define FAKE_ACTION_LILYPAD_DEFAULT_22B static_cast<SokuLib::Action>(1112)
+#define FAKE_ACTION_LILYPAD_DEFAULT_22C static_cast<SokuLib::Action>(1113)
 #define FAKE_ACTION_UNDERGROUND_ALT1_22B static_cast<SokuLib::Action>(1114)
 #define FAKE_ACTION_UNDERGROUND_ALT1_22C static_cast<SokuLib::Action>(1115)
-#define FAKE_ACTION_LILIPAD_DEFAULT_623b static_cast<SokuLib::Action>(1116)
+#define FAKE_ACTION_LILYPAD_DEFAULT_623b static_cast<SokuLib::Action>(1116)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_623b static_cast<SokuLib::Action>(1117)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_623c static_cast<SokuLib::Action>(1118)
-#define FAKE_ACTION_LILIPAD_ALT1_623b static_cast<SokuLib::Action>(1119)
-#define FAKE_ACTION_LILIPAD_ALT1_623c static_cast<SokuLib::Action>(1120)
+#define FAKE_ACTION_LILYPAD_ALT1_623b static_cast<SokuLib::Action>(1119)
+#define FAKE_ACTION_LILYPAD_ALT1_623c static_cast<SokuLib::Action>(1120)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_236b static_cast<SokuLib::Action>(1121)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_236c static_cast<SokuLib::Action>(1122)
 #define FAKE_ACTION_UNDERGROUND_ALT1_236b static_cast<SokuLib::Action>(1123)
@@ -45,10 +45,10 @@
 #define FAKE_ACTION_UNDERGROUND_ALT2_236c static_cast<SokuLib::Action>(1126)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_214b static_cast<SokuLib::Action>(1127)
 #define FAKE_ACTION_UNDERGROUND_DEFAULT_214c static_cast<SokuLib::Action>(1128)
-#define FAKE_ACTION_LILIPAD_ALT1_214b static_cast<SokuLib::Action>(1129)
-#define FAKE_ACTION_LILIPAD_ALT1_214c static_cast<SokuLib::Action>(1130)
-#define FAKE_ACTION_LILIPAD_ALT2_214b static_cast<SokuLib::Action>(1131)
-#define FAKE_ACTION_LILIPAD_ALT2_214c static_cast<SokuLib::Action>(1132)
+#define FAKE_ACTION_LILYPAD_ALT1_214b static_cast<SokuLib::Action>(1129)
+#define FAKE_ACTION_LILYPAD_ALT1_214c static_cast<SokuLib::Action>(1130)
+#define FAKE_ACTION_LILYPAD_ALT2_214b static_cast<SokuLib::Action>(1131)
+#define FAKE_ACTION_LILYPAD_ALT2_214c static_cast<SokuLib::Action>(1132)
 #define FAKE_ACTION_lSC201 static_cast<SokuLib::Action>(1133)
 #define FAKE_ACTION_jSC201 static_cast<SokuLib::Action>(1134)
 #define FAKE_ACTION_uSC202 static_cast<SokuLib::Action>(1135)
@@ -264,25 +264,25 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 
 	{ "sj1d",    FAKE_ACTION_j1D },
 	{ "sj3d",    FAKE_ACTION_j3D },
-	{ "lhj8",    FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP },
-	{ "lhj9",    FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP },
-	{ "lhj7",    FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP },
-	{ "l5a",     FAKE_ACTION_LILIPAD_A },
-	{ "l3a",     FAKE_ACTION_LILIPAD_3A },
-	{ "l2b",     FAKE_ACTION_LILIPAD_2B },
-	{ "l6b",     FAKE_ACTION_LILIPAD_6B },
-	{ "l2c",     FAKE_ACTION_LILIPAD_2C },
-	{ "2",       FAKE_ACTION_LILIPAD_SPAWN },
-	{ "5",       FAKE_ACTION_LILIPAD_DESPAWN },
-	{ "ld22b",   FAKE_ACTION_LILIPAD_DEFAULT_22B },
-	{ "ld22c",   FAKE_ACTION_LILIPAD_DEFAULT_22C },
+	{ "lhj8",    FAKE_ACTION_LILYPAD_NEUTRAL_HIGHJUMP },
+	{ "lhj9",    FAKE_ACTION_LILYPAD_FORWARD_HIGHJUMP },
+	{ "lhj7",    FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP },
+	{ "l5a",     FAKE_ACTION_LILYPAD_A },
+	{ "l3a",     FAKE_ACTION_LILYPAD_3A },
+	{ "l2b",     FAKE_ACTION_LILYPAD_2B },
+	{ "l6b",     FAKE_ACTION_LILYPAD_6B },
+	{ "l2c",     FAKE_ACTION_LILYPAD_2C },
+	{ "2",       FAKE_ACTION_LILYPAD_SPAWN },
+	{ "5",       FAKE_ACTION_LILYPAD_DESPAWN },
+	{ "ld22b",   FAKE_ACTION_LILYPAD_DEFAULT_22B },
+	{ "ld22c",   FAKE_ACTION_LILYPAD_DEFAULT_22C },
 	{ "ua122b",  FAKE_ACTION_UNDERGROUND_ALT1_22B },
 	{ "ua122c",  FAKE_ACTION_UNDERGROUND_ALT1_22C },
-	{ "ld623b",  FAKE_ACTION_LILIPAD_DEFAULT_623b },
+	{ "ld623b",  FAKE_ACTION_LILYPAD_DEFAULT_623b },
 	{ "ud623b",  FAKE_ACTION_UNDERGROUND_DEFAULT_623b },
 	{ "ud623c",  FAKE_ACTION_UNDERGROUND_DEFAULT_623c },
-	{ "la1623b", FAKE_ACTION_LILIPAD_ALT1_623b },
-	{ "la1623c", FAKE_ACTION_LILIPAD_ALT1_623c },
+	{ "la1623b", FAKE_ACTION_LILYPAD_ALT1_623b },
+	{ "la1623c", FAKE_ACTION_LILYPAD_ALT1_623c },
 	{ "ud236b",  FAKE_ACTION_UNDERGROUND_DEFAULT_236b },
 	{ "ud236c",  FAKE_ACTION_UNDERGROUND_DEFAULT_236c },
 	{ "ua1236b", FAKE_ACTION_UNDERGROUND_ALT1_236b },
@@ -291,10 +291,10 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "ua2236c", FAKE_ACTION_UNDERGROUND_ALT2_236c },
 	{ "ud214b",  FAKE_ACTION_UNDERGROUND_DEFAULT_214b },
 	{ "ud214c",  FAKE_ACTION_UNDERGROUND_DEFAULT_214c },
-	{ "la1214b", FAKE_ACTION_LILIPAD_ALT1_214b },
-	{ "la1214c", FAKE_ACTION_LILIPAD_ALT1_214c },
-	{ "la2214b", FAKE_ACTION_LILIPAD_ALT2_214b },
-	{ "la2214c", FAKE_ACTION_LILIPAD_ALT2_214c },
+	{ "la1214b", FAKE_ACTION_LILYPAD_ALT1_214b },
+	{ "la1214c", FAKE_ACTION_LILYPAD_ALT1_214c },
+	{ "la2214b", FAKE_ACTION_LILYPAD_ALT2_214b },
+	{ "la2214c", FAKE_ACTION_LILYPAD_ALT2_214c },
 	{ "lSC201",  FAKE_ACTION_lSC201 },
 	{ "jSC201",  FAKE_ACTION_jSC201 },
 	{ "uSC202",  FAKE_ACTION_uSC202 },
@@ -566,13 +566,13 @@ bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &char
 	}
 
 	if (characterId == SokuLib::CHARACTER_SUWAKO) {
-		if (action == FAKE_ACTION_LILIPAD_SPAWN)
+		if (action == FAKE_ACTION_LILYPAD_SPAWN)
 			return character.objectBase.frameCount == 0 && character.objectBase.animationCounter == 3;
-		if (action == FAKE_ACTION_LILIPAD_DESPAWN)
+		if (action == FAKE_ACTION_LILYPAD_DESPAWN)
 			return character.objectBase.frameCount == 0 && character.objectBase.animationCounter == 3;
 		if (action == FAKE_ACTION_UNDERGROUND_DEFAULT_623c || action == FAKE_ACTION_UNDERGROUND_DEFAULT_623b)
 			return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 6;
-		if (action >= FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP && action <= FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP)
+		if (action >= FAKE_ACTION_LILYPAD_NEUTRAL_HIGHJUMP && action <= FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP)
 			return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 4;
 		if (action == FAKE_ACTION_j1D || action == FAKE_ACTION_j3D)
 			return character.objectBase.frameCount == 10 && (character.objectBase.actionBlockId == 3 || character.objectBase.actionBlockId == 0);
@@ -603,38 +603,38 @@ SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::
 		switch (character.objectBase.action) {
 		case SokuLib::ACTION_NEUTRAL_HIGH_JUMP:
 			if (character.objectBase.actionBlockId == 4)
-				return FAKE_ACTION_LILIPAD_NEUTRAL_HIGHJUMP;
+				return FAKE_ACTION_LILYPAD_NEUTRAL_HIGHJUMP;
 			break;
 		case SokuLib::ACTION_BACKWARD_HIGH_JUMP:
 			if (character.objectBase.actionBlockId == 4)
-				return FAKE_ACTION_LILIPAD_BACKWARD_HIGHJUMP;
+				return FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP;
 			break;
 		case SokuLib::ACTION_FORWARD_HIGH_JUMP:
 			if (character.objectBase.actionBlockId == 4)
-				return FAKE_ACTION_LILIPAD_FORWARD_HIGHJUMP;
+				return FAKE_ACTION_LILYPAD_FORWARD_HIGHJUMP;
 			break;
 		case SokuLib::ACTION_SUWAKO_j1D_j3D:
 			if (copysign(1, character.objectBase.speed.x) == character.objectBase.direction)
 				return FAKE_ACTION_j3D;
 			return FAKE_ACTION_j1D;
 		case SokuLib::ACTION_2A:
-			return FAKE_ACTION_LILIPAD_A;
+			return FAKE_ACTION_LILYPAD_A;
 		case SokuLib::ACTION_3A:
-			return FAKE_ACTION_LILIPAD_3A;
+			return FAKE_ACTION_LILYPAD_3A;
 		case SokuLib::ACTION_2B:
-			return FAKE_ACTION_LILIPAD_2B;
+			return FAKE_ACTION_LILYPAD_2B;
 		case SokuLib::ACTION_3B:
-			return FAKE_ACTION_LILIPAD_6B;
+			return FAKE_ACTION_LILYPAD_6B;
 		case SokuLib::ACTION_2C:
-			return FAKE_ACTION_LILIPAD_2C;
+			return FAKE_ACTION_LILYPAD_2C;
 		case SokuLib::ACTION_CROUCHING:
-			return FAKE_ACTION_LILIPAD_SPAWN;
+			return FAKE_ACTION_LILYPAD_SPAWN;
 		case SokuLib::ACTION_STANDING_UP:
-			return FAKE_ACTION_LILIPAD_DESPAWN;
+			return FAKE_ACTION_LILYPAD_DESPAWN;
 		case SokuLib::ACTION_DEFAULT_SKILL4_AIR_B:
-			return FAKE_ACTION_LILIPAD_DEFAULT_22B;
+			return FAKE_ACTION_LILYPAD_DEFAULT_22B;
 		case SokuLib::ACTION_DEFAULT_SKILL4_AIR_C:
-			return FAKE_ACTION_LILIPAD_DEFAULT_22C;
+			return FAKE_ACTION_LILYPAD_DEFAULT_22C;
 		case SokuLib::ACTION_ALT1_SKILL4_AIR_B:
 			return FAKE_ACTION_UNDERGROUND_ALT1_22B;
 		case SokuLib::ACTION_ALT1_SKILL4_AIR_C:
@@ -642,15 +642,15 @@ SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::
 		case SokuLib::ACTION_DEFAULT_SKILL2_AIR_B:
 			if (character.objectBase.actionBlockId == 6)
 				return FAKE_ACTION_UNDERGROUND_DEFAULT_623c;
-			return FAKE_ACTION_LILIPAD_DEFAULT_623b;
+			return FAKE_ACTION_LILYPAD_DEFAULT_623b;
 		case SokuLib::ACTION_DEFAULT_SKILL2_B:
 			if (character.objectBase.actionBlockId == 6)
 				return FAKE_ACTION_UNDERGROUND_DEFAULT_623b;
 			break;
 		case SokuLib::ACTION_ALT1_SKILL2_B:
-			return FAKE_ACTION_LILIPAD_ALT1_623b;
+			return FAKE_ACTION_LILYPAD_ALT1_623b;
 		case SokuLib::ACTION_ALT1_SKILL2_C:
-			return FAKE_ACTION_LILIPAD_ALT1_623c;
+			return FAKE_ACTION_LILYPAD_ALT1_623c;
 		case SokuLib::ACTION_DEFAULT_SKILL3_B:
 			return FAKE_ACTION_UNDERGROUND_DEFAULT_236b;
 		case SokuLib::ACTION_DEFAULT_SKILL3_C:
@@ -668,13 +668,13 @@ SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::
 		case SokuLib::ACTION_DEFAULT_SKILL1_C:
 			return FAKE_ACTION_UNDERGROUND_DEFAULT_214c;
 		case SokuLib::ACTION_ALT1_SKILL1_AIR_B:
-			return FAKE_ACTION_LILIPAD_ALT1_214b;
+			return FAKE_ACTION_LILYPAD_ALT1_214b;
 		case SokuLib::ACTION_ALT1_SKILL1_AIR_C:
-			return FAKE_ACTION_LILIPAD_ALT1_214c;
+			return FAKE_ACTION_LILYPAD_ALT1_214c;
 		case SokuLib::ACTION_ALT2_SKILL1_AIR_B:
-			return FAKE_ACTION_LILIPAD_ALT2_214b;
+			return FAKE_ACTION_LILYPAD_ALT2_214b;
 		case SokuLib::ACTION_ALT2_SKILL1_AIR_C:
-			return FAKE_ACTION_LILIPAD_ALT2_214c;
+			return FAKE_ACTION_LILYPAD_ALT2_214c;
 		case SokuLib::ACTION_USING_SC_ID_201:
 			return FAKE_ACTION_lSC201;
 		case SokuLib::ACTION_SC_ID_201_ALT_EFFECT:
