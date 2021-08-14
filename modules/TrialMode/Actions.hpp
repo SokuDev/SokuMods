@@ -9,6 +9,9 @@
 #include <map>
 #include <SokuLib.hpp>
 
+SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::Character characterId);
+bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &character, SokuLib::Character characterId);
+
 extern const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs;
 extern std::map<SokuLib::Character, std::vector<std::string>> characterSkills;
 extern const std::map<std::string, SokuLib::Action> actionsFromStr;

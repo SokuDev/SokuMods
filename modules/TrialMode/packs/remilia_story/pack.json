@@ -1,7 +1,7 @@
 {
-    "name": "Basic combos",
-    "pack": "Story",
-    "category": "Remilia Scarlet",
+    "name": "Remilia Scarlet",
+    "mainChr": "Remilia Scarlet",
+    "category": "The XXX Incident",
     "characters": [
         "remilia",
         "reimu"
@@ -10,7 +10,7 @@
         "isPath": false,
         "path": "data/stand/remilia.bmp"
     },
-    "description": "Remilia's bread and butters",
+    "description": "",
     "author": "PinkySmile",
     "icon": {
         "isPath": false,

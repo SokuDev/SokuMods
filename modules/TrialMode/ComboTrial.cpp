@@ -194,7 +194,11 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
 		this->_playIntro();
-	else if (this->_actionCounter != this->_exceptedActions.size() && battleMgr.leftCharacterManager.objectBase.action == this->_exceptedActions[this->_actionCounter]->action)
+	else if (
+		this->_actionCounter != this->_exceptedActions.size() &&
+		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == this->_exceptedActions[this->_actionCounter]->action &&
+		isStartOfMove(this->_exceptedActions[this->_actionCounter]->action, battleMgr.leftCharacterManager, SokuLib::leftChar)
+	)
 		this->_actionCounter++;
 
 	if (!this->_finished && this->_actionCounter == this->_exceptedActions.size() && this->_scores.front().met(this->_attempts)) {
@@ -386,7 +390,10 @@ void ComboTrial::_playIntro()
 		return;
 	}
 	arr->counter = (arr->counter + 1) % arr->inputs.size();
-	if (battleMgr.leftCharacterManager.objectBase.action == arr->action) {
+	if (
+		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == arr->action &&
+		isStartOfMove(arr->action, battleMgr.leftCharacterManager, SokuLib::leftChar)
+	) {
 		arr->counter = 0;
 		this->_actionWaitCounter = 0;
 		this->_actionCounter++;
