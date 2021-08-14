@@ -523,7 +523,7 @@ target_link_libraries(
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
 set_target_properties(remi_basic_bnbmid1 PROPERTIES OUTPUT_NAME bnbmid1)
-set_target_properties(remi_basic_bnbmid1 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_combos" PREFIX "")
+set_target_properties(remi_basic_bnbmid1 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_story" PREFIX "")
 
 
 add_library(
@@ -548,7 +548,7 @@ target_link_libraries(
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )
 set_target_properties(remi_basic_bnbmid2 PROPERTIES OUTPUT_NAME bnbmid2)
-set_target_properties(remi_basic_bnbmid2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_combos" PREFIX "")
+set_target_properties(remi_basic_bnbmid2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_story" PREFIX "")
 
 add_dependencies(TrialMode remi_basic_bnbmid1 remi_basic_bnbmid2)
 
