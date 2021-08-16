@@ -15,7 +15,6 @@ std::vector<std::shared_ptr<Pack>> loadedPacks;
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
 	{ SokuLib::CHARACTER_MARISA, "marisa" },
-	{ SokuLib::CHARACTER_SAKUYA, "sakuya" },
 	{ SokuLib::CHARACTER_ALICE, "alice" },
 	{ SokuLib::CHARACTER_PATCHOULI, "patchouli" },
 	{ SokuLib::CHARACTER_SANAE, "sanae" },
@@ -27,6 +26,7 @@ std::map<unsigned, std::string> validCharacters{
 const std::map<unsigned, std::string> swrCharacters{
 	{ SokuLib::CHARACTER_YOUMU, "youmu" },
 	{ SokuLib::CHARACTER_REMILIA, "remilia" },
+	{ SokuLib::CHARACTER_SAKUYA, "sakuya" },
 	{ SokuLib::CHARACTER_YUYUKO, "yuyuko" },
 	{ SokuLib::CHARACTER_YUKARI, "yukari" },
 	{ SokuLib::CHARACTER_SUIKA, "suika" },
