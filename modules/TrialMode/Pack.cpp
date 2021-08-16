@@ -10,8 +10,13 @@
 #define BLUE_COLOR SokuLib::DrawUtils::DxSokuColor{0xA0, 0xA0, 0xFF}
 
 bool hasSoku2 = false;
+std::vector<std::string> uniqueNames;
+std::vector<std::string> uniqueModes;
 std::vector<std::string> uniqueCategories;
 std::vector<std::shared_ptr<Pack>> loadedPacks;
+std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByName;
+std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByMode;
+std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByCategory;
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
 	{ SokuLib::CHARACTER_MARISA, "marisa" },
@@ -136,8 +141,9 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	this->scorePath = path + "/score.dat";
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
 
+	this->nameStr = object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : path;
 	this->name.texture.createFromText(
-		(this->category + ": " + (object.contains("icon") && object["name"].is_string() ? object["name"].get<std::string>() : path)).c_str(),
+		(this->category + ": " + this->nameStr).c_str(),
 		defaultFont12, {0x100, 30}, &size
 	);
 	this->name.rect = {0, 0, size.x, size.y};
@@ -185,6 +191,15 @@ invalidPreview:
 	};
 	this->description.setPosition({356, 280});
 	this->description.setSize(this->description.texture.getSize());
+
+	if (object.contains("modes") && object["modes"].is_array()) {
+		for (auto &obj : object["modes"]) {
+			if (obj.is_string())
+				this->modes.push_back(obj);
+			else
+				puts("A mode is not a string in the pack ?");
+		}
+	}
 
 	if (object.contains("characters") && object["characters"].is_array()) {
 		bool swrNeeded = false;
@@ -289,9 +304,6 @@ invalidPreview:
 		);
 		return;
 	}
-
-	if (std::find(uniqueCategories.begin(), uniqueCategories.end(), this->category) == uniqueCategories.end())
-		uniqueCategories.push_back(this->category);
 }
 
 Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::json &object)
@@ -477,10 +489,21 @@ void loadPacks()
 
 		auto pack = new Pack(std::string(buffer), val);
 
-		if (!pack->scenarios.empty())
+		if (!pack->scenarios.empty()) {
 			loadedPacks.emplace_back(pack);
-		else {
-			puts("Invalid pack");
+			packsByName[pack->nameStr].push_back(loadedPacks.back());
+			packsByCategory[pack->category].push_back(loadedPacks.back());
+			if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
+				uniqueCategories.push_back(pack->category);
+			if (std::find(uniqueNames.begin(), uniqueNames.end(), pack->nameStr) == uniqueNames.end())
+				uniqueNames.push_back(pack->nameStr);
+			for (auto &mode : pack->modes) {
+				packsByName[mode].push_back(loadedPacks.back());
+				if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
+					uniqueModes.push_back(mode);
+			}
+		} else {
+			puts("Invalid pack :(");
 			delete pack;
 		}
 		buffer[starPos] = 0;

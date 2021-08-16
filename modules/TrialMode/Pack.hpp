@@ -40,21 +40,28 @@ public:
 
 class Pack {
 public:
+	std::string nameStr;
 	std::string category;
 	std::string scorePath;
 	std::unique_ptr<Icon> icon;
-	std::vector<std::unique_ptr<Scenario>> scenarios;
+	std::vector<std::string> modes;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite error;
 	SokuLib::DrawUtils::Sprite author;
 	SokuLib::DrawUtils::Sprite preview;
 	SokuLib::DrawUtils::Sprite description;
+	std::vector<std::unique_ptr<Scenario>> scenarios;
 
 	Pack(const std::string &path, const nlohmann::json &object);
 };
 
+extern std::vector<std::string> uniqueNames;
+extern std::vector<std::string> uniqueModes;
 extern std::vector<std::string> uniqueCategories;
 extern std::vector<std::shared_ptr<Pack>> loadedPacks;
+extern std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByName;
+extern std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByMode;
+extern std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByCategory;
 extern std::map<unsigned, std::string> validCharacters;
 extern const std::map<unsigned, std::string> swrCharacters;
 extern bool hasSoku2;
