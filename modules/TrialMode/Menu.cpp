@@ -8,17 +8,30 @@
 #include "Menu.hpp"
 #include "Pack.hpp"
 
-static unsigned currentPack = 0;
+#define FILTER_TEXT_SIZE 120
+
+static int currentPack = 0;
 static int currentEntry = -1;
 static bool loaded = false;
 static bool loadNextTrial = false;
+static unsigned shownPack = 0;
+static unsigned nameFilter = -1;
+static unsigned modeFilter = -1;
+static unsigned topicFilter = -1;
+static SokuLib::Vector2i nameFilterSize;
+static SokuLib::Vector2i modeFilterSize;
+static SokuLib::Vector2i topicFilterSize;
 static SokuLib::DrawUtils::Sprite lock;
 static SokuLib::DrawUtils::Sprite arrow;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
+static SokuLib::DrawUtils::Sprite arrowSprite;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite questionMarks;
+static SokuLib::DrawUtils::Sprite nameFilterText;
+static SokuLib::DrawUtils::Sprite modeFilterText;
+static SokuLib::DrawUtils::Sprite topicFilterText;
 static SokuLib::DrawUtils::Sprite previewContainer;
 static unsigned packStart = 0;
 static unsigned entryStart = 0;
@@ -440,6 +453,38 @@ void menuLoadAssets()
 	questionMarks.rect.height = questionMarks.texture.getSize().y;
 	questionMarks.tint = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0x80};
 
+	arrowSprite.texture.loadFromGame("data/profile/deck2/sayuu.bmp");
+	arrowSprite.setSize({
+		arrowSprite.texture.getSize().x / 2 + 1,
+		arrowSprite.texture.getSize().y + 1
+	});
+	arrowSprite.rect.width = arrowSprite.texture.getSize().x / 2;
+	arrowSprite.rect.height = arrowSprite.texture.getSize().y;
+
+	nameFilterText.texture.createFromText( "Any name",  defaultFont12, {300, 20}, &nameFilterSize);
+	nameFilterText.setSize({
+		nameFilterText.texture.getSize().x,
+		nameFilterText.texture.getSize().y
+	});
+	nameFilterText.rect.width = nameFilterText.texture.getSize().x;
+	nameFilterText.rect.height = nameFilterText.texture.getSize().y;
+
+	modeFilterText.texture.createFromText( "Any mode",  defaultFont12, {300, 20}, &modeFilterSize);
+	modeFilterText.setSize({
+		modeFilterText.texture.getSize().x,
+		modeFilterText.texture.getSize().y
+	});
+	modeFilterText.rect.width = modeFilterText.texture.getSize().x;
+	modeFilterText.rect.height = modeFilterText.texture.getSize().y;
+
+	topicFilterText.texture.createFromText("Any topic", defaultFont12, {300, 20}, &topicFilterSize);
+	topicFilterText.setSize({
+		topicFilterText.texture.getSize().x,
+		topicFilterText.texture.getSize().y
+	});
+	topicFilterText.rect.width = topicFilterText.texture.getSize().x;
+	topicFilterText.rect.height = topicFilterText.texture.getSize().y;
+
 	loadPacks();
 
 	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
@@ -459,12 +504,88 @@ void menuUnloadAssets()
 	defaultFont10.destruct();
 	defaultFont12.destruct();
 	defaultFont16.destruct();
-	previewContainer.texture.destroy();
+
+	lock.texture.destroy();
+	arrow.texture.destroy();
+	title.texture.destroy();
+	score.texture.destroy();
+	arrowSprite.texture.destroy();
+	missingIcon.texture.destroy();
 	packContainer.texture.destroy();
+	questionMarks.texture.destroy();
+	nameFilterText.texture.destroy();
+	modeFilterText.texture.destroy();
+	topicFilterText.texture.destroy();
+	previewContainer.texture.destroy();
+
 	loadedPacks.clear();
+	uniqueNames.clear();
+	uniqueCategories.clear();
+	packsByName.clear();
+	packsByCategory.clear();
 	currentPack = 0;
 	currentEntry = -1;
 	editorMode = false;
+}
+
+static void displayFilters()
+{
+	arrowSprite.rect.left = 0;
+	arrowSprite.setPosition({
+		static_cast<int>(100 - FILTER_TEXT_SIZE / 2 - arrowSprite.getSize().x),
+		70
+	});
+	arrowSprite.draw();
+	arrowSprite.setPosition({
+		static_cast<int>(320 - FILTER_TEXT_SIZE / 2 - arrowSprite.getSize().x),
+		80
+	});
+	arrowSprite.draw();
+	arrowSprite.setPosition({
+		static_cast<int>(540 - FILTER_TEXT_SIZE / 2 - arrowSprite.getSize().x),
+		90
+	});
+	arrowSprite.draw();
+
+	arrowSprite.rect.left = arrowSprite.texture.getSize().x / 2;
+	arrowSprite.setPosition({
+		static_cast<int>(100 + FILTER_TEXT_SIZE / 2),
+		70
+	});
+	arrowSprite.draw();
+	arrowSprite.setPosition({
+		static_cast<int>(320 + FILTER_TEXT_SIZE / 2),
+		80
+	});
+	arrowSprite.draw();
+	arrowSprite.setPosition({
+		static_cast<int>(540 + FILTER_TEXT_SIZE / 2),
+		90
+	});
+	arrowSprite.draw();
+
+	if (currentPack == -1)
+		((void (*)(float, float, float))0x443a50)(540 - FILTER_TEXT_SIZE / 2, 90 + arrowSprite.getSize().y / 2 - 7, FILTER_TEXT_SIZE + FILTER_TEXT_SIZE / 2);
+	else if (currentPack == -2)
+		((void (*)(float, float, float))0x443a50)(320 - FILTER_TEXT_SIZE / 2, 80 + arrowSprite.getSize().y / 2 - 7, FILTER_TEXT_SIZE + FILTER_TEXT_SIZE / 2);
+	else if (currentPack == -3)
+		((void (*)(float, float, float))0x443a50)(100 - FILTER_TEXT_SIZE / 2, 70 + arrowSprite.getSize().y / 2 - 7, FILTER_TEXT_SIZE + FILTER_TEXT_SIZE / 2);
+
+	nameFilterText.setPosition({
+		static_cast<int>(100 - nameFilterSize.x / 2),
+		static_cast<int>(70 + arrowSprite.getSize().y / 2 - nameFilterSize.y / 2)
+	});
+	nameFilterText.draw();
+	modeFilterText.setPosition({
+		static_cast<int>(320 - modeFilterSize.x / 2),
+		static_cast<int>(80 + arrowSprite.getSize().y / 2 - modeFilterSize.y / 2)
+	});
+	modeFilterText.draw();
+	topicFilterText.setPosition({
+		static_cast<int>(540 - topicFilterSize.x / 2),
+		static_cast<int>(90 + arrowSprite.getSize().y / 2 - topicFilterSize.y / 2)
+	});
+	topicFilterText.draw();
 }
 
 static void switchEditorMode()
@@ -480,8 +601,13 @@ static void switchEditorMode()
 
 void checkScrollUp()
 {
+	if (currentPack < 0) {
+		entryStart = 0;
+		return;
+	}
 	if (currentEntry == -1)
 		return;
+	printf("%i %i %i\n", currentEntry, currentPack, loadedPacks[currentPack]->scenarios.size());
 	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
 		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
 		if (currentEntry > 15)
@@ -494,7 +620,12 @@ void checkScrollUp()
 
 void checkScrollDown()
 {
-	if (currentEntry == -1) {
+	if (currentPack < 0) {
+		packStart = 0;
+		entryStart = 0;
+		return;
+	}
+	if (currentPack >= 0 && currentEntry == -1) {
 		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 25 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
 		entryStart = 0;
 		return;
@@ -517,6 +648,125 @@ inline bool isLocked(int entry)
 	if (!loadedPacks[currentPack]->scenarios[entry]->canBeLocked)
 		return false;
 	return !isCompleted(entry - 1);
+}
+
+static void handleGoLeft()
+{
+	if (currentPack >= 0)
+		return;
+	SokuLib::playSEWaveBuffer(0x27);
+	switch (currentPack) {
+	case -3:
+		nameFilter--;
+		if (nameFilter == -2)
+			nameFilter = uniqueNames.size() - 1;
+		nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(),  defaultFont12, {300, 20}, &nameFilterSize);
+		return;
+	case -2:
+		modeFilter--;
+		if (modeFilter == -2)
+			modeFilter = uniqueModes.size() - 1;
+		modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(),  defaultFont12, {300, 20}, &modeFilterSize);
+		return;
+	case -1:
+		topicFilter--;
+		if (topicFilter == -2)
+			topicFilter = uniqueCategories.size() - 1;
+		topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
+		return;
+	default:
+		return;
+	}
+}
+
+static void handleGoRight()
+{
+	if (currentPack >= 0)
+		return;
+	SokuLib::playSEWaveBuffer(0x27);
+	switch (currentPack) {
+	case -3:
+		nameFilter++;
+		if (nameFilter == uniqueNames.size())
+			nameFilter = -1;
+		nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(),  defaultFont12, {300, 20}, &nameFilterSize);
+		return;
+	case -2:
+		modeFilter++;
+		if (modeFilter == uniqueModes.size())
+			modeFilter = -1;
+		modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(),  defaultFont12, {300, 20}, &modeFilterSize);
+		return;
+	case -1:
+		topicFilter++;
+		if (topicFilter == uniqueCategories.size())
+			topicFilter = -1;
+		topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
+		return;
+	default:
+		return;
+	}
+}
+
+static void handleGoUp()
+{
+	SokuLib::playSEWaveBuffer(0x27);
+	if (currentEntry == -1) {
+		do {
+			currentEntry = -1;
+			currentPack--;
+			if (currentPack == -4)
+				currentPack += loadedPacks.size() + 3;
+			if (currentPack >= 0) {
+				currentEntry += loadedPacks[currentPack]->scenarios.size();
+				shownPack = currentPack;
+			}
+			if (currentPack < 0)
+				break;
+
+			auto &pack = loadedPacks[currentPack];
+
+			if (nameFilter != -1 && pack->nameStr != uniqueNames[nameFilter])
+				continue;
+			if (modeFilter != -1 && std::find(pack->modes.begin(), pack->modes.end(), uniqueModes[modeFilter]) == pack->modes.end())
+				continue;
+			if (topicFilter != -1 && pack->category != uniqueCategories[topicFilter])
+				continue;
+			break;
+		} while (true);
+	} else
+		currentEntry--;
+	checkScrollUp();
+	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
+}
+
+static void handleGoDown()
+{
+	SokuLib::playSEWaveBuffer(0x27);
+	if (currentPack < 0 || currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
+		do {
+			currentPack++;
+			if (currentPack == loadedPacks.size())
+				currentPack = -3;
+			shownPack = max(0, currentPack);
+			currentEntry = -1;
+			if (currentPack < 0)
+				break;
+
+			auto &pack = loadedPacks[currentPack];
+
+			if (nameFilter != -1 && pack->nameStr != uniqueNames[nameFilter])
+				continue;
+			if (modeFilter != -1 && std::find(pack->modes.begin(), pack->modes.end(), uniqueModes[modeFilter]) == pack->modes.end())
+				continue;
+			if (topicFilter != -1 && pack->category != uniqueCategories[topicFilter])
+				continue;
+			break;
+		} while (true);
+	} else
+		currentEntry++;
+	checkScrollDown();
+	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
 }
 
 void handlePlayerInputs(const SokuLib::KeyInput &input)
@@ -564,27 +814,14 @@ nothing:
 		}
 		SokuLib::playSEWaveBuffer(0x29);
 	}
-	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
-		if (currentEntry == -1) {
-			currentPack--;
-			if (currentPack == -1)
-				currentPack += loadedPacks.size();
-			currentEntry += loadedPacks[currentPack]->scenarios.size();
-		} else
-			currentEntry--;
-		checkScrollUp();
-	} else if (input.verticalAxis == 1 || (input.verticalAxis >= 36 && input.verticalAxis % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
-		if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
-			currentPack++;
-			if (currentPack == loadedPacks.size())
-				currentPack = 0;
-			currentEntry = -1;
-		} else
-			currentEntry++;
-		checkScrollDown();
-	}
+	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0))
+		handleGoUp();
+	else if (input.verticalAxis == 1 || (input.verticalAxis >= 36 && input.verticalAxis % 6 == 0))
+		handleGoDown();
+	if (input.horizontalAxis == -1 || (input.horizontalAxis <= -36 && input.horizontalAxis % 6 == 0))
+		handleGoLeft();
+	else if (input.horizontalAxis == 1 || (input.horizontalAxis >= 36 && input.horizontalAxis % 6 == 0))
+		handleGoRight();
 }
 
 int menuOnProcess(SokuLib::MenuResult *This)
@@ -618,6 +855,13 @@ int menuOnProcess(SokuLib::MenuResult *This)
 
 void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 {
+	if (nameFilter != -1 && pack.nameStr != uniqueNames[nameFilter])
+		return;
+	if (modeFilter != -1 && std::find(pack.modes.begin(), pack.modes.end(), uniqueModes[modeFilter]) == pack.modes.end())
+		return;
+	if (topicFilter != -1 && pack.category != uniqueCategories[topicFilter])
+		return;
+
 	if (pos.y >= 100) {
 		packContainer.setPosition({
 			static_cast<int>(pos.x),
@@ -641,6 +885,13 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	int i;
 	auto p = pos;
 	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
+
+	if (nameFilter != -1 && pack.nameStr != uniqueNames[nameFilter])
+		return;
+	if (modeFilter != -1 && std::find(pack.modes.begin(), pack.modes.end(), uniqueModes[modeFilter]) == pack.modes.end())
+		return;
+	if (topicFilter != -1 && pack.category != uniqueCategories[topicFilter])
+		return;
 
 	//100 <= y <= 406
 	if (pos.y >= 100) {
@@ -772,6 +1023,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 	if (!loaded)
 		return;
 
+	displayFilters();
 	title.draw();
 	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
 		// 100 <= y <= 364
@@ -791,8 +1043,8 @@ void menuOnRender(SokuLib::MenuResult *This)
 	if (loadedPacks.empty())
 		return;
 
-	auto &preview     = currentEntry == -1 ? loadedPacks[currentPack]->preview     : loadedPacks[currentPack]->scenarios[currentEntry]->preview;
-	auto &description = currentEntry == -1 ? loadedPacks[currentPack]->description : loadedPacks[currentPack]->scenarios[currentEntry]->description;
+	auto &preview     = currentEntry < 0 ? loadedPacks[shownPack]->preview     : loadedPacks[shownPack]->scenarios[currentEntry]->preview;
+	auto &description = currentEntry < 0 ? loadedPacks[shownPack]->description : loadedPacks[shownPack]->scenarios[currentEntry]->description;
 
 	if (preview.texture.hasTexture())
 		preview.draw();

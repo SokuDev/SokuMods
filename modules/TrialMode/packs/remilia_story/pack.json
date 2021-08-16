@@ -1,6 +1,7 @@
 {
     "name": "The XXX Incident",
     "category": "Remilia Scarlet",
+    "modes": ["Combo"],
     "characters": [
         "remilia",
         "aya",
