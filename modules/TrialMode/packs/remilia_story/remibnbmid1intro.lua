@@ -6,7 +6,7 @@ local dialogs = {
 	"lc Another boring day. Maybe I'll go duel Reimu<br>tonight? If I destroy her shrine, she<br>might get motivated a bit.",
 	--Clic
 	"r h*That should make a good cover. As for the title...*",
-	"lhWOh my, an intruder. You are on time!",
+	"lhhOh my, an intruder. You are on time!",
 	"rhHDon't mind me. I'm not here to invade your<br>privacy or anything.<br>Just here to take a few picture in secret...",
 	"rhEWell so long for the secret part...",
 	"lWEPatchouli told me she needs a new tengu feather,<br>might as well help her out!",

@@ -1,9 +1,14 @@
 {
-    "name": "Remilia Scarlet",
-    "mainChr": "Remilia Scarlet",
-    "category": "The XXX Incident",
+    "name": "The XXX Incident",
+    "category": "Remilia Scarlet",
     "characters": [
         "remilia",
+        "aya",
+        "sakuya",
+        "meirin",
+        "chirno",
+        "patchouli",
+        "reimu",
         "reimu"
     ],
     "stand": {
