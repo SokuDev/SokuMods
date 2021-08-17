@@ -109,6 +109,11 @@ void Trial::_introOnUpdate()
 	this->_introPlayed |= !result;
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_intro->onKeyPressed();
+	if (SokuLib::inputMgrs.pause == 1) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_introPlayed = true;
+		((void (*)(const char *))0x43ff10)(this->music.c_str());
+	};
 }
 
 void Trial::_outroOnUpdate()
@@ -120,4 +125,8 @@ void Trial::_outroOnUpdate()
 	this->_outroPlayed |= !this->_outro->update();
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_outro->onKeyPressed();
+	if (SokuLib::inputMgrs.pause == 1) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_outroPlayed = true;
+	};
 }
