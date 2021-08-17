@@ -1,5 +1,5 @@
 {
-    "music": 17,
+    "music": "data/bgm/op.ogg",
     "stage": 16,
     "player": {
         "character": "remilia",
@@ -8,7 +8,7 @@
         "pos": 1180
     },
     "dummy": {
-        "character": "reimu",
+        "character": "flandre",
         "palette": 0,
         "deck": [],
         "pos": {

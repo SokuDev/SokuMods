@@ -1,0 +1,33 @@
+{
+    "name": "The XXX Incident",
+    "category": "Iku Nagae",
+    "modes": ["Combo", "Story"],
+    "characters": [
+        "iku"
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/iku.bmp"
+    },
+    "description": "",
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "data/character/iku/face/face000.bmp",
+        "offset": {
+            "x": 1,
+            "y": 0
+        },
+        "scale": 0.60,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "scenarios": [
+	{
+            "name": "",
+            "file": "bnbmid3.json",
+            "preview": "",
+            "description": ""
+	}
+    ]
+}
