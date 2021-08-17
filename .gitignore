@@ -7,3 +7,4 @@ score.dat
 modules/TrialMode/packs/*/*.dll
 modules/TrialMode/packs/*/*.pdb
 modules/TrialMode/packs/*/*.ilk
+modules/TrialMode/packs/*/*.manifest

@@ -6,6 +6,11 @@
 #include "Pack.hpp"
 #include "Menu.hpp"
 
+#ifndef _DEBUG
+#define puts(...)
+#define printf(...)
+#endif
+
 #define RED_COLOR  SokuLib::DrawUtils::DxSokuColor{0xFF, 0xA0, 0xA0}
 #define BLUE_COLOR SokuLib::DrawUtils::DxSokuColor{0xA0, 0xA0, 0xFF}
 

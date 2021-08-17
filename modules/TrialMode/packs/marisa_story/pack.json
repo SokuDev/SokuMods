@@ -1,0 +1,56 @@
+{
+    "name": "The XXX Incident",
+    "category": "Marisa Kirisame",
+    "modes": ["Combo"],
+    "characters": [
+        "marisa",
+        "reimu",
+	"tenshi"
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/marisa.bmp"
+    },
+    "description": "Marisa's bread and butters",
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "data/character/marisa/face/face000.bmp",
+        "offset": {
+            "x": 1,
+            "y": 0
+        },
+        "scale": 0.60,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "scenarios": [
+        {
+            "name": "Dial a starter",
+            "file": "bnbmid3.json",
+            "preview": "bnbmid3.png",
+            "description": "5aaa 5b d214b"
+        },
+        {
+            "name": "Dial a starter 2",
+            "file": "bnbmid2.json",
+            "preview": "bnbmid2.png",
+            "description": "5aaa 5b 6c",
+	    "may_be_locked": false
+        },
+        {
+            "name": "Dial a starter 3",
+            "file": "bnbmid1.json",
+            "preview": "bnbmid1.png",
+            "description": "5aaaa 66a d214b",
+	    "may_be_locked": false
+        },
+        {
+            "name": "2a starter",
+            "file": "bnbmid4.json",
+            "preview": "bnbmid4.png",
+            "description": "2a 3a 6c",
+	    "may_be_locked": false
+        }
+    ]
+}

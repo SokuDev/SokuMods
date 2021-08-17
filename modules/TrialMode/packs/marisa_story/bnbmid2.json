@@ -1,0 +1,55 @@
+{
+    "music": 6,
+    "stage": 5,
+    "player": {
+        "character": "marisa",
+        "palette": 0,
+        "deck": [],
+        "pos": 550
+    },
+    "dummy": {
+        "character": "tenshi",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 600,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "expected": "5aaa 5b 6c:20",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 12,
+            "min_damage": 2000,
+            "min_limit": 30
+        },
+        {
+            "min_hits": 16,
+            "min_damage": 2493,
+            "min_limit": 55,
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "hint": [
+
+    ]
+}
