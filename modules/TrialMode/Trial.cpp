@@ -6,6 +6,11 @@
 #include "ComboTrial.hpp"
 #include "Menu.hpp"
 
+#ifndef _DEBUG
+#define puts(...)
+#define printf(...)
+#endif
+
 static int hooks = 0;
 static bool activated = false;
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
@@ -90,8 +95,6 @@ void Trial::_outroOnRender() const
 
 void Trial::_introOnUpdate()
 {
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-
 	(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22; // Remove HUD
 	if (!this->_intro) {
 		this->_introPlayed = true;
@@ -104,19 +107,17 @@ void Trial::_introOnUpdate()
 	if (!result && !this->_introPlayed)
 		((void (*)(const char *))0x43ff10)(this->music.c_str());
 	this->_introPlayed |= !result;
-	if (keys->keymapManager->input.a == 1 || keys->keymapManager->input.b)
+	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_intro->onKeyPressed();
 }
 
 void Trial::_outroOnUpdate()
 {
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-
 	if (!this->_outro) {
 		this->_outroPlayed = true;
 		return;
 	}
 	this->_outroPlayed |= !this->_outro->update();
-	if (keys->keymapManager->input.a == 1 || keys->keymapManager->input.b)
+	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_outro->onKeyPressed();
 }

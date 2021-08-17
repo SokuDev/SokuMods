@@ -163,14 +163,12 @@ static bool done = false;
 // ToDo Launch Text function
 int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 {
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-
 	if (!loadedTrial)
 		return (This->*ogBattleOnProcess)();
 
 	int buffer = !canHaveNextFrame ? loadedTrial->getNextScene() : (This->*ogBattleOnProcess)();
 
-	if (keys->keymapManager->input.a)
+	if (SokuLib::inputMgrs.input.a)
 		buffer = SokuLib::SCENE_BATTLE;
 	canHaveNextFrame = true;
 	if (buffer == SokuLib::SCENE_LOADING);

@@ -8,6 +8,11 @@
 #include "Menu.hpp"
 #include "Pack.hpp"
 
+#ifndef _DEBUG
+#define puts(...)
+#define printf(...)
+#endif
+
 #define FILTER_TEXT_SIZE 120
 
 static int currentPack = 0;
@@ -315,27 +320,25 @@ void ResultMenu::_()
 
 int ResultMenu::onProcess()
 {
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-
-	if (keys->keymapManager->input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+	if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		this->_selected = Trial::RETURN_TO_TITLE_SCREEN;
 	}
-	if (keys->keymapManager->input.a == 1) {
+	if (SokuLib::inputMgrs.input.a == 1) {
 		SokuLib::playSEWaveBuffer(0x28);
 		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
 			loadNextTrial = true;
 		loadedTrial->onMenuClosed(static_cast<Trial::MenuAction>(this->_selected));
 		return false;
 	}
-	if (keys->keymapManager->input.verticalAxis == -1 || (keys->keymapManager->input.verticalAxis <= -36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
+	if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis <= -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_selected--;
 		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
 			this->_selected -= currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
 		this->_selected += Trial::NB_MENU_ACTION;
 		this->_selected %= Trial::NB_MENU_ACTION;
-	} else if (keys->keymapManager->input.verticalAxis == 1 || (keys->keymapManager->input.verticalAxis >= 36 && keys->keymapManager->input.verticalAxis % 6 == 0)) {
+	} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis >= 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_selected++;
 		if (this->_selected == Trial::NB_MENU_ACTION)
@@ -826,8 +829,6 @@ nothing:
 
 int menuOnProcess(SokuLib::MenuResult *This)
 {
-	auto keys = reinterpret_cast<SokuLib::KeyManager *>(0x89A394);
-
 	if (SokuLib::newSceneId != SokuLib::sceneId)
 		return true;
 
@@ -842,12 +843,12 @@ int menuOnProcess(SokuLib::MenuResult *This)
 			return true;
 	}
 	menuLoadAssets();
-	if (keys->keymapManager->input.b) {
+	if (SokuLib::inputMgrs.input.b) {
 		puts("Quit");
 		SokuLib::playSEWaveBuffer(0x29);
 		return false;
 	}
-	handlePlayerInputs(keys->keymapManager->input);
+	handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
 	return true;

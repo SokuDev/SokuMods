@@ -1,0 +1,53 @@
+{
+    "music": 1,
+    "stage": 1,
+    "player": {
+        "character": "marisa",
+        "palette": 0,
+        "deck": [],
+        "pos": 100
+    },
+    "dummy": {
+        "character": "reimu",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 200,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "expected": "2a 3a 6c",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 9,
+            "min_damage": 1724,
+            "min_limit": 68,
+            "max_limit": 68
+        },
+        {
+            "max_attempts": 5
+        },
+        {
+            "max_attempts": 2
+        },
+        {
+            "max_attempts": 1
+        }
+    ],
+    "hint": [
+
+    ]
+}

@@ -8,6 +8,12 @@
 #include <map>
 #include "LuaBattleAnimation.hpp"
 
+#ifndef _DEBUG
+#define puts(...)
+#define printf(...)
+#define fprintf(...)
+#endif
+
 struct FakeCharacterManager {
 	// 0x000
 	char offset_0x000[0xEC];
@@ -1021,7 +1027,7 @@ bool LuaBattleAnimation::update()
 		else {
 			auto err = result.get<sol::error>();
 
-			std::cerr << "update error: " << err.what() << std::endl;
+			fprintf(stderr, "update() error: %s\n", err.what());
 			MessageBox(SokuLib::window, err.what(), "function update() error", MB_ICONERROR);
 			this->_hasError = true;
 			return false;
@@ -1043,7 +1049,7 @@ void LuaBattleAnimation::render() const
 		if (!result.valid()) {
 			auto err = result.get<sol::error>();
 
-			std::cerr << "render error: " << err.what() << std::endl;
+			fprintf(stderr, "render() error: %s\n", err.what());
 			MessageBox(SokuLib::window, err.what(), "function render() error", MB_ICONERROR);
 			this->_hasError = true;
 		}
@@ -1063,7 +1069,7 @@ void LuaBattleAnimation::onKeyPressed()
 		if (!result.valid()) {
 			auto err = result.get<sol::error>();
 
-			std::cerr << "onKeyPressed error: " << err.what() << std::endl;
+			fprintf(stderr, "onKeyPressed() error: %s\n", err.what());
 			MessageBox(SokuLib::window, err.what(), "function onKeyPressed() error", MB_ICONERROR);
 			this->_hasError = true;
 		}
