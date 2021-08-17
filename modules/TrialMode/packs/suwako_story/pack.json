@@ -1,0 +1,33 @@
+{
+    "name": "The XXX Incident",
+    "category": "Suwako Moriya",
+    "modes": ["Combo", "Story"],
+    "characters": [
+        "suwako"
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/suwako.bmp"
+    },
+    "description": "",
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "data/character/suwako/face/face000.bmp",
+        "offset": {
+            "x": 1,
+            "y": 0
+        },
+        "scale": 0.60,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "scenarios": [
+	{
+            "name": "",
+            "file": "bnbmid3.json",
+            "preview": "",
+            "description": ""
+	}
+    ]
+}

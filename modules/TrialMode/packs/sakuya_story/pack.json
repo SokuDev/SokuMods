@@ -1,7 +1,7 @@
 {
     "name": "The XXX Incident",
     "category": "Sakuya Izayoi",
-    "modes": ["Combo"],
+    "modes": ["Combo", "Story"],
     "characters": [
         "sakuya",
         "meirin"

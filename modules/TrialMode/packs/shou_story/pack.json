@@ -1,0 +1,33 @@
+{
+    "name": "The XXX Incident",
+    "category": "Shou Toramaru",
+    "modes": ["Combo", "Story"],
+    "characters": [
+        "shou"
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/shou.bmp"
+    },
+    "description": "",
+    "author": "PinkySmile",
+    "icon": {
+        "isPath": false,
+        "path": "data/character/shou/face/face000.bmp",
+        "offset": {
+            "x": 1,
+            "y": 0
+        },
+        "scale": 0.60,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "scenarios": [
+	{
+            "name": "",
+            "file": "bnbmid3.json",
+            "preview": "",
+            "description": ""
+	}
+    ]
+}

@@ -1,7 +1,7 @@
 {
     "name": "The XXX Incident",
     "category": "Marisa Kirisame",
-    "modes": ["Combo"],
+    "modes": ["Combo", "Story"],
     "characters": [
         "marisa",
         "reimu",

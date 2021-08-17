@@ -1,5 +1,5 @@
 {
-    "music": 17,
+    "music": 31,
     "stage": 16,
     "player": {
         "character": "remilia",
@@ -8,7 +8,7 @@
         "pos": 680
     },
     "dummy": {
-        "character": "reimu",
+        "character": "chirno",
         "palette": 0,
         "deck": [],
         "pos": {

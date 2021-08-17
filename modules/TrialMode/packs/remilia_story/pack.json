@@ -1,7 +1,7 @@
 {
     "name": "The XXX Incident",
     "category": "Remilia Scarlet",
-    "modes": ["Combo"],
+    "modes": ["Combo", "Story"],
     "characters": [
         "remilia",
         "aya",
@@ -9,7 +9,8 @@
         "meirin",
         "chirno",
         "patchouli",
-        "reimu",
+        "flandre",
+        "marisa",
         "reimu"
     ],
     "stand": {
@@ -43,7 +44,7 @@
             "name_hidden_when_locked":  true
         },
         {
-            "name": "Midscreen j2a CH starter",
+            "name": "A Long Lullaby",
             "file": "bnbmid3.json",
             "preview": "bnbmid3.png",
             "may_be_locked":  true,
