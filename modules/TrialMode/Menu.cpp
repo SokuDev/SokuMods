@@ -495,6 +495,9 @@ void menuLoadAssets()
 			return pack2->error.texture.hasTexture();
 		return pack1->category < pack2->category;
 	});
+	std::sort(uniqueCategories.begin(), uniqueCategories.end());
+	std::sort(uniqueNames.begin(), uniqueNames.end());
+	std::sort(uniqueModes.begin(), uniqueModes.end());
 }
 
 void menuUnloadAssets()
@@ -526,8 +529,15 @@ void menuUnloadAssets()
 	uniqueCategories.clear();
 	packsByName.clear();
 	packsByCategory.clear();
+
 	currentPack = 0;
 	currentEntry = -1;
+	shownPack = 0;
+	nameFilter = -1;
+	modeFilter = -1;
+	topicFilter = -1;
+	packStart = 0;
+	entryStart = 0;
 	editorMode = false;
 }
 

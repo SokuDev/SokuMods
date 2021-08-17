@@ -102,8 +102,6 @@ static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::
 	} else if (swrNeeded)
 		msg = "SWR is missing";
 
-	if (msg.empty())
-		PANIC;
 	pack.error.texture.createFromText(msg.c_str(), defaultFont10, {0x100, 30});
 	pack.error.setSize(pack.error.texture.getSize());
 	pack.error.rect = {
