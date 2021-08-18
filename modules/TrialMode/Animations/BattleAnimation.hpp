@@ -6,7 +6,7 @@
 #include <vector>
 #include <list>
 #include <memory>
-#include  <stdexcept>
+#include <stdexcept>
 
 #ifndef SWRSTOYS_BATTLEANIMATION_HPP
 #define SWRSTOYS_BATTLEANIMATION_HPP

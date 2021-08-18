@@ -40,6 +40,8 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
+	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
+	this->_rightWeather = !json["dummy"].contains("affected_by_weather") || !json["dummy"]["affected_by_weather"].is_boolean() || json["dummy"]["affected_by_weather"].get<bool>();
 	memset(&this->_skills, 0xFF, sizeof(this->_skills));
 	if (json.contains("skills") && json["skills"].is_array() && json["skills"].size() == characterSkills[player].size()) {
 		for (int i = 0; i < json["skills"].size(); i++) {
@@ -147,11 +149,15 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
+		SokuLib::displayedWeather = this->_weather;
+		SokuLib::activeWeather = this->_weather;
 		canHaveNextFrame = this->_firstFirst == 1;
 		if (this->_firstFirst)
 			this->_firstFirst--;
 		else
 			this->_introOnUpdate();
+		if (this->_introPlayed)
+			SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
 		return false;
 	}
 
@@ -166,6 +172,10 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		return !this->_freezeCounter && this->_outroPlayed;
 	}
 
+	if (!this->_leftWeather)
+		battleMgr.leftCharacterManager.swordOfRaptureDebuffTimeLeft = 3;
+	if (!this->_rightWeather)
+		battleMgr.rightCharacterManager.swordOfRaptureDebuffTimeLeft = 3;
 	if (!this->_outroPlayed && this->_finished && !this->_playingIntro) {
 		if (!this->_dummyHit) {
 			if ((*reinterpret_cast<char **>(0x8985E8))[0x494] < 22) {
@@ -232,7 +242,17 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	this->_isStart = this->_timer >= 60;
 	battleMgr.currentRound = 3;
 	battleMgr.leftCharacterManager.score = 0;
-	SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
+	if (
+		(SokuLib::activeWeather != this->_weather && this->_weather != SokuLib::WEATHER_AURORA) ||
+		(this->_weather == SokuLib::WEATHER_AURORA && (SokuLib::displayedWeather != this->_weather || SokuLib::activeWeather == SokuLib::WEATHER_CLEAR))
+	) {
+		if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR) {
+			SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
+			SokuLib::displayedWeather = this->_weather;
+		} else
+			SokuLib::weatherCounter = 0;
+	} else
+		SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 750;
 	if (this->_dummyHit && !hit && (!this->_finished || this->_playingIntro))
 		this->_isStart = true;
 	else if (this->_dummyHit && !hit)
@@ -302,12 +322,9 @@ void ComboTrial::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
-	if (this->_first) {
-		SokuLib::displayedWeather = this->_weather;
-		SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
-		SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
+	if (this->_first)
 		this->_waitCounter = 180;
-	} else if (!this->_playingIntro)
+	else if (!this->_playingIntro)
 		this->_attempts++;
 
 	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
