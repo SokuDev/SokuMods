@@ -38,6 +38,8 @@ private:
 	};
 
 	//Init params
+	bool _leftWeather;
+	bool _rightWeather;
 	float _playerStartPos;
 	SokuLib::Vector2f _dummyStartPos;
 	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;

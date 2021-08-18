@@ -46,7 +46,7 @@ private:
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 			battleMgr.leftCharacterManager.objectBase.animate();
 			battleMgr.rightCharacterManager.objectBase.position.x = 1200;
-			((void (*)(const char *))0x43ff10)("data/bgm/ta05.ogg");
+			((void (*)(const char *))0x43ff10)("data/bgm/ta00.ogg");
 		}
 
 		battleMgr.leftCharacterManager.objectBase.doAnimation();

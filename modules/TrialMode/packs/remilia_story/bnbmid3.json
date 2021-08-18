@@ -1,55 +1,52 @@
 {
-    "music": 32,
-    "stage": 16,
+    "music": 34,
+    "stage": 12,
     "player": {
         "character": "remilia",
         "palette": 0,
-        "deck": [],
-        "pos": 750
+        "affected_by_weather": false,
+        "deck": [204, 204, 204, 204, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4],
+        "pos": 550
     },
     "dummy": {
         "character": "meirin",
         "palette": 0,
+        "affected_by_weather": true,
         "deck": [],
         "pos": {
-            "x": 400,
+            "x": 600,
             "y": 0
         }
     },
+    "intro": "bnbmid3intro.lua",
+    "outro": "bnbmid3outro.lua",
     "type": "combo",
 
-    "expected": "d6 j2a:15 2c:25 hj9 j5c j66 j8a",
+    "expected": "5aaaa sc204 hj9 j8a:30",
     "skills": [
         [0, 0],
         [0, 0],
         [0, 0],
         [0, 0]
     ],
-    "weather": 16,
+    "weather": 6,
     "disable_limit": false,
     "uniform_card_cost": 1,
-    "hand": [],
+    "hand": [204],
     "play_combo_after_intro": true,
     "score": [
         {
-            "min_hits": 15,
-            "min_damage": 2000,
-            "min_limit": 104,
-            "max_limit": 120
+            "min_hits": 11,
+            "min_damage": 4267,
+            "min_limit": 130,
+            "max_limit": 130
         },
         {
-            "min_hits": 17,
-            "min_limit": 108
         },
         {
-            "min_hits": 19,
-            "min_limit": 112,
             "max_attempts": 5
         },
         {
-            "min_hits": 22,
-            "min_damage": 2547,
-            "min_limit": 120,
             "max_attempts": 1
         }
     ],
