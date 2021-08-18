@@ -3,7 +3,7 @@
 --
 
 local dialogs = {
-	"lc Another boring day. Maybe I'll go duel Reimu<br>tonight? If I destroy her shrine, she<br>might get motivated a bit.",
+	"lc Another boring day. Maybe I'll go duel Reimu tonight?",
 	--Clic
 	"r h*That should make a good cover. As for the title...*",
 	"lhhOh my, an intruder. You are on time!",
@@ -11,11 +11,11 @@ local dialogs = {
 	"rhEWell so long for the secret part...",
 	"lWEPatchouli told me she needs a new tengu feather,<br>might as well help her out!",
 	--one screaming crow and a feather later
-	"lHEI'm sure even the vegetative Patchouli<br>shall be grateful.",
+	"lHDI'm sure even the vegetative Patchouli<br>shall be grateful.",
 	"rHDMy beautiful feather...",
 	"lCDAnyway what were you doing here?",
 	"rChI was investigating a rumor that..",
-	"lAhSurely You are too tough to talk aren't you?",
+	"lAhSurely you are too tough to talk aren't you?",
 	"rAANo it's not a se...",
 	"lhARoughing you up shall make you talk.",
 	--Battle here
@@ -29,6 +29,8 @@ local currentStage = 0
 local dialog
 local keyPressed = false
 local stop = false
+
+-- CHR 26 -> 1
 
 local function stage0()
 	if ctr == 240 then
@@ -91,7 +93,7 @@ end
 
 local function stage2()
 	battleMgr.leftChr:updateAnimation()
-	if #dialog == #dialogs - 2 then
+	if  keyPressed then
 		currentStage = currentStage + 1
 		dialog.hidden = true
 		dialog:finishAnimations()
@@ -135,9 +137,123 @@ local function stage4()
 	battleMgr.rightChr:updateAnimation()
 	if ctr ~= 0 then
 		ctr = ctr - 1
-	elseif not stop then
+	elseif not stop and dialog.hidden then
 		dialog.hidden = false
+		dialog:onKeyPress()
 	end
+	if #dialog == #dialogs - 6 and keyPressed then
+		dialog.hidden = true
+		currentStage = currentStage + 1
+		battleMgr.leftChr.actionBlockId = 0
+		battleMgr.leftChr.animationCounter = 0
+		battleMgr.leftChr.animationSubFrame = 0
+		battleMgr.leftChr.action = enums.actions.ACTION_ALT2_SKILL3_B
+		battleMgr.leftChr:initAnimation()
+	end
+end
+
+function block0(old)
+	if old == 4 and battleMgr.leftChr.animationCounter == 5 then
+		battleMgr.leftChr:playSfx(26)
+	end
+	if battleMgr.leftChr.animationCounter >= 5 then
+		battleMgr.leftChr.position.x = battleMgr.leftChr.position.x + 15
+		if battleMgr.rightChr.position.x - battleMgr.leftChr.position.x < 60 then
+			battleMgr.leftChr.animationCounter = 0
+			battleMgr.leftChr.animationSubFrame = 0
+			battleMgr.leftChr:animate()
+
+			battleMgr.rightChr.actionBlockId = 0
+			battleMgr.rightChr.animationCounter = 0
+			battleMgr.rightChr.animationSubFrame = 0
+			battleMgr.rightChr.action = enums.actions.ACTION_STAND_GROUND_HIT_SMALL_HITSTUN
+			battleMgr.rightChr:initAnimation()
+		end
+	end
+end
+
+function block1()
+	if battleMgr.leftChr.animationCounter == 3 then
+		battleMgr.leftChr.animationCounter = 0
+		battleMgr.leftChr.animationSubFrame = 0
+		battleMgr.leftChr:animate()
+		battleMgr.leftChr:animate()
+		playSfx(6)
+		battleMgr.leftChr.speed = Vector2f.new(-10, 12.5)
+		battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
+	end
+end
+
+function block2()
+	error("Bad animation block")
+end
+
+function block3(old)
+	battleMgr.leftChr.speed = battleMgr.leftChr.speed + Vector2f.new(0.1, -0.75)
+	battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
+	if battleMgr.leftChr.animationCounter == 9 and battleMgr.leftChr.animationSubFrame == 2 then
+		battleMgr.leftChr.animationCounter = 0
+		battleMgr.leftChr.animationSubFrame = 0
+		battleMgr.leftChr:animate()
+	end
+end
+
+function block4()
+	battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
+	battleMgr.leftChr.speed = battleMgr.leftChr.speed + Vector2f.new(0.1, -0.75)
+	if battleMgr.leftChr.position.y <= 0 and battleMgr.leftChr.speed.y < 0 then
+		battleMgr.leftChr.position.y = 0
+		battleMgr.leftChr.speed.x = 0
+		battleMgr.leftChr.speed.y = 0
+		playSfx(enums.sfxs.land)
+
+		battleMgr.leftChr.animationCounter = 0
+		battleMgr.leftChr.animationSubFrame = 0
+		battleMgr.leftChr:animate()
+
+		battleMgr.rightChr.actionBlockId = 0
+		battleMgr.rightChr.animationCounter = 0
+		battleMgr.rightChr.animationSubFrame = 0
+		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
+		battleMgr.rightChr:initAnimation()
+	end
+end
+
+function block5()
+	if battleMgr.leftChr.animationCounter == 6 and battleMgr.leftChr.animationSubFrame == 4 then
+		battleMgr.leftChr.actionBlockId = 0
+		battleMgr.leftChr.animationCounter = 0
+		battleMgr.leftChr.animationSubFrame = 0
+		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
+		battleMgr.leftChr:initAnimation()
+		dialog.hidden = false
+		dialog:onKeyPress()
+		currentStage = currentStage + 1
+	end
+end
+
+local animBlocks = {
+	block0,
+	block1,
+	block2,
+	block3,
+	block4,
+	block5
+}
+
+local function stage5()
+	local old = battleMgr.leftChr.animationCounter
+
+	battleMgr.leftChr:updateAnimation()
+	if battleMgr.rightChr.animationCounter ~= 1 or battleMgr.rightChr.action ~= enums.actions.ACTION_STAND_GROUND_HIT_SMALL_HITSTUN then
+		battleMgr.rightChr:updateAnimation()
+	end
+	animBlocks[battleMgr.leftChr.actionBlockId + 1](old)
+end
+
+local function stage6()
+	battleMgr.leftChr:updateAnimation()
+	battleMgr.rightChr:updateAnimation()
 	if #dialog == #dialogs - 14 then
 		currentStage = currentStage + 1
 	end
@@ -148,7 +264,9 @@ local anims = {
 	stage1,
 	stage2,
 	stage3,
-	stage4
+	stage4,
+	stage5,
+	stage6
 }
 
 print("Init intro.")
@@ -181,15 +299,15 @@ dialog = StandDialog.new(dialogs)
 
 function update()
 	dialog:update()
+	if currentStage < #anims then
+		anims[currentStage + 1]()
+	end
 	if keyPressed then
 		stop = stop or not dialog:onKeyPress()
 		if stop then
 			dialog.hidden = true
 		end
 		keyPressed = false
-	end
-	if currentStage < #anims then
-		anims[currentStage + 1]()
 	end
 	return not stop or not dialog:isAnimationFinished()
 end
