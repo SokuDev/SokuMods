@@ -25,8 +25,8 @@
         [0, 0],
         [0, 0]
     ],
-    "intro": "bnbmid2.dll",
-    "outro": "bnbmid2.dll",
+    "intro": "bnbmid2intro.lua",
+    "outro": "bnbmid2outro.lua",
     "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
