@@ -1,24 +1,26 @@
 {
     "music": 43,
-    "stage": 16,
+    "stage": 14,
     "player": {
         "character": "remilia",
         "palette": 0,
         "deck": [],
-        "pos": 750
+        "pos": 680
     },
     "dummy": {
         "character": "patchouli",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 400,
+            "x": 900,
             "y": 0
         }
     },
+    "intro": "bnbmid4intro.lua",
+    "outro": "bnbmid4outro.lua",
     "type": "combo",
 
-    "expected": "d6 j2a:15 2c:25 hj9 j5c j66 j8a",
+    "expected": "d6 j2a:15 2c:35 hj9 j5c j66 j8a",
     "skills": [
         [0, 0],
         [0, 0],

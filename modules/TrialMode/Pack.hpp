@@ -8,6 +8,7 @@
 
 #include <nlohmann/json.hpp>
 #include <SokuLib.hpp>
+#include "Images.hpp"
 
 #ifdef _DEBUG
 #define PANIC abort()
@@ -29,8 +30,8 @@ public:
 	char score = -1;
 	std::string file;
 	std::string folder;
+	std::unique_ptr<Image> preview;
 	SokuLib::DrawUtils::Sprite name;
-	SokuLib::DrawUtils::Sprite preview;
 	SokuLib::DrawUtils::Sprite description;
 	SokuLib::DrawUtils::Sprite scoreSprite;
 
