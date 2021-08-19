@@ -343,14 +343,12 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	this->description.setSize(this->description.texture.getSize());
 
 	if (object.contains("preview") && object["preview"].is_string()) {
-		this->preview.texture.loadFromFile((path + object["preview"].get<std::string>()).c_str());
-		this->preview.rect = {
-			0, 0,
-			static_cast<int>(this->preview.texture.getSize().x),
-			static_cast<int>(this->preview.texture.getSize().y),
-		};
-		this->preview.setPosition({398, 128});
-		this->preview.setSize({200, 150});
+		auto str = path + object["preview"].get<std::string>();
+
+		if (str.size() > 4 && str.substr(str.size() - 4, 4) == ".gif")
+			this->preview.reset(new AnimatedImage(str, {398, 128}));
+		else
+			this->preview.reset(new SimpleImage(str, {398, 128}));
 	}
 
 	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())

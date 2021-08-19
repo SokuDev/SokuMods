@@ -34,7 +34,7 @@
         {
             "name": "The Soul Capturing Intruder",
             "file": "bnbmid1.json",
-            "preview": "bnbmid1.png"
+            "preview": "bnbmid1.gifl"
         },
         {
             "name": "A Crimson Maid Day-to-Day",
@@ -51,7 +51,7 @@
             "name_hidden_when_locked":  true
         },
         {
-            "name": "Midscreen DialA starter",
+            "name": "Her Voynich Enigma",
             "file": "bnbmid4.json",
             "preview": "bnbmid4.png",
             "may_be_locked":  true,

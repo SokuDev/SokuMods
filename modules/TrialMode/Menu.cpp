@@ -858,6 +858,8 @@ int menuOnProcess(SokuLib::MenuResult *This)
 		SokuLib::playSEWaveBuffer(0x29);
 		return false;
 	}
+	if (currentEntry >= 0)
+		loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
 	handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
@@ -1054,11 +1056,14 @@ void menuOnRender(SokuLib::MenuResult *This)
 	if (loadedPacks.empty())
 		return;
 
-	auto &preview     = currentEntry < 0 ? loadedPacks[shownPack]->preview     : loadedPacks[shownPack]->scenarios[currentEntry]->preview;
-	auto &description = currentEntry < 0 ? loadedPacks[shownPack]->description : loadedPacks[shownPack]->scenarios[currentEntry]->description;
-
-	if (preview.texture.hasTexture())
-		preview.draw();
-	if (description.texture.hasTexture())
-		description.draw();
+	if (currentEntry < 0) {
+		if (loadedPacks[shownPack]->preview.texture.hasTexture())
+			loadedPacks[shownPack]->preview.draw();
+		if (loadedPacks[shownPack]->description.texture.hasTexture())
+			loadedPacks[shownPack]->description.draw();
+		return;
+	}
+	loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
+	if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
+		loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
 }
