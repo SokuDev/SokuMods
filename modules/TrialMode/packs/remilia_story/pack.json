@@ -34,54 +34,54 @@
         {
             "name": "The Soul Capturing Intruder",
             "file": "bnbmid1.json",
-            "preview": "bnbmid1.gifl"
+            "preview": "bnbmid1.gif"
         },
         {
             "name": "A Crimson Maid Day-to-Day",
             "file": "bnbmid2.json",
-            "preview": "bnbmid2.png",
+            "preview": "bnbmid2.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         },
         {
             "name": "A Long Lullaby",
             "file": "bnbmid3.json",
-            "preview": "bnbmid3.png",
+            "preview": "bnbmid3.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         },
         {
             "name": "Her Voynich Enigma",
             "file": "bnbmid4.json",
-            "preview": "bnbmid4.png",
+            "preview": "bnbmid4.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         },
         {
             "name": "Midscreen 3a starter",
             "file": "bnbmid5.json",
-            "preview": "bnbmid5.png",
+            "preview": "bnbmid5.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         },
         {
             "name": "Corner 5a starter",
             "file": "bnbcorn1.json",
-            "preview": "bnbcorn1.png",
+            "preview": "bnbcorn1.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         },
         {
             "name": "Corner 2a starter",
             "file": "bnbcorn2.json",
-            "preview": "bnbcorn2.png",
+            "preview": "bnbcorn2.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         },
         {
             "name": "Corner j5aa starter",
             "file": "bnbcorn3.json",
-            "preview": "bnbcorn3.png",
+            "preview": "bnbcorn3.gif",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
         }

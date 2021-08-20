@@ -488,8 +488,7 @@ add_library(
         MODULE
         modules/TrialMode/TrialMode.rc
         modules/TrialMode/main.cpp
-        modules/TrialMode/gifdec.c
-        modules/TrialMode/gifdec.h
+        modules/TrialMode/gif_load.h
 	modules/TrialMode/Menu.cpp
         modules/TrialMode/Menu.hpp
         modules/TrialMode/Pack.cpp
@@ -505,7 +504,9 @@ add_library(
         modules/TrialMode/Animations/BattleAnimFramework.cpp
         modules/TrialMode/Animations/LuaBattleAnimation.cpp
         modules/TrialMode/Animations/LuaBattleAnimation.hpp
-        modules/TrialMode/Images.cpp modules/TrialMode/Images.hpp)
+        modules/TrialMode/Images.cpp
+        modules/TrialMode/Images.hpp
+)
 target_compile_options(TrialMode PRIVATE /Zi /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/")

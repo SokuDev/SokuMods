@@ -4,7 +4,7 @@
 
 local dialogs = {
 	"lADNow tell me what lead you have!",
-	"rADNothing in any of my books anything that is<br>happening here.",
+	"rADNothing in any of my books can tell what is<br>happening here.",
 	"lcDAre you sure?",
 	"rchNow that I think about it, there was something<br>suspicious. Something was strange when Reimu came by....",
 	"lWhSo she is here too...",
@@ -34,15 +34,14 @@ function update()
 	if pressed and #dialog == #dialogs - 10 and battleMgr.leftChr.direction ~= enums.directions.LEFT then
 		dialog.hidden = true
 		battleMgr.leftChr.direction = enums.directions.LEFT
+		battleMgr.leftChr.action = enums.actions.ACTION_WALK_FORWARD
+		battleMgr.leftChr:initAnimation()
 		ctr = 20
 	end
 	if side and battleMgr.leftChr.direction == enums.directions.LEFT and ctr ~= 0 then
 		dialog:update()
-		print(ctr)
 		if ctr == 1 then
 			dialog.hidden = false
-			battleMgr.leftChr.action = enums.actions.ACTION_WALK_FORWARD
-			battleMgr.leftChr:initAnimation()
 		end
 		ctr = ctr - 1
 	else
