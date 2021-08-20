@@ -6,7 +6,6 @@
 #define SWRSTOYS_IMAGES_HPP
 
 #include <SokuLib.hpp>
-#include "gifdec.h"
 
 class Image {
 public:
@@ -27,17 +26,31 @@ public:
 class AnimatedImage : public Image {
 private:
 	struct Frame {
-		uint32_t delay;
-		SokuLib::DrawUtils::Sprite sprite;
+		uint32_t delay = 0;
+		SokuLib::DrawUtils::DxSokuColor *buffer = nullptr;
+
+		~Frame() { delete[] buffer; }
 	};
+
+	IDirect3DTexture9 **_pphandle;
+	SokuLib::DrawUtils::Sprite _sprite;
+	SokuLib::Vector2i _pos;
+	SokuLib::DrawUtils::DxSokuColor *_frame = nullptr;
+	SokuLib::DrawUtils::DxSokuColor *_lastFrame = nullptr;
 	std::vector<std::unique_ptr<Frame>> _frames;
 	unsigned int _currentFrame = 0;
 	float _internalCtr = 0;
+	int _last = 0;
+	SokuLib::Vector2u _size{0, 0};
+
+	void _updateTexture();
 
 public:
 	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos);
+	~AnimatedImage() override = default;
 	void reset() override;
 	void update() override;
+	void processChunk(struct GIF_WHDR *chunk);
 	void render() const override;
 };
 

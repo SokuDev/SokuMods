@@ -745,10 +745,14 @@ static void handleGoUp()
 				continue;
 			if (topicFilter != -1 && pack->category != uniqueCategories[topicFilter])
 				continue;
+			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
 			break;
 		} while (true);
-	} else
+	} else {
 		currentEntry--;
+		if (currentEntry != -1)
+			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+	}
 	checkScrollUp();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
 }
@@ -776,8 +780,10 @@ static void handleGoDown()
 				continue;
 			break;
 		} while (true);
-	} else
+	} else {
 		currentEntry++;
+		loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+	}
 	checkScrollDown();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
 }

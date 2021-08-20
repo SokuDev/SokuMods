@@ -8,12 +8,12 @@ local dialogs = {
         "rHHAnd you are surprisingly upbeat.",
         "rHCDo you enjoy your home to be ransack that much?",
         "lHCThey are merely passer by for the most parts.",
-        "lCCThough it is unsettling how easily<br>people invite themselves...",
-        "rCSThe mansion's cats have been quite<br>ineffective this time...",
+        "lCCThough it is unsettling how easily people invite<br>themselves...",
+        "rCSThe mansion's cats have been quite ineffective this<br>time...",
         "rCWNonetheless you have come for information am I correct?",
-        "rCAI fear that this time I won't be able to help,<br>the havoc in the mansion makes it impossible to know<br>for certain who could be this mysterious intruder...",
+        "rCAI fear that this time I won't be able to help.<br>The havoc in the mansion makes it impossible to know<br>for certain who could be this mysterious intruder...",
         "lcAI see...",
-        "lAAI've gone as far as to give you a gift and you<br>still hold information from me? You<br>need more motivation to help me it seems...",
+        "lAAI've gone as far as to give you a gift and you<br>still hold information from me?<br>You need more motivation to help me it seems...",
         "rAE*sigh* Please be wary of my health.",
 	--Battle here
 }
@@ -127,7 +127,7 @@ local anims = {
 
 print("Init intro.")
 
-stageBg.texture:loadFromFile(packPath.."\\bnbmid4intro.png")
+stageBg.texture:loadFromFile(packPath.."/bnbmid4intro.png")
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),
