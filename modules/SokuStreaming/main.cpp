@@ -97,6 +97,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath) {
 	keys[KEY_CHANGE_L_NAME] = GetPrivateProfileInt("Keys", "ChangeLeftName", '3', profilePath);
 	keys[KEY_RESET_SCORES] = GetPrivateProfileInt("Keys", "ResetScores", '5', profilePath);
 	keys[KEY_RESET_STATE] = GetPrivateProfileInt("Keys", "ResetState", '6', profilePath);
+	keys[KEY_CHANGE_ROUND] = GetPrivateProfileInt("Keys", "ChangeRound", '7', profilePath);
 	keys[KEY_DECREASE_R_SCORE] = GetPrivateProfileInt("Keys", "DecreaseRightScore", '8', profilePath);
 	keys[KEY_INCREASE_R_SCORE] = GetPrivateProfileInt("Keys", "IncreaseRightScore", '9', profilePath);
 	keys[KEY_CHANGE_R_NAME] = GetPrivateProfileInt("Keys", "ChangeRightName", '0', profilePath);
