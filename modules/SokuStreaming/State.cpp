@@ -90,6 +90,24 @@ void checkKeyInputs() {
 			}};
 		}
 	}
+	if (isPressed[KEY_CHANGE_ROUND]) {
+		if (!threadUsed) {
+			threadUsed = true;
+			if (thread.joinable())
+				thread.join();
+			thread = std::thread{[] {
+				auto answer = InputBox("Change round name", "Round name", _cache.round);
+
+				if (answer.empty()) {
+					threadUsed = false;
+					return;
+				}
+				_cache.round = answer;
+				broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
+				threadUsed = false;
+			}};
+		}
+	}
 	if (isPressed[KEY_CHANGE_R_NAME]) {
 		if (!threadUsed) {
 			threadUsed = true;
@@ -169,10 +187,10 @@ void updateCache(bool isMultiplayer) {
 		} else if (_cache.realLeftName != SokuLib::profile1.name.operator char *() || _cache.realRightName != SokuLib::profile2.name.operator char *() || SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) {
 			_cache.leftScore = 0;
 			_cache.rightScore = 0;
-			_cache.leftName = SokuLib::profile1.name;
-			_cache.rightName = SokuLib::profile2.name;
-			_cache.realLeftName = SokuLib::profile1.name;
-			_cache.realRightName = SokuLib::profile2.name;
+			_cache.leftName = SokuLib::profile1.name.operator char *();
+			_cache.rightName = SokuLib::profile2.name.operator char *();
+			_cache.realLeftName = SokuLib::profile1.name.operator char *();
+			_cache.realRightName = SokuLib::profile2.name.operator char *();
 		}
 		needReset = false;
 	}
