@@ -38,6 +38,8 @@ static SokuLib::DrawUtils::Sprite nameFilterText;
 static SokuLib::DrawUtils::Sprite modeFilterText;
 static SokuLib::DrawUtils::Sprite topicFilterText;
 static SokuLib::DrawUtils::Sprite previewContainer;
+static SokuLib::DrawUtils::Sprite lockedText;
+static SokuLib::DrawUtils::Sprite lockedImg;
 static unsigned packStart = 0;
 static unsigned entryStart = 0;
 
@@ -450,6 +452,17 @@ void menuLoadAssets()
 	lock.rect.width = lock.texture.getSize().x;
 	lock.rect.height = lock.texture.getSize().y;
 
+	lockedImg.texture.loadFromResource(myModule, MAKEINTRESOURCE(32));
+	lockedImg.setSize({200, 150});
+	lockedImg.rect.width = lockedImg.texture.getSize().x;
+	lockedImg.rect.height = lockedImg.texture.getSize().y;
+	lockedImg.setPosition({398, 128});
+
+	lockedText.setSize({300, 150});
+	lockedText.rect.width = 300;
+	lockedText.rect.height = 150;
+	lockedText.setPosition({356, 280});
+
 	questionMarks.texture.createFromText("????????????????", defaultFont12, {0x100, 15});
 	questionMarks.setSize(questionMarks.texture.getSize());
 	questionMarks.rect.width = questionMarks.texture.getSize().x;
@@ -755,6 +768,11 @@ static void handleGoUp()
 	}
 	checkScrollUp();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
+	if (currentEntry != -1 && isLocked(currentEntry)) {
+		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
+
+		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont10, {300, 150});
+	}
 }
 
 static void handleGoDown()
@@ -786,6 +804,11 @@ static void handleGoDown()
 	}
 	checkScrollDown();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
+	if (currentEntry != -1 && isLocked(currentEntry)) {
+		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
+
+		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont10, {300, 150});
+	}
 }
 
 void handlePlayerInputs(const SokuLib::KeyInput &input)
@@ -1069,7 +1092,12 @@ void menuOnRender(SokuLib::MenuResult *This)
 			loadedPacks[shownPack]->description.draw();
 		return;
 	}
-	loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
-	if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
-		loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
+	if (!isLocked(currentEntry)) {
+		loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
+		if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
+			loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
+	} else {
+		lockedText.draw();
+		lockedImg.draw();
+	}
 }

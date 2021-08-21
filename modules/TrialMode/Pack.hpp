@@ -30,6 +30,7 @@ public:
 	char score = -1;
 	std::string file;
 	std::string folder;
+	std::string nameStr;
 	std::unique_ptr<Image> preview;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite description;

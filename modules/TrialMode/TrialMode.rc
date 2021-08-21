@@ -5,3 +5,4 @@
 20 RCDATA "assets/aliceDoll.png"
 24 RCDATA "assets/trial.png"
 28 RCDATA "assets/locked.png"
+32 RCDATA "assets/lockedPreview.png"
