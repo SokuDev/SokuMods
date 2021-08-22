@@ -32,6 +32,8 @@ private:
 		~Frame() { delete[] buffer; }
 	};
 
+	bool _antiAlias;
+	bool _CRTEffect;
 	IDirect3DTexture9 **_pphandle;
 	SokuLib::DrawUtils::Sprite _sprite;
 	SokuLib::Vector2i _pos;
@@ -44,6 +46,8 @@ private:
 	SokuLib::Vector2u _size{0, 0};
 
 	void _updateTexture();
+	void _copyDecodedFrame(struct GIF_WHDR *chunk, SokuLib::DrawUtils::DxSokuColor *pict, Frame *frameObj);
+	void _processFrame(Frame *frameObj);
 
 public:
 	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing, bool CRTEffect);
