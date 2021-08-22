@@ -30,6 +30,7 @@ static SokuLib::DrawUtils::Sprite lock;
 static SokuLib::DrawUtils::Sprite arrow;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
+static SokuLib::DrawUtils::Sprite frame;
 static SokuLib::DrawUtils::Sprite arrowSprite;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
@@ -38,10 +39,16 @@ static SokuLib::DrawUtils::Sprite nameFilterText;
 static SokuLib::DrawUtils::Sprite modeFilterText;
 static SokuLib::DrawUtils::Sprite topicFilterText;
 static SokuLib::DrawUtils::Sprite previewContainer;
+static SokuLib::DrawUtils::Sprite lockedNoise;
 static SokuLib::DrawUtils::Sprite lockedText;
 static SokuLib::DrawUtils::Sprite lockedImg;
+static SokuLib::DrawUtils::Sprite CRTBands;
+static IDirect3DTexture9 **pphandle = nullptr;
+static IDirect3DTexture9 **pphandle2 = nullptr;
 static unsigned packStart = 0;
 static unsigned entryStart = 0;
+static unsigned band1Start = 0;
+static unsigned band2Start = 0;
 
 std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
@@ -458,10 +465,16 @@ void menuLoadAssets()
 	lockedImg.rect.height = lockedImg.texture.getSize().y;
 	lockedImg.setPosition({398, 128});
 
+	frame.texture.loadFromResource(myModule, MAKEINTRESOURCE(36));
+	frame.setSize({212, 162});
+	frame.rect.width = frame.texture.getSize().x;
+	frame.rect.height = frame.texture.getSize().y;
+	frame.setPosition({392, 122});
+
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
 	lockedText.rect.height = 150;
-	lockedText.setPosition({356, 280});
+	lockedText.setPosition({356, 286});
 
 	questionMarks.texture.createFromText("????????????????", defaultFont12, {0x100, 15});
 	questionMarks.setSize(questionMarks.texture.getSize());
@@ -501,6 +514,38 @@ void menuLoadAssets()
 	topicFilterText.rect.width = topicFilterText.texture.getSize().x;
 	topicFilterText.rect.height = topicFilterText.texture.getSize().y;
 
+	int id;
+	HRESULT ret;
+
+	pphandle = SokuLib::textureMgr.allocate(&id);
+	if (FAILED(ret = D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, pphandle))) {
+		pphandle = nullptr;
+		SokuLib::textureMgr.deallocate(id);
+		fprintf(stderr, "D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, %p) failed with code %li\n", pphandle, ret);
+		goto failed;
+	}
+	lockedNoise.texture.setHandle(id, {200, 150});
+	lockedNoise.setSize({200, 150});
+	lockedNoise.setPosition({398, 128});
+	lockedNoise.rect.width = 200;
+	lockedNoise.rect.height = 150;
+
+failed:
+
+	pphandle2 = SokuLib::textureMgr.allocate(&id);
+	if (FAILED(ret = D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, pphandle2))) {
+		pphandle = nullptr;
+		SokuLib::textureMgr.deallocate(id);
+		fprintf(stderr, "D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, %p) failed with code %li\n", pphandle2, ret);
+		goto failed2;
+	}
+	CRTBands.texture.setHandle(id, {200, 150});
+	CRTBands.setSize({200, 150});
+	CRTBands.setPosition({398, 128});
+	CRTBands.rect.width = 200;
+	CRTBands.rect.height = 150;
+
+failed2:
 	loadPacks();
 
 	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
@@ -511,6 +556,93 @@ void menuLoadAssets()
 	std::sort(uniqueCategories.begin(), uniqueCategories.end());
 	std::sort(uniqueNames.begin(), uniqueNames.end());
 	std::sort(uniqueModes.begin(), uniqueModes.end());
+}
+
+#define NOISE_DELTA 50
+#define RANDOM_VAL rand() % ((NOISE_DELTA) * 2 + 1)
+#define RANDOM(r) ((r) + (RANDOM_VAL) - (NOISE_DELTA))
+
+static void updateNoiseTexture(SokuLib::DrawUtils::DxSokuColor *array)
+{
+	unsigned char r = rand() % 206;
+
+	for (int y = 0; y < 150; y++)
+		for (int x = 0; x < 200; x++) {
+			int g = RANDOM((int)r);
+
+			if (g > 205)
+				r = 205;
+			else if (g < 0)
+				r = 0;
+			else
+				r = g;
+			array[x + y * 200] = SokuLib::DrawUtils::DxSokuColor{r, r, r};
+		}
+}
+
+static void updateBandTexture(SokuLib::DrawUtils::DxSokuColor *array)
+{
+	static bool b = false;
+
+	b = !b;
+	for (int y = 0; y < 150; y++)
+		for (int x = 0; x < 200; x++)
+			array[x + y * 200] = SokuLib::DrawUtils::DxSokuColor{0xFF, 0xFF, 0xFF, 0x00};
+	band1Start += 1 + b;
+	band2Start += 1;
+	if (band1Start > 220)
+		band1Start = 0;
+	if (band2Start > 255)
+		band2Start = 0;
+
+	for (int y = -10; y; y++) {
+		if (band1Start < -y)
+			continue;
+		if (band1Start + y >= 150)
+			break;
+		for (int x = 0; x < 200; x++)
+			array[x + (band1Start + y) * 200].a += 0x55;
+	}
+	for (int y = -20; y; y++) {
+		if (band2Start < -y)
+			continue;
+		if (band2Start + y >= 150)
+			break;
+		for (int x = 0; x < 200; x++)
+			array[x + (band2Start + y) * 200].a += 0x80;
+	}
+}
+
+static void updateNoiseTexture()
+{
+	HRESULT ret;
+	D3DLOCKED_RECT r;
+
+	if (!pphandle)
+		return;
+	if (FAILED(ret = (*pphandle)->LockRect(0, &r, nullptr, 0))) {
+		fprintf(stderr, "(*pphandle)->LockRect(0, &r, nullptr, D3DLOCK_DISCARD) failed with code %li\n", ret);
+		return;
+	}
+	updateNoiseTexture(reinterpret_cast<SokuLib::DrawUtils::DxSokuColor *>(r.pBits));
+	if (FAILED(ret = (*pphandle)->UnlockRect(0)))
+		fprintf(stderr, "(*pphandle)->UnlockRect(0) failed with code %li\n", ret);
+}
+
+static void updateBandTexture()
+{
+	HRESULT ret;
+	D3DLOCKED_RECT r;
+
+	if (!pphandle2)
+		return;
+	if (FAILED(ret = (*pphandle2)->LockRect(0, &r, nullptr, 0))) {
+		fprintf(stderr, "(*pphandle2)->LockRect(0, &r, nullptr, D3DLOCK_DISCARD) failed with code %li\n", ret);
+		return;
+	}
+	updateBandTexture(reinterpret_cast<SokuLib::DrawUtils::DxSokuColor *>(r.pBits));
+	if (FAILED(ret = (*pphandle2)->UnlockRect(0)))
+		fprintf(stderr, "(*pphandle2)->UnlockRect(0) failed with code %li\n", ret);
 }
 
 void menuUnloadAssets()
@@ -536,6 +668,11 @@ void menuUnloadAssets()
 	modeFilterText.texture.destroy();
 	topicFilterText.texture.destroy();
 	previewContainer.texture.destroy();
+	lockedNoise.texture.destroy();
+	lockedText.texture.destroy();
+	lockedImg.texture.destroy();
+	frame.texture.destroy();
+	CRTBands.texture.destroy();
 
 	loadedPacks.clear();
 	uniqueNames.clear();
@@ -771,7 +908,7 @@ static void handleGoUp()
 	if (currentEntry != -1 && isLocked(currentEntry)) {
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
-		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont10, {300, 150});
+		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
 	}
 }
 
@@ -807,7 +944,7 @@ static void handleGoDown()
 	if (currentEntry != -1 && isLocked(currentEntry)) {
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
-		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont10, {300, 150});
+		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
 	}
 }
 
@@ -892,6 +1029,8 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
+	updateNoiseTexture();
+	updateBandTexture();
 	return true;
 }
 
@@ -1096,8 +1235,12 @@ void menuOnRender(SokuLib::MenuResult *This)
 		loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
 		if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
 			loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
+		CRTBands.draw();
 	} else {
+		lockedNoise.draw();
+		CRTBands.draw();
 		lockedText.draw();
 		lockedImg.draw();
 	}
+	frame.draw();
 }

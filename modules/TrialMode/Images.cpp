@@ -14,7 +14,7 @@
 #define fprintf(...)
 #endif
 
-SimpleImage::SimpleImage(const std::string &path, const SokuLib::Vector2i &pos)
+SimpleImage::SimpleImage(const std::string &path, const SokuLib::Vector2i &pos, bool CRTEffect)
 {
 	this->texture.loadFromFile(path.c_str());
 	this->rect = {
@@ -45,7 +45,7 @@ static void callback(void *data, struct GIF_WHDR *chunk)
 	This->processChunk(chunk);
 }
 
-AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos)
+AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing, bool CRTEffect)
 {
 	std::ifstream stream{path, std::ifstream::binary};
 	int id;
