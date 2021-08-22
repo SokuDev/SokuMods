@@ -172,9 +172,8 @@ void AnimatedImage::processChunk(struct GIF_WHDR *chunk)
 					pict[chunk->xdim * y + x + ddst].b = color.B;
 					pict[chunk->xdim * y + x + ddst].a = 0xFF;
 				}
-	for (auto _x = 0; _x < 200; _x++)
-		for (auto _y = 0; _y < 150; _y++)
-			frameObj->buffer[_y * 200 + _x] = pict[chunk->xdim * (_y * chunk->ydim / 150) + (_x * chunk->xdim / 200)];
+	this->_copyDecodedFrame(chunk, pict, frameObj);
+	this->_processFrame(frameObj);
 	if ((chunk->mode == GIF_PREV) && !this->_last) {
 		chunk->frxd = chunk->xdim;
 		chunk->fryd = chunk->ydim;
@@ -214,4 +213,32 @@ void AnimatedImage::_updateTexture()
 	memcpy(r.pBits, this->_frames[this->_currentFrame]->buffer, sizeof(*this->_frames[this->_currentFrame]->buffer) * 200 * 150);
 	if (FAILED(ret = (*this->_pphandle)->UnlockRect(0)))
 		fprintf(stderr, "(*this->_pphandle)->UnlockRect(0) failed with code %li\n", ret);
+}
+
+void AnimatedImage::_copyDecodedFrame(struct GIF_WHDR *chunk, SokuLib::DrawUtils::DxSokuColor *pict, Frame *frameObj)
+{
+	if (!this->_antiAlias) {
+		for (auto x = 0; x < 200; x++)
+			for (auto y = 0; y < 150; y++)
+				frameObj->buffer[y * 200 + x] = pict[chunk->xdim * (y * chunk->ydim / 150) + (x * chunk->xdim / 200)];
+		return;
+	}
+
+	for (auto x = 0; x < 200; x++)
+		for (auto y = 0; y < 150; y++)
+			frameObj->buffer[y * 200 + x] = pict[chunk->xdim * (y * chunk->ydim / 150) + (x * chunk->xdim / 200)];
+}
+
+void AnimatedImage::_processFrame(AnimatedImage::Frame *frameObj)
+{
+	if (!this->_CRTEffect)
+		return;
+	for (auto y = 0; y < 150; y += 2)
+		for (auto x = 0; x < 200; x++) {
+			auto &color = frameObj->buffer[y * 200 + x];
+
+			color.r = color.r * 5 / 6;
+			color.g = color.g * 5 / 6;
+			color.b = color.b * 5 / 6;
+		}
 }
