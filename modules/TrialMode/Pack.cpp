@@ -192,7 +192,7 @@ invalidPreview:
 		static_cast<int>(this->description.texture.getSize().x),
 		static_cast<int>(this->description.texture.getSize().y),
 	};
-	this->description.setPosition({356, 280});
+	this->description.setPosition({356, 286});
 	this->description.setSize(this->description.texture.getSize());
 
 	if (object.contains("modes") && object["modes"].is_array()) {
@@ -340,16 +340,16 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 		static_cast<int>(this->description.texture.getSize().x),
 		static_cast<int>(this->description.texture.getSize().y),
 	};
-	this->description.setPosition({356, 280});
+	this->description.setPosition({356, 286});
 	this->description.setSize(this->description.texture.getSize());
 
 	if (object.contains("preview") && object["preview"].is_string()) {
 		auto str = path + object["preview"].get<std::string>();
 
 		if (str.size() > 4 && str.substr(str.size() - 4, 4) == ".gif")
-			this->preview.reset(new AnimatedImage(str, {398, 128}));
+			this->preview.reset(new AnimatedImage(str, {398, 128}, true, true));
 		else
-			this->preview.reset(new SimpleImage(str, {398, 128}));
+			this->preview.reset(new SimpleImage(str, {398, 128}, true));
 	}
 
 	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())

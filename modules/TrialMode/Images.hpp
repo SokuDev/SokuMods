@@ -17,7 +17,7 @@ public:
 
 class SimpleImage : public Image, public SokuLib::DrawUtils::Sprite {
 public:
-	SimpleImage(const std::string &path, const SokuLib::Vector2i &pos);
+	SimpleImage(const std::string &path, const SokuLib::Vector2i &pos, bool CRTEffect);
 	void reset() override;
 	void update() override;
 	void render() const override;
@@ -46,7 +46,7 @@ private:
 	void _updateTexture();
 
 public:
-	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos);
+	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing, bool CRTEffect);
 	~AnimatedImage() override = default;
 	void reset() override;
 	void update() override;
