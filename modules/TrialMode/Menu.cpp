@@ -5,6 +5,8 @@
 #define _USE_MATH_DEFINES
 #include <fstream>
 #include <dinput.h>
+#include <process.h>
+#include <thread>
 #include "Menu.hpp"
 #include "Pack.hpp"
 
@@ -15,9 +17,10 @@
 
 #define FILTER_TEXT_SIZE 120
 
-static int currentPack = 0;
+static int currentPack = -3;
 static int currentEntry = -1;
 static bool loaded = false;
+static bool loading = false;
 static bool loadNextTrial = false;
 static unsigned shownPack = 0;
 static unsigned nameFilter = -1;
@@ -53,6 +56,8 @@ static unsigned band2Start = 0;
 
 std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
+bool drawMutex = false;
+bool filterMutex = false;
 SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
@@ -403,6 +408,51 @@ void loadFont()
 	defaultFont16.setIndirect(desc);
 }
 
+void checkScrollDown()
+{
+	if (currentPack < 0) {
+		packStart = 0;
+		entryStart = 0;
+		return;
+	}
+	if (currentPack >= 0 && currentEntry == -1) {
+		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 25 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+		entryStart = 0;
+		return;
+	}
+	if (currentEntry - entryStart > 15)
+		entryStart = currentEntry - 15;
+}
+
+void onPackLoaded(int pos)
+{
+	if (currentPack >= pos && currentPack >= 0) {
+		currentPack++;
+		shownPack++;
+	}
+	checkScrollDown();
+	nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(), defaultFont12, {300, 20}, &nameFilterSize);
+	modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(), defaultFont12, {300, 20}, &modeFilterSize);
+	topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
+}
+
+static void startPackLoading()
+{
+	loadPacks(onPackLoaded);
+	loading = false;
+}
+
+void __lockMutex(volatile bool &mutex)
+{
+	while (mutex) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	mutex = true;
+}
+
+void __unlockMutex(bool &mutex)
+{
+	mutex = false;
+}
+
 void menuLoadAssets()
 {
 	if (loaded)
@@ -553,16 +603,8 @@ failed:
 	CRTBands.rect.height = 150;
 
 failed2:
-	loadPacks();
-
-	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
-		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
-			return pack2->error.texture.hasTexture();
-		return pack1->category < pack2->category;
-	});
-	std::sort(uniqueCategories.begin(), uniqueCategories.end());
-	std::sort(uniqueNames.begin(), uniqueNames.end());
-	std::sort(uniqueModes.begin(), uniqueModes.end());
+	loading = true;
+	_beginthread(reinterpret_cast<_beginthread_proc_type>(startPackLoading), 0, nullptr);
 }
 
 #define NOISE_DELTA 50
@@ -688,7 +730,7 @@ void menuUnloadAssets()
 	packsByName.clear();
 	packsByCategory.clear();
 
-	currentPack = 0;
+	currentPack = -3;
 	currentEntry = -1;
 	shownPack = 0;
 	nameFilter = -1;
@@ -787,22 +829,6 @@ void checkScrollUp()
 	}
 	if (currentEntry < entryStart)
 		entryStart = currentEntry;
-}
-
-void checkScrollDown()
-{
-	if (currentPack < 0) {
-		packStart = 0;
-		entryStart = 0;
-		return;
-	}
-	if (currentPack >= 0 && currentEntry == -1) {
-		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 25 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
-		entryStart = 0;
-		return;
-	}
-	if (currentEntry - entryStart > 15)
-		entryStart = currentEntry - 15;
 }
 
 inline bool isCompleted(int entry)
@@ -1001,6 +1027,7 @@ nothing:
 		}
 		SokuLib::playSEWaveBuffer(0x29);
 	}
+	__lockMutex(filterMutex);
 	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0))
 		handleGoUp();
 	else if (input.verticalAxis == 1 || (input.verticalAxis >= 36 && input.verticalAxis % 6 == 0))
@@ -1009,13 +1036,20 @@ nothing:
 		handleGoLeft();
 	else if (input.horizontalAxis == 1 || (input.horizontalAxis >= 36 && input.horizontalAxis % 6 == 0))
 		handleGoRight();
+	__unlockMutex(filterMutex);
 }
 
 int menuOnProcess(SokuLib::MenuResult *This)
 {
+	if (!loading && SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		return loading;
+	}
+
 	if (SokuLib::newSceneId != SokuLib::sceneId)
 		return true;
 
+	__lockMutex(drawMutex);
 	if (loadNextTrial) {
 		loadNextTrial = false;
 		++currentEntry;
@@ -1023,17 +1057,21 @@ int menuOnProcess(SokuLib::MenuResult *This)
 			loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
 			loadedPacks[currentPack]->scenarios[currentEntry]->file
 		);
-		if (loadRequest)
+		if (loadRequest) {
+			__unlockMutex(drawMutex);
 			return true;
+		}
 	}
 	menuLoadAssets();
-	if (SokuLib::inputMgrs.input.b) {
+	if (SokuLib::inputMgrs.input.b == 1) {
 		puts("Quit");
 		SokuLib::playSEWaveBuffer(0x29);
-		return false;
+		__unlockMutex(drawMutex);
+		return loading;
 	}
 	if (currentEntry >= 0)
 		loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
+	__unlockMutex(drawMutex);
 	handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
@@ -1214,6 +1252,8 @@ void menuOnRender(SokuLib::MenuResult *This)
 
 	displayFilters();
 	title.draw();
+	__lockMutex(drawMutex);
+	__lockMutex(filterMutex);
 	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
 		// 100 <= y <= 364
 		renderOnePackBack(*loadedPacks[i], pos, i == currentPack);
@@ -1227,16 +1267,20 @@ void menuOnRender(SokuLib::MenuResult *This)
 		if (pos.y > 394)
 			break;
 	}
+	__unlockMutex(filterMutex);
 
 	previewContainer.draw();
-	if (loadedPacks.empty())
+	if (loadedPacks.empty()) {
+		__unlockMutex(drawMutex);
 		return;
+	}
 
 	if (currentEntry < 0) {
 		if (loadedPacks[shownPack]->preview.texture.hasTexture())
 			loadedPacks[shownPack]->preview.draw();
 		if (loadedPacks[shownPack]->description.texture.hasTexture())
 			loadedPacks[shownPack]->description.draw();
+		__unlockMutex(drawMutex);
 		return;
 	}
 	if (!isLocked(currentEntry)) {
@@ -1255,5 +1299,6 @@ void menuOnRender(SokuLib::MenuResult *This)
 		lockedText.draw();
 		lockedImg.draw();
 	}
+	__unlockMutex(drawMutex);
 	frame.draw();
 }
