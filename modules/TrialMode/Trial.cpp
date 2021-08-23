@@ -49,10 +49,30 @@ Trial::Trial(const char *folder, const nlohmann::json &json)
 		this->music = (t < 10 ? "data/bgm/st0" : "data/bgm/st") + std::to_string(t) + ".ogg";
 	} else
 		this->music = json["music"];
+	if (json.contains("counter_hit") && json["counter_hit"].is_boolean() && json["counter_hit"].get<bool>()) {
+		DWORD old;
+
+		puts("Moves always counter hit");
+		::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
+		// This removes the check for counter hits so moves will always counter hit if they can
+		*(unsigned short *)0x47abb7 = 0x9090;
+		*(unsigned short *)0x47abc3 = 0x9090;
+		::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+		::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+	}
 }
 
 Trial::~Trial()
 {
+	DWORD old;
+
+	puts("Restore counter hit check");
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
+	// We remove the always counter hit patch
+	*(unsigned short *)0x47abb7 = 0x1e75; //           JNZ        LAB_0047abd7
+	*(unsigned short *)0x47abc3 = 0x1275; //           JNZ        LAB_0047abd7
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
 Trial *Trial::create(const char *folder, SokuLib::Character player, const nlohmann::json &json)
@@ -77,6 +97,7 @@ void Trial::hook()
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origKeymapManager_SetInputs = SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(0x40A45D, KeymapManagerSetInputs));
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
 void Trial::_introOnRender() const
