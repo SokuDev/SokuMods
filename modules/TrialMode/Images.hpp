@@ -13,14 +13,16 @@ public:
 	virtual void reset() = 0;
 	virtual void update() = 0;
 	virtual void render() const = 0;
+	virtual bool isValid() const = 0;
 };
 
 class SimpleImage : public Image, public SokuLib::DrawUtils::Sprite {
 public:
-	SimpleImage(const std::string &path, const SokuLib::Vector2i &pos, bool CRTEffect);
+	SimpleImage(const std::string &path, const SokuLib::Vector2i &pos);
 	void reset() override;
 	void update() override;
 	void render() const override;
+	bool isValid() const override;
 };
 
 class AnimatedImage : public Image {
@@ -33,7 +35,6 @@ private:
 	};
 
 	bool _antiAlias;
-	bool _CRTEffect;
 	IDirect3DTexture9 **_pphandle;
 	SokuLib::DrawUtils::Sprite _sprite;
 	SokuLib::Vector2i _pos;
@@ -50,12 +51,13 @@ private:
 	void _processFrame(Frame *frameObj);
 
 public:
-	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing, bool CRTEffect);
+	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing);
 	~AnimatedImage() override = default;
 	void reset() override;
 	void update() override;
 	void processChunk(struct GIF_WHDR *chunk);
 	void render() const override;
+	bool isValid() const override;
 };
 
 #endif //SWRSTOYS_IMAGES_HPP

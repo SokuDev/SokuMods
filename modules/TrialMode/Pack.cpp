@@ -347,9 +347,9 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 		auto str = path + object["preview"].get<std::string>();
 
 		if (str.size() > 4 && str.substr(str.size() - 4, 4) == ".gif")
-			this->preview.reset(new AnimatedImage(str, {398, 128}, true, true));
+			this->preview.reset(new AnimatedImage(str, {398, 128}, true));
 		else
-			this->preview.reset(new SimpleImage(str, {398, 128}, true));
+			this->preview.reset(new SimpleImage(str, {398, 128}));
 	}
 
 	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())
