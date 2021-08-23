@@ -39,6 +39,7 @@ static SokuLib::DrawUtils::Sprite nameFilterText;
 static SokuLib::DrawUtils::Sprite modeFilterText;
 static SokuLib::DrawUtils::Sprite topicFilterText;
 static SokuLib::DrawUtils::Sprite previewContainer;
+static SokuLib::DrawUtils::Sprite blackSilouettes;
 static SokuLib::DrawUtils::Sprite lockedNoise;
 static SokuLib::DrawUtils::Sprite lockedText;
 static SokuLib::DrawUtils::Sprite lockedImg;
@@ -471,6 +472,12 @@ void menuLoadAssets()
 	frame.rect.height = frame.texture.getSize().y;
 	frame.setPosition({392, 122});
 
+	blackSilouettes.texture.loadFromResource(myModule, MAKEINTRESOURCE(40));
+	blackSilouettes.setSize({200, 150});
+	blackSilouettes.rect.width = blackSilouettes.texture.getSize().x;
+	blackSilouettes.rect.height = blackSilouettes.texture.getSize().y;
+	blackSilouettes.setPosition({398, 128});
+
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
 	lockedText.rect.height = 150;
@@ -673,6 +680,7 @@ void menuUnloadAssets()
 	lockedImg.texture.destroy();
 	frame.texture.destroy();
 	CRTBands.texture.destroy();
+	blackSilouettes.texture.destroy();
 
 	loadedPacks.clear();
 	uniqueNames.clear();
@@ -1232,7 +1240,12 @@ void menuOnRender(SokuLib::MenuResult *This)
 		return;
 	}
 	if (!isLocked(currentEntry)) {
-		loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
+		if (loadedPacks[shownPack]->scenarios[currentEntry]->preview->isValid())
+			loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
+		else {
+			lockedNoise.draw();
+			blackSilouettes.draw();
+		}
 		if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
 			loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
 		CRTBands.draw();

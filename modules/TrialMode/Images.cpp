@@ -14,7 +14,7 @@
 #define fprintf(...)
 #endif
 
-SimpleImage::SimpleImage(const std::string &path, const SokuLib::Vector2i &pos, bool CRTEffect)
+SimpleImage::SimpleImage(const std::string &path, const SokuLib::Vector2i &pos)
 {
 	this->texture.loadFromFile(path.c_str());
 	this->rect = {
@@ -38,6 +38,11 @@ void SimpleImage::render() const
 void SimpleImage::reset()
 {}
 
+bool SimpleImage::isValid() const
+{
+	return this->texture.hasTexture();
+}
+
 static void callback(void *data, struct GIF_WHDR *chunk)
 {
 	auto This = (AnimatedImage *)data;
@@ -45,7 +50,7 @@ static void callback(void *data, struct GIF_WHDR *chunk)
 	This->processChunk(chunk);
 }
 
-AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing, bool CRTEffect)
+AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing)
 {
 	std::ifstream stream{path, std::ifstream::binary};
 	int id;
@@ -84,14 +89,6 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 	}
 
 	printf("GIF %dx%d\n", this->_size.x, this->_size.y);
-	this->_sprite.texture.setHandle(id, this->_size);
-	this->_sprite.rect = {
-		0, 0,
-		static_cast<int>(this->_sprite.texture.getSize().x),
-		static_cast<int>(this->_sprite.texture.getSize().y),
-	};
-	this->_sprite.setPosition(this->_pos);
-	this->_sprite.setSize({200, 150});
 
 	delete[] buf;
 	delete[] this->_frame;
@@ -102,6 +99,14 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 		fprintf(stderr, "D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, %p) failed with code %i\n", this->_pphandle, ret);
 		return;
 	}
+	this->_sprite.texture.setHandle(id, this->_size);
+	this->_sprite.rect = {
+		0, 0,
+		static_cast<int>(this->_sprite.texture.getSize().x),
+		static_cast<int>(this->_sprite.texture.getSize().y),
+		};
+	this->_sprite.setPosition(this->_pos);
+	this->_sprite.setSize({200, 150});
 	this->_updateTexture();
 }
 
@@ -231,14 +236,9 @@ void AnimatedImage::_copyDecodedFrame(struct GIF_WHDR *chunk, SokuLib::DrawUtils
 
 void AnimatedImage::_processFrame(AnimatedImage::Frame *frameObj)
 {
-	if (!this->_CRTEffect)
-		return;
-	for (auto y = 0; y < 150; y += 2)
-		for (auto x = 0; x < 200; x++) {
-			auto &color = frameObj->buffer[y * 200 + x];
+}
 
-			color.r = color.r * 5 / 6;
-			color.g = color.g * 5 / 6;
-			color.b = color.b * 5 / 6;
-		}
+bool AnimatedImage::isValid() const
+{
+	return this->_sprite.texture.hasTexture();
 }
