@@ -27,7 +27,7 @@
         [0, 0],
         [0, 0]
     ],
-    "weather": 21,
+    "weather": "clear",
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [],
