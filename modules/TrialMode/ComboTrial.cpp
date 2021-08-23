@@ -246,16 +246,23 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
 		this->_playIntro();
-	else if (this->_actionCounter != this->_exceptedActions.size())
-		for (auto act : this->_exceptedActions[this->_actionCounter]->actions)
-			if (
-				addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == act &&
-				isStartOfMove(act, battleMgr.leftCharacterManager, SokuLib::leftChar)
-			) {
-				this->_actionCounter++;
-				break;
-			}
+	else if (this->_actionCounter != this->_exceptedActions.size()) {
+		auto i = this->_actionCounter;
 
+		while (i == this->_actionCounter || this->_exceptedActions[i - 1]->optional) {
+			for (auto act : this->_exceptedActions[i]->actions)
+				if (
+					addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == act &&
+					isStartOfMove(act, battleMgr.leftCharacterManager, SokuLib::leftChar)
+				) {
+					this->_actionCounter = i + 1;
+					goto checkFinish;
+				}
+			i++;
+		}
+	}
+
+checkFinish:
 	if (!this->_finished && this->_actionCounter == this->_exceptedActions.size() && this->_scores.front().met(this->_attempts)) {
 		SokuLib::playSEWaveBuffer(44);
 		if (!this->_playingIntro)
@@ -339,6 +346,9 @@ void ComboTrial::render() const
 		this->_doll.draw();
 	} else
 		this->_attemptText.draw();
+
+	auto last = 0;
+
 	for (int i = 0; i < this->_exceptedActions.size(); i++) {
 		auto &elem = this->_exceptedActions[i];
 
@@ -346,8 +356,19 @@ void ComboTrial::render() const
 			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0xFF, 0x60};
 		else if (this->_actionCounter > i)
 			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0x60, 0x60};
-		else
-			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor::White;
+		else if (elem->optional)
+			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0xFF, 0xFF, 0x60};
+		else {
+			bool good = false;
+
+			for (int j = i; j > 0 && this->_exceptedActions[j - 1]->optional; j--)
+				good |= (j - 1) == this->_actionCounter;
+
+			if (good)
+				elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0xFF, 0x60};
+			else
+				elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor::White;
+		}
 		elem->sprite.setPosition(pos);
 		elem->sprite.draw();
 		pos.y += elem->sprite.getSize().y;
@@ -565,6 +586,10 @@ void ComboTrial::SpecialAction::parse()
 			if (!hitsStr.empty())
 				throw std::invalid_argument("Multiple hit counts found for move " + this->name);
 		}
+		if (c == '!') {
+			this->optional = true;
+			continue;
+		}
 		p &= c != ')' || !d;
 		if (c == '(' || c == ')' || c == ':')
 			continue;
@@ -636,7 +661,7 @@ void ComboTrial::SpecialAction::parse()
 
 	SokuLib::Vector2i realSize;
 
-	this->sprite.texture.createFromText(this->moveName.c_str(), defaultFont16, {100, 20}, &realSize);
+	this->sprite.texture.createFromText(this->moveName.c_str(), defaultFont16, {400, 20}, &realSize);
 	this->sprite.setSize(realSize.to<unsigned>());
 	this->sprite.rect.width = realSize.x;
 	this->sprite.rect.height = realSize.y;

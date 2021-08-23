@@ -18,7 +18,7 @@
     },
     "type": "combo",
 
-    "expected": "d6 j5aa d6 j5aa d6 j5a:12 j8a",
+    "expected": "d6/9 j5aa d6/9 j5aa d6 j5a:12 j8a",
     "skills": [
         [0, 0],
         [0, 0],
