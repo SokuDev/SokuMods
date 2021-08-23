@@ -440,7 +440,7 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 }
 
-void loadPacks()
+void loadPacks(void (*onPackLoaded)(int pos))
 {
 	printf("Loading packs in %s\n", packsLocation);
 
@@ -492,7 +492,11 @@ void loadPacks()
 		auto pack = new Pack(std::string(buffer), val);
 
 		if (!pack->scenarios.empty()) {
+			__lockMutex(drawMutex);
 			loadedPacks.emplace_back(pack);
+			__unlockMutex(drawMutex);
+
+			__lockMutex(filterMutex);
 			packsByName[pack->nameStr].push_back(loadedPacks.back());
 			packsByCategory[pack->category].push_back(loadedPacks.back());
 			if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
@@ -504,6 +508,27 @@ void loadPacks()
 				if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
 					uniqueModes.push_back(mode);
 			}
+			__unlockMutex(filterMutex);
+
+			__lockMutex(drawMutex);
+			std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
+				if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
+					return pack2->error.texture.hasTexture();
+				return pack1->category < pack2->category;
+			});
+			__unlockMutex(drawMutex);
+			__lockMutex(filterMutex);
+			std::sort(uniqueCategories.begin(), uniqueCategories.end());
+			std::sort(uniqueNames.begin(), uniqueNames.end());
+			std::sort(uniqueModes.begin(), uniqueModes.end());
+			__unlockMutex(filterMutex);
+
+			if (onPackLoaded)
+				onPackLoaded(std::find_if(
+					loadedPacks.begin(),
+					loadedPacks.end(),
+					[pack](const std::shared_ptr<Pack> &p) { return &*p == pack; }
+				) - loadedPacks.begin());
 		} else {
 			puts("Invalid pack :(");
 			delete pack;

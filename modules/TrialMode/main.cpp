@@ -206,10 +206,6 @@ int __fastcall myTitleOnProcess(SokuLib::Title *This)
 
 int __fastcall myResultOnProcess(SokuLib::MenuResult *This)
 {
-	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
-		SokuLib::playSEWaveBuffer(0x29);
-		return 0;
-	}
 	return menuOnProcess(This) && !goToTitle;
 }
 

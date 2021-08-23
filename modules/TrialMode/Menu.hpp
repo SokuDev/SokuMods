@@ -34,7 +34,11 @@ extern SokuLib::SWRFont defaultFont16;
 extern bool loadRequest;
 extern std::unique_ptr<Trial> loadedTrial;
 extern bool editorMode;
+extern bool drawMutex;
+extern bool filterMutex;
 
+void __lockMutex(volatile bool &mutex);
+void __unlockMutex(bool &mutex);
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
 void menuOnRender(SokuLib::MenuResult *This);

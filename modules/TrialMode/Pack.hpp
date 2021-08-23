@@ -69,7 +69,7 @@ extern const std::map<unsigned, std::string> swrCharacters;
 extern bool hasSoku2;
 extern char packsLocation[1024 + MAX_PATH];
 
-void loadPacks();
+void loadPacks(void (*onPackLoaded)(int pos) = nullptr);
 
 
 #endif //SWRSTOYS_PACK_HPP
