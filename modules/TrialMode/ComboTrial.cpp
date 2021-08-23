@@ -246,12 +246,15 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
 		this->_playIntro();
-	else if (
-		this->_actionCounter != this->_exceptedActions.size() &&
-		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == this->_exceptedActions[this->_actionCounter]->action &&
-		isStartOfMove(this->_exceptedActions[this->_actionCounter]->action, battleMgr.leftCharacterManager, SokuLib::leftChar)
-	)
-		this->_actionCounter++;
+	else if (this->_actionCounter != this->_exceptedActions.size())
+		for (auto act : this->_exceptedActions[this->_actionCounter]->actions)
+			if (
+				addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == act &&
+				isStartOfMove(act, battleMgr.leftCharacterManager, SokuLib::leftChar)
+			) {
+				this->_actionCounter++;
+				break;
+			}
 
 	if (!this->_finished && this->_actionCounter == this->_exceptedActions.size() && this->_scores.front().met(this->_attempts)) {
 		SokuLib::playSEWaveBuffer(44);
@@ -456,8 +459,8 @@ void ComboTrial::_playIntro()
 	}
 	arr->counter = (arr->counter + 1) % arr->inputs.size();
 	if (
-		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == arr->action &&
-		isStartOfMove(arr->action, battleMgr.leftCharacterManager, SokuLib::leftChar)
+		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == arr->actions[0] &&
+		isStartOfMove(arr->actions[0], battleMgr.leftCharacterManager, SokuLib::leftChar)
 	) {
 		arr->counter = 0;
 		this->_actionWaitCounter = 0;
@@ -573,12 +576,34 @@ void ComboTrial::SpecialAction::parse()
 			this->moveName += std::tolower(c);
 	}
 	printf("Move %s -> %s (%s) :%s: -> ", this->name.c_str(), this->moveName.c_str(), hitsStr.c_str(), delayStr.c_str());
+
+	std::string move;
+	std::string firstMove;
+
 	try {
-		this->action = getMoveAction(SokuLib::leftChar, this->moveName);
-		printf("%i ", this->action);
+		size_t pos;
+		std::string str = this->moveName;
+		std::string real;
+
+		do {
+			pos = str.find('/');
+			move = str.substr(0, pos);
+			if (firstMove.empty())
+				firstMove = move;
+			this->actions.push_back(getMoveAction(SokuLib::leftChar, move));
+			if (pos != std::string::npos) {
+				str = str.substr(pos + 1);
+				printf("%i/", this->actions.back());
+				real += move + "/";
+			} else {
+				printf("%i ", this->actions.back());
+				real += move;
+			}
+		} while (pos != std::string::npos);
+		this->moveName = real;
 	} catch (std::exception &) {
 		printf("INVALID\n");
-		throw std::invalid_argument(this->moveName + " is not a recognized move name");
+		throw std::invalid_argument(move + " is not a recognized move name");
 	}
 
 	try {
@@ -604,17 +629,17 @@ void ComboTrial::SpecialAction::parse()
 	}
 
 	try {
-		this->inputs = actionStrToInputs.at(this->moveName);
+		this->inputs = actionStrToInputs.at(firstMove);
 	} catch (...) {
-		throw std::invalid_argument(this->moveName + " is not yet implemented");
+		throw std::invalid_argument(firstMove + " is not yet implemented");
 	}
 
-	SokuLib::Vector2i real;
+	SokuLib::Vector2i realSize;
 
-	this->sprite.texture.createFromText(this->moveName.c_str(), defaultFont16, {100, 20}, &real);
-	this->sprite.setSize(real.to<unsigned>());
-	this->sprite.rect.width = real.x;
-	this->sprite.rect.height = real.y;
+	this->sprite.texture.createFromText(this->moveName.c_str(), defaultFont16, {100, 20}, &realSize);
+	this->sprite.setSize(realSize.to<unsigned>());
+	this->sprite.rect.width = realSize.x;
+	this->sprite.rect.height = realSize.y;
 }
 
 ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrial::ScorePrerequisites *other)
