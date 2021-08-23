@@ -13,6 +13,7 @@
 class ComboTrial : public Trial {
 private:
 	struct SpecialAction {
+		bool optional;
 		std::vector<SokuLib::Action> actions;
 		unsigned nbHits;
 		unsigned delay;
