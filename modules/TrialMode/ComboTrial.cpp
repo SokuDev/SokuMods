@@ -14,6 +14,37 @@
 #define dxLockRect(texture, ...) (*((int (__stdcall**)(void*, int, D3DLOCKED_RECT*, int, int))(*(int*)texture + 0x4c)))(texture, __VA_ARGS__)
 #define dxUnlockRect(texture, ...) (*((int (__stdcall**)(void*, int))(*(int*)texture + 0x50)))(texture, __VA_ARGS__)
 
+static const std::map<std::string, SokuLib::Weather> weathers {
+	{ "sunny",          SokuLib::WEATHER_SUNNY },
+	{ "drizzle",        SokuLib::WEATHER_DRIZZLE },
+	{ "cloudy",         SokuLib::WEATHER_CLOUDY },
+	{ "blue sky",       SokuLib::WEATHER_BLUE_SKY },
+	{ "hail",           SokuLib::WEATHER_HAIL },
+	{ "spring haze",    SokuLib::WEATHER_SPRING_HAZE },
+	{ "heavy fog",      SokuLib::WEATHER_HEAVY_FOG },
+	{ "snow",           SokuLib::WEATHER_SNOW },
+	{ "sun shower",     SokuLib::WEATHER_SUN_SHOWER },
+	{ "sprinkle",       SokuLib::WEATHER_SPRINKLE },
+	{ "tempest",        SokuLib::WEATHER_TEMPEST },
+	{ "mountain vapor", SokuLib::WEATHER_MOUNTAIN_VAPOR },
+	{ "mm",             SokuLib::WEATHER_MOUNTAIN_VAPOR },
+	{ "river mist",     SokuLib::WEATHER_RIVER_MIST },
+	{ "rm",             SokuLib::WEATHER_RIVER_MIST },
+	{ "typhoon",        SokuLib::WEATHER_TYPHOON },
+	{ "calm",           SokuLib::WEATHER_CALM },
+	{ "diamond dust",   SokuLib::WEATHER_DIAMOND_DUST },
+	{ "dd",             SokuLib::WEATHER_DIAMOND_DUST },
+	{ "dust storm",     SokuLib::WEATHER_DUST_STORM },
+	{ "ds",             SokuLib::WEATHER_DUST_STORM },
+	{ "scorching sun",  SokuLib::WEATHER_SCORCHING_SUN },
+	{ "ss",             SokuLib::WEATHER_SCORCHING_SUN },
+	{ "monsoon",        SokuLib::WEATHER_MONSOON },
+	{ "aurora",         SokuLib::WEATHER_AURORA },
+	{ "random",         SokuLib::WEATHER_AURORA },
+	{ "twilight",       SokuLib::WEATHER_TWILIGHT },
+	{ "clear",          SokuLib::WEATHER_CLEAR },
+	{ "none",           SokuLib::WEATHER_CLEAR },
+};
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 
 ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nlohmann::json &json) :
@@ -85,6 +116,17 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	}
 
 	this->_weather = json.contains("weather") && json["weather"].is_number() ? static_cast<SokuLib::Weather>(json["weather"].get<int>()) : SokuLib::WEATHER_CLEAR;
+	if (json.contains("weather") && json["weather"].is_string()) {
+		std::string weather = json["weather"];
+
+		std::for_each(weather.begin(), weather.end(), [](char &c){ c = tolower(c); });
+
+		auto it = weathers.find(weather);
+
+		if (it == weathers.end())
+			throw std::invalid_argument(weather + " is not a valid weather name");
+		this->_weather = it->second;
+	}
 	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() ? json["disable_limit"].get<bool>() : false;
 	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
 	this->_playComboAfterIntro = json.contains("play_combo_after_intro") && json["play_combo_after_intro"].is_boolean() ? json["play_combo_after_intro"].get<bool>() : false;

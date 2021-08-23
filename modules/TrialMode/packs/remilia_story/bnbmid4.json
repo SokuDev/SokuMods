@@ -28,7 +28,7 @@
         [0, 0]
     ],
     "counter_hit": true,
-    "weather": 21,
+    "weather": "clear",
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [],
