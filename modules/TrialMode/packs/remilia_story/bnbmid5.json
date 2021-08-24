@@ -16,6 +16,8 @@
             "y": 0
         }
     },
+    "intro": "bnbmid5intro.lua",
+    "outro": "bnbmid5outro.lua",
     "type": "combo",
 
     "expected": "3a 2a:55 5c d236b:32",
