@@ -6,7 +6,7 @@ local dialogs = {
 	"rWDWhy being a journalist is so hard?",
 	"lWDI was still pretty soft you know?",
 	"lCDNow talk!",
-	"rCDI was just investigating the rumor that someone<br>had infiltrated the scarlet manor.",
+	"rCDI was just investigating the rumor that someone<br>had infiltrated the Scarlet Mansion.",
 	"lcDWell it's not anything new...",
 	"rcDI meant neither Marisa nor me.",
 	"lSDNow that is surprising!<br>Sakuya must know something..."
