@@ -16,6 +16,8 @@
             "y": 100
         }
     },
+    "intro": "bnbcorn2intro.lua",
+    "outro": "bnbcorn2outro.lua",
     "type": "combo",
 
     "expected": "hj8 j5aa j6a:30 j5b",
