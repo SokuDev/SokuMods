@@ -1,5 +1,5 @@
 {
-    "music": "data/bgm/op.ogg",
+    "music": "data/bgm/st03.ogg",
     "stage": 16,
     "player": {
         "character": "remilia",
@@ -16,6 +16,8 @@
             "y": 0
         }
     },
+    "intro": "bnbcorn1intro.lua",
+    "outro": "bnbcorn1outro.lua",
     "type": "combo",
 
     "expected": "5aaaa 6a 5c",
