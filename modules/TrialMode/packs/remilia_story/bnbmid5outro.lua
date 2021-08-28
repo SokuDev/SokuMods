@@ -118,7 +118,7 @@ local anims = {
 	stage4
 }
 
-print("Init intro.")
+print("Init outro.")
 
 flashRect.size = Vector2u.new(640, 480)
 flashRect.borderColor = enums.colors.Transparent

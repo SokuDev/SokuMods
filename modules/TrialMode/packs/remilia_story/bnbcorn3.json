@@ -16,9 +16,11 @@
             "y": 100
         }
     },
+    "intro": "bnbcorn3intro.lua",
+    "outro": "bnbcorn3outro.lua",
     "type": "combo",
 
-    "expected": "d6 j5aa d6 j5aa 2c:20 hj9:35 j5aa",
+    "expected": "d6/9/8 j5aa d6/9 j5aa 2c:20 hj9/hj8:35 j5aa",
     "skills": [
         [0, 0],
         [0, 0],
