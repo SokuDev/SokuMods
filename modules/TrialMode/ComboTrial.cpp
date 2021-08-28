@@ -250,6 +250,8 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		auto i = this->_actionCounter;
 
 		while (i == this->_actionCounter || this->_exceptedActions[i - 1]->optional) {
+			if (i >= this->_exceptedActions.size())
+				break;
 			for (auto act : this->_exceptedActions[i]->actions)
 				if (
 					addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == act &&
@@ -263,7 +265,14 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	}
 
 checkFinish:
-	if (!this->_finished && this->_actionCounter == this->_exceptedActions.size() && this->_scores.front().met(this->_attempts)) {
+	if (!this->_finished && this->_scores.front().met(this->_attempts)) {
+		auto i = this->_actionCounter;
+
+		while (i < this->_exceptedActions.size()) {
+			if (!this->_exceptedActions[i]->optional)
+				goto disableLimit;
+			i++;
+		}
 		SokuLib::playSEWaveBuffer(44);
 		if (!this->_playingIntro)
 			this->_freezeCounter = 120;
@@ -271,6 +280,7 @@ checkFinish:
 		return false;
 	}
 
+disableLimit:
 	if (this->_disableLimit) {
 		battleMgr.leftCharacterManager.combo.limit = 0;
 		battleMgr.rightCharacterManager.combo.limit = 0;
