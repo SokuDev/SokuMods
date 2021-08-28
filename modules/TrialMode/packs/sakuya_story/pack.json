@@ -1,7 +1,6 @@
 {
-    "name": "The XXX Incident",
-    "category": "Sakuya Izayoi",
-    "modes": ["Combo", "Story"],
+    "name": "The Izayoi trials",
+    "category": "Sakuya Izayoi ",
     "characters": [
         "sakuya",
         "meirin"
@@ -10,8 +9,8 @@
         "isPath": false,
         "path": "data/stand/sakuya.bmp"
     },
-    "description": "Sakuya's combos",
-    "author": "Dakawalf, Exioloz",
+    "description": "Sakuya Drip",
+    "author": "Exioloz",
     "icon": {
         "isPath": false,
         "path": "data/character/sakuya/face/face000.bmp",
@@ -25,52 +24,54 @@
     },
     "scenarios": [
         {
+            "name": "f5A/2A starter",
+            "file": "lore1.json",
+            "preview": "lore1.gif",
+            "description": "2A 3A 66B | <br>Basic combo conversion for far melee pokes. <br>3A only combo into 66B on ground"
+        },
+        {
+            "name": "6A starter",
+            "file": "lore2.json",
+            "preview": "lore2.gif",
+            "description": "6A 2B hjc.9 j.6A | <br>6A Basic combo."
+        },
+        {
             "name": "5AAA starter",
-            "file": "bnbmid2.json",
-            "preview": "bnbmid2.png",
-            "description": "5AAA 2B hjc9 j2B j66/D6/D3 j5A 5AAAA | <br>Common Midscreen BnB. <br>Doesn't work on midgets <br>and most crouching characters."
+            "file": "lore3.json",
+            "preview": "lore3.gif",
+            "description": "5AAA 2B 5C d.236B | <br>The best corner carry !"
         },
         {
-            "name": "66A starter",
-            "file": "bnbmid5.json",
-            "preview": "bnbmid5.png",
-            "description": "66A d623B j5B j66 j6A | <br>Sakuya's only meterless <br>combo option after hitting 66A. <br>66A needs to hit deep enough <br>or 623B won't connect. <br>Make sure that all B knives come out, <br>otherwise it won't limit. <br>If your opponent ends up too high, <br>finish with j.6C instead."
+            "name": "66B starter",
+            "file": "lore4.json",
+            "preview": "lore4.gif",
+            "description": "66B SC205 | <br>Best (only) way to follow-up 66B. <br>Also works with Luminous Ricochet."
         },
         {
-            "name": "Corner 5AAAA starter",
-            "file": "bnbcorn0.json",
-            "preview": "bnbcorn0.png",
-            "description": "5AAAA hj9 j5A j6A j2B D2/D1 | <br>Universal BnB D2 to setup oki."
+            "name": "j6A Air-to-Air",
+            "file": "lore5.json",
+            "preview": "lore5.gif",
+            "description": "j.6A j.6C j.66 j.6C | <br>Basic Air-to-Air combo conversion. <br>Pray it limits, <br>otherwise you may add d.236B."
         },
         {
-            "name": "Corner 6A starter",
-            "file": "bnbcorn7.json",
-            "preview": "bnbcorn7.png",
-            "description": "6A 6C hj9 j5A j6C j66 j5A j6A | <br>More damaging variant of the basic 6A, <br>will however drop if started with CH f.5A. <br>Also works some distance away from the corner."
-        },
+            "name": "3A Anti-air",
+            "file": "lore6.json",
+            "preview": "lore6.gif",
+            "description": "3A hj.9 j.5A j.6A j.6C | <br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A."
+        },        
         {
-            "name": "Near-Corner 5AAA starter",
-            "file": "bnbcorn9.json",
-            "preview": "bnbcorn9.png",
-            "description": "5AAA 2B hj9 j5C D6 j5A 5AAAA | <br>Near corner, More optimized version with 5A starter."
+            "name": "66C CH",
+            "file": "lore7.json",
+            "preview": "lore7.gif",
+            "description": "66C hj.9/D9 j.5A j.2A 66A d.623B| <br>The best meterless combo off of 66C. <br>You have to walk back a little sometimes. <br>After j.5A it is corner only. <br>It is the corner ender theory."
         },
+     
         {
-            "name": "66C CH starter",
-            "file": "CH1.json",
-            "preview": "CH1.png",
-            "description": "66C hj9 j5A j2A 66A d623B | <br>The best meterless combo off of 66C. <br>Note that if you move into the corner due to 66C, <br>you have to walk back a little, <br>otherwise you will be facing outwards of the corner."
-        },
-        {
-            "name": "Corner j2A CH starter",
-            "file": "CH4.json",
-            "preview": "CH4.png",
-            "description": "j2A hj8 D3 j5A j8 j5A j2A 66A d623B | <br>An optimized corner combo, <br>that can be done off of <br>highjump escapes or similar things."
-        },
-        {
-            "name": "LV3+ d623",
-            "file": "LV3CUMbnb.json",
-            "preview": "LV3CUMbnb.png",
-            "description": "5AAA d623B j6C D8 j5A j6A j6C jd623C | <br>LV3+ Close-up magic combo."
+            "name": "5AAA starter",
+            "file": "lore8.json",
+            "preview": "lore8.gif",
+            "description": "5AAA 2B hjc.9 j.2B j.66/D6/D3 j.5A 5AAAA | <br>Common Midscreen BnB. <br>Doesn't work on midgets <br>and most crouching characters."
         }
+        
     ]
 }

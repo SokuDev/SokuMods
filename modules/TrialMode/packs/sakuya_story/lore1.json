@@ -1,14 +1,14 @@
 {
     "music": 12,
-    "stage": 12,
+    "stage": 14,
     "player": {
         "character": "sakuya",
         "palette": 0,
         "deck": [],
-        "pos": 400
+        "pos": 700
     },
     "dummy": {
-        "character": "meirin",
+        "character": "marisa",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -16,18 +16,19 @@
             "y": 0
         }
     },
-    "type": "combo",
-
-    "expected": "66c hj9:40 j5a:15 j2a 66a:40 d623b",
+    "intro" : "lore1intro.lua",
+    "outro" : "lore1outro.lua",
+    "type" : "combo",
+    "expected": "f5a/2a 3a 66b:68",
     "skills": [
         [0, 0],
         [0, 0],
         [0, 0],
         [0, 0]
     ],
-    "weather": 16,
+    "weather": 21,
     "disable_limit": false,
-    "uniform_card_cost": 5,
+    "uniform_card_cost": 1,
     "hand": [],
     "play_combo_after_intro": true,
     "hint": [
@@ -35,20 +36,21 @@
     ],
     "score": [
     {
-        "min_hits": 6,
-        "min_damage": 2500,
-        "min_limit": 85,
-        "max_limit": 130
+        "min_hits": 5,
+        "min_damage": 1469,
+        "min_limit": 60
     },
     {   
-        "min_hits": 8,
-        "min_damage" : 2585
+        "min_hits": 6,
+        "min_damage" : 1620,
+        "min_limit": 70
+        
     },
     {
-        "max_attempts": 10
+        "max_attempts": 50
     },
     {
-        "max_attempts": 5
+        "max_attempts": 25
     }
     ]
 }

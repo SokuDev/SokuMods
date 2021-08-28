@@ -13,19 +13,19 @@
         "deck": [],
         "pos": {
             "x": 800,
-            "y": 0
+            "y": 100
         }
     },
     "type": "combo",
 
-    "expected": "66a d623b j5b:10 j66:30 j6a",
+    "expected": "9 j6a:5 j6c j66/j6d j6c jd236b!:25",
     "skills": [
         [0, 0],
         [0, 0],
         [0, 0],
         [0, 0]
     ],
-    "weather": "clear",
+    "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [],
@@ -35,21 +35,20 @@
     ],
     "score": [
     {
-        "min_hits": 15,
-        "min_damage": 1900,
-        "min_limit": 90,
-        "max_limit": 130
+        "min_hits": 9,
+        "min_damage": 1705,
+        "min_limit": 88
     },
     {
-        "min_limit": 102,
-        "min_hits": 20,
-        "min_damage" : 2034
+        "min_hits": 11,
+        "min_damage": 1843,
+        "min_limit": 100
     },
     {
-        "max_attempts": 10
+        "max_attempts": 50
     },
     {
-        "max_attempts": 5
+        "max_attempts": 25
     }
     ]
 }

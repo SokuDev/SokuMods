@@ -5,27 +5,27 @@
         "character": "sakuya",
         "palette": 0,
         "deck": [],
-        "pos": 1155
+        "pos": 700
     },
     "dummy": {
         "character": "meirin",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 1240,
+            "x": 750,
             "y": 0
         }
     },
     "type": "combo",
 
-    "expected": "6a 6c hj9 j5a j6c j66 j5a j6a",
+    "expected": "d6! 5aaa 2b hj9 j5b/j2b j66:30/jd6:30 j5a:20 5aaaa",
     "skills": [
         [0, 0],
         [0, 0],
         [0, 0],
         [0, 0]
     ],
-    "weather": "clear",
+    "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [],
@@ -35,21 +35,22 @@
     ],
     "score": [
     {
-        "min_hits": 7,
-        "min_damage": 2120,
-        "min_limit": 90,
-        "max_limit": 120
-    },
-    {   
-        "min_limit": 100,
-        "min_hits": 8,
-        "min_damage" : 2144
+        "min_hits": 26,
+        "min_damage": 2300,
+        "min_limit": 100
     },
     {
-        "max_attempts": 10
+        "min_hits": 29,
+        "min_damage" : 2403,
+        "min_limit": 103
     },
     {
-        "max_attempts": 5
+        "min_hits": 32,
+        "min_damage" : 2412,
+        "min_limit": 112
+    },
+    {
+        "max_attempts": 50
     }
     ]
 }
