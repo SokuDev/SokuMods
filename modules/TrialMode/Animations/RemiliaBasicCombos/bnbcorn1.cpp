@@ -6,6 +6,22 @@
 #include <memory>
 #include "../BattleAnimation.hpp"
 
+#define TRANSLATE_MAX 120
+#define REISEN_START_LOCATION 570
+#define CAM_START_LOCATION (-20)
+#define BG_START_LOCATION 850
+#define HIT_STOP 7
+#define PUSH_RATIO 2
+
+#define spawnSubObject(chr, id, x, y) do {        \
+	float something[3];                        \
+	                                           \
+	memset(something, 0, sizeof(something));   \
+	something[2] = 1;                          \
+	((void (__thiscall *)(SokuLib::CharacterManager &, int, float, float, char, int, float *, int))0x46EB30)(chr, id, x, y, 1, 1, something, 3); \
+} while (0)
+#define updateSubObjects(chr) ((void (__thiscall *)(SokuLib::ObjListManager &))0x633ce0)((chr).objects)
+
 char profilePath[1024];
 static const std::vector<std::string> dialogs{
 	//Flandre walking happily
@@ -29,7 +45,13 @@ class Intro : public BattleAnimation {
 private:
 	SokuLib::DrawUtils::Sprite _stageBg;
 	SokuLib::DrawUtils::Sprite _stageBottom;
+	bool _falling = true;
+	bool _remiIn = false;
+	unsigned _fightCtr = 120;
+	unsigned _fightStage = 0;
 	unsigned _ctr = 240;
+	unsigned _ctr2;
+	unsigned _ctr3 = 0;
 	unsigned _currentStage = 0;
 	std::unique_ptr<SokuStand> _dialog;
 	bool _keyPressed = false;
@@ -37,6 +59,328 @@ private:
 	SokuLib::PlayerInfo _playerInfo;
 	int buffer[0xA];
 	SokuLib::CharacterManager *_reisen = nullptr;
+
+	void fightStage0(SokuLib::BattleManager &battleMgr)
+	{
+		this->_reisen->objectBase.position += this->_reisen->objectBase.speed;
+		battleMgr.rightCharacterManager.objectBase.position += battleMgr.rightCharacterManager.objectBase.speed;
+		this->_reisen->objectBase.speed.y -= 0.6;
+		battleMgr.rightCharacterManager.objectBase.speed.y -= 0.6;
+		if (this->_reisen->objectBase.position.y <= 300 && this->_reisen->objectBase.action != SokuLib::ACTION_j5A) {
+			this->_reisen->objectBase.action = SokuLib::ACTION_j5A;
+			this->_reisen->objectBase.animate();
+		}
+		if (battleMgr.rightCharacterManager.objectBase.position.y <= 200) {
+			battleMgr.rightCharacterManager.objectBase.speed = {0, 0};
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FORWARD_AIRDASH;
+			battleMgr.rightCharacterManager.objectBase.animate();
+			this->_fightStage++;
+		}
+		if (REISEN_START_LOCATION - this->_reisen->objectBase.position.x + CAM_START_LOCATION < TRANSLATE_MAX) {
+			SokuLib::camera.translate.x = REISEN_START_LOCATION - this->_reisen->objectBase.position.x + CAM_START_LOCATION;
+			SokuLib::camera.backgroundTranslate.x = this->_reisen->objectBase.position.x - REISEN_START_LOCATION + BG_START_LOCATION;
+		} else {
+			SokuLib::camera.translate.x = TRANSLATE_MAX;
+			SokuLib::camera.backgroundTranslate.x = CAM_START_LOCATION - TRANSLATE_MAX + BG_START_LOCATION;
+		}
+	}
+
+	void fightStage1(SokuLib::BattleManager &battleMgr)
+	{
+		this->_reisen->objectBase.position += this->_reisen->objectBase.speed;
+		battleMgr.rightCharacterManager.objectBase.position += battleMgr.rightCharacterManager.objectBase.speed;
+		if (this->_falling)
+			this->_reisen->objectBase.speed.y -= 0.6;
+		if (this->_reisen->objectBase.action == SokuLib::ACTION_j5A) {
+			if (this->_reisen->objectBase.frameCount == 8) {
+				SokuLib::playSEWaveBuffer(27);
+			}
+			if (this->_reisen->objectBase.position.y <= 0) {
+				SokuLib::playSEWaveBuffer(30);
+				this->_reisen->objectBase.speed.x = -4;
+				this->_reisen->objectBase.speed.y = 0;
+				this->_reisen->objectBase.position.y = 0;
+				this->_reisen->objectBase.action = SokuLib::ACTION_WALK_BACKWARD;
+				this->_reisen->objectBase.animate();
+				this->_falling = false;
+			}
+		} else if (
+			this->_reisen->objectBase.action == SokuLib::ACTION_RIGHTBLOCK_HIGH_MEDIUM_BLOCKSTUN ||
+			this->_reisen->objectBase.action == SokuLib::ACTION_RIGHTBLOCK_LOW_BIG_BLOCKSTUN
+		) {
+			if (this->_reisen->objectBase.speed.x > 0)
+				this->_reisen->objectBase.speed.x += 0.6;
+			else
+				this->_reisen->objectBase.speed.x = 0;
+		} else if (this->_reisen->objectBase.action == SokuLib::ACTION_BE2) {
+			if (this->_reisen->objectBase.actionBlockId == 1 && this->_reisen->objectBase.frameCount == 0) {
+				this->_reisen->objectBase.speed.y = 20;
+				SokuLib::playSEWaveBuffer(43);
+			} else if (this->_reisen->objectBase.actionBlockId >= 1) {
+				this->_reisen->objectBase.speed.y -= 0.75;
+			}
+		}
+
+		if (this->_remiIn) {
+			battleMgr.leftCharacterManager.objectBase.doAnimation();
+			battleMgr.leftCharacterManager.objectBase.doAnimation();
+			battleMgr.leftCharacterManager.objectBase.position = battleMgr.leftCharacterManager.objectBase.position + battleMgr.leftCharacterManager.objectBase.speed;
+			if (battleMgr.leftCharacterManager.objectBase.position.y <= 0) {
+				if (battleMgr.leftCharacterManager.objectBase.speed.y < 0) {
+					battleMgr.leftCharacterManager.objectBase.speed.x = 20;
+					battleMgr.leftCharacterManager.objectBase.speed.y = 0;
+					battleMgr.leftCharacterManager.objectBase.animate2();
+				}
+				if (battleMgr.leftCharacterManager.objectBase.speed.x != 0)
+					battleMgr.leftCharacterManager.objectBase.speed.x = battleMgr.leftCharacterManager.objectBase.speed.x - 2;
+				else if (battleMgr.leftCharacterManager.objectBase.actionBlockId == 0) {
+					this->_fightStage++;
+					this->_dialog->setHidden(false);
+					battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+					battleMgr.leftCharacterManager.objectBase.animate();
+				} else if (battleMgr.leftCharacterManager.objectBase.actionBlockId != 2)
+					battleMgr.leftCharacterManager.objectBase.animate2();
+			} else
+				battleMgr.leftCharacterManager.objectBase.speed.y = battleMgr.leftCharacterManager.objectBase.speed.y - 2;
+		}
+
+		if (this->_reisen->objectBase.action == SokuLib::ACTION_NEUTRAL_HIGH_JUMP) {
+			if (this->_reisen->objectBase.actionBlockId == 1 && this->_reisen->objectBase.frameCount == 0) {
+				this->_reisen->objectBase.speed.y = 20;
+				SokuLib::playSEWaveBuffer(43);
+			} else if (this->_reisen->objectBase.actionBlockId >= 1) {
+				this->_reisen->objectBase.speed.y -= 0.75;
+			}
+		}
+
+		if (battleMgr.rightCharacterManager.objectBase.position.x < this->_reisen->objectBase.position.x + 75) {
+			this->_reisen->objectBase.position.x += battleMgr.rightCharacterManager.objectBase.speed.x / PUSH_RATIO;
+			if (battleMgr.rightCharacterManager.objectBase.position.x < this->_reisen->objectBase.position.x + 75)
+				battleMgr.rightCharacterManager.objectBase.position.x = this->_reisen->objectBase.position.x + 75;
+		}
+
+		if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_NEUTRAL_HIGH_JUMP) {
+			if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 1 && battleMgr.rightCharacterManager.objectBase.frameCount == 0) {
+				battleMgr.rightCharacterManager.objectBase.speed.y = 23;
+				SokuLib::playSEWaveBuffer(43);
+			} else if (battleMgr.rightCharacterManager.objectBase.actionBlockId >= 1) {
+				battleMgr.rightCharacterManager.objectBase.speed.y--;
+			}
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_3A) {
+			this->_ctr2++;
+			if (this->_ctr2 == 15) {
+				battleMgr.leftCharacterManager.objectBase.animate();
+				battleMgr.leftCharacterManager.objectBase.animate2();
+				battleMgr.leftCharacterManager.objectBase.speed = SokuLib::Vector2f{30, 12};
+				battleMgr.leftCharacterManager.objectBase.position.y = 0;
+				battleMgr.leftCharacterManager.playSE(10);
+				this->_remiIn = true;
+			}
+			if (battleMgr.rightCharacterManager.objectBase.frameCount == 10) {
+				SokuLib::playSEWaveBuffer(29);
+				battleMgr.rightCharacterManager.objectBase.speed.x = -13;
+			} else if (battleMgr.rightCharacterManager.objectBase.frameCount == 14) {
+				SokuLib::playSEWaveBuffer(20);
+				this->_fightCtr = HIT_STOP;
+				this->_reisen->objectBase.speed.x = -13;
+				this->_reisen->objectBase.action = SokuLib::ACTION_RIGHTBLOCK_LOW_BIG_BLOCKSTUN;
+				this->_reisen->objectBase.animate();
+			} else if (this->_ctr2 == 20) {
+				this->_reisen->objectBase.speed.x = 0;
+				this->_reisen->objectBase.action = SokuLib::ACTION_BE2;
+				this->_reisen->objectBase.animate();
+				SokuLib::playSEWaveBuffer(35);
+			} else if (this->_ctr2 == 25) {
+				this->_ctr2 = 0;
+				battleMgr.rightCharacterManager.objectBase.speed.x = 0;
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_NEUTRAL_HIGH_JUMP;
+				battleMgr.rightCharacterManager.objectBase.animate();
+			}
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_2A) {
+			if (battleMgr.rightCharacterManager.objectBase.frameCount == 8) {
+				SokuLib::playSEWaveBuffer(27);
+				SokuLib::playSEWaveBuffer(20);
+				this->_fightCtr = HIT_STOP;
+				this->_reisen->objectBase.action = SokuLib::ACTION_RIGHTBLOCK_LOW_SMALL_BLOCKSTUN;
+				this->_reisen->objectBase.animate();
+			} else if (battleMgr.rightCharacterManager.objectBase.frameCount == 9) {
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_3A;
+				battleMgr.rightCharacterManager.objectBase.animate();
+				this->_ctr2 = 0;
+			}
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_j5AA) {
+			if (battleMgr.rightCharacterManager.objectBase.frameCount == 5) {
+				SokuLib::playSEWaveBuffer(27);
+				SokuLib::playSEWaveBuffer(20);
+				this->_fightCtr = HIT_STOP;
+				this->_reisen->objectBase.speed.x = -10;
+				this->_reisen->objectBase.action = SokuLib::ACTION_RIGHTBLOCK_HIGH_MEDIUM_BLOCKSTUN;
+				this->_reisen->objectBase.animate();
+			}
+			if (battleMgr.rightCharacterManager.objectBase.position.y <= 0) {
+				battleMgr.rightCharacterManager.objectBase.speed = {0, 0};
+				battleMgr.rightCharacterManager.objectBase.position.y = 0;
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_2A;
+				battleMgr.rightCharacterManager.objectBase.animate();
+				SokuLib::playSEWaveBuffer(30);
+			}
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_j5A) {
+			if (battleMgr.rightCharacterManager.objectBase.frameCount == 8) {
+				SokuLib::playSEWaveBuffer(27);
+				SokuLib::playSEWaveBuffer(20);
+				this->_fightCtr = HIT_STOP;
+				this->_reisen->objectBase.speed.x = -10;
+				this->_reisen->objectBase.action = SokuLib::ACTION_RIGHTBLOCK_HIGH_MEDIUM_BLOCKSTUN;
+				this->_reisen->objectBase.animate();
+			} else if (battleMgr.rightCharacterManager.objectBase.frameCount == 9) {
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_j5AA;
+				battleMgr.rightCharacterManager.objectBase.animate();
+			}
+		} else {
+			if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 1 && battleMgr.rightCharacterManager.objectBase.frameCount == 0) {
+				battleMgr.rightCharacterManager.objectBase.speed = {-30, -4};
+				SokuLib::playSEWaveBuffer(31); // Dashing sound
+			} else if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 1 && battleMgr.rightCharacterManager.objectBase.frameCount == 8) {
+				battleMgr.rightCharacterManager.objectBase.speed.x = -10;
+			} else if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 2) {
+				battleMgr.rightCharacterManager.objectBase.speed.y = -4.5;
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_j5A;
+				battleMgr.rightCharacterManager.objectBase.animate();
+			}
+		}
+		if (REISEN_START_LOCATION - this->_reisen->objectBase.position.x + CAM_START_LOCATION < TRANSLATE_MAX) {
+			SokuLib::camera.translate.x = REISEN_START_LOCATION - this->_reisen->objectBase.position.x + CAM_START_LOCATION;
+			SokuLib::camera.backgroundTranslate.x = this->_reisen->objectBase.position.x - REISEN_START_LOCATION + BG_START_LOCATION;
+		} else {
+			SokuLib::camera.translate.x = TRANSLATE_MAX;
+			SokuLib::camera.backgroundTranslate.x = CAM_START_LOCATION - TRANSLATE_MAX + BG_START_LOCATION;
+		}
+	}
+
+	void fightStage2(SokuLib::BattleManager &battleMgr)
+	{
+		this->_reisen->objectBase.position += this->_reisen->objectBase.speed;
+		battleMgr.rightCharacterManager.objectBase.position += battleMgr.rightCharacterManager.objectBase.speed;
+
+		this->_ctr3++;
+		if (this->_ctr3 == 5) {
+			battleMgr.rightCharacterManager.objectBase.speed.y = 2.66;
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_j6A;
+			battleMgr.rightCharacterManager.objectBase.animate();
+			this->_reisen->objectBase.action = SokuLib::ACTION_j2B;
+			this->_reisen->objectBase.animate();
+		}
+
+		if (this->_reisen->objectBase.action == SokuLib::ACTION_BE2) {
+			if (this->_reisen->objectBase.actionBlockId == 1 && this->_reisen->objectBase.frameCount == 0) {
+				this->_reisen->objectBase.speed.y = 20;
+				SokuLib::playSEWaveBuffer(43);
+			} else if (this->_reisen->objectBase.actionBlockId >= 1) {
+				this->_reisen->objectBase.speed.y -= 0.75;
+			}
+		} else if (this->_reisen->objectBase.position.x < -500) {
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FLY;
+			battleMgr.rightCharacterManager.objectBase.animate();
+			battleMgr.rightCharacterManager.objectBase.speed = {0, 0};
+			this->_reisen->objectBase.speed = {0, 0};
+			this->_reisen->objectBase.position.x = -490;
+		}
+
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
+		if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_NEUTRAL_HIGH_JUMP) {
+			if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 1 && battleMgr.rightCharacterManager.objectBase.frameCount == 0) {
+				battleMgr.rightCharacterManager.objectBase.speed.y = 23;
+				SokuLib::playSEWaveBuffer(43);
+			} else if (battleMgr.rightCharacterManager.objectBase.actionBlockId >= 1) {
+				battleMgr.rightCharacterManager.objectBase.speed.y--;
+			}
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_3A) {
+			this->_ctr2++;
+			if (battleMgr.rightCharacterManager.objectBase.frameCount == 10) {
+				SokuLib::playSEWaveBuffer(29);
+				battleMgr.rightCharacterManager.objectBase.speed.x = -13;
+			} else if (battleMgr.rightCharacterManager.objectBase.frameCount == 14) {
+				SokuLib::playSEWaveBuffer(20);
+				this->_fightCtr = HIT_STOP;
+				this->_reisen->objectBase.speed.x = -13;
+				this->_reisen->objectBase.action = SokuLib::ACTION_RIGHTBLOCK_LOW_BIG_BLOCKSTUN;
+				this->_reisen->objectBase.animate();
+			} else if (this->_ctr2 == 20) {
+				this->_reisen->objectBase.speed.x = 0;
+				this->_reisen->objectBase.action = SokuLib::ACTION_BE2;
+				this->_reisen->objectBase.animate();
+				SokuLib::playSEWaveBuffer(35);
+			} else if (this->_ctr2 == 25) {
+				this->_ctr2 = 0;
+				battleMgr.rightCharacterManager.objectBase.speed.x = 0;
+				battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_NEUTRAL_HIGH_JUMP;
+				battleMgr.rightCharacterManager.objectBase.animate();
+			}
+		} else if (battleMgr.rightCharacterManager.objectBase.position.y < 0 && battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_LANDING) {
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_LANDING;
+			battleMgr.rightCharacterManager.objectBase.animate();
+			battleMgr.rightCharacterManager.objectBase.position.y = 0;
+			battleMgr.rightCharacterManager.objectBase.speed = {0, 0};
+			SokuLib::playSEWaveBuffer(30);
+		} else if (
+			battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_LANDING &&
+			battleMgr.rightCharacterManager.objectBase.actionBlockId == 0 &&
+			battleMgr.rightCharacterManager.objectBase.frameCount == 0
+		) {
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+			battleMgr.rightCharacterManager.objectBase.animate();
+			this->_dialog->onKeyPress();
+			this->_fightStage++;
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_FALLING)
+			battleMgr.rightCharacterManager.objectBase.speed.y -= 0.6;
+		else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_FLY) {
+			if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 1 && battleMgr.rightCharacterManager.objectBase.frameCount == 0) {
+				battleMgr.rightCharacterManager.objectBase.speed.y = -25;
+				SokuLib::playSEWaveBuffer(31);
+			} else if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 1 && battleMgr.rightCharacterManager.objectBase.frameCount == 12)
+				battleMgr.rightCharacterManager.objectBase.speed.y = -4;
+			else if (battleMgr.rightCharacterManager.objectBase.actionBlockId > 1 || battleMgr.rightCharacterManager.objectBase.frameCount == 14)
+				battleMgr.rightCharacterManager.objectBase.speed.y -= 0.6;
+		} else if (battleMgr.rightCharacterManager.objectBase.action == SokuLib::ACTION_j6A) {
+			if (battleMgr.rightCharacterManager.objectBase.actionBlockId == 0 && battleMgr.rightCharacterManager.objectBase.frameCount == 12) {
+				SokuLib::playSEWaveBuffer(29);
+				SokuLib::playSEWaveBuffer(25);
+				battleMgr.rightCharacterManager.objectBase.speed = {7.5, 9.86};
+				this->_reisen->objectBase.action = SokuLib::ACTION_AIR_HIT_BIG_HITSTUN;
+				this->_reisen->objectBase.animate();
+				this->_reisen->damageLimited = true;
+				this->_reisen->realLimit = 100;
+				this->_reisen->objectBase.speed.x = -20;
+				this->_fightCtr = HIT_STOP * 2;
+			} else if (battleMgr.rightCharacterManager.objectBase.actionBlockId != 0 || battleMgr.rightCharacterManager.objectBase.frameCount > 12)
+				battleMgr.rightCharacterManager.objectBase.speed.y -= 0.6;
+		}
+	}
+
+	std::vector<void (Intro::*)(SokuLib::BattleManager &)> _fightStages{
+		&Intro::fightStage0,
+		&Intro::fightStage1,
+		&Intro::fightStage2
+	};
+
+	bool updateFight()
+	{
+		auto &battleMgr = SokuLib::getBattleMgr();
+
+		if (this->_fightCtr) {
+			this->_fightCtr--;
+			return true;
+		}
+		//if (this->_fightStage == 2 && !this->_keyPressed) {
+		//	return true;
+		//}
+		this->_keyPressed = false;
+		updateSubObjects(*this->_reisen);
+		this->_reisen->objectBase.doAnimation();
+		battleMgr.rightCharacterManager.objectBase.doAnimation();
+		(this->*this->_fightStages[this->_fightStage])(battleMgr);
+		return this->_fightStage < this->_fightStages.size();
+	}
 
 	void stage0()
 	{
@@ -59,33 +403,26 @@ private:
 			(*(void (__thiscall **)(SokuLib::CharacterManager *))(*(int *)this->_reisen + 0x44))(this->_reisen);
 			*(SokuLib::CharacterManager **)&this->_reisen->objectBase.offset_0x168[8] = &battleMgr.rightCharacterManager;
 
-			battleMgr.leftCharacterManager.objectBase.position.x = 0;
+			SokuLib::camera.scale = 0.8;
+			SokuLib::camera.translate.x = CAM_START_LOCATION;
+			SokuLib::camera.translate.y = 525;
+			SokuLib::camera.backgroundTranslate.x = BG_START_LOCATION;
+
+			battleMgr.leftCharacterManager.objectBase.position.x = -500;
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_DEFAULT_SKILL1_B;
 
-			battleMgr.rightCharacterManager.objectBase.position.x = 800;
-			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+			battleMgr.rightCharacterManager.objectBase.position.y = 525;
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
 			battleMgr.rightCharacterManager.objectBase.animate();
 
-			this->_reisen->objectBase.action = SokuLib::ACTION_j6A;
+			this->_reisen->objectBase.position.x = REISEN_START_LOCATION;
+			this->_reisen->objectBase.position.y = 525;
+			this->_reisen->objectBase.action = SokuLib::ACTION_FALLING;
 			this->_reisen->objectBase.animate();
-			this->_reisen->playSE(0);
 
-			float something[3];
-
-			memset(something, 0, sizeof(something));
-			something[2] = 1;
-			//((void (__thiscall *)(SokuLib::CharacterManager *, int, float, float, char, int, float *, int))0x46EB30)(this->_reisen, 0x320, 420, 120, 1, 1, something, 3);
-			//((void (__thiscall *)(SokuLib::CharacterManager *, int, float, float, char, int, float *, int))0x46EB30)(this->_reisen, 0x351, 420, 100, 1, 1, something, 3);
-			((void (__thiscall *)(SokuLib::CharacterManager *, int, float, float, char, int, float *, int))0x46EB30)(this->_reisen, 0x3E6, 420, 0, 1, 1, something, 3);
-
-			//((void (__thiscall *)(SokuLib::CharacterManager &, int, float, float, char, int, float *, int))0x46EB30)(battleMgr.leftCharacterManager, 0x357, 800, 0, 1, 1, something, 3);
-			((void (__thiscall *)(SokuLib::CharacterManager &, int, float, float, char, int, float *, int))0x46EB30)(battleMgr.leftCharacterManager, 0x3E6, 800, 50, 1, 1, something, 3);
-			((void (*)(const char *))0x43ff10)("data/bgm/ta08.ogg");
+			((void (*)(const char *))0x43ff10)("data/bgm/st20.ogg");
 		}
 
-		battleMgr.leftCharacterManager.objectBase.doAnimation();
-		battleMgr.rightCharacterManager.objectBase.doAnimation();
-		this->_reisen->objectBase.doAnimation();
 		if (this->_ctr < 60) {
 			if (this->_stageBg.tint.a)
 				this->_stageBg.tint.a -= 0xF;
@@ -98,57 +435,23 @@ private:
 				this->_stageBottom.tint.a += 0xF;
 		}
 
+		updateFight();
 		if (this->_ctr % 2)
 			this->_stageBottom.setPosition(this->_stageBottom.getPosition() + SokuLib::Vector2i{1, 0});
 		this->_ctr--;
 		if (!this->_ctr)
 			this->_currentStage++;
-		//((void (__thiscall *)(SokuLib::CharacterManager *))0x46a510)(this->_reisen);
 	}
 
 	void stage1()
 	{
-		auto &battleMgr = SokuLib::getBattleMgr();
-
-		//TODO: Make battle against Reisen
-		battleMgr.leftCharacterManager.objectBase.doAnimation();
-		this->_reisen->objectBase.doAnimation();
-		if (true) {
+		if (!updateFight()) {
 			this->_currentStage++;
-			battleMgr.leftCharacterManager.objectBase.animate();
-			battleMgr.leftCharacterManager.objectBase.animate2();
-			battleMgr.leftCharacterManager.objectBase.speed = SokuLib::Vector2f{30, 12};
-			battleMgr.leftCharacterManager.objectBase.position.y = 0;
-			battleMgr.leftCharacterManager.playSE(10);
+			((void (*)(const char *))0x43ff10)("data/bgm/ta08.ogg");
 		}
 	}
 
 	void stage2()
-	{
-		auto &battleMgr = SokuLib::getBattleMgr();
-		battleMgr.leftCharacterManager.objectBase.doAnimation();
-		battleMgr.rightCharacterManager.objectBase.doAnimation();
-		battleMgr.leftCharacterManager.objectBase.position = battleMgr.leftCharacterManager.objectBase.position + battleMgr.leftCharacterManager.objectBase.speed;
-		if (battleMgr.leftCharacterManager.objectBase.position.y <= 0) {
-			if (battleMgr.leftCharacterManager.objectBase.speed.y < 0) {
-				battleMgr.leftCharacterManager.objectBase.speed.x = 20;
-				battleMgr.leftCharacterManager.objectBase.speed.y = 0;
-				battleMgr.leftCharacterManager.objectBase.animate2();
-			}
-			if (battleMgr.leftCharacterManager.objectBase.speed.x != 0)
-				battleMgr.leftCharacterManager.objectBase.speed.x = battleMgr.leftCharacterManager.objectBase.speed.x - 2;
-			else if (battleMgr.leftCharacterManager.objectBase.actionBlockId == 0) {
-				this->_currentStage++;
-				battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
-				battleMgr.leftCharacterManager.objectBase.animate();
-				this->_dialog->setHidden(false);
-			} else if (battleMgr.leftCharacterManager.objectBase.actionBlockId != 2)
-				battleMgr.leftCharacterManager.objectBase.animate2();
-		} else
-			battleMgr.leftCharacterManager.objectBase.speed.y = battleMgr.leftCharacterManager.objectBase.speed.y - 2;
-	}
-
-	void stage3()
 	{
 		auto &battleMgr = SokuLib::getBattleMgr();
 
@@ -159,8 +462,7 @@ private:
 	std::vector<void (Intro::*)()> anims{
 		&Intro::stage0,
 		&Intro::stage1,
-		&Intro::stage2,
-		&Intro::stage3
+		&Intro::stage2
 	};
 
 public:
@@ -205,22 +507,6 @@ public:
 		if (this->_currentStage < this->anims.size())
 			(this->*this->anims[this->_currentStage])();
 
-		((void (__thiscall *)(SokuLib::ObjListManager &))0x633ce0)(this->_reisen->objects);
-		this->_reisen->objectBase.doAnimation();
-		//if (this->_reisen->objects.list.size)
-		//	this->_reisen->objects.list.head->next->val->doAnimation();
-		auto *node = this->_reisen->objects.list.head->next;
-		for (unsigned int k = 0; node && k < this->_reisen->objects.list.size; k++) {
-			(*(void (__thiscall **)(SokuLib::ObjectManager *))((int)node->val->vtable + 0x28))(node->val);
-			node = node->next;
-		}
-
-		node = SokuLib::getBattleMgr().leftCharacterManager.objects.list.head->next;
-		for (unsigned int k = 0; node && k < SokuLib::getBattleMgr().leftCharacterManager.objects.list.size; k++) {
-			(*(void (__thiscall **)(SokuLib::ObjectManager *))((int)node->val->vtable + 0x28))(node->val);
-			node = node->next;
-		}
-
 		if (this->_keyPressed) {
 			this->_stop |= !this->_dialog->onKeyPress();
 			puts(this->_stop ? "Stop" : "Not stop");
@@ -233,13 +519,16 @@ public:
 
 	void render() const override
 	{
-		if (this->_reisen) {
+		if (this->_currentStage <= 1 && this->_reisen) {
+			// Display the CharacterManager
+			((void (__thiscall *)(SokuLib::CharacterManager &))0x438d20)(*this->_reisen);
+
 			// Display the CharacterManager subobjects
 			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_reisen->objects, -1);
 			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_reisen->objects, 1);
 
-			// Display the CharacterManager
-			((void (__thiscall *)(SokuLib::CharacterManager &))0x438d20)(*this->_reisen);
+			// We redraw Remilia because Reisen's subobjects mess up the DirectX context and this will clean it up
+			((void (__thiscall *)(SokuLib::CharacterManager &))0x438d20)(SokuLib::getBattleMgr().leftCharacterManager);
 		}
 		if (this->_ctr) {
 			this->_stageBg.draw();
