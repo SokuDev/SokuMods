@@ -1076,8 +1076,11 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	if (currentEntry >= 0) {
 		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
 			loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
-		else
+		else {
+			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading)
+				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 			loadingGear.setRotation(loadingGear.getRotation() + 0.1);
+		}
 	}
 	handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
