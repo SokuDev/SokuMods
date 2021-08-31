@@ -6,7 +6,8 @@ local dialogs = {
 	"lADNow tell me what lead you have!",
 	"rADNothing in any of my books can tell what is<br>happening here.",
 	"lcDAre you sure?",
-	"rchNow that I think about it, there was something<br>suspicious. Something was strange when Reimu came by....",
+	"rchNow that I think about it, there was something<br>suspicious.",
+	"rcSReimu came by and she was acting...<br>Awkwardly I would say.",
 	"lWhSo she is here too...",
 	"rWAIt was the first time I felt like she already knew<br>what she was looking for, and not<br>just following her instinct.",
 	"rWEThough it is baseless information...",
@@ -31,7 +32,7 @@ flashRect.size = Vector2u.new(640, 480)
 
 function update()
 	battleMgr.leftChr:updateAnimation()
-	if pressed and #dialog == #dialogs - 10 and battleMgr.leftChr.direction ~= enums.directions.LEFT then
+	if pressed and #dialog == #dialogs - 11 and battleMgr.leftChr.direction ~= enums.directions.LEFT then
 		dialog.hidden = true
 		battleMgr.leftChr.direction = enums.directions.LEFT
 		battleMgr.leftChr.action = enums.actions.ACTION_WALK_FORWARD
