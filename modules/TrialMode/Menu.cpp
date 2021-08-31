@@ -47,6 +47,8 @@ static SokuLib::DrawUtils::Sprite lockedNoise;
 static SokuLib::DrawUtils::Sprite lockedText;
 static SokuLib::DrawUtils::Sprite lockedImg;
 static SokuLib::DrawUtils::Sprite CRTBands;
+static SokuLib::DrawUtils::Sprite loadingGear;
+
 static IDirect3DTexture9 **pphandle = nullptr;
 static IDirect3DTexture9 **pphandle2 = nullptr;
 static unsigned packStart = 0;
@@ -442,17 +444,6 @@ static void startPackLoading()
 	loading = false;
 }
 
-void __lockMutex(volatile bool &mutex)
-{
-	while (mutex) std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	mutex = true;
-}
-
-void __unlockMutex(bool &mutex)
-{
-	mutex = false;
-}
-
 void menuLoadAssets()
 {
 	if (loaded)
@@ -547,6 +538,14 @@ void menuLoadAssets()
 	arrowSprite.rect.width = arrowSprite.texture.getSize().x / 2;
 	arrowSprite.rect.height = arrowSprite.texture.getSize().y;
 
+	loadingGear.texture.loadFromGame("data/scene/logo/gear.bmp");
+	loadingGear.setSize({
+		loadingGear.texture.getSize().x,
+		loadingGear.texture.getSize().y
+	});
+	loadingGear.rect.width = loadingGear.texture.getSize().x;
+	loadingGear.rect.height = loadingGear.texture.getSize().y;
+
 	nameFilterText.texture.createFromText( "Any name",  defaultFont12, {300, 20}, &nameFilterSize);
 	nameFilterText.setSize({
 		nameFilterText.texture.getSize().x,
@@ -588,7 +587,6 @@ void menuLoadAssets()
 	lockedNoise.rect.height = 150;
 
 failed:
-
 	pphandle2 = SokuLib::textureMgr.allocate(&id);
 	if (FAILED(ret = D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, pphandle2))) {
 		pphandle = nullptr;
@@ -604,7 +602,7 @@ failed:
 
 failed2:
 	loading = true;
-	_beginthread(reinterpret_cast<_beginthread_proc_type>(startPackLoading), 0, nullptr);
+	startPackLoading();
 }
 
 #define NOISE_DELTA 50
@@ -722,6 +720,7 @@ void menuUnloadAssets()
 	lockedImg.texture.destroy();
 	frame.texture.destroy();
 	CRTBands.texture.destroy();
+	loadingGear.texture.destroy();
 	blackSilouettes.texture.destroy();
 
 	loadedPacks.clear();
@@ -929,13 +928,20 @@ static void handleGoUp()
 				continue;
 			if (topicFilter != -1 && pack->category != uniqueCategories[topicFilter])
 				continue;
-			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+			else
+				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 			break;
 		} while (true);
 	} else {
 		currentEntry--;
-		if (currentEntry != -1)
-			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+		if (currentEntry != -1) {
+			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+			else
+				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+		}
 	}
 	checkScrollUp();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
@@ -971,7 +977,10 @@ static void handleGoDown()
 		} while (true);
 	} else {
 		currentEntry++;
-		loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+		else
+			loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 	}
 	checkScrollDown();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
@@ -1027,7 +1036,6 @@ nothing:
 		}
 		SokuLib::playSEWaveBuffer(0x29);
 	}
-	__lockMutex(filterMutex);
 	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0))
 		handleGoUp();
 	else if (input.verticalAxis == 1 || (input.verticalAxis >= 36 && input.verticalAxis % 6 == 0))
@@ -1036,7 +1044,6 @@ nothing:
 		handleGoLeft();
 	else if (input.horizontalAxis == 1 || (input.horizontalAxis >= 36 && input.horizontalAxis % 6 == 0))
 		handleGoRight();
-	__unlockMutex(filterMutex);
 }
 
 int menuOnProcess(SokuLib::MenuResult *This)
@@ -1049,7 +1056,6 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	if (SokuLib::newSceneId != SokuLib::sceneId)
 		return true;
 
-	__lockMutex(drawMutex);
 	if (loadNextTrial) {
 		loadNextTrial = false;
 		++currentEntry;
@@ -1058,7 +1064,6 @@ int menuOnProcess(SokuLib::MenuResult *This)
 			loadedPacks[currentPack]->scenarios[currentEntry]->file
 		);
 		if (loadRequest) {
-			__unlockMutex(drawMutex);
 			return true;
 		}
 	}
@@ -1066,12 +1071,14 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	if (SokuLib::inputMgrs.input.b == 1) {
 		puts("Quit");
 		SokuLib::playSEWaveBuffer(0x29);
-		__unlockMutex(drawMutex);
 		return loading;
 	}
-	if (currentEntry >= 0)
-		loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
-	__unlockMutex(drawMutex);
+	if (currentEntry >= 0) {
+		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+			loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
+		else
+			loadingGear.setRotation(loadingGear.getRotation() + 0.1);
+	}
 	handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
@@ -1252,8 +1259,6 @@ void menuOnRender(SokuLib::MenuResult *This)
 
 	displayFilters();
 	title.draw();
-	__lockMutex(drawMutex);
-	__lockMutex(filterMutex);
 	for (unsigned i = packStart; i < loadedPacks.size(); i++) {
 		// 100 <= y <= 364
 		renderOnePackBack(*loadedPacks[i], pos, i == currentPack);
@@ -1267,11 +1272,9 @@ void menuOnRender(SokuLib::MenuResult *This)
 		if (pos.y > 394)
 			break;
 	}
-	__unlockMutex(filterMutex);
 
 	previewContainer.draw();
 	if (loadedPacks.empty()) {
-		__unlockMutex(drawMutex);
 		return;
 	}
 
@@ -1280,15 +1283,24 @@ void menuOnRender(SokuLib::MenuResult *This)
 			loadedPacks[shownPack]->preview.draw();
 		if (loadedPacks[shownPack]->description.texture.hasTexture())
 			loadedPacks[shownPack]->description.draw();
-		__unlockMutex(drawMutex);
 		return;
 	}
 	if (!isLocked(currentEntry)) {
-		if (loadedPacks[shownPack]->scenarios[currentEntry]->preview->isValid())
-			loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
-		else {
+		if (!loadedPacks[shownPack]->scenarios[currentEntry]->loading) {
+			if (loadedPacks[shownPack]->scenarios[currentEntry]->preview && loadedPacks[shownPack]->scenarios[currentEntry]->preview->isValid())
+				loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
+			else {
+				lockedNoise.draw();
+				blackSilouettes.draw();
+			}
+		} else {
 			lockedNoise.draw();
-			blackSilouettes.draw();
+			loadingGear.setRotation(-loadingGear.getRotation());
+			loadingGear.setPosition({540, 243});
+			loadingGear.draw();
+			loadingGear.setRotation(-loadingGear.getRotation());
+			loadingGear.setPosition({563, 225});
+			loadingGear.draw();
 		}
 		if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
 			loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
@@ -1299,6 +1311,5 @@ void menuOnRender(SokuLib::MenuResult *This)
 		lockedText.draw();
 		lockedImg.draw();
 	}
-	__unlockMutex(drawMutex);
 	frame.draw();
 }

@@ -25,17 +25,20 @@ struct Icon {
 
 class Scenario {
 public:
+	bool loading = false;
 	bool canBeLocked = true;
 	bool nameHiddenIfLocked = false;
 	char score = -1;
 	std::string file;
 	std::string folder;
 	std::string nameStr;
+	std::string previewFile;
 	std::unique_ptr<Image> preview;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite description;
 	SokuLib::DrawUtils::Sprite scoreSprite;
 
+	void loadPreview();
 	Scenario(char score, int i, const std::string &path, const nlohmann::json &object);
 	void setScore(char score);
 };
