@@ -9,6 +9,7 @@
 #include <thread>
 #include "Menu.hpp"
 #include "Pack.hpp"
+#include "version.h"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -26,6 +27,7 @@ static unsigned shownPack = 0;
 static unsigned nameFilter = -1;
 static unsigned modeFilter = -1;
 static unsigned topicFilter = -1;
+static SokuLib::Vector2i versionStrSize;
 static SokuLib::Vector2i nameFilterSize;
 static SokuLib::Vector2i modeFilterSize;
 static SokuLib::Vector2i topicFilterSize;
@@ -48,6 +50,7 @@ static SokuLib::DrawUtils::Sprite lockedText;
 static SokuLib::DrawUtils::Sprite lockedImg;
 static SokuLib::DrawUtils::Sprite CRTBands;
 static SokuLib::DrawUtils::Sprite loadingGear;
+static SokuLib::DrawUtils::Sprite version;
 
 static IDirect3DTexture9 **pphandle = nullptr;
 static IDirect3DTexture9 **pphandle2 = nullptr;
@@ -58,8 +61,6 @@ static unsigned band2Start = 0;
 
 std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
-bool drawMutex = false;
-bool filterMutex = false;
 SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
@@ -545,6 +546,18 @@ void menuLoadAssets()
 	});
 	loadingGear.rect.width = loadingGear.texture.getSize().x;
 	loadingGear.rect.height = loadingGear.texture.getSize().y;
+
+	version.texture.createFromText("Version " VERSION_STR,  defaultFont10, {300, 20}, &versionStrSize);
+	version.setPosition({
+		639 - versionStrSize.x,
+		479 - versionStrSize.y
+	});
+	version.setSize({
+		static_cast<unsigned int>(versionStrSize.x),
+		static_cast<unsigned int>(versionStrSize.y)
+	});
+	version.rect.width = versionStrSize.x;
+	version.rect.height = versionStrSize.y;
 
 	nameFilterText.texture.createFromText( "Any name",  defaultFont12, {300, 20}, &nameFilterSize);
 	nameFilterText.setSize({
@@ -1277,6 +1290,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 	}
 
 	previewContainer.draw();
+	version.draw();
 	if (loadedPacks.empty()) {
 		return;
 	}
