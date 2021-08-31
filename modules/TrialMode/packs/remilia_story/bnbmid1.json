@@ -40,16 +40,17 @@
             "max_limit": 120
         },
         {
+            "max_attempts": 20,
             "min_hits": 15,
             "min_limit": 114
         },
         {
-            "max_attempts": 1,
+            "max_attempts": 10,
             "min_hits": 16,
             "min_limit": 116
         },
         {
-            "max_attempts": 1,
+            "max_attempts": 5,
             "min_hits": 18,
             "min_limit": 120
         }

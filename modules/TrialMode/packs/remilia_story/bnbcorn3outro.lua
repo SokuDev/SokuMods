@@ -3,8 +3,9 @@
 --
 
 local dialogs = {
-	"lc It's boring...",
-	"lA Why aren't you fighting back?",
+	"rcEAs I thought",
+	"lcEIt's boring...",
+	"lAEWhy aren't you fighting back?",
 	--Reimu getting back on her feet
 	"rADI won't retaliate so stop attacking.",
 	"lCDDoesn't it make the best opportunity to beat you?",
@@ -86,7 +87,7 @@ end
 
 local function stage1()
 	battleMgr.leftCharacterManager:updateAnimation()
-	if #dialogs - 2 == #dialog and keyPressed then
+	if #dialogs - 3 == #dialog and keyPressed then
 		keyPressed = false
 		battleMgr.rightCharacterManager.direction = enums.directions.LEFT
 		battleMgr.rightCharacterManager.action = enums.actions.ACTION_NEUTRAL_TECH
@@ -115,7 +116,7 @@ end
 local function stage3()
 	battleMgr.leftCharacterManager:updateAnimation()
 	battleMgr.rightCharacterManager:updateAnimation()
-	if #dialogs - 15 == #dialog and keyPressed then
+	if #dialogs - 16 == #dialog and keyPressed then
 		dialog.hidden = true
 		currentStage = currentStage + 1
 		ctr = 0

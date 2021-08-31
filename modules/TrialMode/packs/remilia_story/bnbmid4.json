@@ -47,13 +47,13 @@
         {
             "min_hits": 19,
             "min_limit": 112,
-            "max_attempts": 5
+            "max_attempts": 10
         },
         {
             "min_hits": 22,
             "min_damage": 2547,
             "min_limit": 120,
-            "max_attempts": 1
+            "max_attempts": 5
         }
     ],
     "hint": [

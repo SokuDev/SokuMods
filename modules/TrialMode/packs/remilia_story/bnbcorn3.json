@@ -43,10 +43,11 @@
             "max_attempts": 15
         },
         {
-            "min_hits": 15
+            "min_hits": 15,
+            "max_attempts": 10
         },
         {
-            "max_attempts": 1
+            "max_attempts": 5
         }
     ],
     "hint": [

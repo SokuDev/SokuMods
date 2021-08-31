@@ -44,11 +44,12 @@
             "min_limit": 132
         },
         {
-            "min_hits": 12,
-            "min_limit": 138
+            "min_hits": 10,
+            "min_limit": 134
         },
         {
-            "max_attempts": 1
+            "min_hits": 12,
+            "min_limit": 138
         }
     ],
     "hint": [
