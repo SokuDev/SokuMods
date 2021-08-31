@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <process.h>
 #include "Pack.hpp"
 #include "Menu.hpp"
 
@@ -57,7 +58,7 @@ static std::vector<std::string> authors{
 	"Spinning Ran",
 	"Hieda no Akyuu",
 	"Book stealing rats",
-	"Sakuya the cat",
+	"The library's cat",
 	"Insane Marisa",
 	"A scary jelly donut",
 	"The light eater",
@@ -343,14 +344,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	this->description.setPosition({356, 286});
 	this->description.setSize(this->description.texture.getSize());
 
-	if (object.contains("preview") && object["preview"].is_string()) {
-		auto str = path + object["preview"].get<std::string>();
-
-		if (str.size() > 4 && str.substr(str.size() - 4, 4) == ".gif")
-			this->preview.reset(new AnimatedImage(str, {398, 128}, true));
-		else
-			this->preview.reset(new SimpleImage(str, {398, 128}));
-	}
+	if (object.contains("preview") && object["preview"].is_string())
+		this->previewFile = path + object["preview"].get<std::string>();
 
 	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())
 		this->canBeLocked = object["may_be_locked"];
@@ -370,6 +365,23 @@ void Scenario::setScore(char score)
 		this->scoreSprite.rect.height = this->scoreSprite.texture.getSize().y;
 	}
 	this->score = score;
+}
+
+void loadPreview(Scenario *scenario)
+{
+	if (scenario->previewFile.size() > 4 && scenario->previewFile.substr(scenario->previewFile.size() - 4, 4) == ".gif")
+		scenario->preview = std::make_unique<AnimatedImage>(scenario->previewFile, SokuLib::Vector2i{398, 128}, true);
+	else
+		scenario->preview = std::make_unique<SimpleImage>(scenario->previewFile, SokuLib::Vector2i{398, 128});
+	scenario->loading = false;
+}
+
+void Scenario::loadPreview()
+{
+	if (this->loading || this->preview)
+		return;
+	this->loading = true;
+	_beginthread(reinterpret_cast<_beginthread_proc_type>(::loadPreview), 0, this);
 }
 
 Icon::Icon(const std::string &path, const nlohmann::json &object)
@@ -492,11 +504,8 @@ void loadPacks(void (*onPackLoaded)(int pos))
 		auto pack = new Pack(std::string(buffer), val);
 
 		if (!pack->scenarios.empty()) {
-			__lockMutex(drawMutex);
 			loadedPacks.emplace_back(pack);
-			__unlockMutex(drawMutex);
 
-			__lockMutex(filterMutex);
 			packsByName[pack->nameStr].push_back(loadedPacks.back());
 			packsByCategory[pack->category].push_back(loadedPacks.back());
 			if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
@@ -508,20 +517,15 @@ void loadPacks(void (*onPackLoaded)(int pos))
 				if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
 					uniqueModes.push_back(mode);
 			}
-			__unlockMutex(filterMutex);
 
-			__lockMutex(drawMutex);
 			std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
 				if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
 					return pack2->error.texture.hasTexture();
 				return pack1->category < pack2->category;
 			});
-			__unlockMutex(drawMutex);
-			__lockMutex(filterMutex);
 			std::sort(uniqueCategories.begin(), uniqueCategories.end());
 			std::sort(uniqueNames.begin(), uniqueNames.end());
 			std::sort(uniqueModes.begin(), uniqueModes.end());
-			__unlockMutex(filterMutex);
 
 			if (onPackLoaded)
 				onPackLoaded(std::find_if(
