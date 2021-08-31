@@ -324,8 +324,6 @@ disableLimit:
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
-		if (battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_IDLE && battleMgr.rightCharacterManager.objectBase.action != SokuLib::ACTION_LANDING)
-			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
 		if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
 			this->_playComboAfterIntro = true;
 	}
@@ -427,24 +425,25 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
 	battleMgr.leftCharacterManager.currentSpirit = 10000;
 	battleMgr.leftCharacterManager.maxSpirit = 10000;
-	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
+	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 	battleMgr.leftCharacterManager.objectBase.animate();
-	battleMgr.leftCharacterManager.objectBase.actionBlockId = 0;
-	battleMgr.leftCharacterManager.objectBase.frameCount = 0;
-	battleMgr.leftCharacterManager.objectBase.animationSubFrame = 0;
 	battleMgr.leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	battleMgr.leftCharacterManager.objectBase.position.y = 0;
 	battleMgr.leftCharacterManager.objectBase.speed.x = 0;
 	battleMgr.leftCharacterManager.objectBase.speed.y = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.xRotation = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.yRotation = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.zRotation = 0;
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
 	battleMgr.rightCharacterManager.currentSpirit = 10000;
 	battleMgr.rightCharacterManager.maxSpirit = 10000;
-	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
-	battleMgr.rightCharacterManager.objectBase.actionBlockId = 0;
-	battleMgr.rightCharacterManager.objectBase.frameCount = 0;
-	battleMgr.rightCharacterManager.objectBase.animationSubFrame = 0;
+	battleMgr.rightCharacterManager.objectBase.renderInfos.xRotation = 0;
+	battleMgr.rightCharacterManager.objectBase.renderInfos.yRotation = 0;
+	battleMgr.rightCharacterManager.objectBase.renderInfos.zRotation = 0;
+	battleMgr.rightCharacterManager.objectBase.action = this->_dummyStartPos.y == 0 ? SokuLib::ACTION_IDLE : SokuLib::ACTION_FALLING;
+	battleMgr.rightCharacterManager.objectBase.animate();
 	battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 	battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 	battleMgr.rightCharacterManager.objectBase.speed.x = 0;

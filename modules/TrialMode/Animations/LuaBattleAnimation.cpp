@@ -41,8 +41,8 @@ struct FakeCharacterManager {
 	// 0x110
 	SokuLib::RenderInfo renderInfos;
 
-	// 0x128
-	char offset_0x128[0x14];
+	// 0x130
+	char offset_0x130[0x0C];
 
 	//  ADDR_ACTIONIDOFS        enum Action       (2) 0x13C
 	SokuLib::Action action;
