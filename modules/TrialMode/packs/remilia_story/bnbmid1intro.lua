@@ -3,19 +3,19 @@
 --
 
 local dialogs = {
-	"lc Another boring day. Maybe I'll go duel Reimu tonight?",
+	"lc Another boring day. Should I go to her shrine?",
 	--Clic
 	"r h*That should make a good cover. As for the title...*",
-	"lhhOh my, an intruder. You are on time!",
-	"rhHDon't mind me. I'm not here to invade your<br>privacy or anything.<br>Just here to take a few picture in secret...",
-	"rhEWell so long for the secret part...",
+	"lhhOh my, an intruder. You are right on time!",
+	"rhHDon't mind me, I'm simply here to take a<br>few pictures in secret...",
+	"rhEWell, so long for it to be secret...",
 	"lWEPatchouli told me she needs a new tengu feather,<br>might as well help her out!",
 	--one screaming crow and a feather later
 	"lHDI'm sure even the vegetative Patchouli<br>shall be grateful.",
 	"rHDMy beautiful feather...",
 	"lCDAnyway what were you doing here?",
 	"rChI was investigating a rumor that..",
-	"lAhSurely you are too tough to talk aren't you?",
+	"lAhToo tough to talk, aren't you?",
 	"rAANo it's not a se...",
 	"lhARoughing you up shall make you talk.",
 	--Battle here
