@@ -21,12 +21,15 @@
 static int currentPack = -3;
 static int currentEntry = -1;
 static bool loaded = false;
-static bool loading = false;
 static bool loadNextTrial = false;
 static unsigned shownPack = 0;
 static unsigned nameFilter = -1;
 static unsigned modeFilter = -1;
 static unsigned topicFilter = -1;
+static unsigned nbPacks = 0;
+static unsigned nbName = 0;
+static unsigned nbMode = 0;
+static unsigned nbTopic = 0;
 static SokuLib::Vector2i versionStrSize;
 static SokuLib::Vector2i nameFilterSize;
 static SokuLib::Vector2i modeFilterSize;
@@ -61,6 +64,7 @@ static unsigned band2Start = 0;
 
 std::unique_ptr<Trial> loadedTrial;
 bool loadRequest;
+unsigned loading = false;
 SokuLib::SWRFont defaultFont10;
 SokuLib::SWRFont defaultFont12;
 SokuLib::SWRFont defaultFont16;
@@ -427,24 +431,6 @@ void checkScrollDown()
 		entryStart = currentEntry - 15;
 }
 
-void onPackLoaded(int pos)
-{
-	if (currentPack >= pos && currentPack >= 0) {
-		currentPack++;
-		shownPack++;
-	}
-	checkScrollDown();
-	nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(), defaultFont12, {300, 20}, &nameFilterSize);
-	modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(), defaultFont12, {300, 20}, &modeFilterSize);
-	topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
-}
-
-static void startPackLoading()
-{
-	loadPacks(onPackLoaded);
-	loading = false;
-}
-
 void menuLoadAssets()
 {
 	if (loaded)
@@ -547,7 +533,14 @@ void menuLoadAssets()
 	loadingGear.rect.width = loadingGear.texture.getSize().x;
 	loadingGear.rect.height = loadingGear.texture.getSize().y;
 
-	version.texture.createFromText("Version " VERSION_STR,  defaultFont10, {300, 20}, &versionStrSize);
+	version.texture.createFromText(
+#ifdef _DEBUG
+		"Version " VERSION_STR " DEBUG",
+#else
+		"Version " VERSION_STR,
+#endif
+		defaultFont10, {300, 20}, &versionStrSize
+	);
 	version.setPosition({
 		639 - versionStrSize.x,
 		479 - versionStrSize.y
@@ -614,8 +607,31 @@ failed:
 	CRTBands.rect.height = 150;
 
 failed2:
-	loading = true;
-	startPackLoading();
+	loadPacks();
+
+	if (
+		nbPacks != loadedPacks.size() ||
+		nbName != uniqueNames.size() ||
+		nbMode != uniqueModes.size() ||
+		nbTopic != uniqueCategories.size()
+	) {
+		currentPack = -3;
+		currentEntry = -1;
+		shownPack = 0;
+		nameFilter = -1;
+		modeFilter = -1;
+		topicFilter = -1;
+		packStart = 0;
+		entryStart = 0;
+		nbPacks = loadedPacks.size();
+		nbName = uniqueNames.size();
+		nbMode = uniqueModes.size();
+		nbTopic = uniqueCategories.size();
+	} else {
+		nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(), defaultFont12, {300, 20}, &nameFilterSize);
+		modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(), defaultFont12, {300, 20}, &modeFilterSize);
+		topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
+	}
 }
 
 #define NOISE_DELTA 50
@@ -742,14 +758,6 @@ void menuUnloadAssets()
 	packsByName.clear();
 	packsByCategory.clear();
 
-	currentPack = -3;
-	currentEntry = -1;
-	shownPack = 0;
-	nameFilter = -1;
-	modeFilter = -1;
-	topicFilter = -1;
-	packStart = 0;
-	entryStart = 0;
 	editorMode = false;
 }
 
