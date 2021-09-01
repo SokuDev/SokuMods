@@ -167,7 +167,7 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		if (obj.contains("isPath") && obj["isPath"]) {
 			std::string relative = obj["path"];
 
-			if (!isInvalidPath(relative)) {
+			if (isInvalidPath(relative)) {
 				printf("%s is not a valid path\n", relative.c_str());
 				goto invalidPreview;
 			}
@@ -374,6 +374,7 @@ void loadPreview(Scenario *scenario)
 	else
 		scenario->preview = std::make_unique<SimpleImage>(scenario->previewFile, SokuLib::Vector2i{398, 128});
 	scenario->loading = false;
+	::loading--;
 }
 
 void Scenario::loadPreview()
@@ -381,6 +382,7 @@ void Scenario::loadPreview()
 	if (this->loading || this->preview)
 		return;
 	this->loading = true;
+	::loading++;
 	_beginthread(reinterpret_cast<_beginthread_proc_type>(::loadPreview), 0, this);
 }
 
@@ -452,7 +454,7 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 }
 
-void loadPacks(void (*onPackLoaded)(int pos))
+void loadPacks()
 {
 	printf("Loading packs in %s\n", packsLocation);
 
@@ -526,13 +528,6 @@ void loadPacks(void (*onPackLoaded)(int pos))
 			std::sort(uniqueCategories.begin(), uniqueCategories.end());
 			std::sort(uniqueNames.begin(), uniqueNames.end());
 			std::sort(uniqueModes.begin(), uniqueModes.end());
-
-			if (onPackLoaded)
-				onPackLoaded(std::find_if(
-					loadedPacks.begin(),
-					loadedPacks.end(),
-					[pack](const std::shared_ptr<Pack> &p) { return &*p == pack; }
-				) - loadedPacks.begin());
 		} else {
 			puts("Invalid pack :(");
 			delete pack;

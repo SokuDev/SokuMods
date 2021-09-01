@@ -34,6 +34,7 @@ extern SokuLib::SWRFont defaultFont16;
 extern bool loadRequest;
 extern std::unique_ptr<Trial> loadedTrial;
 extern bool editorMode;
+extern unsigned loading;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
