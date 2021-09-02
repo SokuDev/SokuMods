@@ -18,6 +18,7 @@ local dialogs = {
 	"lASAnyway you are hiding something, I can feel it.<br>Now tell me everything.",
 	"rAEWill you not harass me if I tell you?",
 	"lhEHere I come Reimu!",
+	"rcEAs I thought"
 	--Battle here
 }
 
