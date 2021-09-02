@@ -3,7 +3,6 @@
 --
 
 local dialogs = {
-	"rcEAs I thought",
 	"lcEIt's boring...",
 	"lAEWhy aren't you fighting back?",
 	--Reimu getting back on her feet
