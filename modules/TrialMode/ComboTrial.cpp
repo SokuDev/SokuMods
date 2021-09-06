@@ -572,6 +572,7 @@ void ComboTrial::onMenuClosed(MenuAction action)
 	case RETRY:
 		this->_attempts = 0;
 		this->_playingIntro = true;
+		this->_actionCounter = this->_exceptedActions.size();
 		break;
 	case GO_TO_NEXT_TRIAL:
 	case RETURN_TO_TRIAL_SELECT:
