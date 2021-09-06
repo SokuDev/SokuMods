@@ -71,7 +71,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
-	this->_crouching = !json["dummy"].contains("crouch") || !json["dummy"]["crouch"].is_boolean() || json["dummy"]["crouch"].get<bool>();
+	this->_crouching = json["dummy"].contains("crouch") && !json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
 	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
 	this->_rightWeather = !json["dummy"].contains("affected_by_weather") || !json["dummy"]["affected_by_weather"].is_boolean() || json["dummy"]["affected_by_weather"].get<bool>();
 	memset(&this->_skills, 0xFF, sizeof(this->_skills));
@@ -504,9 +504,22 @@ void ComboTrial::_playIntro()
 		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == arr->actions[0] &&
 		isStartOfMove(arr->actions[0], battleMgr.leftCharacterManager, SokuLib::leftChar)
 	) {
-		arr->counter = 0;
-		this->_actionWaitCounter = 0;
-		this->_actionCounter++;
+		if (arr->chargeTime) {
+			arr->chargeCounter++;
+		} else {
+			arr->counter = 0;
+			this->_actionWaitCounter = 0;
+			this->_actionCounter++;
+		}
+	}
+	if (arr->chargeCounter) {
+		if (arr->chargeCounter == arr->chargeTime) {
+			arr->counter = 0;
+			arr->chargeCounter = 0;
+			this->_actionWaitCounter = 0;
+			this->_actionCounter++;
+		} else
+			arr->chargeCounter++;
 	}
 }
 
@@ -517,9 +530,24 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 		if (this->_waitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
-		if (this->_exceptedActions[this->_actionCounter]->delay > this->_actionWaitCounter)
+
+		auto &arr = this->_exceptedActions[this->_actionCounter];
+
+		if (arr->delay > this->_actionWaitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
-		originalInputs = this->_exceptedActions[this->_actionCounter]->inputs[this->_exceptedActions[this->_actionCounter]->counter];
+		if (arr->chargeCounter == 0)
+			originalInputs = arr->inputs[arr->counter];
+		else {
+			originalInputs = arr->inputs.back();
+			originalInputs.a *= 2;
+			originalInputs.b *= 2;
+			originalInputs.c *= 2;
+			originalInputs.d *= 2;
+			originalInputs.horizontalAxis *= 2;
+			originalInputs.verticalAxis *= 2;
+			originalInputs.changeCard *= 2;
+			originalInputs.spellcard *= 2;
+		}
 		originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
 		return;
 	}
@@ -591,7 +619,7 @@ SokuLib::Scene ComboTrial::getNextScene()
 
 void ComboTrial::SpecialAction::parse()
 {
-	std::string hitsStr;
+	std::string chargeStr;
 	std::string delayStr;
 	bool d = false;
 	bool p = false;
@@ -603,26 +631,26 @@ void ComboTrial::SpecialAction::parse()
 			if (d && !delayStr.empty())
 				throw std::invalid_argument("Multiple delays found for move " + this->name);
 		}
-		if (c == '(' && !p && !d) {
+		if (c == '[' && !p && !d) {
 			p = true;
-			if (!hitsStr.empty())
-				throw std::invalid_argument("Multiple hit counts found for move " + this->name);
+			if (!chargeStr.empty())
+				throw std::invalid_argument("Multiple charge timers found for move " + this->name);
 		}
 		if (c == '!') {
 			this->optional = true;
 			continue;
 		}
-		p &= c != ')' || !d;
-		if (c == '(' || c == ')' || c == ':')
+		p &= c != ']' || !d;
+		if (c == '[' || c == ']' || c == ':')
 			continue;
 		if (d)
 			delayStr += c;
 		else if (p)
-			hitsStr += c;
+			chargeStr += c;
 		else
 			this->moveName += std::tolower(c);
 	}
-	printf("Move %s -> %s (%s) :%s: -> ", this->name.c_str(), this->moveName.c_str(), hitsStr.c_str(), delayStr.c_str());
+	printf("Move %s -> %s [%s] :%s: -> ", this->name.c_str(), this->moveName.c_str(), chargeStr.c_str(), delayStr.c_str());
 
 	std::string move;
 	std::string firstMove;
@@ -654,14 +682,14 @@ void ComboTrial::SpecialAction::parse()
 	}
 
 	try {
-		if (!hitsStr.empty())
-			this->nbHits = std::stoul(hitsStr);
+		if (!chargeStr.empty())
+			this->chargeTime = std::stoul(chargeStr);
 		else
-			this->nbHits = 0;
-		printf("%i ", this->nbHits);
+			this->chargeTime = 0;
+		printf("%i ", this->chargeTime);
 	} catch (std::exception &) {
 		printf("INVALID\n");
-		throw std::invalid_argument(hitsStr + " is not a valid hit count");
+		throw std::invalid_argument(chargeStr + " is not a valid charge timer");
 	}
 
 	try {
@@ -669,9 +697,9 @@ void ComboTrial::SpecialAction::parse()
 			this->delay = std::stoul(delayStr);
 		else
 			this->delay = 0;
-		printf("%i\n", this->delay);
+		printf("%i ", this->delay);
 	} catch (std::exception &) {
-		printf("INVALID\n");
+		printf("INVALID ");
 		throw std::invalid_argument(delayStr + " is not a valid delay");
 	}
 
@@ -683,6 +711,15 @@ void ComboTrial::SpecialAction::parse()
 
 	SokuLib::Vector2i realSize;
 
+	if (this->chargeTime) {
+		int dig = std::isdigit(this->moveName.back());
+		int index = this->moveName.size() - 2;
+
+		while (index >= 0 && dig == std::isdigit(this->moveName[index]))
+			index--;
+		this->moveName = this->moveName.substr(0, index + 1) + "[" + this->moveName.substr(index + 1) + "]";
+	}
+	puts(this->moveName.c_str());
 	this->sprite.texture.createFromText(this->moveName.c_str(), defaultFont16, {400, 20}, &realSize);
 	this->sprite.setSize(realSize.to<unsigned>());
 	this->sprite.rect.width = realSize.x;
@@ -701,8 +738,6 @@ ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, c
 				throw std::invalid_argument("First score element is missing the field \"min_damage\"");
 			if (!json.contains("min_limit"))
 				throw std::invalid_argument("First score element is missing the field \"min_limit\"");
-			//if (!json.contains("max_limit"))
-			//	throw std::invalid_argument("First score element is missing the field \"max_limit\"");
 		}
 	} else
 		*this = *other;
@@ -728,11 +763,6 @@ ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, c
 		if (!json["min_limit"].is_number())
 			throw std::invalid_argument("Field \"min_limit\" is specified but not a number");
 		this->minLimit = json["min_limit"];
-	}
-	if (json.contains("max_limit")) {
-		if (!json["max_limit"].is_number())
-			throw std::invalid_argument("Field \"max_limit\" is specified but not a number");
-		this->maxLimit = json["max_limit"];
 	}
 }
 

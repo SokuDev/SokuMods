@@ -15,11 +15,12 @@ private:
 	struct SpecialAction {
 		bool optional;
 		std::vector<SokuLib::Action> actions;
-		unsigned nbHits;
+		unsigned chargeTime;
 		unsigned delay;
 		std::vector<SokuLib::KeyInput> inputs;
 		SokuLib::DrawUtils::Sprite sprite;
 		unsigned int counter = 0;
+		unsigned int chargeCounter = 0;
 		std::string moveName;
 		std::string name;
 
@@ -31,7 +32,6 @@ private:
 		unsigned hits = 0;
 		int damage = INT32_MIN;
 		unsigned minLimit = 0;
-		unsigned maxLimit = -1;
 
 		ScorePrerequisites() = default;
 		ScorePrerequisites(const nlohmann::json &json, const ScorePrerequisites *other);
