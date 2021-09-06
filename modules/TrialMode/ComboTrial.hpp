@@ -39,6 +39,7 @@ private:
 	};
 
 	//Init params
+	bool _crouching;
 	bool _leftWeather;
 	bool _rightWeather;
 	float _playerStartPos;

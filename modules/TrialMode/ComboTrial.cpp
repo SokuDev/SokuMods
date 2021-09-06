@@ -71,6 +71,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
+	this->_crouching = !json["dummy"].contains("crouch") || !json["dummy"]["crouch"].is_boolean() || json["dummy"]["crouch"].get<bool>();
 	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
 	this->_rightWeather = !json["dummy"].contains("affected_by_weather") || !json["dummy"]["affected_by_weather"].is_boolean() || json["dummy"]["affected_by_weather"].get<bool>();
 	memset(&this->_skills, 0xFF, sizeof(this->_skills));
@@ -183,6 +184,13 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 			} catch (std::exception &e) {
 				throw std::invalid_argument("Score element #" + std::to_string(this->_scores.size()) + " is invalid : " + e.what());
 			}
+	if (this->_crouching && this->_dummyStartPos.y)
+		MessageBox(
+			SokuLib::window,
+			"Warning: The field \"crouch\" from the dummy is set to true but the dummy is airborne so it cannot crouch.",
+			"Incompatible parameters",
+			MB_ICONWARNING
+		);
 }
 
 bool ComboTrial::update(bool &canHaveNextFrame)
@@ -324,6 +332,10 @@ disableLimit:
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
+		if (this->_crouching && this->_dummyStartPos.y == 0) {
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_CROUCHED;
+			battleMgr.rightCharacterManager.objectBase.animate();
+		}
 		if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
 			this->_playComboAfterIntro = true;
 	}
