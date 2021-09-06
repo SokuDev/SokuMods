@@ -20,7 +20,7 @@
     "outro": "bnbmid4outro.lua",
     "type": "combo",
 
-    "expected": "d6 j2a:15 2c:35 hj9 j5c j66 j8a",
+    "expected": "d6 j2a:15 2c/5c:35 hj9 j5c j66 j8a",
     "skills": [
         [0, 0],
         [0, 0],
