@@ -5,6 +5,25 @@
 #include "Actions.hpp"
 
 #define FAKE_ACTION_ORRERIES_REACTIVATE static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 1)
+#define FAKE_ACTION_MPP_ACTIVATE        static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 2)
+#define FAKE_ACTION_MPP_IDLE            static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 3)
+#define FAKE_ACTION_MPP_WALK            static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 4)
+#define FAKE_ACTION_MPP_JUMP            static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 5)
+#define FAKE_ACTION_MPP_FALL            static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 6)
+#define FAKE_ACTION_MPP_SOMETHING       static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 7)
+#define FAKE_ACTION_MPP_LANDING         static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 8)
+#define FAKE_ACTION_MPP_5A              static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 9)
+#define FAKE_ACTION_MPP_5B              static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 10)
+#define FAKE_ACTION_MPP_5C              static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 11)
+#define FAKE_ACTION_MPP_J5A             static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 12)
+#define FAKE_ACTION_MPP_J5A_LANDING     static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 13)
+#define FAKE_ACTION_MPP_J5B             static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 14)
+#define FAKE_ACTION_MPP_J5B_LANDING     static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 15)
+#define FAKE_ACTION_MPP_DEACTIVATE      static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 16)
+#define FAKE_ACTION_MPP_2x              static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 17)
+#define FAKE_ACTION_MPP_J5C             static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 18)
+#define FAKE_ACTION_MPP_J5C_FALLING     static_cast<SokuLib::Action>(SokuLib::ACTION_AIR_ORRERIES_C + 19)
+
 #define FAKE_ACTION_5AAA6A static_cast<SokuLib::Action>(1000)
 #define FAKE_ACTION_FLY1 static_cast<SokuLib::Action>(1001)
 #define FAKE_ACTION_FLY2 static_cast<SokuLib::Action>(1002)
@@ -235,7 +254,7 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "jsc217",     SokuLib::ACTION_SC_ID_217_ALT_EFFECT },
 	{ "jsc218",     SokuLib::ACTION_SC_ID_218_ALT_EFFECT },
 	{ "jsc219",     SokuLib::ACTION_SC_ID_219_ALT_EFFECT },
-	{"Osc215",         FAKE_ACTION_ORRERIES_REACTIVATE },
+	{ "Osc215",     FAKE_ACTION_ORRERIES_REACTIVATE },
 
 	{ "hjd9",       SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH },
 	{ "hjd8",       SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH },
@@ -315,6 +334,20 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "lSC209",  FAKE_ACTION_lSC209 },
 	{ "jSC209",  FAKE_ACTION_jSC209 },
 	{ "uSC212",  FAKE_ACTION_uSC212 },
+
+	{ "mpp5",   FAKE_ACTION_MPP_IDLE },
+	{ "mpp4",   FAKE_ACTION_MPP_WALK },
+	{ "mpp6",   FAKE_ACTION_MPP_WALK },
+	{ "mpp7",   FAKE_ACTION_MPP_JUMP },
+	{ "mpp8",   FAKE_ACTION_MPP_JUMP },
+	{ "mpp9",   FAKE_ACTION_MPP_JUMP },
+	{ "mpp2x",  FAKE_ACTION_MPP_2x },
+	{ "mpp5a",  FAKE_ACTION_MPP_5A },
+	{ "mpp5b",  FAKE_ACTION_MPP_5B },
+	{ "mpp5c",  FAKE_ACTION_MPP_5C },
+	{ "mppj5a", FAKE_ACTION_MPP_J5A },
+	{ "mppj5b", FAKE_ACTION_MPP_J5B },
+	{ "mppj5c", FAKE_ACTION_MPP_J5C },
 };
 
 const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
@@ -550,6 +583,20 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 	{ "lSC209",     {{0, 0, 0, 0, 0, 0, 0, 1}} },
 	{ "jSC209",     {{0, 0, 0, 0, 0, 0, 0, 1}} },
 	{ "uSC212",     {{0, 0, 0, 0, 0, 0, 0, 1}} },
+
+	{ "mpp5",   {{0, 0, 0, 0, 0, 0, 0, 0}} },
+	{ "mpp4",   {{-1, 0, 0, 0, 0, 0, 0, 0}} },
+	{ "mpp6",   {{1, 0, 0, 0, 0, 0, 0, 0}} },
+	{ "mpp7",   {{-1, -1, 0, 0, 0, 0, 0, 0}} },
+	{ "mpp8",   {{0, -1, 0, 0, 0, 0, 0, 0}} },
+	{ "mpp9",   {{1, -1, 0, 0, 0, 0, 0, 0}} },
+	{ "mpp5a",  {{0, 0, 1, 0, 0, 0, 0, 0}} },
+	{ "mpp5b",  {{0, 0, 0, 1, 0, 0, 0, 0}} },
+	{ "mpp5c",  {{0, 0, 0, 0, 1, 0, 0, 0}} },
+	{ "mppj5a", {{0, 0, 1, 0, 0, 0, 0, 0}} },
+	{ "mpp2x",  {{0, 1, 0, 0, 1, 0, 0, 0}} },
+	{ "mppj5b", {{0, 0, 0, 1, 0, 0, 0, 0}} },
+	{ "mppj5c", {{0, 0, 0, 0, 1, 0, 0, 0}} },
 };
 
 
@@ -577,6 +624,32 @@ bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &char
 	if (characterId == SokuLib::CHARACTER_REIMU) {
 		if (action == SokuLib::ACTION_ALT1_SKILL4_B || action == SokuLib::ACTION_ALT1_SKILL4_C)
 			return character.objectBase.frameCount == 0 && (character.objectBase.actionBlockId == 0 || character.objectBase.actionBlockId == 2 || character.objectBase.actionBlockId == 7);
+	}
+
+	if (characterId == SokuLib::CHARACTER_SUIKA) {
+		switch (action) {
+		case FAKE_ACTION_MPP_ACTIVATE:
+		case FAKE_ACTION_MPP_IDLE:
+		case FAKE_ACTION_MPP_WALK:
+		case FAKE_ACTION_MPP_JUMP:
+		case FAKE_ACTION_MPP_FALL:
+		case FAKE_ACTION_MPP_SOMETHING:
+		case FAKE_ACTION_MPP_LANDING:
+		case FAKE_ACTION_MPP_5A:
+		case FAKE_ACTION_MPP_5B:
+		case FAKE_ACTION_MPP_5C:
+		case FAKE_ACTION_MPP_J5A:
+		case FAKE_ACTION_MPP_J5A_LANDING:
+		case FAKE_ACTION_MPP_J5B:
+		case FAKE_ACTION_MPP_J5B_LANDING:
+		case FAKE_ACTION_MPP_DEACTIVATE:
+		case FAKE_ACTION_MPP_2x:
+		case FAKE_ACTION_MPP_J5C:
+		case FAKE_ACTION_MPP_J5C_FALLING:
+			return character.objectBase.frameCount == 0;
+		default:
+			break;
+		}
 	}
 
 	if (characterId == SokuLib::CHARACTER_SUWAKO) {
@@ -612,6 +685,46 @@ SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::
 		return SokuLib::ACTION_DEFAULT_SKILL3_C;
 	if ((characterId == SokuLib::CHARACTER_REMILIA || characterId == SokuLib::CHARACTER_FLANDRE) && character.objectBase.action == SokuLib::ACTION_ALT1_SKILL1_B && character.objectBase.actionBlockId == 3)
 		return SokuLib::ACTION_ALT1_SKILL1_C;
+	if (characterId == SokuLib::CHARACTER_SUIKA && character.objectBase.action == SokuLib::ACTION_USING_SC_ID_205) {
+		switch (character.objectBase.actionBlockId) {
+		case 1:
+			return FAKE_ACTION_MPP_IDLE;
+		case 2:
+			return FAKE_ACTION_MPP_WALK;
+		case 3:
+			return FAKE_ACTION_MPP_JUMP;
+		case 4:
+			return FAKE_ACTION_MPP_FALL;
+		case 5:
+			return FAKE_ACTION_MPP_SOMETHING;
+		case 6:
+			return FAKE_ACTION_MPP_LANDING;
+		case 7:
+			return FAKE_ACTION_MPP_5A;
+		case 8:
+			return FAKE_ACTION_MPP_5B;
+		case 9:
+			return FAKE_ACTION_MPP_5C;
+		case 10:
+			return FAKE_ACTION_MPP_J5A;
+		case 11:
+			return FAKE_ACTION_MPP_J5A_LANDING;
+		case 12:
+			return FAKE_ACTION_MPP_J5B;
+		case 13:
+			return FAKE_ACTION_MPP_J5B_LANDING;
+		case 14:
+			return FAKE_ACTION_MPP_DEACTIVATE;
+		case 15:
+			return FAKE_ACTION_MPP_2x;
+		case 16:
+			return FAKE_ACTION_MPP_J5C;
+		case 17:
+			return FAKE_ACTION_MPP_J5C_FALLING;
+		default:
+			break;
+		}
+	}
 	//My mom says I am special !
 	if (characterId == SokuLib::CHARACTER_SUWAKO)
 		switch (character.objectBase.action) {

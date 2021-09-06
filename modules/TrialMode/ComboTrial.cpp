@@ -71,7 +71,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
-	this->_crouching = json["dummy"].contains("crouch") && !json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
+	this->_crouching = json["dummy"].contains("crouch") && json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
 	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
 	this->_rightWeather = !json["dummy"].contains("affected_by_weather") || !json["dummy"]["affected_by_weather"].is_boolean() || json["dummy"]["affected_by_weather"].get<bool>();
 	memset(&this->_skills, 0xFF, sizeof(this->_skills));
@@ -305,9 +305,9 @@ disableLimit:
 		return false;
 	}
 
-	if (this->_actionCounter && !this->_dummyHit) {
+	if (this->_actionCounter && !this->_dummyHit && !battleMgr.leftCharacterManager.timeStop && !battleMgr.rightCharacterManager.timeStop)
 		this->_timer++;
-	} else
+	else
 		this->_timer = 0;
 	this->_isStart = this->_timer >= 60;
 	battleMgr.currentRound = 3;
