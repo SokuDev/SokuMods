@@ -266,8 +266,8 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "be4",        SokuLib::ACTION_BE4 },
 	{ "be6",        SokuLib::ACTION_BE6 },
 
-	{ "j66",        SokuLib::ACTION_FORWARD_AIRDASH },
 	{ "j44",        SokuLib::ACTION_BACKWARD_AIRDASH },
+	{ "j66",        SokuLib::ACTION_FORWARD_AIRDASH },
 	{ "44",         SokuLib::ACTION_BACKDASH },
 	{ "66",         SokuLib::ACTION_FORWARD_DASH },
 	{ "d4",         SokuLib::ACTION_BACKDASH },
@@ -284,6 +284,8 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "9",          SokuLib::ACTION_FORWARD_JUMP },
 	{ "8",          SokuLib::ACTION_NEUTRAL_JUMP },
 	{ "7",          SokuLib::ACTION_BACKWARD_JUMP },
+	{ "6",          SokuLib::ACTION_WALK_FORWARD },
+	{ "4",          SokuLib::ACTION_WALK_BACKWARD },
 
 	{ "drug",       SokuLib::ACTION_SPELL_BREAKING_DRUG },
 	{ "hackoruken", SokuLib::ACTION_FORWARD_DASH },
