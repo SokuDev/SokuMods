@@ -68,6 +68,7 @@ extern std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByName;
 extern std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByMode;
 extern std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByCategory;
 extern std::map<unsigned, std::string> validCharacters;
+extern std::map<unsigned, std::map<unsigned short, std::pair<std::string, unsigned int>>> characterCards;
 extern const std::map<unsigned, std::string> swrCharacters;
 extern bool hasSoku2;
 extern char packsLocation[1024 + MAX_PATH];

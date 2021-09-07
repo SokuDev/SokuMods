@@ -5,6 +5,7 @@
 #include "ComboTrial.hpp"
 #include "Actions.hpp"
 #include "Menu.hpp"
+#include "Pack.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -571,18 +572,40 @@ SokuLib::KeyInput ComboTrial::getDummyInputs()
 
 SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
 {
+	auto error = false;
+
 	try {
 		auto act = actionsFromStr.at(name);
+		auto pos = name.find("sc2");
 
 		if (act >= SokuLib::ACTION_DEFAULT_SKILL1_B && act <= SokuLib::ACTION_ALT2_SKILL5_AIR_C) {
 			auto input = characterSkills[chr].at(name[name.size() - 3]);
+			auto move = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
+			auto skillName = characterCards[chr][100 + (move % 3) * characterSkills[chr].size() + move / 3].first;
 
-			name = name.substr(0, name.size() - strlen("skillXb")) +
-			       input +
-			       name[name.size() - 1];
+			name = input + name.back() + " (" + (skillName.empty() ? "Unknown skill" : skillName) + ")";
+		}
+		try {
+			if (pos != std::string::npos) {
+				auto scId = std::stoul(name.substr(pos + 2, 3));
+				auto &entry = characterCards[chr].at(scId);
+
+				name = name.substr(0, pos) + std::to_string(entry.second) + "SC (" + entry.first + ")";
+			}
+		} catch (...) {
+			printf("%u %s %s\n", name.size(), name.c_str(), name.substr(pos + 2, 3).c_str());
+			error = true;
+			if (error) {
+				assert(false);
+				throw;
+			}
 		}
 		return act;
-	} catch (...) {}
+	} catch (...) {
+		if (error)
+			throw;
+	}
+
 
 	int start = name[0] == 'j';
 	int realStart = (name[start] == 'a' ? 2 : 1) + start;
@@ -593,9 +616,15 @@ SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &n
 	if (it == inputs.end())
 		throw std::exception();
 	try {
-		return actionsFromStr.at(name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name[name.size() - 1]);
+		auto act = actionsFromStr.at(name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name[name.size() - 1]);
+		auto moveId = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
+		auto skillName = characterCards[chr][100 + (moveId % 3) * characterSkills[chr].size() + moveId / 3].first;
+
+		name = name.substr(realStart, name.size() - realStart - 1) + name.back() + " (" + (skillName.empty() ? "Unknown skill" : skillName) + ")";
+		return act;
 	} catch (std::exception &e) {
-		printf("%s\n", (name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name[name.size() - 1]).c_str());
+		printf("%s\n", (name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name.back()).c_str());
+	bigMistake:
 		assert(false);
 		throw;
 	}
