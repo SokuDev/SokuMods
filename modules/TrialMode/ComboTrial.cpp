@@ -640,7 +640,7 @@ void ComboTrial::SpecialAction::parse()
 			this->optional = true;
 			continue;
 		}
-		p &= c != ']' || !d;
+		p &= c != ']' && !d;
 		if (c == '[' || c == ']' || c == ':')
 			continue;
 		if (d)
