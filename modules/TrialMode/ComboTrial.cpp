@@ -722,7 +722,7 @@ void ComboTrial::SpecialAction::parse()
 		int dig = std::isdigit(this->moveName.back());
 		int index = this->moveName.size() - 2;
 
-		while (index >= 0 && dig == std::isdigit(this->moveName[index]))
+		while (index >= 0 && !dig && !std::isdigit(this->moveName[index]))
 			index--;
 		this->moveName = this->moveName.substr(0, index + 1) + "[" + this->moveName.substr(index + 1) + "]";
 	}

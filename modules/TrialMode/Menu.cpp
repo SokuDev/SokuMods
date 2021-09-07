@@ -20,6 +20,7 @@
 
 static int currentPack = -3;
 static int currentEntry = -1;
+static bool expended = false;
 static bool loaded = false;
 static bool loadNextTrial = false;
 static unsigned shownPack = 0;
@@ -413,22 +414,6 @@ void loadFont()
 	desc.height = 16;
 	defaultFont16.create();
 	defaultFont16.setIndirect(desc);
-}
-
-void checkScrollDown()
-{
-	if (currentPack < 0) {
-		packStart = 0;
-		entryStart = 0;
-		return;
-	}
-	if (currentPack >= 0 && currentEntry == -1) {
-		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 25 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
-		entryStart = 0;
-		return;
-	}
-	if (currentEntry - entryStart > 15)
-		entryStart = currentEntry - 15;
 }
 
 void menuLoadAssets()
@@ -832,15 +817,40 @@ static void switchEditorMode()
 	SokuLib::playSEWaveBuffer(48);
 }
 
+void checkScrollDown()
+{
+	if (currentPack < 0) {
+		packStart = 0;
+		entryStart = 0;
+		return;
+	}
+	if (currentPack >= 0 && currentEntry == -1) {
+		if (expended) {
+			auto newStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 25 - (expended ? 15.f * loadedPacks[currentPack]->scenarios.size() : 0)) / 35));
+
+			packStart = max(packStart, newStart);
+		} else if (currentPack - packStart > 6)
+			packStart = currentPack - 6;
+		entryStart = 0;
+		return;
+	}
+	if (currentEntry - entryStart > 15)
+		entryStart = currentEntry - 15;
+}
+
 void checkScrollUp()
 {
 	if (currentPack < 0) {
 		entryStart = 0;
 		return;
 	}
-	if (currentEntry == -1)
+	if (currentEntry == -1) {
+		if (currentPack < packStart)
+			packStart = currentPack;
+		else if (currentPack - packStart > 6)
+			packStart = currentPack - 6;
 		return;
-	printf("%i %i %i\n", currentEntry, currentPack, loadedPacks[currentPack]->scenarios.size());
+	}
 	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
 		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
 		if (currentEntry > 15)
@@ -935,7 +945,7 @@ static void handleGoUp()
 			if (currentPack == -4)
 				currentPack += loadedPacks.size() + 3;
 			if (currentPack >= 0) {
-				currentEntry += loadedPacks[currentPack]->scenarios.size();
+				//currentEntry += loadedPacks[currentPack]->scenarios.size();
 				shownPack = currentPack;
 			}
 			if (currentPack < 0)
@@ -949,12 +959,14 @@ static void handleGoUp()
 				continue;
 			if (topicFilter != -1 && pack->category != uniqueCategories[topicFilter])
 				continue;
-			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
-				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
-			else
-				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+			//if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+			//	loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+			//else
+			//	loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 			break;
 		} while (true);
+		if (currentPack >= 0)
+			expended = false;
 	} else {
 		currentEntry--;
 		if (currentEntry != -1) {
@@ -976,7 +988,7 @@ static void handleGoUp()
 static void handleGoDown()
 {
 	SokuLib::playSEWaveBuffer(0x27);
-	if (currentPack < 0 || currentEntry == loadedPacks[currentPack]->scenarios.size() - 1) {
+	if (currentPack < 0 || currentEntry == loadedPacks[currentPack]->scenarios.size() - 1 || !expended) {
 		do {
 			currentPack++;
 			if (currentPack == loadedPacks.size())
@@ -996,6 +1008,8 @@ static void handleGoDown()
 				continue;
 			break;
 		} while (true);
+		if (currentPack >= 0)
+			expended = false;
 	} else {
 		currentEntry++;
 		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
@@ -1045,17 +1059,23 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 	editorMode = true;
 	switchEditorMode();
 nothing:
-	if (input.a == 1 && currentEntry != -1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE) {
-		if (!isLocked(currentEntry)) {
-			puts("Start game !");
+	if (input.a == 1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE && currentPack >= 0) {
+		if (currentEntry == -1) {
 			SokuLib::playSEWaveBuffer(0x28);
-			prepareGameLoading(
-				loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
-				loadedPacks[currentPack]->scenarios[currentEntry]->file
-			);
-			return;
+			expended = !expended;
+			checkScrollDown();
+		} else {
+			if (!isLocked(currentEntry)) {
+				puts("Start game !");
+				SokuLib::playSEWaveBuffer(0x28);
+				prepareGameLoading(
+					loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
+					loadedPacks[currentPack]->scenarios[currentEntry]->file
+					);
+				return;
+			}
+			SokuLib::playSEWaveBuffer(0x29);
 		}
-		SokuLib::playSEWaveBuffer(0x29);
 	}
 	if (input.verticalAxis == -1 || (input.verticalAxis <= -36 && input.verticalAxis % 6 == 0))
 		handleGoUp();
@@ -1128,7 +1148,7 @@ void renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		packContainer.draw();
 	}
 	pos.y += 35;
-	if (deployed) {
+	if (deployed && expended) {
 		for (int i = entryStart; i < pack.scenarios.size(); i++) {
 			pos.y += 15;
 			if (pos.y > 379)
@@ -1209,7 +1229,7 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	}
 	pos.y += 35;
 
-	if (!deployed) {
+	if (!deployed || !expended) {
 		pos.y += 5;
 		return;
 	}
