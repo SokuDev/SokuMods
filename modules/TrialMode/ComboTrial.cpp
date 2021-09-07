@@ -332,10 +332,10 @@ disableLimit:
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
-		if (this->_crouching && this->_dummyStartPos.y == 0) {
-			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_CROUCHED;
-			battleMgr.rightCharacterManager.objectBase.animate();
-		}
+		//if (this->_crouching && this->_dummyStartPos.y == 0) {
+		//	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_CROUCHED;
+		//	battleMgr.rightCharacterManager.objectBase.animate();
+		//}
 		if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
 			this->_playComboAfterIntro = true;
 	}
@@ -431,7 +431,6 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.combo.rate = 0;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
-	//battleMgr.leftCharacterManager.objects.list.size = 0;
 	for (auto card : this->_hand) {
 		auto obj = battleMgr.leftCharacterManager.addCard(card);
 
@@ -459,7 +458,10 @@ void ComboTrial::_initGameStart()
 	battleMgr.rightCharacterManager.objectBase.renderInfos.xRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.yRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.zRotation = 0;
-	battleMgr.rightCharacterManager.objectBase.action = this->_dummyStartPos.y == 0 ? SokuLib::ACTION_IDLE : SokuLib::ACTION_FALLING;
+	if (this->_dummyStartPos.y == 0)
+		battleMgr.rightCharacterManager.objectBase.action = this->_crouching ? SokuLib::ACTION_CROUCHED : SokuLib::ACTION_IDLE;
+	else
+		battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
 	battleMgr.rightCharacterManager.objectBase.animate();
 	battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 	battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
@@ -564,7 +566,7 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 
 SokuLib::KeyInput ComboTrial::getDummyInputs()
 {
-	return {0, 0, 0, 0, 0, 0, 0, 0};
+	return {0, this->_crouching, 0, 0, 0, 0, 0, 0};
 }
 
 SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
