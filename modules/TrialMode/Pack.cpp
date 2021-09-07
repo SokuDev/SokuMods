@@ -23,6 +23,7 @@ std::vector<std::shared_ptr<Pack>> loadedPacks;
 std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByName;
 std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByMode;
 std::map<std::string, std::vector<std::shared_ptr<Pack>>> packsByCategory;
+std::map<unsigned, std::map<unsigned short, std::pair<std::string, unsigned int>>> characterCards;
 std::map<unsigned, std::string> validCharacters{
 	{ SokuLib::CHARACTER_REIMU, "reimu" },
 	{ SokuLib::CHARACTER_MARISA, "marisa" },

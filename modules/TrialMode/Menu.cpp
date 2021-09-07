@@ -109,6 +109,73 @@ std::vector<SokuLib::KeyInput> lastInputs{
 	{0, 0, 0, 0, 0, 0, 0, 0},
 };
 
+static void loadAllExistingCards()
+{
+	if (!characterCards.empty())
+		return;
+
+	char buffer[] = "data/csv/000000000000/spellcard.csv";
+	char bufferCards[] = "data/card/000000000000/card000.bmp";
+	auto chrs = validCharacters;
+
+	if (!SokuLib::SWRUnlinked)
+		for (auto &chr : swrCharacters)
+			chrs.emplace(chr);
+	puts("Loading cards");
+	for (auto &[id, codeName] : chrs) {
+		sprintf(buffer, "data/csv/%s/spellcard.csv", codeName.c_str());
+		printf("Loading cards from %s\n", buffer);
+
+		SokuLib::CSVParser parser{buffer};
+		int i = 0;
+
+		do {
+			auto str = parser.getNextCell();
+			unsigned short cardId;
+
+			i++;
+			try {
+				auto str2 = parser.getNextCell();
+
+				printf("New card %s: %s\n", str.c_str(), str2.c_str());
+				cardId = std::stoul(str);
+				characterCards[id][cardId].first = str2;
+			} catch (std::exception &e) {
+				MessageBoxA(
+					SokuLib::window,
+					(
+						"Fatal error: Cannot load cards list for " + codeName + ":\n" +
+						"In file " + buffer + ": Cannot parse cell #1 at line #" + std::to_string(i) +
+						" \"" + str + "\": " + e.what()
+					).c_str(),
+					"Loading card names failed",
+					MB_ICONERROR
+				);
+				abort();
+			}
+			parser.getNextCell();
+			try {
+				auto str2 = parser.getNextCell();
+
+				printf("Card %s has cost: %s\n", str.c_str(), str2.c_str());
+				characterCards[id][cardId].second = std::stoul(str2);
+			} catch (std::exception &e) {
+				MessageBoxA(
+					SokuLib::window,
+					(
+						"Fatal error: Cannot load cards list for " + codeName + ":\n" +
+						"In file " + buffer + ": Cannot parse cell #3 at line #" + std::to_string(i) +
+						" \"" + str + "\": " + e.what()
+					).c_str(),
+					"Loading card costs failed",
+					MB_ICONERROR
+				);
+				abort();
+			}
+		} while (parser.goToNextLine());
+	}
+}
+
 void saveScores()
 {
 	std::ofstream stream{loadedPacks[currentPack]->scorePath, std::ofstream::binary};
@@ -421,6 +488,7 @@ void menuLoadAssets()
 	if (loaded)
 		return;
 	loaded = true;
+	loadAllExistingCards();
 	puts("Loading assets");
 
 	loadFont();
