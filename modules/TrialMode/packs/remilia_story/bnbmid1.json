@@ -11,6 +11,7 @@
         "character": "aya",
         "palette": 0,
         "deck": [],
+        "crouch": true,
         "pos": {
             "x": 800,
             "y": 0
