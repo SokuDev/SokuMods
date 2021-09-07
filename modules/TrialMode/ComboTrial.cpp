@@ -425,8 +425,13 @@ void ComboTrial::_initGameStart()
 		this->_waitCounter += 30;
 
 	this->_firstFirst = 0;
+	battleMgr.leftCharacterManager.combo.limit = 0;
+	battleMgr.leftCharacterManager.combo.damages = 0;
+	battleMgr.leftCharacterManager.combo.nbHits = 0;
+	battleMgr.leftCharacterManager.combo.rate = 0;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
+	//battleMgr.leftCharacterManager.objects.list.size = 0;
 	for (auto card : this->_hand) {
 		auto obj = battleMgr.leftCharacterManager.addCard(card);
 
