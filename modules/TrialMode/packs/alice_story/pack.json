@@ -23,11 +23,11 @@
         "yMirror": false
     },
     "scenarios": [
-	{
-            "name": "",
-            "file": "bnbmid3.json",
-            "preview": "",
-            "description": ""
-	}
+        {
+                "name": "test",
+                "file": "bnbmid3.json",
+                "preview": "",
+                "description": ""
+        }
     ]
 }

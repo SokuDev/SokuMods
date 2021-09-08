@@ -144,10 +144,12 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 
 	{ "66c",        SokuLib::ACTION_66C },
 	{ "2c",         SokuLib::ACTION_2C },
+	{ "4c",         SokuLib::ACTION_4C },
 	{ "5c",         SokuLib::ACTION_5C },
 	{ "6c",         SokuLib::ACTION_6C },
 	{ "j1c",        SokuLib::ACTION_j1C },
 	{ "j2c",        SokuLib::ACTION_j2C },
+	{ "j4c",        SokuLib::ACTION_j1C },
 	{ "j5c",        SokuLib::ACTION_j5C },
 	{ "j6c",        SokuLib::ACTION_j6C },
 	{ "oc",         SokuLib::ACTION_ORRERIES_C },
@@ -424,6 +426,7 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 
 	{ "66c",        {{1, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}, {1, 0, 0, 0, 0, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}} },
 	{ "2c",         {{0, 1, 0, 0, 1, 0, 0, 0}} },
+	{ "4c",         {{-1, 0, 0, 0, 1, 0, 0, 0}} },
 	{ "5c",         {{0, 0, 0, 0, 1, 0, 0, 0}} },
 	{ "6c",         {{1, 0, 0, 0, 1, 0, 0, 0}} },
 	{ "j1c",        {{-1, 1, 0, 0, 1, 0, 0, 0}} },
@@ -901,5 +904,7 @@ SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::
 		default:
 			break;
 	}
+	if (character.objectBase.action == SokuLib::ACTION_ALICE_4C)
+		return SokuLib::ACTION_4C;
 	return character.objectBase.action;
 }

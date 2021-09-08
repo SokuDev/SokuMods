@@ -451,6 +451,10 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.objectBase.renderInfos.xRotation = 0;
 	battleMgr.leftCharacterManager.objectBase.renderInfos.yRotation = 0;
 	battleMgr.leftCharacterManager.objectBase.renderInfos.zRotation = 0;
+	if (SokuLib::leftChar == SokuLib::CHARACTER_SANAE) {
+		battleMgr.leftCharacterManager.suwakoTimeLeft = 0;
+		battleMgr.leftCharacterManager.kanakoTimeLeft = 0;
+	}
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
