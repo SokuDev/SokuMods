@@ -141,7 +141,7 @@ void LoadSettings()
 
 	puts("Loading settings...");
 	*packsLocation = 0;
-	if (GetPrivateProfileInt("TrialMode", "IsPathAbsolute", 1, profilePath)) {
+	if (GetPrivateProfileInt("TrialMode", "IsPathAbsolute", 0, profilePath) == 0) {
 		strcpy(packsLocation, profileFolderPath);
 		strcat(packsLocation, "\\");
 	}
