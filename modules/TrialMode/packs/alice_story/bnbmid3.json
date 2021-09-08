@@ -1,0 +1,67 @@
+{
+    "music": 34,
+    "stage": 12,
+    "player": {
+        "character": "alice",
+        "palette": 0,
+        "deck": [],
+        "pos": 550
+    },
+    "dummy": {
+        "character": "meirin",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 600,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "dolls": [
+        {
+            "x": 150,
+            "y": 160,
+            "dir": 1
+        },
+        {
+            "x": 350,
+            "y": 260,
+            "dir": 1
+        },
+        {
+            "x": 650,
+            "y": 360,
+            "dir": 1
+        }
+    ],
+    "expected": "5aaaa",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "uniform_card_cost": 1,
+    "hand": [],
+    "score": [
+        {
+            "min_hits": 11,
+            "min_damage": 4267,
+            "min_limit": 130,
+            "max_limit": 130
+        },
+        {
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "hint": [
+
+    ]
+}
