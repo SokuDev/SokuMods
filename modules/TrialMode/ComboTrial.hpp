@@ -59,6 +59,7 @@ private:
 	std::vector<ScorePrerequisites> _scores;
 	bool _playComboAfterIntro;
 	std::vector<Doll> _dolls;
+	bool _jump = false;
 
 	//State
 	unsigned char _dollAnim = 0;
