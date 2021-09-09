@@ -60,6 +60,11 @@ private:
 	bool _playComboAfterIntro;
 	std::vector<Doll> _dolls;
 	bool _jump = false;
+	bool _mpp = false;
+	bool _orerries = false;
+	bool _privateSquare = false;
+	bool _stones = false;
+	bool _tickTimer = false;
 
 	//State
 	unsigned char _dollAnim = 0;
