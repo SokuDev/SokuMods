@@ -75,17 +75,22 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (json.contains("dolls") && json["dolls"].is_array()) {
 		if (player != SokuLib::CHARACTER_ALICE)
 			throw std::invalid_argument("Can only specify doll placement for alice");
-		for (auto &obj : json["dolls"]) {
-			if (
-				obj.is_object() &&
-				obj.contains("x") && obj["x"].is_number() &&
-				obj.contains("y") && obj["y"].is_number() &&
-				obj.contains("dir") && obj["dir"].is_number()
-			)
-				this->_dolls.push_back({SokuLib::Vector2f{obj["x"], obj["y"]}, obj["dir"].get<SokuLib::Direction>()});
+		for (int i = 0; i < json["dolls"].size(); i++) {
+			auto &obj = json["dolls"][i];
+
+			if (!obj.is_object())
+				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": Value is not an object");
+			if (!obj.contains("x") && obj["x"].is_number())
+				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": x is not a number");
+			if (!obj.contains("y") && obj["y"].is_number())
+				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": y is not a number");
+			if (!obj.contains("dir") && obj["dir"].is_number())
+				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": Direction is not a number");
+			this->_dolls.push_back({SokuLib::Vector2f{obj["x"], obj["y"]}, obj["dir"].get<SokuLib::Direction>()});
 		}
 	}
 
+	this->_jump = json["dummy"].contains("jump") && json["dummy"]["jump"].is_boolean() && json["dummy"]["jump"].get<bool>();
 	this->_failTimer = json.contains("fail_timer") && json["fail_timer"].is_number() ? json["fail_timer"].get<int>() : 60;
 	this->_crouching = json["dummy"].contains("crouch") && json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
 	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
@@ -151,6 +156,10 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
 	this->_loadExpected(json["expected"]);
+	if (this->_jump && this->_dummyStartPos.y != 0)
+		throw std::invalid_argument("Cannot specify a non zero y if the dummy is jumping");
+	if (this->_jump && this->_crouching)
+		throw std::invalid_argument("The dummy cannot crouch and jump at the time!");
 
 	this->_gear.texture.loadFromResource(myModule, MAKEINTRESOURCE(12));
 	this->_gear.setPosition({559, 70});
@@ -345,9 +354,11 @@ disableLimit:
 		this->_dummyHit = false;
 	this->_dummyHit |= hit;
 	if (!this->_dummyHit && !this->_finished) {
-		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
-		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
+		if (!this->_jump) {
+			battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
+			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
+		}
 		//if (this->_crouching && this->_dummyStartPos.y == 0) {
 		//	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_CROUCHED;
 		//	battleMgr.rightCharacterManager.objectBase.animate();
@@ -621,7 +632,7 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 
 SokuLib::KeyInput ComboTrial::getDummyInputs()
 {
-	return {0, this->_crouching, 0, 0, 0, 0, 0, 0};
+	return {0, this->_crouching - this->_jump, 0, 0, 0, 0, 0, 0};
 }
 
 SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
@@ -946,7 +957,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 		defaultFont12,
 		{130, 14},
 		&size
-		);
+	);
 	//if (prerequ.minLimit == prerequ.maxLimit)
 	//	this->_limit.texture.createFromText(
 	//		("Exactly " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
