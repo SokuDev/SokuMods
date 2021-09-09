@@ -38,6 +38,11 @@ private:
 		bool met(unsigned currentAttempts) const;
 	};
 
+	struct Doll {
+		SokuLib::Vector2f pos;
+		SokuLib::Direction dir;
+	};
+
 	//Init params
 	bool _crouching;
 	bool _leftWeather;
@@ -53,6 +58,7 @@ private:
 	std::vector<unsigned short> _hand;
 	std::vector<ScorePrerequisites> _scores;
 	bool _playComboAfterIntro;
+	std::vector<Doll> _dolls;
 
 	//State
 	unsigned char _dollAnim = 0;
@@ -64,6 +70,8 @@ private:
 	unsigned _attempts = 0;
 	float _rotation = 0;
 	unsigned _firstFirst = 1;
+	unsigned _currentDoll = 0;
+	unsigned _lastSize = 0;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;

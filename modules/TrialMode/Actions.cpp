@@ -259,7 +259,7 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "osc215",     FAKE_ACTION_ORRERIES_REACTIVATE },
 
 	{ "hjd9",       SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH },
-	{ "hjd8",       SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH },
+	{ "hjd8",       SokuLib::ACTION_NEUTRAL_HIGH_JUMP_FROM_GROUND_DASH },
 	{ "hj9",        SokuLib::ACTION_FORWARD_HIGH_JUMP },
 	{ "hj8",        SokuLib::ACTION_NEUTRAL_HIGH_JUMP },
 	{ "hj7",        SokuLib::ACTION_BACKWARD_HIGH_JUMP },
