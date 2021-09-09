@@ -72,6 +72,20 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
+	if (json.contains("dolls") && json["dolls"].is_array()) {
+		if (player != SokuLib::CHARACTER_ALICE)
+			throw std::invalid_argument("Can only specify doll placement for alice");
+		for (auto &obj : json["dolls"]) {
+			if (
+				obj.is_object() &&
+				obj.contains("x") && obj["x"].is_number() &&
+				obj.contains("y") && obj["y"].is_number() &&
+				obj.contains("dir") && obj["dir"].is_number()
+			)
+				this->_dolls.push_back({SokuLib::Vector2f{obj["x"], obj["y"]}, obj["dir"].get<SokuLib::Direction>()});
+		}
+	}
+
 	this->_failTimer = json.contains("fail_timer") && json["fail_timer"].is_number() ? json["fail_timer"].get<int>() : 60;
 	this->_crouching = json["dummy"].contains("crouch") && json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
 	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
@@ -410,11 +424,43 @@ void ComboTrial::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (this->_currentDoll) {
+		auto obj = battleMgr.leftCharacterManager.objects.list.vector()[battleMgr.leftCharacterManager.objects.list.size - 2];
+
+		obj->action = static_cast<SokuLib::Action>(805);
+		obj->animate();
+		while (obj->actionBlockId != 8)
+			obj->animate2();
+		obj->position = this->_dolls[this->_currentDoll - 1].pos;
+		obj->direction = this->_dolls[this->_currentDoll - 1].dir;
+		battleMgr.leftCharacterManager.aliceDollCount = 0;
+	} else if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE) {
+		for (auto &obj : battleMgr.leftCharacterManager.objects.list.vector()) {
+			if (
+				(obj->action == 805 && obj->image->number >= 304 && obj->image->number <= 313) || //This is Alice's doll (C)
+				(obj->action == 825 && obj->image->number >= 322 && obj->image->number <= 325)    //This is Alice's doll (d22)
+			) {
+				obj->action = static_cast<SokuLib::Action>(805);
+				obj->animate();
+				obj->actionBlockId = 7;
+			}
+		}
+	}
+	if (this->_currentDoll != this->_dolls.size()) {
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_5C;
+		battleMgr.leftCharacterManager.objectBase.animate();
+		while (battleMgr.leftCharacterManager.objectBase.frameCount != 9)
+			battleMgr.leftCharacterManager.objectBase.doAnimation();
+		this->_lastSize = battleMgr.leftCharacterManager.objects.list.size;
+		this->_currentDoll++;
+		return;
+	}
 	if (this->_first)
 		this->_waitCounter = 180;
 	else if (!this->_playingIntro)
 		this->_attempts++;
 
+	this->_currentDoll = 0;
 	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
 	this->_isStart = false;
 	this->_dummyHit = false;
@@ -456,24 +502,10 @@ void ComboTrial::_initGameStart()
 		battleMgr.leftCharacterManager.suwakoTimeLeft = 0;
 		battleMgr.leftCharacterManager.kanakoTimeLeft = 0;
 	}
-	if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE) {
-		for (auto &obj : battleMgr.leftCharacterManager.objects.list.vector()) {
-			if (
-				(obj->action == 805 && obj->image->number >= 304 && obj->image->number <= 313) || //This is Alice's doll (C)
-				(obj->action == 825 && obj->image->number >= 322 && obj->image->number <= 325)    //This is Alice's doll (d22)
-			) {
-				if (obj->action == 825) {
-					obj->action = static_cast<SokuLib::Action>(805);
-					obj->animate();
-				}
-				obj->actionBlockId = 7;
-			}
-		}
-		battleMgr.leftCharacterManager.aliceDollCount = 0;
-	}
 	//(*(void (__thiscall **)(SokuLib::ObjListManager &, int))&*battleMgr.leftCharacterManager.objects.offset_0x00)(battleMgr.leftCharacterManager.objects, 0);
 	//battleMgr.leftCharacterManager.objects;
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
+	battleMgr.leftCharacterManager.aliceDollCount = this->_dolls.size();
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
 	battleMgr.rightCharacterManager.currentSpirit = 10000;
