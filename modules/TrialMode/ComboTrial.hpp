@@ -43,6 +43,7 @@ private:
 	bool _leftWeather;
 	bool _rightWeather;
 	float _playerStartPos;
+	unsigned _failTimer;
 	SokuLib::Vector2f _dummyStartPos;
 	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;
 	SokuLib::Weather _weather;

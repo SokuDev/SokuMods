@@ -72,6 +72,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
+	this->_failTimer = json.contains("fail_timer") && json["fail_timer"].is_number() ? json["fail_timer"] : 60;
 	this->_crouching = json["dummy"].contains("crouch") && json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
 	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
 	this->_rightWeather = !json["dummy"].contains("affected_by_weather") || !json["dummy"]["affected_by_weather"].is_boolean() || json["dummy"]["affected_by_weather"].get<bool>();
@@ -310,7 +311,7 @@ disableLimit:
 		this->_timer++;
 	else
 		this->_timer = 0;
-	this->_isStart = this->_timer >= 60;
+	this->_isStart = this->_timer >= this->_failTimer;
 	battleMgr.currentRound = 3;
 	battleMgr.leftCharacterManager.score = 0;
 	if (
@@ -455,6 +456,8 @@ void ComboTrial::_initGameStart()
 		battleMgr.leftCharacterManager.suwakoTimeLeft = 0;
 		battleMgr.leftCharacterManager.kanakoTimeLeft = 0;
 	}
+	//(*(void (__thiscall **)(SokuLib::ObjListManager &, int))&*battleMgr.leftCharacterManager.objects.offset_0x00)(battleMgr.leftCharacterManager.objects, 0);
+	//battleMgr.leftCharacterManager.objects;
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
