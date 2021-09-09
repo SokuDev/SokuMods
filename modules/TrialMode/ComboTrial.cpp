@@ -456,6 +456,21 @@ void ComboTrial::_initGameStart()
 		battleMgr.leftCharacterManager.suwakoTimeLeft = 0;
 		battleMgr.leftCharacterManager.kanakoTimeLeft = 0;
 	}
+	if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE) {
+		for (auto &obj : battleMgr.leftCharacterManager.objects.list.vector()) {
+			if (
+				(obj->action == 805 && obj->image->number >= 304 && obj->image->number <= 313) || //This is Alice's doll (C)
+				(obj->action == 825 && obj->image->number >= 322 && obj->image->number <= 325)    //This is Alice's doll (d22)
+			) {
+				if (obj->action == 825) {
+					obj->action = static_cast<SokuLib::Action>(805);
+					obj->animate();
+				}
+				obj->actionBlockId = 7;
+			}
+		}
+		battleMgr.leftCharacterManager.aliceDollCount = 0;
+	}
 	//(*(void (__thiscall **)(SokuLib::ObjListManager &, int))&*battleMgr.leftCharacterManager.objects.offset_0x00)(battleMgr.leftCharacterManager.objects, 0);
 	//battleMgr.leftCharacterManager.objects;
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
