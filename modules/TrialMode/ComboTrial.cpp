@@ -149,9 +149,25 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 			throw std::invalid_argument(weather + " is not a valid weather name");
 		this->_weather = it->second;
 	}
-	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() ? json["disable_limit"].get<bool>() : false;
+
+	this->_mpp           = json["player"].contains("mpp")            && json["player"]["mpp"].is_boolean()            && json["player"]["mpp"].get<bool>();
+	this->_stones        = json["player"].contains("stones")         && json["player"]["stones"].is_boolean()         && json["player"]["stones"].get<bool>();
+	this->_orerries      = json["player"].contains("orreries")       && json["player"]["orreries"].is_boolean()       && json["player"]["orreries"].get<bool>();
+	this->_tickTimer     = json["player"].contains("tick_timer")     && json["player"]["tick_timer"].is_boolean()     && json["player"]["tick_timer"].get<bool>();
+	this->_privateSquare = json["player"].contains("private_square") && json["player"]["private_square"].is_boolean() && json["player"]["private_square"].get<bool>();
+
+	if (this->_mpp && player != SokuLib::CHARACTER_SUIKA)
+		throw std::invalid_argument("Missing Purple Power is only allowed for Suika");
+	if (this->_stones && player != SokuLib::CHARACTER_PATCHOULI)
+		throw std::invalid_argument("Philosopher's Stones is only allowed for Patchouli");
+	if (this->_orerries && player != SokuLib::CHARACTER_MARISA)
+		throw std::invalid_argument("Orerries's Sun is only allowed for Marisa");
+	if (this->_privateSquare && player != SokuLib::CHARACTER_SAKUYA)
+		throw std::invalid_argument("Private Square is only allowed for Sakuya");
+
+	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() && json["disable_limit"].get<bool>();
 	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
-	this->_playComboAfterIntro = json.contains("play_combo_after_intro") && json["play_combo_after_intro"].is_boolean() ? json["play_combo_after_intro"].get<bool>() : false;
+	this->_playComboAfterIntro = json.contains("play_combo_after_intro") && json["play_combo_after_intro"].is_boolean() && json["play_combo_after_intro"].get<bool>();
 	this->_playerStartPos = json["player"]["pos"];
 	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
@@ -275,6 +291,17 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_initGameStart();
 		return false;
 	}
+
+	if (this->_tickTimer);
+	else if (this->_mpp)
+		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 900;
+	else if (this->_stones)
+		battleMgr.leftCharacterManager.philosophersStoneTime = 900;
+	else if (this->_orerries)
+		battleMgr.leftCharacterManager.orreriesTimeLeft = 900;
+	else if (this->_privateSquare)
+		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
+
 	if (this->_waitCounter) {
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
@@ -500,8 +527,32 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
 	battleMgr.leftCharacterManager.currentSpirit = 10000;
 	battleMgr.leftCharacterManager.maxSpirit = 10000;
-	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
-	battleMgr.leftCharacterManager.objectBase.animate();
+
+	if (this->_mpp) {
+		puts("Init MPP");
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
+		battleMgr.leftCharacterManager.objectBase.animate();
+		while (battleMgr.leftCharacterManager.objectBase.frameCount != 80)
+			battleMgr.leftCharacterManager.objectBase.doAnimation();
+	} else if (this->_stones) {
+		puts("Init Philosophers' Stone");
+		if (battleMgr.leftCharacterManager.philosophersStoneTime <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+		battleMgr.leftCharacterManager.objectBase.animate();
+	} else if (this->_orerries) {
+		puts("Init Orreries");
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_215;
+		battleMgr.leftCharacterManager.objectBase.animate();
+	} else if (this->_privateSquare) {
+		puts("Init Private Square");
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		battleMgr.leftCharacterManager.objectBase.animate();
+	} else {
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+		battleMgr.leftCharacterManager.objectBase.animate();
+	}
 	battleMgr.leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	battleMgr.leftCharacterManager.objectBase.position.y = 0;
 	battleMgr.leftCharacterManager.objectBase.speed.x = 0;
