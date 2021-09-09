@@ -5,20 +5,20 @@
         "character": "sakuya",
         "palette": 0,
         "deck": [],
-        "pos": 400
+        "pos": 100
     },
     "dummy": {
-        "character": "meirin",
+        "character": "aya",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 800,
+            "x": 500,
             "y": 0
         }
     },
     "type": "combo",
 
-    "expected": "66c hj9:40 j5a:15 j2a 66a:40 d623b",
+    "expected": "66c hj9/hj8/hj7/9/8/7/d6:40 j2a:11 66c:55",
     "skills": [
         [0, 0],
         [0, 0],
@@ -35,19 +35,15 @@
     ],
     "score": [
     {
-        "min_hits": 6,
-        "min_damage": 2412,
-        "min_limit": 90
+        "min_hits": 3,
+        "min_damage": 2187,
+        "min_limit": 100
     },
     {
-        "min_hits": 7,
-        "min_damage": 2502,
-        "min_limit": 95
+       "max_attempts": 100
     },
     {   
-        "min_hits": 8,
-        "min_damage" : 2585,
-        "min_limit" : 100
+        "max_attempts": 50
     },
     {
         "max_attempts": 25

@@ -9,7 +9,7 @@ local dialogs = {
     "rHHJust passing by to give back patchouli some books that I <br>borrowed ~ze.",
     "lHHOh, so really didn't come to steal anything this time?",
     "lHcI'll just have to confirm that.",
-    "rHEuuooooooooooooh \xF0\x9F\x98\xAD"
+    "rHEuuooooooooooooh"
 	--Battle here
 }
 
@@ -57,7 +57,7 @@ function update()
 			battleMgr.rightCharacterManager.position.x = 800
 			battleMgr.rightCharacterManager.position.y = 0
 			battleMgr.rightCharacterManager.animationSubFrame = 0
-			battleMgr.rightCharacterManager.action = enums.actions.ACTION_STAND_GROUND_HIT_HUGE_HITSTUN
+			battleMgr.rightCharacterManager.action = enums.actions.ACTION_STAND_GROUND
 			battleMgr.rightCharacterManager:initAnimation()
 		end
 	elseif flashRect.fillColor.a ~= 0 then

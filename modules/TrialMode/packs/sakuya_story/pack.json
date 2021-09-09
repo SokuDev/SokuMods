@@ -1,15 +1,23 @@
 {
-    "name": "Babylone's Aurora",
-    "category": "Sakuya Izayoi ",
+    "name": "An everyday ordeal",
+    "category": "Sakuya Izayoi",
+    "modes": ["Combo", "Story"],
     "characters": [
         "sakuya",
-        "meirin"
+        "meirin",
+        "marisa",
+        "patchouli",
+        "udonge",
+        "youmu",
+        "yuyuko",
+        "aya",
+        "suika"
     ],
     "stand": {
         "isPath": false,
         "path": "data/stand/sakuya.bmp"
     },
-    "description": "Sakuya Drip",
+    "description": "Incident at the Scarlet Devil Mansion",
     "author": "Exioloz",
     "icon": {
         "isPath": false,
@@ -39,7 +47,7 @@
             "name": "5AAA starter",
             "file": "lore3.json",
             "preview": "lore3.gif",
-            "description": "5AAA 2B 5C d.236B | <br>The best corner carry !"
+            "description": "5AAA 2B 5C d.236B | <br>The best corner carry ! <br>It is better to start 5AAA with dash momentum <br>and let more B and C knives hit. <br>This also will allow you to limit."
         },
         {
             "name": "66B starter",
@@ -63,7 +71,7 @@
             "name": "66C CH",
             "file": "lore7.json",
             "preview": "lore7.gif",
-            "description": "66C hj.9/D9 j.5A j.2A 66A d.623B| <br>The best meterless combo off of 66C. <br>You have to walk back a little sometimes. <br>After j.5A it is corner only. <br>It is the corner ender theory."
+            "description": "66C hj.9/D9/D6 j.2A 66C| <br>Basic 66C CH combo, <br>works everywhere.<br>You have to do some adjustement <br>depending on how you hit 66C."
         },
      
         {

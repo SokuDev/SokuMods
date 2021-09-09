@@ -8,7 +8,7 @@
         "pos": 550
     },
     "dummy": {
-        "character": "meirin",
+        "character": "yuyuko",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -18,7 +18,7 @@
     },
     "type": "combo",
 
-    "expected": "3a hj9 j5a:11 j6a:5 j6c",
+    "expected": "3a hj9 !j5a:11 j6a:5 j6c",
     "skills": [
         [0, 0],
         [0, 0],
@@ -35,17 +35,19 @@
     ],
     "score": [
     {
+        "min_hits": 6,
+        "min_damage": 1700,
+        "min_limit": 98
+    },
+    {
         "min_hits": 7,
-        "min_damage": 1782,
+        "min_damage": 1780,
         "min_limit": 98
     },
     {
         "min_hits": 8,
-        "min_damage" : 1856,
+        "min_damage" : 1850,
         "min_limit": 100
-    },
-    {
-        "max_attempts": 25
     },
     {
         "max_attempts": 10

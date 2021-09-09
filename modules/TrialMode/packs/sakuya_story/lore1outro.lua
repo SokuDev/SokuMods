@@ -6,9 +6,7 @@ local dialogs = {
 	"rWDI really didn't steal anything this time.",
 	"lADThis time?",
 	"lCDSo what were you doing here?",
-	"rCDNothing, Just visiting I promise.",
-	"lCDYou stay here while I check something.",
-	"rCDNo Please...",
+	"rCDNothing, really.",
 	"lADWhat is Meiling doing, letting anyone in?"
     --Battle here
 }

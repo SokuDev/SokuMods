@@ -8,7 +8,7 @@
         "pos": 700
     },
     "dummy": {
-        "character": "meirin",
+        "character": "udonge",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -28,7 +28,7 @@
     "weather": 21,
     "disable_limit": false,
     "uniform_card_cost": 1,
-    "hand": [205, 2, 2, 2, 2],
+    "hand": [205],
     "play_combo_after_intro": true,
     "hint": [
 
