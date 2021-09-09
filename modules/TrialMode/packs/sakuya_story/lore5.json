@@ -8,7 +8,7 @@
         "pos": 700
     },
     "dummy": {
-        "character": "meirin",
+        "character": "youmu",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -18,7 +18,7 @@
     },
     "type": "combo",
 
-    "expected": "9 j6a:5 j6c j66/j6d j6c jd236b!:25",
+    "expected": "!hj9 j6a:20 j6c:25 !j66/j6d j6c jd236b!:20",
     "skills": [
         [0, 0],
         [0, 0],
@@ -35,20 +35,23 @@
     ],
     "score": [
     {
-        "min_hits": 9,
-        "min_damage": 1705,
-        "min_limit": 88
-    },
-    {
         "min_hits": 11,
-        "min_damage": 1843,
+        "min_damage": 1840,
         "min_limit": 100
     },
     {
-        "max_attempts": 50
+        "min_hits": 12,
+        "min_damage": 1855,
+        "min_limit": 100
     },
     {
-        "max_attempts": 25
+        "min_hits": 12,
+        "min_damage": 1905,
+        "min_limit": 102
+    },
+    {
+        
+        "max_attempts" : 25
     }
     ]
 }

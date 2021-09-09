@@ -8,7 +8,7 @@
         "pos": 700
     },
     "dummy": {
-        "character": "meirin",
+        "character": "suika",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -18,7 +18,7 @@
     },
     "type": "combo",
 
-    "expected": "d6! 5aaa 2b hj9 j5b/j2b j66:30/jd6:30 j5a:20 5aaaa",
+    "expected": "d6! 5aaa 2b hj9 j5b/j2b j66/j6d:30 j5a:20 5aaaa",
     "skills": [
         [0, 0],
         [0, 0],
@@ -46,8 +46,8 @@
     },
     {
         "min_hits": 32,
-        "min_damage" : 2412,
-        "min_limit": 112
+        "min_damage" : 2410,
+        "min_limit": 110
     },
     {
         "max_attempts": 50
