@@ -324,6 +324,10 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 
 	{ "drug",       SokuLib::ACTION_SPELL_BREAKING_DRUG },
 	{ "hackoruken", SokuLib::ACTION_FORWARD_DASH },
+	{ "system",     SokuLib::ACTION_SYSTEM_CARD },
+	{ "bomb",       SokuLib::ACTION_BOMB },
+	{ "hangeki",    SokuLib::ACTION_HANGEKI },
+	{ "left_h_fan", SokuLib::ACTION_LEFT_HANDED_FOLDING_FAN },
 
 	{ "sj1d",    FAKE_ACTION_j1D },
 	{ "sj3d",    FAKE_ACTION_j3D },
@@ -611,6 +615,10 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 
 	{ "drug",       {{0, 0, 0, 0, 0, 0, 0, 1}} },
 	{ "hackoruken", {{0, 0, 0, 0, 0, 0, 0, 1}} },
+	{ "system",     {{0, 0, 0, 0, 0, 0, 0, 1}} },
+	{ "bomb",       {{0, 0, 0, 0, 0, 0, 0, 1}} },
+	{ "hangeki",    {{0, 0, 0, 0, 0, 0, 0, 1}} },
+	{ "left_h_fan", {{0, 0, 0, 0, 0, 0, 0, 1}} },
 
 	{ "sj1d",       {{-1, 1, 0, 0, 0, 1, 0, 0}} },
 	{ "sj3d",       {{1, 1, 0, 0, 0, 1, 0, 0}} },
