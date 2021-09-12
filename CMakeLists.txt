@@ -477,6 +477,8 @@ add_library(
         modules/TrialMode/Trial.hpp
         modules/TrialMode/ComboTrial.cpp
         modules/TrialMode/ComboTrial.hpp
+        modules/TrialMode/ComboTrialEditor.cpp
+        modules/TrialMode/ComboTrialEditor.hpp
         modules/TrialMode/Actions.cpp
         modules/TrialMode/Actions.hpp
         modules/TrialMode/Animations/BattleAnimation.cpp
