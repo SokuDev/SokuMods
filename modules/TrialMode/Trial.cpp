@@ -4,13 +4,13 @@
 
 #include "Trial.hpp"
 #include "ComboTrial.hpp"
-#include "Menu.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
 #define printf(...)
 #endif
 
+static unsigned char buffer[11];
 static int hooks = 0;
 static bool activated = false;
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
@@ -31,6 +31,31 @@ static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 
 Trial::Trial(const char *folder, const nlohmann::json &json)
 {
+	DWORD old;
+
+	buffer[0] = *(unsigned char *)0x40D1FB;
+	buffer[1] = *(unsigned char *)0x40D245;
+	buffer[2] = *(unsigned char *)0x40D27A;
+	buffer[3] = *(unsigned char *)0x40D27B;
+	buffer[4] = *(unsigned char *)0x40D27C;
+	buffer[5] = *(unsigned char *)0x40D27D;
+	buffer[6] = *(unsigned char *)0x40D27E;
+	buffer[7] = *(unsigned char *)0x40D27F;
+	buffer[8] = *(unsigned char *)0x40D280;
+	buffer[9] = *(unsigned char *)0x40D281;
+	buffer[10]= *(unsigned char *)0x40D282;
+
+	// This applies the filesystem first patch from Slen
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
+	*(unsigned char *)0x40D1FB = 0xEB;
+	*(unsigned char *)0x40D245 = 0x1C;
+	*(unsigned char *)0x40D27A = 0x74;
+	*(unsigned char *)0x40D27B = 0x91;
+	for (int i = 0; i < 7; i++)
+		((unsigned char *)0x40D27C)[i] = 0x90;
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+
 	if (json.contains("intro") && json["intro"].is_string())
 		try {
 			this->_intro.reset(loadBattleAnimation(folder, (folder + json["intro"].get<std::string>()).c_str(), true));
@@ -49,6 +74,8 @@ Trial::Trial(const char *folder, const nlohmann::json &json)
 		this->music = (t < 10 ? "data/bgm/st0" : "data/bgm/st") + std::to_string(t) + ".ogg";
 	} else
 		this->music = json["music"];
+	for (auto pos = this->music.find("{{pack_path}}"); pos != std::string::npos; pos = this->music.find("{{pack_path}}"))
+		this->music.replace(pos, strlen("{{pack_path}}"), folder);
 	if (json.contains("counter_hit") && json["counter_hit"].is_boolean() && json["counter_hit"].get<bool>()) {
 		DWORD old;
 
@@ -71,6 +98,12 @@ Trial::~Trial()
 	// We remove the always counter hit patch
 	*(unsigned short *)0x47abb7 = 0x1e75; //           JNZ        LAB_0047abd7
 	*(unsigned short *)0x47abc3 = 0x1275; //           JNZ        LAB_0047abd7
+
+	// We remove the filesystem first patch if it was there
+	*(unsigned char *)0x40D1FB = buffer[0];
+	*(unsigned char *)0x40D245 = buffer[1];
+	for (int i = 2; i < 11; i++)
+		((unsigned char *)0x40D27A)[i - 2] = buffer[i];
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
@@ -119,21 +152,21 @@ void Trial::_introOnUpdate()
 	(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22; // Remove HUD
 	if (!this->_intro) {
 		this->_introPlayed = true;
-		((void (*)(const char *))0x43ff10)(this->music.c_str());
+		SokuLib::playBGM(this->music.c_str());
 		return;
 	}
 
 	auto result = this->_intro->update();
 
 	if (!result && !this->_introPlayed)
-		((void (*)(const char *))0x43ff10)(this->music.c_str());
+		SokuLib::playBGM(this->music.c_str());
 	this->_introPlayed |= !result;
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_intro->onKeyPressed();
 	if (SokuLib::inputMgrs.pause == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
 		this->_introPlayed = true;
-		((void (*)(const char *))0x43ff10)(this->music.c_str());
+		SokuLib::playBGM(this->music.c_str());
 	};
 }
 

@@ -7,6 +7,7 @@
 #include <sol/sol.hpp>
 #include <map>
 #include "LuaBattleAnimation.hpp"
+#include "Trial.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -1005,8 +1006,8 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		{ "ACTION_SPELL_BREAKING_DRUG", SokuLib::ACTION_SPELL_BREAKING_DRUG },
 	};
 
-	(*this->_lua)["playBGM"] = (void (*)(const char *))0x43ff10;
-	(*this->_lua)["playBgm"] = (void (*)(const char *))0x43ff10;
+	(*this->_lua)["playBGM"] = SokuLib::playBGM;
+	(*this->_lua)["playBgm"] = SokuLib::playBGM;
 	(*this->_lua)["camera"] = std::ref(SokuLib::camera);
 	(*this->_lua)["packPath"] = packPath;
 	(*this->_lua)["playSFX"] = SokuLib::playSEWaveBuffer;
