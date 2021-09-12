@@ -2,7 +2,7 @@
 // Created by PinkySmile on 23/07/2021.
 //
 
-#include "ComboTrial.hpp"
+#include "ComboTrialEditor.hpp"
 #include "Actions.hpp"
 #include "Menu.hpp"
 #include "Pack.hpp"
@@ -12,12 +12,9 @@
 #define printf(...)
 #endif
 
-#define dxLockRect(texture, ...) (*((int (__stdcall**)(void*, int, D3DLOCKED_RECT*, int, int))(*(int*)texture + 0x4c)))(texture, __VA_ARGS__)
-#define dxUnlockRect(texture, ...) (*((int (__stdcall**)(void*, int))(*(int*)texture + 0x50)))(texture, __VA_ARGS__)
-
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 
-ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nlohmann::json &json) :
+ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json) :
 	Trial(folder, json)
 {
 	int text;
@@ -146,31 +143,6 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (this->_jump && this->_crouching)
 		throw std::invalid_argument("The dummy cannot crouch and jump at the time!");
 
-	this->_gear.texture.loadFromResource(myModule, MAKEINTRESOURCE(12));
-	this->_gear.setPosition({559, 70});
-	this->_gear.setSize({64, 64});
-	this->_gear.rect.left = 0;
-	this->_gear.rect.top = 0;
-	this->_gear.rect.width = this->_gear.texture.getSize().x;
-	this->_gear.rect.height = this->_gear.texture.getSize().y;
-
-	this->_gearShadow.texture.loadFromResource(myModule, MAKEINTRESOURCE(16));
-	this->_gearShadow.setPosition({561, 72});
-	this->_gearShadow.setSize({64, 64});
-	this->_gearShadow.rect.left = 0;
-	this->_gearShadow.rect.top = 0;
-	this->_gearShadow.rect.width = this->_gearShadow.texture.getSize().x;
-	this->_gearShadow.rect.height = this->_gearShadow.texture.getSize().y;
-
-	this->_doll.texture.loadFromResource(myModule, MAKEINTRESOURCE(20));
-	this->_doll.setPosition({577, 80});
-	this->_doll.setSize({33, 46});
-	this->_doll.setMirroring(true, false);
-	this->_doll.rect.left = 0;
-	this->_doll.rect.top = 0;
-	this->_doll.rect.width = this->_doll.texture.getSize().x / 4;
-	this->_doll.rect.height = this->_doll.texture.getSize().y;
-
 	this->_attemptText.texture.createFromText("214a -> Review demo<br>Attempt #1", defaultFont10, {116, 24});
 	this->_attemptText.setPosition({4, 58});
 	this->_attemptText.setSize(this->_attemptText.texture.getSize());
@@ -203,7 +175,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 		);
 }
 
-bool ComboTrial::update(bool &canHaveNextFrame)
+bool ComboTrialEditor::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
@@ -228,7 +200,7 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		canHaveNextFrame = (this->_freezeCounter % max((5 - this->_freezeCounter / 30), 1) == 0);
 		this->_freezeCounter--;
 		if (!this->_freezeCounter && this->_outroPlayed)
-			SokuLib::activateMenu(new ComboTrialResult(*this));
+			SokuLib::activateMenu(new ComboTrialEditorResult(*this));
 		return !this->_freezeCounter && this->_outroPlayed;
 	}
 
@@ -245,7 +217,7 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 			this->_outroOnUpdate();
 			canHaveNextFrame = false;
 			if (this->_outroPlayed)
-				SokuLib::activateMenu(new ComboTrialResult(*this));
+				SokuLib::activateMenu(new ComboTrialEditorResult(*this));
 			return false;
 		}
 	} else if (this->_finished && !this->_playingIntro) {
@@ -365,7 +337,7 @@ disableLimit:
 	return false;
 }
 
-void ComboTrial::render() const
+void ComboTrialEditor::render() const
 {
 	if (!this->_introPlayed)
 		return this->_introOnRender();
@@ -378,17 +350,10 @@ void ComboTrial::render() const
 
 	SokuLib::Vector2i pos = {120, 60};
 
-	if (this->_playingIntro) {
-		this->_gearShadow.setRotation(this->_rotation);
-		this->_gearShadow.draw();
-
-		this->_gear.setRotation(this->_rotation);
-		this->_gear.draw();
-
-		this->_doll.rect.left = (this->_dollAnim >> 3 & 0b11) * this->_doll.texture.getSize().x / 4;
-		this->_doll.draw();
-	} else
+	if (!this->_playingIntro)
 		this->_attemptText.draw();
+	else
+		return;
 
 	auto last = 0;
 
@@ -418,7 +383,7 @@ void ComboTrial::render() const
 	}
 }
 
-int ComboTrial::getScore()
+int ComboTrialEditor::getScore()
 {
 	int index = 0;
 
@@ -427,7 +392,7 @@ int ComboTrial::getScore()
 	return index - 1;
 }
 
-void ComboTrial::_initGameStart()
+void ComboTrialEditor::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
@@ -561,7 +526,7 @@ void ComboTrial::_initGameStart()
 		SokuLib::LEFT : SokuLib::RIGHT;
 }
 
-void ComboTrial::_loadExpected(const std::string &expected)
+void ComboTrialEditor::_loadExpected(const std::string &expected)
 {
 	bool par = false;
 	char last = ' ';
@@ -582,7 +547,7 @@ void ComboTrial::_loadExpected(const std::string &expected)
 		action->parse();
 }
 
-void ComboTrial::_playIntro()
+void ComboTrialEditor::_playIntro()
 {
 	if (this->_actionCounter == this->_exceptedActions.size())
 		return;
@@ -618,7 +583,7 @@ void ComboTrial::_playIntro()
 	}
 }
 
-void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
+void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
 	if (this->_playingIntro) {
 		if (this->_actionCounter == this->_exceptedActions.size())
@@ -652,12 +617,12 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 	}
 }
 
-SokuLib::KeyInput ComboTrial::getDummyInputs()
+SokuLib::KeyInput ComboTrialEditor::getDummyInputs()
 {
 	return {0, this->_crouching - this->_jump, 0, 0, 0, 0, 0, 0};
 }
 
-SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
+SokuLib::Action ComboTrialEditor::getMoveAction(SokuLib::Character chr, std::string &name)
 {
 	auto error = false;
 
@@ -717,7 +682,7 @@ SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &n
 	}
 }
 
-void ComboTrial::onMenuClosed(MenuAction action)
+void ComboTrialEditor::onMenuClosed(MenuAction action)
 {
 	switch (action) {
 	case RETRY:
@@ -735,12 +700,12 @@ void ComboTrial::onMenuClosed(MenuAction action)
 	}
 }
 
-SokuLib::Scene ComboTrial::getNextScene()
+SokuLib::Scene ComboTrialEditor::getNextScene()
 {
 	return this->_next;
 }
 
-void ComboTrial::SpecialAction::parse()
+void ComboTrialEditor::SpecialAction::parse()
 {
 	std::string chargeStr;
 	std::string delayStr;
@@ -849,7 +814,7 @@ void ComboTrial::SpecialAction::parse()
 	this->sprite.rect.height = realSize.y;
 }
 
-ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrial::ScorePrerequisites *other)
+ComboTrialEditor::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrialEditor::ScorePrerequisites *other)
 {
 	if (!other) {
 		if (!editorMode) {
@@ -889,7 +854,7 @@ ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, c
 	}
 }
 
-bool ComboTrial::ScorePrerequisites::met(unsigned currentAttempts) const
+bool ComboTrialEditor::ScorePrerequisites::met(unsigned currentAttempts) const
 {
 	auto &battle = SokuLib::getBattleMgr();
 
@@ -906,7 +871,7 @@ bool ComboTrial::ScorePrerequisites::met(unsigned currentAttempts) const
 	return true;
 }
 
-ComboTrialResult::ComboTrialResult(ComboTrial &trial) :
+ComboTrialEditorResult::ComboTrialEditorResult(ComboTrialEditor &trial) :
 	ResultMenu(trial.getScore()),
 	_parent(trial)
 {
@@ -914,7 +879,7 @@ ComboTrialResult::ComboTrialResult(ComboTrial &trial) :
 		this->_parts[i].load(trial._attempts, trial._scores[i], i);
 }
 
-int ComboTrialResult::onRender()
+int ComboTrialEditorResult::onRender()
 {
 	auto ret = ResultMenu::onRender();
 
@@ -926,7 +891,7 @@ int ComboTrialResult::onRender()
 #define BOTTOM_POS 332
 #define SIZE 29
 
-void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScorePrerequisites &prerequ, int index)
+void ComboTrialEditorResult::ScorePart::load(int ttlattempts, const ComboTrialEditor::ScorePrerequisites &prerequ, int index)
 {
 	SokuLib::Vector2i size;
 	int ogIndex = index;
@@ -1000,7 +965,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_limit.rect.height = this->_limit.texture.getSize().y;
 }
 
-void ComboTrialResult::ScorePart::draw(float alpha)
+void ComboTrialEditorResult::ScorePart::draw(float alpha)
 {
 	auto &battle= SokuLib::getBattleMgr();
 	auto white  = SokuLib::DrawUtils::DxSokuColor::White * alpha;

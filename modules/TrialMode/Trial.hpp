@@ -12,11 +12,14 @@
 #include <SokuLib.hpp>
 #include "Animations/BattleAnimation.hpp"
 
+extern const std::map<std::string, SokuLib::Weather> weathers;
+
 class Trial {
 private:
 	std::string music;
 	std::unique_ptr<BattleAnimation> _intro;
 	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _factory;
+	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _editorFactory;
 
 protected:
 	std::unique_ptr<BattleAnimation> _outro;
