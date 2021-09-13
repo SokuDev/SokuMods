@@ -818,6 +818,7 @@ void menuUnloadAssets()
 	packsByCategory.clear();
 
 	editorMode = false;
+	memset(lastInputs.data(), 0, sizeof(*lastInputs.data()) * lastInputs.size());
 }
 
 static void displayFilters()
