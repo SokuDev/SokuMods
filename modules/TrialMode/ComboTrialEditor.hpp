@@ -57,7 +57,7 @@ private:
 	int _uniformCardCost;
 	std::vector<unsigned short> _hand;
 	std::vector<ScorePrerequisites> _scores;
-	bool _playComboAfterIntro;
+	bool _playComboAfterIntro = false;
 	std::vector<Doll> _dolls;
 	bool _jump = false;
 	bool _mpp = false;
@@ -65,6 +65,8 @@ private:
 	bool _privateSquare = false;
 	bool _stones = false;
 	bool _tickTimer = false;
+	unsigned _introRequ = 0;
+	unsigned _outroRequ = 0;
 
 	//State
 	unsigned char _dollAnim = 0;
@@ -73,7 +75,6 @@ private:
 	unsigned _actionCounter = 0;
 	unsigned _actionWaitCounter = 0;
 	unsigned _timer = 0;
-	unsigned _attempts = 0;
 	float _rotation = 0;
 	unsigned _firstFirst = 1;
 	unsigned _currentDoll = 0;
@@ -93,7 +94,8 @@ private:
 	void _initGameStart();
 	void _loadExpected(const std::string &expected);
 
-	static SokuLib::Action getMoveAction(SokuLib::Character chr, std::string &name);
+	static void _initVanillaGame();
+	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &name);
 
 public:
 	ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json);

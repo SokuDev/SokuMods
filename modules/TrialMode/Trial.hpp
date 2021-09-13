@@ -16,12 +16,15 @@ extern const std::map<std::string, SokuLib::Weather> weathers;
 
 class Trial {
 private:
-	std::string music;
-	std::unique_ptr<BattleAnimation> _intro;
+	std::string _music;
+	std::string _folder;
+	std::string _introPath;
+	std::string _outroPath;
 	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _factory;
 	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _editorFactory;
 
 protected:
+	std::unique_ptr<BattleAnimation> _intro;
 	std::unique_ptr<BattleAnimation> _outro;
 	bool _introPlayed = false;
 	bool _outroPlayed = false;
@@ -30,6 +33,7 @@ protected:
 	void _outroOnRender() const;
 	void _introOnUpdate();
 	void _outroOnUpdate();
+	void _initAnimations(bool intro = true, bool outro = true);
 
 public:
 	enum MenuAction {

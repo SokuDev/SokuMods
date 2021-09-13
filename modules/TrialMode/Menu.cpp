@@ -40,6 +40,7 @@ static SokuLib::DrawUtils::Sprite arrow;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite frame;
+static SokuLib::DrawUtils::Sprite wrench;
 static SokuLib::DrawUtils::Sprite arrowSprite;
 static SokuLib::DrawUtils::Sprite missingIcon;
 static SokuLib::DrawUtils::Sprite packContainer;
@@ -559,6 +560,11 @@ void menuLoadAssets()
 	blackSilouettes.rect.height = blackSilouettes.texture.getSize().y;
 	blackSilouettes.setPosition({398, 128});
 
+	wrench.texture.loadFromResource(myModule, MAKEINTRESOURCE(44));
+	wrench.setSize({32, 32});
+	wrench.rect.width = wrench.texture.getSize().x;
+	wrench.rect.height = wrench.texture.getSize().y;
+
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
 	lockedText.rect.height = 150;
@@ -1046,7 +1052,7 @@ static void handleGoUp()
 	}
 	checkScrollUp();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
-	if (currentEntry != -1 && isLocked(currentEntry)) {
+	if (currentEntry != -1 && isLocked(currentEntry) && !editorMode) {
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
 		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
@@ -1087,7 +1093,7 @@ static void handleGoDown()
 	}
 	checkScrollDown();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
-	if (currentEntry != -1 && isLocked(currentEntry)) {
+	if (currentEntry != -1 && isLocked(currentEntry) && !editorMode) {
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
 		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
@@ -1133,7 +1139,7 @@ nothing:
 			expended = !expended;
 			checkScrollDown();
 		} else {
-			if (!isLocked(currentEntry)) {
+			if (!isLocked(currentEntry) || editorMode) {
 				puts("Start game !");
 				SokuLib::playSEWaveBuffer(0x28);
 				prepareGameLoading(
@@ -1312,7 +1318,7 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 					static_cast<int>(pos.y - 10)
 				});
 				lock.draw();
-				if (scenario->nameHiddenIfLocked) {
+				if (scenario->nameHiddenIfLocked && !editorMode) {
 					questionMarks.setPosition({
 						static_cast<int>(pos.x + 100),
 						static_cast<int>(pos.y)
@@ -1325,7 +1331,10 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 						static_cast<int>(pos.x + 100),
 						static_cast<int>(pos.y)
 					});
-					scenario->name.tint = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0x80};
+					if (!editorMode)
+						scenario->name.tint = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0x80};
+					else
+						scenario->name.tint = SokuLib::DrawUtils::DxSokuColor::White;
 					scenario->name.draw();
 				}
 			} else {
@@ -1342,6 +1351,13 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 					});
 					scenario->scoreSprite.draw();
 				}
+			}
+			if (editorMode) {
+				wrench.setPosition({
+					static_cast<int>(pos.x + 287),
+					static_cast<int>(pos.y - 10)
+				});
+				wrench.draw();
 			}
 		}
 		pos.y += 15;
@@ -1398,7 +1414,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 			loadedPacks[shownPack]->description.draw();
 		return;
 	}
-	if (!isLocked(currentEntry)) {
+	if (!isLocked(currentEntry) || editorMode) {
 		if (!loadedPacks[shownPack]->scenarios[currentEntry]->loading) {
 			if (loadedPacks[shownPack]->scenarios[currentEntry]->preview && loadedPacks[shownPack]->scenarios[currentEntry]->preview->isValid())
 				loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();

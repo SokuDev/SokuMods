@@ -19,6 +19,8 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 {
 	int text;
 
+	this->_introPlayed = true;
+	this->_outroPlayed = true;
 	if (!editorMode) {
 		if (!json.contains("score") || !json["score"].is_array())
 			throw std::invalid_argument("The \"score\" field is not present or invalid.");
@@ -133,7 +135,6 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 
 	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() && json["disable_limit"].get<bool>();
 	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
-	this->_playComboAfterIntro = json.contains("play_combo_after_intro") && json["play_combo_after_intro"].is_boolean() && json["play_combo_after_intro"].get<bool>();
 	this->_playerStartPos = json["player"]["pos"];
 	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
@@ -143,7 +144,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 	if (this->_jump && this->_crouching)
 		throw std::invalid_argument("The dummy cannot crouch and jump at the time!");
 
-	this->_attemptText.texture.createFromText("214a -> Review demo<br>Attempt #1", defaultFont10, {116, 24});
+	this->_attemptText.texture.createFromText("214a -> Review demo<br>22a reload and play intro<br>63214a reload and play outro", defaultFont10, {306, 124});
 	this->_attemptText.setPosition({4, 58});
 	this->_attemptText.setSize(this->_attemptText.texture.getSize());
 	this->_attemptText.rect.left = 0;
@@ -199,9 +200,6 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	if (this->_freezeCounter) {
 		canHaveNextFrame = (this->_freezeCounter % max((5 - this->_freezeCounter / 30), 1) == 0);
 		this->_freezeCounter--;
-		if (!this->_freezeCounter && this->_outroPlayed)
-			SokuLib::activateMenu(new ComboTrialEditorResult(*this));
-		return !this->_freezeCounter && this->_outroPlayed;
 	}
 
 	if (!this->_leftWeather)
@@ -217,15 +215,12 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			this->_outroOnUpdate();
 			canHaveNextFrame = false;
 			if (this->_outroPlayed)
-				SokuLib::activateMenu(new ComboTrialEditorResult(*this));
+				this->_finished = false;
 			return false;
 		}
-	} else if (this->_finished && !this->_playingIntro) {
-		canHaveNextFrame = false;
-		return true;
 	}
 
-	if ((*reinterpret_cast<char **>(0x8985E8))[0x494])
+	if ((*reinterpret_cast<char **>(0x8985E8))[0x494] && !this->_playingIntro)
 		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
 	if (this->_isStart) {
@@ -243,6 +238,12 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	else if (this->_privateSquare)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
 
+	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30) {
+		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
+		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
+		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
+		return false;
+	}
 	if (this->_waitCounter) {
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
@@ -266,7 +267,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	}
 
 checkFinish:
-	if (!this->_finished && this->_scores.front().met(this->_attempts)) {
+	if (!this->_finished && this->_scores.front().met(0)) {
 		auto i = this->_actionCounter;
 
 		while (i < this->_exceptedActions.size()) {
@@ -293,7 +294,6 @@ disableLimit:
 	           battleMgr.rightCharacterManager.objectBase.action <= SokuLib::ACTION_FORWARD_DASH;
 
 	if (this->_playComboAfterIntro && !hit && battleMgr.leftCharacterManager.objectBase.action <= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN) {
-		this->_attempts--;
 		this->_initGameStart();
 		return false;
 	}
@@ -327,12 +327,46 @@ disableLimit:
 			battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		}
-		//if (this->_crouching && this->_dummyStartPos.y == 0) {
-		//	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_CROUCHED;
-		//	battleMgr.rightCharacterManager.objectBase.animate();
-		//}
-		if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
+
+		if (battleMgr.leftCharacterManager.keyCombination._6314a)
+			this->_outroRequ++;
+		else
+			this->_outroRequ = 0;
+		if (battleMgr.leftCharacterManager.keyCombination._22a)
+			this->_introRequ++;
+		else
+			this->_introRequ = 0;
+
+		if (!this->_playingIntro && this->_outroRequ == 1) {
+			try {
+				this->_initAnimations(false, true);
+				this->_outroPlayed = false;
+				this->_finished = true;
+			} catch (std::exception &e) {
+				MessageBox(
+					SokuLib::window,
+					e.what(),
+					"Outro loading error",
+					MB_ICONERROR
+				);
+			}
+		} else if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
 			this->_playComboAfterIntro = true;
+		else if (!this->_playingIntro && this->_introRequ == 1) {
+			try {
+				ComboTrialEditor::_initVanillaGame();
+				this->_initAnimations(true, false);
+				this->_introPlayed = false;
+			} catch (std::exception &e) {
+				MessageBox(
+					SokuLib::window,
+					e.what(),
+					"Intro loading error",
+					MB_ICONERROR
+				);
+				this->_initGameStart();
+			}
+		}
 	}
 	return false;
 }
@@ -348,7 +382,7 @@ void ComboTrialEditor::render() const
 	if (this->_finished && !this->_playingIntro)
 		return;
 
-	SokuLib::Vector2i pos = {120, 60};
+	SokuLib::Vector2i pos = {160, 60};
 
 	if (!this->_playingIntro)
 		this->_attemptText.draw();
@@ -387,7 +421,7 @@ int ComboTrialEditor::getScore()
 {
 	int index = 0;
 
-	while (index < this->_scores.size() && this->_scores[index].met(this->_attempts))
+	while (index < this->_scores.size() && this->_scores[index].met(0))
 		index++;
 	return index - 1;
 }
@@ -427,13 +461,8 @@ void ComboTrialEditor::_initGameStart()
 		this->_currentDoll++;
 		return;
 	}
-	if (this->_first)
-		this->_waitCounter = 180;
-	else if (!this->_playingIntro)
-		this->_attempts++;
 
 	this->_currentDoll = 0;
-	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
@@ -441,8 +470,10 @@ void ComboTrialEditor::_initGameStart()
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
 	this->_first = false;
-	if (this->_playingIntro)
+	if (this->_playingIntro) {
 		this->_waitCounter += 30;
+		(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
+	}
 
 	this->_firstFirst = 0;
 	battleMgr.leftCharacterManager.combo.limit = 0;
@@ -622,7 +653,7 @@ SokuLib::KeyInput ComboTrialEditor::getDummyInputs()
 	return {0, this->_crouching - this->_jump, 0, 0, 0, 0, 0, 0};
 }
 
-SokuLib::Action ComboTrialEditor::getMoveAction(SokuLib::Character chr, std::string &name)
+SokuLib::Action ComboTrialEditor::_getMoveAction(SokuLib::Character chr, std::string &name)
 {
 	auto error = false;
 
@@ -676,7 +707,6 @@ SokuLib::Action ComboTrialEditor::getMoveAction(SokuLib::Character chr, std::str
 		return act;
 	} catch (std::exception &e) {
 		printf("%s\n", (name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name.back()).c_str());
-	bigMistake:
 		assert(false);
 		throw;
 	}
@@ -686,7 +716,6 @@ void ComboTrialEditor::onMenuClosed(MenuAction action)
 {
 	switch (action) {
 	case RETRY:
-		this->_attempts = 0;
 		this->_playingIntro = true;
 		this->_actionCounter = this->_exceptedActions.size();
 		break;
@@ -703,6 +732,57 @@ void ComboTrialEditor::onMenuClosed(MenuAction action)
 SokuLib::Scene ComboTrialEditor::getNextScene()
 {
 	return this->_next;
+}
+
+void ComboTrialEditor::_initVanillaGame()
+{
+	auto &battleMgr = SokuLib::getBattleMgr();
+
+	battleMgr.leftCharacterManager.combo.limit = 0;
+	battleMgr.leftCharacterManager.combo.damages = 0;
+	battleMgr.leftCharacterManager.combo.nbHits = 0;
+	battleMgr.leftCharacterManager.combo.rate = 0;
+	battleMgr.leftCharacterManager.objectBase.hp = 10000;
+	battleMgr.leftCharacterManager.currentSpirit = 10000;
+	battleMgr.leftCharacterManager.maxSpirit = 10000;
+	battleMgr.rightCharacterManager.objectBase.direction = SokuLib::RIGHT;
+	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+	battleMgr.leftCharacterManager.objectBase.animate();
+	battleMgr.leftCharacterManager.objectBase.position.x = 480;
+	battleMgr.leftCharacterManager.objectBase.position.y = 0;
+	battleMgr.leftCharacterManager.objectBase.speed.x = 0;
+	battleMgr.leftCharacterManager.objectBase.speed.y = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.xRotation = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.yRotation = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.zRotation = 0;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.scale.x = 1;
+	battleMgr.leftCharacterManager.objectBase.renderInfos.scale.y = 1;
+	if (SokuLib::leftChar == SokuLib::CHARACTER_SANAE) {
+		battleMgr.leftCharacterManager.suwakoTimeLeft = 0;
+		battleMgr.leftCharacterManager.kanakoTimeLeft = 0;
+	}
+
+	battleMgr.rightCharacterManager.objectBase.hp = 10000;
+	battleMgr.rightCharacterManager.currentSpirit = 10000;
+	battleMgr.rightCharacterManager.maxSpirit = 10000;
+	battleMgr.rightCharacterManager.objectBase.renderInfos.xRotation = 0;
+	battleMgr.rightCharacterManager.objectBase.renderInfos.yRotation = 0;
+	battleMgr.rightCharacterManager.objectBase.renderInfos.zRotation = 0;
+	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+	battleMgr.rightCharacterManager.objectBase.animate();
+	battleMgr.rightCharacterManager.objectBase.position.x = 800;
+	battleMgr.rightCharacterManager.objectBase.position.y = 0;
+	battleMgr.rightCharacterManager.objectBase.speed.x = 0;
+	battleMgr.rightCharacterManager.objectBase.speed.y = 0;
+	battleMgr.rightCharacterManager.objectBase.animate();
+	battleMgr.rightCharacterManager.objectBase.direction = SokuLib::LEFT;
+
+	SokuLib::camera.translate = {-320, 420};
+	SokuLib::camera.backgroundTranslate = {640, 0};
+	SokuLib::camera.scale = 1;
+
+	SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
+	SokuLib::weatherCounter = 0;
 }
 
 void ComboTrialEditor::SpecialAction::parse()
@@ -753,7 +833,7 @@ void ComboTrialEditor::SpecialAction::parse()
 			move = str.substr(0, pos);
 			if (firstMove.empty())
 				firstMove = move;
-			this->actions.push_back(getMoveAction(SokuLib::leftChar, move));
+			this->actions.push_back(_getMoveAction(SokuLib::leftChar, move));
 			if (pos != std::string::npos) {
 				str = str.substr(pos + 1);
 				printf("%i/", this->actions.back());
@@ -876,7 +956,7 @@ ComboTrialEditorResult::ComboTrialEditorResult(ComboTrialEditor &trial) :
 	_parent(trial)
 {
 	for (int i = 0; i < this->_parts.size(); i++)
-		this->_parts[i].load(trial._attempts, trial._scores[i], i);
+		this->_parts[i].load(0, trial._scores[i], i);
 }
 
 int ComboTrialEditorResult::onRender()

@@ -136,7 +136,6 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 
 	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() && json["disable_limit"].get<bool>();
 	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
-	this->_playComboAfterIntro = json.contains("play_combo_after_intro") && json["play_combo_after_intro"].is_boolean() && json["play_combo_after_intro"].get<bool>();
 	this->_playerStartPos = json["player"]["pos"];
 	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
@@ -355,10 +354,6 @@ disableLimit:
 			battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		}
-		//if (this->_crouching && this->_dummyStartPos.y == 0) {
-		//	battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_CROUCHED;
-		//	battleMgr.rightCharacterManager.objectBase.animate();
-		//}
 		if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
 			this->_playComboAfterIntro = true;
 	}
@@ -711,7 +706,6 @@ SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &n
 		return act;
 	} catch (std::exception &e) {
 		printf("%s\n", (name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name.back()).c_str());
-	bigMistake:
 		assert(false);
 		throw;
 	}
