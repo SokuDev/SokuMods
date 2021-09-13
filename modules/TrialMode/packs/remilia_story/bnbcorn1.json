@@ -16,7 +16,7 @@
             "y": 0
         }
     },
-    "intro": "bnbcorn1intro.dll",
+    "intro": "bnbcorn1intro.lua",
     "outro": "bnbcorn1outro.lua",
     "type": "combo",
 
