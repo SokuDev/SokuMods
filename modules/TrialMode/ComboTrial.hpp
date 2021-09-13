@@ -57,7 +57,7 @@ private:
 	int _uniformCardCost;
 	std::vector<unsigned short> _hand;
 	std::vector<ScorePrerequisites> _scores;
-	bool _playComboAfterIntro;
+	bool _playComboAfterIntro = true;
 	std::vector<Doll> _dolls;
 	bool _jump = false;
 	bool _mpp = false;
