@@ -199,6 +199,22 @@ bool checkField(const std::string &field, const nlohmann::json &value, bool (nlo
 	return true;
 }
 
+inline bool isCompleted(int entry)
+{
+	if (entry < 0)
+		return true;
+	return loadedPacks[currentPack]->scenarios[entry]->score != -1;
+}
+
+inline bool isLocked(int entry)
+{
+	if (entry <= 0)
+		return false;
+	if (!loadedPacks[currentPack]->scenarios[entry]->canBeLocked)
+		return false;
+	return !isCompleted(entry - 1);
+}
+
 bool addCharacterToBuffer(const std::string &name, const nlohmann::json &chr, SokuLib::PlayerInfo &info, bool isRight)
 {
 	if (!checkField("character", chr, &nlohmann::json::is_string))
@@ -691,6 +707,12 @@ failed2:
 		modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(), defaultFont12, {300, 20}, &modeFilterSize);
 		topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
 	}
+
+	if (currentEntry != -1 && isLocked(currentEntry)) {
+		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
+
+		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
+	}
 }
 
 #define NOISE_DELTA 50
@@ -885,8 +907,8 @@ static void switchEditorMode()
 {
 	for (auto &pack : loadedPacks) {
 		if (!pack->error.texture.hasTexture()) {
-			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::Green * 0.25;
-			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::Green * 0.25;
+			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor{0x80, 0xFF, 0x80};
+			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor{0x80, 0xFF, 0x80};
 		}
 	}
 	SokuLib::playSEWaveBuffer(48);
@@ -934,22 +956,6 @@ void checkScrollUp()
 	}
 	if (currentEntry < entryStart)
 		entryStart = currentEntry;
-}
-
-inline bool isCompleted(int entry)
-{
-	if (entry < 0)
-		return true;
-	return loadedPacks[currentPack]->scenarios[entry]->score != -1;
-}
-
-inline bool isLocked(int entry)
-{
-	if (entry <= 0)
-		return false;
-	if (!loadedPacks[currentPack]->scenarios[entry]->canBeLocked)
-		return false;
-	return !isCompleted(entry - 1);
 }
 
 static void handleGoLeft()
