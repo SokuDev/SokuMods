@@ -1,5 +1,5 @@
 {
-    "name": "An everyday ordeal",
+    "name": "Babylone's Aurora",
     "category": "Sakuya Izayoi",
     "modes": ["Combo", "Story"],
     "characters": [
@@ -18,7 +18,7 @@
         "path": "data/stand/sakuya.bmp"
     },
     "description": "Incident at the Scarlet Devil Mansion",
-    "author": "Exioloz",
+    "author": "Exioloz, PinkySmile",
     "icon": {
         "isPath": false,
         "path": "data/character/sakuya/face/face000.bmp",

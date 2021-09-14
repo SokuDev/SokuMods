@@ -3,21 +3,19 @@
 --
 
 local dialogs = {
-	"Sakuya Happy1 : The mistress is quite lively today.",
-	"Sakuya Concerned: If she likes visits that much, maybe I should let them in? Well that wouldn’t be appropriate from a maid.",
-	"Sakuya Surprised : Now, I should begin my instigations. I fear that the mystery of this intruder might not be solved without confronting the sun…",
-	"marisa coming and seeing sakuya and try to sneak out",
-	"Sakuya Confident: Stop right here!",
-	"Marisa Embarrassed: Shoot",
-	"Marisa Happy1 : I’m just passing by.",
-	"Sakuya Angry: You know, you shouldn’t be here in the first place.",
-	"Marisa Confident: Can I just stay here for a while?",
-	"Marisa Happy2:I won’t steal!",
-	"Sakuya Happy2 : I will let you live here as long as sodium does.",
-	"Marisa Happy1: Ok.",
-	"Marisa Concerned : …",
-	"Marisa Embarrassed: how long is that?",
-	"Sakuya Winning: Time’s up!",
+	--Sakuya walking to Meiling on the ground
+	"lc Here you are...",
+	--Meiling moving in her sleep?
+	"lW It seems you at least tried to fulfill your role this time.",
+	"rWSAh Sakuya?",
+	"rWDSo it was just a dream...",
+	"lADIt's no time to stay unconscious.",
+	"lhDSo, who beat you?",
+	"rhEI'm not sure...",
+	"rhSBut I was put unconscious so suddenly that it<br>can't be anyone!",
+	"lASIt could have been anyone since they attacked<br>you in your sleep, doesn't they?",
+	"lCSYou truly are useless, so just accept your punishment.",
+	"rCcBut I wasn't sleeping this time...",
 	--Battle here
 }
 
@@ -34,6 +32,11 @@ local stop = false
 
 local function stage0()
 	if ctr == 240 then
+		camera.translate.x = 0
+		camera.backgroundTranslate.x = 400
+		battleMgr.leftChr.position.x = -200
+		battleMgr.rightChr.position.x = 1000
+
 		playBGM("data/bgm/ta01.ogg")
 	end
 	if ctr < 60 then
@@ -57,204 +60,61 @@ local function stage0()
 	ctr = ctr - 1
 	if ctr == 0 then
 		currentStage = currentStage + 1
-		battleMgr.leftChr.position.x = 400
-		battleMgr.leftChr.actionBlockId = 0
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
 		battleMgr.leftChr.action = enums.actions.ACTION_WALK_FORWARD
 		battleMgr.leftChr:initAnimation()
-		battleMgr.rightChr.position.x = 1200
-		ctr = 3
+		battleMgr.rightChr.action = enums.actions.ACTION_KNOCKED_DOWN_STATIC
+		battleMgr.rightChr:initAnimation()
 	end
 end
 
 local function stage1()
 	battleMgr.leftChr:updateAnimation()
-	if camera.backgroundTranslate.y ~= 0 then
-		camera.backgroundTranslate.y = camera.backgroundTranslate.y + 1
-		camera.translate.y = camera.translate.y - 1
-	end
-	battleMgr.leftChr.position.x = battleMgr.leftChr.position.x + 5 * battleMgr.leftChr.direction
-	if battleMgr.leftChr.direction == enums.directions.RIGHT and battleMgr.leftChr.position.x > 800 then
-		battleMgr.leftChr.direction = enums.directions.LEFT
-	elseif battleMgr.leftChr.direction == enums.directions.LEFT and battleMgr.leftChr.position.x < 400 then
-		battleMgr.leftChr.direction = enums.directions.RIGHT
-		ctr = ctr - 1
-	end
-	if ctr == 0 then
-		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
-		battleMgr.leftChr:initAnimation()
-		currentStage = currentStage + 1
-		dialog.hidden = false
+	battleMgr.leftChr.position.x = battleMgr.leftChr.position.x + 5
+	if battleMgr.leftChr.position.x > 200 then
+		camera.translate.x = camera.translate.x - 5
+		camera.backgroundTranslate.x = camera.backgroundTranslate.x + 5
+		if battleMgr.leftChr.position.x >= 800 then
+			dialog.hidden = false
+			currentStage = currentStage + 1
+			battleMgr.leftChr.action = enums.actions.ACTION_IDLE
+			battleMgr.leftChr:initAnimation()
+		end
 	end
 end
 
 local function stage2()
-	battleMgr.leftChr:updateAnimation()
-	if  keyPressed then
+	if #dialog == #dialogs - 2 and keyPressed then
+		keyPressed = false
 		currentStage = currentStage + 1
-		dialog.hidden = true
-		dialog:finishAnimations()
-		battleMgr.rightChr.position.x = 800
+		battleMgr.rightChr.action = enums.actions.ACTION_NEUTRAL_TECH
+		battleMgr.rightChr:initAnimation()
+	end
+end
+
+local function stage3()
+	keyPressed = false
+	battleMgr.leftChr:updateAnimation()
+	battleMgr.rightChr:updateAnimation()
+	if battleMgr.rightChr.animationCounter == 7 then
+		dialog:onKeyPress()
+		currentStage = currentStage + 1
 		battleMgr.rightChr.actionBlockId = 0
 		battleMgr.rightChr.animationCounter = 0
 		battleMgr.rightChr.animationSubFrame = 0
 		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
 		battleMgr.rightChr:initAnimation()
-		battleMgr.leftChr.actionBlockId = 0
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr.action = enums.actions.ACTION_STAND_GROUND_HIT_HUGE_HITSTUN
-		battleMgr.leftChr:initAnimation()
-		flashRect.fillColor = enums.colors.White
-		playSfx(enums.sfxs.mishagujiSamaHit)
-	end
-end
-
-local function stage3()
-	battleMgr.rightChr:updateAnimation()
-	if flashRect.fillColor.a > 1 then
-		local color = flashRect.fillColor
-
-		color.a = color.a - 0x2
-		flashRect.fillColor = color
-	else
-		flashRect.fillColor = enums.colors.Transparent
-		currentStage = currentStage + 1
-		battleMgr.leftChr.actionBlockId = 0
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
-		battleMgr.leftChr:initAnimation()
-		ctr = 12
 	end
 end
 
 local function stage4()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
-	if ctr ~= 0 then
-		ctr = ctr - 1
-	elseif not stop and dialog.hidden then
-		dialog.hidden = false
-		dialog:onKeyPress()
-	end
-	if #dialog == #dialogs - 6 and keyPressed then
-		dialog.hidden = true
-		currentStage = currentStage + 1
-		battleMgr.leftChr.actionBlockId = 0
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr.action = enums.actions.ACTION_ALT2_SKILL3_B
-		battleMgr.leftChr:initAnimation()
-	end
 end
-
-function block0(old)
-	if old == 4 and battleMgr.leftChr.animationCounter == 5 then
-		battleMgr.leftChr:playSfx(26)
-	end
-	if battleMgr.leftChr.animationCounter >= 5 then
-		battleMgr.leftChr.position.x = battleMgr.leftChr.position.x + 15
-		if battleMgr.rightChr.position.x - battleMgr.leftChr.position.x < 60 then
-			battleMgr.leftChr.animationCounter = 0
-			battleMgr.leftChr.animationSubFrame = 0
-			battleMgr.leftChr:animate()
-
-			battleMgr.rightChr.actionBlockId = 0
-			battleMgr.rightChr.animationCounter = 0
-			battleMgr.rightChr.animationSubFrame = 0
-			battleMgr.rightChr.action = enums.actions.ACTION_STAND_GROUND_HIT_SMALL_HITSTUN
-			battleMgr.rightChr:initAnimation()
-		end
-	end
-end
-
-function block1()
-	if battleMgr.leftChr.animationCounter == 3 then
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr:animate()
-		battleMgr.leftChr:animate()
-		playSfx(6)
-		battleMgr.leftChr.speed = Vector2f.new(-10, 12.5)
-		battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
-	end
-end
-
-function block2()
-	error("Bad animation block")
-end
-
-function block3(old)
-	battleMgr.leftChr.speed = battleMgr.leftChr.speed + Vector2f.new(0.1, -0.75)
-	battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
-	if battleMgr.leftChr.animationCounter == 9 and battleMgr.leftChr.animationSubFrame == 2 then
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr:animate()
-	end
-end
-
-function block4()
-	battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
-	battleMgr.leftChr.speed = battleMgr.leftChr.speed + Vector2f.new(0.1, -0.75)
-	if battleMgr.leftChr.position.y <= 0 and battleMgr.leftChr.speed.y < 0 then
-		battleMgr.leftChr.position.y = 0
-		battleMgr.leftChr.speed.x = 0
-		battleMgr.leftChr.speed.y = 0
-		playSfx(enums.sfxs.land)
-
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr:animate()
-
-		battleMgr.rightChr.actionBlockId = 0
-		battleMgr.rightChr.animationCounter = 0
-		battleMgr.rightChr.animationSubFrame = 0
-		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
-		battleMgr.rightChr:initAnimation()
-	end
-end
-
-function block5()
-	if battleMgr.leftChr.animationCounter == 6 and battleMgr.leftChr.animationSubFrame == 4 then
-		battleMgr.leftChr.actionBlockId = 0
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
-		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
-		battleMgr.leftChr:initAnimation()
-		dialog.hidden = false
-		dialog:onKeyPress()
-		currentStage = currentStage + 1
-	end
-end
-
-local animBlocks = {
-	block0,
-	block1,
-	block2,
-	block3,
-	block4,
-	block5
-}
 
 local function stage5()
-	local old = battleMgr.leftChr.animationCounter
-
-	battleMgr.leftChr:updateAnimation()
-	if battleMgr.rightChr.animationCounter ~= 1 or battleMgr.rightChr.action ~= enums.actions.ACTION_STAND_GROUND_HIT_SMALL_HITSTUN then
-		battleMgr.rightChr:updateAnimation()
-	end
-	animBlocks[battleMgr.leftChr.actionBlockId + 1](old)
 end
 
 local function stage6()
-	battleMgr.leftChr:updateAnimation()
-	battleMgr.rightChr:updateAnimation()
-	if #dialog == #dialogs - 14 then
-		currentStage = currentStage + 1
-	end
 end
 
 local anims = {
@@ -269,7 +129,7 @@ local anims = {
 
 print("Init intro.")
 
-stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro.png")
+stageBg.texture:loadFromFile(packPath.."\\lore2intro.png")
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),
@@ -279,7 +139,7 @@ stageBg.rect.width  = stageBg.texture.size.x
 stageBg.rect.height = stageBg.texture.size.y
 stageBg.tint.a = 0
 
-stageBottom.texture:loadFromGame("data/scenario/effect/Stage1.png")
+stageBottom.texture:loadFromGame("data/scenario/effect/Stage2.png")
 stageBottom.size = stageBottom.texture.size
 stageBottom.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),
