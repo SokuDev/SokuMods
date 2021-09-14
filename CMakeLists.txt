@@ -312,6 +312,11 @@ file(WRITE "${CMAKE_BINARY_DIR}/SokuRoll.inl" "const unsigned char sokuroll_data
 target_include_directories(SWRSokuRoll PRIVATE "${CMAKE_BINARY_DIR}")
 target_link_libraries(SWRSokuRoll MemoryModule)
 
+set(BUILD_TH123E OFF CACHE BOOL "Whether to build the th123e SWRSToys mod")
+if(BUILD_TH123E)
+    add_subdirectory(modules/th123e)
+endif()
+
 module(UPnPNat)
 target_sources(UPnPNat PRIVATE modules/UPnPNat/UPnPNat.cpp)
 target_link_libraries(UPnPNat iphlpapi ole32 oleaut32)

@@ -1,9 +1,9 @@
 [submodule "detours"]
 	path = detours
-	url = git@github.com:microsoft/Detours.git
+	url = https://github.com/microsoft/Detours.git
 [submodule "MemoryModule"]
 	path = MemoryModule
-	url = git@github.com:fancycode/MemoryModule.git
+	url = https://github.com/fancycode/MemoryModule.git
 [submodule "modules/SkipIntro/Soku-SkipIntro"]
 	path = modules/SkipIntro/Soku-SkipIntro
 	url = https://github.com/S-len/Soku-SkipIntro.git
