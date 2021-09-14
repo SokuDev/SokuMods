@@ -82,8 +82,8 @@ private:
 
 	SokuLib::SWRFont _lfont;
 	SokuLib::SWRFont _rfont;
-	CharStand _left;
-	CharStand _right;
+	CharStand _left = NOSTAND;
+	CharStand _right = NOSTAND;
 	SokuLib::Vector2f _leftPos;
 	SokuLib::Vector2f _rightPos;
 	float _leftStep = 1;

@@ -284,6 +284,7 @@ unsigned int SokuStand::getCurrentDialog() const
 
 SokuStand::~SokuStand()
 {
+	puts("Destroying dialog");
 	this->_lfont.destruct();
 	this->_rfont.destruct();
 }

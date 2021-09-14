@@ -5,32 +5,23 @@
 #include <sol/sol.hpp>
 #include "FakeChrMgr.hpp"
 
-static std::vector<FakeCharacterManager *> _created;
-
-void pushFakeChrMgrLuaTable(sol::state &state)
+void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager *> &_created)
 {
 	auto type = state.new_usertype<FakeCharacterManager>("Character");
 
-	type["new"] = [](SokuLib::PlayerInfo &playerInfo){
-		FakeCharacterManager *obj[0xB];
+	type[sol::meta_function::construct] = [&_created](SokuLib::PlayerInfo &playerInfo){
+		FakeCharacterManager *obj[0xC];
+		FakeCharacterManager *chr;
 
 		if (SokuLib::sceneId != SokuLib::SCENE_BATTLE)
 			throw sol::error("You need to init the character when in battle.");
-		((void (__thiscall *)(FakeCharacterManager **, bool, SokuLib::PlayerInfo &))0x46da40)(obj, false, playerInfo);
-		(*(void (__thiscall **)(FakeCharacterManager *))(*(int *)obj[0xA] + 0x44))(obj[0xA]);
-		obj[0xA]->opponent = (FakeCharacterManager *)&SokuLib::getBattleMgr().rightCharacterManager;
-		_created.push_back(obj[0xA]);
-		return obj[0xA];
-	};
-	type[sol::meta_function::garbage_collect] = [](FakeCharacterManager *obj){
-		auto it = std::find(_created.begin(), _created.end(), obj);
-
-		if (it == _created.end())
-			return;
-		printf("Deleting %p\n", obj);
-		_created.erase(it);
-		(*(void (__thiscall **)(FakeCharacterManager *, char))obj->offset_0x000)(obj, 0);
-		SokuLib::Delete(obj);
+		((void (__thiscall *)(FakeCharacterManager **, bool, SokuLib::PlayerInfo &))0x46da40)(obj, playerInfo.isRight, playerInfo);
+		chr = obj[0xA + playerInfo.isRight];
+		(*(void (__thiscall **)(FakeCharacterManager *))(*(int *)chr + 0x44))(chr);
+		chr->opponent = playerInfo.isRight ? (FakeCharacterManager *)&SokuLib::getBattleMgr().leftCharacterManager : (FakeCharacterManager *)&SokuLib::getBattleMgr().rightCharacterManager;
+		_created.push_back(chr);
+		printf("Allocated character %p\n", chr);
+		return chr;
 	};
 	type["position"] = &FakeCharacterManager::position;
 	type["speed"] = &FakeCharacterManager::speed;
