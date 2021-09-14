@@ -177,7 +177,7 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		"effectiveDeck", &SokuLib::PlayerInfo::effectiveDeck//,
 		//"keyManager", &SokuLib::PlayerInfo::keyManager
 	);
-	pushFakeChrMgrLuaTable(*this->_lua);
+	pushFakeChrMgrLuaTable(*this->_lua, this->_created);
 	(*this->_lua)[sol::create_if_nil]["enums"]["directions"] = std::map<std::string, int>{
 		{ "LEFT", SokuLib::LEFT },
 		{ "RIGHT", SokuLib::RIGHT }
@@ -604,5 +604,16 @@ void LuaBattleAnimation::onKeyPressed()
 	} catch (std::exception &e) {
 		MessageBox(SokuLib::window, e.what(), "Cannot fetch onKeyPressed function", MB_ICONERROR);
 		this->_hasError = true;
+	}
+}
+
+LuaBattleAnimation::~LuaBattleAnimation()
+{
+	puts("Delete Lua state");
+	this->_lua.reset();
+	for (auto &obj : this->_created) {
+		printf("Deleting character %p\n", obj);
+		(*(void (__thiscall **)(FakeCharacterManager *, char))obj->vtable)(obj, 0);
+		SokuLib::Delete(obj);
 	}
 }
