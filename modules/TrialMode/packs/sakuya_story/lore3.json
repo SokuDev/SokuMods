@@ -1,5 +1,5 @@
 {
-    "music": 12,
+    "music": 34,
     "stage": 12,
     "player": {
         "character": "sakuya",
@@ -16,9 +16,11 @@
             "y": 0
         }
     },
+    "intro": "lore2intro.lua",
+    "outro": "lore2outro.lua",
     "type": "combo",
 
-    "expected": "!d6 5aaa 2b 5c:30 d236b:35",
+    "expected": "!d6 5aaa 2b 5c:20 d236b:35",
     "skills": [
         [0, 0],
         [0, 0],
@@ -45,7 +47,7 @@
             "min_limit": 93
         },
         {
-            "min_hits": 29,
+            "min_hits": 27,
             "min_damage" : 2267,
             "min_limit": 100
         },
