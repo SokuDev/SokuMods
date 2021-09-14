@@ -8,7 +8,7 @@
         "pos": 100
     },
     "dummy": {
-        "character": "aya",
+        "character": "patchouli",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -34,19 +34,19 @@
 
     ],
     "score": [
-    {
-        "min_hits": 3,
-        "min_damage": 2187,
-        "min_limit": 100
-    },
-    {
-       "max_attempts": 100
-    },
-    {   
-        "max_attempts": 50
-    },
-    {
-        "max_attempts": 25
-    }
+        {
+            "min_hits": 3,
+            "min_damage": 2187,
+            "min_limit": 100
+        },
+        {
+           "max_attempts": 25
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
     ]
 }

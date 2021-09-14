@@ -34,23 +34,23 @@
 
     ],
     "score": [
-    {
-        "min_hits": 26,
-        "min_damage": 2300,
-        "min_limit": 100
-    },
-    {
-        "min_hits": 29,
-        "min_damage" : 2403,
-        "min_limit": 103
-    },
-    {
-        "min_hits": 32,
-        "min_damage" : 2410,
-        "min_limit": 110
-    },
-    {
-        "max_attempts": 50
-    }
+        {
+            "min_hits": 26,
+            "min_damage": 2300,
+            "min_limit": 100
+        },
+        {
+            "min_hits": 29,
+            "min_damage" : 2403,
+            "min_limit": 103
+        },
+        {
+            "min_hits": 32,
+            "min_damage" : 2410,
+            "min_limit": 110
+        },
+        {
+            "max_attempts": 10
+        }
     ]
 }

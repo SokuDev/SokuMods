@@ -8,7 +8,7 @@
         "pos": 400
     },
     "dummy": {
-        "character": "patchouli",
+        "character": "meirin",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -18,7 +18,7 @@
     },
     "type": "combo",
 
-    "expected": "!d6 5aaa 2b 5c:20 d236b:35",
+    "expected": "!d6 5aaa 2b 5c:30 d236b:35",
     "skills": [
         [0, 0],
         [0, 0],
@@ -34,23 +34,23 @@
 
     ],
     "score": [
-    {
-        "min_hits": 20,
-        "min_damage": 2100,
-        "min_limit": 80
-    },
-    {
-        "min_hits": 23,
-        "min_damage" : 2200,
-        "min_limit": 93
-    },
-    {
-        "min_hits": 28,
-        "min_damage" : 2300,
-        "min_limit": 100
-    },
-    {
-        "max_attempts" : 25
-    }
+        {
+            "min_hits": 20,
+            "min_damage": 2100,
+            "min_limit": 80
+        },
+        {
+            "min_hits": 23,
+            "min_damage" : 2200,
+            "min_limit": 93
+        },
+        {
+            "min_hits": 29,
+            "min_damage" : 2267,
+            "min_limit": 100
+        },
+        {
+            "max_attempts" : 25
+        }
     ]
 }

@@ -3,12 +3,13 @@
 --
 
 local dialogs = {
-	"rWDI really didn't steal anything this time.",
-	"lADThis time?",
-	"lCDSo what were you doing here?",
-	"rCDNothing, really.",
-	"lADWhat is Meiling doing, letting anyone in?"
-    --Battle here
+	"r DStop it, I'm already half dead!",
+	"lHDWell that's why they call it a half life.",
+	"lCDBut why were you already in such bad shape?",
+	"rCSDon't you know how many youkai are here?",
+	"rCCThis place is in quite a mess.",
+	"lECAnd I'll be the one that has to clean it up..."
+	--Battle here
 }
 
 local dialog  = StandDialog.new(dialogs)

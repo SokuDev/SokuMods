@@ -8,7 +8,7 @@
         "pos": 400
     },
     "dummy": {
-        "character": "meirin",
+        "character": "yuyuko",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -34,23 +34,23 @@
 
     ],
     "score": [
-    {
-        "min_hits": 15,
-        "min_damage" : 1717,
-        "min_limit": 119
-    },
-    {
-        "min_hits": 16,
-        "min_damage" : 1736,
-        "min_limit": 122
-    },
-    {
-        "min_hits": 17,
-        "min_damage" : 1755,
-        "min_limit": 125
-    },
-    {
-        "max_attempts": 25
-    }
+        {
+            "min_hits": 15,
+            "min_damage" : 1717,
+            "min_limit": 119
+        },
+        {
+            "min_hits": 16,
+            "min_damage" : 1736,
+            "min_limit": 122
+        },
+        {
+            "min_hits": 17,
+            "min_damage" : 1755,
+            "min_limit": 125
+        },
+        {
+            "max_attempts": 25
+        }
     ]
 }

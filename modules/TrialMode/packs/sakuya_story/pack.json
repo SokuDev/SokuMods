@@ -32,50 +32,43 @@
     },
     "scenarios": [
         {
-            "name": "f5A/2A starter",
+            "name": "Spring Cleaning",
             "file": "lore1.json",
             "preview": "lore1.gif",
             "description": "2A 3A 66B | <br>Basic combo conversion for far melee pokes. <br>3A only combo into 66B on ground"
         },
         {
-            "name": "6A starter",
-            "file": "lore2.json",
-            "preview": "lore2.gif",
-            "description": "6A 2B hjc.9 j.6A | <br>6A Basic combo."
-        },
-        {
-            "name": "5AAA starter",
+            "name": "Umbra's Presence",
             "file": "lore3.json",
             "preview": "lore3.gif",
             "description": "5AAA 2B 5C d.236B | <br>The best corner carry ! <br>It is better to start 5AAA with dash momentum <br>and let more B and C knives hit. <br>This also will allow you to limit."
         },
         {
-            "name": "66B starter",
             "file": "lore4.json",
             "preview": "lore4.gif",
             "description": "66B SC205 | <br>Best (only) way to follow-up 66B. <br>Also works with Luminous Ricochet."
         },
         {
-            "name": "j6A Air-to-Air",
+            "file": "lore6.json",
+            "preview": "lore6.gif",
+            "description": "3A hj.9 j.5A j.6A j.6C | <br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A."
+        },
+        {
+            "file": "lore7.json",
+            "preview": "lore7.gif",
+            "description": "66C hj.9/D9/D6 j.2A 66C| <br>Basic 66C CH combo, <br>works everywhere.<br>You have to do some adjustment <br>depending on how you hit 66C."
+        },
+        {
+            "file": "lore2.json",
+            "preview": "lore2.gif",
+            "description": "6A 2B hjc.9 j.6A | <br>6A Basic combo."
+        },        
+        {
             "file": "lore5.json",
             "preview": "lore5.gif",
             "description": "j.6A j.6C j.66 j.6C | <br>Basic Air-to-Air combo conversion. <br>Pray it limits, <br>otherwise you may add d.236B."
         },
         {
-            "name": "3A Anti-air",
-            "file": "lore6.json",
-            "preview": "lore6.gif",
-            "description": "3A hj.9 j.5A j.6A j.6C | <br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A."
-        },        
-        {
-            "name": "66C CH",
-            "file": "lore7.json",
-            "preview": "lore7.gif",
-            "description": "66C hj.9/D9/D6 j.2A 66C| <br>Basic 66C CH combo, <br>works everywhere.<br>You have to do some adjustement <br>depending on how you hit 66C."
-        },
-     
-        {
-            "name": "5AAA starter",
             "file": "lore8.json",
             "preview": "lore8.gif",
             "description": "5AAA 2B hjc.9 j.2B j.66/D6/D3 j.5A 5AAAA | <br>Common Midscreen BnB. <br>Doesn't work on midgets <br>and most crouching characters."
