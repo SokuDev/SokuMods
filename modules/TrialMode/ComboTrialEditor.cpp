@@ -13,12 +13,19 @@
 #endif
 
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
+static char _old;
 
 ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json) :
 	Trial(folder, json)
 {
 	int text;
+	DWORD oldV;
 
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &oldV);
+	_old = *(char *)0x463a10;
+	*(char *)0x463a10 = 0xEB;
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, oldV, &oldV);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	this->_introPlayed = true;
 	this->_outroPlayed = true;
 	if (!editorMode) {
@@ -174,6 +181,16 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 			"Incompatible parameters",
 			MB_ICONWARNING
 		);
+}
+
+ComboTrialEditor::~ComboTrialEditor()
+{
+	DWORD old;
+
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
+	*(char *)0x463a10 = _old;
+	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
 bool ComboTrialEditor::update(bool &canHaveNextFrame)
