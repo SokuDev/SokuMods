@@ -487,7 +487,7 @@ void loadPacks()
 		nlohmann::json val;
 
 		if (stream.fail()) {
-			printf("%s -> Not found...", buffer);
+			printf("%s -> Not found...\n", buffer);
 			continue;
 		}
 		try {

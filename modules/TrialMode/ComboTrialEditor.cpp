@@ -534,7 +534,8 @@ void ComboTrialEditor::_initGameStart()
 	//(*(void (__thiscall **)(SokuLib::ObjListManager &, int))&*battleMgr.leftCharacterManager.objects.offset_0x00)(battleMgr.leftCharacterManager.objects, 0);
 	//battleMgr.leftCharacterManager.objects;
 	memcpy(&battleMgr.leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
-	battleMgr.leftCharacterManager.aliceDollCount = this->_dolls.size();
+	if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE)
+		battleMgr.leftCharacterManager.aliceDollCount = this->_dolls.size();
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
 	battleMgr.rightCharacterManager.currentSpirit = 10000;
@@ -551,7 +552,6 @@ void ComboTrialEditor::_initGameStart()
 	battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 	battleMgr.rightCharacterManager.objectBase.speed.x = 0;
 	battleMgr.rightCharacterManager.objectBase.speed.y = 0;
-	battleMgr.rightCharacterManager.objectBase.animate();
 	battleMgr.rightCharacterManager.objectBase.direction =
 		battleMgr.rightCharacterManager.objectBase.position.x > battleMgr.leftCharacterManager.objectBase.position.x ?
 		SokuLib::LEFT : SokuLib::RIGHT;
@@ -774,7 +774,6 @@ void ComboTrialEditor::_initVanillaGame()
 	battleMgr.rightCharacterManager.objectBase.position.y = 0;
 	battleMgr.rightCharacterManager.objectBase.speed.x = 0;
 	battleMgr.rightCharacterManager.objectBase.speed.y = 0;
-	battleMgr.rightCharacterManager.objectBase.animate();
 	battleMgr.rightCharacterManager.objectBase.direction = SokuLib::LEFT;
 
 	SokuLib::camera.translate = {-320, 420};
