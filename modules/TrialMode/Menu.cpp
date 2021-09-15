@@ -103,8 +103,13 @@ static void loadAllExistingCards()
 			try {
 				auto str2 = parser.getNextCell();
 
-				printf("New card %s: %s\n", str.c_str(), str2.c_str());
+				printf("New card %s: \"%s\" ->", str.c_str(), str2.c_str());
 				cardId = std::stoul(str);
+				while (str2.front() >= 0 && str2.front() < 127 && std::isspace(str2.front()))
+					str2.erase(str2.begin());
+				while (str2.back() >= 0 && str2.back() < 127 && std::isspace(str2.back()))
+					str2.pop_back();
+				printf(" \"%s\"\n", str2.c_str());
 				characterCards[id][cardId].first = str2;
 			} catch (std::exception &e) {
 				MessageBoxA(
