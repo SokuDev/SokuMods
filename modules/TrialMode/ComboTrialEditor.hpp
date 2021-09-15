@@ -99,6 +99,7 @@ private:
 
 public:
 	ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json);
+	~ComboTrialEditor() override;
 
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 	SokuLib::KeyInput getDummyInputs() override;
