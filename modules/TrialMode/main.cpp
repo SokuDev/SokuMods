@@ -278,7 +278,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	//og_loadTexture = reinterpret_cast<int (__fastcall *)(void *, void *, void *, void *)>(SokuLib::TamperNearJmpOpr(0x40505c, fakeLoad));
 	//VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
-	Trial::hook();
+	TrialBase::hook();
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	puts("Done...");
 	srand(time(nullptr));

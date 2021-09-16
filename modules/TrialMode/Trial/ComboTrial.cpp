@@ -489,8 +489,8 @@ void ComboTrial::_initGameStart()
 	}
 
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
-	battleMgr.leftCharacterManager.currentSpirit = 10000;
-	battleMgr.leftCharacterManager.maxSpirit = 10000;
+	battleMgr.leftCharacterManager.currentSpirit = 1000;
+	battleMgr.leftCharacterManager.maxSpirit = 1000;
 
 	if (this->_mpp) {
 		puts("Init MPP");
@@ -536,8 +536,8 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.aliceDollCount = this->_dolls.size();
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
-	battleMgr.rightCharacterManager.currentSpirit = 10000;
-	battleMgr.rightCharacterManager.maxSpirit = 10000;
+	battleMgr.rightCharacterManager.currentSpirit = 1000;
+	battleMgr.rightCharacterManager.maxSpirit = 1000;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.xRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.yRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.zRotation = 0;

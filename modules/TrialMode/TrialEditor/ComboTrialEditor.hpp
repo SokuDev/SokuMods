@@ -7,10 +7,10 @@
 
 
 #include <SokuLib.hpp>
-#include "Trial.hpp"
+#include "TrialEditor.hpp"
 #include "Menu.hpp"
 
-class ComboTrialEditor : public Trial {
+class ComboTrialEditor : public TrialEditor {
 private:
 	struct SpecialAction {
 		bool optional;
@@ -99,7 +99,7 @@ private:
 
 public:
 	ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json);
-	~ComboTrialEditor() override;
+	~ComboTrialEditor() override = default;
 
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 	SokuLib::KeyInput getDummyInputs() override;

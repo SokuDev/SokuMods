@@ -10,6 +10,8 @@
 #include "Menu.hpp"
 #include "Pack.hpp"
 #include "version.h"
+#include "Trial/Trial.hpp"
+#include "TrialEditor/TrialEditor.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -64,7 +66,7 @@ static unsigned entryStart = 0;
 static unsigned band1Start = 0;
 static unsigned band2Start = 0;
 
-std::unique_ptr<Trial> loadedTrial;
+std::unique_ptr<TrialBase> loadedTrial;
 bool loadRequest;
 unsigned loading = false;
 SokuLib::SWRFont defaultFont10;
@@ -317,7 +319,7 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 	if (!addCharacterToBuffer("dummy", value["dummy"], SokuLib::rightPlayerInfo, true))
 		return false;
 	try {
-		loadedTrial.reset(Trial::create(folder, SokuLib::leftPlayerInfo.character, value));
+		loadedTrial.reset((editorMode ? TrialEditor::create : Trial::create)(folder, SokuLib::leftPlayerInfo.character, value));
 	} catch (std::exception &e) {
 		MessageBox(
 			SokuLib::window,
@@ -376,10 +378,10 @@ ResultMenu::ResultMenu(int score)
 	this->_score.rect.width = this->_score.texture.getSize().x / 4;
 	this->_score.rect.height = this->_score.texture.getSize().y;
 
-	for (int i = 0; i < Trial::menuActionText.size(); i++) {
+	for (int i = 0; i < TrialBase::menuActionText.size(); i++) {
 		auto &sprite = this->_text[i];
 
-		sprite.texture.createFromText(Trial::menuActionText[i].c_str(), defaultFont16, {230, 24});
+		sprite.texture.createFromText(TrialBase::menuActionText[i].c_str(), defaultFont16, {230, 24});
 		sprite.setPosition({128, 182 + i * 24});
 		sprite.setSize(sprite.texture.getSize());
 		sprite.rect.width = sprite.texture.getSize().x;
@@ -399,28 +401,28 @@ int ResultMenu::onProcess()
 {
 	if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
-		this->_selected = Trial::RETURN_TO_TITLE_SCREEN;
+		this->_selected = TrialBase::RETURN_TO_TITLE_SCREEN;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
 		SokuLib::playSEWaveBuffer(0x28);
-		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
+		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
 			loadNextTrial = true;
-		loadedTrial->onMenuClosed(static_cast<Trial::MenuAction>(this->_selected));
+		loadedTrial->onMenuClosed(static_cast<TrialBase::MenuAction>(this->_selected));
 		return false;
 	}
 	if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis <= -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_selected--;
-		if (this->_selected == Trial::GO_TO_NEXT_TRIAL)
+		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
 			this->_selected -= currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
-		this->_selected += Trial::NB_MENU_ACTION;
-		this->_selected %= Trial::NB_MENU_ACTION;
+		this->_selected += TrialBase::NB_MENU_ACTION;
+		this->_selected %= TrialBase::NB_MENU_ACTION;
 	} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis >= 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_selected++;
-		if (this->_selected == Trial::NB_MENU_ACTION)
+		if (this->_selected == TrialBase::NB_MENU_ACTION)
 			this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
-		this->_selected %= Trial::NB_MENU_ACTION;
+		this->_selected %= TrialBase::NB_MENU_ACTION;
 	}
 	return true;
 }
