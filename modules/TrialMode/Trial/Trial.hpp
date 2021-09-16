@@ -10,11 +10,10 @@
 #include <functional>
 #include <nlohmann/json.hpp>
 #include <SokuLib.hpp>
+#include "TrialBase.hpp"
 #include "Animations/BattleAnimation.hpp"
 
-extern const std::map<std::string, SokuLib::Weather> weathers;
-
-class Trial {
+class Trial : public TrialBase {
 private:
 	std::string _music;
 	std::string _folder;
@@ -36,29 +35,10 @@ protected:
 	void _initAnimations(bool intro = true, bool outro = true);
 
 public:
-	enum MenuAction {
-		GO_TO_NEXT_TRIAL,
-		RETRY,
-		RETURN_TO_TRIAL_SELECT,
-		RETURN_TO_TITLE_SCREEN,
-		NB_MENU_ACTION
-	};
-
-	static const std::array<std::string, NB_MENU_ACTION> menuActionText;
-
-	static void hook();
-
 	Trial(const char *folder, const nlohmann::json &json);
-	virtual ~Trial();
-	virtual bool update(bool &canHaveNextFrame) = 0;
-	virtual void render() const = 0;
-	virtual int getScore() = 0;
-	virtual void editPlayerInputs(SokuLib::KeyInput &originalInputs) = 0;
-	virtual SokuLib::KeyInput getDummyInputs() = 0;
-	virtual void onMenuClosed(MenuAction action) = 0;
-	virtual SokuLib::Scene getNextScene() = 0;
+	~Trial() override;
 
-	static Trial *create(const char *folder, SokuLib::Character player, const nlohmann::json &json);
+	static TrialBase *create(const char *folder, SokuLib::Character player, const nlohmann::json &json);
 };
 
 

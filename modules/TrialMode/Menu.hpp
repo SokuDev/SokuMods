@@ -7,7 +7,7 @@
 
 
 #include <SokuLib.hpp>
-#include "Trial.hpp"
+#include "TrialBase.hpp"
 
 class ResultMenu : public SokuLib::IMenu {
 private:
@@ -15,7 +15,7 @@ private:
 	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _score;
 	SokuLib::DrawUtils::Sprite _resultTop;
-	std::array<SokuLib::DrawUtils::Sprite, Trial::NB_MENU_ACTION> _text;
+	std::array<SokuLib::DrawUtils::Sprite, TrialBase::NB_MENU_ACTION> _text;
 
 public:
 	ResultMenu(int score);
@@ -32,7 +32,7 @@ extern SokuLib::SWRFont defaultFont10;
 extern SokuLib::SWRFont defaultFont12;
 extern SokuLib::SWRFont defaultFont16;
 extern bool loadRequest;
-extern std::unique_ptr<Trial> loadedTrial;
+extern std::unique_ptr<TrialBase> loadedTrial;
 extern bool editorMode;
 extern unsigned loading;
 

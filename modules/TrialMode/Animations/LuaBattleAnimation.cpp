@@ -8,7 +8,6 @@
 #include <map>
 #include "FakeChrMgr.hpp"
 #include "LuaBattleAnimation.hpp"
-#include "Trial.hpp"
 
 #ifndef _DEBUG
 #define puts(...)

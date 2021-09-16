@@ -2,6 +2,7 @@
 // Created by PinkySmile on 23/07/2021.
 //
 
+#include "Patches.hpp"
 #include "ComboTrialEditor.hpp"
 #include "Actions.hpp"
 #include "Menu.hpp"
@@ -13,17 +14,14 @@
 #endif
 
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
-static char _old;
 
 ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json) :
-	Trial(folder, json)
+	TrialEditor(folder, json)
 {
 	int text;
 	DWORD oldV;
 
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &oldV);
-	_old = *(char *)0x463a10;
-	*(char *)0x463a10 = 0xEB;
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, oldV, &oldV);
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	this->_introPlayed = true;
@@ -181,16 +179,6 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 			"Incompatible parameters",
 			MB_ICONWARNING
 		);
-}
-
-ComboTrialEditor::~ComboTrialEditor()
-{
-	DWORD old;
-
-	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
-	*(char *)0x463a10 = _old;
-	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
-	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
 bool ComboTrialEditor::update(bool &canHaveNextFrame)
@@ -367,9 +355,9 @@ disableLimit:
 					MB_ICONERROR
 				);
 			}
-		} else if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro)
+		} else if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro) {
 			this->_playComboAfterIntro = true;
-		else if (!this->_playingIntro && this->_introRequ == 1) {
+		} else if (!this->_playingIntro && this->_introRequ == 1) {
 			try {
 				ComboTrialEditor::_initVanillaGame();
 				this->_initAnimations(true, false);
@@ -507,8 +495,8 @@ void ComboTrialEditor::_initGameStart()
 	}
 
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
-	battleMgr.leftCharacterManager.currentSpirit = 10000;
-	battleMgr.leftCharacterManager.maxSpirit = 10000;
+	battleMgr.leftCharacterManager.currentSpirit = 1000;
+	battleMgr.leftCharacterManager.maxSpirit = 1000;
 
 	if (this->_mpp) {
 		puts("Init MPP");
@@ -555,8 +543,8 @@ void ComboTrialEditor::_initGameStart()
 		battleMgr.leftCharacterManager.aliceDollCount = this->_dolls.size();
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
-	battleMgr.rightCharacterManager.currentSpirit = 10000;
-	battleMgr.rightCharacterManager.maxSpirit = 10000;
+	battleMgr.rightCharacterManager.currentSpirit = 1000;
+	battleMgr.rightCharacterManager.maxSpirit = 1000;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.xRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.yRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.zRotation = 0;
@@ -760,8 +748,8 @@ void ComboTrialEditor::_initVanillaGame()
 	battleMgr.leftCharacterManager.combo.nbHits = 0;
 	battleMgr.leftCharacterManager.combo.rate = 0;
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
-	battleMgr.leftCharacterManager.currentSpirit = 10000;
-	battleMgr.leftCharacterManager.maxSpirit = 10000;
+	battleMgr.leftCharacterManager.currentSpirit = 1000;
+	battleMgr.leftCharacterManager.maxSpirit = 1000;
 	battleMgr.rightCharacterManager.objectBase.direction = SokuLib::RIGHT;
 	battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 	battleMgr.leftCharacterManager.objectBase.animate();
@@ -780,8 +768,8 @@ void ComboTrialEditor::_initVanillaGame()
 	}
 
 	battleMgr.rightCharacterManager.objectBase.hp = 10000;
-	battleMgr.rightCharacterManager.currentSpirit = 10000;
-	battleMgr.rightCharacterManager.maxSpirit = 10000;
+	battleMgr.rightCharacterManager.currentSpirit = 1000;
+	battleMgr.rightCharacterManager.maxSpirit = 1000;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.xRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.yRotation = 0;
 	battleMgr.rightCharacterManager.objectBase.renderInfos.zRotation = 0;
