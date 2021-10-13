@@ -7,6 +7,7 @@
 #include <list>
 #include <map>
 #include <process.h>
+#include <iostream>
 #include <thread>
 
 #define FONT_HEIGHT 16
@@ -16,7 +17,10 @@ struct PingData {
 	unsigned long long totalTime = 0;
 	unsigned long long nbTime = 0;
 	long long last = 0;
+	long long peak = 0;
 	unsigned long long oldTime = 0;
+	unsigned long long lastUpdate = 0;
+	unsigned ignoreTime = 0;
 };
 
 struct CDesignSprite {
@@ -29,8 +33,10 @@ struct CDesignSprite {
 	int UNKNOWN_3;
 };
 
+static int (__stdcall *realRecvFrom)(SOCKET s, char *buf, int len, int flags, sockaddr *from, int * fromlen);
+static int (__stdcall *realSendTo)(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen);
 static void (*s_originalDrawGradiantBar)(float param1, float param2, float param3);
-static SOCKET (__stdcall *realSocket)(int af, int type, int protocol);
+//static SOCKET (__stdcall *realSocket)(int af, int type, int protocol);
 static int (__stdcall *realCloseSocket)(SOCKET s);
 static int (__stdcall *realBind)(SOCKET s, sockaddr * addr, int namelen);
 
@@ -50,6 +56,7 @@ static SokuLib::DrawUtils::Sprite yes;
 static SokuLib::DrawUtils::Sprite noH;
 static SokuLib::DrawUtils::Sprite no;
 
+static unsigned deadTime = 0;
 static unsigned short port;
 static bool spec;
 static unsigned timer = 10000;
@@ -65,8 +72,52 @@ static SOCKET mySocket = INVALID_SOCKET;
 static int *retAddr = nullptr;
 static PingData connectedPing;
 static std::map<unsigned, PingData> data;
-static bool konniConnect = false;
+static std::map<unsigned, std::list<std::vector<unsigned char>>> queues;
+static bool pingRequested = false;
+static bool gotPingAnswer = false;
+static bool sentPing = false;
+static std::string name;
+static sockaddr_in currentAddress;
+static bool inQueue = false;
 
+int __stdcall fakeRecvFrom(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen)
+{
+	auto it = queues.find(currentAddress.sin_addr.s_addr);
+
+	if (s != mySocket)
+		return realRecvFrom(s, buf, len, flags, from, fromlen);
+	if (it == queues.end())
+		return realRecvFrom(s, buf, len, flags, from, fromlen);
+	if (it->second.empty()) {
+		puts("List is empty!");
+		queues.clear();
+		return realRecvFrom(s, buf, len, flags, from, fromlen);
+	}
+	inQueue = true;
+
+	auto &entry = it->second.front();
+
+	printf("Send fake packet ");
+	SokuLib::displayPacketContent(std::cout, *reinterpret_cast<SokuLib::Packet *>(buf));
+	printf("\n");
+	len = min(len, entry.size());
+	memcpy(buf, entry.data(), len);
+	it->second.pop_front();
+	if (from) {
+		*reinterpret_cast<sockaddr_in *>(from) = currentAddress;
+		if (fromlen)
+			*fromlen = sizeof(currentAddress);
+	}
+	return len;
+}
+
+int __stdcall fakeSendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen)
+{
+	if (!inQueue)
+		return realSendTo(s, buf, len, flags, to, tolen);
+	inQueue = false;
+	return 0;
+}
 
 std::string getLastSocketError(int err = WSAGetLastError()) {
 	char *s = nullptr;
@@ -89,6 +140,7 @@ std::string getLastSocketError(int err = WSAGetLastError()) {
 
 void __stdcall fakeCloseSocket(SOCKET s)
 {
+	puts("Destroy socket");
 	if (s == mySocket)
 		mySocket = INVALID_SOCKET;
 	realCloseSocket(s);
@@ -96,15 +148,21 @@ void __stdcall fakeCloseSocket(SOCKET s)
 
 SOCKET __stdcall fakeSocket(int af, int type, int protocol)
 {
-	if (mySocket != INVALID_SOCKET)
+	puts("Call to socket");
+	if (mySocket != INVALID_SOCKET) {
+		puts("Creating fake socket");
 		return mySocket;
-	return realSocket(af, type, protocol);
+	}
+	puts("Real socket");
+	return SokuLib::DLL::ws2_32.socket(af, type, protocol);
 }
 
 int __stdcall fakeBind(SOCKET s, sockaddr *addr, int namelen)
 {
-	if (mySocket == INVALID_SOCKET)
+	puts("Fake bind");
+	if (s != mySocket)
 		return realBind(s, addr, namelen);
+	puts("No bind");
 	return 0;
 }
 
@@ -112,6 +170,7 @@ void cancelHost(SokuLib::MenuConnect &menu)
 {
 	*retAddr = 0x446B1B - (int)(retAddr) - 4;
 	menu.subchoice = 0;
+	puts("Cancel host sock");
 	realCloseSocket(mySocket);
 	mySocket = INVALID_SOCKET;
 }
@@ -126,7 +185,7 @@ unsigned __stdcall hostLoop(void *)
 	port = menu->port;
 	spec = menu->spectate;
 	puts("Thread start");
-	while (true) {
+	while (hosting) {
 		SokuLib::Packet packet;
 
 		addr.sin_family = AF_INET;
@@ -135,7 +194,7 @@ unsigned __stdcall hostLoop(void *)
 		puts("Recv");
 		len = sizeof(addr);
 
-		int size = SokuLib::DLL::ws2_32.recvfrom(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet), 0, reinterpret_cast<sockaddr *>(&addr), &len);
+		int size = realRecvFrom(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet), 0, reinterpret_cast<sockaddr *>(&addr), &len);
 
 		if (size == -1)
 			return -1;
@@ -145,83 +204,129 @@ unsigned __stdcall hostLoop(void *)
 		unsigned long long time = counter.QuadPart * 1000 / timer_frequency.QuadPart;
 
 		auto &ping = data[addr.sin_addr.s_addr];
+		auto &queue = queues[addr.sin_addr.s_addr];
 
+		if (packet.type != SokuLib::SOKUROLL_TIME_ACK) {
+			queue.emplace_back();
+			queue.back().resize(size);
+			memcpy(queue.back().data(), &packet, size);
+		}
 		if (packet.type == SokuLib::HELLO) {
+			//ping.nbTime = 0;
 			packet.type = SokuLib::OLLEH;
-			if (
-				addr.sin_addr.S_un.S_un_b.s_b1 == 51 &&
-				addr.sin_addr.S_un.S_un_b.s_b2 == 15 &&
-				addr.sin_addr.S_un.S_un_b.s_b3 == 50 &&
-				addr.sin_addr.S_un.S_un_b.s_b4 == 91
-			) {
-				puts("Everyone say hi to Konni :wave:");
-				konniConnect = false;
-			}
-			ping.oldTime = time;
-			ping.nbTime = 0;
-			puts("Reply OLLEH");
-			SokuLib::DLL::ws2_32.sendto(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.type), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+			printf("Reply OLLEH %lli\n", ping.last);
+			realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.type), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
 		} else if (packet.type == SokuLib::INIT_REQUEST) {
-			ping.last = time - ping.oldTime;
-			ping.oldTime = time;
-			ping.totalTime += ping.last;
-			ping.nbTime++;
-			printf("%s (%s) is joining as ", inet_ntoa(addr.sin_addr), std::string{packet.initRequest.name, packet.initRequest.name + packet.initRequest.nameLength}.c_str());
+			printf("Game ID: (");
+			for (unsigned char c : packet.initRequest.gameId)
+				printf("0x%02X ", c);
+			printf(
+				"\"%s\") %s (%s) is joining as ",
+				std::string(packet.initRequest.gameId, packet.initRequest.gameId + sizeof(packet.initRequest.gameId)).c_str(),
+				inet_ntoa(addr.sin_addr),
+				std::string{packet.initRequest.name, packet.initRequest.name + packet.initRequest.nameLength}.c_str()
+			);
+			//TODO: Replace with the gameid the game is currently using
+			if (memcmp(
+				packet.initRequest.gameId,
+				SokuLib::SWRUnlinked ? SokuLib::Soku110acNoSWRAllChars : SokuLib::Soku110acRollSWRAllChars,
+				sizeof(packet.initRequest.gameId)
+			) != 0) {
+				printf("Invalid game version!\n");
+				continue;
+			}
 			if (packet.initRequest.reqType == SokuLib::SPECTATE_REQU) {
 				printf("spectator (last: %llims)\n", ping.last);
-				if (
-					addr.sin_addr.S_un.S_un_b.s_b1 == 51 &&
-					addr.sin_addr.S_un.S_un_b.s_b2 == 15 &&
-					addr.sin_addr.S_un.S_un_b.s_b3 == 50 &&
-					addr.sin_addr.S_un.S_un_b.s_b4 == 91 &&
-					!konniConnect
-				) {
-					konniConnect = true;
-					puts("Waiting 2 seconds for Konni to be happy");
-					std::this_thread::sleep_for(std::chrono::seconds(2));
-				}
 				packet.type = SokuLib::INIT_ERROR;
 				packet.initError.reason = spec ? SokuLib::ERROR_GAME_STATE_INVALID : SokuLib::ERROR_SPECTATE_DISABLED;
 				puts("Reply INIT_ERROR");
-				SokuLib::DLL::ws2_32.sendto(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.initError), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+				realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.initError), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
 			} else {
 				printf("player (last: %llims)\n", ping.last);
-				if (!someoneConnected) {
-					DWORD old;
+				if (someoneConnected)
+					continue;
+				DWORD old;
 
-					SokuLib::playSEWaveBuffer(0x39);
-					boxText.texture.createFromText(
-						(std::string{packet.initRequest.name, packet.initRequest.name + packet.initRequest.nameLength} +
-						" (" + std::to_string(ping.last) + "ms) joined.<br>Accept ?").c_str(),
-						font,
-						{TEXTURE_SIZE, FONT_HEIGHT * 2}
-					);
-					yesSelected = true;
-					VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-					*(char *)0x407f43 = 0x90;
-					*(char *)0x407f44 = 0x90;
-					*(char *)0x407f45 = 0x90;
-					*(char *)0x407f46 = 0x90;
-					*(char *)0x407f47 = 0x90;
-					*(char *)0x407f48 = 0x90;
-					*(char *)0x407f49 = 0x90;
-					*(char *)0x407f4A = 0x90;
-					*(char *)0x407f4B = 0x90;
-					*(char *)0x407f4C = 0x90;
-					*(char *)0x407f4D = 0x90;
-					VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
-				}
+				SokuLib::playSEWaveBuffer(0x39);
+				name = std::string{packet.initRequest.name, packet.initRequest.name + packet.initRequest.nameLength};
+				boxText.texture.createFromText(
+					(name + " joined. Accept?<br>Calulating ping...").c_str(),
+					font,
+					{TEXTURE_SIZE, FONT_HEIGHT * 2}
+				);
+				deadTime = 90;
+				yesSelected = true;
+				currentAddress = addr;
+				VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+				*(char *)0x407f43 = 0x90;
+				*(char *)0x407f44 = 0x90;
+				*(char *)0x407f45 = 0x90;
+				*(char *)0x407f46 = 0x90;
+				*(char *)0x407f47 = 0x90;
+				*(char *)0x407f48 = 0x90;
+				*(char *)0x407f49 = 0x90;
+				*(char *)0x407f4A = 0x90;
+				*(char *)0x407f4B = 0x90;
+				*(char *)0x407f4C = 0x90;
+				*(char *)0x407f4D = 0x90;
+				VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 				someoneConnected = true;
-				packet.type = SokuLib::OLLEH;
-				puts("Reply OLLEH");
-				SokuLib::DLL::ws2_32.sendto(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.type), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+				pingRequested = false;
+				gotPingAnswer = true;
+				sentPing = false;
+				memset(&ping, 0, sizeof(ping));
+				memset(&packet.initSuccess, 0, sizeof(packet.initSuccess));
+				packet.type = SokuLib::INIT_SUCCESS;
+				strncpy(packet.initSuccess.clientProfileName, packet.initRequest.name, min(packet.initRequest.nameLength, sizeof(packet.initSuccess.clientProfileName)));
+				strcpy(packet.initSuccess.hostProfileName, SokuLib::profile1.name);
+				packet.initSuccess.swrDisabled = SokuLib::SWRUnlinked;
+				packet.initSuccess.dataSize = 68;
+				packet.initSuccess.unknown1[4] = 0x10;
+				puts("Reply INIT_SUCCESS");
+				realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.initSuccess), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
 			}
 		} else if (packet.type == SokuLib::QUIT) {
 			packet.type = SokuLib::QUIT;
 			puts("Reply QUIT");
-			SokuLib::DLL::ws2_32.sendto(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.type), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+			realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.type), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+		} else if (packet.type == SokuLib::CLIENT_GAME) {
+			if (!someoneConnected)
+				continue;
+			packet.type = SokuLib::HOST_GAME;
+			puts("Reply HOST_GAME");
+			realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.game), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+			pingRequested &= time - ping.lastUpdate <= 1000;
+			if (!pingRequested) {
+				sentPing = true;
+				pingRequested = true;
+				packet.type = SokuLib::SOKUROLL_TIME;
+				packet.rollTime.timeStamp = 0;
+				packet.rollTime.sequenceId = 0;
+				if (gotPingAnswer)
+					ping.oldTime = time;
+				ping.lastUpdate = time;
+				puts("Reply ROLLTIME");
+				gotPingAnswer = false;
+				realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.rollTime), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+			}
+		} else if (packet.type == SokuLib::SOKUROLL_TIME_ACK) {
+			if (!sentPing)
+				continue;
+			gotPingAnswer = true;
+			sentPing = false;
+			ping.last = time - ping.oldTime;
+			ping.peak = max(ping.peak, ping.last);
+			ping.oldTime = time;
+			ping.totalTime += ping.last;
+			ping.nbTime++;
+			boxText.texture.createFromText(
+				(name + " joined. Accept?<br>Ping: L:" + std::to_string(ping.last) + "ms, A:" + std::to_string(ping.totalTime / ping.nbTime) + "ms, P:" + std::to_string(ping.peak) + "ms").c_str(),
+				font,
+				{TEXTURE_SIZE, FONT_HEIGHT * 2}
+			);
 		}
 	}
+	return 0;
 }
 
 void onRender()
@@ -401,18 +506,25 @@ void fakeHost()
 	auto menu = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 	WSADATA WSAData;
 
+	for (auto &[ip, packets] : queues)
+		if (ip != currentAddress.sin_addr.s_addr)
+			packets.clear();
 	CloseHandle((HANDLE)threadPtr);
+	threadPtr = 0;
 	SokuLib::DLL::ws2_32.WSAStartup(MAKEWORD(2, 2), &WSAData);
 	if (hosting) {
+		puts("Stopping host");
 		hosting = false;
-		assert(mySocket != INVALID_SOCKET);
-		closesocket(mySocket);
-		mySocket = INVALID_SOCKET;
 		return;
 	}
+	if (mySocket != INVALID_SOCKET) {
+		closesocket(mySocket);
+		mySocket = INVALID_SOCKET;
+	}
+	queues.clear();
 	puts("Starting host");
 	puts("Creating socket...");
-	mySocket = realSocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	mySocket = SokuLib::DLL::ws2_32.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (mySocket == INVALID_SOCKET) {
 		puts(getLastSocketError().c_str());
 		error = true;
@@ -509,7 +621,9 @@ void onUpdate()
 	if (timer < 240)
 		timer++;
 	if (someoneConnected) {
-		if (SokuLib::inputMgrs.input.a == 1) {
+		if (deadTime)
+			deadTime--;
+		else if (SokuLib::inputMgrs.input.a == 1) {
 			DWORD old;
 
 			SokuLib::inputMgrs.input.a = 2;
@@ -535,6 +649,7 @@ void onUpdate()
 			} else {
 				SokuLib::playSEWaveBuffer(41);
 				someoneConnected = false;
+				queues.clear();
 			}
 		}
 		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1) {
@@ -562,12 +677,13 @@ int __fastcall ConnectMenu_OnRender(SokuLib::MenuConnect *This)
 
 int __fastcall ConnectMenu_OnProcess(SokuLib::MenuConnect *This)
 {
-	if (hosting) {
+	if (hosting && !someoneConnected) {
 		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(1, false, false, false)) {
 			SokuLib::playSEWaveBuffer(0x29);
 			return false;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
+			puts("Cancel host");
 			SokuLib::playSEWaveBuffer(0x29);
 			fakeHost();
 		}
@@ -582,16 +698,19 @@ void placeHooks()
 
 	//Setup hooks
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	realSocket      = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.socket,      &fakeSocket);
-	realBind        = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.bind,        &fakeBind);
-	realCloseSocket = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.closesocket, &fakeCloseSocket);
+	realBind        = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.bind,            &fakeBind);
+	realCloseSocket = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.closesocket,     &fakeCloseSocket);
+	realRecvFrom    = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.recvfrom,        &fakeRecvFrom);
+	realSendTo      = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.sendto,          &fakeSendTo);
 	connectOnRender = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onRender, ConnectMenu_OnRender);
-	connectOnProcess= SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess, ConnectMenu_OnProcess);
+	connectOnProcess= SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess,ConnectMenu_OnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	//ogOnRenderCall = SokuLib::TamperNearJmpOpr(0x40817d, onRender);
 	s_originalDrawGradiantBar = reinterpret_cast<void (*)(float, float, float)>(SokuLib::TamperNearJmpOpr(0x445e6f, drawGradiantBar));
+	SokuLib::TamperNearCall(0x41311d, &fakeSocket);
+	*(char *)(0x41311d + 5) = 0x90;
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	hostTrampoline = new SokuLib::Trampoline(0x446a40, fakeHost, 6);
