@@ -10,6 +10,11 @@
 #include <iostream>
 #include <thread>
 
+#ifndef _DEBUG
+#define puts(...)
+#define printf(...)
+#endif
+
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x200
 
@@ -79,6 +84,7 @@ static bool sentPing = false;
 static std::string name;
 static sockaddr_in currentAddress;
 static bool inQueue = false;
+static bool needHook = false;
 
 int __stdcall fakeRecvFrom(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen)
 {
@@ -191,13 +197,15 @@ unsigned __stdcall hostLoop(void *)
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(port);
 		addr.sin_addr.S_un.S_addr = 0;
-		puts("Recv");
+		printf("Recv %p\n", realRecvFrom);
 		len = sizeof(addr);
 
 		int size = realRecvFrom(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet), 0, reinterpret_cast<sockaddr *>(&addr), &len);
 
-		if (size == -1)
+		if (size == -1) {
+			puts("Error!");
 			return -1;
+		}
 		printf("Received %i bytes: opcode %s (%i) from %s\n", size, SokuLib::PacketTypeToString(packet.type).c_str(), packet.type, inet_ntoa(addr.sin_addr));
 
 		QueryPerformanceCounter(&counter);
@@ -255,21 +263,9 @@ unsigned __stdcall hostLoop(void *)
 					{TEXTURE_SIZE, FONT_HEIGHT * 2}
 				);
 				deadTime = 90;
+				needHook = true;
 				yesSelected = true;
 				currentAddress = addr;
-				VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-				*(char *)0x407f43 = 0x90;
-				*(char *)0x407f44 = 0x90;
-				*(char *)0x407f45 = 0x90;
-				*(char *)0x407f46 = 0x90;
-				*(char *)0x407f47 = 0x90;
-				*(char *)0x407f48 = 0x90;
-				*(char *)0x407f49 = 0x90;
-				*(char *)0x407f4A = 0x90;
-				*(char *)0x407f4B = 0x90;
-				*(char *)0x407f4C = 0x90;
-				*(char *)0x407f4D = 0x90;
-				VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 				someoneConnected = true;
 				pingRequested = false;
 				gotPingAnswer = true;
@@ -320,7 +316,7 @@ unsigned __stdcall hostLoop(void *)
 			ping.totalTime += ping.last;
 			ping.nbTime++;
 			boxText.texture.createFromText(
-				(name + " joined. Accept?<br>Ping: L:" + std::to_string(ping.last) + "ms, A:" + std::to_string(ping.totalTime / ping.nbTime) + "ms, P:" + std::to_string(ping.peak) + "ms").c_str(),
+				(name + " joined. Accept?<br>Ping: Last:" + std::to_string(ping.last) + "ms, Aver:" + std::to_string(ping.totalTime / ping.nbTime) + "ms, Peak:" + std::to_string(ping.peak) + "ms").c_str(),
 				font,
 				{TEXTURE_SIZE, FONT_HEIGHT * 2}
 			);
@@ -569,14 +565,32 @@ void acceptHost(void *)
 	menu->spectate = spec;
 	menu->choice = 1;
 	menu->subchoice = 2;
-	hostTrampoline->operator() < void(__thiscall *)(SokuLib::MenuConnect *) > (menu);
+	hostTrampoline->operator()<void(__thiscall *)(SokuLib::MenuConnect *)>(menu);
 	puts("My job here is done");
 }
 
 void onUpdate()
 {
+	DWORD old;
+
 	if (!loaded)
 		loadAssets();
+	if (needHook) {
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+		*(char *)0x407f43 = 0x90;
+		*(char *)0x407f44 = 0x90;
+		*(char *)0x407f45 = 0x90;
+		*(char *)0x407f46 = 0x90;
+		*(char *)0x407f47 = 0x90;
+		*(char *)0x407f48 = 0x90;
+		*(char *)0x407f49 = 0x90;
+		*(char *)0x407f4A = 0x90;
+		*(char *)0x407f4B = 0x90;
+		*(char *)0x407f4C = 0x90;
+		*(char *)0x407f4D = 0x90;
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+		needHook = false;
+	}
 	if (timer <= 60) {
 		box.setPosition({
 			static_cast<int>(640 - box.getSize().x * timer / 60),
@@ -624,8 +638,6 @@ void onUpdate()
 		if (deadTime)
 			deadTime--;
 		else if (SokuLib::inputMgrs.input.a == 1) {
-			DWORD old;
-
 			SokuLib::inputMgrs.input.a = 2;
 			VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 			*(char *)0x407f43 = 0xFF;
