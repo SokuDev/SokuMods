@@ -6,7 +6,7 @@ local dialogs = {
 	--Sakuya walking to Meiling on the ground
 	"lc Here you are...",
 	--Meiling moving in her sleep?
-	"lW It seems you at least tried to fulfill your role this time.",
+	"lW It seems you at least tried to fulfill your role<br>this time.",
 	"rWSAh Sakuya?",
 	"rWDSo it was just a dream...",
 	"lADIt's no time to stay unconscious.",
