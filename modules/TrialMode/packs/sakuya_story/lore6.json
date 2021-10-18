@@ -8,7 +8,7 @@
         "pos": 550
     },
     "dummy": {
-        "character": "meirin",
+        "character": "udonge",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -18,7 +18,7 @@
     },
     "type": "combo",
 
-    "expected": "3a hj9 !j5a:11 j6a:5 j6c",
+    "expected": "3a hj9 !j5a:8 j6a:5 j6c",
     "skills": [
         [0, 0],
         [0, 0],
