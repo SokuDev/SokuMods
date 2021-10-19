@@ -1,5 +1,5 @@
 {
-    "music": 12,
+    "music": "{{pack_path}}/suika.ogg",
     "stage": 12,
     "player": {
         "character": "sakuya",
