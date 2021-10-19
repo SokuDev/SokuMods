@@ -18,7 +18,7 @@
         "path": "data/stand/sakuya.bmp"
     },
     "description": "Incident at the Scarlet Devil Mansion",
-    "author": "Exioloz, PinkySmile",
+    "author": "Exioloz, PinkySmile, second degree",
     "icon": {
         "isPath": false,
         "path": "data/character/sakuya/face/face000.bmp",
@@ -44,11 +44,13 @@
             "description": "5AAA 2B 5C d.236B | <br>The best corner carry ! <br>It is better to start 5AAA with dash momentum <br>and let more B and C knives hit. <br>This also will allow you to limit."
         },
         {
+            "name": "A Lead To Answers",
             "file": "lore4.json",
             "preview": "lore4.gif",
             "description": "66B SC205 | <br>Best (only) way to follow-up 66B. <br>Also works with Luminous Ricochet."
         },
         {
+            "name": "A Rabbit Foot For Luck",
             "file": "lore6.json",
             "preview": "lore6.gif",
             "description": "3A hj.9 j.5A j.6A j.6C | <br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A."

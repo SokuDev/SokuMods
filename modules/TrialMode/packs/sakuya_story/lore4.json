@@ -1,6 +1,6 @@
 {
-    "music": 12,
-    "stage": 12,
+    "music": 15,
+    "stage": 14,
     "player": {
         "character": "sakuya",
         "palette": 0,
@@ -16,6 +16,8 @@
             "y": 0
         }
     },
+    "intro": "lore3intro.lua",
+    "outro": "lore3outro.lua",
     "type": "combo",
 
     "expected": "66b SC205:50",
