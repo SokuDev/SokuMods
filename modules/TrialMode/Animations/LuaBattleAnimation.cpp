@@ -114,6 +114,17 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		"finishAnimations", &SokuStand::finishAnimations,
 		sol::meta_function::length, &SokuStand::getCurrentDialog
 	);
+	this->_lua->new_usertype<SokuLib::RenderInfo>(
+		"RenderInfo",
+		"new", [](){ return SokuLib::RenderInfo{}; },
+		"color", &SokuLib::RenderInfo::color,
+		"shaderType", &SokuLib::RenderInfo::shaderType,
+		"shaderColor", &SokuLib::RenderInfo::shaderColor,
+		"scale", &SokuLib::RenderInfo::scale,
+		"xRotation", &SokuLib::RenderInfo::xRotation,
+		"yRotation", &SokuLib::RenderInfo::yRotation,
+		"zRotation", &SokuLib::RenderInfo::zRotation
+	);
 	this->_lua->new_usertype<SokuLib::DrawUtils::TextureRect>(
 		"TextureRect",
 		"new", [](int l, int r, int w, int h){ return SokuLib::DrawUtils::TextureRect{l, r, w, h}; },
