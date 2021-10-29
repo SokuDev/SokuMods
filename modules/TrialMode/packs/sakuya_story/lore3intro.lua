@@ -75,7 +75,6 @@ local function stage1()
 	if battleMgr.leftChr.position.x >= 400 then
 		currentStage = currentStage + 1
 		dialog.hidden = false
-		dialog:onKeyPress()
 		ctr = 30
 		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
 		battleMgr.leftChr:initAnimation()

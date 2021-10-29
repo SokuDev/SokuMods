@@ -30,7 +30,7 @@ local stop = false
 
 local function stage0()
 	if ctr == 240 then
-		playBGM("data/bgm/ta01.ogg")
+		playBGM("data/bgm/ta03.ogg")
 		battleMgr.leftChr.position.x = -100
 		battleMgr.rightChr.position.x = 1000
 		battleMgr.rightChr.renderInfos.color.a = 0
@@ -152,7 +152,7 @@ local anims = {
 
 print("Init intro.")
 
-stageBg.texture:loadFromFile(packPath.."/lore4intro.png")
+stageBg.texture:loadFromFile(packPath.."/lore5intro.png")
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),
@@ -162,7 +162,7 @@ stageBg.rect.width  = stageBg.texture.size.x
 stageBg.rect.height = stageBg.texture.size.y
 stageBg.tint.a = 0
 
-stageBottom.texture:loadFromGame("data/scenario/effect/Stage4.png")
+stageBottom.texture:loadFromGame("data/scenario/effect/Stage5.png")
 stageBottom.size = stageBottom.texture.size
 stageBottom.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),

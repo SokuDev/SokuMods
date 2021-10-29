@@ -5,20 +5,20 @@
         "character": "sakuya",
         "palette": 0,
         "deck": [],
-        "pos": 700
+        "pos": 1000
     },
     "dummy": {
         "character": "aya",
         "palette": 0,
         "deck": [],
         "pos": {
-            "x": 800,
-            "y": 100
+            "x": 1100,
+            "y": 400
         }
     },
     "type": "combo",
 
-    "expected": "!hj9 j6a:20 j6c:25 !j66/j6d j6c jd236b!:20",
+    "expected": "!hj8 j8A:30 j5B:28 j66/j9D:30 j8A/j6A",
     "skills": [
         [0, 0],
         [0, 0],
@@ -34,22 +34,23 @@
 
     ],
     "score": [
-        {
-            "min_hits": 11,
-            "min_damage": 1740,
-            "min_limit": 100
-        },
-        {
-            "min_hits": 12,
-            "min_damage": 1855,
-            "min_limit": 100
-        },
-        {
-            "min_hits": 12,
-            "min_damage": 1905
-        },
-        {
-            "max_attempts" : 5
-        }
+	    {
+		"min_hits": 10,
+		"min_damage": 1650,
+		"min_limit": 100
+	    },
+	    {
+		"min_hits": 13,
+		"min_damage": 1720,
+		"min_limit": 111
+	    },
+	    {
+		"min_hits": 17,
+		"min_damage": 1800,
+		"min_limit": 120
+	    },
+	    {
+		"max_attempts": 5
+	    }
     ]
 }
