@@ -3,8 +3,8 @@
 --
 
 local dialogs = {
-	"lcEIt's boring...",
-	"lAEWhy aren't you fighting back?",
+	"lcDIt's boring...",
+	"lADWhy aren't you fighting back?",
 	--Reimu getting back on her feet
 	"rADI won't retaliate so stop attacking.",
 	"lCDDoesn't it make the best opportunity to beat you?",
@@ -115,7 +115,7 @@ end
 local function stage3()
 	battleMgr.leftCharacterManager:updateAnimation()
 	battleMgr.rightCharacterManager:updateAnimation()
-	if #dialogs - 16 == #dialog and keyPressed then
+	if #dialogs - 17 == #dialog and keyPressed then
 		dialog.hidden = true
 		currentStage = currentStage + 1
 		ctr = 0

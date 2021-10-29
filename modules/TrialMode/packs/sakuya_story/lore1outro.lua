@@ -5,9 +5,9 @@
 local dialogs = {
 	"r DStop it, I'm already half dead!",
 	"lHDWell that's why they call it a half life.",
-	"lCDBut why were you already in such bad shape?",
-	"rCSDon't you know how many youkai are here?",
-	"rCCThis place is in quite a mess.",
+	"lcDBut why were you already in such bad shape?",
+	"rcSDon't you know how many youkai are here?",
+	"rcCThis place is in quite a mess.",
 	"lECAnd I'll be the one that has to clean it up..."
 	--Battle here
 }
