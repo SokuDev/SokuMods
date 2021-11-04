@@ -6,6 +6,7 @@
 #include <process.h>
 #include "Pack.hpp"
 #include "Menu.hpp"
+#include "version.h"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -81,11 +82,13 @@ bool isInvalidPath(const std::string &path)
 	return false;
 }
 
-static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::string> &missingChars)
+static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::string> &missingChars, const std::string *version = nullptr)
 {
 	std::string msg;
 
-	if (swrNeeded && !missingChars.empty()) {
+	if (version)
+		msg = "Mod version >" + *version + " required.";
+	else if (swrNeeded && !missingChars.empty()) {
 		if (!hasSoku2)
 			msg = "Soku2 and SWR are missing";
 		else
@@ -127,6 +130,60 @@ static void makeAuthorStr(Pack &pack, const std::string &str)
 		static_cast<int>(size.y),
 	};
 	pack.author.setSize((size - 1).to<unsigned>());
+}
+
+int getVersionFromStr(const std::string &str)
+{
+	size_t pos = 0;
+	int version = 0;
+
+	for (char c : str) {
+		if (std::isdigit(c))
+			break;
+		pos++;
+	}
+
+	std::string realStr = str.substr(pos);
+
+	try {
+		version |= std::stoul(realStr, &pos);
+	} catch (...) {
+		throw std::invalid_argument(str + " is not a valid version string (invalid major \"" + realStr + "\")");
+	}
+
+	realStr = realStr.substr(pos + 1);
+	try {
+		version <<= 8;
+		version |= std::stoul(realStr, &pos);
+	} catch (...) {
+		throw std::invalid_argument(str + " is not a valid version string (invalid minor \"" + realStr + "\")");
+	}
+
+	realStr = realStr.substr(pos + 1);
+	try {
+		version <<= 16;
+		version |= std::stoul(realStr, &pos);
+	} catch (...) {
+		throw std::invalid_argument(str + " is not a valid version string (invalid build number \"" + realStr + "\")");
+	}
+	return version;
+}
+
+bool checkVersion(const std::string &version)
+{
+	if (version == VERSION_STR)
+		return true;
+
+	int reqReleaseState = 3 - (version.substr(0, strlen("beta ")) == "beta ") - (version.substr(0, strlen("alpha ")) == "alpha ") * 2;
+	int releaseState = 3 - (strncmp(VERSION_STR, "beta ", strlen("beta ")) == 0) - (strncmp(VERSION_STR, "alpha ", strlen("alpha ")) == 0) * 2;
+
+	if (releaseState < reqReleaseState)
+		return false;
+
+	int myVersion = getVersionFromStr(VERSION_STR);
+	int reqVersion = getVersionFromStr(version);
+
+	return myVersion >= reqVersion;
 }
 
 Pack::Pack(const std::string &path, const nlohmann::json &object)
@@ -243,17 +300,31 @@ invalidPreview:
 				invalidChars.push_back(str);
 		}
 
-		if (!invalidChars.empty() || swrNeeded)
-			generateErrorMsg(*this, swrNeeded, invalidChars);
-		else {
-			makeAuthorStr(
-				*this,
-				object.contains("author") && object["author"].is_string() ?
+		std::string version = object.contains("min_version") ? object["min_version"] : VERSION_STR;
+
+		try {
+			if (!checkVersion(version))
+				generateErrorMsg(*this, swrNeeded, invalidChars, &version);
+			else if (!invalidChars.empty() || swrNeeded)
+				generateErrorMsg(*this, swrNeeded, invalidChars);
+			else {
+				makeAuthorStr(
+					*this,
+					object.contains("author") && object["author"].is_string() ?
 					object["author"].get<std::string>() :
 					authors[rand() % authors.size()]
+				);
+				this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = BLUE_COLOR;
+				this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = BLUE_COLOR;
+			}
+		} catch (std::exception &e) {
+			MessageBox(
+				SokuLib::window,
+				("Trial pack " + path + " is not valid: pack.json: " + e.what()).c_str(),
+				"Trial pack loading error",
+				MB_ICONERROR
 			);
-			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = BLUE_COLOR;
-			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = BLUE_COLOR;
+			return;
 		}
 	} else
 		MessageBox(

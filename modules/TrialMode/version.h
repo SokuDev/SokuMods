@@ -1,1 +1,1 @@
-#define VERSION_STR "alpha 0.3.85"
+#define VERSION_STR "alpha 0.4.0"
