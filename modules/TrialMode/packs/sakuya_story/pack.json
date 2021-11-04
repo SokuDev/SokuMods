@@ -17,6 +17,7 @@
         "isPath": false,
         "path": "data/stand/sakuya.bmp"
     },
+    "min_version": "alpha 0.4.0",
     "description": "Incident at the Scarlet Devil Mansion",
     "author": "Exioloz, PinkySmile, second degree",
     "icon": {
