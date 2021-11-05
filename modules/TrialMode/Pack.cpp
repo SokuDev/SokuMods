@@ -351,7 +351,7 @@ invalidPreview:
 	for (int i = 0; i < scenarii.size(); i++) {
 		char score;
 
-		stream.read(&score, 1);
+		stream.read(&score, sizeof(score));
 
 		auto scene = new Scenario(score, i, path, scenarii[i]);
 
@@ -371,15 +371,17 @@ invalidPreview:
 		if (this->error.texture.hasTexture())
 			scene->name.tint = SokuLib::DrawUtils::DxSokuColor::Red;
 	}
-	if (this->scenarios.empty()) {
-		MessageBox(
-			SokuLib::window,
-			("Trial pack " + path + " has no valid scenario and will be discarded.\n").c_str(),
-			"Trial pack loading error",
-			MB_ICONERROR
-		);
-		return;
-	}
+
+	std::map<Scenario *, int> _map;
+
+	for (int i = 0; i < this->scenarios.size(); i++)
+		_map[&*this->scenarios[i]] = i;
+
+	std::sort(this->scenarios.begin(), this->scenarios.end(), [&_map](const std::unique_ptr<Scenario> &s1, const std::unique_ptr<Scenario> &s2){
+		if (s1->extra != s2->extra)
+			return s2->extra;
+		return _map[&*s1] < _map[&*s2];
+	});
 }
 
 Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::json &object)
@@ -423,6 +425,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 		this->canBeLocked = object["may_be_locked"];
 	if (object.contains("name_hidden_when_locked") && object["name_hidden_when_locked"].is_boolean())
 		this->nameHiddenIfLocked = object["name_hidden_when_locked"];
+	if (object.contains("extra") && object["extra"].is_boolean())
+		this->extra = object["extra"];
 }
 
 void Scenario::setScore(char score)
@@ -591,19 +595,19 @@ void loadPacks()
 				if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
 					uniqueModes.push_back(mode);
 			}
-
-			std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
-				if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
-					return pack2->error.texture.hasTexture();
-				return pack1->category < pack2->category;
-			});
-			std::sort(uniqueCategories.begin(), uniqueCategories.end());
-			std::sort(uniqueNames.begin(), uniqueNames.end());
-			std::sort(uniqueModes.begin(), uniqueModes.end());
 		} else {
 			puts("Invalid pack :(");
 			delete pack;
 		}
 		buffer[starPos] = 0;
 	} while (FindNextFileA(findHandle, &data));
+
+	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
+		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
+			return pack2->error.texture.hasTexture();
+		return pack1->category < pack2->category;
+	});
+	std::sort(uniqueCategories.begin(), uniqueCategories.end());
+	std::sort(uniqueNames.begin(), uniqueNames.end());
+	std::sort(uniqueModes.begin(), uniqueModes.end());
 }

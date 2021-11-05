@@ -55,6 +55,8 @@ static SokuLib::DrawUtils::Sprite blackSilouettes;
 static SokuLib::DrawUtils::Sprite lockedNoise;
 static SokuLib::DrawUtils::Sprite lockedText;
 static SokuLib::DrawUtils::Sprite lockedImg;
+static SokuLib::DrawUtils::Sprite extraText;
+static SokuLib::DrawUtils::Sprite extraImg;
 static SokuLib::DrawUtils::Sprite CRTBands;
 static SokuLib::DrawUtils::Sprite loadingGear;
 static SokuLib::DrawUtils::Sprite version;
@@ -154,7 +156,16 @@ void saveScores()
 	std::ofstream stream{loadedPacks[currentPack]->scorePath, std::ofstream::binary};
 
 	for (auto &scenario : loadedPacks[currentPack]->scenarios)
-		stream.write(&scenario->score, 1);
+		stream.write(&scenario->score, sizeof(scenario->score));
+}
+
+std::vector<unsigned char> getScores()
+{
+	std::vector<unsigned char> scores;
+
+	for (auto &scenario : loadedPacks[currentPack]->scenarios)
+		scores.push_back(scenario->score);
+	return scores;
 }
 
 bool checkField(const std::string &field, const nlohmann::json &value, bool (nlohmann::json::*fct)() const noexcept)
@@ -184,7 +195,12 @@ inline bool isLocked(int entry)
 		return false;
 	if (!loadedPacks[currentPack]->scenarios[entry]->canBeLocked)
 		return false;
-	return !isCompleted(entry - 1);
+	if (!loadedPacks[currentPack]->scenarios[entry]->extra)
+		return !isCompleted(entry - 1);
+	for (auto &scenario : loadedPacks[currentPack]->scenarios)
+		if (scenario->score != 3 && !scenario->extra)
+			return true;
+	return false;
 }
 
 bool addCharacterToBuffer(const std::string &name, const nlohmann::json &chr, SokuLib::PlayerInfo &info, bool isRight)
@@ -378,6 +394,13 @@ ResultMenu::ResultMenu(int score)
 	this->_score.rect.width = this->_score.texture.getSize().x / 4;
 	this->_score.rect.height = this->_score.texture.getSize().y;
 
+	for (int i = currentEntry; i < loadedPacks[currentPack]->scenarios.size(); i++)
+		if (!loadedPacks[currentPack]->scenarios[i]->extra) {
+			this->_done = false;
+			break;
+		}
+
+	this->_done &= !loadedPacks[currentPack]->scenarios[currentEntry]->extra;
 	for (int i = 0; i < TrialBase::menuActionText.size(); i++) {
 		auto &sprite = this->_text[i];
 
@@ -387,8 +410,10 @@ ResultMenu::ResultMenu(int score)
 		sprite.rect.width = sprite.texture.getSize().x;
 		sprite.rect.height = sprite.texture.getSize().y;
 	}
-	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1)
+	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1 || isLocked(currentEntry + 1)) {
 		this->_text[0].tint = SokuLib::DrawUtils::DxSokuColor{0x40, 0x40, 0x40};
+		this->_disabled = true;
+	}
 }
 
 void ResultMenu::_()
@@ -404,6 +429,10 @@ int ResultMenu::onProcess()
 		this->_selected = TrialBase::RETURN_TO_TITLE_SCREEN;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
+		if (this->_disabled && this->_selected == TrialBase::GO_TO_NEXT_TRIAL) {
+			SokuLib::playSEWaveBuffer(0x29);
+			return true;
+		}
 		SokuLib::playSEWaveBuffer(0x28);
 		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
 			loadNextTrial = true;
@@ -413,15 +442,11 @@ int ResultMenu::onProcess()
 	if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis <= -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_selected--;
-		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
-			this->_selected -= currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
 		this->_selected += TrialBase::NB_MENU_ACTION;
 		this->_selected %= TrialBase::NB_MENU_ACTION;
 	} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis >= 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_selected++;
-		if (this->_selected == TrialBase::NB_MENU_ACTION)
-			this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
 		this->_selected %= TrialBase::NB_MENU_ACTION;
 	}
 	return true;
@@ -432,6 +457,7 @@ int ResultMenu::onRender()
 	this->_title.draw();
 	this->_resultTop.draw();
 	this->_score.draw();
+	//Display the green gradiant cursor bar
 	((void (*)(float, float, float))0x443a50)(128, 184 + this->_selected * 24, 300);
 	for (auto &sprite : this->_text)
 		sprite.draw();
@@ -520,6 +546,11 @@ void menuLoadAssets()
 	score.rect.width = score.texture.getSize().x / 4;
 	score.rect.height = score.texture.getSize().y;
 
+	extraImg.texture.loadFromGame("data/infoeffect/weatherOrbWhite.bmp");
+	extraImg.setSize({32, 24});
+	extraImg.rect.width = extraImg.texture.getSize().x;
+	extraImg.rect.height = extraImg.texture.getSize().y;
+
 	title.texture.loadFromResource(myModule, MAKEINTRESOURCE(24));
 	title.setSize(title.texture.getSize());
 	title.rect.width = title.texture.getSize().x;
@@ -557,6 +588,12 @@ void menuLoadAssets()
 	lockedText.rect.width = 300;
 	lockedText.rect.height = 150;
 	lockedText.setPosition({356, 286});
+
+	extraText.setSize({300, 150});
+	extraText.rect.width = 300;
+	extraText.rect.height = 150;
+	extraText.setPosition({356, 286});
+	extraText.texture.createFromText("Unlocked by getting a perfect rank for each<br>trial of this pack", defaultFont12, {300, 150});
 
 	questionMarks.texture.createFromText("????????????????", defaultFont12, {0x100, 15});
 	questionMarks.setSize(questionMarks.texture.getSize());
@@ -800,6 +837,8 @@ void menuUnloadAssets()
 	lockedNoise.texture.destroy();
 	lockedText.texture.destroy();
 	lockedImg.texture.destroy();
+	extraText.texture.destroy();
+	extraImg.texture.destroy();
 	frame.texture.destroy();
 	CRTBands.texture.destroy();
 	loadingGear.texture.destroy();
@@ -1266,6 +1305,13 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		auto &scenario = pack.scenarios[i];
 
 		if (pos.y >= 100) {
+			if (scenario->extra && scenario->score == -1) {
+				extraImg.setPosition({
+					static_cast<int>(pos.x + 271),
+					static_cast<int>(pos.y - 5)
+				});
+				extraImg.draw();
+			}
 			if (isLocked(i)) {
 				lock.setPosition({
 					static_cast<int>(pos.x + 271),
@@ -1391,7 +1437,10 @@ void menuOnRender(SokuLib::MenuResult *This)
 	} else {
 		lockedNoise.draw();
 		CRTBands.draw();
-		lockedText.draw();
+		if (loadedPacks[shownPack]->scenarios[currentEntry]->extra)
+			extraText.draw();
+		else
+			lockedText.draw();
 		lockedImg.draw();
 	}
 	frame.draw();

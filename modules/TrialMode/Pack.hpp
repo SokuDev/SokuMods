@@ -25,6 +25,7 @@ struct Icon {
 
 class Scenario {
 public:
+	bool extra = false;
 	bool loading = false;
 	bool canBeLocked = true;
 	bool nameHiddenIfLocked = false;
