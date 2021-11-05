@@ -8,7 +8,7 @@
         "pos": 850
     },
     "dummy": {
-        "character": "reimu",
+        "character": "suika",
         "palette": 0,
         "deck": [],
         "pos": {
@@ -16,11 +16,9 @@
             "y": 0
         }
     },
-    "intro": "bnbmid3intro.script",
-    "outro": "bnbmid3outro.script",
     "type": "combo",
 
-    "expected": "4a SC205",
+    "expected": "4a !4a !4a !4a SC205",
     "skills": [
         [0, 0],
         [0, 0],

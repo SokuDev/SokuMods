@@ -11,11 +11,15 @@
 
 class ResultMenu : public SokuLib::IMenu {
 private:
+	bool _done = true;
 	int _selected = 0;
 	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _score;
 	SokuLib::DrawUtils::Sprite _resultTop;
 	std::array<SokuLib::DrawUtils::Sprite, TrialBase::NB_MENU_ACTION> _text;
+
+protected:
+	bool _disabled = false;
 
 public:
 	ResultMenu(int score);

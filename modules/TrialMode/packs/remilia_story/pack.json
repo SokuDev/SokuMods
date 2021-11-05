@@ -92,6 +92,12 @@
             "description": "d6 j5aa d6 j5aa 2c hj9 j5aa | Corner only<br><br>",
             "may_be_locked":  true,
             "name_hidden_when_locked":  true
+        },
+        {
+            "name": "Extra1",
+            "file": "bnbany1.json",
+            "description": "4a 4a 4a 4a 5SC | Works everywhere<br><br>",
+            "extra":  true
         }
     ]
 }
