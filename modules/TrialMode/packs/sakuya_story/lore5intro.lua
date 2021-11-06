@@ -112,6 +112,7 @@ local function stage3()
 		currentStage = currentStage + 1
 		dialog.hidden = true
 		battleMgr.rightChr.action = enums.actions.ACTION_j2A
+		playSfx(enums.sfxs.longMelee)
 		battleMgr.rightChr:initAnimation()
 	end
 end
@@ -123,6 +124,7 @@ local function stage4()
 	if battleMgr.rightChr.position.y <= 0 then
 		battleMgr.rightChr.position.y = 0
 		battleMgr.rightChr:animate()
+		battleMgr.rightChr:playSfx(012)
 		currentStage = currentStage + 1
 	end
 end
@@ -133,6 +135,7 @@ local function stage5()
 	if battleMgr.rightChr.actionBlockId == 0 then
 		battleMgr.rightChr.action = enums.actions.ACTION_DEFAULT_SKILL4_B
 		battleMgr.rightChr:initAnimation()
+		playSfx(enums.sfxs.mediumMelee)
 		currentStage = currentStage + 1
 	end
 end
@@ -151,8 +154,6 @@ local function stage6()
 	print(#dialog)
 	print(#dialogs)
 	if #dialog == #dialogs - 6 then
-		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
-		battleMgr.rightChr:initAnimation()
 		currentStage = currentStage + 1
 	end
 end
@@ -160,6 +161,10 @@ end
 local function stage7()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
+	if battleMgr.rightChr.action == enums.actions.ACTION_DEFAULT_SKILL4_B and battleMgr.rightChr.actionBlockId == 0 then
+		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
+		battleMgr.rightChr:initAnimation()
+	end
 	if bool == true then
 		print("stage7")
 		bool = false
