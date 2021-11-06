@@ -115,7 +115,7 @@ end
 local function stage3()
 	battleMgr.leftCharacterManager:updateAnimation()
 	battleMgr.rightCharacterManager:updateAnimation()
-	if #dialogs - 17 == #dialog and keyPressed then
+	if #dialogs - 15 == #dialog and keyPressed then
 		dialog.hidden = true
 		currentStage = currentStage + 1
 		ctr = 0

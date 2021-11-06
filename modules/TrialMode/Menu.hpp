@@ -9,6 +9,7 @@
 #include <memory>
 #include <SokuLib.hpp>
 #include "TrialBase.hpp"
+#include "PackOutro.hpp"
 
 class ResultMenu : public SokuLib::IMenu {
 private:
@@ -38,6 +39,7 @@ extern SokuLib::SWRFont defaultFont12;
 extern SokuLib::SWRFont defaultFont16;
 extern bool loadRequest;
 extern std::unique_ptr<TrialBase> loadedTrial;
+extern std::unique_ptr<PackOutro> loadedOutro;
 extern bool editorMode;
 extern unsigned loading;
 
@@ -45,7 +47,7 @@ void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
 void menuOnRender(SokuLib::MenuResult *This);
 void menuUnloadAssets();
-std::vector<char> getCurrentPackScores();
+std::vector<unsigned> getCurrentPackScores();
 
 
 #endif //SWRSTOYS_MENU_HPP
