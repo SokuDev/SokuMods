@@ -68,6 +68,7 @@ static unsigned entryStart = 0;
 static unsigned band1Start = 0;
 static unsigned band2Start = 0;
 
+std::unique_ptr<PackOutro> loadedOutro;
 std::unique_ptr<TrialBase> loadedTrial;
 bool loadRequest;
 unsigned loading = false;
@@ -370,13 +371,13 @@ void prepareGameLoading(const char *folder, const std::string &path)
 	loadRequest = true;
 }
 
-std::vector<char> getCurrentPackScores()
+std::vector<unsigned> getCurrentPackScores()
 {
-	std::vector<char> scores;
+	std::vector<unsigned> scores;
 
 	scores.reserve(loadedPacks[currentPack]->scenarios.size());
 	for (auto &scenario : loadedPacks[currentPack]->scenarios)
-		scores.push_back(scenario->score);
+		scores.push_back(static_cast<unsigned char>(scenario->score));
 	return scores;
 }
 
@@ -404,7 +405,7 @@ ResultMenu::ResultMenu(int score)
 	this->_score.rect.width = this->_score.texture.getSize().x / 4;
 	this->_score.rect.height = this->_score.texture.getSize().y;
 
-	for (int i = currentEntry; i < loadedPacks[currentPack]->scenarios.size(); i++)
+	for (int i = currentEntry + 1; i < loadedPacks[currentPack]->scenarios.size(); i++)
 		if (!loadedPacks[currentPack]->scenarios[i]->extra) {
 			this->_done = false;
 			break;
@@ -414,7 +415,7 @@ ResultMenu::ResultMenu(int score)
 	for (int i = 0; i < TrialBase::menuActionText.size(); i++) {
 		auto &sprite = this->_text[i];
 
-		sprite.texture.createFromText(TrialBase::menuActionText[i].c_str(), defaultFont16, {230, 24});
+		sprite.texture.createFromText(i == 0 && this->_done && !loadedPacks[currentPack]->outroPath.empty() ? "Watch pack outro" : TrialBase::menuActionText[i].c_str(), defaultFont16, {230, 24});
 		sprite.setPosition({128, 182 + i * 24});
 		sprite.setSize(sprite.texture.getSize());
 		sprite.rect.width = sprite.texture.getSize().x;
@@ -439,15 +440,27 @@ int ResultMenu::onProcess()
 		this->_selected = TrialBase::RETURN_TO_TITLE_SCREEN;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
-		if (this->_disabled && this->_selected == TrialBase::GO_TO_NEXT_TRIAL && !this->_done) {
-			SokuLib::playSEWaveBuffer(0x29);
-			return true;
+
+		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL) {
+			if (this->_disabled && !this->_done) {
+				SokuLib::playSEWaveBuffer(0x29);
+				return true;
+			}
+
+			auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+			if (!loadedPacks[currentPack]->outroPath.empty() && !scenario->extra && this->_done) {
+				try {
+					loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
+				} catch (std::exception &e) {
+					SokuLib::playSEWaveBuffer(0x29);
+					MessageBox(SokuLib::window, ("Error when loading pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+					return true;
+				}
+			} else
+				loadNextTrial = true;
 		}
 		SokuLib::playSEWaveBuffer(0x28);
-		if (this->_done) {
-
-		} else if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
-			loadNextTrial = true;
 		loadedTrial->onMenuClosed(static_cast<TrialBase::MenuAction>(this->_selected));
 		return false;
 	}
@@ -1149,7 +1162,7 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 				prepareGameLoading(
 					loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
 					loadedPacks[currentPack]->scenarios[currentEntry]->file
-					);
+				);
 				return;
 			}
 			SokuLib::playSEWaveBuffer(0x29);
@@ -1167,13 +1180,24 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 
 int menuOnProcess(SokuLib::MenuResult *This)
 {
-	if (!loading && SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+	if (SokuLib::newSceneId != SokuLib::sceneId)
+		return true;
+
+	if (editorMode && SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0) {
+		try {
+			loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
+		} catch (std::exception &e) {
+			SokuLib::playSEWaveBuffer(0x29);
+			MessageBox(SokuLib::window, ("Error when loading pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+			return true;
+		}
+		return true;
+	}
+
+	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		return loading;
 	}
-
-	if (SokuLib::newSceneId != SokuLib::sceneId)
-		return true;
 
 	if (loadNextTrial) {
 		loadNextTrial = false;
@@ -1201,11 +1225,24 @@ int menuOnProcess(SokuLib::MenuResult *This)
 			loadingGear.setRotation(loadingGear.getRotation() + 0.1);
 		}
 	}
-	handlePlayerInputs(SokuLib::inputMgrs.input);
+	if (!loadedOutro)
+		handlePlayerInputs(SokuLib::inputMgrs.input);
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
 	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
 	updateNoiseTexture();
 	updateBandTexture();
+
+	if (loadedOutro) {
+		try {
+			if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false))
+				SokuLib::playSEWaveBuffer(0x29);
+			else if (loadedOutro->update())
+				return true;
+		} catch (std::exception &e) {
+			MessageBox(SokuLib::window, ("Error when updating pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+		}
+		loadedOutro.reset();
+	}
 	return true;
 }
 
@@ -1394,7 +1431,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 	SokuLib::Vector2<float> pos = {16, 116};
 
 	if (!loaded)
-		return;
+		goto displayOutro;
 
 	displayFilters();
 	title.draw();
@@ -1415,7 +1452,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 	previewContainer.draw();
 	version.draw();
 	if (loadedPacks.empty()) {
-		return;
+		goto displayOutro;
 	}
 
 	if (currentEntry < 0) {
@@ -1423,7 +1460,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 			loadedPacks[shownPack]->preview.draw();
 		if (loadedPacks[shownPack]->description.texture.hasTexture())
 			loadedPacks[shownPack]->description.draw();
-		return;
+		goto displayOutro;
 	}
 	if (!isLocked(currentEntry) || editorMode) {
 		if (!loadedPacks[shownPack]->scenarios[currentEntry]->loading) {
@@ -1455,4 +1492,7 @@ void menuOnRender(SokuLib::MenuResult *This)
 		lockedImg.draw();
 	}
 	frame.draw();
+displayOutro:
+	if (loadedOutro)
+		loadedOutro->draw();
 }

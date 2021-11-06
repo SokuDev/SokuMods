@@ -46,9 +46,11 @@ public:
 
 class Pack {
 public:
+	std::string path;
 	std::string nameStr;
 	std::string category;
 	std::string scorePath;
+	std::string outroPath;
 	std::unique_ptr<Icon> icon;
 	std::vector<std::string> modes;
 	SokuLib::DrawUtils::Sprite name;

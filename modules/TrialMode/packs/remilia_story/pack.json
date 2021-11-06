@@ -17,6 +17,8 @@
         "isPath": true,
         "path": "title.png"
     },
+    "min_version": "alpha 0.4.0",
+    "outro": "outro.lua",
     "description": "Another boring day for Remilia...<br>Or so she thought, until half of Gensokyo get<br>into her own mansion after hearing a strange<br>rumor. But who is this mysterious intruder<br>everyone is talking about?",
     "author": "PinkySmile, second degree",
     "icon": {

@@ -7,22 +7,43 @@
 
 
 #include <string>
+#include <map>
 #include <sol/forward.hpp>
 #include <SokuLib.hpp>
 
 class PackOutro {
 private:
-	sol::state _lua;
+	unsigned _wait = 60;
+	unsigned _textWait = 0;
+	bool _nearFinished = false;
+	bool _finished = false;
+	bool _ended = false;
+	sol::state *_lua;
+	SokuLib::Color _colorUp = SokuLib::Color::White;
+	SokuLib::Color _colorDown = SokuLib::Color::White;
+	SokuLib::DrawUtils::RectangleShape _rect;
 	unsigned _currentSprite = 0;
 	unsigned _currentCommand = 0;
 	std::vector<std::string> _commands;
 	SokuLib::DrawUtils::Sprite _background;
+	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _text;
 	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _sprites;
+
+	static const std::map<std::string, void (PackOutro::*)(const std::string &args)> _commandsCallbacks;
+
+	void _endCmd(const std::string &args);
+	void _textCmd(const std::string &args);
+	void _clearCmd(const std::string &args);
+	void _colorCmd(const std::string &args);
+	void _setBGMCmd(const std::string &args);
+	void _backgroundCmd(const std::string &args);
+	void _processNextCommand();
 
 public:
 	PackOutro(const std::string &packPath, const std::string &file);
+	~PackOutro();
 	void draw() const;
-	void update();
+	bool update();
 };
 
 

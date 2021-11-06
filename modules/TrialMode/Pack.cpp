@@ -200,6 +200,7 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		return;
 	}
 
+	this->path = path;
 	this->scorePath = path + "/score.dat";
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
 
@@ -210,6 +211,13 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	);
 	this->name.rect = {0, 0, size.x, size.y};
 	this->name.setSize((size - 1).to<unsigned>());
+
+	if (object.contains("outro") && object["outro"].is_string()) {
+		std::string relative = object["outro"];
+
+		if (!isInvalidPath(relative))
+			this->outroPath = path + "/" + relative;
+	}
 
 	if (object.contains("icon")) {
 		this->icon = std::make_unique<Icon>(path, object["icon"]);
