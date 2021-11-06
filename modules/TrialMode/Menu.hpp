@@ -44,6 +44,7 @@ void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
 void menuOnRender(SokuLib::MenuResult *This);
 void menuUnloadAssets();
+std::vector<char> getCurrentPackScores();
 
 
 #endif //SWRSTOYS_MENU_HPP

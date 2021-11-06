@@ -512,7 +512,13 @@ add_library(
         modules/TrialMode/Images.hpp
 	modules/TrialMode/Animations/FakeChrMgr.cpp
         modules/TrialMode/Animations/FakeChrMgr.hpp
-        modules/TrialMode/Patches.cpp modules/TrialMode/Patches.hpp modules/TrialMode/TrialBase.hpp modules/TrialMode/TrialBase.cpp)
+        modules/TrialMode/Patches.cpp
+        modules/TrialMode/Patches.hpp
+        modules/TrialMode/TrialBase.hpp
+        modules/TrialMode/TrialBase.cpp
+        modules/TrialMode/PackOutro.cpp
+        modules/TrialMode/PackOutro.hpp
+)
 target_compile_options(TrialMode PRIVATE /Zi /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/")
