@@ -201,6 +201,7 @@ int __fastcall myTitleOnProcess(SokuLib::Title *This)
 		puts("Moving to LOADING !");
 		return SokuLib::SCENE_LOADING;
 	}
+	loadedTrial.reset();
 	return buffer;
 }
 

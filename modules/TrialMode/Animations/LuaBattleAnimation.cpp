@@ -15,6 +15,18 @@
 #define fprintf(...)
 #endif
 
+static DWORD old;
+static double _loopStart, _loopEnd;
+static void (__stdcall *og)(int);
+
+static void __stdcall editLoop(int ptr) {
+	//int samplePerSec = *reinterpret_cast<int*>(ptr+0x12fc);
+	*reinterpret_cast<double*>(ptr+0x12e8) = _loopStart;
+	*reinterpret_cast<double*>(ptr+0x12f0) = _loopEnd;
+	SokuLib::TamperNearJmpOpr(0x418cc5, og);
+	VirtualProtect((PVOID)0x418cc5, 5, old, &old);
+}
+
 struct FakeBattleManager {
 	// 0x000
 	char unknown[0xC];
@@ -541,8 +553,17 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		{ "ACTION_SPELL_BREAKING_DRUG", SokuLib::ACTION_SPELL_BREAKING_DRUG },
 	};
 
-	(*this->_lua)["playBGM"] = SokuLib::playBGM;
-	(*this->_lua)["playBgm"] = SokuLib::playBGM;
+	(*this->_lua)["playBGM"] = sol::overload(
+		SokuLib::playBGM,
+		[](const std::string &path, double loopStart, double loopEnd){
+			_loopStart = loopStart;
+			_loopEnd = loopEnd;
+			VirtualProtect((PVOID)0x418cc5, 5, PAGE_EXECUTE_WRITECOPY, &old);
+			og = SokuLib::TamperNearJmpOpr(0x418cc5, editLoop);
+			SokuLib::playBGM(path.c_str());
+		}
+	);
+	(*this->_lua)["playBgm"] = (*this->_lua)["playBGM"];
 	(*this->_lua)["camera"] = std::ref(SokuLib::camera);
 	(*this->_lua)["packPath"] = packPath;
 	(*this->_lua)["playSFX"] = SokuLib::playSEWaveBuffer;

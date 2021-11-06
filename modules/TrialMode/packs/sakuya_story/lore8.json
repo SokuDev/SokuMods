@@ -1,5 +1,7 @@
 {
     "music": "{{pack_path}}/suika.ogg",
+    "music_loop_start": 3.792,
+    "music_loop_end": 195.655,
     "stage": 12,
     "player": {
         "character": "sakuya",

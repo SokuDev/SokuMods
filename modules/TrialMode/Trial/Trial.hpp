@@ -19,8 +19,12 @@ private:
 	std::string _folder;
 	std::string _introPath;
 	std::string _outroPath;
+	double _loopStart = 0;
+	double _loopEnd = 0;
 	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _factory;
 	static const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _editorFactory;
+
+	void _playBGM();
 
 protected:
 	std::unique_ptr<BattleAnimation> _intro;

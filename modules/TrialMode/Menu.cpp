@@ -370,6 +370,16 @@ void prepareGameLoading(const char *folder, const std::string &path)
 	loadRequest = true;
 }
 
+std::vector<char> getCurrentPackScores()
+{
+	std::vector<char> scores;
+
+	scores.reserve(loadedPacks[currentPack]->scenarios.size());
+	for (auto &scenario : loadedPacks[currentPack]->scenarios)
+		scores.push_back(scenario->score);
+	return scores;
+}
+
 ResultMenu::ResultMenu(int score)
 {
 	loadedPacks[currentPack]->scenarios[currentEntry]->setScore(max(loadedPacks[currentPack]->scenarios[currentEntry]->score, score));
@@ -429,12 +439,14 @@ int ResultMenu::onProcess()
 		this->_selected = TrialBase::RETURN_TO_TITLE_SCREEN;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
-		if (this->_disabled && this->_selected == TrialBase::GO_TO_NEXT_TRIAL) {
+		if (this->_disabled && this->_selected == TrialBase::GO_TO_NEXT_TRIAL && !this->_done) {
 			SokuLib::playSEWaveBuffer(0x29);
 			return true;
 		}
 		SokuLib::playSEWaveBuffer(0x28);
-		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
+		if (this->_done) {
+
+		} else if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL)
 			loadNextTrial = true;
 		loadedTrial->onMenuClosed(static_cast<TrialBase::MenuAction>(this->_selected));
 		return false;
@@ -542,7 +554,6 @@ void menuLoadAssets()
 
 	score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
 	score.setSize({32, 32});
-	score.tint = SokuLib::DrawUtils::DxSokuColor::White;
 	score.rect.width = score.texture.getSize().x / 4;
 	score.rect.height = score.texture.getSize().y;
 
