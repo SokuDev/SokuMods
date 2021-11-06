@@ -26,10 +26,10 @@
         [0, 0],
         [0, 0]
     ],
-    "weather": 16,
     "disable_limit": false,
     "uniform_card_cost": 1,
     "hand": [],
+	"counter_hit": true,
     "play_combo_after_intro": true,
     "hint": [
 
