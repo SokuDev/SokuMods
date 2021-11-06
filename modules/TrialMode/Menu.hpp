@@ -6,6 +6,7 @@
 #define SWRSTOYS_MENU_HPP
 
 
+#include <memory>
 #include <SokuLib.hpp>
 #include "TrialBase.hpp"
 
