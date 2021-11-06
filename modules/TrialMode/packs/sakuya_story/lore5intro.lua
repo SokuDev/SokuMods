@@ -2,18 +2,27 @@
 -- Created by PinkySmile on 12/08/2021.
 --
 
+local bool = false
+
 local dialogs = {
-	"lc Where could she be...",
-	--Reisen appears
-	"r WHere you are again?",
-	"r hIf you wish to meet our princess I<br>fear you'll need her approval.",
-	"lhhDo not bother your master.",
-	"lHhIt is you that I have business with.",
-	"rHSMe? How curious?<br>And what do you have to do with me?",
-	"lWSIllusion is your thing, isn't it?",
-	"lcSIt must be quite easy to hide yourself...",
-	"rcCAnd what are you implying!?",
-	"lCCThat you are a suspect!"
+	"Lc She should be around here.",
+	"R CStop right here!",
+	"LHCI'm no criminal.",
+	"RHSSo you’ve come right to me! I have some questions to ask you.",
+	"LWSGood, so do I.",
+	"RWWWhat is going on in the Scarlet mansion?",
+	"LSWHmmm",
+	"LEWI hoped you would be the one to answer this question...",
+	"REEAren't you the one supposed to guard the place?",
+	"LSEWell actually I'm not a guard, I'm a maid but...",
+	"LcEI don't think you're lying to me and you're not the sneaky type, but why are you interested in our business?",
+	"RcHLady Yuyuko told me to investigate. She said it was important.",
+	"RccI think...",
+	"LhcWell then, may I speak with her.",
+	"RhAI won't let you pass!",
+	"LCAToo bad!",
+	"RCCWhatever this incident is, you must be the culprit!",
+	"LECYou really are terrible at investigating aren't you?"
 	--Battle here
 }
 
@@ -32,8 +41,8 @@ local function stage0()
 	if ctr == 240 then
 		playBGM("data/bgm/ta03.ogg")
 		battleMgr.leftChr.position.x = -100
-		battleMgr.rightChr.position.x = 1000
-		battleMgr.rightChr.renderInfos.color.a = 0
+		battleMgr.rightChr.position.x = 800
+		battleMgr.rightChr.position.y = 600
 	end
 	if ctr < 60 then
 		if stageBg.tint.a ~= 0 then
@@ -69,7 +78,6 @@ local function stage1()
 	battleMgr.leftChr.speed.y = battleMgr.leftChr.speed.y - 0.7
 	if battleMgr.leftChr.position.y <= 0 then
 		currentStage = currentStage + 1
-		ctr = 30
 		playSfx(enums.sfxs.land)
 		battleMgr.leftChr.position.y = 0
 		battleMgr.leftChr.action = enums.actions.ACTION_LANDING
@@ -87,12 +95,10 @@ local function stage2()
 		battleMgr.leftChr.animationCounter == 0 and
 		battleMgr.leftChr.animationSubFrame == 0
 	then
-		battleMgr.leftChr.actionBlockId = 0
-		battleMgr.leftChr.animationCounter = 0
-		battleMgr.leftChr.animationSubFrame = 0
 		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
 		battleMgr.leftChr:initAnimation()
 		currentStage = currentStage + 1
+		ctr = 30
 	end
 end
 
@@ -105,39 +111,59 @@ local function stage3()
 	if keyPressed then
 		currentStage = currentStage + 1
 		dialog.hidden = true
-		battleMgr.rightChr.action = enums.actions.ACTION_WALK_FORWARD
+		battleMgr.rightChr.action = enums.actions.ACTION_j2A
 		battleMgr.rightChr:initAnimation()
-		battleMgr.rightChr:playSfx(17)
 	end
 end
 
 local function stage4()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
-	if battleMgr.rightChr.renderInfos.color.a ~= 0xFF then
-		battleMgr.rightChr.renderInfos.color.a = battleMgr.rightChr.renderInfos.color.a + 5
-	else
+	battleMgr.rightChr.position.y = battleMgr.rightChr.position.y - 30
+	if battleMgr.rightChr.position.y <= 0 then
+		battleMgr.rightChr.position.y = 0
+		battleMgr.rightChr:animate()
 		currentStage = currentStage + 1
-		dialog.hidden = false
-		dialog:onKeyPress()
-		keyPressed = false
-		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
-		battleMgr.rightChr:initAnimation()
-		return
-	end
-	battleMgr.rightChr.position.x = battleMgr.rightChr.position.x - 4
-	if camera.translate.x ~= -420 then
-		camera.translate.x = camera.translate.x - 5
-		camera.backgroundTranslate.x = camera.backgroundTranslate.x + 5
 	end
 end
 
 local function stage5()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
+	if battleMgr.rightChr.actionBlockId == 0 then
+		battleMgr.rightChr.action = enums.actions.ACTION_DEFAULT_SKILL4_B
+		battleMgr.rightChr:initAnimation()
+		currentStage = currentStage + 1
+	end
 end
 
 local function stage6()
+	battleMgr.leftChr:updateAnimation()
+	battleMgr.rightChr:updateAnimation()
+	while battleMgr.rightChr.actionBlockId ~= 1 do
+		print("entrer dans la condition")
+		battleMgr.rightChr:animate()
+	end
+	if dialog.hidden == true then
+		dialog.hidden = false
+		onKeyPressed()
+	end
+	print(#dialog)
+	print(#dialogs)
+	if #dialog == #dialogs - 6 then
+		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
+		battleMgr.rightChr:initAnimation()
+		currentStage = currentStage + 1
+	end
+end
+
+local function stage7()
+	battleMgr.leftChr:updateAnimation()
+	battleMgr.rightChr:updateAnimation()
+	if bool == true then
+		print("stage7")
+		bool = false
+	end
 end
 
 local anims = {
@@ -147,7 +173,8 @@ local anims = {
 	stage3,
 	stage4,
 	stage5,
-	stage6
+	stage6,
+	stage7
 }
 
 print("Init intro.")
@@ -183,6 +210,7 @@ function update()
 	if currentStage < #anims then
 		anims[currentStage + 1]()
 	end
+	battleMgr.rightChr.objects:update()
 	if keyPressed then
 		stop = stop or not dialog:onKeyPress()
 		if stop then
