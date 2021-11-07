@@ -144,15 +144,12 @@ local function stage6()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
 	while battleMgr.rightChr.actionBlockId ~= 1 do
-		print("entrer dans la condition")
 		battleMgr.rightChr:animate()
 	end
 	if dialog.hidden == true then
 		dialog.hidden = false
 		onKeyPressed()
 	end
-	print(#dialog)
-	print(#dialogs)
 	if #dialog == #dialogs - 6 then
 		currentStage = currentStage + 1
 	end
@@ -166,7 +163,6 @@ local function stage7()
 		battleMgr.rightChr:initAnimation()
 	end
 	if bool == true then
-		print("stage7")
 		bool = false
 	end
 end
@@ -181,8 +177,6 @@ local anims = {
 	stage6,
 	stage7
 }
-
-print("Init intro.")
 
 stageBg.texture:loadFromFile(packPath.."/lore5intro.png")
 stageBg.size = stageBg.texture.size
