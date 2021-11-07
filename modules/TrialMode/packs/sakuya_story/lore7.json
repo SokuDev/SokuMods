@@ -17,6 +17,7 @@
         }
     },
     "intro": "lore5intro.lua",
+	"outro": "lore5outro.lua",
     "type": "combo",
 
     "expected": "66c hj9/hj8/hj7/9/8/7/d6:40 j2a:11 66c:55",
