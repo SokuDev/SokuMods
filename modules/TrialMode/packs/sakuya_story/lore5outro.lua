@@ -7,9 +7,9 @@ local dialogs = {
 "RcDWhy does lady Yuyuko give me a mission like this,<br>she implies that it is important,<br>yet she gives no clue and simply goes away.",
 "LSDShe is quite lazy after all,<br>and she does seem to enjoy seeing you try.",
 "RSAHow am I supposed to serve her,<br>when she never says what she truly wants?",
-"LWAThough Your master is quite lazy She's not dumb,<br>I'm sure she has a good reason<br>for sending you on those missions.",
+"LWAThough Your master is quite lazy, but she's not dumb,<br>I'm sure she has a good reason<br>for sending you on those missions.",
 "LHAAs a servant you should always support your master.<br>Even if she is not perfect and her orders are not the best,<br>be confident that she will better herself in failure. ",
-"LHAAnd if she continues,<br>it may simply be how she is and  what she wants.",
+"LHAAnd if she continues,<br>it may simply be how she is and what she wants.",
 "RHh...",
 "LhhWhat I'm trying to say is,<br>you should believe in Yuyuko's decisions.",
 "RhWI see, it seems it is my mind that needs some sharpening.",
@@ -40,7 +40,6 @@ function update()
 	end
 	if #dialog <= #dialogs - 9 and battleMgr.rightChr.action ~= enums.actions.ACTION_KNOCKED_DOWN_STATIC and counter <=41 then
 		counter = counter + 1
-		print(counter)
 	end
 	if battleMgr.rightChr.actionBlockId == 0 and battleMgr.rightChr.action == enums.actions.ACTION_NEUTRAL_TECH and counter > 20 then
 		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
@@ -54,34 +53,36 @@ function update()
 		dialog:update()
 		battleMgr.rightCharacterManager:updateAnimation()
 		dialog.hidden = true
-		battleMgr.rightChr.action = enums.actions.ACTION_BACKWARD_HIGH_JUMP
+		battleMgr.rightChr.action = enums.actions.ACTION_FORWARD_DASH
 		battleMgr.rightChr:initAnimation()
 		playSfx(enums.sfxs.highJump)
-		battleMgr.rightChr.speed.x = 15
-		battleMgr.rightChr.speed.y = 15
+		battleMgr.rightChr.speed.x = 12
 		counter = 0
 	end
-	if 	battleMgr.rightChr.action == enums.actions.ACTION_BACKWARD_HIGH_JUMP and counter <= 42 then
+	if 	battleMgr.rightChr.action == enums.actions.ACTION_FORWARD_DASH and counter <= 42 then
+		battleMgr.rightChr.direction = enums.directions.RIGHT
 		battleMgr.rightChr.position.x = battleMgr.rightChr.position.x + battleMgr.rightChr.speed.x
-		battleMgr.rightChr.position.y = battleMgr.rightChr.position.y + battleMgr.rightChr.speed.y - 0.7
 		if battleMgr.rightChr.position.x >= 2200 and counter == 42 then
 			dialog.hidden = false
 			onKeyPressed()
 			counter = counter + 1
 		end
 	end
+	if #dialog < 2 then
+		battleMgr.leftChr.direction = enums.directions.LEFT
+	end
 	if pressed and #dialog == 0 then
 		dialog:update()
 		battleMgr.leftCharacterManager:updateAnimation()
-		if battleMgr.leftChr.action ~= enums.actions.ACTION_BACKWARD_HIGH_JUMP then
+		if battleMgr.leftChr.action ~= enums.actions.ACTION_FORWARD_HIGH_JUMP then
 			dialog.hidden = true
-			battleMgr.leftChr.action = enums.actions.ACTION_BACKWARD_HIGH_JUMP
+			battleMgr.leftChr.action = enums.actions.ACTION_FORWARD_HIGH_JUMP
 			battleMgr.leftChr:initAnimation()
 		else
 			if battleMgr.leftChr.actionBlockId >= 1 then
 				if battleMgr.leftChr.actionBlockId == 1 and battleMgr.leftChr.frameCount == 0 then
 					playSfx(enums.sfxs.highJump)
-					battleMgr.leftChr.speed.x = -30
+					battleMgr.leftChr.speed.x = -25
 					battleMgr.leftChr.speed.y = 20
 				end
 				battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
@@ -119,12 +120,14 @@ function update()
 			battleMgr.leftCharacterManager.animationSubFrame = 0
 			battleMgr.leftCharacterManager.action = enums.actions.ACTION_IDLE
 			battleMgr.leftCharacterManager:initAnimation()
+			battleMgr.leftCharacterManager.direction = enums.directions.RIGHT
 
 			battleMgr.rightCharacterManager.position.x = 1000
 			battleMgr.rightCharacterManager.position.y = 0
 			battleMgr.rightCharacterManager.animationSubFrame = 0
 			battleMgr.rightCharacterManager.action = enums.actions.ACTION_KNOCKED_DOWN_STATIC
 			battleMgr.rightCharacterManager:initAnimation()
+			battleMgr.rightCharacterManager.direction = enums.directions.LEFT
 		end
 	elseif flashRect.fillColor.a ~= 0 then
 		color.a = color.a - 0x11;
