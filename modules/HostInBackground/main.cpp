@@ -9,6 +9,7 @@
 #include <process.h>
 #include <iostream>
 #include <thread>
+#include <fstream>
 
 #ifndef _DEBUG
 #define puts(...)
@@ -61,6 +62,10 @@ static SokuLib::DrawUtils::Sprite yes;
 static SokuLib::DrawUtils::Sprite noH;
 static SokuLib::DrawUtils::Sprite no;
 
+static bool soku2Found = false;
+static unsigned char soku2Major = 0;
+static unsigned char soku2Minor = 0;
+static char soku2Letter = 0;
 static unsigned deadTime = 0;
 static unsigned short port;
 static bool spec;
@@ -85,6 +90,109 @@ static std::string name;
 static sockaddr_in currentAddress;
 static bool inQueue = false;
 static bool needHook = false;
+
+void getSoku2Version(wchar_t *path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	printf("Loading file %S\n", path);
+	soku2Found = true;
+	while (std::getline(stream, line)) {
+		auto pos = line.find("set_version(");
+
+		if (pos == std::string::npos)
+			continue;
+		printf("Line is %s\n", line.c_str());
+		line = line.substr(pos + strlen("set_version(") + 1);
+		pos = line.find('"');
+		if (pos == std::string::npos) {
+			MessageBox(nullptr, "Cannot parse Soku2 version: Missing closing \" in set_version line.", "Init error", MB_ICONERROR);
+			abort();
+		}
+		line = line.substr(0, pos);
+		printf("Version string is %s\n", line.c_str());
+		pos = line.find('.');
+		if (pos == std::string::npos) {
+			MessageBox(nullptr, "Cannot parse Soku2 version: Cannot find . chaarcter in version string.", "Init error", MB_ICONERROR);
+			abort();
+		}
+		try {
+			soku2Major = std::stoul(line.substr(0, pos));
+			line = line.substr(pos + 1);
+			soku2Minor = std::stoul(line, &pos);
+			if (pos != line.size() - 1) {
+				MessageBox(nullptr, "Cannot parse Soku2 version: Trailing letters found.", "Init error", MB_ICONERROR);
+				abort();
+			}
+			soku2Letter = line.back();
+		} catch (std::exception &e) {
+			MessageBox(nullptr, ("Cannot parse Soku2 version: " + std::string(e.what()) + ".").c_str(), "Init error", MB_ICONERROR);
+			abort();
+		}
+		printf("Soku2 version is %i.%i%c\n", soku2Major, soku2Minor, soku2Letter);
+		return;
+	}
+	MessageBox(nullptr, "Cannot parse Soku2 version: The set_version line was not found.", "Init error", MB_ICONERROR);
+	abort();
+}
+
+void loadSoku2Config()
+{
+	puts("Looking for Soku2 config...");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	printf("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		printf("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		printf("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\SOKU2.lua");
+		getSoku2Version(module_path);
+		return;
+	}
+}
 
 int __stdcall fakeRecvFrom(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen)
 {
@@ -119,8 +227,16 @@ int __stdcall fakeRecvFrom(SOCKET s, char *buf, int len, int flags, sockaddr *fr
 
 int __stdcall fakeSendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen)
 {
-	if (!inQueue)
+	printf("Fake send %i: ", len);
+	if (!inQueue) {
+		printf("real ");
+		SokuLib::displayPacketContent(std::cout, *reinterpret_cast<SokuLib::Packet *>(buf));
+		printf("\n");
 		return realSendTo(s, buf, len, flags, to, tolen);
+	}
+	printf("fake ");
+	SokuLib::displayPacketContent(std::cout, *reinterpret_cast<SokuLib::Packet *>(buf));
+	printf("\n");
 	inQueue = false;
 	return 0;
 }
@@ -219,6 +335,7 @@ unsigned __stdcall hostLoop(void *)
 			queue.back().resize(size);
 			memcpy(queue.back().data(), &packet, size);
 		}
+
 		if (packet.type == SokuLib::HELLO) {
 			//ping.nbTime = 0;
 			packet.type = SokuLib::OLLEH;
@@ -273,12 +390,15 @@ unsigned __stdcall hostLoop(void *)
 				memset(&ping, 0, sizeof(ping));
 				memset(&packet.initSuccess, 0, sizeof(packet.initSuccess));
 				packet.type = SokuLib::INIT_SUCCESS;
-				strncpy(packet.initSuccess.clientProfileName, packet.initRequest.name, min(packet.initRequest.nameLength, sizeof(packet.initSuccess.clientProfileName)));
+				printf("strncpy(%p, %p, %i)\n", packet.initSuccess.clientProfileName, packet.initRequest.name, min(name.size(), sizeof(packet.initSuccess.clientProfileName)));
+				strncpy(packet.initSuccess.clientProfileName, name.c_str(), sizeof(packet.initSuccess.clientProfileName));
 				strcpy(packet.initSuccess.hostProfileName, SokuLib::profile1.name);
 				packet.initSuccess.swrDisabled = SokuLib::SWRUnlinked;
 				packet.initSuccess.dataSize = 68;
 				packet.initSuccess.unknown1[4] = 0x10;
-				puts("Reply INIT_SUCCESS");
+				printf("Reply ");
+				SokuLib::displayPacketContent(std::cout, packet);
+				printf("\n");
 				realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.initSuccess), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
 			}
 		} else if (packet.type == SokuLib::QUIT) {
@@ -320,6 +440,12 @@ unsigned __stdcall hostLoop(void *)
 				font,
 				{TEXTURE_SIZE, FONT_HEIGHT * 2}
 			);
+		} else if (packet.type == SokuLib::SOKU2_PLAY_REQU && soku2Found) {
+			puts("Reply SOKU2_PLAY_REQU");
+			packet.soku2PlayRequ.major = soku2Major;
+			packet.soku2PlayRequ.minor = soku2Minor;
+			packet.soku2PlayRequ.letter = soku2Letter;
+			realSendTo(mySocket, reinterpret_cast<char *>(&packet), sizeof(packet.soku2PlayRequ), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
 		}
 	}
 	return 0;
@@ -753,11 +879,12 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen("CONOUT$", "w", stderr);
 #endif
 
-	puts("Initializing...");
+	puts("BGHost v1 Initializing...");
+	loadSoku2Config();
 	QueryPerformanceFrequency(&timer_frequency);
 	GetModuleFileName(hMyModule, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
-	PathAppend(profilePath, "DiscordIntegration.ini");
+	PathAppend(profilePath, "HostInBackground.ini");
 	LoadSettings(profilePath);
 	placeHooks();
 	puts("Done...");
