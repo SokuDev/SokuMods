@@ -191,6 +191,7 @@ void loadSoku2CSV(LPWSTR path)
 		infos.shortName = shortName;
 		infos.fullName = fullName;
 		infos.codeName = codeName;
+		infos.isSoku2 = true;
 		infos.skills.clear();
 		infos.skills.emplace_back();
 		for (auto c : skillInputs) {
@@ -253,7 +254,9 @@ void loadSoku2Config()
 			*result = '\\';
 		PathRemoveFileSpecW(module_path);
 		printf("Found Soku2 module folder at %S\n", module_path);
-		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		PathAppendW(module_path, L"\\config\\info");
+		wcscpy(Practice::soku2Path, module_path);
+		PathAppendW(module_path, L"\\characters.csv");
 		loadSoku2CSV(module_path);
 		return;
 	}

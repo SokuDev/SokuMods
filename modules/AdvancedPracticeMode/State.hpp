@@ -35,9 +35,10 @@ namespace Practice
 		std::string fullName;
 		std::vector<std::string> skills;
 		std::map<unsigned short, Card> cards;
+		bool isSoku2 = false;
 	};
 
-	extern std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
+	extern std::map<SokuLib::Character, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
 	extern std::map<SokuLib::Character, CharacterInfo> characterInfos;
 
 	enum TechDirection {
@@ -198,6 +199,7 @@ namespace Practice
 	extern sf::RenderWindow *sfmlWindow;
 	extern char profilePath[1024 + MAX_PATH];
 	extern char profileParent[1024 + MAX_PATH];
+	extern wchar_t soku2Path[1024 + MAX_PATH];
 	extern SokuLib::KeyInput lastPlayerInputs;
 	extern Settings settings;
 	extern void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &);

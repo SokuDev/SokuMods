@@ -19,7 +19,7 @@
 
 namespace Practice
 {
-	std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
+	std::map<SokuLib::Character, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
 	std::map<SokuLib::Character, CharacterInfo> characterInfos{
 		{ SokuLib::CHARACTER_REIMU,     { SokuLib::CHARACTER_REIMU,     "reimu",     "Reimu",     "Reimu Hakurei",          {"236", "214", "421", "623"} }},
 		{ SokuLib::CHARACTER_MARISA,    { SokuLib::CHARACTER_MARISA,    "marisa",    "Marisa",    "Marisa Kirisame",        {"214", "623", "22",  "236"} }},
@@ -86,7 +86,7 @@ namespace Practice
 					sprintf(bufferCards, "data/card/%s/card%03lu.bmp", info.codeName.c_str(), cardId);
 					entry.id = cardId;
 					entry.name = str2;
-					Texture::loadFromGame(sprite.texture, bufferCards);
+					sprite.texture.loadFromGame(bufferCards);
 				} catch (std::exception &e) {
 					MessageBoxA(
 						SokuLib::window,
@@ -152,6 +152,7 @@ namespace Practice
 		puts("Work done !");
 	}
 
+	wchar_t soku2Path[1024 + MAX_PATH];
 	Settings settings;
 	sf::RenderWindow *sfmlWindow;
 	char profilePath[1024 + MAX_PATH];

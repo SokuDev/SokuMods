@@ -385,8 +385,6 @@ add_library(
         modules/AdvancedPracticeMode/Logic.hpp
         modules/AdvancedPracticeMode/Dummy.cpp
         modules/AdvancedPracticeMode/Dummy.hpp
-        modules/AdvancedPracticeMode/DrawUtils.cpp
-        modules/AdvancedPracticeMode/DrawUtils.hpp
         modules/AdvancedPracticeMode/Inputs.cpp
         modules/AdvancedPracticeMode/Inputs.hpp
         modules/AdvancedPracticeMode/Hitboxes.cpp

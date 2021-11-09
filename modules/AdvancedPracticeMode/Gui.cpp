@@ -40,8 +40,19 @@ namespace Practice
 			return;
 		skillsTextures.resize(maxi + 1);
 		for (auto &[id, infos] : characterInfos) {
-			printf("Loading file %s\n", (std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png").c_str());
-			skillsTextures[id].loadFromFile(std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png");
+			std::string result;
+
+			if (infos.isSoku2) {
+				char path[1024 + MAX_PATH];
+
+				memset(path, 0, sizeof(path));
+				for (int i = 0; soku2Path[i]; i++)
+					path[i] = soku2Path[i];
+				result = std::string(path) + "/sheets/" + infos.codeName + "Skills.png";
+			} else
+				result = std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png";
+			printf("Loading file %s\n", result.c_str());
+			skillsTextures[id].loadFromFile(result);
 		}
 		puts("Init done");
 	}
