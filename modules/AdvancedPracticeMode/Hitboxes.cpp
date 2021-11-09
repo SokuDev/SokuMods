@@ -375,9 +375,9 @@ namespace Practice
 	static void drawCollisionBox(const SokuLib::ObjectManager &manager)
 	{
 		FloatRect rect{};
-		const SokuLib::Box &box = *manager.frameData.collisionBox;
+		const SokuLib::Box &box = *manager.frameData->collisionBox;
 
-		if (!manager.frameData.collisionBox)
+		if (!manager.frameData->collisionBox)
 			return;
 
 		rect.x1 = SokuLib::camera.scale * (std::ceil(manager.position.x) + manager.direction * box.left + SokuLib::camera.translate.x);
@@ -416,7 +416,7 @@ namespace Practice
 				manager.hurtBoxes[i],
 				manager.hurtBoxesRotation[i],
 				DxSokuColor::Green,
-				(manager.frameData.frameFlags.chOnHit ? DxSokuColor::Cyan : DxSokuColor::Green) * BOXES_ALPHA
+				(manager.frameData->frameFlags.chOnHit ? DxSokuColor::Cyan : DxSokuColor::Green) * BOXES_ALPHA
 			);
 	}
 
@@ -577,7 +577,7 @@ namespace Practice
 	{
 		auto basePos = barPos;
 		auto &base = manager.objectBase;
-		auto &flags = base.frameData.frameFlags;
+		auto &flags = base.frameData->frameFlags;
 		auto superArmorRatio = getSuperArmorRatio(manager, character, maxAttributes);
 		auto maxSuperArmor = getMaxSuperArmor(manager, character, maxAttributes);
 
@@ -662,7 +662,7 @@ namespace Practice
 		Vector2<int> leftBound = {maxX, 0};
 		Vector2<int> base;
 		int rightBound = 0;
-		auto &attack = manager.frameData.attackFlags;
+		auto &attack = manager.frameData->attackFlags;
 		Rect<Vector2<float>> rect;
 
 		for (int i = 0; i < manager.hurtBoxCount; i++) {
@@ -750,7 +750,7 @@ namespace Practice
 				if ( //This is Patchouli's bubble
 					baseCharacter == SokuLib::CHARACTER_PATCHOULI &&
 					manager.action == 0x358 &&
-					(manager.image.number == 0x154 || manager.image.number == 0x1B3)
+					(manager.image->number == 0x154 || manager.image->number == 0x1B3)
 				) {
 					displayObjectBar(TIME_SPRITE_OFF, leftBound, base, 360 - manager.frameCount, 360, DxSokuColor::Green);
 					realHp += 3000;
@@ -760,7 +760,7 @@ namespace Practice
 				if ( //This is Alice's doll (C)
 					baseCharacter == SokuLib::CHARACTER_ALICE &&
 					manager.action == 805 &&
-					(manager.image.number >= 304 && manager.image.number <= 313)
+					(manager.image->number >= 304 && manager.image->number <= 313)
 				) {
 					realHp += 600;
 					maxHp = 600;
@@ -769,7 +769,7 @@ namespace Practice
 				if ( //This is Alice's doll (d22)
 					baseCharacter == SokuLib::CHARACTER_ALICE &&
 					manager.action == 825 &&
-					(manager.image.number >= 322 && manager.image.number <= 325)
+					(manager.image->number >= 322 && manager.image->number <= 325)
 				) {
 					realHp += 700;
 					maxHp = 700;
@@ -801,7 +801,7 @@ namespace Practice
 		for (const auto _elem : array) {
 			auto elem = reinterpret_cast<const SokuLib::ProjectileManager *>(_elem);
 
-			if ((elem->isActive && elem->objectBase.hitCount > 0) || elem->objectBase.frameData.attackFlags.value > 0) {
+			if ((elem->isActive && elem->objectBase.hitCount > 0) || elem->objectBase.frameData->attackFlags.value > 0) {
 				if (params.showSubObjectHurtboxes)
 					drawHurtBoxes(elem->objectBase);
 				if (params.showSubObjectHitboxes)

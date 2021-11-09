@@ -92,8 +92,8 @@ namespace Practice
 			character.objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
 			character.objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH
 		) && (
-			!character.objectBase.frameData.frameFlags.guardAvailable ||
-			character.objectBase.frameData.frameFlags.guarding
+			!character.objectBase.frameData->frameFlags.guardAvailable ||
+			character.objectBase.frameData->frameFlags.guarding
 		);
 	}
 

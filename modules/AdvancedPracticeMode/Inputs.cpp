@@ -701,12 +701,12 @@ namespace Practice
 			{LEFT_SPRITE_POS, DASH_SPRITE_POS},
 			{24, 32}
 		} },
-		{ SokuLib::ACTION_LILIPAD_FORWARD_DASH, {
+		{ SokuLib::ACTION_LILYPAD_FORWARD_DASH, {
 			inputSheet,
 			{LILIPAD_SPRITE_POS, RIGHT_SPRITE_POS, DASH_SPRITE_POS},
 			{24, 32}
 		} },
-		{ SokuLib::ACTION_LILIPAD_BACKDASH, {
+		{ SokuLib::ACTION_LILYPAD_BACKDASH, {
 			inputSheet,
 			{LILIPAD_SPRITE_POS, LEFT_SPRITE_POS, DASH_SPRITE_POS},
 			{24, 32}
@@ -1514,7 +1514,7 @@ namespace Practice
 			{RIGHTDOWN_SPRITE_POS, A_SPRITE_POS},
 			{24, 32}
 		} },
-		{ SokuLib::ACTION_SUWAKO_LILIPAD_6A, {
+		{ SokuLib::ACTION_SUWAKO_LILYPAD_6A, {
 			inputSheet,
 			{LILIPAD_SPRITE_POS, RIGHT_SPRITE_POS, A_SPRITE_POS},
 			{24, 32}
