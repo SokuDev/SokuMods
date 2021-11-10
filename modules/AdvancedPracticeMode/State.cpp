@@ -377,14 +377,26 @@ namespace Practice
 
 	CharacterState::CharacterState(SokuLib::Character chr)
 	{
+		// Levels
+		char nbSkills = 0;
+
+		for (auto &entry : characterInfos[chr].cards) {
+			if (entry.first < 200) {
+				nbSkills += 1;
+				printf("Card %s (%i) is a skill\n", entry.second.name.c_str(), entry.first);
+			}
+		}
+		printf("This character (%i) has %i skill cards ", chr, nbSkills);
+		nbSkills /= 3;
+
 		SokuLib::Skill buffer[15] = {
 			{0x00, false},
 			{0x00, false},
 			{0x00, false},
 			{0x00, false},
 			{
-			 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
-			       chr != SokuLib::CHARACTER_PATCHOULI
+				static_cast<unsigned char>((nbSkills != 5) * 0x7F),
+			       nbSkills != 5
 			},
 			{0x7F, true},
 			{0x7F, true},

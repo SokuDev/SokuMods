@@ -19,8 +19,17 @@ namespace Practice
 
 	inline void getSkillMap(SokuLib::Skill *skillMap, char (&skills)[5], SokuLib::Character character)
 	{
-		char nbSkills = 4 + (character == SokuLib::CHARACTER_PATCHOULI);
+		// Levels
+		char nbSkills = 0;
 
+		for (auto &entry : characterInfos[character].cards) {
+			if (entry.first < 200) {
+				nbSkills += 1;
+				printf("Card %s (%i) is a skill\n", entry.second.name.c_str(), entry.first);
+			}
+		}
+		printf("This character (%i) has %i skill cards ", character, nbSkills);
+		nbSkills /= 3;
 		memset(skills, 0, sizeof(skills));
 		for (char i = nbSkills; i < 3 * nbSkills; i++) {
 			if (!skillMap[i].notUsed)
@@ -323,8 +332,7 @@ namespace Practice
 
 		puts("Skill map");
 		getSkillMap(state.skillMap, skills, character);
-		if (character == SokuLib::CHARACTER_PATCHOULI) {
-			nbSkills = 5;
+		if (nbSkills == 5) {
 			pan->get<tgui::Widget>("Skill4Lvl")->setVisible(true);
 			pan->get<tgui::Widget>("Skill4Img")->setVisible(true);
 			pan->get<tgui::Widget>("Skill4Id")->setVisible(true);
@@ -382,6 +390,7 @@ namespace Practice
 			lvl->removeAllItems();
 			for (int j = skills[i] != 0; j < 5; j++)
 				lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
+			printf("Skill %i (%i) is level %i\n", i, skills[i], state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
 			lvl->setSelectedItemByIndex(state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
 			*callback = lvl->connect("ItemSelected", [&state, i, nbSkills](std::weak_ptr<tgui::ComboBox> skill, int item){
 				auto index = skill.lock()->getSelectedItemIndex();

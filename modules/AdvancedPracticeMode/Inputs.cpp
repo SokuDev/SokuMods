@@ -176,8 +176,13 @@ namespace Practice
 				return 8;
 			default:
 				int move = ((action - 500) / 20) * 3 + ((action - 500) % 20 / 5);
+				char nbSkills = 0;
 
-				return (move % 3) * (4 + (character == SokuLib::CHARACTER_PATCHOULI)) + move / 3;
+				for (auto &entry : characterInfos[character].cards)
+					if (entry.first < 200)
+						nbSkills += 1;
+				nbSkills /= 3;
+				return (move % 3) * nbSkills + move / 3;
 			}
 		}
 
