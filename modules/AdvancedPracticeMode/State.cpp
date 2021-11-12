@@ -108,6 +108,9 @@ namespace Practice
 	{
 		unsigned short originalDeck[20];
 
+		if (SokuLib::mode != SokuLib::BATTLE_MODE_PRACTICE && !settings.nonSaved.enabled)
+			return s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+
 		if (newDeck.size != 20) {
 			MessageBoxA(
 				SokuLib::window,
