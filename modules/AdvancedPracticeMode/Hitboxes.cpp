@@ -4,14 +4,13 @@
 
 #include <SokuLib.hpp>
 #include <cmath>
-#include "DrawUtils.hpp"
 #include "Hitboxes.hpp"
 #include "State.hpp"
 #include <list>
 
 namespace Practice
 {
-#define BOXES_ALPHA 0.5
+#define BOXES_ALPHA 0.25
 #define CHECK_CONFIG_VAL(var, app, key, path) { \
 	int __ret = GetPrivateProfileInt((app), (key), -1, (path));\
 \
@@ -44,12 +43,12 @@ namespace Practice
 
 	class BorderedBar {
 	private:
-		Sprite &_sprite;
+		SokuLib::DrawUtils::Sprite &_sprite;
 		BarConfig _config;
 
-		void _drawBorder(Vector2<int> pos, Vector2<unsigned> size, bool reversed)
+		void _drawBorder(SokuLib::Vector2i pos, SokuLib::Vector2u size, bool reversed)
 		{
-			this->_sprite.tint = DxSokuColor::White;
+			this->_sprite.tint = SokuLib::Color::White;
 			this->_sprite.rect.top = 0;
 			this->_sprite.rect.height = this->_sprite.texture.getSize().y;
 
@@ -119,7 +118,7 @@ namespace Practice
 			this->_sprite.draw();
 		}
 
-		void _drawFiller(Vector2<int> pos, unsigned size, Vector2<unsigned> maxSize, bool reversed, unsigned short offset)
+		void _drawFiller(SokuLib::Vector2i pos, unsigned size, SokuLib::Vector2u maxSize, bool reversed, unsigned short offset)
 		{
 			if (reversed) {
 				pos.x -= this->_config.borderEnd.size;
@@ -208,7 +207,7 @@ namespace Practice
 		}
 
 	public:
-		BorderedBar(Sprite &sprite, LPCSTR configPath, LPCSTR configApp) :
+		BorderedBar(SokuLib::DrawUtils::Sprite &sprite, LPCSTR configPath, LPCSTR configApp) :
 			_sprite(sprite)
 		{
 			CHECK_CONFIG_VAL(this->_config.fillerStart.size,    configApp, "FILLER_START_SIZE",    configPath);
@@ -226,13 +225,13 @@ namespace Practice
 			CHECK_CONFIG_VAL(this->_config.borderEnd.offset,    configApp, "BORDER_END_OFFSET",    configPath);
 		}
 
-		void draw(Vector2<int> pos, unsigned size, Vector2<unsigned> maxSize, bool reversed)
+		void draw(SokuLib::Vector2i pos, unsigned size, SokuLib::Vector2u maxSize, bool reversed)
 		{
 			this->_drawBorder(pos, maxSize, reversed);
 			this->_drawFiller(pos, size, maxSize, reversed, this->_config.filler.normalOffset);
 		}
 
-		void draw(Vector2<int> pos, unsigned size, Vector2<unsigned> maxSize, bool reversed, DxSokuColor color)
+		void draw(SokuLib::Vector2i pos, unsigned size, SokuLib::Vector2u maxSize, bool reversed, SokuLib::Color color)
 		{
 			this->_drawBorder(pos, maxSize, reversed);
 			this->_sprite.tint = color;
@@ -298,11 +297,11 @@ namespace Practice
 		unsigned short stopWatch;
 	};
 
-	static RectangleShape rectangle;
-	static Sprite flagsSprite;
-	static Sprite borderSprite;
-	static Sprite iconBgSprite;
-	static Sprite iconCoverSprite;
+	static SokuLib::DrawUtils::RectangleShape rectangle;
+	static SokuLib::DrawUtils::Sprite flagsSprite;
+	static SokuLib::DrawUtils::Sprite borderSprite;
+	static SokuLib::DrawUtils::Sprite iconBgSprite;
+	static SokuLib::DrawUtils::Sprite iconCoverSprite;
 	static std::unique_ptr<BorderedBar> healthBorder;
 	static std::unique_ptr<BorderedBar> installBorder;
 	static std::pair<MaxAttributes, MaxAttributes> allMaxAttributes;
@@ -315,35 +314,35 @@ namespace Practice
 		std::string profile = profilePath;
 
 		profile += "/assets/";
-		Texture::loadFromFile(flagsSprite.texture, (profile + "flags.png").c_str());
+		flagsSprite.texture.loadFromFile((profile + "flags.png").c_str());
 		flagsSprite.setSize({32, 32});
 		flagsSprite.rect.height = 32;
 
-		Texture::loadFromFile(iconBgSprite.texture, (profile + "iconBg.png").c_str());
+		iconBgSprite.texture.loadFromFile((profile + "iconBg.png").c_str());
 		iconBgSprite.setSize({40, 40});
 		iconBgSprite.rect.width = 40;
 		iconBgSprite.rect.height = 40;
 		iconBgSprite.rect.top = 0;
 		iconBgSprite.rect.left = 0;
 
-		Texture::loadFromFile(iconCoverSprite.texture, (profile + "iconCover.png").c_str());
+		iconCoverSprite.texture.loadFromFile((profile + "iconCover.png").c_str());
 		iconCoverSprite.setSize({40, 40});
 		iconCoverSprite.rect.width = 40;
 		iconCoverSprite.rect.height = 40;
 		iconCoverSprite.rect.top = 0;
 		iconCoverSprite.rect.left = 0;
-		//iconCoverSprite.tint = DxSokuColor::Transparent;
+		//iconCoverSprite.tint = SokuLib::Color::Transparent;
 
-		Texture::loadFromFile(borderSprite.texture, (profile + "borders.png").c_str());
+		borderSprite.texture.loadFromFile((profile + "borders.png").c_str());
 		profile += "borders.ini";
 		healthBorder .reset(new BorderedBar(borderSprite, profile.c_str(), "HEALTH"));
 		installBorder.reset(new BorderedBar(borderSprite, profile.c_str(), "INSTALL"));
 	}
 
-	static void drawBox(const SokuLib::Box &box, const SokuLib::RotationBox *rotation, DxSokuColor borderColor, DxSokuColor fillColor)
+	static void drawBox(const SokuLib::Box &box, const SokuLib::RotationBox *rotation, SokuLib::Color borderColor, SokuLib::Color fillColor)
 	{
 		if (!rotation) {
-			FloatRect rect{};
+			SokuLib::DrawUtils::FloatRect rect{};
 
 			rect.x1 = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left);
 			rect.x2 = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.right);
@@ -351,7 +350,7 @@ namespace Practice
 			rect.y2 = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.bottom);
 			rectangle.setRect(rect);
 		} else {
-			Rect<Vector2<float>> rect;
+			SokuLib::DrawUtils::Rect<SokuLib::Vector2f> rect;
 
 			rect.x1.x = SokuLib::camera.scale * (SokuLib::camera.translate.x + box.left);
 			rect.x1.y = SokuLib::camera.scale * (SokuLib::camera.translate.y + box.top);
@@ -374,10 +373,10 @@ namespace Practice
 
 	static void drawCollisionBox(const SokuLib::ObjectManager &manager)
 	{
-		FloatRect rect{};
-		const SokuLib::Box &box = *manager.frameData.collisionBox;
+		SokuLib::DrawUtils::FloatRect rect{};
+		const SokuLib::Box &box = *manager.frameData->collisionBox;
 
-		if (!manager.frameData.collisionBox)
+		if (!manager.frameData->collisionBox)
 			return;
 
 		rect.x1 = SokuLib::camera.scale * (std::ceil(manager.position.x) + manager.direction * box.left + SokuLib::camera.translate.x);
@@ -386,8 +385,8 @@ namespace Practice
 		rect.y2 = SokuLib::camera.scale * (box.bottom - std::ceil(manager.position.y) + SokuLib::camera.translate.y);
 
 		rectangle.setRect(rect);
-		rectangle.setFillColor(DxSokuColor::Yellow * BOXES_ALPHA);
-		rectangle.setBorderColor(DxSokuColor::Yellow);
+		rectangle.setFillColor(SokuLib::Color::Yellow * BOXES_ALPHA);
+		rectangle.setBorderColor(SokuLib::Color::Yellow);
 		rectangle.draw();
 	}
 
@@ -401,8 +400,8 @@ namespace Practice
 			static_cast<unsigned int>(SokuLib::camera.scale * 5),
 			static_cast<unsigned int>(SokuLib::camera.scale * 5)
 		});
-		rectangle.setFillColor(DxSokuColor::White);
-		rectangle.setBorderColor(DxSokuColor::White + DxSokuColor::Black);
+		rectangle.setFillColor(SokuLib::Color::White);
+		rectangle.setBorderColor(SokuLib::Color::White + SokuLib::Color::Black);
 		rectangle.draw();
 	}
 
@@ -415,8 +414,8 @@ namespace Practice
 			drawBox(
 				manager.hurtBoxes[i],
 				manager.hurtBoxesRotation[i],
-				DxSokuColor::Green,
-				(manager.frameData.frameFlags.chOnHit ? DxSokuColor::Cyan : DxSokuColor::Green) * BOXES_ALPHA
+				SokuLib::Color::Green,
+				(manager.frameData->frameFlags.chOnHit ? SokuLib::Color::Cyan : SokuLib::Color::Green) * BOXES_ALPHA
 			);
 	}
 
@@ -426,10 +425,10 @@ namespace Practice
 			return;
 
 		for (int i = 0; i < manager.hitBoxCount; i++)
-			drawBox(manager.hitBoxes[i], manager.hitBoxesRotation[i], DxSokuColor::Red, DxSokuColor::Red * BOXES_ALPHA);
+			drawBox(manager.hitBoxes[i], manager.hitBoxesRotation[i], SokuLib::Color::Red, SokuLib::Color::Red * BOXES_ALPHA);
 	}
 
-	static void displayPlayerFrameFlag(SpriteOffsets textureOffset, Vector2<int> &barPos, bool reverse)
+	static void displayPlayerFrameFlag(SpriteOffsets textureOffset, SokuLib::Vector2i &barPos, bool reverse)
 	{
 		auto size = static_cast<int>(std::ceil(flagsSprite.texture.getSize().x / 32.f));
 
@@ -464,7 +463,7 @@ namespace Practice
 			barPos.x -= 8;
 	}
 
-	static void displayPlayerBar(SpriteOffsets textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, bool reverse, DxSokuColor color)
+	static void displayPlayerBar(SpriteOffsets textureOffset, SokuLib::Vector2i basePos, SokuLib::Vector2i &barPos, unsigned value, unsigned max, bool reverse, SokuLib::Color color)
 	{
 		if (value > max)
 			printf("Showing out of bound box %u / %u\n", value, max);
@@ -480,7 +479,7 @@ namespace Practice
 			installBorder->draw({barPos.x, barPos.y + 4}, 200 * value / max, {200, 24}, reverse, color);
 	}
 
-	static void displayObjectFrameFlag(SpriteOffsets textureOffset, Vector2<int> &barPos)
+	static void displayObjectFrameFlag(SpriteOffsets textureOffset, SokuLib::Vector2i &barPos)
 	{
 		auto scaled = 32 * SokuLib::camera.scale;
 		auto scaled2 = 40 * SokuLib::camera.scale;
@@ -516,7 +515,7 @@ namespace Practice
 		barPos.x += scaled;
 	}
 
-	static void displayObjectBar(SpriteOffsets textureOffset, Vector2<int> basePos, Vector2<int> &barPos, unsigned value, unsigned max, DxSokuColor color)
+	static void displayObjectBar(SpriteOffsets textureOffset, SokuLib::Vector2i basePos, SokuLib::Vector2i &barPos, unsigned value, unsigned max, SokuLib::Color color)
 	{
 		auto &barObj = (textureOffset == HEALTH_SPRITE_OFF || textureOffset == TIME_SPRITE_OFF ? *healthBorder : *installBorder);
 
@@ -573,11 +572,11 @@ namespace Practice
 		return 0;
 	}
 
-	static void displayPlayerStatusFlags(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse)
+	static void displayPlayerStatusFlags(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, SokuLib::Vector2i barPos, bool reverse)
 	{
 		auto basePos = barPos;
 		auto &base = manager.objectBase;
-		auto &flags = base.frameData.frameFlags;
+		auto &flags = base.frameData->frameFlags;
 		auto superArmorRatio = getSuperArmorRatio(manager, character, maxAttributes);
 		auto maxSuperArmor = getMaxSuperArmor(manager, character, maxAttributes);
 
@@ -597,9 +596,9 @@ namespace Practice
 			displayPlayerFrameFlag(STOP_WATCH_SPRITE_OFF, barPos, reverse);
 		if (superArmorRatio || manager.noSuperArmor == 0 || flags.superArmor) {
 			if (superArmorRatio > 0)
-				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, 10000 * superArmorRatio, 10000, reverse, DxSokuColor::Blue);
+				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, 10000 * superArmorRatio, 10000, reverse, SokuLib::Color::Blue);
 			else if (maxSuperArmor)
-				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, max(0, static_cast<int>(maxSuperArmor - manager.objectBase.superarmorDamageTaken)), maxSuperArmor, reverse, DxSokuColor::Red);
+				displayPlayerBar(SUPERARMOR_SPRITE_OFF, basePos, barPos, max(0, static_cast<int>(maxSuperArmor - manager.objectBase.superarmorDamageTaken)), maxSuperArmor, reverse, SokuLib::Color::Red);
 			else
 				displayPlayerFrameFlag(SUPERARMOR_SPRITE_OFF, barPos, reverse);
 		}
@@ -622,33 +621,33 @@ namespace Practice
 		} else
 			maxAttributes.drop = 0;
 		if (manager.magicPotionTimeLeft && (!manager.dropInvulTimeLeft || manager.magicPotionTimeLeft != 1))
-			displayPlayerBar(MAGIC_POTION_SPRITE_OFF, basePos, barPos, manager.magicPotionTimeLeft, 360, reverse, DxSokuColor::Blue);
+			displayPlayerBar(MAGIC_POTION_SPRITE_OFF, basePos, barPos, manager.magicPotionTimeLeft, 360, reverse, SokuLib::Color::Blue);
 		if (manager.healingCharmTimeLeft)
-			displayPlayerBar(HEALING_CHARM_SPRITE_OFF, basePos, barPos, manager.healingCharmTimeLeft, 250, reverse, DxSokuColor::Cyan);
+			displayPlayerBar(HEALING_CHARM_SPRITE_OFF, basePos, barPos, manager.healingCharmTimeLeft, 250, reverse, SokuLib::Color::Cyan);
 		if (character == SokuLib::CHARACTER_SAKUYA && manager.sakuyasWorldTime)
-			displayPlayerBar(STOP_WATCH_SPRITE_OFF, basePos, barPos, manager.sakuyasWorldTime, 300, reverse, DxSokuColor{0x44, 0x44, 0x44, 0xFF});
+			displayPlayerBar(STOP_WATCH_SPRITE_OFF, basePos, barPos, manager.sakuyasWorldTime, 300, reverse, SokuLib::Color{0x44, 0x44, 0x44, 0xFF});
 		else if (maxAttributes.stopWatch)
-			displayPlayerBar(STOP_WATCH_SPRITE_OFF, basePos, barPos, 51 - maxAttributes.stopWatch, 50, reverse, DxSokuColor{0x44, 0x44, 0x44, 0xFF});
+			displayPlayerBar(STOP_WATCH_SPRITE_OFF, basePos, barPos, 51 - maxAttributes.stopWatch, 50, reverse, SokuLib::Color{0x44, 0x44, 0x44, 0xFF});
 
 		switch (character) {
 		case SokuLib::CHARACTER_PATCHOULI:
 			if (manager.philosophersStoneTime)
-				displayPlayerBar(PHILOSOPHERS_STONE_OFF, basePos, barPos, manager.philosophersStoneTime, 1200, reverse, DxSokuColor::Magenta);
+				displayPlayerBar(PHILOSOPHERS_STONE_OFF, basePos, barPos, manager.philosophersStoneTime, 1200, reverse, SokuLib::Color::Magenta);
 			break;
 		case SokuLib::CHARACTER_REMILIA:
 			if (manager.milleniumVampireTime)
-				displayPlayerBar(MILLENIUM_SPRITE_OFF, basePos, barPos, manager.milleniumVampireTime, 600, reverse, DxSokuColor::Red);
+				displayPlayerBar(MILLENIUM_SPRITE_OFF, basePos, barPos, manager.milleniumVampireTime, 600, reverse, SokuLib::Color::Red);
 			break;
 		case SokuLib::CHARACTER_YOUMU:
 			if (manager.youmuCloneTimeLeft) {
 				maxAttributes.clones = max(maxAttributes.clones, manager.youmuCloneTimeLeft);
-				displayPlayerBar(CLONES_SPRITE_OFF, basePos, barPos, manager.youmuCloneTimeLeft, maxAttributes.clones, reverse, DxSokuColor{0xAA, 0xAA, 0xAA, 0xFF});
+				displayPlayerBar(CLONES_SPRITE_OFF, basePos, barPos, manager.youmuCloneTimeLeft, maxAttributes.clones, reverse, SokuLib::Color{0xAA, 0xAA, 0xAA, 0xFF});
 			} else
 				maxAttributes.clones = 0;
 			break;
 		case SokuLib::CHARACTER_REIMU:
 			if (manager.fantasyHeavenTimeLeft)
-				displayPlayerBar(FANTASY_HEAVEN_SPRITE_OFF, basePos, barPos, manager.fantasyHeavenTimeLeft, 900, reverse, DxSokuColor::Red);
+				displayPlayerBar(FANTASY_HEAVEN_SPRITE_OFF, basePos, barPos, manager.fantasyHeavenTimeLeft, 900, reverse, SokuLib::Color::Red);
 			break;
 		default:
 			break;
@@ -659,11 +658,11 @@ namespace Practice
 	{
 		int maxX = 640 - (32 + 50) * SokuLib::camera.scale;
 		int maxY = 480 - 32 * SokuLib::camera.scale;
-		Vector2<int> leftBound = {maxX, 0};
-		Vector2<int> base;
+		SokuLib::Vector2i leftBound = {maxX, 0};
+		SokuLib::Vector2i base;
 		int rightBound = 0;
-		auto &attack = manager.frameData.attackFlags;
-		Rect<Vector2<float>> rect;
+		auto &attack = manager.frameData->attackFlags;
+		SokuLib::DrawUtils::Rect<SokuLib::Vector2f> rect;
 
 		for (int i = 0; i < manager.hurtBoxCount; i++) {
 			auto &box = manager.hurtBoxes[i];
@@ -726,7 +725,7 @@ namespace Practice
 		}
 
 		if (!manager.hurtBoxCount && !manager.hitBoxCount)
-			leftBound = Vector2<int>{
+			leftBound = SokuLib::Vector2i{
 				static_cast<int>(manager.position.x),
 				static_cast<int>(manager.position.y)
 			};
@@ -750,9 +749,9 @@ namespace Practice
 				if ( //This is Patchouli's bubble
 					baseCharacter == SokuLib::CHARACTER_PATCHOULI &&
 					manager.action == 0x358 &&
-					(manager.image.number == 0x154 || manager.image.number == 0x1B3)
+					(manager.image->number == 0x154 || manager.image->number == 0x1B3)
 				) {
-					displayObjectBar(TIME_SPRITE_OFF, leftBound, base, 360 - manager.frameCount, 360, DxSokuColor::Green);
+					displayObjectBar(TIME_SPRITE_OFF, leftBound, base, 360 - manager.frameCount, 360, SokuLib::Color::Green);
 					realHp += 3000;
 					maxHp = 3000;
 				}
@@ -760,7 +759,7 @@ namespace Practice
 				if ( //This is Alice's doll (C)
 					baseCharacter == SokuLib::CHARACTER_ALICE &&
 					manager.action == 805 &&
-					(manager.image.number >= 304 && manager.image.number <= 313)
+					(manager.image->number >= 304 && manager.image->number <= 313)
 				) {
 					realHp += 600;
 					maxHp = 600;
@@ -769,19 +768,19 @@ namespace Practice
 				if ( //This is Alice's doll (d22)
 					baseCharacter == SokuLib::CHARACTER_ALICE &&
 					manager.action == 825 &&
-					(manager.image.number >= 322 && manager.image.number <= 325)
+					(manager.image->number >= 322 && manager.image->number <= 325)
 				) {
 					realHp += 700;
 					maxHp = 700;
 				}
 
 				if (realHp && maxHp > 1)
-					displayObjectBar(HEALTH_SPRITE_OFF, leftBound, base, realHp, maxHp, DxSokuColor::Green);
+					displayObjectBar(HEALTH_SPRITE_OFF, leftBound, base, realHp, maxHp, SokuLib::Color::Green);
 			}
 		}
 	}
 
-	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, Vector2<int> barPos, bool reverse, const HitBoxParams &params)
+	static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, SokuLib::Character character, MaxAttributes &maxAttributes, SokuLib::Vector2i barPos, bool reverse, const HitBoxParams &params)
 	{
 		if (params.showCollisionBox)
 			drawCollisionBox(manager.objectBase);
@@ -801,7 +800,7 @@ namespace Practice
 		for (const auto _elem : array) {
 			auto elem = reinterpret_cast<const SokuLib::ProjectileManager *>(_elem);
 
-			if ((elem->isActive && elem->objectBase.hitCount > 0) || elem->objectBase.frameData.attackFlags.value > 0) {
+			if ((elem->isActive && elem->objectBase.hitCount > 0) || elem->objectBase.frameData->attackFlags.value > 0) {
 				if (params.showSubObjectHurtboxes)
 					drawHurtBoxes(elem->objectBase);
 				if (params.showSubObjectHitboxes)

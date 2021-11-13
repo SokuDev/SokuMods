@@ -43,7 +43,7 @@ int __stdcall myRecvfrom(SOCKET s, char *buf, int len, int flags, sockaddr *from
 void networkSelectCommon()
 {
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT && SokuLib::checkKeyOneshot(DIK_F12, 0, 0, 0)) {
-		auto res = MessageBoxA(SokuLib::window, (std::string("Do you want to start a training session against ") + SokuLib::getNetObject().profile2name + " ?").c_str(), "Start practice ?", MB_ICONQUESTION | MB_YESNO);
+		auto res = MessageBoxA(SokuLib::window, (std::string("Do you want to start a training session against ") + SokuLib::getNetObject().profile2name + " ?").c_str(), "Start practice?", MB_ICONQUESTION | MB_YESNO);
 
 		if (res == IDYES) {
 			SokuLib::PacketType packet = SokuLib::APM_START_SESSION_REQUEST;
@@ -121,8 +121,18 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 
 	sf::Event event;
 
-	while (Practice::sfmlWindow->pollEvent(event))
-		Practice::gui.handleEvent(event);
+	while (Practice::sfmlWindow->pollEvent(event)) {
+		try {
+			Practice::gui.handleEvent(event);
+		} catch (std::exception &e) {
+			MessageBoxA(
+				SokuLib::window,
+				("Gui error when handling even: " + std::string(e.what())).c_str(),
+				"Error",
+				MB_ICONERROR
+			);
+		}
+	}
 	frameCounter += Practice::settings.requestedFrameRate / 60.f;
 	while (frameCounter >= 1) {
 		// super
@@ -149,7 +159,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath)
 	AllocConsole();
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
-	puts("Hello !");
+	puts("Hello!");
 	//port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 }
 
@@ -191,6 +201,7 @@ void loadSoku2CSV(LPWSTR path)
 		infos.shortName = shortName;
 		infos.fullName = fullName;
 		infos.codeName = codeName;
+		infos.isSoku2 = true;
 		infos.skills.clear();
 		infos.skills.emplace_back();
 		for (auto c : skillInputs) {
@@ -253,11 +264,9 @@ void loadSoku2Config()
 			*result = '\\';
 		PathRemoveFileSpecW(module_path);
 		printf("Found Soku2 module folder at %S\n", module_path);
-		Practice::soku2Path = std::string{
-			reinterpret_cast<char *>(module_path),
-			reinterpret_cast<char *>(module_path + wcslen(module_path))
-		};
-		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		PathAppendW(module_path, L"\\config\\info");
+		wcscpy(Practice::soku2Path, module_path);
+		PathAppendW(module_path, L"\\characters.csv");
 		loadSoku2CSV(module_path);
 		return;
 	}

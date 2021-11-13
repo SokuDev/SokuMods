@@ -19,8 +19,17 @@ namespace Practice
 
 	inline void getSkillMap(SokuLib::Skill *skillMap, char (&skills)[5], SokuLib::Character character)
 	{
-		char nbSkills = 4 + (character == SokuLib::CHARACTER_PATCHOULI);
+		// Levels
+		char nbSkills = 0;
 
+		for (auto &entry : characterInfos[character].cards) {
+			if (entry.first < 200) {
+				nbSkills += 1;
+				printf("Card %s (%i) is a skill\n", entry.second.name.c_str(), entry.first);
+			}
+		}
+		printf("This character (%i) has %i skill cards ", character, nbSkills);
+		nbSkills /= 3;
 		memset(skills, 0, sizeof(skills));
 		for (char i = nbSkills; i < 3 * nbSkills; i++) {
 			if (!skillMap[i].notUsed)
@@ -40,12 +49,19 @@ namespace Practice
 			return;
 		skillsTextures.resize(maxi + 1);
 		for (auto &[id, infos] : characterInfos) {
-			auto path = id < SokuLib::CHARACTER_RANDOM ?
-				(std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png") :
-				(soku2Path + "/config/info/images/" + infos.codeName + "Skills.png");
+			std::string result;
 
-			printf("Loading file %s\n", path.c_str());
-			skillsTextures[id].loadFromFile(path);
+			if (infos.isSoku2) {
+				char path[1024 + MAX_PATH];
+
+				memset(path, 0, sizeof(path));
+				for (int i = 0; soku2Path[i]; i++)
+					path[i] = soku2Path[i];
+				result = std::string(path) + "/sheets/" + infos.codeName + "Skills.png";
+			} else
+				result = std::string(profilePath) + "/assets/skills/" + infos.codeName + "Skills.png";
+			printf("Loading file %s\n", result.c_str());
+			skillsTextures[id].loadFromFile(result);
 		}
 		puts("Init done");
 	}
@@ -204,7 +220,7 @@ namespace Practice
 		return macro;
 	}
 
-	static void importMacrosFromFile(std::array<std::vector<Macro>, 20> &buffer, int selectedCharacter, const std::string &file)
+	static void importMacrosFromFile(std::map<SokuLib::Character, std::vector<Macro>> &buffer, SokuLib::Character selectedCharacter, const std::string &file)
 	{
 		std::ifstream stream{file};
 		unsigned magic;
@@ -316,8 +332,7 @@ namespace Practice
 
 		puts("Skill map");
 		getSkillMap(state.skillMap, skills, character);
-		if (character == SokuLib::CHARACTER_PATCHOULI) {
-			nbSkills = 5;
+		if (nbSkills == 5) {
 			pan->get<tgui::Widget>("Skill4Lvl")->setVisible(true);
 			pan->get<tgui::Widget>("Skill4Img")->setVisible(true);
 			pan->get<tgui::Widget>("Skill4Id")->setVisible(true);
@@ -375,6 +390,7 @@ namespace Practice
 			lvl->removeAllItems();
 			for (int j = skills[i] != 0; j < 5; j++)
 				lvl->addItem(j == 4 ? "MAX" : std::to_string(j));
+			printf("Skill %i (%i) is level %i\n", i, skills[i], state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
 			lvl->setSelectedItemByIndex(state.skillMap[skills[i] * nbSkills + i].level - (skills[i] != 0));
 			*callback = lvl->connect("ItemSelected", [&state, i, nbSkills](std::weak_ptr<tgui::ComboBox> skill, int item){
 				auto index = skill.lock()->getSelectedItemIndex();
@@ -482,7 +498,7 @@ namespace Practice
 		populateCharacterPanel(profile, rightPanel, SokuLib::getBattleMgr().rightCharacterManager, SokuLib::rightChar, settings.nonSaved.rightState);
 		puts("Update state");
 		updateGuiState();
-		puts("All done !");
+		puts("All done!");
 	}
 
 	static void updateDummyPanel()
@@ -706,7 +722,7 @@ namespace Practice
 	static void showMacroInputs(const std::string &profile, std::weak_ptr<tgui::ComboBox> macrosWeak, tgui::EditBox::Ptr name, tgui::ScrollablePanel::Ptr inputPanel, tgui::ComboBox::Ptr character)
 	{
 		auto macros = macrosWeak.lock();
-		auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)];
+		auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 
 		inputPanel->removeAllWidgets();
 		if (macros->getSelectedItemIndex() >= allMacros.size())
@@ -789,7 +805,7 @@ namespace Practice
 					SokuLib::window,
 					("List has been trimmed because this macro has more than 50 input entries (" +
 					std::to_string(elems.size()) + ") entries.\nIf you think this macro is corrupted, please remove it.").c_str(),
-					"Corrupted macro ?",
+					"Corrupted macro?",
 					MB_ICONWARNING
 				);
 				break;
@@ -826,7 +842,7 @@ namespace Practice
 	}
 
 	void displayMacroPanel(const std::string &profile)
-	{/*
+	{
 		panel->loadWidgetsFromFile(profile + "/assets/macro.gui");
 
 		auto macros = panel->get<tgui::ComboBox>("Macros");
@@ -843,7 +859,7 @@ namespace Practice
 		auto import = panel->get<tgui::Button>("Import");
 		auto loop = panel->get<tgui::CheckBox>("Loop");
 		auto recorderCommon = [deleteMacro, macros, newMacro, character, addInput, exportButton, import, profile, name, inputPanel](std::weak_ptr<tgui::Button> me, std::weak_ptr<tgui::Button> other, bool recordAsDummy){
-			const auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)];
+			const auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 			auto isEmpty = allMacros.empty();
 			SokuLib::KeyInput empty;
 
@@ -875,13 +891,13 @@ namespace Practice
 				import->setEnabled(false);
 				exportButton->setEnabled(false);
 				me.lock()->setText("Stop recording");
-				settings.nonSaved.recordBuffer = &settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)][macros->getSelectedItemIndex()].macroElems;
+				settings.nonSaved.recordBuffer = &settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))][macros->getSelectedItemIndex()].macroElems;
 			} else
 				return false;
 			return true;
 		};
 		auto createEmptyMacro = [name, inputPanel, macros, character, deleteMacro, play, record1, addInput, record2, exportButton]{
-			auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)];
+			auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 			auto macroName = "Untitled macro " + std::to_string(allMacros.size() + 1);
 
 			allMacros.push_back({macroName, {}});
@@ -897,8 +913,12 @@ namespace Practice
 			exportButton->setEnabled(true);
 			inputPanel->removeAllWidgets();
 		};
-		auto loadMacros = [macros, name, deleteMacro, inputPanel, play, record1, addInput, record2, exportButton](int character){
-			const auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character < SokuLib::CHARACTER_RANDOM ? character : character + 2)];
+		auto loadMacros = [macros, name, deleteMacro, inputPanel, play, record1, addInput, record2, exportButton](std::weak_ptr<tgui::ComboBox> self, int character){
+			auto id = self.lock()->getItemIds()[character].toAnsiString();
+
+			printf("Loading macro for character %i (ID %s)\n", character, id.c_str());
+
+			const auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(id))];
 			auto isEmpty = allMacros.empty();
 
 			macros->removeAllItems();
@@ -917,9 +937,10 @@ namespace Practice
 			exportButton->setEnabled(!isEmpty);
 		};
 
-		character->setSelectedItemByIndex(SokuLib::rightChar);
-		character->connect("ItemSelected", loadMacros);
-		loadMacros(SokuLib::rightChar);
+		for (auto &chr : characterInfos)
+			character->addItem(chr.second.fullName, std::to_string(chr.first));
+		character->connect("ItemSelected", loadMacros, std::weak_ptr<tgui::ComboBox>(character));
+		character->setSelectedItemById(std::to_string(SokuLib::rightChar));
 		showMacroInputs(profile, macros, name, inputPanel, character);
 		if (!settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty()){
 			record1->setText("Pause macro");
@@ -932,7 +953,7 @@ namespace Practice
 		macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
 		newMacro->connect("Clicked", createEmptyMacro);
 		name->connect("TextChanged", [character, macros, profile, name, inputPanel](std::string newName){
-			auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)];
+			auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 			auto selected = macros->getSelectedItemIndex();
 			auto &changedMacro = allMacros[selected];
 
@@ -945,7 +966,7 @@ namespace Practice
 			macros->connect("ItemSelected", showMacroInputs, profile, std::weak_ptr<tgui::ComboBox>(macros), name, inputPanel, character);
 		});
 		deleteMacro->connect("Clicked", [inputPanel, macros, character, name, play, record1, addInput, record2, exportButton](std::weak_ptr<tgui::Button> self){
-			auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)];
+			auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 			auto index = macros->getSelectedItemIndex();
 			auto isEmpty = allMacros.size() == 1;
 
@@ -967,7 +988,7 @@ namespace Practice
 				inputPanel->removeAllWidgets();
 		}, std::weak_ptr<tgui::Button>(deleteMacro));
 		play->connect("Clicked", [character, macros, record1, record2]{
-			auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)][macros->getSelectedItemIndex()];
+			auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))][macros->getSelectedItemIndex()];
 
 			if (settings.nonSaved.playingMacroBuffer.macroElems.empty() && settings.nonSaved.playList.empty())
 				settings.nonSaved.playingMacro = true;
@@ -988,7 +1009,7 @@ namespace Practice
 			}
 		}, std::weak_ptr<tgui::Button>(record2), std::weak_ptr<tgui::Button>(record1));
 		addInput->connect("Clicked", [character, profile, macros, name, inputPanel]{
-			auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)][macros->getSelectedItemIndex()];
+			auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))][macros->getSelectedItemIndex()];
 
 			if (macro.macroElems.empty())
 				macro.macroElems.emplace_back();
@@ -1013,7 +1034,7 @@ namespace Practice
 			auto exportAllToFile = pan->get<tgui::Button>("AllFile");
 
 			exportThisToFile->connect("Clicked", [character, macros, profile]{
-				auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)][macros->getSelectedItemIndex()];
+				auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))][macros->getSelectedItemIndex()];
 				std::string path = exploreFile("Save macro file", profile, true);
 
 				if (path.empty())
@@ -1021,7 +1042,7 @@ namespace Practice
 				exportMacroToFile(macro, path);
 			});
 			exportChrToFile->connect("Clicked", [character, profile]{
-				auto &macros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+				auto &macros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 				std::string path = exploreFile("Save macro file", profile, true);
 
 				if (path.empty())
@@ -1036,7 +1057,7 @@ namespace Practice
 				exportMacrosToFile(settings.nonSaved.macros, path);
 			});
 			exportStr->connect("Clicked", [character, macros, close]{
-				auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(character->getSelectedItemIndex() < SokuLib::CHARACTER_RANDOM ? character->getSelectedItemIndex() : character->getSelectedItemIndex() + 2)][macros->getSelectedItemIndex()];
+				auto &macro = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))][macros->getSelectedItemIndex()];
 				auto fakePanel = tgui::Panel::create({"100%", "100%"});
 				auto text = tgui::TextBox::create();
 				auto close = [text](std::weak_ptr<tgui::Panel> fakePanel){
@@ -1083,10 +1104,10 @@ namespace Practice
 
 				if (path.empty())
 					return;
-				importMacrosFromFile(settings.nonSaved.macros.macros, character->getSelectedItemIndex(), path);
+				importMacrosFromFile(settings.nonSaved.macros.macros, static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString())), path);
 				displayMacroPanel(profile);
 
-				panel->get<tgui::ComboBox>("Character")->setSelectedItemByIndex(character->getSelectedItemIndex());
+				panel->get<tgui::ComboBox>("Character")->setSelectedItemById(character->getSelectedItemId());
 				panel->get<tgui::ComboBox>("Macros")->setSelectedItemByIndex(macros->getItemCount() + 1);
 			});
 			str->connect("Clicked", [profile, character, macros, name, deleteMacro, play, record1, addInput, record2, exportButton, inputPanel]{
@@ -1102,7 +1123,7 @@ namespace Practice
 				};
 
 				ok->connect("Clicked", [profile, text, character, macros, name, deleteMacro, play, record1, addInput, record2, exportButton, inputPanel]{
-					auto &allMacros = settings.nonSaved.macros.macros[character->getSelectedItemIndex()];
+					auto &allMacros = settings.nonSaved.macros.macros[static_cast<SokuLib::Character>(std::stoul(character->getSelectedItemId().toAnsiString()))];
 					auto macro = importMacroFromString(text->getText());
 
 					allMacros.push_back(macro);
@@ -1147,11 +1168,12 @@ namespace Practice
 		}, std::weak_ptr<tgui::Button>(import));
 
 		if (settings.nonSaved.recordingMacro) {
-			for (int i = 0; i < settings.nonSaved.macros.macros.size(); i++)
-				for (int j = 0; j < settings.nonSaved.macros.macros[i].size(); j++)
-					if (settings.nonSaved.recordBuffer == &settings.nonSaved.macros.macros[i][j].macroElems) {
-						character->setSelectedItemByIndex(i);
+			for (auto &macrosPair : settings.nonSaved.macros.macros)
+				for (int j = 0; j < macrosPair.second.size(); j++)
+					if (settings.nonSaved.recordBuffer == &macrosPair.second[j].macroElems) {
+						character->setSelectedItemByIndex(macrosPair.first);
 						macros->setSelectedItemByIndex(j);
+						break;
 					}
 
 			(settings.nonSaved.recordForDummy ? record2 : record1)->setEnabled(false);
@@ -1164,7 +1186,7 @@ namespace Practice
 			addInput->setEnabled(false);
 			import->setEnabled(false);
 			exportButton->setEnabled(false);
-		}*/
+		}
 	}
 
 	static void updateCharacterPanel(tgui::Panel::Ptr pan, SokuLib::CharacterManager &manager, SokuLib::Character character, CharacterState &state)
@@ -1179,7 +1201,7 @@ namespace Practice
 
 	static void updateMacroPanel()
 	{
-		/*auto queue = panel->get<tgui::TextBox>("Queue");
+		auto queue = panel->get<tgui::TextBox>("Queue");
 		auto record1 = panel->get<tgui::Button>("Record1");
 		auto record2 = panel->get<tgui::Button>("Record2");
 
@@ -1202,7 +1224,7 @@ namespace Practice
 				text += elem.name;
 			}
 			queue->setText(text);
-		}*/
+		}
 	}
 
 	static void displayHitboxesPanel(const std::string &profile)

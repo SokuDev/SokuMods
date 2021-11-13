@@ -373,6 +373,31 @@ install(FILES README.md DESTINATION "SokuEngine"
 
 # WIP Module
 
+
+add_library(
+        "OfflineSpectator"
+        MODULE
+        modules/OfflineSpectator/main.cpp
+)
+target_compile_options(OfflineSpectator PRIVATE /Zi)
+target_compile_definitions("OfflineSpectator" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("OfflineSpectator" PRIVATE include include/directx "modules/OfflineSpectator/")
+target_link_directories("OfflineSpectator" PRIVATE lib)
+target_link_libraries(
+        OfflineSpectator
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        zlib
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "OfflineSpectator" LIBRARY DESTINATION "SWRSToys/modules/OfflineSpectator/")
+install(TARGETS "OfflineSpectator" LIBRARY DESTINATION "SokuEngine/modules/OfflineSpectator/")
+
+
+
 add_library(
         "AdvancedPracticeMode"
         MODULE
@@ -385,8 +410,6 @@ add_library(
         modules/AdvancedPracticeMode/Logic.hpp
         modules/AdvancedPracticeMode/Dummy.cpp
         modules/AdvancedPracticeMode/Dummy.hpp
-        modules/AdvancedPracticeMode/DrawUtils.cpp
-        modules/AdvancedPracticeMode/DrawUtils.hpp
         modules/AdvancedPracticeMode/Inputs.cpp
         modules/AdvancedPracticeMode/Inputs.hpp
         modules/AdvancedPracticeMode/Hitboxes.cpp

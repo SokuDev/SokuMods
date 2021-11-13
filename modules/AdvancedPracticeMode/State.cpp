@@ -19,8 +19,7 @@
 
 namespace Practice
 {
-	std::string soku2Path;
-	std::map<SokuLib::Character, std::map<unsigned short, Sprite>> cardsTextures;
+	std::map<SokuLib::Character, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
 	std::map<SokuLib::Character, CharacterInfo> characterInfos{
 		{ SokuLib::CHARACTER_REIMU,     { SokuLib::CHARACTER_REIMU,     "reimu",     "Reimu",     "Reimu Hakurei",          {"236", "214", "421", "623"} }},
 		{ SokuLib::CHARACTER_MARISA,    { SokuLib::CHARACTER_MARISA,    "marisa",    "Marisa",    "Marisa Kirisame",        {"214", "623", "22",  "236"} }},
@@ -87,7 +86,7 @@ namespace Practice
 					sprintf(bufferCards, "data/card/%s/card%03lu.bmp", info.codeName.c_str(), cardId);
 					entry.id = cardId;
 					entry.name = str2;
-					Texture::loadFromGame(sprite.texture, bufferCards);
+					sprite.texture.loadFromGame(bufferCards);
 				} catch (std::exception &e) {
 					MessageBoxA(
 						SokuLib::window,
@@ -108,6 +107,9 @@ namespace Practice
 	void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &deck, int param4, SokuLib::Dequeue<short> &newDeck)
 	{
 		unsigned short originalDeck[20];
+
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_PRACTICE && !settings.nonSaved.enabled)
+			return s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
 
 		if (newDeck.size != 20) {
 			MessageBoxA(
@@ -150,9 +152,10 @@ namespace Practice
 			newDeck[i] = originalDeck[i];
 		newDeck.size = 20;
 		s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
-		puts("Work done !");
+		puts("Work done!");
 	}
 
+	wchar_t soku2Path[1024 + MAX_PATH];
 	Settings settings;
 	sf::RenderWindow *sfmlWindow;
 	char profilePath[1024 + MAX_PATH];
@@ -195,7 +198,7 @@ namespace Practice
 		original_onHit = SokuLib::union_cast<int (SokuLib::CharacterManager::*)(int)>(SokuLib::TamperNearJmpOpr(0x47c5a9, reinterpret_cast<DWORD>(onHit)));
 		VirtualProtect((PVOID)0x47c5aa, 4, old, &old);
 
-		//This forces the dummy to have an input device (probably keyboard ?)
+		//This forces the dummy to have an input device (probably keyboard?)
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 			((unsigned *)0x00898680)[1] = 0x008986A8;
 	}
@@ -377,14 +380,26 @@ namespace Practice
 
 	CharacterState::CharacterState(SokuLib::Character chr)
 	{
+		// Levels
+		char nbSkills = 0;
+
+		for (auto &entry : characterInfos[chr].cards) {
+			if (entry.first < 200) {
+				nbSkills += 1;
+				printf("Card %s (%i) is a skill\n", entry.second.name.c_str(), entry.first);
+			}
+		}
+		printf("This character (%i) has %i skill cards ", chr, nbSkills);
+		nbSkills /= 3;
+
 		SokuLib::Skill buffer[15] = {
 			{0x00, false},
 			{0x00, false},
 			{0x00, false},
 			{0x00, false},
 			{
-			 static_cast<unsigned char>((chr != SokuLib::CHARACTER_PATCHOULI) * 0x7F),
-			       chr != SokuLib::CHARACTER_PATCHOULI
+				static_cast<unsigned char>((nbSkills != 5) * 0x7F),
+			       nbSkills != 5
 			},
 			{0x7F, true},
 			{0x7F, true},
@@ -434,27 +449,47 @@ namespace Practice
 			}
 		}
 
-		for (auto &[id, infos] : characterInfos) {
+		this->macros.clear();
+		while (!stream.eof()) {
+			unsigned char character;
 			unsigned short length;
-			auto &macroArray = this->macros[id];
+			std::string name;
 
+			stream.read(reinterpret_cast<char *>(&character), sizeof(character));
 			stream.read(reinterpret_cast<char *>(&length), sizeof(length));
+
 			if (stream.fail())
 				break;
-			std::cout << "Macro array for " << infos.fullName << " has " << length << " entry/entries at load time" << std::endl;
-			if (length >= 4096) {
+
+			try {
+				name = characterInfos.at(static_cast<SokuLib::Character>(character)).fullName;
+			} catch (std::out_of_range &e) {
+				name = "unknown character " + std::to_string(character);
+			}
+
+			if (this->macros.find(static_cast<SokuLib::Character>(character)) != this->macros.end()) {
+				MessageBoxA(
+					SokuLib::window,
+					("Character " + name + " has multiple entries in the same file! They will all be merged but this may be a sign the macro file is corrupted.").c_str(),
+					"Corrupted macro file?", MB_ICONWARNING
+				);
+			}
+
+			auto &macroArray = this->macros[static_cast<SokuLib::Character>(character)];
+
+			std::cout << "Macro array for " << name << " has " << length << " entry/entries at load time" << std::endl;
+			if (macroArray.size() + length >= 4096) {
 				MessageBoxA(
 					SokuLib::window,
 					("There are more than 4096 macros entry (" +
-					 std::to_string(length) +
-					 ").\nThe macro file might be corrupted. The mod might crash if you have too many macros.\n"
-					 "Please remove unused macros.\nDo you want to remove the file ?").c_str(),
+					std::to_string(macroArray.size() + length) +
+					 ").\nThe macro file might be corrupted. The mod might crash (or be very slow) if you have too many macros.\n"
+					 "Please remove unused macros.\nDo you want to remove the file?").c_str(),
 					"Suspicious amount of macros in file.", MB_ICONWARNING | MB_YESNO
 				);
 				//TODO: Actually remove the file
 			}
-			macroArray.clear();
-			macroArray.reserve(length);
+			macroArray.reserve(macroArray.size() + length);
 			for (int j = length; j; j--)
 				stream >> (macroArray.emplace_back(), macroArray.back());
 		}
@@ -485,8 +520,15 @@ namespace Practice
 		stream.write(reinterpret_cast<char *>(&magic), sizeof(magic));
 		for (auto &[id, macroArray] : this->macros) {
 			unsigned short length = macroArray.size();
+			unsigned char character = id;
 
-			std::cout << "Macro array for " << characterInfos[id].fullName << " has " << length << " entry/entries at save time" << std::endl;
+			std::cout << "Macro array for " << characterInfos[id].fullName << " has " << length << " entry/entries at save time";
+			if (length == 0) {
+				std::cout << " (skipped)" << std::endl;
+				continue;
+			}
+			std::cout << std::endl;
+			stream.write(reinterpret_cast<char *>(&character), sizeof(character));
 			stream.write(reinterpret_cast<char *>(&length), sizeof(length));
 			for (const auto &macro : macroArray)
 				stream << macro;

@@ -1,21 +1,4 @@
 Renderer.1 {
-    arrowbackgroundcolor = #F5F5F5;
-    arrowbackgroundcolorhover = white;
-    arrowcolor = #3C3C3C;
-    arrowcolorhover = black;
-    backgroundcolor = #F5F5F5;
-    bordercolor = black;
-    borders = (1, 1, 1, 1);
-    padding = (0, 0, 0, 0);
-    textcolor = #3C3C3C;
-    texturearrow = None;
-    texturearrowdisabled = None;
-    texturearrowhover = None;
-    texturebackground = None;
-    texturebackgrounddisabled = None;
-}
-
-Renderer.2 {
     backgroundcolor = #F5F5F5;
     backgroundcolordisabled = #E6E6E6;
     backgroundcolordown = #EBEBEB;
@@ -37,6 +20,23 @@ Renderer.2 {
     texturehover = None;
 }
 
+Renderer.2 {
+    arrowbackgroundcolor = #F5F5F5;
+    arrowbackgroundcolorhover = white;
+    arrowcolor = #3C3C3C;
+    arrowcolorhover = black;
+    backgroundcolor = #F5F5F5;
+    bordercolor = black;
+    borders = (1, 1, 1, 1);
+    padding = (0, 0, 0, 0);
+    textcolor = #3C3C3C;
+    texturearrow = None;
+    texturearrowdisabled = None;
+    texturearrowhover = None;
+    texturebackground = None;
+    texturebackgrounddisabled = None;
+}
+
 ComboBox.Macros {
     ChangeItemOnScroll = true;
     ExpandDirection = Down;
@@ -45,7 +45,7 @@ ComboBox.Macros {
     Position = (210, 70);
     Size = (220, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 EditBox.Name {
@@ -96,7 +96,7 @@ Button.New {
     Size = (100, 22);
     Text = "New macro";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.Delete {
@@ -104,7 +104,7 @@ Button.Delete {
     Size = (110, 22);
     Text = "Delete macro";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.Play {
@@ -112,7 +112,7 @@ Button.Play {
     Size = (120, 22);
     Text = "Play macro";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.Record1 {
@@ -120,7 +120,7 @@ Button.Record1 {
     Size = (190, 22);
     Text = "Record macro from dummy";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.AddInput {
@@ -128,20 +128,18 @@ Button.AddInput {
     Size = (190, 22);
     Text = "Add new element";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 ComboBox.Character {
     ChangeItemOnScroll = true;
     ExpandDirection = Down;
-    Items = ["Reimu Hakurei", "Marisa Kirisame", "Sakuya Izayoi", "Alice Margatroid", "Patchouli Knowledge", "Youmu Konpaku", "Remilia Scarlet", "Yuyuko Saigyouji", "Yukari Yakumo", "Suika Ibuki", "Reisen Undongein Inaba", "Aya Shameimaru", "Komachi Onozuka", "Iku Nagae", "Tenshi Hinanawi", "Sanae Kochiya", Cirno, "Hong Meiling", "Utsuho Reiuji", "Suwako Moriya"];
     ItemsToDisplay = 0;
     MaximumItems = 0;
     Position = (10, 10);
-    SelectedItemIndex = 10;
     Size = (190, 22);
     TextSize = 13;
-    renderer = &1;
+    renderer = &2;
 }
 
 Button.Record2 {
@@ -149,7 +147,7 @@ Button.Record2 {
     Size = (220, 22);
     Text = "Record macro from player";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 CheckBox.Loop {
@@ -215,7 +213,7 @@ Button.Import {
     Size = (90, 22);
     Text = "Import...";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }
 
 Button.Export {
@@ -223,5 +221,5 @@ Button.Export {
     Size = (90, 22);
     Text = "Export...";
     TextSize = 13;
-    renderer = &2;
+    renderer = &1;
 }

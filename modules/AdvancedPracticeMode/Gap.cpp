@@ -37,8 +37,8 @@ namespace Practice
 		GapElem(int timer, int gap): timer(timer), gap(gap) {};
 	};
 	static SokuLib::SWRFont font;
-	static Sprite backBox;
-	static RectangleShape bar;
+	static SokuLib::DrawUtils::Sprite backBox;
+	static SokuLib::DrawUtils::RectangleShape bar;
 	static std::pair<int, int> fas;
 	static BlockingState left;
 	static BlockingState right;
@@ -92,8 +92,8 @@ namespace Practice
 			character.objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN &&
 			character.objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH
 		) && (
-			!character.objectBase.frameData.frameFlags.guardAvailable ||
-			character.objectBase.frameData.frameFlags.guarding
+			!character.objectBase.frameData->frameFlags.guardAvailable ||
+			character.objectBase.frameData->frameFlags.guarding
 		);
 	}
 
@@ -145,7 +145,7 @@ namespace Practice
 	{
 		SokuLib::FontDescription desc;
 
-		Texture::loadFromFile(backBox.texture, (std::string(profilePath) + "/assets/infoBar.png").c_str());
+		backBox.texture.loadFromFile((std::string(profilePath) + "/assets/infoBar.png").c_str());
 		backBox.setSize({102, 18});
 		backBox.rect.width = backBox.texture.getSize().x;
 		backBox.rect.height = backBox.texture.getSize().y;
@@ -172,9 +172,9 @@ namespace Practice
 		font.setIndirect(desc);
 	}
 
-	void showFrameAdvantageOrGapBox(const char *fmt, int v, int x, int &y, float alpha, DxSokuColor color)
+	void showFrameAdvantageOrGapBox(const char *fmt, int v, int x, int &y, float alpha, SokuLib::Color color)
 	{
-		Sprite sprite;
+		SokuLib::DrawUtils::Sprite sprite;
 		char buffer[32];
 		int text;
 
@@ -214,16 +214,16 @@ namespace Practice
 
 	void drawGap(GapElem &gap, int x, int &y)
 	{
-		DxSokuColor color;
+		SokuLib::Color color;
 
 		if (gap.gap < 7)
-			color = DxSokuColor::Green;
+			color = SokuLib::Color::Green;
 		else if (gap.gap < 12)
-			color = DxSokuColor::Yellow;
+			color = SokuLib::Color::Yellow;
 		else if (gap.gap < 16)
-			color = DxSokuColor{0xFF, 0x80, 0x00, 0xFF};
+			color = SokuLib::Color{0xFF, 0x80, 0x00, 0xFF};
 		else
-			color = DxSokuColor::Red;
+			color = SokuLib::Color::Red;
 		if (gap.gap)
 			showFrameAdvantageOrGapBox("Gap: %iF", gap.gap, x, y, getAlpha(gap.timer), color);
 		else
@@ -252,8 +252,8 @@ namespace Practice
 				actual * 2 + 1,
 				5
 			});
-			bar.setBorderColor(DxSokuColor::Black);
-			bar.setFillColor(DxSokuColor::Red);
+			bar.setBorderColor(SokuLib::Color::Black);
+			bar.setFillColor(SokuLib::Color::Red);
 			bar.draw();
 		} else if (it2 != blockStun.end()) {
 			if (!settings.showBlockstun)
@@ -267,8 +267,8 @@ namespace Practice
 				actual * 2 + 1,
 				5
 			});
-			bar.setBorderColor(DxSokuColor::Black);
-			bar.setFillColor(DxSokuColor::White);
+			bar.setBorderColor(SokuLib::Color::Black);
+			bar.setFillColor(SokuLib::Color::White);
 			bar.draw();
 		} else if (
 			!manager.damageLimited &&
@@ -288,8 +288,8 @@ namespace Practice
 				 static_cast<unsigned int>(manager.untech + 1),
 				5
 			});
-			bar.setBorderColor(DxSokuColor::Black);
-			bar.setFillColor(DxSokuColor{0xFF, 0x80, 0x00, 0xFF});
+			bar.setBorderColor(SokuLib::Color::Black);
+			bar.setFillColor(SokuLib::Color{0xFF, 0x80, 0x00, 0xFF});
 			bar.draw();
 		}
 	}
@@ -302,9 +302,9 @@ namespace Practice
 
 		if (!settings.nonSaved.enabled && settings.showFrameAdvantage) {
 			if (timers.first < 240)
-				showFrameAdvantageOrGapBox("Adv: %+i", fas.first,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+				showFrameAdvantageOrGapBox("Adv: %+i", fas.first,  348, yLeft,  getAlpha(timers.first),  (fas.first  < 0 ? SokuLib::Color::Red : SokuLib::Color::Green));
 			if (timers.second < 240)
-				showFrameAdvantageOrGapBox("Adv: %+i", fas.second, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? DxSokuColor::Red : DxSokuColor::Green));
+				showFrameAdvantageOrGapBox("Adv: %+i", fas.second, 202, yRight, getAlpha(timers.second), (fas.second < 0 ? SokuLib::Color::Red : SokuLib::Color::Green));
 		}
 
 		if (!settings.nonSaved.enabled && settings.showGaps) {
@@ -317,7 +317,7 @@ namespace Practice
 		drawBars(battle.rightCharacterManager, right);
 	}
 
-	static void generateTextSprite(Sprite &sprite, const char *buffer)
+	static void generateTextSprite(SokuLib::DrawUtils::Sprite &sprite, const char *buffer)
 	{
 		int text;
 

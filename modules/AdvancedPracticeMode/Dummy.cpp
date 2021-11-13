@@ -282,11 +282,11 @@ namespace Practice
 					settings.nonSaved.playList.push_back(settings.nonSaved.playList.front());
 				settings.nonSaved.playingMacroBuffer = settings.nonSaved.playList.front();
 				settings.nonSaved.playList.pop_front();
-				puts("Done !");
+				puts("Done!");
 				return;
 			}
 			settings.nonSaved.playingMacro = false;
-			puts("Done !");
+			puts("Done!");
 		}
 		if (!nextDummyInputs.empty()) {
 			auto &next = nextDummyInputs.front();

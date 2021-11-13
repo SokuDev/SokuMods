@@ -23,8 +23,8 @@ namespace Practice
 		case SokuLib::APM_START_SESSION_REQUEST:
 			resp = MessageBoxA(
 				SokuLib::window,
-				(std::string(SokuLib::getNetObject().profile1name) + " wants to start a practice session.\n\nAccept ?").c_str(),
-				"Start practice ?",
+				(std::string(SokuLib::getNetObject().profile1name) + " wants to start a practice session.\n\nAccept?").c_str(),
+				"Start practice?",
 				MB_YESNO | MB_ICONQUESTION
 			);
 			if (resp == IDYES)
