@@ -27,7 +27,7 @@ static bool finished = true;
 static bool loaded = false;
 static std::mutex mutex;
 static SOCKET sock = INVALID_SOCKET;
-static unsigned short hostPort = 10800;
+static unsigned short hostPort = 10900;
 
 static std::ofstream stream{"speclog.txt"};
 
@@ -147,9 +147,9 @@ int __stdcall fakeRecvfrom(SOCKET s, char *buf, int len, int flags, sockaddr *fr
 		std::vector<byte> result;
 		auto pack = reinterpret_cast<SokuLib::Packet *>(buf);
 
-		printf("RecvFrom -> ");
+		printf("RecvFrom %i -> ", ret);
 		SokuLib::displayPacketContent(std::cout, *pack);
-		stream << "RecvFrom -> ";
+		stream << "RecvFrom " << ret << " -> ";
 		SokuLib::displayPacketContent(stream, *pack);
 
 		if (pack->type == SokuLib::HOST_GAME && pack->game.event.type == SokuLib::GAME_REPLAY) {
@@ -204,9 +204,9 @@ int __stdcall fakeSendto(SOCKET s, char *buf, int len, int flags, sockaddr *to, 
 	std::vector<byte> result;
 	auto pack = reinterpret_cast<SokuLib::Packet *>(buf);
 
-	printf("SendTo -> ");
+	printf("SendTo %i -> ", len);
 	SokuLib::displayPacketContent(std::cout, *reinterpret_cast<SokuLib::Packet *>(buf));
-	stream << "SendTo -> ";
+	stream << "SendTo " << len << " -> ";
 	SokuLib::displayPacketContent(stream, *reinterpret_cast<SokuLib::Packet *>(buf));
 	if (pack->type == SokuLib::HOST_GAME && pack->game.event.type == SokuLib::GAME_REPLAY) {
 		auto ret = ZUtils::decompress(pack->game.event.replay.compressedData, pack->game.event.replay.replaySize, result);
@@ -346,14 +346,21 @@ std::pair<byte *, unsigned> getReplayData(unsigned frameId)
 	byte *data = new byte[size];
 	auto pack = reinterpret_cast<SokuLib::ReplayData *>(data);
 
+	if (frameId == -1) {
+		pack->matchId = 0;
+		pack->frameId = frameId;
+		pack->endFrameId = 0;
+		pack->length = 0;
+		return {data, size - 2};
+	}
 	pack->matchId = gameId;
 	pack->frameId = frameId + length;
 	pack->endFrameId = finished ? replays[gameId].size() : 0;
 	pack->length = length;
-	for (int i = 0; i < length; i += 2) {
-		if (i + frameId < replays[gameId].size()) {
-			pack->replayInputs[i].battle = replays[gameId][i + frameId].first;
-			pack->replayInputs[i + 1].battle = replays[gameId][i + frameId].second;
+	for (int i = frameId / 2, j = length - 2; j >= 0; i++, j -= 2) {
+		if (i < replays[gameId].size()) {
+			pack->replayInputs[j + 1].battle = replays[gameId][i].first;
+			pack->replayInputs[j].battle     = replays[gameId][i].second;
 		}
 	}
 	return {data, size};
@@ -378,7 +385,7 @@ void handleClientGame(SokuLib::Packet &packet, sockaddr_in &addr)
 	packet.game.event.type = SokuLib::GAME_REPLAY;
 	packet.game.event.replay.replaySize = result.size();
 	memcpy(packet.game.event.replay.compressedData, result.data(), result.size());
-	SokuLib::DLL::ws2_32.sendto(sock, reinterpret_cast<char *>(&packet), sizeof(packet.game.event.replay), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
+	SokuLib::DLL::ws2_32.sendto(sock, reinterpret_cast<char *>(&packet), 2 + sizeof(packet.game.event.replay) + result.size(), 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
 }
 
 void handlePacket(SokuLib::Packet &packet, sockaddr_in &addr)
@@ -472,15 +479,17 @@ void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 	auto &mgr = SokuLib::getBattleMgr();
 	SokuLib::BattleKeys *input;
 
-	if (This == mgr.leftCharacterManager.keyManager->keymapManager)
+	if (This == mgr.leftCharacterManager.keyManager->keymapManager) {
+		replays[gameId].emplace_back();
 		input = &replays[gameId].back().first;
-	else if (mgr.rightCharacterManager.keyManager && This == mgr.rightCharacterManager.keyManager->keymapManager)
+	} else if (mgr.rightCharacterManager.keyManager && This == mgr.rightCharacterManager.keyManager->keymapManager)
 		input = &replays[gameId].back().second;
 	else
 		return;
 
-	input->up = This->input.verticalAxis > 0;
-	input->down = This->input.verticalAxis < 0;
+	memset(input, 0, sizeof(*input));
+	input->up = This->input.verticalAxis < 0;
+	input->down = This->input.verticalAxis > 0;
 	input->left = This->input.horizontalAxis < 0;
 	input->right = This->input.horizontalAxis > 0;
 	input->A = This->input.a;
@@ -495,12 +504,11 @@ void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 int __fastcall CBattle_OnProcess(SokuLib::Battle *This) {
 	// super
 	mutex.lock();
-	replays[gameId].emplace_back();
 
 	int ret = (This->*s_origCBattle_Process)();
 
 	loaded = false;
-	finished |= SokuLib::getBattleMgr().leftCharacterManager.score == 2 || SokuLib::getBattleMgr().rightCharacterManager.score == 2;
+	finished |= ret != SokuLib::SCENE_BATTLE;
 	mutex.unlock();
 	return ret;
 }
@@ -527,7 +535,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath) {
 	AllocConsole();
 	freopen_s(&_, "CONOUT$", "w", stdout);
 #endif
-	hostPort = GetPrivateProfileInt("Network", "Port", 10800, profilePath);
+	hostPort = GetPrivateProfileInt("Network", "Port", 10900, profilePath);
 	_beginthread(networkLoop, 0, nullptr);
 }
 
