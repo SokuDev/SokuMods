@@ -16,6 +16,7 @@ static int (SokuLib::CharacterManager::*original_onHit)(int param);
 
 #endif
 
+static bool loaded = false;
 static SokuLib::DrawUtils::Sprite bePunish;
 static SokuLib::DrawUtils::Sprite jumpPunish;
 static SokuLib::DrawUtils::Sprite dashPunish;
@@ -35,7 +36,7 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 	{
 		return &jumpPunish;
 	}
-	else if (character.objectBase.action >= SokuLib::ACTION_FORWARD_DASH && character.objectBase.action <= SokuLib::ACTION_LILIPAD_BACKDASH)
+	else if (character.objectBase.action >= SokuLib::ACTION_FORWARD_DASH && character.objectBase.action <= SokuLib::ACTION_LILYPAD_BACKDASH)
 	{
 		return &dashPunish;
 	}
@@ -55,7 +56,7 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 
 int __fastcall isHit(SokuLib::CharacterManager &character, int, int param)
 {
-	if (!character.objectBase.frameData.frameFlags.guardAvailable &&
+	if (!character.objectBase.frameData->frameFlags.guardAvailable &&
 		(character.objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN ||
 		character.objectBase.action > SokuLib::ACTION_NEUTRAL_TECH))
 	{
@@ -76,6 +77,22 @@ int __fastcall isHit(SokuLib::CharacterManager &character, int, int param)
 
 void createPunishTextSprite(SokuLib::DrawUtils::Sprite &punishText, char* punishMessage)
 {
+	SokuLib::Vector2<int> realSize;
+	if (!punishText.texture.createFromText(punishMessage, font, {0x1000, 50}, &realSize))
+	{
+		puts("Create from text failed");
+	}
+	punishText.setSize(realSize.to<unsigned>());
+	punishText.rect.width = realSize.x;
+	punishText.rect.height = realSize.y;
+}
+
+void createSprites()
+{
+	if (loaded)
+		return;
+
+	loaded = true;
 	SokuLib::FontDescription desc;
 
 	desc.r1 = 255;
@@ -98,18 +115,6 @@ void createPunishTextSprite(SokuLib::DrawUtils::Sprite &punishText, char* punish
 	font.create();
 	font.setIndirect(desc);
 
-	SokuLib::Vector2<int> realSize;
-	if (!punishText.texture.createFromText(punishMessage, font, {0x1000, 50}, &realSize))
-	{
-		puts("Create from text failed");
-	}
-	punishText.setSize(realSize.to<unsigned>());
-	punishText.rect.width = realSize.x;
-	punishText.rect.height = realSize.y;
-}
-
-void createSprites()
-{
 	createPunishTextSprite(jumpPunish, "Jump Punish!");
 	createPunishTextSprite(bePunish, "BE Punish!");
 	createPunishTextSprite(dashPunish, "Dash Punish!");
@@ -117,16 +122,11 @@ void createSprites()
 	createPunishTextSprite(punish, "Punish!");
 }
 
-void __fastcall BattleOnRoundstart(SokuLib::BattleManager *This)
-{
-	(This->*og_BattleManagerOnRoundstart)();
-	createSprites();
-}
-
 int __fastcall BattleOnProcess(SokuLib::BattleManager *This)
 {
 	int ret = (This->*og_BattleManagerOnProcess)();
 
+	createSprites();
 	return ret;
 }
 
@@ -163,8 +163,16 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 {
 	DWORD old;
 
+#ifdef _DEBUG
+	FILE *_;
+
+	AllocConsole();
+	freopen_s(&_, "CONOUT$", "w", stdout);
+	freopen_s(&_, "CONOUT$", "w", stderr);
+#endif
+
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	og_BattleManagerOnRoundstart = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRoundStart, BattleOnRoundstart);
+	//og_BattleManagerOnRoundstart = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRoundStart, BattleOnRoundstart);
 	og_BattleManagerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, BattleOnProcess);
 	og_BattleManagerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  BattleOnRender);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
