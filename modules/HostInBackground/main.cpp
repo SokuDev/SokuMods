@@ -695,6 +695,8 @@ void acceptHost(void *)
 	puts("My job here is done");
 }
 
+char hook[11];
+
 void onUpdate()
 {
 	DWORD old;
@@ -703,17 +705,10 @@ void onUpdate()
 		loadAssets();
 	if (needHook) {
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-		*(char *)0x407f43 = 0x90;
-		*(char *)0x407f44 = 0x90;
-		*(char *)0x407f45 = 0x90;
-		*(char *)0x407f46 = 0x90;
-		*(char *)0x407f47 = 0x90;
-		*(char *)0x407f48 = 0x90;
-		*(char *)0x407f49 = 0x90;
-		*(char *)0x407f4A = 0x90;
-		*(char *)0x407f4B = 0x90;
-		*(char *)0x407f4C = 0x90;
-		*(char *)0x407f4D = 0x90;
+		for (int i = 0; i < 11; i++) {
+			hook[i] = ((char *)0x407f43)[i];
+			((char *)0x407f43)[i] = 0x90;
+		}
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 		needHook = false;
 	}
@@ -740,7 +735,7 @@ void onUpdate()
 		box.setPosition({
 			static_cast<int>(640 - box.getSize().x * (60 - (timer - 180)) / 60),
 			0
-				});
+		});
 		text.setPosition({
 			static_cast<int>(640 - box.getSize().x * (60 - (timer - 180)) / 60) + 20,
 			15
@@ -766,17 +761,8 @@ void onUpdate()
 		else if (SokuLib::inputMgrs.input.a == 1) {
 			SokuLib::inputMgrs.input.a = 2;
 			VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-			*(char *)0x407f43 = 0xFF;
-			*(char *)0x407f44 = 0xD0;
-			*(char *)0x407f45 = 0x83;
-			*(char *)0x407f46 = 0xF8;
-			*(char *)0x407f47 = 0xFF;
-			*(char *)0x407f48 = 0x89;
-			*(char *)0x407f49 = 0x86;
-			*(char *)0x407f4A = 0xB0;
-			*(char *)0x407f4B = 0x00;
-			*(char *)0x407f4C = 0x00;
-			*(char *)0x407f4D = 0x00;
+			for (int i = 0; i < 11; i++)
+				((char *)0x407f43)[i] = hook[i];
 			VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 			if (yesSelected) {
 				SokuLib::playSEWaveBuffer(40);
@@ -862,6 +848,16 @@ void LoadSettings(LPCSTR profilePath)
 {
 	puts("Loading settings...");
 	//config.refreshRate = GetPrivateProfileInt("DiscordIntegration", "RefreshTime", 1000, profilePath);
+}
+
+extern "C" __declspec(dllexport) bool isHosting()
+{
+	return hosting;
+}
+
+extern "C" __declspec(dllexport) unsigned short getHostPort()
+{
+	return port;
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16])
