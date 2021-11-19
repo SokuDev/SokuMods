@@ -679,6 +679,10 @@ void fakeHost()
 	menu->choice = 0;
 	menu->subchoice = 0;
 	(*(CDesignSprite **)0x089a390)->active = false;
+	box.setPosition({640 ,0});
+	text.setPosition({640, 15});
+	gear1.setPosition({640, 10});
+	gear2.setPosition({640, 20});
 }
 
 void acceptHost(void *)
@@ -801,7 +805,9 @@ int __fastcall ConnectMenu_OnRender(SokuLib::MenuConnect *This)
 
 int __fastcall ConnectMenu_OnProcess(SokuLib::MenuConnect *This)
 {
-	if (hosting && !someoneConnected) {
+	if (hosting) {
+		if (someoneConnected)
+			return false;
 		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(1, false, false, false)) {
 			SokuLib::playSEWaveBuffer(0x29);
 			return false;
