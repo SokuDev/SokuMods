@@ -27,6 +27,8 @@ static int (SokuLib::MenuResult::* ogResultOnRender)();
 static SokuLib::MenuResult *(SokuLib::MenuResult::* ogResultOnDestruct)(unsigned char);
 static int (__fastcall *og_loadTexture )(void *, void *, void *, void *);
 static bool stopRepeat = false;
+static SokuLib::DrawUtils::Texture itemTexture;
+static SokuLib::DrawUtils::Texture selectedItemsTexture;
 
 void loadSoku2CSV(LPWSTR path)
 {
@@ -192,8 +194,18 @@ int __fastcall myBattleOnRender(SokuLib::Battle *This)
 	return buffer;
 }
 
+static bool __loaded = false;
+
 int __fastcall myTitleOnProcess(SokuLib::Title *This)
 {
+	if (!__loaded) {
+		__loaded = true;
+		itemTexture.loadFromResource(myModule, MAKEINTRESOURCE(48));
+		selectedItemsTexture.loadFromResource(myModule, MAKEINTRESOURCE(52));
+		This->menuItemTiles.dxHandle = itemTexture.releaseHandle();
+		This->menuSelectedItemTiles.dxHandle = selectedItemsTexture.releaseHandle();
+	}
+
 	int buffer = (This->*ogTitleOnProcess)();
 
 	if (loadRequest) {
