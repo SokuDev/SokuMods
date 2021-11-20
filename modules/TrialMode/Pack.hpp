@@ -60,6 +60,7 @@ public:
 	SokuLib::DrawUtils::Sprite description;
 	std::vector<std::unique_ptr<Scenario>> scenarios;
 
+	Pack() = default;
 	Pack(const std::string &path, const nlohmann::json &object);
 };
 

@@ -1241,8 +1241,8 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	}
 	if (!loadedOutro)
 		handlePlayerInputs(SokuLib::inputMgrs.input);
-	SokuLib::currentScene->to<SokuLib::Title>().cursorPos = 8;
-	SokuLib::currentScene->to<SokuLib::Title>().cursorPos2 = 8;
+	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.pos = 8;
+	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.posCopy = 8;
 	updateNoiseTexture();
 	updateBandTexture();
 
