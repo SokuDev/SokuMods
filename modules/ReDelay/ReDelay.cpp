@@ -69,7 +69,7 @@ void handleInput(SokuLib::KeymapManager *base) {
 
 	auto &mgr = SokuLib::getBattleMgr();
 
-	if (base == mgr.leftCharacterManager.keyManager->keymapManager) {
+	if (mgr.leftCharacterManager.keyManager && base == mgr.leftCharacterManager.keyManager->keymapManager) {
 		lastInputsLeft.push_back(base->input);
 		updateInput(lastInputs.first, lastInputsLeft.front());
 		memcpy(&base->input, &lastInputs.first, sizeof(base->input));
