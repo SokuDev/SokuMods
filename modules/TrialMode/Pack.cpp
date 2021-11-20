@@ -369,7 +369,7 @@ invalidPreview:
 			delete scene;
 			MessageBox(
 				SokuLib::window,
-				("Warning: Trial pack " + path + ": scenario preview #" + std::to_string(i) + " is invalid.\n").c_str(),
+				("Warning: Trial pack " + path + ": scenario file #" + std::to_string(i) + " is invalid.\n").c_str(),
 				"Trial pack warning",
 				MB_ICONWARNING
 			);
@@ -589,23 +589,18 @@ void loadPacks()
 
 		auto pack = new Pack(std::string(buffer), val);
 
-		if (!pack->scenarios.empty()) {
-			loadedPacks.emplace_back(pack);
+		loadedPacks.emplace_back(pack);
 
-			packsByName[pack->nameStr].push_back(loadedPacks.back());
-			packsByCategory[pack->category].push_back(loadedPacks.back());
-			if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
-				uniqueCategories.push_back(pack->category);
-			if (std::find(uniqueNames.begin(), uniqueNames.end(), pack->nameStr) == uniqueNames.end())
-				uniqueNames.push_back(pack->nameStr);
-			for (auto &mode : pack->modes) {
-				packsByName[mode].push_back(loadedPacks.back());
-				if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
-					uniqueModes.push_back(mode);
-			}
-		} else {
-			puts("Invalid pack :(");
-			delete pack;
+		packsByName[pack->nameStr].push_back(loadedPacks.back());
+		packsByCategory[pack->category].push_back(loadedPacks.back());
+		if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
+			uniqueCategories.push_back(pack->category);
+		if (std::find(uniqueNames.begin(), uniqueNames.end(), pack->nameStr) == uniqueNames.end())
+			uniqueNames.push_back(pack->nameStr);
+		for (auto &mode : pack->modes) {
+			packsByName[mode].push_back(loadedPacks.back());
+			if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
+				uniqueModes.push_back(mode);
 		}
 		buffer[starPos] = 0;
 	} while (FindNextFileA(findHandle, &data));

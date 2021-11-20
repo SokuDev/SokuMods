@@ -4,6 +4,7 @@
 
 #define _USE_MATH_DEFINES
 #include <fstream>
+#include <direct.h>
 #include <dinput.h>
 #include <process.h>
 #include <thread>
@@ -12,6 +13,7 @@
 #include "version.h"
 #include "Trial/Trial.hpp"
 #include "TrialEditor/TrialEditor.hpp"
+#include "InputBox.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -1152,12 +1154,120 @@ static void handleGoDown()
 	}
 }
 
+void createBasicPack(const std::string &folder, const std::string &path)
+{
+	printf("Creating pack at location %s\n", path.c_str());
+
+	std::ofstream stream{path + "\\pack.json"};
+	nlohmann::json json;
+
+	if (stream.fail()) {
+		MessageBox(
+			SokuLib::window,
+			("Cannot open " + path + "\\pack.json for writing: " + strerror(errno)).c_str(),
+			"Pack creation error",
+			MB_ICONERROR
+		);
+		return;
+	}
+	json["min_version"] = VERSION_STR;
+	json["author"] = SokuLib::profile1.name;
+	json["characters"] = nlohmann::json::array();
+	json["scenarios"] = nlohmann::json::array();
+	stream << json.dump(4);
+
+	auto pack = std::make_shared<Pack>(folder, json);
+
+	loadedPacks.push_back(pack);
+	packsByName[pack->nameStr].push_back(loadedPacks.back());
+	packsByCategory[pack->category].push_back(loadedPacks.back());
+	if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
+		uniqueCategories.push_back(pack->category);
+	if (std::find(uniqueNames.begin(), uniqueNames.end(), pack->nameStr) == uniqueNames.end())
+		uniqueNames.push_back(pack->nameStr);
+	for (auto &mode : pack->modes) {
+		packsByName[mode].push_back(loadedPacks.back());
+		if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
+			uniqueModes.push_back(mode);
+	}
+	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
+		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
+			return pack2->error.texture.hasTexture();
+		return pack1->category < pack2->category;
+	});
+	std::sort(uniqueCategories.begin(), uniqueCategories.end());
+	std::sort(uniqueNames.begin(), uniqueNames.end());
+	std::sort(uniqueModes.begin(), uniqueModes.end());
+
+	auto it = std::find(loadedPacks.begin(), loadedPacks.end(), pack);
+
+	currentPack = it - loadedPacks.begin();
+	shownPack = currentPack;
+	SokuLib::playSEWaveBuffer(0x28);
+	checkScrollDown();
+	modeFilter = -1;
+	nameFilter = -1;
+	topicFilter = -1;
+	currentEntry = -1;
+	pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor{0x80, 0xFF, 0x80};
+	pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor{0x80, 0xFF, 0x80};
+}
+
+bool checkEditorKeys(const SokuLib::KeyInput &input)
+{
+	if (SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0) {
+		try {
+			loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
+		} catch (std::exception &e) {
+			SokuLib::playSEWaveBuffer(0x29);
+			MessageBox(SokuLib::window, ("Error when loading pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+		}
+		return true;
+	}
+	if (SokuLib::inputMgrs.input.c == 1) {
+		if (currentPack < 0) {
+			std::string folder{packsLocation, packsLocation + strlen(packsLocation) - 1};
+			auto path = folder + InputBox("Enter a folder name", "Folder name", "");
+
+			if (path.empty()) {
+				puts("Canceled");
+				goto afterCInput;
+			}
+			if (_mkdir(path.c_str()) != 0) {
+				MessageBox(
+					SokuLib::window,
+					(path + ": " + strerror(errno)).c_str(),
+					"Pack creation error",
+					MB_ICONERROR
+				);
+				goto afterCInput;
+			}
+			createBasicPack(folder, path);
+		}
+	}
+afterCInput:
+	return true;
+}
+
+bool editorUpdate()
+{
+	checkEditorKeys(SokuLib::inputMgrs.input);
+	return true;
+}
+
+void editorRender()
+{
+
+}
+
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
 	if (SokuLib::inputMgrs.input.spellcard == 1)
 		switchEditorMode();
 	if (input.a == 1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE && currentPack >= 0) {
-		if (currentEntry == -1) {
+		if (loadedPacks[currentPack]->scenarios.empty())
+			SokuLib::playSEWaveBuffer(0x29);
+		else if (currentEntry == -1) {
 			SokuLib::playSEWaveBuffer(0x28);
 			expended = true;
 			currentEntry = 0;
@@ -1192,22 +1302,6 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	if (SokuLib::newSceneId != SokuLib::sceneId)
 		return true;
 
-	if (editorMode && SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0) {
-		try {
-			loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
-		} catch (std::exception &e) {
-			SokuLib::playSEWaveBuffer(0x29);
-			MessageBox(SokuLib::window, ("Error when loading pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
-			return true;
-		}
-		return true;
-	}
-
-	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
-		SokuLib::playSEWaveBuffer(0x29);
-		return loading;
-	}
-
 	if (loadNextTrial) {
 		loadNextTrial = false;
 		++currentEntry;
@@ -1220,16 +1314,6 @@ int menuOnProcess(SokuLib::MenuResult *This)
 		}
 	}
 	menuLoadAssets();
-	if (SokuLib::inputMgrs.input.b == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
-		if (expended) {
-			expended = false;
-			currentEntry = -1;
-		} else {
-			puts("Quit");
-			return loading;
-		}
-	}
 	if (currentEntry >= 0) {
 		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
 			loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
@@ -1239,12 +1323,32 @@ int menuOnProcess(SokuLib::MenuResult *This)
 			loadingGear.setRotation(loadingGear.getRotation() + 0.1);
 		}
 	}
-	if (!loadedOutro)
-		handlePlayerInputs(SokuLib::inputMgrs.input);
-	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.pos = 8;
-	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.posCopy = 8;
 	updateNoiseTexture();
 	updateBandTexture();
+
+	if (!loadedOutro) {
+		if (editorMode && !editorUpdate())
+			return true;
+		else {
+			if (SokuLib::inputMgrs.input.b == 1) {
+				SokuLib::playSEWaveBuffer(0x29);
+				if (expended) {
+					expended = false;
+					currentEntry = -1;
+				} else {
+					puts("Quit");
+					return loading;
+				}
+			}
+			if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+				SokuLib::playSEWaveBuffer(0x29);
+				return loading;
+			}
+			handlePlayerInputs(SokuLib::inputMgrs.input);
+		}
+	}
+	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.pos = 8;
+	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.posCopy = 8;
 
 	if (loadedOutro) {
 		try {
@@ -1509,4 +1613,6 @@ void menuOnRender(SokuLib::MenuResult *This)
 displayOutro:
 	if (loadedOutro)
 		loadedOutro->draw();
+	if (editorMode)
+		editorRender();
 }
