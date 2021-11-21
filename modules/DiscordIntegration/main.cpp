@@ -92,6 +92,33 @@ static const char *const allElems[]{
 	"connecting",
 };
 
+static std::string _ip;
+static unsigned short _port;
+static bool _isSpec;
+static bool _connecting = false;
+static bool _warped = false;
+
+volatile long long discord_id;
+
+bool isHosting()
+{
+	auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+	HMODULE handle = LoadLibraryA("HostInBackground");
+
+	if (!handle)
+		return menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2;
+
+	auto _isHosting   = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isHosting"));
+	auto _getHostPort = reinterpret_cast<unsigned short (*)()>(GetProcAddress(handle, "getHostPort"));
+
+	logMessagef("HostInBackground detected %p %p\n", _isHosting, _getHostPort);
+	if (!_isHosting || !_getHostPort || !_isHosting())
+		return menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2;
+	_port = _getHostPort();
+	logMessagef("HostInBackground hosting on port %u\n", _port);
+	return true;
+}
+
 struct StringConfig {
 	bool timestamp;
 	bool set_timestamp;
@@ -404,15 +431,13 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 			return;
 		}
 
-		if ((menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
-					&& menuObj->subchoice == 3)
-			|| (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)) {
+		if ((menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 3) || (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)) {
 			if (state.host != 2)
 				state.totalTimestamp = time(nullptr);
 			state.host = 2;
 			index = STRING_INDEX_CONNECTING;
 			party = 2;
-		} else if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2) {
+		} else if (isHosting()) {
 			if (state.host != 1)
 				state.totalTimestamp = time(nullptr);
 			state.host = 1;
@@ -431,17 +456,17 @@ void titleScreenStateUpdate() {
 		return;
 	}
 
-	if ((menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
-				&& menuObj->subchoice == 3)
-		|| (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)) {
+	if (
+		(menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 3) ||
+		(menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)
+	) {
 		if (state.roomIp.empty())
 			state.roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
-	} else if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2) {
+	} else if (isHosting()) {
 		if (state.roomIp.empty())
 			try {
 				state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
-			} catch (...) {
-			}
+			} catch (...) {}
 		logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", state.roomIp.c_str(), menuObj->spectate ? "" : "not ");
 	} else if (!state.roomIp.empty())
 		state.roomIp.clear();
@@ -500,14 +525,13 @@ void tick() {
 	updateActivity(index, party);
 }
 
-volatile long long discord_id;
-
 extern "C" __declspec(dllexport) long long DiscordId() {
 	return discord_id;
 }
 
 class MyThread {
 private:
+	bool _connected = false;
 	bool _done = false;
 	int _connectTimeout = 1;
 
@@ -526,30 +550,13 @@ public:
 	static void onActivityJoin(const char *sec) {
 		logMessagef("Got activity join with payload %s\n", sec);
 
-		auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 		std::string secret = sec;
-		auto ip = secret.substr(4, secret.find_last_of(':') - 4);
-		unsigned short port = std::stol(secret.substr(secret.find_last_of(':') + 1));
-		bool isSpec = secret.substr(0, 4) == "spec";
 
-		if (!SokuLib::MenuConnect::isInNetworkMenu()) {
-			logMessage("Warping to connect screen.\n");
-			menuObj = &SokuLib::MenuConnect::moveToConnectMenu();
-			logMessage("Done.\n");
-		} else
-			logMessage("Already in connect screen\n");
-
-		if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE
-			&& menuObj->subchoice == 3)
-			return;
-		if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)
-			return;
-		if (menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2)
-			return;
-
-		logMessagef("Connecting to %s:%u as %s\n", ip.c_str(), port, isSpec ? "spectator" : "player");
-		menuObj->joinHost(ip.c_str(), port, isSpec);
-		state.roomIp = ip + ":" + std::to_string(port);
+		_ip = secret.substr(4, secret.find_last_of(':') - 4);
+		_port = std::stol(secret.substr(secret.find_last_of(':') + 1));
+		_isSpec = secret.substr(0, 4) == "spec";
+		_connecting = true;
+		_warped = false;
 	}
 
 	void init() {
@@ -570,31 +577,53 @@ public:
 		logMessage("Connected !\n");
 		state.core->UserManager().OnCurrentUserUpdate.Connect(MyThread::onCurrentUserUpdate);
 		state.core->ActivityManager().OnActivityJoin.Connect(MyThread::onActivityJoin);
+		this->_connected = true;
 	}
 
 	void run() const {
 		logMessage("Entering loop\n");
-		while (!this->isDone()) {
-			auto currentScene = SokuLib::sceneId;
-			auto newScene = SokuLib::newSceneId;
-
-			logMessagef("Current scene is %i vs new scene %i\n", currentScene, newScene);
-			if (currentScene != newScene)
-				state.totalTimestamp = time(nullptr);
-
-			if (currentScene >= 0 && currentScene == newScene) {
-				tick();
-				logMessage("Callback returned\n");
-			} else if (currentScene == SokuLib::SCENE_TITLE && (newScene == SokuLib::SCENE_SELECTSV || newScene == SokuLib::SCENE_SELECTCL))
-				updateActivity(STRING_INDEX_CONNECTING, 2);
-			else
-				logMessage("No callback call\n");
-			logMessage("Running discord callbacks\n");
-			state.core->RunCallbacks();
-			logMessagef("Waiting for next cycle (%llu ms)\n", config.refreshRate);
-			std::this_thread::sleep_for(std::chrono::milliseconds(config.refreshRate));
-		}
+		while (!this->isDone())
+			this->loop();
 		logMessage("Exit game\n");
+	}
+
+	void loop() const {
+		logMessagef("Current scene is %i vs new scene %i\n", SokuLib::sceneId, SokuLib::newSceneId);
+		if (SokuLib::sceneId != SokuLib::newSceneId)
+			state.totalTimestamp = time(nullptr);
+
+		if (_connecting) {
+			if (!SokuLib::MenuConnect::isInNetworkMenu()) {
+				if (SokuLib::sceneId == SokuLib::SCENE_TITLE && !_warped) {
+					logMessage("Warping to connect screen.\n");
+					SokuLib::MenuConnect::moveToConnectMenu();
+					_warped = true;
+					state.roomIp = _ip + ":" + std::to_string(_port);
+					logMessage("Done.\n");
+				} else
+					SokuLib::newSceneId = SokuLib::SCENE_TITLE;
+			} else {
+				auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+
+				if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 3)
+					return;
+				if (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)
+					return;
+				if (isHosting())
+					return;
+			}
+		}
+		if (SokuLib::sceneId >= 0 && SokuLib::sceneId == SokuLib::newSceneId) {
+			tick();
+			logMessage("Callback returned\n");
+		} else if (SokuLib::sceneId == SokuLib::SCENE_TITLE && (SokuLib::newSceneId == SokuLib::SCENE_SELECTSV || SokuLib::newSceneId == SokuLib::SCENE_SELECTCL))
+			updateActivity(STRING_INDEX_CONNECTING, 2);
+		else
+			logMessage("No callback call\n");
+		logMessage("Running discord callbacks\n");
+		state.core->RunCallbacks();
+		//logMessagef("Waiting for next cycle (%llu ms)\n", config.refreshRate);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(config.refreshRate));
 	}
 };
 static MyThread updateThread;
@@ -800,7 +829,10 @@ void LoadSettings(LPCSTR profilePath) {
 
 void start(void *ignored) {
 	updateThread.init();
-	updateThread.run();
+}
+
+void loop() {
+	updateThread.loop();
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
@@ -830,8 +862,9 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
-	// can't use std::thread here beacause it deadlocks against DllMain DLL_THREAD_ATTACH in some circumstances
+	// can't use std::thread here because it deadlocks against DllMain DLL_THREAD_ATTACH in some circumstances
 	_beginthread(start, 0, nullptr);
+	new SokuLib::Trampoline(0x407f43, loop, 5);
 	logMessage("Done...\n");
 	return true;
 }

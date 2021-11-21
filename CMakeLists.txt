@@ -460,3 +460,23 @@ target_link_libraries(th123eloader shlwapi user32)
 set_target_properties(th123eloader PROPERTIES
         OUTPUT_NAME th123e)
 install(TARGETS th123eloader RUNTIME DESTINATION ".")
+
+# WIP
+add_library(
+        "HostInBackground"
+        MODULE
+        modules/HostInBackground/main.cpp
+)
+target_compile_options(HostInBackground PRIVATE /Zi)
+target_compile_definitions("HostInBackground" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
+target_include_directories("HostInBackground" PRIVATE include include/directx "modules/HostInBackground/")
+target_link_directories("HostInBackground" PRIVATE lib)
+target_link_libraries(
+        HostInBackground
+        SokuLib
+        shlwapi
+        ws2_32
+	d3dx9
+)
+install(TARGETS "HostInBackground" LIBRARY DESTINATION "SWRSToys/modules/HostInBackground/")
+install(TARGETS "HostInBackground" LIBRARY DESTINATION "SokuEngine/modules/HostInBackground/")
