@@ -760,6 +760,7 @@ void onUpdate()
 	if (timer < 240)
 		timer++;
 	if (someoneConnected) {
+		*(bool *)0x89a88c = false;
 		if (deadTime)
 			deadTime--;
 		else if (SokuLib::inputMgrs.input.a == 1) {
