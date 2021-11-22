@@ -1,5 +1,5 @@
 {
-    "name": "The basics",
+    "author": "PinkySmile",
     "category": "System mechanics",
     "characters": [
         "reimu",
@@ -9,31 +9,38 @@
         "meirin",
         "patchouli"
     ],
-    "author": "PinkySmile",
     "icon": {
         "isPath": false,
-        "path": "data/scene/select/character/08b_circle/circle_16.bmp",
         "offset": {
-            "x": 27,
-            "y": 0
+            "x": 27.0,
+            "y": 0.0
         },
+        "path": "data/scene/select/character/08b_circle/circle_16.bmp",
         "rect": {
-            "top": 0,
+            "height": 127,
             "left": 0,
-            "width": 128,
-            "height": 128
+            "top": 0,
+            "width": 128
         },
-        "scale": 0.21,
+        "scale": 0.2200000286102295,
         "xMirror": false,
         "yMirror": false
     },
+    "modes": [],
+    "name": "The basics",
     "scenarios": [
         {
-            "name": "",
-            "face": "",
+            "description": "",
+            "extra": false,
             "file": ".json",
-            "preview": ".png",
-            "description": ""
+            "may_be_locked": true,
+            "name": "",
+            "name_hidden_when_locked": false,
+            "preview": ".png"
         }
-    ]
+    ],
+    "stand": {
+        "isPath": false,
+        "path": ""
+    }
 }

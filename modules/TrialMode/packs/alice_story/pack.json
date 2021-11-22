@@ -1,33 +1,44 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Alice Margatroid",
-    "modes": ["Combo", "Story"],
     "characters": [
         "alice"
+    ],
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/alice/face/face000.bmp",
+        "rect": {
+            "height": 55,
+            "left": 0,
+            "top": 0,
+            "width": 135
+        },
+        "scale": 0.5000043511390686,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [
+        {
+            "description": "",
+            "extra": false,
+            "file": "bnbmid3.json",
+            "may_be_locked": true,
+            "name": "test",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        }
     ],
     "stand": {
         "isPath": false,
         "path": "data/stand/alice.bmp"
-    },
-    "description": "",
-    "author": "PinkySmile",
-    "icon": {
-        "isPath": false,
-        "path": "data/character/alice/face/face000.bmp",
-        "offset": {
-            "x": 1,
-            "y": 0
-        },
-        "scale": 0.60,
-        "xMirror": true,
-        "yMirror": false
-    },
-    "scenarios": [
-        {
-                "name": "test",
-                "file": "bnbmid3.json",
-                "preview": "",
-                "description": ""
-        }
-    ]
+    }
 }

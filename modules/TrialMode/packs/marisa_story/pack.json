@@ -1,56 +1,74 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Marisa Kirisame",
-    "modes": ["Combo", "Story"],
     "characters": [
         "marisa",
         "reimu",
-	"tenshi"
+        "tenshi"
+    ],
+    "description": "Marisa's bread and butters",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/marisa/face/face000.bmp",
+        "rect": {
+            "height": 55,
+            "left": 0,
+            "top": 0,
+            "width": 135
+        },
+        "scale": 0.5000001788139343,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [
+        {
+            "description": "5aaa 5b d214b",
+            "extra": false,
+            "file": "bnbmid3.json",
+            "may_be_locked": true,
+            "name": "Dial a starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnbmid3.png"
+        },
+        {
+            "description": "5aaa 5b 6c",
+            "extra": false,
+            "file": "bnbmid2.json",
+            "may_be_locked": false,
+            "name": "Dial a starter 2",
+            "name_hidden_when_locked": false,
+            "preview": "bnbmid2.png"
+        },
+        {
+            "description": "5aaaa 66a d214b",
+            "extra": false,
+            "file": "bnbmid1.json",
+            "may_be_locked": false,
+            "name": "Dial a starter 3",
+            "name_hidden_when_locked": false,
+            "preview": "bnbmid1.png"
+        },
+        {
+            "description": "2a 3a 6c",
+            "extra": false,
+            "file": "bnbmid4.json",
+            "may_be_locked": false,
+            "name": "2a starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnbmid4.png"
+        }
     ],
     "stand": {
         "isPath": false,
         "path": "data/stand/marisa.bmp"
-    },
-    "description": "Marisa's bread and butters",
-    "author": "PinkySmile",
-    "icon": {
-        "isPath": false,
-        "path": "data/character/marisa/face/face000.bmp",
-        "offset": {
-            "x": 1,
-            "y": 0
-        },
-        "scale": 0.60,
-        "xMirror": true,
-        "yMirror": false
-    },
-    "scenarios": [
-        {
-            "name": "Dial a starter",
-            "file": "bnbmid3.json",
-            "preview": "bnbmid3.png",
-            "description": "5aaa 5b d214b"
-        },
-        {
-            "name": "Dial a starter 2",
-            "file": "bnbmid2.json",
-            "preview": "bnbmid2.png",
-            "description": "5aaa 5b 6c",
-	    "may_be_locked": false
-        },
-        {
-            "name": "Dial a starter 3",
-            "file": "bnbmid1.json",
-            "preview": "bnbmid1.png",
-            "description": "5aaaa 66a d214b",
-	    "may_be_locked": false
-        },
-        {
-            "name": "2a starter",
-            "file": "bnbmid4.json",
-            "preview": "bnbmid4.png",
-            "description": "2a 3a 6c",
-	    "may_be_locked": false
-        }
-    ]
+    }
 }

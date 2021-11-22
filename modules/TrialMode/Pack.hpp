@@ -21,6 +21,7 @@ struct Icon {
 	std::string path;
 	SokuLib::DrawUtils::TextureRect rect = {0, 0, 0, 0};
 	SokuLib::Vector2f translate = {0, 0};
+	SokuLib::Vector2f untransformedRect = {0, 0};
 	SokuLib::DrawUtils::Sprite sprite;
 	SokuLib::Vector2<bool> mirror{false, false};
 	float scale = 1;
@@ -38,7 +39,10 @@ public:
 	std::string file;
 	std::string folder;
 	std::string nameStr;
+	std::string fileRel;
 	std::string previewFile;
+	std::string previewFileRel;
+	std::string descriptionStr;
 	std::unique_ptr<Image> preview;
 	SokuLib::DrawUtils::Sprite name;
 	SokuLib::DrawUtils::Sprite description;

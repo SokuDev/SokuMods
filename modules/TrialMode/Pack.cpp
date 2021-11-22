@@ -410,7 +410,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	if (!object.contains("file") || !object["file"].is_string())
 		return;
 	this->folder = path + "\\";
-	this->file = this->folder + object["file"].get<std::string>();
+	this->fileRel = object["file"];
+	this->file = this->folder + this->fileRel;
 	this->nameStr = (object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : object["file"].get<std::string>());
 	this->name.texture.createFromText(
 		this->nameStr.c_str(),
@@ -423,6 +424,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	};
 	this->name.setSize(this->name.texture.getSize());
 
+	if (object.contains("description") && object["description"].is_string())
+		this->descriptionStr = object["description"];
 	this->description.texture.createFromText(
 		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
 		defaultFont12, {300, 150}
@@ -435,8 +438,10 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	this->description.setPosition({356, 286});
 	this->description.setSize(this->description.texture.getSize());
 
-	if (object.contains("preview") && object["preview"].is_string())
-		this->previewFile = path + object["preview"].get<std::string>();
+	if (object.contains("preview") && object["preview"].is_string()) {
+		this->previewFileRel = object["preview"];
+		this->previewFile = path + this->previewFileRel;
+	}
 
 	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())
 		this->canBeLocked = object["may_be_locked"];
@@ -523,8 +528,8 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 		this->sprite.texture.loadFromGame(this->path.c_str());
 	}
 
-	this->rect.width = min(68 / this->scale, this->sprite.texture.getSize().x);
-	this->rect.height = min(27 / this->scale, this->sprite.texture.getSize().y);
+	this->untransformedRect.x = this->sprite.texture.getSize().x;
+	this->untransformedRect.y = this->sprite.texture.getSize().y;
 	if (object.contains("rect") && object["rect"].is_object()) {
 		auto &rec = object["rect"];
 
@@ -533,11 +538,13 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 		if (rec.contains("left") && rec["left"].is_number())
 			this->rect.left = rec["left"];
 		if (rec.contains("width") && rec["width"].is_number())
-			this->rect.width = min(68 / this->scale, rec["width"].get<float>());
+			this->untransformedRect.x = rec["width"];
 		if (rec.contains("height") && rec["height"].is_number())
-			this->rect.height = min(27 / this->scale, rec["height"].get<float>());
+			this->untransformedRect.y = rec["height"];
 	}
 
+	this->rect.width = min(68 / this->scale, this->untransformedRect.x);
+	this->rect.height = min(28 / this->scale, this->untransformedRect.y);
 	this->sprite.setSize({
 		static_cast<unsigned int>(this->rect.width * this->scale),
 		static_cast<unsigned int>(this->rect.height * this->scale)
