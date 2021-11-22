@@ -11,3 +11,6 @@
 44 RCDATA "assets/edit.png"
 48 RCDATA "assets/items.png"
 52 RCDATA "assets/selectedItems.png"
+56 RCDATA "assets/editSeatBackground.png"
+60 RCDATA "assets/editSeatForeground.png"
+64 RCDATA "assets/stick_top.png"
