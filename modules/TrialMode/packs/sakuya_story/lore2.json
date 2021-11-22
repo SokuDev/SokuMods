@@ -1,6 +1,6 @@
 {
-    "music": 16,
-    "stage": 12,
+    "music": 0,
+    "stage": 32,
     "player": {
         "character": "sakuya",
         "palette": 0,
@@ -16,6 +16,8 @@
             "y": 0
         }
     },
+	    "intro": "lore6intro.lua",
+    "outro": "lore6outro.lua",
     "type": "combo",
 
     "expected": "6a 2b hj9/hj8 j6a",
