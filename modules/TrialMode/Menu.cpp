@@ -22,86 +22,6 @@
 
 #define FILTER_TEXT_SIZE 120
 
-static struct PackEditPage {
-	unsigned cursorPos = 0;
-	bool opened = false;
-	bool selectingPos = false;
-	bool selectingScale = false;
-	SokuLib::DrawUtils::Sprite name;
-	SokuLib::DrawUtils::Sprite modes;
-	SokuLib::DrawUtils::Sprite author;
-	SokuLib::DrawUtils::Sprite version;
-	SokuLib::DrawUtils::Sprite category;
-	SokuLib::DrawUtils::Sprite iconPath;
-	SokuLib::DrawUtils::Sprite endingPath;
-	SokuLib::DrawUtils::Sprite characters;
-	SokuLib::DrawUtils::Sprite description;
-	SokuLib::DrawUtils::Sprite previewPath;
-	SokuLib::DrawUtils::Sprite cursor;
-	SokuLib::DrawUtils::Sprite cursorGear;
-
-	static constexpr std::pair<SokuLib::Vector2i, SokuLib::Vector2u> cursorLocations[] = {
-		{{167 + 7,  62}, {133, 23}},
-		{{396 + 7,  63}, {133, 23}},
-		{{167 + 7,  99}, {133, 23}},
-		{{316 + 7,  92}, { 95, 17}},
-		{{316 + 7, 108}, { 95, 17}},
-		{{165 + 7, 127}, {168, 17}},
-		{{411 + 7, 129}, { 14, 14}},
-		{{411 + 7, 147}, { 14, 14}},
-		{{467 + 7, 100}, { 57, 56}},
-		{{167 + 7, 173}, {133, 23}},
-		{{316 + 7, 166}, { 95, 17}},
-		{{316 + 7, 182}, { 95, 17}},
-		{{167 + 7, 208}, {361, 23}},
-		{{167 + 7, 246}, {133, 23}},
-		{{396 + 7, 246}, {133, 23}},
-		{{167 + 7, 282}, {361, 91}},
-		{{167 + 7, 387}, {133, 23}},
-		{{396 + 7, 387}, {133, 23}},
-	};
-	static constexpr unsigned int leftTable[] = {
-		1, 0,
-		8, 2, 2,
-		8, 5, 5, 6,
-		10, 9, 9,
-		12,
-		14, 13,
-		15,
-		17, 16
-	};
-	static constexpr unsigned int rightTable[] = {
-		1, 0,
-		3, 8, 8,
-		6, 8, 8, 5,
-		10, 9, 9,
-		12,
-		14, 13,
-		15,
-		17, 16
-	};
-	static constexpr unsigned int upTable[] = {
-		16, 17,
-		0, 1, 3,
-		2, 4, 6, 1,
-		5, 7, 10,
-		9,
-		12, 12,
-		13,
-		15, 15
-	};
-	static constexpr unsigned int downTable[] = {
-		2, 3,
-		5, 4, 6,
-		9, 7, 10, 10,
-		12, 11, 12,
-		13,
-		15, 15,
-		16,
-		0, 1
-	};
-} packEditPage;
-
 static SokuLib::Vector2i offsetTable[9] = {
 	{-8, 8},
 	{0, 10},
@@ -176,6 +96,117 @@ bool editorMode = false;
 char profilePath[1024 + MAX_PATH];
 char profileFolderPath[1024 + MAX_PATH];
 
+static struct PackEditPage {
+	unsigned cursorPos = 0;
+	bool opened = false;
+	bool selectingPos = false;
+	bool selectingScale = false;
+	SokuLib::DrawUtils::Sprite name;
+	SokuLib::DrawUtils::Sprite modes;
+	SokuLib::DrawUtils::Sprite author;
+	SokuLib::DrawUtils::Sprite version;
+	SokuLib::DrawUtils::Sprite category;
+	SokuLib::DrawUtils::Sprite iconPath;
+	SokuLib::DrawUtils::Sprite endingPath;
+	SokuLib::DrawUtils::Sprite characters;
+	SokuLib::DrawUtils::Sprite description;
+	SokuLib::DrawUtils::Sprite previewPath;
+	SokuLib::DrawUtils::Sprite cursor;
+	SokuLib::DrawUtils::Sprite cursorGear;
+
+	void notImplemented()
+	{
+		MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
+	}
+
+	void changeScale()
+	{
+		this->selectingScale = static_cast<bool>(loadedPacks[currentPack]->icon);
+		SokuLib::playSEWaveBuffer(0x29 - this->selectingScale);
+	}
+
+	static constexpr void (PackEditPage::*handlers[])() = {
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::changeScale,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+		&PackEditPage::notImplemented,
+	};
+	static constexpr std::pair<SokuLib::Vector2i, SokuLib::Vector2u> cursorLocations[] = {
+		{{167 + 7,  62}, {133, 23}},
+		{{396 + 7,  63}, {133, 23}},
+		{{167 + 7,  99}, {133, 23}},
+		{{316 + 7,  92}, { 95, 17}},
+		{{316 + 7, 108}, { 95, 17}},
+		{{165 + 7, 127}, {168, 17}},
+		{{411 + 7, 129}, { 14, 14}},
+		{{411 + 7, 147}, { 14, 14}},
+		{{467 + 7, 100}, { 57, 56}},
+		{{167 + 7, 173}, {133, 23}},
+		{{316 + 7, 166}, { 95, 17}},
+		{{316 + 7, 182}, { 95, 17}},
+		{{167 + 7, 208}, {361, 23}},
+		{{167 + 7, 246}, {133, 23}},
+		{{396 + 7, 246}, {133, 23}},
+		{{167 + 7, 282}, {361, 91}},
+		{{167 + 7, 387}, {133, 23}},
+		{{396 + 7, 387}, {133, 23}},
+	};
+	static constexpr unsigned int leftTable[] = {
+		1, 0,
+		8, 2, 2,
+		8, 5, 5, 6,
+		10, 9, 9,
+		12,
+		14, 13,
+		15,
+		17, 16
+	};
+	static constexpr unsigned int rightTable[] = {
+		1, 0,
+		3, 8, 8,
+		6, 8, 8, 5,
+		10, 9, 9,
+		12,
+		14, 13,
+		15,
+		17, 16
+	};
+	static constexpr unsigned int upTable[] = {
+		16, 17,
+		0, 1, 3,
+		2, 4, 6, 1,
+		5, 7, 10,
+		9,
+		12, 12,
+		13,
+		15, 15
+	};
+	static constexpr unsigned int downTable[] = {
+		2, 3,
+		5, 4, 6,
+		9, 7, 10, 10,
+		12, 11, 12,
+		13,
+		15, 15,
+		16,
+		0, 1
+	};
+} packEditPage;
+
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
 static void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
@@ -183,15 +214,15 @@ static void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 	SokuLib::Sprite (&CursorSprites)[3] = *(SokuLib::Sprite (*)[3])0x89A6C0;
 
 	//0x443a50 -> Vanilla display cursor
-	CursorSprites[0].scale.x = size.x * 0.00195313;
+	CursorSprites[0].scale.x = size.x * 0.00195313f;
 	CursorSprites[0].scale.y = size.y / 16.f;
 	pos.x -= 7;
 	CursorSprites[0].render(pos.x, pos.y);
 	CRenderer_Unknown1(0x896B4C, 2);
-	CursorSprites[1].rotation = *(float *)0x89A450 * 4.00000000;
-	CursorSprites[1].render(pos.x, pos.y + 8.00000000);
-	CursorSprites[2].rotation = -*(float *)0x89A450 * 4.00000000;
-	CursorSprites[2].render(pos.x - 14.00000000, pos.y - 1.00000000);
+	CursorSprites[1].rotation = *(float *)0x89A450 * 4.00000000f;
+	CursorSprites[1].render(pos.x, pos.y + 8.00000000f);
+	CursorSprites[2].rotation = -*(float *)0x89A450 * 4.00000000f;
+	CursorSprites[2].render(pos.x - 14.00000000f, pos.y - 1.00000000f);
 	CRenderer_Unknown1(0x896B4C, 1);
 }
 
@@ -1514,31 +1545,173 @@ void createBasicPack(const std::string &folder, const std::string &path)
 
 bool saveCurrentPack()
 {
+	auto &pack = loadedPacks[currentPack];
+	nlohmann::json json;
+	std::vector<nlohmann::json> scenarios;
+	std::string str;
+	std::ofstream stream;
+
+	json["modes"] = pack->modes;
+	json["characters"] = pack->characters;
+	json["stand"] = {
+		{"isPath", pack->previewGameAsset},
+		{"path", pack->previewPath}
+	};
+	if (!pack->nameStr.empty())
+		json["name"] = pack->nameStr;
+	if (!pack->category.empty())
+		json["category"] = pack->category;
+	if (!pack->minVersion.empty())
+		json["min_version"] = pack->minVersion;
+	if (!pack->outroRelPath.empty())
+		json["outro"] = pack->outroRelPath;
+	if (!pack->descriptionStr.empty())
+		json["description"] = pack->descriptionStr;
+	if (!pack->authorStr.empty())
+		json["author"] = pack->authorStr;
+	if (pack->icon)
+		json["icon"] = {
+			{"isPath", pack->icon->gameAsset},
+			{"path", pack->icon->path},
+			{"offset", {
+				{"x", pack->icon->translate.x},
+				{"y", pack->icon->translate.y}
+			}},
+			{"scale", pack->icon->scale},
+			{"xMirror", pack->icon->mirror.x},
+			{"yMirror", pack->icon->mirror.y},
+			{"rect", {
+				{"left", pack->icon->rect.left},
+				{"top", pack->icon->rect.top},
+				{"width", pack->icon->rect.width},
+				{"height", pack->icon->rect.height},
+			}}
+		};
+	json["scenarios"] = nlohmann::json::array();
+	for (auto &scenario : pack->scenarios) {
+		json["scenarios"].push_back({
+			{"name", scenario->nameStr},
+			{"file", scenario->fileRel},
+			{"preview", scenario->previewFileRel},
+			{"description", scenario->descriptionStr},
+			{"may_be_locked", scenario->canBeLocked},
+			{"name_hidden_when_locked", scenario->nameHiddenIfLocked},
+			{"extra", scenario->extra},
+		});
+	}
+	str = json.dump(4);
+	if (rename(
+		(pack->path + "/pack.json").c_str(),
+		(pack->path + "/pack_backup.json").c_str()
+	)) {
+		MessageBox(
+			SokuLib::window,
+			("Cannot rename " + pack->path + "/pack.json to " + pack->path + "/pack_backup.json: " + strerror(errno)).c_str(),
+			"Saving error",
+			MB_ICONERROR
+		);
+		return false;
+	}
+	stream.open(pack->path + "/pack.json");
+	if (stream.fail()) {
+		MessageBox(
+			SokuLib::window,
+			("Cannot open " + pack->path + "/pack.json for writing: " + strerror(errno)).c_str(),
+			"Saving error",
+			MB_ICONERROR
+		);
+		rename(
+			(pack->path + "/pack_backup.json").c_str(),
+			(pack->path + "/pack.json").c_str()
+		);
+		return false;
+	}
+	stream << str;
+	if (stream.fail()) {
+		MessageBox(
+			SokuLib::window,
+			("Cannot write to " + pack->path + "/pack.json: " + strerror(errno)).c_str(),
+			"Saving error",
+			MB_ICONERROR
+		);
+		unlink((pack->path + "/pack.json").c_str());
+		rename(
+			(pack->path + "/pack_backup.json").c_str(),
+			(pack->path + "/pack.json").c_str()
+		);
+		return false;
+	}
+	unlink((pack->path + "/pack_backup.json").c_str());
 	return true;
 }
 
 bool checkEditorKeys(const SokuLib::KeyInput &input)
 {
 	if (packEditPage.opened) {
-		if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
-			SokuLib::playSEWaveBuffer(0x27);
-			packEditPage.cursorPos = PackEditPage::leftTable[packEditPage.cursorPos];
-		} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || (SokuLib::inputMgrs.input.horizontalAxis > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
-			SokuLib::playSEWaveBuffer(0x27);
-			packEditPage.cursorPos = PackEditPage::rightTable[packEditPage.cursorPos];
-		}
-		if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis < -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
-			SokuLib::playSEWaveBuffer(0x27);
-			packEditPage.cursorPos = PackEditPage::upTable[packEditPage.cursorPos];
-		} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
-			SokuLib::playSEWaveBuffer(0x27);
-			packEditPage.cursorPos = PackEditPage::downTable[packEditPage.cursorPos];
-		}
-		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
-			SokuLib::playSEWaveBuffer(0x29);
-			if (saveCurrentPack())
-				packEditPage.opened = false;
-			return false;
+		auto &pack = loadedPacks[currentPack];
+
+		if (packEditPage.selectingPos) {
+
+		} else if (packEditPage.selectingScale) {
+			if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
+				SokuLib::playSEWaveBuffer(0x29);
+				packEditPage.selectingScale = false;
+				return true;
+			}
+			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+				SokuLib::playSEWaveBuffer(0x27);
+				if (pack->icon->scale >= 0.02) {
+					pack->icon->scale -= 0.01;
+					packEditPage.cursor.setPosition({static_cast<int>(161 + (pack->icon ? 77 * pack->icon->scale : 77)), 136});
+					packEditPage.cursorGear.setPosition({static_cast<int>(153 + (pack->icon ? 77 * pack->icon->scale : 77)), 141});
+					packEditPage.cursorGear.setRotation(packEditPage.cursorGear.getRotation() - 0.1);
+				}
+				pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
+				pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
+				pack->icon->sprite.setSize({
+					static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
+					static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+				});
+				pack->icon->sprite.rect = pack->icon->rect;
+			} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || (SokuLib::inputMgrs.input.horizontalAxis > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+				SokuLib::playSEWaveBuffer(0x27);
+				if (pack->icon->scale < 2) {
+					pack->icon->scale += 0.01;
+					packEditPage.cursor.setPosition({static_cast<int>(161 + (pack->icon ? 77 * pack->icon->scale : 77)), 136});
+					packEditPage.cursorGear.setPosition({static_cast<int>(153 + (pack->icon ? 77 * pack->icon->scale : 77)), 141});
+					packEditPage.cursorGear.setRotation(packEditPage.cursorGear.getRotation() + 0.1);
+				}
+				pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
+				pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
+				pack->icon->sprite.setSize({
+					static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
+					static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+				});
+				pack->icon->sprite.rect = pack->icon->rect;
+			}
+		} else {
+			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+				SokuLib::playSEWaveBuffer(0x27);
+				packEditPage.cursorPos = PackEditPage::leftTable[packEditPage.cursorPos];
+			} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || (SokuLib::inputMgrs.input.horizontalAxis > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+				SokuLib::playSEWaveBuffer(0x27);
+				packEditPage.cursorPos = PackEditPage::rightTable[packEditPage.cursorPos];
+			}
+			if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis < -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+				SokuLib::playSEWaveBuffer(0x27);
+				packEditPage.cursorPos = PackEditPage::upTable[packEditPage.cursorPos];
+			} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+				SokuLib::playSEWaveBuffer(0x27);
+				packEditPage.cursorPos = PackEditPage::downTable[packEditPage.cursorPos];
+			}
+			if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
+				SokuLib::playSEWaveBuffer(0x29);
+				if (saveCurrentPack())
+					packEditPage.opened = false;
+				return false;
+			}
+			if (SokuLib::inputMgrs.input.a == 1)
+				(packEditPage.*PackEditPage::handlers[packEditPage.cursorPos])();
 		}
 		return true;
 	}

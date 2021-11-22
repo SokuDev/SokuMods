@@ -1,27 +1,34 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Suika Ibuki",
-    "modes": ["Combo", "Story"],
     "characters": [
         "suika"
     ],
-    "stand": {
-        "isPath": false,
-        "path": "data/stand/suika.bmp"
-    },
-    "description": "",
-    "author": "PinkySmile",
     "icon": {
         "isPath": false,
-        "path": "data/character/suika/face/face000.bmp",
         "offset": {
-            "x": 1,
-            "y": 0
+            "x": 1.0,
+            "y": 0.0
         },
-        "scale": 0.60,
+        "path": "data/character/suika/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100001692771912,
         "xMirror": true,
         "yMirror": false
     },
-    "scenarios": [
-    ]
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/suika.bmp"
+    }
 }
