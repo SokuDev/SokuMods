@@ -498,6 +498,8 @@ add_library(
         modules/TrialMode/TrialBase.cpp
         modules/TrialMode/PackOutro.cpp
         modules/TrialMode/PackOutro.hpp
+        modules/TrialMode/InputBox.cpp
+        modules/TrialMode/InputBox.hpp
 )
 target_compile_options(TrialMode PRIVATE /Zi /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)

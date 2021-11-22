@@ -302,7 +302,7 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		{ "utsuho",     SokuLib::CHARACTER_UTSUHO },
 		{ "suwako",     SokuLib::CHARACTER_SUWAKO },
 		{ "random",     SokuLib::CHARACTER_RANDOM },
-		{ "unsused",    SokuLib::CHARACTER_UNSUSED },
+		{ "namazu",     SokuLib::CHARACTER_NAMAZU },
 		{ "momiji",     SokuLib::CHARACTER_MOMIJI },
 		{ "clownpiece", SokuLib::CHARACTER_CLOWNPIECE },
 		{ "flandre",    SokuLib::CHARACTER_FLANDRE },
