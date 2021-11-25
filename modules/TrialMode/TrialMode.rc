@@ -16,3 +16,5 @@
 64 RCDATA "assets/stick_top.png"
 68 RCDATA "assets/tick.png"
 72 RCDATA "assets/editSeatEmpty.png"
+76 RCDATA "assets/editScenario.png"
+80 RCDATA "assets/editDescription.png"

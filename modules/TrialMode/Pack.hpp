@@ -32,7 +32,7 @@ struct Icon {
 class Scenario {
 public:
 	bool extra = false;
-	bool loading = false;
+	volatile bool loading = false;
 	bool canBeLocked = true;
 	bool nameHiddenIfLocked = false;
 	char score = -1;
@@ -48,7 +48,7 @@ public:
 	SokuLib::DrawUtils::Sprite description;
 	SokuLib::DrawUtils::Sprite scoreSprite;
 
-	void loadPreview();
+	void loadPreview(bool force = false);
 	Scenario(char score, int i, const std::string &path, const nlohmann::json &object);
 	void setScore(char score);
 };
