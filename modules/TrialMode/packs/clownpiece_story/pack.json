@@ -7,7 +7,7 @@
     "icon": {
         "isPath": false,
         "offset": {
-            "x": 1.0,
+            "x": 2.0,
             "y": 0.0
         },
         "path": "data/character/clownpiece/face/face000.bmp",

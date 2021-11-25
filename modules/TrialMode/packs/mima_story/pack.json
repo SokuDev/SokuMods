@@ -4,6 +4,7 @@
     "characters": [
         "mima"
     ],
+    "description": "No description provided",
     "icon": {
         "isPath": false,
         "offset": {
@@ -17,7 +18,7 @@
             "top": 0,
             "width": 128
         },
-        "scale": 0.5300002694129944,
+        "scale": 0.5300003290176392,
         "xMirror": true,
         "yMirror": false
     },

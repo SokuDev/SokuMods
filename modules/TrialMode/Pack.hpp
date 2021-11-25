@@ -17,7 +17,7 @@
 #endif
 
 struct Icon {
-	bool gameAsset = false;
+	bool fsPath = false;
 	std::string path;
 	SokuLib::DrawUtils::TextureRect rect = {0, 0, 0, 0};
 	SokuLib::Vector2f translate = {0, 0};
@@ -55,7 +55,7 @@ public:
 
 class Pack {
 public:
-	bool previewGameAsset = false;
+	bool previewFSAsset = false;
 	std::string path;
 	std::string nameStr;
 	std::string category;
@@ -76,10 +76,15 @@ public:
 	SokuLib::DrawUtils::Sprite description;
 	std::vector<std::unique_ptr<Scenario>> scenarios;
 
+	static bool isInvalidPath(const std::string &path);
+	static bool checkVersion(const std::string &version);
+	static int getVersionFromStr(const std::string &str);
+
 	Pack() = default;
 	Pack(const std::string &path, const nlohmann::json &object);
 };
 
+extern std::vector<std::string> authors;
 extern std::vector<std::string> uniqueNames;
 extern std::vector<std::string> uniqueModes;
 extern std::vector<std::string> uniqueCategories;

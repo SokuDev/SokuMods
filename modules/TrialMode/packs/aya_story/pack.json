@@ -7,17 +7,17 @@
     "icon": {
         "isPath": false,
         "offset": {
-            "x": 1.0,
+            "x": 4.0,
             "y": 0.0
         },
         "path": "data/character/aya/face/face000.bmp",
         "rect": {
-            "height": 57,
+            "height": 54,
             "left": 0,
             "top": 0,
-            "width": 138
+            "width": 133
         },
-        "scale": 0.4900001883506775,
+        "scale": 0.5100002884864807,
         "xMirror": true,
         "yMirror": false
     },

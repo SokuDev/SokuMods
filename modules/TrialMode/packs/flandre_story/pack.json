@@ -7,7 +7,7 @@
     "icon": {
         "isPath": false,
         "offset": {
-            "x": 1.0,
+            "x": 2.0,
             "y": 0.0
         },
         "path": "data/character/flandre/face/face000.bmp",
@@ -17,7 +17,7 @@
             "top": 0,
             "width": 133
         },
-        "scale": 0.5100001692771912,
+        "scale": 0.5100002288818359,
         "xMirror": true,
         "yMirror": false
     },
