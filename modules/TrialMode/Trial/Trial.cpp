@@ -145,3 +145,8 @@ void Trial::_playBGM()
 	og = SokuLib::TamperNearJmpOpr(0x418cc5, editLoop);
 	SokuLib::playBGM(this->_music.c_str());
 }
+
+bool Trial::isTypeValid(const std::string &type)
+{
+	return Trial::_factory.find(type) != Trial::_factory.end();
+}

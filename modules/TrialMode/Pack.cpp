@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <process.h>
+#include <thread>
 #include "Pack.hpp"
 #include "Menu.hpp"
 #include "version.h"
@@ -484,19 +485,25 @@ void Scenario::setScore(char score)
 
 void loadPreview(Scenario *scenario)
 {
-	if (scenario->previewFile.size() > 4 && scenario->previewFile.substr(scenario->previewFile.size() - 4, 4) == ".gif")
-		scenario->preview = std::make_unique<AnimatedImage>(scenario->previewFile, SokuLib::Vector2i{398, 128}, true);
+	std::string file = scenario->previewFile;
+
+	while (scenario->loading)
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+	scenario->loading = true;
+	if (file.size() > 4 && file.substr(file.size() - 4, 4) == ".gif")
+		scenario->preview = std::make_unique<AnimatedImage>(file, SokuLib::Vector2i{398, 128}, true);
 	else
-		scenario->preview = std::make_unique<SimpleImage>(scenario->previewFile, SokuLib::Vector2i{398, 128});
+		scenario->preview = std::make_unique<SimpleImage>(file, SokuLib::Vector2i{398, 128});
 	scenario->loading = false;
 	::loading--;
 }
 
-void Scenario::loadPreview()
+void Scenario::loadPreview(bool force)
 {
 	if (this->loading || this->preview)
-		return;
-	this->loading = true;
+		if (!force)
+			return;
 	::loading++;
 	_beginthread(reinterpret_cast<_beginthread_proc_type>(::loadPreview), 0, this);
 }

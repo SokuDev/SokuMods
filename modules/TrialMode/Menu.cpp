@@ -74,9 +74,11 @@ static SokuLib::DrawUtils::Sprite CRTBands;
 static SokuLib::DrawUtils::Sprite loadingGear;
 static SokuLib::DrawUtils::Sprite version;
 static SokuLib::DrawUtils::Sprite editSeat;
+static SokuLib::DrawUtils::Sprite editScenarioSeat;
 static SokuLib::DrawUtils::Sprite editSeatEmpty;
 static SokuLib::DrawUtils::Sprite editSeatForeground;
 static SokuLib::DrawUtils::Sprite stickTop;
+static SokuLib::DrawUtils::Sprite tickSprite;
 
 static IDirect3DTexture9 **pphandle = nullptr;
 static IDirect3DTexture9 **pphandle2 = nullptr;
@@ -96,6 +98,219 @@ HMODULE myModule;
 bool editorMode = false;
 char profilePath[1024 + MAX_PATH];
 char profileFolderPath[1024 + MAX_PATH];
+
+static struct PackEditScenario {
+	bool opened = false;
+	unsigned int cursorPos = 0;
+	SokuLib::DrawUtils::Sprite name;
+	SokuLib::DrawUtils::Sprite filePath;
+	SokuLib::DrawUtils::Sprite previewPath;
+
+	void resetName()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->nameStr.clear();
+		scenario->name.texture.createFromText(scenario->fileRel.c_str(), defaultFont10, {0x100, 30});
+		scenario->name.rect = {
+			0, 0,
+			static_cast<int>(scenario->name.texture.getSize().x),
+			static_cast<int>(scenario->name.texture.getSize().y),
+		};
+		scenario->name.setSize(scenario->name.texture.getSize());
+		this->name.texture.createFromText("", defaultFont12, {153, 23});
+		SokuLib::playSEWaveBuffer(0x29);
+	}
+
+	void resetFile()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->fileRel.clear();
+		if (scenario->nameStr.empty()) {
+			scenario->name.texture.createFromText("", defaultFont10, {0x100, 30});
+			scenario->name.rect = {
+				0, 0,
+				static_cast<int>(scenario->name.texture.getSize().x),
+				static_cast<int>(scenario->name.texture.getSize().y),
+			};
+			scenario->name.setSize(scenario->name.texture.getSize());
+		}
+		this->filePath.texture.createFromText("", defaultFont12, {153, 23});
+		SokuLib::playSEWaveBuffer(0x29);
+	}
+
+	void resetPreviewPath()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->previewFile.clear();
+		scenario->previewFileRel.clear();
+		scenario->preview.reset();
+		this->previewPath.texture.createFromText("", defaultFont12, {153, 23});
+		SokuLib::playSEWaveBuffer(0x29);
+	}
+
+	void nothing()
+	{
+	}
+
+	void resetDescription()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->descriptionStr.clear();
+		scenario->description.texture.createFromText("No description provided", defaultFont12, {300, 150});
+		scenario->description.rect = {
+			0, 0,
+			static_cast<int>(scenario->description.texture.getSize().x),
+			static_cast<int>(scenario->description.texture.getSize().y),
+		};
+		scenario->description.setPosition({356, 286});
+		scenario->description.setSize(scenario->description.texture.getSize());
+		SokuLib::playSEWaveBuffer(0x29);
+	}
+
+	void setName()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+		auto input = InputBox("Enter new name", "New name", scenario->nameStr);
+
+		if (input.empty())
+			return SokuLib::playSEWaveBuffer(0x29);
+		scenario->nameStr = input;
+		scenario->name.texture.createFromText(scenario->nameStr.c_str(), defaultFont10, {0x100, 30});
+		scenario->name.rect = {
+			0, 0,
+			static_cast<int>(scenario->name.texture.getSize().x),
+			static_cast<int>(scenario->name.texture.getSize().y),
+		};
+		scenario->name.setSize(scenario->name.texture.getSize());
+		this->name.texture.createFromText(scenario->nameStr.c_str(), defaultFont12, {153, 23});
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	void setFile()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+		auto input = InputBox("Enter new file path", "New file path", scenario->fileRel);
+
+		if (input.empty())
+			return SokuLib::playSEWaveBuffer(0x29);
+
+		scenario->fileRel = input;
+		if (scenario->nameStr.empty()) {
+			scenario->name.texture.createFromText(scenario->fileRel.c_str(), defaultFont10, {0x100, 30});
+			scenario->name.rect = {
+				0, 0,
+				static_cast<int>(scenario->name.texture.getSize().x),
+				static_cast<int>(scenario->name.texture.getSize().y),
+			};
+			scenario->name.setSize(scenario->name.texture.getSize());
+		}
+		this->filePath.texture.createFromText(scenario->fileRel.c_str(), defaultFont12, {153, 23});
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	void setPreviewPath()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+		auto input = InputBox("Enter new preview path", "New preview path", scenario->previewFileRel);
+
+		if (input.empty())
+			return SokuLib::playSEWaveBuffer(0x29);
+
+		scenario->previewFileRel = input;
+		scenario->previewFile = scenario->folder + "/" + scenario->previewFileRel;
+		scenario->loadPreview(true);
+		this->previewPath.texture.createFromText(scenario->previewFileRel.c_str(), defaultFont12, {153, 23});
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	void switchExtra()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->extra = !scenario->extra;
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	void switchLock()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->canBeLocked = !scenario->canBeLocked;
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	void switchHidden()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		scenario->nameHiddenIfLocked = !scenario->nameHiddenIfLocked;
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	void setDescription()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+		auto input = InputBox("Enter new description", "New description", scenario->descriptionStr);
+
+		if (input.empty())
+			return SokuLib::playSEWaveBuffer(0x29);
+
+		scenario->descriptionStr = input;
+		scenario->description.texture.createFromText(scenario->descriptionStr.c_str(), defaultFont12, {300, 150});
+		scenario->description.rect = {
+			0, 0,
+			static_cast<int>(scenario->description.texture.getSize().x),
+			static_cast<int>(scenario->description.texture.getSize().y),
+		};
+		scenario->description.setPosition({356, 286});
+		scenario->description.setSize(scenario->description.texture.getSize());
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	static constexpr void (PackEditScenario::*resetHandlers[])() = {
+		&PackEditScenario::resetName,        // Name
+		&PackEditScenario::resetFile,        // File
+		&PackEditScenario::resetPreviewPath, // Preview path
+		&PackEditScenario::nothing,          // Extra
+		&PackEditScenario::nothing,          // Can be locked
+		&PackEditScenario::nothing,          // Hidden
+		&PackEditScenario::resetDescription, // Description
+	};
+	static constexpr void (PackEditScenario::*handlers[])() = {
+		&PackEditScenario::setName,        // Name
+		&PackEditScenario::setFile,        // File
+		&PackEditScenario::setPreviewPath, // Preview path
+		&PackEditScenario::switchExtra,    // Extra
+		&PackEditScenario::switchLock,     // Can be locked
+		&PackEditScenario::switchHidden,   // Hidden
+		&PackEditScenario::setDescription, // Description
+	};
+	static constexpr std::pair<SokuLib::Vector2i, SokuLib::Vector2u> cursorLocations[] = {
+		{{182 + 7, 240}, {133, 23}},
+		{{182 + 7, 270}, {133, 23}},
+		{{182 + 7, 298}, {133, 24}},
+		{{179 + 7, 334}, { 14, 14}},
+		{{302 + 7, 333}, { 14, 14}},
+		{{287 + 7, 363}, { 14, 14}},
+		{{352 + 7, 286}, { 282, 121}},
+	};
+	static constexpr unsigned int leftTable[] = {
+		6, 6, 6, 6, 3, 6, 0
+	};
+	static constexpr unsigned int rightTable[] = {
+		6, 6, 6, 4, 6, 6, 0
+	};
+	static constexpr unsigned int upTable[] = {
+		5, 0, 1, 2, 2, 3, 6
+	};
+	static constexpr unsigned int downTable[] = {
+		1, 2, 3, 5, 5, 0, 6
+	};
+} packEditScenario;
 
 static struct PackEditPage {
 	unsigned cursorPos = 0;
@@ -117,7 +332,6 @@ static struct PackEditPage {
 	SokuLib::DrawUtils::Sprite previewPath;
 	SokuLib::DrawUtils::Sprite cursor;
 	SokuLib::DrawUtils::Sprite cursorGear;
-	SokuLib::DrawUtils::Sprite tickSprite;
 	SokuLib::DrawUtils::RectangleShape rect;
 	std::map<unsigned int, std::string> chrs;
 	std::vector<std::string> orderChrs;
@@ -1296,10 +1510,10 @@ void menuLoadAssets()
 	stickTop.rect.width = stickTop.texture.getSize().x;
 	stickTop.rect.height = stickTop.texture.getSize().y;
 
-	packEditPage.tickSprite.texture.loadFromResource(myModule, MAKEINTRESOURCE(68));
-	packEditPage.tickSprite.setSize(packEditPage.tickSprite.texture.getSize());
-	packEditPage.tickSprite.rect.width = packEditPage.tickSprite.texture.getSize().x;
-	packEditPage.tickSprite.rect.height = packEditPage.tickSprite.texture.getSize().y;
+	tickSprite.texture.loadFromResource(myModule, MAKEINTRESOURCE(68));
+	tickSprite.setSize(tickSprite.texture.getSize());
+	tickSprite.rect.width = tickSprite.texture.getSize().x;
+	tickSprite.rect.height = tickSprite.texture.getSize().y;
 
 	editSeatEmpty.texture.loadFromResource(myModule, MAKEINTRESOURCE(72));
 	editSeatEmpty.setSize(editSeat.texture.getSize());
@@ -1309,6 +1523,12 @@ void menuLoadAssets()
 	});
 	editSeatEmpty.rect.width = editSeatEmpty.texture.getSize().x;
 	editSeatEmpty.rect.height = editSeatEmpty.texture.getSize().y;
+
+	editScenarioSeat.texture.loadFromResource(myModule, MAKEINTRESOURCE(76));
+	editScenarioSeat.setSize(editScenarioSeat.texture.getSize());
+	editScenarioSeat.setPosition({122, 226});
+	editScenarioSeat.rect.width = editScenarioSeat.texture.getSize().x;
+	editScenarioSeat.rect.height = editScenarioSeat.texture.getSize().y;
 
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
@@ -1570,6 +1790,7 @@ void menuUnloadAssets()
 	loadingGear.texture.destroy();
 	blackSilouettes.texture.destroy();
 	editSeat.texture.destroy();
+	editScenarioSeat.texture.destroy();
 	editSeatEmpty.texture.destroy();
 	stickTop.texture.destroy();
 	packEditPage.name.texture.destroy();
@@ -1584,6 +1805,9 @@ void menuUnloadAssets()
 	packEditPage.endingPath.texture.destroy();
 	packEditPage.cursor.texture.destroy();
 	packEditPage.cursorGear.texture.destroy();
+	packEditScenario.name.texture.destroy();
+	packEditScenario.filePath.texture.destroy();
+	packEditScenario.previewPath.texture.destroy();
 
 	packEditPage.charactersFaces.clear();
 	loadedPacks.clear();
@@ -1593,6 +1817,7 @@ void menuUnloadAssets()
 	packsByCategory.clear();
 
 	editorMode = false;
+	packEditScenario.opened = false;
 	packEditPage.opened = false;
 	packEditPage.selectingPos = false;
 	packEditPage.selectingScale = false;
@@ -1681,6 +1906,7 @@ static void switchEditorMode()
 		}
 	}
 	SokuLib::playSEWaveBuffer(sound);
+	packEditScenario.opened = false;
 	packEditPage.opened = false;
 	packEditPage.selectingPos = false;
 	packEditPage.selectingScale = false;
@@ -2029,7 +2255,34 @@ void openPackEditPage()
 
 void openTrialEditPage()
 {
+	auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
 	SokuLib::playSEWaveBuffer(0x28);
+	packEditScenario.opened = true;
+
+	packEditScenario.name.texture.createFromText(scenario->nameStr.c_str(), defaultFont12, {153, 23}, nullptr);
+	packEditScenario.name.setSize({133, 13});
+	packEditScenario.name.rect.width  = 133;
+	packEditScenario.name.rect.height = 13;
+	packEditScenario.name.setPosition({182, 244});
+	packEditScenario.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
+	packEditScenario.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
+
+	packEditScenario.filePath.texture.createFromText(scenario->fileRel.c_str(), defaultFont12, {153, 23}, nullptr);
+	packEditScenario.filePath.setSize({133, 13});
+	packEditScenario.filePath.rect.width  = 133;
+	packEditScenario.filePath.rect.height = 13;
+	packEditScenario.filePath.setPosition({182, 274});
+	packEditScenario.filePath.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
+	packEditScenario.filePath.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
+
+	packEditScenario.previewPath.texture.createFromText(scenario->previewFileRel.c_str(), defaultFont12, {153, 23}, nullptr);
+	packEditScenario.previewPath.setSize({133, 13});
+	packEditScenario.previewPath.rect.width  = 133;
+	packEditScenario.previewPath.rect.height = 13;
+	packEditScenario.previewPath.setPosition({182, 302});
+	packEditScenario.previewPath.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
+	packEditScenario.previewPath.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
 }
 
 void createBasicPack(const std::string &path)
@@ -2197,9 +2450,35 @@ bool saveCurrentPack()
 
 bool checkEditorKeys(const SokuLib::KeyInput &input)
 {
-	if (packEditPage.opened) {
-		bool cond = SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false);
+	if (packEditScenario.opened) {
+		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
+			SokuLib::playSEWaveBuffer(0x29);
+			if (saveCurrentPack())
+				packEditScenario.opened = false;
+			return false;
+		}
+		if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			packEditScenario.cursorPos = PackEditScenario::leftTable[packEditScenario.cursorPos];
+		} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || (SokuLib::inputMgrs.input.horizontalAxis > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			packEditScenario.cursorPos = PackEditScenario::rightTable[packEditScenario.cursorPos];
+		}
+		if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis < -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			packEditScenario.cursorPos = PackEditScenario::upTable[packEditScenario.cursorPos];
+		} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			packEditScenario.cursorPos = PackEditScenario::downTable[packEditScenario.cursorPos];
+		}
+		if (SokuLib::inputMgrs.input.a == 1)
+			(packEditScenario.*PackEditScenario::handlers[packEditScenario.cursorPos])();
+		if (SokuLib::inputMgrs.input.c == 1)
+			(packEditScenario.*PackEditScenario::resetHandlers[packEditScenario.cursorPos])();
+		return true;
+	} else if (packEditPage.opened) {
 		auto &pack = loadedPacks[currentPack];
+		bool cond = SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false);
 		bool playSound = false;
 
 		if (packEditPage.selectingCharacters) {
@@ -2218,7 +2497,7 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 				packEditPage.characters.texture.createFromText(result.c_str(), defaultFont12, {381, 23}, nullptr);
 				SokuLib::playSEWaveBuffer(0x29);
 				packEditPage.selectingCharacters = false;
-				return true;
+				return false;
 			}
 			if (SokuLib::inputMgrs.input.a == 1) {
 				auto it = std::find(pack->characters.begin(), pack->characters.end(), packEditPage.orderChrs[packEditPage.chrCursorPos]);
@@ -2407,12 +2686,65 @@ afterCInput:
 		else
 			openTrialEditPage();
 	}
+	if (SokuLib::inputMgrs.input.d == 1 && currentPack >= 0) {
+		auto &pack = loadedPacks[currentPack];
+
+		if (currentEntry >= 0) {
+			if (MessageBoxA(
+				SokuLib::window,
+				("Are you sure you want to delete scenario named \"" + pack->scenarios[currentEntry]->nameStr + "\"?").c_str(),
+				"Delete scenario?",
+				MB_ICONQUESTION | MB_YESNO
+			) == IDNO)
+				return SokuLib::playSEWaveBuffer(0x29), true;
+			pack->scenarios.erase(pack->scenarios.begin() + currentEntry);
+			currentEntry -= currentEntry == pack->scenarios.size();
+			expended = !pack->scenarios.empty();
+		} else {
+			std::string jsonfile = InputBox("Enter file name. If the file doesn't exist, it will be created.", "File name", "");
+			struct stat s;
+
+			if (jsonfile.empty())
+				return SokuLib::playSEWaveBuffer(0x29), true;
+			if (stat((pack->path + "/" + jsonfile).c_str(), &s) != 0) {
+				std::string type = InputBox("Enter trial type\nValid types are \"combo\"", "Trial type", "");
+
+				if (type.empty())
+					return SokuLib::playSEWaveBuffer(0x29), true;
+				if (!Trial::isTypeValid(type)) {
+					MessageBox(SokuLib::window, (type + " is not a valid trial type.").c_str(), "Error", MB_ICONERROR);
+					return SokuLib::playSEWaveBuffer(0x29), true;
+				}
+
+				std::ofstream stream{pack->path + "/" + jsonfile};
+
+				if (stream.fail()) {
+					MessageBox(SokuLib::window, ("Cannot open " + pack->path + "/" + jsonfile + " for writing: " + strerror(errno)).c_str(), "Error", MB_ICONERROR);
+					return SokuLib::playSEWaveBuffer(0x29), true;
+				}
+				stream << "{" << std::endl;
+				stream << R"(    "type": ")" << type << "\"" << std::endl;
+				stream << "}" << std::endl;
+				if (stream.fail()) {
+					MessageBox(SokuLib::window, ("Cannot write to " + pack->path + "/" + jsonfile + ": " + strerror(errno)).c_str(), "Error", MB_ICONERROR);
+					return SokuLib::playSEWaveBuffer(0x29), true;
+				}
+			}
+			pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
+			currentEntry = pack->scenarios.size() - 1;
+			expended = true;
+		}
+		SokuLib::playSEWaveBuffer(0x28);
+		saveCurrentPack();
+	}
 	return true;
 }
 
 bool editorUpdate()
 {
 	if (!checkEditorKeys(SokuLib::inputMgrs.input))
+		return false;
+	if (packEditScenario.opened)
 		return false;
 	if (packEditPage.opened) {
 		auto &inputs = SokuLib::inputMgrs.input;
@@ -2429,7 +2761,29 @@ bool editorUpdate()
 
 void editorRender()
 {
-	if (packEditPage.opened) {
+	if (packEditScenario.opened) {
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		editScenarioSeat.draw();
+		displaySokuCursor(PackEditScenario::cursorLocations[packEditScenario.cursorPos].first, PackEditScenario::cursorLocations[packEditScenario.cursorPos].second);
+		packEditScenario.name.draw();
+		packEditScenario.filePath.draw();
+		packEditScenario.previewPath.draw();
+		if (scenario->extra) {
+			tickSprite.setPosition({177, 329});
+			tickSprite.draw();
+		}
+		if (scenario->canBeLocked) {
+			tickSprite.setPosition({300, 328});
+			tickSprite.draw();
+		}
+		if (scenario->nameHiddenIfLocked) {
+			tickSprite.setPosition({305, 375});
+			tickSprite.draw();
+		}
+		if (scenario->description.texture.hasTexture())
+			scenario->description.draw();
+	} else if (packEditPage.opened) {
 		auto &pack = loadedPacks[currentPack];
 
 		editSeat.draw();
@@ -2450,12 +2804,12 @@ void editorRender()
 		packEditPage.cursor.draw();
 		if (pack->icon) {
 			if (pack->icon->mirror.x) {
-				packEditPage.tickSprite.setPosition({409, 127});
-				packEditPage.tickSprite.draw();
+				tickSprite.setPosition({409, 127});
+				tickSprite.draw();
 			}
 			if (pack->icon->mirror.y) {
-				packEditPage.tickSprite.setPosition({409, 145});
-				packEditPage.tickSprite.draw();
+				tickSprite.setPosition({409, 145});
+				tickSprite.draw();
 			}
 		}
 		if (packEditPage.selectingCharacters) {
@@ -2477,11 +2831,11 @@ void editorRender()
 						69 + 40 * (i % 9),
 					}, {16, 16});
 				if (std::find(pack->characters.begin(), pack->characters.end(), chr.second) != pack->characters.end()) {
-					packEditPage.tickSprite.setPosition({
+					tickSprite.setPosition({
 						118 + 100 * (i / 9),
 						67 + 40 * (i % 9),
 					});
-					packEditPage.tickSprite.draw();
+					tickSprite.draw();
 				}
 				i++;
 			}
