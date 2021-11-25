@@ -26,48 +26,28 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	this->_introPlayed = true;
 	this->_outroPlayed = true;
-	if (!editorMode) {
-		if (!json.contains("score") || !json["score"].is_array())
-			throw std::invalid_argument("The \"score\" field is not present or invalid.");
-		if (json["score"].size() != 4)
-			throw std::invalid_argument("The \"score\" field doesn't have exactly 4 elements.");
-	}
-	if (!json.contains("expected") || !json["expected"].is_string())
-		throw std::invalid_argument("The \"expected\" field is not present or invalid.");
-	if (json.contains("hint") && !json["hint"].is_array())
-		throw std::invalid_argument("The \"hint\" field is not valid.");
-	if (!json["player"].contains("pos") || !json["player"]["pos"].is_number())
-		throw std::invalid_argument(R"(The field "pos" in the "player" field is not present or invalid.)");
-	if (!json["dummy"].contains("pos") || !json["dummy"]["pos"].is_object())
-		throw std::invalid_argument(R"(The field "pos" in the "dummy" field is not present or invalid.)");
-	if (!json["dummy"]["pos"].contains("x") || !json["dummy"]["pos"]["x"].is_number())
-		throw std::invalid_argument(R"(The field "x" of the field "pos" in the "dummy" field is not present or invalid.)");
-	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
-		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
 	if (json.contains("dolls") && json["dolls"].is_array()) {
-		if (player != SokuLib::CHARACTER_ALICE)
-			throw std::invalid_argument("Can only specify doll placement for alice");
 		for (int i = 0; i < json["dolls"].size(); i++) {
 			auto &obj = json["dolls"][i];
 
 			if (!obj.is_object())
-				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": Value is not an object");
+				continue;
 			if (!obj.contains("x") && obj["x"].is_number())
-				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": x is not a number");
+				continue;
 			if (!obj.contains("y") && obj["y"].is_number())
-				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": y is not a number");
+				continue;
 			if (!obj.contains("dir") && obj["dir"].is_number())
-				throw std::invalid_argument("Error in doll #" + std::to_string(i) + ": Direction is not a number");
+				continue;
 			this->_dolls.push_back({SokuLib::Vector2f{obj["x"], obj["y"]}, obj["dir"].get<SokuLib::Direction>()});
 		}
 	}
 
-	this->_jump = json["dummy"].contains("jump") && json["dummy"]["jump"].is_boolean() && json["dummy"]["jump"].get<bool>();
-	this->_failTimer = json.contains("fail_timer") && json["fail_timer"].is_number() ? json["fail_timer"].get<int>() : 60;
-	this->_crouching = json["dummy"].contains("crouch") && json["dummy"]["crouch"].is_boolean() && json["dummy"]["crouch"].get<bool>();
-	this->_leftWeather = !json["player"].contains("affected_by_weather") || !json["player"]["affected_by_weather"].is_boolean() || json["player"]["affected_by_weather"].get<bool>();
-	this->_rightWeather = !json["dummy"].contains("affected_by_weather") || !json["dummy"]["affected_by_weather"].is_boolean() || json["dummy"]["affected_by_weather"].get<bool>();
+	this->_jump = getField(json, false, &nlohmann::json::is_boolean, "jump", "dummy");
+	this->_failTimer = getField(json, 60, &nlohmann::json::is_number, "fail_timer");
+	this->_crouching = getField(json, false, &nlohmann::json::is_boolean, "crouch", "dummy");
+	this->_leftWeather = getField(json, true, &nlohmann::json::is_boolean, "affected_by_weather", "player");
+	this->_rightWeather = getField(json, true, &nlohmann::json::is_boolean, "affected_by_weather", "dummy");
 	memset(&this->_skills, 0xFF, sizeof(this->_skills));
 	if (json.contains("skills") && json["skills"].is_array() && json["skills"].size() == characterSkills[player].size()) {
 		for (int i = 0; i < json["skills"].size(); i++) {
@@ -95,9 +75,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 
 	try {
 		this->_hand = json.contains("hand") && json["hand"].is_array() ? json["hand"].get<std::vector<unsigned short>>() : std::vector<unsigned short>{};
-	} catch (...) {
-		throw std::invalid_argument("Hand contains invalid values");
-	}
+	} catch (...) {}
 
 	for (auto card : this->_hand) {
 		if (card <= 20)
@@ -105,7 +83,8 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 		for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++)
 			if (card == SokuLib::leftPlayerInfo.effectiveDeck[i])
 				goto ok;
-		throw std::invalid_argument("Player deck doesn't have card " + std::to_string(card));
+		this->_hand.clear();
+		break;
 	ok:
 		continue;
 	}
@@ -118,38 +97,26 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 
 		auto it = weathers.find(weather);
 
-		if (it == weathers.end())
-			throw std::invalid_argument(weather + " is not a valid weather name");
-		this->_weather = it->second;
+		if (it != weathers.end())
+			this->_weather = it->second;
 	}
 
-	this->_mpp           = json["player"].contains("mpp")            && json["player"]["mpp"].is_boolean()            && json["player"]["mpp"].get<bool>();
-	this->_stones        = json["player"].contains("stones")         && json["player"]["stones"].is_boolean()         && json["player"]["stones"].get<bool>();
-	this->_orerries      = json["player"].contains("orreries")       && json["player"]["orreries"].is_boolean()       && json["player"]["orreries"].get<bool>();
-	this->_tickTimer     = json["player"].contains("tick_timer")     && json["player"]["tick_timer"].is_boolean()     && json["player"]["tick_timer"].get<bool>();
-	this->_privateSquare = json["player"].contains("private_square") && json["player"]["private_square"].is_boolean() && json["player"]["private_square"].get<bool>();
+	this->_mpp           = getField(json, false, &nlohmann::json::is_boolean, "mpp",            "player");
+	this->_stones        = getField(json, false, &nlohmann::json::is_boolean, "stones",         "player");
+	this->_orerries      = getField(json, false, &nlohmann::json::is_boolean, "orreries",       "player");
+	this->_tickTimer     = getField(json, false, &nlohmann::json::is_boolean, "tick_timer",     "player");
+	this->_privateSquare = getField(json, false, &nlohmann::json::is_boolean, "private_square", "player");
 
-	if (this->_mpp && player != SokuLib::CHARACTER_SUIKA)
-		throw std::invalid_argument("Missing Purple Power is only allowed for Suika");
-	if (this->_stones && player != SokuLib::CHARACTER_PATCHOULI)
-		throw std::invalid_argument("Philosopher's Stones is only allowed for Patchouli");
-	if (this->_orerries && player != SokuLib::CHARACTER_MARISA)
-		throw std::invalid_argument("Orerries's Sun is only allowed for Marisa");
-	if (this->_privateSquare && player != SokuLib::CHARACTER_SAKUYA)
-		throw std::invalid_argument("Private Square is only allowed for Sakuya");
+	this->_disableLimit = getField(json, false, &nlohmann::json::is_boolean, "disable_limit");
+	this->_uniformCardCost = getField(json, -1, &nlohmann::json::is_number, "uniform_card_cost");
+	this->_playerStartPos = getField(json, 480.f, &nlohmann::json::is_number, "pos", "player");
+	this->_dummyStartPos.x = getField(json, 800.f, &nlohmann::json::is_number, "x", "dummy", "pos");
+	this->_dummyStartPos.y = getField(json, 0.f, &nlohmann::json::is_number, "y", "dummy", "pos");
+	try {
+		this->_loadExpected(getField<std::string>(json, "", &nlohmann::json::is_string, "expected"));
+	} catch (...) {}
 
-	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() && json["disable_limit"].get<bool>();
-	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
-	this->_playerStartPos = json["player"]["pos"];
-	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
-	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
-	this->_loadExpected(json["expected"]);
-	if (this->_jump && this->_dummyStartPos.y != 0)
-		throw std::invalid_argument("Cannot specify a non zero y if the dummy is jumping");
-	if (this->_jump && this->_crouching)
-		throw std::invalid_argument("The dummy cannot crouch and jump at the time!");
-
-	this->_attemptText.texture.createFromText("214a -> Review demo<br>22a reload and play intro<br>63214a reload and play outro", defaultFont10, {306, 124});
+	this->_attemptText.texture.createFromText("Editor mode", defaultFont16, {306, 124});
 	this->_attemptText.setPosition({4, 58});
 	this->_attemptText.setSize(this->_attemptText.texture.getSize());
 	this->_attemptText.rect.left = 0;
@@ -172,13 +139,6 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, SokuLib::Character player
 			} catch (std::exception &e) {
 				throw std::invalid_argument("Score element #" + std::to_string(this->_scores.size()) + " is invalid : " + e.what());
 			}
-	if (this->_crouching && this->_dummyStartPos.y)
-		MessageBox(
-			SokuLib::window,
-			"Warning: The field \"crouch\" from the dummy is set to true but the dummy is airborne so it cannot crouch.",
-			"Incompatible parameters",
-			MB_ICONWARNING
-		);
 }
 
 bool ComboTrialEditor::update(bool &canHaveNextFrame)
@@ -900,18 +860,7 @@ void ComboTrialEditor::SpecialAction::parse()
 
 ComboTrialEditor::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrialEditor::ScorePrerequisites *other)
 {
-	if (!other) {
-		if (!editorMode) {
-			if (json.contains("max_attempts"))
-				throw std::invalid_argument("First score element shouldn't have the field \"max_attempts\"");
-			if (!json.contains("min_hits"))
-				throw std::invalid_argument("First score element is missing the field \"min_hits\"");
-			if (!json.contains("min_damage"))
-				throw std::invalid_argument("First score element is missing the field \"min_damage\"");
-			if (!json.contains("min_limit"))
-				throw std::invalid_argument("First score element is missing the field \"min_limit\"");
-		}
-	} else
+	if (other)
 		*this = *other;
 
 	if (json.contains("max_attempts")) {

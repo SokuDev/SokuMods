@@ -1068,6 +1068,81 @@ inline bool isLocked(int entry)
 	return false;
 }
 
+void addCharacterToBufferEditor(const std::string &name, const nlohmann::json &json, SokuLib::PlayerInfo &info, bool isRight)
+{
+	std::string str = getField<std::string>(json, "reimu", &nlohmann::json::is_string, "character", name);
+	auto it = std::find_if(
+		validCharacters.begin(),
+		validCharacters.end(),
+		[str](const std::pair<unsigned, std::string> &s) {
+			return s.second == str;
+		}
+	);
+	auto itSWR = std::find_if(
+		swrCharacters.begin(),
+		swrCharacters.end(),
+		[str](const std::pair<unsigned, std::string> &s) {
+			return s.second == str;
+		}
+	);
+
+	if (it == validCharacters.end() && (SokuLib::SWRUnlinked || itSWR == swrCharacters.end())) {
+		MessageBox(
+			SokuLib::window,
+			("Error in field \"" + name + "\": " + str + " is not a valid character.").c_str(),
+			"Loading error",
+			MB_ICONERROR
+		);
+		it = validCharacters.begin();
+	}
+
+	std::vector<int> deck;
+
+	try {
+		std::map<unsigned short, int> cards;
+
+		deck = getField<std::vector<int>>(json, {}, &nlohmann::json::is_array, "deck", name);
+		if (deck.size() != 20 && !deck.empty())
+			throw std::out_of_range("Deck must either be empty or have 20 cards");
+		for (int card : deck) {
+			cards[card]++;
+			if (cards[card] > 4)
+				throw std::out_of_range("More than 4 card " + std::to_string(card) + " are in this deck.");
+		}
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("Error in field \"" + name + "\": Deck is not valid: " + std::string()).c_str(),
+			"Loading error",
+			MB_ICONERROR
+		);
+		deck.clear();
+	}
+
+	info.character = static_cast<SokuLib::Character>(it == validCharacters.end() ? itSWR->first : it->first);
+	info.palette = getField(json, 0, &nlohmann::json::is_number, "palette", name);
+	info.isRight = isRight;
+
+	auto FUN_00434bf0 = reinterpret_cast<void (__thiscall *)(SokuLib::Profile *, char)>(0x434bf0);
+
+	//:magic_wand:
+	if (isRight) {
+		*((SokuLib::KeyManager **)0x00898684) = reinterpret_cast<SokuLib::KeyManager *>(0x8986a8);
+		FUN_00434bf0(&SokuLib::profile2, -1);
+		info.keyManager = (SokuLib::KeyManager **)0x0089918c;
+	} else {
+		*((SokuLib::KeyManager **)0x00898680) = *(char *)0x898678 < '\0' ?
+							reinterpret_cast<SokuLib::KeyManager *>(0x8986a8) :
+							((SokuLib::KeyManager *(__thiscall *)(int, char))0x43e3b0)(0x899cec, *(char *)0x898678);
+		FUN_00434bf0(&SokuLib::profile1, *(char *)0x898678);
+		info.keyManager = (SokuLib::KeyManager **)0x008989A0;
+	}
+
+	info.effectiveDeck.clear();
+	for (auto card : deck)
+		info.effectiveDeck.push_back(card);
+}
+
 bool addCharacterToBuffer(const std::string &name, const nlohmann::json &chr, SokuLib::PlayerInfo &info, bool isRight)
 {
 	if (!checkField("character", chr, &nlohmann::json::is_string))
@@ -1200,7 +1275,7 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 	if (!addCharacterToBuffer("dummy", value["dummy"], SokuLib::rightPlayerInfo, true))
 		return false;
 	try {
-		loadedTrial.reset((editorMode ? TrialEditor::create : Trial::create)(folder, SokuLib::leftPlayerInfo.character, value));
+		loadedTrial.reset(Trial::create(folder, SokuLib::leftPlayerInfo.character, value));
 	} catch (std::exception &e) {
 		MessageBox(
 			SokuLib::window,
@@ -1227,10 +1302,73 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 	return true;
 }
 
+bool prepareReplayBufferEditor(const std::string &path, const char *folder)
+{
+	std::ifstream stream{path};
+	nlohmann::json value;
+
+	if (stream.fail()) {
+		MessageBox(
+			SokuLib::window,
+			("Cannot load file " + path + ": " + strerror(errno)).c_str(),
+			"Trial loading error",
+			MB_ICONERROR
+		);
+		return false;
+	}
+
+	try {
+		stream >> value;
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
+			"Trial loading error",
+			MB_ICONERROR
+		);
+		return false;
+	}
+
+	if (!checkField("type", value, &nlohmann::json::is_string))
+		return false;
+
+	addCharacterToBufferEditor("player", value, SokuLib::leftPlayerInfo, false);
+	addCharacterToBufferEditor("dummy", value, SokuLib::rightPlayerInfo, true);
+	try {
+		loadedTrial.reset(TrialEditor::create(folder, SokuLib::leftPlayerInfo.character, value));
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
+			"Trial loading error",
+			MB_ICONERROR
+		);
+		return false;
+	}
+
+	*(char *)0x899D0C = getField(value, 6, &nlohmann::json::is_number, "stage");
+	if (value.contains("music")) {
+		if (value["music"].is_number())
+			*(char *)0x899D0D = value["music"].get<char>();
+		else {
+			char nb = 6;
+			std::string str = value["music"];
+
+			if (str.size() == strlen("data/bgm/st00.ogg") && str.substr(0, 11) == "data/bgm/st" && str.substr(13) == ".ogg")
+				try {
+					nb = std::stoul(str.substr(11, 2));
+				} catch (...) {}
+			*(char *)0x899D0D = nb;
+		}
+	} else
+		*(char *)0x899D0D = 6;
+	return true;
+}
+
 void prepareGameLoading(const char *folder, const std::string &path)
 {
 	SokuLib::setBattleMode(SokuLib::BATTLE_MODE_VSPLAYER, SokuLib::BATTLE_SUBMODE_PLAYING1);
-	if (!prepareReplayBuffer(path, folder))
+	if ((editorMode && !prepareReplayBufferEditor(path, folder)) || (!editorMode && !prepareReplayBuffer(path, folder)))
 		return;
 	loadRequest = true;
 }
@@ -2707,7 +2845,7 @@ afterCInput:
 			if (jsonfile.empty())
 				return SokuLib::playSEWaveBuffer(0x29), true;
 			if (stat((pack->path + "/" + jsonfile).c_str(), &s) != 0) {
-				std::string type = InputBox("Enter trial type\nValid types are \"combo\"", "Trial type", "");
+				std::string type = InputBox("Enter trial type\r\nValid types are \"combo\"", "Trial type", "");
 
 				if (type.empty())
 					return SokuLib::playSEWaveBuffer(0x29), true;
@@ -2778,7 +2916,7 @@ void editorRender()
 			tickSprite.draw();
 		}
 		if (scenario->nameHiddenIfLocked) {
-			tickSprite.setPosition({305, 375});
+			tickSprite.setPosition({285, 357});
 			tickSprite.draw();
 		}
 		if (scenario->description.texture.hasTexture())
