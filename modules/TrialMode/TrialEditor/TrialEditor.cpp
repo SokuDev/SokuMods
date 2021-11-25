@@ -24,12 +24,12 @@ TrialEditor::TrialEditor(const char *folder, const nlohmann::json &json)
 		this->_introPath = folder + json["intro"].get<std::string>();
 	if (json.contains("outro") && json["outro"].is_string())
 		this->_outroPath = folder + json["outro"].get<std::string>();
-	if (json["music"].is_number()) {
+	if (json.contains("music") && json["music"].is_number()) {
 		unsigned t = json["music"];
 
 		this->_music = (t < 10 ? "data/bgm/st0" : "data/bgm/st") + std::to_string(t) + ".ogg";
 	} else
-		this->_music = json["music"];
+		this->_music = getField<std::string>(json, "data/bgm/op.ogg", &nlohmann::json::is_string, "music");
 	for (auto pos = this->_music.find("{{pack_path}}"); pos != std::string::npos; pos = this->_music.find("{{pack_path}}"))
 		this->_music.replace(pos, strlen("{{pack_path}}"), folder);
 	if (json.contains("counter_hit") && json["counter_hit"].is_boolean() && json["counter_hit"].get<bool>())

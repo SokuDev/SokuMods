@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <SokuLib.hpp>
+#include <nlohmann/json.hpp>
 #include "TrialBase.hpp"
 #include "PackOutro.hpp"
 
@@ -49,5 +50,21 @@ void menuOnRender(SokuLib::MenuResult *This);
 void menuUnloadAssets();
 std::vector<unsigned> getCurrentPackScores();
 
+template<typename T, typename ...Args>
+T getField(nlohmann::json json, T defaultValue, bool (nlohmann::json::*checker)() const, std::string field, Args... fields)
+{
+	std::vector<std::string> vec{fields...};
+
+	if (!json.is_object())
+		return defaultValue;
+	for (auto &val : vec) {
+		if (!json.contains(val) || !json[val].is_object())
+			return defaultValue;
+		json = json[val];
+	}
+	if (!json.contains(field) || !(json[field].*checker)())
+		return defaultValue;
+	return json[field];
+}
 
 #endif //SWRSTOYS_MENU_HPP

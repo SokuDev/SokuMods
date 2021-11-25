@@ -22,12 +22,10 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 {
 	int text;
 
-	if (!editorMode) {
-		if (!json.contains("score") || !json["score"].is_array())
-			throw std::invalid_argument("The \"score\" field is not present or invalid.");
-		if (json["score"].size() != 4)
-			throw std::invalid_argument("The \"score\" field doesn't have exactly 4 elements.");
-	}
+	if (!json.contains("score") || !json["score"].is_array())
+		throw std::invalid_argument("The \"score\" field is not present or invalid.");
+	if (json["score"].size() != 4)
+		throw std::invalid_argument("The \"score\" field doesn't have exactly 4 elements.");
 	if (!json.contains("expected") || !json["expected"].is_string())
 		throw std::invalid_argument("The \"expected\" field is not present or invalid.");
 	if (json.contains("hint") && !json["hint"].is_array())
@@ -846,16 +844,14 @@ void ComboTrial::SpecialAction::parse()
 ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrial::ScorePrerequisites *other)
 {
 	if (!other) {
-		if (!editorMode) {
-			if (json.contains("max_attempts"))
-				throw std::invalid_argument("First score element shouldn't have the field \"max_attempts\"");
-			if (!json.contains("min_hits"))
-				throw std::invalid_argument("First score element is missing the field \"min_hits\"");
-			if (!json.contains("min_damage"))
-				throw std::invalid_argument("First score element is missing the field \"min_damage\"");
-			if (!json.contains("min_limit"))
-				throw std::invalid_argument("First score element is missing the field \"min_limit\"");
-		}
+		if (json.contains("max_attempts"))
+			throw std::invalid_argument("First score element shouldn't have the field \"max_attempts\"");
+		if (!json.contains("min_hits"))
+			throw std::invalid_argument("First score element is missing the field \"min_hits\"");
+		if (!json.contains("min_damage"))
+			throw std::invalid_argument("First score element is missing the field \"min_damage\"");
+		if (!json.contains("min_limit"))
+			throw std::invalid_argument("First score element is missing the field \"min_limit\"");
 	} else
 		*this = *other;
 

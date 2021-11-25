@@ -119,6 +119,15 @@
             "name": "Extra1",
             "name_hidden_when_locked": false,
             "preview": ""
+        },
+        {
+            "description": "",
+            "extra": true,
+            "file": "test.json",
+            "may_be_locked": false,
+            "name": "test.json",
+            "name_hidden_when_locked": false,
+            "preview": ""
         }
     ],
     "stand": {
