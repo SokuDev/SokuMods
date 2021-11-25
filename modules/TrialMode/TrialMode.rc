@@ -14,3 +14,5 @@
 56 RCDATA "assets/editSeatBackground.png"
 60 RCDATA "assets/editSeatForeground.png"
 64 RCDATA "assets/stick_top.png"
+68 RCDATA "assets/tick.png"
+72 RCDATA "assets/editSeatEmpty.png"

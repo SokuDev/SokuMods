@@ -4,20 +4,21 @@
     "characters": [
         "alice"
     ],
+    "description": "No description provided",
     "icon": {
         "isPath": false,
         "offset": {
-            "x": 1.0,
-            "y": 0.0
+            "x": 3.500000476837158,
+            "y": 0.5000001788139343
         },
         "path": "data/character/alice/face/face000.bmp",
         "rect": {
-            "height": 55,
+            "height": 54,
             "left": 0,
             "top": 0,
-            "width": 135
+            "width": 133
         },
-        "scale": 0.5000043511390686,
+        "scale": 0.5100044012069702,
         "xMirror": true,
         "yMirror": false
     },

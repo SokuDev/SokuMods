@@ -10,7 +10,8 @@
         "patchouli",
         "flandre",
         "marisa",
-        "reimu"
+        "reimu",
+        "udonge"
     ],
     "description": "Another boring day for Remilia...<br>Or so she thought, until half of Gensokyo get<br>into her own mansion after hearing a strange<br>rumor. But who is this mysterious intruder<br>everyone is talking about?",
     "icon": {
@@ -26,7 +27,7 @@
             "top": 0,
             "width": 133
         },
-        "scale": 0.5100001692771912,
+        "scale": 0.5100002288818359,
         "xMirror": true,
         "yMirror": false
     },

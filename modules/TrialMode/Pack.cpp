@@ -51,7 +51,7 @@ const std::map<unsigned, std::string> swrCharacters{
 };
 char packsLocation[1024 + MAX_PATH];
 
-static std::vector<std::string> authors{
+std::vector<std::string> authors{
 	"9 Baka Cirno",
 	"Illuminated Catfish",
 	"Fun frog that never wakes back up",
@@ -67,7 +67,7 @@ static std::vector<std::string> authors{
 	"Frightened Youmu",
 };
 
-bool isInvalidPath(const std::string &path)
+bool Pack::isInvalidPath(const std::string &path)
 {
 	if (path.find("/../") != std::string::npos)
 		return true;
@@ -76,6 +76,14 @@ bool isInvalidPath(const std::string &path)
 	if (path.find("/..\\") != std::string::npos)
 		return true;
 	if (path.find("\\..\\") != std::string::npos)
+		return true;
+	if (path.substr(0, 3) == "../")
+		return true;
+	if (path.substr(0, 3) == "..\\")
+		return true;
+	if (path.substr(path.size() - 3) == "/..")
+		return true;
+	if (path.substr(path.size() - 3) == "\\..")
 		return true;
 	if (path.find(':') != std::string::npos)
 		return true;
@@ -87,7 +95,7 @@ static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::
 	std::string msg;
 
 	if (version)
-		msg = "Mod version >" + *version + " required.";
+		msg = "Mod version >=" + *version + " required.";
 	else if (swrNeeded && !missingChars.empty()) {
 		if (!hasSoku2)
 			msg = "Soku2 and SWR are missing";
@@ -132,7 +140,7 @@ static void makeAuthorStr(Pack &pack, const std::string &str)
 	pack.author.setSize((size - 1).to<unsigned>());
 }
 
-int getVersionFromStr(const std::string &str)
+int Pack::getVersionFromStr(const std::string &str)
 {
 	size_t pos = 0;
 	int version = 0;
@@ -169,11 +177,13 @@ int getVersionFromStr(const std::string &str)
 	return version;
 }
 
-bool checkVersion(const std::string &version)
+bool Pack::checkVersion(const std::string &version)
 {
 	if (version == VERSION_STR)
 		return true;
 
+	if (version.substr(0, strlen("beta ")) != "beta " && version.substr(0, strlen("alpha ")) != "alpha " && !std::isdigit(version[0]))
+		throw std::invalid_argument("Invalid version modifier found at start of version string (" + version + ")");
 	int reqReleaseState = 3 - (version.substr(0, strlen("beta ")) == "beta ") - (version.substr(0, strlen("alpha ")) == "alpha ") * 2;
 	int releaseState = 3 - (strncmp(VERSION_STR, "beta ", strlen("beta ")) == 0) - (strncmp(VERSION_STR, "alpha ", strlen("alpha ")) == 0) * 2;
 
@@ -220,7 +230,13 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		if (!isInvalidPath(relative)) {
 			this->outroRelPath = relative;
 			this->outroPath = path + "/" + relative;
-		}
+		} else
+			MessageBox(
+				SokuLib::window,
+				("Warning: Trial pack " + path + " has an invalid outro path \"" + relative + "\".").c_str(),
+				"Trial pack warning",
+				MB_ICONWARNING
+			);
 	}
 
 	if (object.contains("icon")) {
@@ -238,11 +254,16 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 			std::string relative = obj["path"];
 
 			if (isInvalidPath(relative)) {
-				printf("%s is not a valid path\n", relative.c_str());
+				MessageBox(
+					SokuLib::window,
+					("Warning: Trial pack " + path + " has an invalid preview path \"" + relative + "\".").c_str(),
+					"Trial pack warning",
+					MB_ICONWARNING
+				);
 				goto invalidPreview;
 			}
 			this->preview.texture.loadFromFile((path + "/" + (this->previewPath = relative)).c_str());
-			this->previewGameAsset = true;
+			this->previewFSAsset = true;
 		} else
 			this->preview.texture.loadFromGame((this->previewPath = obj["path"]).c_str());
 		this->preview.rect = {
@@ -255,12 +276,8 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	}
 
 invalidPreview:
-	if (object.contains("description") && object["description"].is_string())
-		this->descriptionStr = object["description"];
-	this->description.texture.createFromText(
-		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
-		defaultFont12, {300, 150}
-	);
+	this->descriptionStr = object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided";
+	this->description.texture.createFromText(this->descriptionStr.c_str(),defaultFont12, {300, 150});
 	this->description.rect = {
 		0, 0,
 		static_cast<int>(this->description.texture.getSize().x),
@@ -511,7 +528,7 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 	if (object.contains("isPath") && object["isPath"]) {
 		std::string relative = object["path"];
 
-		if (isInvalidPath(relative)) {
+		if (Pack::isInvalidPath(relative)) {
 			MessageBox(
 				SokuLib::window,
 				("Warning: Trial pack " + path + " has an invalid icon path \"" + relative + "\".").c_str(),
@@ -522,7 +539,7 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 		}
 		this->path = relative;
 		this->sprite.texture.loadFromFile((path + "/" + this->path).c_str());
-		this->gameAsset = true;
+		this->fsPath = true;
 	} else {
 		this->path = object["path"];
 		this->sprite.texture.loadFromGame(this->path.c_str());

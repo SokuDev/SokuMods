@@ -7,7 +7,7 @@
     "icon": {
         "isPath": false,
         "offset": {
-            "x": 1.0,
+            "x": 3.0,
             "y": 0.0
         },
         "path": "data/character/chirno/face/face000.bmp",
@@ -17,7 +17,7 @@
             "top": 0,
             "width": 133
         },
-        "scale": 0.5100002288818359,
+        "scale": 0.5100007057189941,
         "xMirror": true,
         "yMirror": false
     },
