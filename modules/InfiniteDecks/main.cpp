@@ -838,16 +838,15 @@ static void initFont() {
 
 bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This, std::array<unsigned short, 20> &deck)
 {
-	auto vec = ((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->vector();
 	unsigned index = 0;
 
-	for (auto pair : vec) {
-		auto i = pair->second;
+	for (auto &pair : *This->editedDeck) {
+		auto i = pair.second;
 
 		while (i) {
 			if (index == 20)
 				return false;
-			deck[index] = pair->first;
+			deck[index] = pair.first;
 			i--;
 			index++;
 		}
@@ -882,16 +881,14 @@ static void onDeckSaved()
 
 	if (!saveProfile(path, toSave)) {
 		if (menu->displayedNumberOfCards == 20) {
-			((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->vector()[0]->second++;
+			menu->editedDeck->begin()->second++;
 			saveError = true;
 		}
 		return;
 	}
 
-	auto cards = ((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->vector();
-
-	for (auto card : cards)
-		card->second = 0;
+	for (auto &card : *menu->editedDeck)
+		card.second = 0;
 	for (int i = 0; i < 5; i++)
 		((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->operator[](i) = 4;
 }
@@ -1250,8 +1247,8 @@ void loadDeckToGame(SokuLib::ProfileDeckEdit *This, const std::array<unsigned sh
 {
 	int count = 0;
 
-	for (auto pair : ((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->vector())
-		pair->second = 0;
+	for (auto &pair : *This->editedDeck)
+		pair.second = 0;
 	for (int i = 0; i < 20; i++)
 		if (deck[i] != 21) {
 			((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->operator[](deck[i])++;
@@ -1820,7 +1817,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 
 	if (saveError) {
 		saveError = false;
-		((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->vector()[0]->second--;
+		This->editedDeck->begin()->second--;
 	}
 
 	sprite.rect.top = sprite.rect.width = 0;
