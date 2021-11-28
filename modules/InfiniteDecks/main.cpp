@@ -1,13 +1,75 @@
 #include <Windows.h>
-#include <SokuLib.hpp>
 #include <map>
+#include <vector>
+#include <cassert>
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <dinput.h>
 #include <Shlwapi.h>
 #include <sstream>
-#include "DrawUtils.hpp"
+#include <SokuLib.hpp>
+
+template<typename T, typename T2>
+struct MapNode {
+	MapNode<T, T2> *prev;
+	MapNode<T, T2> *next;
+	MapNode<T, T2> *head;
+	std::pair<T, T2> data;
+};
+
+template<typename T, typename T2>
+struct OldMap {
+private:
+	static void _exploreList(MapNode<T, T2> *chain, std::vector<MapNode<T, T2> *> &lookup)
+	{
+		if (std::find(lookup.begin(), lookup.end(), chain) != lookup.end())
+			return;
+		lookup.push_back(chain);
+		OldMap<T, T2>::_exploreList(chain->next, lookup);
+		OldMap<T, T2>::_exploreList(chain->prev, lookup);
+		OldMap<T, T2>::_exploreList(chain->head, lookup);
+	}
+
+public:
+	char offset_0x00[4];
+	MapNode<T, T2> *data;
+	unsigned int someKindOfSize;
+
+	std::vector<std::pair<T, T2> *> vector()
+	{
+		std::vector<MapNode<T, T2> *> chains{
+			reinterpret_cast<MapNode<T, T2> *>(this),
+			this->data
+		};
+		std::vector<std::pair<T, T2> *> result;
+
+		OldMap<T, T2>::_exploreList(this->data->next, chains);
+		OldMap<T, T2>::_exploreList(this->data->prev, chains);
+		OldMap<T, T2>::_exploreList(this->data->head, chains);
+		chains.erase(chains.begin(), chains.begin() + 2);
+		for (auto chain : chains)
+			result.push_back(&chain->data);
+		return result;
+	}
+
+	T2 &operator[](const T &key);
+};
+
+static auto FUN_0044e050 = SokuLib::union_cast<MapNode<unsigned short, unsigned char> *(OldMap<unsigned short, unsigned char>::*)(MapNode<unsigned short, unsigned char> *, const unsigned short &)>(0x44e050);
+static auto FUN_0044f3e0 = SokuLib::union_cast<MapNode<unsigned short, unsigned char> *(OldMap<unsigned short, unsigned char>::*)(MapNode<unsigned short, unsigned char> *, const unsigned short &)>(0x44f3e0);
+
+template<>
+unsigned char &OldMap<unsigned short, unsigned char>::operator[](const unsigned short &key)
+{
+	MapNode<unsigned short, unsigned char> buffer;
+
+	(this->*FUN_0044e050)(&buffer, key);
+	if (buffer.next == this->data)
+		(this->*FUN_0044f3e0)(&buffer, key)->next->data.second = 0;
+	assert(buffer.next != this->data);
+	return buffer.next->data.second;
+}
 
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x200
@@ -44,7 +106,7 @@ static SokuLib::SelectClient *(SokuLib::SelectClient::*og_CSelectCL_Init)();
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_Destructor)(unsigned char param);
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*og_CProfileDeckEdit_Init)(int param_2, int param_3, SokuLib::Sprite *param_4);
 
-std::map<unsigned char, std::map<unsigned short, DrawUtils::Sprite>> cardsTextures;
+std::map<unsigned char, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
 std::map<unsigned, std::vector<unsigned short>> characterSpellCards;
 std::map<unsigned, std::array<unsigned short, 20>> defaultDecks;
 std::map<unsigned, std::string> names{
@@ -77,7 +139,7 @@ struct Deck {
 
 struct Guide {
 	bool active = false;
-	DrawUtils::Sprite sprite;
+	SokuLib::DrawUtils::Sprite sprite;
 	unsigned char alpha = 0;
 };
 
@@ -135,13 +197,13 @@ static std::array<std::map<unsigned char, std::vector<Deck>>, 3> loadedDecks;
 static std::vector<Deck> editedDecks;
 static SokuLib::Character lastLeft;
 static SokuLib::Character lastRight;
-static DrawUtils::Sprite arrowSprite;
-static DrawUtils::Sprite baseSprite;
-static DrawUtils::Sprite nameSprite;
-static DrawUtils::Sprite noSprite;
-static DrawUtils::Sprite noSelectedSprite;
-static DrawUtils::Sprite yesSprite;
-static DrawUtils::Sprite yesSelectedSprite;
+static SokuLib::DrawUtils::Sprite arrowSprite;
+static SokuLib::DrawUtils::Sprite baseSprite;
+static SokuLib::DrawUtils::Sprite nameSprite;
+static SokuLib::DrawUtils::Sprite noSprite;
+static SokuLib::DrawUtils::Sprite noSelectedSprite;
+static SokuLib::DrawUtils::Sprite yesSprite;
+static SokuLib::DrawUtils::Sprite yesSelectedSprite;
 static Guide createDeckGuide;
 static Guide selectDeckGuide;
 static Guide editBoxGuide;
@@ -250,8 +312,9 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 	std::array<unsigned short, 20> randomDeck{21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21};
 
 	if (lastChr == SokuLib::CHARACTER_RANDOM) {
-		generateFakeDeck(chr, chr, rand() % (bases.size() + 1), bases, buffer);
-		return;
+		if (bases.empty())
+			return generateFakeDeck(chr, chr, &defaultDecks[chr], buffer);
+		return generateFakeDeck(chr, lastChr, &bases[rand() % bases.size()].cards, buffer);
 	}
 	if (id == bases.size())
 		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
@@ -260,7 +323,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 	if (id == bases.size() + 2)
 		return generateFakeDeck(chr, lastChr, &randomDeck, buffer);
 	if (id == bases.size() + 3)
-		return generateFakeDeck(chr, lastChr, rand() % (bases.size() + 1), bases, buffer);
+		return generateFakeDeck(chr, lastChr, &bases[rand() % bases.size()].cards, buffer);
 	return generateFakeDeck(chr, lastChr, &bases[id].cards, buffer);
 }
 
@@ -775,7 +838,7 @@ static void initFont() {
 
 bool saveDeckFromGame(SokuLib::ProfileDeckEdit *This, std::array<unsigned short, 20> &deck)
 {
-	auto vec = This->editedDeck->vector();
+	auto vec = ((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->vector();
 	unsigned index = 0;
 
 	for (auto pair : vec) {
@@ -819,25 +882,25 @@ static void onDeckSaved()
 
 	if (!saveProfile(path, toSave)) {
 		if (menu->displayedNumberOfCards == 20) {
-			menu->editedDeck->vector()[0]->second++;
+			((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->vector()[0]->second++;
 			saveError = true;
 		}
 		return;
 	}
 
-	auto cards = menu->editedDeck->vector();
+	auto cards = ((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->vector();
 
 	for (auto card : cards)
 		card->second = 0;
 	for (int i = 0; i < 5; i++)
-		menu->editedDeck->operator[](i) = 4;
+		((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->operator[](i) = 4;
 }
 
-void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, DrawUtils::Vector2<int> pos, const char *overridingName = nullptr)
+void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, SokuLib::Vector2i pos, const char *overridingName = nullptr)
 {
 	std::vector<unsigned short> deck;
 	std::string name;
-	DrawUtils::Vector2<int> base = pos;
+	SokuLib::Vector2i base = pos;
 
 	if (select == decks.size()) {
 		name = "Default deck";
@@ -849,9 +912,9 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 	} else if (select == decks.size() + 2) {
 		name = "Randomized deck";
 		deck.resize(20, 21);
-	} else if (select == decks.size() + 3)
-		return renderDeck(chr, weirdRand((int)&decks, 3) % (decks.size() + 1), decks, pos, "Any deck");
-	else {
+	} else if (select == decks.size() + 3 && !decks.empty())
+		return renderDeck(chr, weirdRand((int)&decks, 3) % decks.size(), decks, pos, "Any deck");
+	else if (select <= decks.size()) {
 		name = decks[select].name;
 		deck = {decks[select].cards.begin(), decks[select].cards.end()};
 	}
@@ -861,35 +924,35 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 
 	if (!deck.empty()) {
 		for (int i = 0; i < 10; i++) {
-			DrawUtils::Sprite &sprite = (deck[i] < 100 ? cardsTextures[SokuLib::CHARACTER_RANDOM][deck[i]] : cardsTextures[chr][deck[i]]);
+			SokuLib::DrawUtils::Sprite &sprite = (deck[i] < 100 ? cardsTextures[SokuLib::CHARACTER_RANDOM][deck[i]] : cardsTextures[chr][deck[i]]);
 
 			sprite.setPosition(pos);
 			sprite.setSize({10, 16});
 			sprite.rect.top = sprite.rect.width = 0;
 			sprite.rect.width = sprite.texture.getSize().x;
 			sprite.rect.height = sprite.texture.getSize().y;
-			sprite.tint = DrawUtils::DxSokuColor::White;
+			sprite.tint = SokuLib::Color::White;
 			sprite.draw();
 			pos.x += 10;
 		}
 		pos.x = base.x;
 		pos.y += 16;
 		for (int i = 0; i < 10; i++) {
-			DrawUtils::Sprite &sprite = (deck[i + 10] < 100 ? cardsTextures[SokuLib::CHARACTER_RANDOM][deck[i + 10]] : cardsTextures[chr][deck[i + 10]]);
+			SokuLib::DrawUtils::Sprite &sprite = (deck[i + 10] < 100 ? cardsTextures[SokuLib::CHARACTER_RANDOM][deck[i + 10]] : cardsTextures[chr][deck[i + 10]]);
 
 			sprite.setPosition(pos);
 			sprite.setSize({10, 16});
 			sprite.rect.top = sprite.rect.width = 0;
 			sprite.rect.width = sprite.texture.getSize().x;
 			sprite.rect.height = sprite.texture.getSize().y;
-			sprite.tint = DrawUtils::DxSokuColor::White;
+			sprite.tint = SokuLib::Color::White;
 			sprite.draw();
 			pos.x += 10;
 		}
 	}
 	pos.y = base.y + 32;
 
-	DrawUtils::Sprite sprite;
+	SokuLib::DrawUtils::Sprite sprite;
 	int text;
 	int width = 0;
 
@@ -905,7 +968,7 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 	sprite.rect = {
 		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 	};
-	sprite.tint = DrawUtils::DxSokuColor::White;
+	sprite.tint = SokuLib::Color::White;
 	sprite.draw();
 }
 
@@ -943,10 +1006,10 @@ int __fastcall CSelect_OnRender(SokuLib::Select *This) {
 	return renderingCommon((This->*s_originalSelectOnRender)());
 }
 
-static void loadTexture(DrawUtils::Texture &container, const char *path, bool shouldExist = true)
+static void loadTexture(SokuLib::DrawUtils::Texture &container, const char *path, bool shouldExist = true)
 {
 	int text = 0;
-	DrawUtils::Vector2<unsigned> size;
+	SokuLib::Vector2u size;
 	int *ret = SokuLib::textureMgr.loadTexture(&text, path, &size.x, &size.y);
 
 	printf("Loading texture %s\n", path);
@@ -960,7 +1023,7 @@ static void loadTexture(DrawUtils::Texture &container, const char *path, bool sh
 	container.setHandle(text, size);
 }
 
-static inline void loadTexture(DrawUtils::Sprite &container, const char *path, bool shouldExist = true)
+static inline void loadTexture(SokuLib::DrawUtils::Sprite &container, const char *path, bool shouldExist = true)
 {
 	loadTexture(container.texture, path, shouldExist);
 }
@@ -979,7 +1042,7 @@ static void loadCardAssets()
 {
 	int text;
 	char buffer[128];
-	DrawUtils::Texture tmp;
+	SokuLib::DrawUtils::Texture tmp;
 
 	puts("Loading card assets");
 	for (int i = 0; i <= 20; i++) {
@@ -1053,12 +1116,12 @@ static int selectProcessCommon(int v)
 		if (left == 1 || (left >= 36 && left % 6 == 0)) {
 			SokuLib::playSEWaveBuffer(0x27);
 			if (downSelectedDeck == 0)
-				downSelectedDeck = decks.size() + 3;
+				downSelectedDeck = decks.size() + 3 - decks.empty();
 			else
 				downSelectedDeck--;
 		} else if (right == 1 || (right >= 36 && right % 6 == 0)) {
 			SokuLib::playSEWaveBuffer(0x27);
-			if (downSelectedDeck == decks.size() + 3)
+			if (downSelectedDeck == decks.size() + 3 - decks.empty())
 				downSelectedDeck = 0;
 			else
 				downSelectedDeck++;
@@ -1140,11 +1203,11 @@ static void handleInput(const SokuLib::KeyInput &inputs, int index)
 
 	if (inputs.horizontalAxis < 0) {
 		if (selectedDeck == 0)
-			selectedDeck = decks.size() + 3;
+			selectedDeck = decks.size() + 3 - decks.empty();
 		else
 			selectedDeck--;
 	} else {
-		if (selectedDeck == decks.size() + 3)
+		if (selectedDeck == decks.size() + 3 - decks.empty())
 			selectedDeck = 0;
 		else
 			selectedDeck++;
@@ -1187,11 +1250,11 @@ void loadDeckToGame(SokuLib::ProfileDeckEdit *This, const std::array<unsigned sh
 {
 	int count = 0;
 
-	for (auto pair : This->editedDeck->vector())
+	for (auto pair : ((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->vector())
 		pair->second = 0;
 	for (int i = 0; i < 20; i++)
 		if (deck[i] != 21) {
-			This->editedDeck->operator[](deck[i])++;
+			((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->operator[](deck[i])++;
 			count++;
 		}
 	This->displayedNumberOfCards = count;
@@ -1225,8 +1288,8 @@ void renameBoxRender()
 {
 	int text;
 	int width;
-	DrawUtils::Sprite textSprite;
-	DrawUtils::RectangleShape rect;
+	SokuLib::DrawUtils::Sprite textSprite;
+	SokuLib::DrawUtils::RectangleShape rect;
 
 	nameSprite.setPosition({160, 192});
 	nameSprite.setSize(nameSprite.texture.getSize());
@@ -1235,7 +1298,7 @@ void renameBoxRender()
 		static_cast<int>(nameSprite.texture.getSize().x),
 		static_cast<int>(nameSprite.texture.getSize().y)
 	};
-	nameSprite.tint = DrawUtils::DxSokuColor::White;
+	nameSprite.tint = SokuLib::Color::White;
 	nameSprite.draw();
 
 	if (!SokuLib::textureMgr.createTextTexture(&text, nameBuffer, font, TEXTURE_SIZE, 18, &width, nullptr)) {
@@ -1282,9 +1345,9 @@ void renameBoxUpdate(SokuLib::KeyManager *keys)
 void deleteBoxRender()
 {
 	int text;
-	DrawUtils::Sprite textSprite;
-	DrawUtils::Sprite &yes = deleteBoxSelectedItem ? yesSelectedSprite : yesSprite;
-	DrawUtils::Sprite &no  = deleteBoxSelectedItem ? noSprite : noSelectedSprite;
+	SokuLib::DrawUtils::Sprite textSprite;
+	SokuLib::DrawUtils::Sprite &yes = deleteBoxSelectedItem ? yesSelectedSprite : yesSprite;
+	SokuLib::DrawUtils::Sprite &no  = deleteBoxSelectedItem ? noSprite : noSelectedSprite;
 
 	if (deleteBoxSelectedItem == 2)
 		return;
@@ -1296,7 +1359,7 @@ void deleteBoxRender()
 		static_cast<int>(baseSprite.texture.getSize().x),
 		static_cast<int>(baseSprite.texture.getSize().y)
 	};
-	baseSprite.tint = DrawUtils::DxSokuColor::White;
+	baseSprite.tint = SokuLib::Color::White;
 	baseSprite.draw();
 
 	yes.setPosition({242, 228});
@@ -1306,7 +1369,7 @@ void deleteBoxRender()
 		static_cast<int>(yes.texture.getSize().x),
 		static_cast<int>(yes.texture.getSize().y)
 	};
-	yes.tint = DrawUtils::DxSokuColor::White;
+	yes.tint = SokuLib::Color::White;
 	yes.draw();
 
 	no.setPosition({338, 228});
@@ -1316,7 +1379,7 @@ void deleteBoxRender()
 		static_cast<int>(no.texture.getSize().x),
 		static_cast<int>(no.texture.getSize().y)
 	};
-	no.tint = DrawUtils::DxSokuColor::White;
+	no.tint = SokuLib::Color::White;
 	no.draw();
 
 	if (!SokuLib::textureMgr.createTextTexture(&text, ("Delete deck " + editedDecks[editSelectedDeck].name + " ?").c_str(), defaultFont, TEXTURE_SIZE, FONT_HEIGHT + 18, nullptr, nullptr)) {
@@ -1329,8 +1392,8 @@ void deleteBoxRender()
 	textSprite.rect = {
 		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 	};
-	textSprite.tint = DrawUtils::DxSokuColor::White;
-	textSprite.fillColors[2] = textSprite.fillColors[3] = DrawUtils::DxSokuColor::Blue;
+	textSprite.tint = SokuLib::Color::White;
+	textSprite.fillColors[2] = textSprite.fillColors[3] = SokuLib::Color::Blue;
 	textSprite.draw();
 }
 
@@ -1374,7 +1437,7 @@ void copyBoxRender()
 {
 	int text;
 	int width;
-	DrawUtils::Sprite textSprite;
+	SokuLib::DrawUtils::Sprite textSprite;
 
 	baseSprite.setPosition({160, 192});
 	baseSprite.setSize(baseSprite.texture.getSize());
@@ -1383,7 +1446,7 @@ void copyBoxRender()
 		static_cast<int>(baseSprite.texture.getSize().x),
 		static_cast<int>(baseSprite.texture.getSize().y)
 	};
-	baseSprite.tint = DrawUtils::DxSokuColor::White;
+	baseSprite.tint = SokuLib::Color::White;
 	baseSprite.draw();
 
 	const std::string &name = copyBoxSelectedItem == editedDecks.size() - 1 ? "Default deck" : editedDecks[copyBoxSelectedItem].name;
@@ -1394,7 +1457,7 @@ void copyBoxRender()
 	}
 
 	constexpr float increase = 1;
-	DrawUtils::Vector2<int> pos{static_cast<int>(321 - (width / 2) * increase), 230};
+	SokuLib::Vector2i pos{static_cast<int>(321 - (width / 2) * increase), 230};
 
 	textSprite.setPosition(pos);
 	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
@@ -1402,7 +1465,7 @@ void copyBoxRender()
 	textSprite.rect = {
 		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 	};
-	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.tint = SokuLib::Color::White;
 	textSprite.draw();
 
 	pos.x -= 32 * increase;
@@ -1410,7 +1473,7 @@ void copyBoxRender()
 	arrowSprite.rect = {0, 0, 32, 32};
 	arrowSprite.setPosition(pos);
 	arrowSprite.setSize({static_cast<unsigned>(32 * increase + 1), static_cast<unsigned>(32 * increase + 1)});
-	arrowSprite.tint = DrawUtils::DxSokuColor::White;
+	arrowSprite.tint = SokuLib::Color::White;
 	arrowSprite.draw();
 
 	pos.x += 32 * increase + width * increase;
@@ -1424,7 +1487,7 @@ void copyBoxRender()
 	}
 	textSprite.setPosition({166, 200});
 	textSprite.texture.setHandle(text, {TEXTURE_SIZE, FONT_HEIGHT + 18});
-	textSprite.fillColors[2] = textSprite.fillColors[3] = DrawUtils::DxSokuColor::Blue;
+	textSprite.fillColors[2] = textSprite.fillColors[3] = SokuLib::Color::Blue;
 	textSprite.draw();
 }
 
@@ -1749,21 +1812,21 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 {
 	int ret = (This->*s_originalCProfileDeckEdit_OnRender)();
 
-	DrawUtils::Sprite &sprite = cardsTextures[SokuLib::CHARACTER_RANDOM][21];
-	DrawUtils::Sprite textSprite;
-	DrawUtils::Vector2<int> pos{38, 88};
+	SokuLib::DrawUtils::Sprite &sprite = cardsTextures[SokuLib::CHARACTER_RANDOM][21];
+	SokuLib::DrawUtils::Sprite textSprite;
+	SokuLib::Vector2i pos{38, 88};
 	int text;
 	int width = 0;
 
 	if (saveError) {
 		saveError = false;
-		This->editedDeck->vector()[0]--;
+		((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->vector()[0]->second--;
 	}
 
 	sprite.rect.top = sprite.rect.width = 0;
 	sprite.rect.width = sprite.texture.getSize().x;
 	sprite.rect.height = sprite.texture.getSize().y;
-	sprite.tint = DrawUtils::DxSokuColor::White;
+	sprite.tint = SokuLib::Color::White;
 	sprite.setSize({20, 32});
 	for (int i = 20; i > This->displayedNumberOfCards; i--) {
 		sprite.setPosition({304 + 24 * ((i - 1) % 10), 260 + 38 * ((i - 1) / 10)});
@@ -1793,7 +1856,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		textSprite.rect = {
 			0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 		};
-		textSprite.tint = DrawUtils::DxSokuColor::Red * alpha;
+		textSprite.tint = SokuLib::Color::Red * alpha;
 		textSprite.draw();
 	}
 
@@ -1808,7 +1871,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 	textSprite.rect = {
 		0, 0, TEXTURE_SIZE, FONT_HEIGHT + 18
 	};
-	textSprite.tint = DrawUtils::DxSokuColor::White;
+	textSprite.tint = SokuLib::Color::White;
 	textSprite.draw();
 
 	pos.x -= 32;
@@ -1816,7 +1879,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 	arrowSprite.rect = {0, 0, 32, 32};
 	arrowSprite.setPosition(pos);
 	arrowSprite.setSize({33, 33});
-	arrowSprite.tint = DrawUtils::DxSokuColor::White;
+	arrowSprite.tint = SokuLib::Color::White;
 	arrowSprite.draw();
 
 	pos.x += 32 + width;

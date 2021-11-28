@@ -289,8 +289,6 @@ target_sources(
         "InfiniteDecks" PRIVATE
         modules/InfiniteDecks/InfiniteDecks.rc
         modules/InfiniteDecks/main.cpp
-        modules/InfiniteDecks/DrawUtils.cpp
-        modules/InfiniteDecks/DrawUtils.hpp
 )
 target_link_libraries(
         InfiniteDecks
