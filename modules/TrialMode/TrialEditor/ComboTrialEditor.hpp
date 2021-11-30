@@ -91,6 +91,9 @@ private:
 
 	//Render
 	SokuLib::DrawUtils::Sprite _pause;
+	SokuLib::DrawUtils::Sprite _comboSprite;
+	SokuLib::DrawUtils::Sprite _introSprite;
+	SokuLib::DrawUtils::Sprite _outroSprite;
 	SokuLib::DrawUtils::Sprite _trialEditorMockup;
 	SokuLib::DrawUtils::Sprite _trialEditorPlayer;
 	SokuLib::DrawUtils::Sprite _trialEditorDummy;
@@ -151,7 +154,17 @@ private:
 	bool setOutro();
 	bool setIntro();
 	bool saveReturnToCharSelect();
+	bool playIntro();
+	bool playOutro();
+	bool playPreview();
 	static const std::vector<bool (ComboTrialEditor::*)()> callbacks[];
+
+	void noRender() const;
+	void playerRender() const;
+	void dummyRender() const;
+	void systemRender() const;
+	void miscRender() const;
+	static void (ComboTrialEditor::* const renderCallbacks[])() const;
 
 	void _playIntro();
 	void _initGameStart();

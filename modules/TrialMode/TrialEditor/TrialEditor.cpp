@@ -64,7 +64,7 @@ TrialEditor::TrialEditor(const char *folder, const nlohmann::json &json)
 	for (auto pos = this->_music.find("{{pack_path}}"); pos != std::string::npos; pos = this->_music.find("{{pack_path}}"))
 		this->_music.replace(pos, strlen("{{pack_path}}"), folder);
 	if (json.contains("counter_hit") && json["counter_hit"].is_boolean() && json["counter_hit"].get<bool>())
-		applyCounterHitOnlyPatch();
+		this->_counterHit = true, applyCounterHitOnlyPatch();
 	if (json.contains("music_loop_start") && json["music_loop_start"].is_number())
 		this->_loopStart = json["music_loop_start"];
 	if (json.contains("music_loop_end") && json["music_loop_end"].is_number())
