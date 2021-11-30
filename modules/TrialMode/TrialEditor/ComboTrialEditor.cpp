@@ -147,6 +147,30 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 		this->_loadExpected(getField<std::string>(json, "", &nlohmann::json::is_string, "expected"));
 	} catch (...) {}
 
+	this->_comboSprite.texture.createFromText(this->_transformComboToString().c_str(), defaultFont12, {250, 30});
+	this->_comboSprite.setPosition({388, 353});
+	this->_comboSprite.setSize(this->_comboSprite.texture.getSize());
+	this->_comboSprite.rect.left = 0;
+	this->_comboSprite.rect.top = 0;
+	this->_comboSprite.rect.width = this->_comboSprite.texture.getSize().x;
+	this->_comboSprite.rect.height = this->_comboSprite.texture.getSize().y;
+
+	this->_introSprite.texture.createFromText(this->_introRelPath.c_str(), defaultFont12, {250, 30});
+	this->_introSprite.setPosition({379, 260});
+	this->_introSprite.setSize(this->_introSprite.texture.getSize());
+	this->_introSprite.rect.left = 0;
+	this->_introSprite.rect.top = 0;
+	this->_introSprite.rect.width = this->_introSprite.texture.getSize().x;
+	this->_introSprite.rect.height = this->_introSprite.texture.getSize().y;
+
+	this->_outroSprite.texture.createFromText(this->_outroRelPath.c_str(), defaultFont12, {250, 30});
+	this->_outroSprite.setPosition({379, 294});
+	this->_outroSprite.setSize(this->_outroSprite.texture.getSize());
+	this->_outroSprite.rect.left = 0;
+	this->_outroSprite.rect.top = 0;
+	this->_outroSprite.rect.width = this->_outroSprite.texture.getSize().x;
+	this->_outroSprite.rect.height = this->_outroSprite.texture.getSize().y;
+
 	this->_attemptText.texture.createFromText("Editor mode", defaultFont16, {306, 124});
 	this->_attemptText.setPosition({4, 58});
 	this->_attemptText.setSize(this->_attemptText.texture.getSize());
@@ -328,17 +352,9 @@ disableLimit:
 			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		}
 
-		if (battleMgr.leftCharacterManager.keyCombination._6314a)
-			this->_outroRequ++;
-		else
-			this->_outroRequ = 0;
-		if (battleMgr.leftCharacterManager.keyCombination._22a)
-			this->_introRequ++;
-		else
-			this->_introRequ = 0;
-
 		if (!this->_playingIntro && this->_outroRequ == 1) {
 			try {
+				this->_outroRequ = 0;
 				this->_initAnimations(false, true);
 				this->_outroPlayed = false;
 				this->_finished = true;
@@ -350,10 +366,9 @@ disableLimit:
 					MB_ICONERROR
 				);
 			}
-		} else if (battleMgr.leftCharacterManager.keyCombination._214a && !this->_playingIntro) {
-			this->_playComboAfterIntro = true;
 		} else if (!this->_playingIntro && this->_introRequ == 1) {
 			try {
+				this->_introRequ = 0;
 				ComboTrialEditor::_initVanillaGame();
 				this->_initAnimations(true, false);
 				this->_introPlayed = false;
@@ -647,6 +662,8 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 		if (originalInputs.a == 1) {
 			this->_openPause();
 			this->_changingDummyPos = false;
+			this->_jump &= this->_dummyStartPos.y == 0;
+			this->_crouching &= this->_dummyStartPos.y == 0;
 			SokuLib::playSEWaveBuffer(0x28);
 			originalInputs.a = 0;
 		}
@@ -911,6 +928,7 @@ int ComboTrialEditor::pauseOnRender() const
 	this->_trialEditorMockup.draw();
 	if (this->_selectedSubcategory)
 		(&this->_trialEditorMockup)[this->_selectedSubcategory].draw();
+	(this->*ComboTrialEditor::renderCallbacks[this->_selectedSubcategory])();
 	if (this->_selectingCharacters)
 		this->_selectingCharacterRender();
 	return true;
@@ -950,12 +968,22 @@ const std::vector<bool (ComboTrialEditor::*)()> ComboTrialEditor::callbacks[] = 
 		&ComboTrialEditor::setMusic,    //Music
 		&ComboTrialEditor::setWeather,  //Weather
 		&ComboTrialEditor::setFailTimer,//Fail timer
-		&ComboTrialEditor::setOutro,    //Intro
-		&ComboTrialEditor::setIntro     //Outro
+		&ComboTrialEditor::setIntro,    //Intro
+		&ComboTrialEditor::setOutro,    //Outro
+		&ComboTrialEditor::playIntro,   //Play intro
+		&ComboTrialEditor::playOutro,   //Play outro
+		&ComboTrialEditor::playPreview  //Play preview
 	},
 	{&ComboTrialEditor::saveReturnToCharSelect},//Save
 	{&ComboTrialEditor::returnToCharSelect},
 	{&ComboTrialEditor::returnToTitleScreen}
+};
+void (ComboTrialEditor::* const ComboTrialEditor::renderCallbacks[])() const = {
+	&ComboTrialEditor::noRender,
+	&ComboTrialEditor::playerRender,
+	&ComboTrialEditor::dummyRender,
+	&ComboTrialEditor::systemRender,
+	&ComboTrialEditor::miscRender
 };
 
 bool ComboTrialEditor::notImplemented()
@@ -1006,7 +1034,9 @@ bool ComboTrialEditor::setPlayerHand()
 
 bool ComboTrialEditor::setPlayerWeather()
 {
-	return notImplemented();
+	this->_leftWeather = !this->_leftWeather;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setPlayerDolls()
@@ -1039,17 +1069,29 @@ bool ComboTrialEditor::setDummyDeck()
 
 bool ComboTrialEditor::setDummyCrouch()
 {
-	return notImplemented();
+	if (this->_dummyStartPos.y)
+		return SokuLib::playSEWaveBuffer(0x29), false;
+	this->_crouching = !this->_crouching;
+	this->_jump = false;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setDummyJump()
 {
-	return notImplemented();
+	if (this->_dummyStartPos.y)
+		return SokuLib::playSEWaveBuffer(0x29), false;
+	this->_jump = !this->_jump;
+	this->_crouching = false;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setDummyWeather()
 {
-	return notImplemented();
+	this->_rightWeather = !this->_rightWeather;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setCRankRequ()
@@ -1074,12 +1116,20 @@ bool ComboTrialEditor::setSRankRequ()
 
 bool ComboTrialEditor::setCounterHit()
 {
-	return notImplemented();
+	this->_counterHit = !this->_counterHit;
+	if (this->_counterHit)
+		applyCounterHitOnlyPatch();
+	else
+		removeCounterHitOnlyPatch();
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setLimitDisabled()
 {
-	return notImplemented();
+	this->_disableLimit = !this->_disableLimit;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setCardCosts()
@@ -1120,6 +1170,33 @@ bool ComboTrialEditor::setOutro()
 bool ComboTrialEditor::setIntro()
 {
 	return notImplemented();
+}
+
+bool ComboTrialEditor::playIntro()
+{
+	this->_introRequ++;
+	this->_menuCursorPos = 0;
+	this->_selectedSubcategory = 0;
+	SokuLib::playSEWaveBuffer(0x28);
+	return false;
+}
+
+bool ComboTrialEditor::playOutro()
+{
+	this->_outroRequ++;
+	this->_menuCursorPos = 0;
+	this->_selectedSubcategory = 0;
+	SokuLib::playSEWaveBuffer(0x28);
+	return false;
+}
+
+bool ComboTrialEditor::playPreview()
+{
+	this->_playComboAfterIntro = true;
+	this->_menuCursorPos = 0;
+	this->_selectedSubcategory = 0;
+	SokuLib::playSEWaveBuffer(0x28);
+	return false;
 }
 
 bool ComboTrialEditor::saveReturnToCharSelect()
@@ -1212,6 +1289,8 @@ bool ComboTrialEditor::save() const
 		if (this->_crouching)
 			json["dummy"]["crouch"]  = this->_crouching;
 
+		if (this->_counterHit)
+			json["counter_hit"] = this->_counterHit;
 		if (this->_uniformCardCost)
 			json["uniform_card_cost"] = this->_uniformCardCost;
 		if (this->_disableLimit)
@@ -1421,6 +1500,53 @@ void ComboTrialEditor::_selectingCharacterRender() const
 void ComboTrialEditor::_openPause() const
 {
 	SokuLib::activateMenu(((void *(__thiscall *)(void *, SokuLib::BattleManager &))0x444F40)(SokuLib::NewFct(0x78), SokuLib::getBattleMgr()));
+}
+
+void ComboTrialEditor::noRender() const
+{
+}
+
+void ComboTrialEditor::playerRender() const
+{
+	if (this->_leftWeather) {
+		tickSprite.setPosition({304, 287});
+		tickSprite.draw();
+	}
+}
+
+void ComboTrialEditor::dummyRender() const
+{
+	if (this->_crouching) {
+		tickSprite.setPosition({304, 222});
+		tickSprite.draw();
+	}
+	if (this->_jump) {
+		tickSprite.setPosition({304, 254});
+		tickSprite.draw();
+	}
+	if (this->_rightWeather) {
+		tickSprite.setPosition({304, 286});
+		tickSprite.draw();
+	}
+}
+
+void ComboTrialEditor::systemRender() const
+{
+	if (this->_counterHit) {
+		tickSprite.setPosition({303, 254});
+		tickSprite.draw();
+	}
+	if (this->_disableLimit) {
+		tickSprite.setPosition({303, 286});
+		tickSprite.draw();
+	}
+	this->_comboSprite.draw();
+}
+
+void ComboTrialEditor::miscRender() const
+{
+	this->_introSprite.draw();
+	this->_outroSprite.draw();
 }
 
 void ComboTrialEditor::SpecialAction::parse()

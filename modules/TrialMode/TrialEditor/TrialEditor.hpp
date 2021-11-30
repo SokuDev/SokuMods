@@ -33,6 +33,7 @@ protected:
 	std::unique_ptr<BattleAnimation> _intro;
 	std::unique_ptr<BattleAnimation> _outro;
 	bool _introPlayed = false;
+	bool _counterHit = false;
 	bool _outroPlayed = false;
 
 	void _introOnRender() const;
