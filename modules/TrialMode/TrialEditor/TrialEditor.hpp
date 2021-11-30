@@ -13,15 +13,23 @@
 #include "TrialBase.hpp"
 #include "Animations/BattleAnimation.hpp"
 
+extern bool reloadRequest;
+
 class TrialEditor : public TrialBase {
-private:
+protected:
+	int (SokuLib::PauseMenu::*_ogOnUpdate)();
+	int (SokuLib::PauseMenu::*_ogOnRender)();
 	std::string _music;
+	std::string _musicReal;
 	std::string _folder;
 	std::string _introPath;
 	std::string _outroPath;
-	static const std::map<std::string, std::function<TrialEditor *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> _factory;
+	std::string _introRelPath;
+	std::string _outroRelPath;
+	double _loopStart = 0;
+	double _loopEnd = 0;
+	static const std::map<std::string, std::function<TrialEditor *(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json)>> _factory;
 
-protected:
 	std::unique_ptr<BattleAnimation> _intro;
 	std::unique_ptr<BattleAnimation> _outro;
 	bool _introPlayed = false;
@@ -32,12 +40,15 @@ protected:
 	void _introOnUpdate();
 	void _outroOnUpdate();
 	void _initAnimations(bool intro = true, bool outro = true);
+	void _playBGM();
 
 public:
 	TrialEditor(const char *folder, const nlohmann::json &json);
 	~TrialEditor() override;
 
-	static TrialBase *create(const char *folder, SokuLib::Character player, const nlohmann::json &json);
+	virtual int pauseOnUpdate() = 0;
+	virtual int pauseOnRender() const = 0;
+	static TrialBase *create(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json);
 };
 
 

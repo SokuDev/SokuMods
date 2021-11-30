@@ -860,7 +860,7 @@ ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, c
 			throw std::invalid_argument("Field \"max_attempts\" is specified but not a number");
 		this->attempts = json["max_attempts"];
 		if (!this->attempts)
-			throw std::invalid_argument("It's impossible to win without trying ! THINK MARK ! THINK!");
+			throw std::invalid_argument("It's impossible to win without trying! THINK MARK! THINK!");
 	}
 	if (json.contains("min_hits")) {
 		if (!json["min_hits"].is_number())
