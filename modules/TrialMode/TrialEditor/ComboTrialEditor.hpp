@@ -104,8 +104,11 @@ private:
 	unsigned _chrCursorPos = 0;
 	unsigned _menuCursorPos = 0;
 	unsigned _selectedSubcategory = 0;
+	bool _changingPlayerPos = false;
+	bool _changingDummyPos = false;
 	bool _selectingCharacters = false;
 	bool _needReload = false;
+	SokuLib::Vector2f _dummyStartPosTmp;
 	SokuLib::Character *_characterEdit = nullptr;
 
 	std::string _transformComboToString() const;
@@ -113,6 +116,7 @@ private:
 	nlohmann::json _getScoresJson() const;
 	void _selectingCharacterUpdate();
 	void _selectingCharacterRender() const;
+	void _openPause() const;
 
 	//Menu callbacks
 	bool notImplemented();

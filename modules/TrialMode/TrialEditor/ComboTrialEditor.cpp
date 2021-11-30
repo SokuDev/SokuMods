@@ -616,6 +616,42 @@ void ComboTrialEditor::_playIntro()
 
 void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
+	if (this->_changingPlayerPos) {
+		originalInputs.b = 0;
+		originalInputs.c = 0;
+		originalInputs.d = 0;
+		originalInputs.verticalAxis = 0;
+		originalInputs.spellcard = 0;
+		originalInputs.changeCard = 0;
+		if (originalInputs.a == 1) {
+			this->_openPause();
+			this->_playerStartPos = SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x;
+			this->_changingPlayerPos = false;
+			SokuLib::playSEWaveBuffer(0x28);
+			originalInputs.a = 0;
+		}
+		return;
+	}
+	if (this->_changingDummyPos) {
+		this->_dummyStartPos.x += 6 * originalInputs.horizontalAxis;
+		this->_dummyStartPos.x = min(1300, max(0, this->_dummyStartPos.x));
+		this->_dummyStartPos.y -= 6 * originalInputs.verticalAxis;
+		this->_dummyStartPos.y = min(1300, max(0, this->_dummyStartPos.y));
+		originalInputs.b = 0;
+		originalInputs.c = 0;
+		originalInputs.d = 0;
+		originalInputs.horizontalAxis = 0;
+		originalInputs.verticalAxis = 0;
+		originalInputs.spellcard = 0;
+		originalInputs.changeCard = 0;
+		if (originalInputs.a == 1) {
+			this->_openPause();
+			this->_changingDummyPos = false;
+			SokuLib::playSEWaveBuffer(0x28);
+			originalInputs.a = 0;
+		}
+		return;
+	}
 	if (this->_playingIntro) {
 		if (this->_actionCounter == this->_exceptedActions.size())
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
@@ -786,6 +822,12 @@ void ComboTrialEditor::_initVanillaGame()
 
 int ComboTrialEditor::pauseOnUpdate()
 {
+	if (this->_changingPlayerPos || this->_changingDummyPos) {
+		this->_changingPlayerPos = false;
+		this->_changingDummyPos = false;
+		this->_dummyStartPos = this->_dummyStartPosTmp;
+		SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
+	}
 	if (this->_selectingCharacters) {
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
@@ -824,10 +866,18 @@ int ComboTrialEditor::pauseOnUpdate()
 		return true;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
-		if (this->_selectedSubcategory)
-			return (this->*ComboTrialEditor::callbacks[this->_selectedSubcategory][this->_menuCursorPos])();
-		if (ComboTrialEditor::callbacks[this->_menuCursorPos].size() <= 1)
-			return (this->*ComboTrialEditor::callbacks[this->_menuCursorPos][0])();
+		if (this->_selectedSubcategory) {
+			if ((this->*ComboTrialEditor::callbacks[this->_selectedSubcategory][this->_menuCursorPos])())
+				return true;
+			reloadRequest = this->_needReload;
+			return false;
+		}
+		if (ComboTrialEditor::callbacks[this->_menuCursorPos].size() <= 1) {
+			if ((this->*ComboTrialEditor::callbacks[this->_menuCursorPos][0])())
+				return true;
+			reloadRequest = this->_needReload;
+			return false;
+		}
 		this->_selectedSubcategory = this->_menuCursorPos;
 		this->_menuCursorPos = 0;
 		SokuLib::playSEWaveBuffer(0x28);
@@ -918,7 +968,6 @@ bool ComboTrialEditor::notImplemented()
 bool ComboTrialEditor::returnToGame()
 {
 	SokuLib::playSEWaveBuffer(0x28);
-	reloadRequest = this->_needReload;
 	return false;
 }
 
@@ -933,7 +982,11 @@ bool ComboTrialEditor::setPlayerCharacter()
 
 bool ComboTrialEditor::setPlayerPosition()
 {
-	return notImplemented();
+	this->_changingPlayerPos = true;
+	this->_dummyStartPosTmp = this->_dummyStartPos;
+	SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
+	SokuLib::playSEWaveBuffer(0x28);
+	return false;
 }
 
 bool ComboTrialEditor::setPlayerDeck()
@@ -972,7 +1025,11 @@ bool ComboTrialEditor::setDummyCharacter()
 
 bool ComboTrialEditor::setDummyPosition()
 {
-	return notImplemented();
+	this->_changingDummyPos = true;
+	this->_dummyStartPosTmp = this->_dummyStartPos;
+	SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
+	SokuLib::playSEWaveBuffer(0x28);
+	return false;
 }
 
 bool ComboTrialEditor::setDummyDeck()
@@ -1359,6 +1416,11 @@ void ComboTrialEditor::_selectingCharacterRender() const
 		sprite.draw();
 		i++;
 	}
+}
+
+void ComboTrialEditor::_openPause() const
+{
+	SokuLib::activateMenu(((void *(__thiscall *)(void *, SokuLib::BattleManager &))0x444F40)(SokuLib::NewFct(0x78), SokuLib::getBattleMgr()));
 }
 
 void ComboTrialEditor::SpecialAction::parse()
