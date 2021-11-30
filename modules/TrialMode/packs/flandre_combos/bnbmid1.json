@@ -4,7 +4,7 @@
         "deck": [],
         "palette": 0,
         "pos": {
-            "x": 600.0,
+            "x": 312.0,
             "y": 100.0
         }
     },
@@ -14,7 +14,7 @@
         "character": "flandre",
         "deck": [],
         "palette": 0,
-        "pos": 400.0
+        "pos": 66.0
     },
     "score": [
         {
