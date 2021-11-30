@@ -18,59 +18,6 @@ struct MapNode {
 	std::pair<T, T2> data;
 };
 
-template<typename T, typename T2>
-struct OldMap {
-private:
-	static void _exploreList(MapNode<T, T2> *chain, std::vector<MapNode<T, T2> *> &lookup)
-	{
-		if (std::find(lookup.begin(), lookup.end(), chain) != lookup.end())
-			return;
-		lookup.push_back(chain);
-		OldMap<T, T2>::_exploreList(chain->next, lookup);
-		OldMap<T, T2>::_exploreList(chain->prev, lookup);
-		OldMap<T, T2>::_exploreList(chain->head, lookup);
-	}
-
-public:
-	char offset_0x00[4];
-	MapNode<T, T2> *data;
-	unsigned int someKindOfSize;
-
-	std::vector<std::pair<T, T2> *> vector()
-	{
-		std::vector<MapNode<T, T2> *> chains{
-			reinterpret_cast<MapNode<T, T2> *>(this),
-			this->data
-		};
-		std::vector<std::pair<T, T2> *> result;
-
-		OldMap<T, T2>::_exploreList(this->data->next, chains);
-		OldMap<T, T2>::_exploreList(this->data->prev, chains);
-		OldMap<T, T2>::_exploreList(this->data->head, chains);
-		chains.erase(chains.begin(), chains.begin() + 2);
-		for (auto chain : chains)
-			result.push_back(&chain->data);
-		return result;
-	}
-
-	T2 &operator[](const T &key);
-};
-
-static auto FUN_0044e050 = SokuLib::union_cast<MapNode<unsigned short, unsigned char> *(OldMap<unsigned short, unsigned char>::*)(MapNode<unsigned short, unsigned char> *, const unsigned short &)>(0x44e050);
-static auto FUN_0044f3e0 = SokuLib::union_cast<MapNode<unsigned short, unsigned char> *(OldMap<unsigned short, unsigned char>::*)(MapNode<unsigned short, unsigned char> *, const unsigned short &)>(0x44f3e0);
-
-template<>
-unsigned char &OldMap<unsigned short, unsigned char>::operator[](const unsigned short &key)
-{
-	MapNode<unsigned short, unsigned char> buffer;
-
-	(this->*FUN_0044e050)(&buffer, key);
-	if (buffer.next == this->data)
-		(this->*FUN_0044f3e0)(&buffer, key)->next->data.second = 0;
-	assert(buffer.next != this->data);
-	return buffer.next->data.second;
-}
-
 #define FONT_HEIGHT 16
 #define TEXTURE_SIZE 0x200
 
@@ -890,7 +837,7 @@ static void onDeckSaved()
 	for (auto &card : *menu->editedDeck)
 		card.second = 0;
 	for (int i = 0; i < 5; i++)
-		((OldMap<unsigned short, unsigned char> *)(menu->editedDeck))->operator[](i) = 4;
+		menu->editedDeck->operator[](i) = 4;
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, SokuLib::Vector2i pos, const char *overridingName = nullptr)
