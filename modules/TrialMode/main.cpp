@@ -9,6 +9,7 @@
 #include <shlwapi.h>
 #include <dinput.h>
 #include <SokuLib.hpp>
+#include <TrialEditor/TrialEditor.hpp>
 #include "Menu.hpp"
 #include "Pack.hpp"
 #include "Actions.hpp"
@@ -170,10 +171,12 @@ int __fastcall myBattleOnProcess(SokuLib::Battle *This)
 
 	int buffer = !canHaveNextFrame ? loadedTrial->getNextScene() : (This->*ogBattleOnProcess)();
 
+	canHaveNextFrame = true;
 	if (SokuLib::inputMgrs.input.a)
 		buffer = SokuLib::SCENE_BATTLE;
-	canHaveNextFrame = true;
-	if (buffer == SokuLib::SCENE_LOADING);
+	if (reloadRequest)
+		return SokuLib::SCENE_TITLE;
+	else if (buffer == SokuLib::SCENE_LOADING);
 	else if (buffer != SokuLib::SCENE_BATTLE)
 		loadedTrial.reset();
 	else
@@ -202,9 +205,9 @@ int __fastcall myTitleOnProcess(SokuLib::Title *This)
 		__loaded = true;
 		itemTexture.loadFromResource(myModule, MAKEINTRESOURCE(48));
 		selectedItemsTexture.loadFromResource(myModule, MAKEINTRESOURCE(52));
-		This->menuItemTiles.dxHandle = itemTexture.releaseHandle();
-		This->menuSelectedItemTiles.dxHandle = selectedItemsTexture.releaseHandle();
 	}
+	This->menuItemTiles.dxHandle = itemTexture.releaseHandle();
+	This->menuSelectedItemTiles.dxHandle = selectedItemsTexture.releaseHandle();
 
 	int buffer = (This->*ogTitleOnProcess)();
 

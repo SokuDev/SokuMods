@@ -39,7 +39,7 @@
     "name": "Babylone's Aurora",
     "scenarios": [
         {
-            "description": "2A 3A 66B | <br>Basic combo conversion for far melee pokes. <br>3A only combo into 66B on ground",
+            "description": "2A 3A 66B<br>Basic combo conversion for far melee pokes. <br>3A only combo into 66B on ground",
             "extra": false,
             "file": "lore1.json",
             "may_be_locked": true,
@@ -48,7 +48,7 @@
             "preview": "lore1.gif"
         },
         {
-            "description": "5AAA 2B 5C d.236B | <br>The best corner carry ! <br>It is better to start 5AAA with dash momentum <br>and let more B and C knives hit. <br>This also will allow you to limit.",
+            "description": "5AAA 2B 5C d.236B<br>The best corner carry ! <br>It is better to start 5AAA with dash momentum <br>and let more B and C knives hit. <br>This also will allow you to limit.",
             "extra": false,
             "file": "lore3.json",
             "may_be_locked": true,
@@ -57,7 +57,7 @@
             "preview": "lore3.gif"
         },
         {
-            "description": "66B SC205 | <br>Best (only) way to follow-up 66B. <br>Also works with Luminous Ricochet.",
+            "description": "66B SC205<br>Best (only) way to follow-up 66B. <br>Also works with Luminous Ricochet.",
             "extra": false,
             "file": "lore4.json",
             "may_be_locked": true,
@@ -66,7 +66,7 @@
             "preview": "lore4.gif"
         },
         {
-            "description": "3A hj.9 j.5A j.6A j.6C | <br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A.",
+            "description": "3A hj.9 j.5A j.6A j.6C<br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A.",
             "extra": false,
             "file": "lore6.json",
             "may_be_locked": true,
@@ -75,7 +75,7 @@
             "preview": "lore6.gif"
         },
         {
-            "description": "66C hj.9/D9/D6 j.2A 66C| <br>Basic 66C CH combo, <br>works everywhere.<br>You have to do some adjustment <br>depending on how you hit 66C.",
+            "description": "66C hj.9/D9/D6 j.2A 66C<br>Basic 66C CH combo, <br>works everywhere.<br>You have to do some adjustment <br>depending on how you hit 66C.",
             "extra": false,
             "file": "lore7.json",
             "may_be_locked": true,
@@ -84,7 +84,7 @@
             "preview": "lore7.gif"
         },
         {
-            "description": "6A 2B hjc.9 j.6A | <br>6A Basic combo.",
+            "description": "6A 2B hjc.9 j.6A<br>6A Basic combo.",
             "extra": false,
             "file": "lore2.json",
             "may_be_locked": true,
@@ -93,7 +93,7 @@
             "preview": "lore2.gif"
         },
         {
-            "description": "j8A j5B j9D/j66 j6A/j8A | <br>j8A combo near-corner/corner.",
+            "description": "j8A j5B j9D/j66 j6A/j8A<br>j8A combo near-corner/corner.",
             "extra": false,
             "file": "lore5.json",
             "may_be_locked": true,
@@ -102,7 +102,7 @@
             "preview": "lore5.gif"
         },
         {
-            "description": "5AAA 2B hjc.9 j.2B j.66/D6/D3 j.5A 5AAAA | <br>Common Midscreen BnB. <br>Doesn't work on midgets <br>and most crouching characters.",
+            "description": "5AAA 2B hjc.9 j.2B j.66/D6/D3 j.5A 5AAAA<br>Common Midscreen BnB. <br>Doesn't work on midgets <br>and most crouching characters.",
             "extra": false,
             "file": "lore8.json",
             "may_be_locked": true,

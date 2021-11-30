@@ -15,12 +15,14 @@ private:
 	struct SpecialAction {
 		bool optional;
 		std::vector<SokuLib::Action> actions;
+		std::vector<std::string> actionsStr;
 		unsigned chargeTime;
 		unsigned delay;
 		std::vector<SokuLib::KeyInput> inputs;
 		SokuLib::DrawUtils::Sprite sprite;
 		unsigned int counter = 0;
 		unsigned int chargeCounter = 0;
+		std::string realMoveName;
 		std::string moveName;
 		std::string name;
 
@@ -84,11 +86,68 @@ private:
 	bool _dummyHit = false;
 	bool _playingIntro = false;
 	bool _finished = false;
+	bool _quit = false;
 	SokuLib::Scene _next = SokuLib::SCENE_BATTLE;
 
 	//Render
+	SokuLib::DrawUtils::Sprite _pause;
+	SokuLib::DrawUtils::Sprite _trialEditorMockup;
+	SokuLib::DrawUtils::Sprite _trialEditorPlayer;
+	SokuLib::DrawUtils::Sprite _trialEditorDummy;
+	SokuLib::DrawUtils::Sprite _trialEditorSystem;
+	SokuLib::DrawUtils::Sprite _trialEditorMisc;
 	mutable SokuLib::DrawUtils::Sprite _attemptText;
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
+
+	//Editor
+	std::string _path;
+	unsigned _chrCursorPos = 0;
+	unsigned _menuCursorPos = 0;
+	unsigned _selectedSubcategory = 0;
+	bool _selectingCharacters = false;
+	bool _needReload = false;
+	SokuLib::Character *_characterEdit = nullptr;
+
+	std::string _transformComboToString() const;
+	std::vector<std::array<unsigned int, 2>> _getSkills() const;
+	nlohmann::json _getScoresJson() const;
+	void _selectingCharacterUpdate();
+	void _selectingCharacterRender() const;
+
+	//Menu callbacks
+	bool notImplemented();
+	bool returnToCharSelect();
+	bool returnToGame();
+	bool returnToTitleScreen();
+	bool setPlayerCharacter();
+	bool setPlayerPosition();
+	bool setPlayerDeck();
+	bool setPlayerSkills();
+	bool setPlayerHand();
+	bool setPlayerWeather();
+	bool setPlayerDolls();
+	bool setDummyCharacter();
+	bool setDummyPosition();
+	bool setDummyDeck();
+	bool setDummyCrouch();
+	bool setDummyJump();
+	bool setDummyWeather();
+	bool setCRankRequ();
+	bool setBRankRequ();
+	bool setARankRequ();
+	bool setSRankRequ();
+	bool setCounterHit();
+	bool setLimitDisabled();
+	bool setCardCosts();
+	bool setCombo();
+	bool setStage();
+	bool setMusic();
+	bool setWeather();
+	bool setFailTimer();
+	bool setOutro();
+	bool setIntro();
+	bool saveReturnToCharSelect();
+	static const std::vector<bool (ComboTrialEditor::*)()> callbacks[];
 
 	void _playIntro();
 	void _initGameStart();
@@ -98,7 +157,7 @@ private:
 	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &name);
 
 public:
-	ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json);
+	ComboTrialEditor(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json);
 	~ComboTrialEditor() override = default;
 
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
@@ -108,6 +167,9 @@ public:
 	int getScore() override;
 	void onMenuClosed(MenuAction action) override;
 	SokuLib::Scene getNextScene() override;
+	int pauseOnUpdate() override;
+	int pauseOnRender() const override;
+	bool save() const;
 
 	friend class ComboTrialEditorResult;
 };

@@ -1247,11 +1247,14 @@ void loadDeckToGame(SokuLib::ProfileDeckEdit *This, const std::array<unsigned sh
 {
 	int count = 0;
 
-	for (auto &pair : *This->editedDeck)
-		pair.second = 0;
+	This->editedDeck->clear();
 	for (int i = 0; i < 20; i++)
 		if (deck[i] != 21) {
-			((OldMap<unsigned short, unsigned char> *)(This->editedDeck))->operator[](deck[i])++;
+			auto iter = This->editedDeck->find(deck[i]);
+			if (iter == This->editedDeck->end())
+				(*This->editedDeck)[deck[i]] = 1;
+			else
+				iter->second++;
 			count++;
 		}
 	This->displayedNumberOfCards = count;
