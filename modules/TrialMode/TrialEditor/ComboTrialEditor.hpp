@@ -71,6 +71,7 @@ private:
 	unsigned _outroRequ = 0;
 
 	//State
+	bool _needInit = false;
 	unsigned char _dollAnim = 0;
 	unsigned _freezeCounter = 0;
 	unsigned _waitCounter = 0;
@@ -104,9 +105,13 @@ private:
 
 	//Editor
 	std::string _path;
+	unsigned _dollSelected = 0;
 	unsigned _chrCursorPos = 0;
+	unsigned _dollCursorPos = 0;
 	unsigned _menuCursorPos = 0;
 	unsigned _selectedSubcategory = 0;
+	float _fakePlayerPos = 0;
+	bool _managingDolls = false;
 	bool _changingPlayerPos = false;
 	bool _changingDummyPos = false;
 	bool _selectingCharacters = false;
@@ -116,6 +121,7 @@ private:
 	SokuLib::Vector2f _dummyStartPosTmp;
 	SokuLib::Character *_characterEdit = nullptr;
 	SokuLib::Sprite _characterSprite;
+	SokuLib::Camera _oldCamera;
 
 	bool _copyDeckToPlayerSkills();
 	bool _copyDeckToPlayerHand();
