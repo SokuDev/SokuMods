@@ -4,6 +4,7 @@
 
 #include <dinput.h>
 #include <fstream>
+#include "InputBox.hpp"
 #include "Patches.hpp"
 #include "ComboTrialEditor.hpp"
 #include "Actions.hpp"
@@ -231,6 +232,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		canHaveNextFrame = false;
 		return true;
 	}
+	if (this->_changingPlayerPos)
+		battleMgr.leftCharacterManager.objectBase.position.x = this->_fakePlayerPos;
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
 		SokuLib::displayedWeather = this->_weather;
@@ -274,11 +277,69 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	if ((*reinterpret_cast<char **>(0x8985E8))[0x494] && !this->_playingIntro)
 		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
-	if (this->_isStart || this->_quit || this->_needReload) {
+	if (this->_isStart || this->_quit || this->_needReload || this->_needInit) {
 		this->_quit = false;
 		this->_needReload = false;
 		this->_initGameStart();
 		return false;
+	}
+
+	if (this->_dolls.size() * 2 != SokuLib::getBattleMgr().leftCharacterManager.objects.list.size && this->_managingDolls)
+		this->_initGameStart();
+	else if (this->_managingDolls) {
+		SokuLib::camera.backgroundTranslate.x = 640;
+		SokuLib::camera.backgroundTranslate.y = 0;
+		SokuLib::camera.scale = 0.5;
+		if (SokuLib::inputMgrs.input.spellcard == 1 && this->_dollCursorPos != this->_dolls.size()) {
+			this->_dolls.erase(this->_dolls.begin() + this->_dollCursorPos);
+			this->_initGameStart();
+			SokuLib::playSEWaveBuffer(0x29);
+		}
+		if (SokuLib::inputMgrs.input.b == 1) {
+			this->_openPause();
+			SokuLib::playSEWaveBuffer(0x29);
+		}
+		if (SokuLib::inputMgrs.input.c == 1 && this->_dollCursorPos != this->_dolls.size()) {
+			SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->direction =
+			this->_dolls[this->_dollCursorPos].dir = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
+			SokuLib::playSEWaveBuffer(0x28);
+		}
+		if (SokuLib::inputMgrs.input.a == 1) {
+			if (this->_dollCursorPos == this->_dolls.size()) {
+				SokuLib::playSEWaveBuffer(0x28);
+				this->_dolls.push_back({
+					SokuLib::getBattleMgr().leftCharacterManager.objectBase.position,
+					SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction
+				});
+				this->_initGameStart();
+			} else {
+				SokuLib::playSEWaveBuffer(0x28 + this->_dollSelected);
+				this->_dollSelected = !this->_dollSelected;
+			}
+		}
+		if (this->_dollSelected) {
+			auto &pos = SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->position;
+
+			if (SokuLib::inputMgrs.input.horizontalAxis)
+				pos.x += std::copysign(6, SokuLib::inputMgrs.input.horizontalAxis);
+			if (SokuLib::inputMgrs.input.verticalAxis)
+				pos.y += std::copysign(6, -SokuLib::inputMgrs.input.verticalAxis);
+			this->_dolls[this->_dollCursorPos].pos = pos;
+		} else {
+			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || SokuLib::inputMgrs.input.verticalAxis == -1) {
+				if (this->_dollCursorPos == 0)
+					this->_dollCursorPos = this->_dolls.size();
+				else
+					this->_dollCursorPos--;
+				SokuLib::playSEWaveBuffer(0x27);
+			} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || SokuLib::inputMgrs.input.verticalAxis == 1) {
+				if (this->_dollCursorPos == this->_dolls.size())
+					this->_dollCursorPos = 0;
+				else
+					this->_dollCursorPos++;
+				SokuLib::playSEWaveBuffer(0x27);
+			}
+		}
 	}
 
 	if (this->_tickTimer);
@@ -426,6 +487,17 @@ void ComboTrialEditor::render() const
 	if (this->_finished && !this->_playingIntro)
 		return;
 
+	if (this->_managingDolls && this->_dollCursorPos < this->_dolls.size()) {
+		auto pos = this->_dolls[this->_dollCursorPos].pos - SokuLib::Vector2f{32 - 7, -32};
+		pos.y *= -1;
+		auto result = (pos + SokuLib::camera.translate) * SokuLib::camera.scale;
+
+		displaySokuCursor(
+			result.to<int>(),
+			(SokuLib::Vector2u{64, 64} * SokuLib::camera.scale).to<unsigned>()
+		);
+	}
+
 	SokuLib::Vector2i pos = {160, 60};
 
 	if (!this->_playingIntro)
@@ -474,7 +546,7 @@ void ComboTrialEditor::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
-	if (this->_currentDoll) {
+	if (this->_currentDoll && battleMgr.leftCharacterManager.objects.list.size) {
 		auto obj = battleMgr.leftCharacterManager.objects.list.vector()[battleMgr.leftCharacterManager.objects.list.size - 2];
 
 		obj->action = static_cast<SokuLib::Action>(805);
@@ -497,15 +569,19 @@ void ComboTrialEditor::_initGameStart()
 		}
 	}
 	if (this->_currentDoll != this->_dolls.size()) {
+		battleMgr.leftCharacterManager.objectBase.position.y = 0;
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_5C;
 		battleMgr.leftCharacterManager.objectBase.animate();
 		while (battleMgr.leftCharacterManager.objectBase.frameCount != 9)
 			battleMgr.leftCharacterManager.objectBase.doAnimation();
 		this->_lastSize = battleMgr.leftCharacterManager.objects.list.size;
 		this->_currentDoll++;
+		this->_needInit = true;
 		return;
 	}
 
+	this->_dollSelected = false;
+	this->_needInit = false;
 	this->_currentDoll = 0;
 	this->_isStart = false;
 	this->_dummyHit = false;
@@ -660,16 +736,23 @@ void ComboTrialEditor::_playIntro()
 
 void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
+	if (this->_managingDolls) {
+		memset(&originalInputs, 0, sizeof(originalInputs));
+		return;
+	}
 	if (this->_changingPlayerPos) {
+		this->_fakePlayerPos += 6 * originalInputs.horizontalAxis;
+		this->_fakePlayerPos = min(1240, max(40, this->_fakePlayerPos));
 		originalInputs.b = 0;
 		originalInputs.c = 0;
 		originalInputs.d = 0;
 		originalInputs.verticalAxis = 0;
 		originalInputs.spellcard = 0;
 		originalInputs.changeCard = 0;
+		originalInputs.horizontalAxis = 0;
 		if (originalInputs.a == 1) {
 			this->_openPause();
-			this->_playerStartPos = SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x;
+			this->_playerStartPos = this->_fakePlayerPos;
 			this->_changingPlayerPos = false;
 			SokuLib::playSEWaveBuffer(0x28);
 			originalInputs.a = 0;
@@ -868,6 +951,10 @@ void ComboTrialEditor::_initVanillaGame()
 
 int ComboTrialEditor::pauseOnUpdate()
 {
+	if (this->_managingDolls) {
+		this->_managingDolls = false;
+		SokuLib::camera = this->_oldCamera;
+	}
 	if (this->_changingPlayerPos || this->_changingDummyPos) {
 		this->_changingPlayerPos = false;
 		this->_changingDummyPos = false;
@@ -1041,7 +1128,7 @@ bool ComboTrialEditor::setPlayerPosition()
 {
 	this->_changingPlayerPos = true;
 	this->_dummyStartPosTmp = this->_dummyStartPos;
-	SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
+	this->_fakePlayerPos = SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
 }
@@ -1181,7 +1268,15 @@ bool ComboTrialEditor::setPlayerWeather()
 
 bool ComboTrialEditor::setPlayerDolls()
 {
-	return notImplemented();
+	if (SokuLib::leftChar != SokuLib::CHARACTER_ALICE) {
+		SokuLib::playSEWaveBuffer(0x29);
+		return true;
+	}
+	SokuLib::playSEWaveBuffer(0x28);
+	this->_dollCursorPos = 0;
+	this->_managingDolls = true;
+	this->_initGameStart();
+	return false;
 }
 
 bool ComboTrialEditor::setDummyCharacter()
@@ -1342,14 +1437,34 @@ bool ComboTrialEditor::setFailTimer()
 	return notImplemented();
 }
 
-bool ComboTrialEditor::setOutro()
-{
-	return notImplemented();
-}
-
 bool ComboTrialEditor::setIntro()
 {
-	return notImplemented();
+	this->_introRelPath = InputBox("Enter new intro path.", "New intro", this->_introRelPath);
+	this->_introPath = this->_folder + this->_introRelPath;
+	this->_introSprite.texture.createFromText(this->_introRelPath.c_str(), defaultFont12, {250, 30});
+	this->_introSprite.setPosition({379, 260});
+	this->_introSprite.setSize(this->_introSprite.texture.getSize());
+	this->_introSprite.rect.left = 0;
+	this->_introSprite.rect.top = 0;
+	this->_introSprite.rect.width = this->_introSprite.texture.getSize().x;
+	this->_introSprite.rect.height = this->_introSprite.texture.getSize().y;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
+}
+
+bool ComboTrialEditor::setOutro()
+{
+	this->_outroRelPath = InputBox("Enter new outro path.", "New outro", this->_outroRelPath);
+	this->_outroPath = this->_folder + this->_outroRelPath;
+	this->_outroSprite.texture.createFromText(this->_outroRelPath.c_str(), defaultFont12, {250, 30});
+	this->_outroSprite.setPosition({379, 294});
+	this->_outroSprite.setSize(this->_outroSprite.texture.getSize());
+	this->_outroSprite.rect.left = 0;
+	this->_outroSprite.rect.top = 0;
+	this->_outroSprite.rect.width = this->_outroSprite.texture.getSize().x;
+	this->_outroSprite.rect.height = this->_outroSprite.texture.getSize().y;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::playIntro()
