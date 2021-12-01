@@ -111,9 +111,16 @@ private:
 	bool _changingDummyPos = false;
 	bool _selectingCharacters = false;
 	bool _needReload = false;
+	SokuLib::Profile _fakeProfile;
+	SokuLib::ProfileDeckEdit *_deckEditMenu = nullptr;
 	SokuLib::Vector2f _dummyStartPosTmp;
 	SokuLib::Character *_characterEdit = nullptr;
+	SokuLib::Sprite _characterSprite;
 
+	bool _copyDeckToPlayerSkills();
+	bool _copyDeckToPlayerHand();
+	bool _copyDeckToPlayerDeck();
+	bool _copyDeckToDummyDeck();
 	std::string _transformComboToString() const;
 	std::vector<std::array<unsigned int, 2>> _getSkills() const;
 	nlohmann::json _getScoresJson() const;
@@ -175,8 +182,9 @@ private:
 
 public:
 	ComboTrialEditor(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json);
-	~ComboTrialEditor() override = default;
+	~ComboTrialEditor() override;
 
+	bool (ComboTrialEditor::*onDeckSaved)();
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 	SokuLib::KeyInput getDummyInputs() override;
 	bool update(bool &canHaveNextFrame) override;

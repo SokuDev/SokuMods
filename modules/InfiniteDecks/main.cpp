@@ -1668,6 +1668,10 @@ SokuLib::ProfileDeckEdit *__fastcall CProfileDeckEdit_Init(SokuLib::ProfileDeckE
 		loadedDecks[2] = loadedDecks[editSelectedProfile];
 		for (auto &val : loadedDecks[2])
 			val.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
+	} else if (loadedDecks[2][This->editedCharacter].empty()) {
+		loadedDecks[2] = loadedDecks[0];
+		for (auto &val : loadedDecks[2])
+			val.second.push_back({"Create new deck", {21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21}});
 	}
 	editedDecks = loadedDecks[2][This->editedCharacter];
 	loadDeckToGame(This, editedDecks[editSelectedDeck].cards);
