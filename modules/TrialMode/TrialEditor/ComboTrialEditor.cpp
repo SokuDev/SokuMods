@@ -16,6 +16,16 @@
 #endif
 
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
+static char data[10];
+
+bool deckSaved()
+{
+	auto &trial = reinterpret_cast<ComboTrialEditor &>(*loadedTrial);
+
+	if (trial.onDeckSaved)
+		return (trial.*trial.onDeckSaved)();
+	return false;
+}
 
 ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json) :
 	TrialEditor(folder, json)
@@ -192,6 +202,25 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 				this->_scores.emplace_back(j, old);
 				old = &this->_scores.back();
 			} catch (std::exception &e) {}
+
+	DWORD oldV;
+
+	::VirtualProtect((void *)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &oldV);
+	memcpy(data, (void *)0x00450121, 10);
+	SokuLib::TamperNearCall(0x00450121, deckSaved);
+	SokuLib::TamperNearJmp(0x00450126, 0x0045017F);
+	::VirtualProtect((void *)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, oldV, &oldV);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+}
+
+ComboTrialEditor::~ComboTrialEditor()
+{
+	DWORD oldV;
+
+	::VirtualProtect((void *)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &oldV);
+	memcpy((void *)0x00450121, data, 10);
+	::VirtualProtect((void *)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, oldV, &oldV);
+	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
 bool ComboTrialEditor::update(bool &canHaveNextFrame)
@@ -1019,17 +1048,128 @@ bool ComboTrialEditor::setPlayerPosition()
 
 bool ComboTrialEditor::setPlayerDeck()
 {
-	return notImplemented();
+	int ret;
+	int width;
+	int height;
+	int count = 0;
+
+	if (SokuLib::textureMgr.loadTexture(&ret, ("data/stand/" + chrs[SokuLib::leftChar] + ".bmp").c_str(), &width, &height)) {
+		this->_characterSprite.init(ret, 0, 0, width, height);
+		for (auto &vertice: this->_characterSprite.vertices)
+			vertice.color = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+	}
+
+	this->_fakeProfile = SokuLib::profile1;
+	SokuLib::textureMgr.createTextTexture(&ret, "Temporary Profile", *reinterpret_cast<SokuLib::SWRFont *>(0x897020), 300, 50, &width, &height);
+	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
+	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
+	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
+		SokuLib::NewFct(0x840),
+		this->_fakeProfile,
+		SokuLib::leftChar,
+		this->_characterSprite
+	);
+
+	this->_deckEditMenu->editedDeck->clear();
+	for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++) {
+		auto card = SokuLib::leftPlayerInfo.effectiveDeck[i];
+		auto iter = this->_deckEditMenu->editedDeck->find(card);
+
+		if (iter == this->_deckEditMenu->editedDeck->end())
+			(*this->_deckEditMenu->editedDeck)[card] = 1;
+		else
+			iter->second++;
+		count++;
+	}
+	this->_deckEditMenu->displayedNumberOfCards = count;
+
+	this->onDeckSaved = &ComboTrialEditor::_copyDeckToPlayerDeck;
+	SokuLib::playSEWaveBuffer(0x28);
+	SokuLib::activateMenu(this->_deckEditMenu);
+	return true;
 }
 
 bool ComboTrialEditor::setPlayerSkills()
 {
-	return notImplemented();
+	int ret;
+	int width;
+	int height;
+	int count = 0;
+	auto skills = this->_getSkills();
+
+	if (SokuLib::textureMgr.loadTexture(&ret, ("data/stand/" + chrs[SokuLib::leftChar] + ".bmp").c_str(), &width, &height)) {
+		this->_characterSprite.init(ret, 0, 0, width, height);
+		for (auto &vertice: this->_characterSprite.vertices)
+			vertice.color = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+	}
+
+	this->_fakeProfile = SokuLib::profile1;
+	SokuLib::textureMgr.createTextTexture(&ret, "Temporary Profile", *reinterpret_cast<SokuLib::SWRFont *>(0x897020), 300, 50, &width, &height);
+	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
+	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
+	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
+		SokuLib::NewFct(0x840),
+		this->_fakeProfile,
+		SokuLib::leftChar,
+		this->_characterSprite
+	);
+
+	this->_deckEditMenu->editedDeck->clear();
+	for (int i = 0; i < skills.size(); i++) {
+		(*this->_deckEditMenu->editedDeck)[100 + i + skills[i][0] * skills.size()] = skills[i][1];
+		count += skills[i][1];
+	}
+	this->_deckEditMenu->displayedNumberOfCards = count;
+
+	this->onDeckSaved = &ComboTrialEditor::_copyDeckToPlayerSkills;
+	SokuLib::playSEWaveBuffer(0x28);
+	SokuLib::activateMenu(this->_deckEditMenu);
+	return true;
 }
 
 bool ComboTrialEditor::setPlayerHand()
 {
-	return notImplemented();
+	int ret;
+	int width;
+	int height;
+	int count = 0;
+
+	if (SokuLib::textureMgr.loadTexture(&ret, ("data/stand/" + chrs[SokuLib::leftChar] + ".bmp").c_str(), &width, &height)) {
+		this->_characterSprite.init(ret, 0, 0, width, height);
+		for (auto &vertice: this->_characterSprite.vertices)
+			vertice.color = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+	}
+
+	this->_fakeProfile = SokuLib::profile1;
+	SokuLib::textureMgr.createTextTexture(&ret, "Temporary Profile", *reinterpret_cast<SokuLib::SWRFont *>(0x897020), 300, 50, &width, &height);
+	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
+	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
+	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
+		SokuLib::NewFct(0x840),
+		this->_fakeProfile,
+		SokuLib::leftChar,
+		this->_characterSprite
+	);
+
+	this->_deckEditMenu->editedDeck->clear();
+	for (auto card : this->_hand) {
+		auto iter = this->_deckEditMenu->editedDeck->find(card);
+
+		if (iter == this->_deckEditMenu->editedDeck->end())
+			(*this->_deckEditMenu->editedDeck)[card] = 1;
+		else
+			iter->second++;
+		count++;
+	}
+	this->_deckEditMenu->displayedNumberOfCards = count;
+
+	this->onDeckSaved = &ComboTrialEditor::_copyDeckToPlayerHand;
+	SokuLib::playSEWaveBuffer(0x28);
+	SokuLib::activateMenu(this->_deckEditMenu);
+	return true;
 }
 
 bool ComboTrialEditor::setPlayerWeather()
@@ -1064,7 +1204,47 @@ bool ComboTrialEditor::setDummyPosition()
 
 bool ComboTrialEditor::setDummyDeck()
 {
-	return notImplemented();
+	int ret;
+	int width;
+	int height;
+	int count = 0;
+	auto old = SokuLib::profile1.sprite.dxHandle;
+
+	if (SokuLib::textureMgr.loadTexture(&ret, ("data/stand/" + chrs[SokuLib::rightChar] + ".bmp").c_str(), &width, &height)) {
+		this->_characterSprite.init(ret, 0, 0, width, height);
+		for (auto &vertice: this->_characterSprite.vertices)
+			vertice.color = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+	}
+
+	this->_fakeProfile = SokuLib::profile1;
+	SokuLib::textureMgr.createTextTexture(&ret, "Temporary Profile", *reinterpret_cast<SokuLib::SWRFont *>(0x897020), 300, 50, &width, &height);
+	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
+	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
+	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
+		SokuLib::NewFct(0x840),
+		this->_fakeProfile,
+		SokuLib::rightChar,
+		this->_characterSprite
+	);
+
+	this->_deckEditMenu->editedDeck->clear();
+	for (int i = 0; i < SokuLib::rightPlayerInfo.effectiveDeck.size; i++) {
+		auto card = SokuLib::rightPlayerInfo.effectiveDeck[i];
+		auto iter = this->_deckEditMenu->editedDeck->find(card);
+
+		if (iter == this->_deckEditMenu->editedDeck->end())
+			(*this->_deckEditMenu->editedDeck)[card] = 1;
+		else
+			iter->second++;
+		count++;
+	}
+	this->_deckEditMenu->displayedNumberOfCards = count;
+
+	this->onDeckSaved = &ComboTrialEditor::_copyDeckToDummyDeck;
+	SokuLib::playSEWaveBuffer(0x28);
+	SokuLib::activateMenu(this->_deckEditMenu);
+	return true;
 }
 
 bool ComboTrialEditor::setDummyCrouch()
@@ -1547,6 +1727,100 @@ void ComboTrialEditor::miscRender() const
 {
 	this->_introSprite.draw();
 	this->_outroSprite.draw();
+}
+
+bool ComboTrialEditor::_copyDeckToPlayerDeck()
+{
+	if (this->_deckEditMenu->displayedNumberOfCards != 20 && this->_deckEditMenu->displayedNumberOfCards) {
+		MessageBox(SokuLib::window, "A trial deck must either contain no card or 20 cards.", "Invalid deck", MB_ICONERROR);
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_deckEditMenu->saveDialogDisplayed = false;
+		return true;
+	}
+	SokuLib::leftPlayerInfo.effectiveDeck.clear();
+	for (auto &pair : *this->_deckEditMenu->editedDeck) {
+		if (pair.second > 4) {
+			MessageBox(SokuLib::window, "Cannot have more than 4 copies of the same card in a deck.", "Invalid deck", MB_ICONERROR);
+			SokuLib::playSEWaveBuffer(0x29);
+			this->_deckEditMenu->saveDialogDisplayed = false;
+			return true;
+		}
+		for (int i = 0; i < pair.second; i++)
+			SokuLib::leftPlayerInfo.effectiveDeck.push_back(pair.first);
+	}
+	assert(SokuLib::leftPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
+	this->_needReload = true;
+	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
+	return false;
+}
+
+bool ComboTrialEditor::_copyDeckToDummyDeck()
+{
+	if (this->_deckEditMenu->displayedNumberOfCards != 20 && this->_deckEditMenu->displayedNumberOfCards) {
+		MessageBox(SokuLib::window, "A trial deck must either contain no card or 20 cards.", "Invalid deck", MB_ICONERROR);
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_deckEditMenu->saveDialogDisplayed = false;
+		return true;
+	}
+	SokuLib::rightPlayerInfo.effectiveDeck.clear();
+	for (auto &pair : *this->_deckEditMenu->editedDeck) {
+		if (pair.second > 4) {
+			MessageBox(SokuLib::window, "Cannot have more than 4 copies of the same card in a deck.", "Invalid deck", MB_ICONERROR);
+			SokuLib::playSEWaveBuffer(0x29);
+			this->_deckEditMenu->saveDialogDisplayed = false;
+			return true;
+		}
+		for (int i = 0; i < pair.second; i++)
+			SokuLib::rightPlayerInfo.effectiveDeck.push_back(pair.first);
+	}
+	assert(SokuLib::rightPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
+	this->_needReload = true;
+	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
+	return false;
+}
+
+bool ComboTrialEditor::_copyDeckToPlayerSkills()
+{
+	auto size = characterSkills[SokuLib::leftChar].size();
+
+	memset(&this->_skills, 0xFF, sizeof(this->_skills));
+	for (int i = 0; i < size; i++) {
+		bool hasSkill = false;
+
+		for (int j = 0; j < 3; j++) {
+			auto lvl = (*this->_deckEditMenu->editedDeck).find(100 + i + j * size);
+
+			if (lvl != this->_deckEditMenu->editedDeck->end() && lvl->second != 0) {
+				this->_skills[i + j * size].notUsed = false;
+				this->_skills[i + j * size].level = lvl->second;
+				hasSkill = true;
+			}
+		}
+		if (!hasSkill) {
+			this->_skills[i].notUsed = false;
+			this->_skills[i].level = 0;
+		}
+	}
+	memcpy(&SokuLib::getBattleMgr().leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
+	return false;
+}
+
+bool ComboTrialEditor::_copyDeckToPlayerHand()
+{
+	if (this->_deckEditMenu->displayedNumberOfCards > 5) {
+		MessageBox(SokuLib::window, "A hand cannot contain more than 5 cards.", "Invalid hand", MB_ICONERROR);
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_deckEditMenu->saveDialogDisplayed = false;
+		return true;
+	}
+	this->_hand.clear();
+	for (auto &pair : *this->_deckEditMenu->editedDeck)
+		for (int i = 0; i < pair.second; i++)
+			this->_hand.push_back(pair.first);
+	assert(SokuLib::rightPlayerInfo.effectiveDeck.size == this->_hand.size());
+	this->_needReload = true;
+	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
+	return false;
 }
 
 void ComboTrialEditor::SpecialAction::parse()
