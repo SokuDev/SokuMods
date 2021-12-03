@@ -204,6 +204,8 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (*(char*)0x89a88c == 2)
+		return true;
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
 		SokuLib::displayedWeather = this->_weather;
@@ -647,7 +649,7 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 
 SokuLib::KeyInput ComboTrial::getDummyInputs()
 {
-	return {0, this->_crouching - this->_jump, 0, 0, 0, 0, 0, 0};
+	return {0, this->_crouching - (this->_jump && this->_waitCounter < 30), 0, 0, 0, 0, 0, 0};
 }
 
 SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)

@@ -23,3 +23,5 @@
 92 RCDATA "assets/trialEditorMockup.png"
 96 RCDATA "assets/trialEditorPlayer.png"
 100 RCDATA "assets/trialEditorSystem.png"
+104 RCDATA "assets/comboEdiFG.png"
+108 RCDATA "assets/comboEditBG.png"
