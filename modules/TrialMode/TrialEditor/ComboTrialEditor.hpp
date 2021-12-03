@@ -29,6 +29,13 @@ private:
 		void parse();
 	};
 
+	struct RecordedAction {
+		SokuLib::Inputs lastInput;
+		unsigned frameCount;
+		SokuLib::Action action;
+		SokuLib::DrawUtils::Sprite sprite;
+	};
+
 	struct ScorePrerequisites {
 		unsigned attempts = -1;
 		unsigned hits = 0;
@@ -92,6 +99,8 @@ private:
 
 	//Render
 	SokuLib::DrawUtils::Sprite _pause;
+	SokuLib::DrawUtils::Sprite _comboEditFG;
+	SokuLib::DrawUtils::Sprite _comboEditBG;
 	SokuLib::DrawUtils::Sprite _comboSprite;
 	SokuLib::DrawUtils::Sprite _introSprite;
 	SokuLib::DrawUtils::Sprite _outroSprite;
@@ -109,6 +118,7 @@ private:
 	unsigned _chrCursorPos = 0;
 	unsigned _dollCursorPos = 0;
 	unsigned _menuCursorPos = 0;
+	unsigned _comboEditCursor = 0;
 	unsigned _selectedSubcategory = 0;
 	float _fakePlayerPos = 0;
 	bool _managingDolls = false;
@@ -116,6 +126,9 @@ private:
 	bool _changingDummyPos = false;
 	bool _selectingCharacters = false;
 	bool _needReload = false;
+	bool _comboPageDisplayed = false;
+	bool _recordingCombo = false;
+	std::vector<std::unique_ptr<RecordedAction>> _recordBuffer;
 	SokuLib::Profile _fakeProfile;
 	SokuLib::ProfileDeckEdit *_deckEditMenu = nullptr;
 	SokuLib::Vector2f _dummyStartPosTmp;
@@ -133,6 +146,7 @@ private:
 	void _selectingCharacterUpdate();
 	void _selectingCharacterRender() const;
 	void _openPause() const;
+	void _typeNewCombo();
 
 	//Menu callbacks
 	bool notImplemented();
@@ -201,34 +215,6 @@ public:
 	int pauseOnUpdate() override;
 	int pauseOnRender() const override;
 	bool save() const;
-
-	friend class ComboTrialEditorResult;
-};
-
-class ComboTrialEditorResult : public ResultMenu {
-private:
-	struct ScorePart {
-	private:
-		int _ttlAttempts;
-		SokuLib::DrawUtils::Sprite _score;
-		SokuLib::DrawUtils::Sprite _hits;
-		SokuLib::DrawUtils::Sprite _damages;
-		SokuLib::DrawUtils::Sprite _attempts;
-		SokuLib::DrawUtils::Sprite _limit;
-		ComboTrialEditor::ScorePrerequisites _prerequ;
-
-	public:
-		void load(int ttlattempts, const ComboTrialEditor::ScorePrerequisites &prerequ, int index);
-		void draw(float alpha);
-	};
-
-	ComboTrialEditor &_parent;
-	std::array<ScorePart, 4> _parts;
-
-public:
-	ComboTrialEditorResult(ComboTrialEditor &trial);
-	~ComboTrialEditorResult() override = default;
-	int onRender() override;
 };
 
 

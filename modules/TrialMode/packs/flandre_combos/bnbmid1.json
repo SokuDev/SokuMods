@@ -2,13 +2,14 @@
     "dummy": {
         "character": "remilia",
         "deck": [],
+        "jump": true,
         "palette": 0,
         "pos": {
             "x": 312.0,
-            "y": 100.0
+            "y": 0.0
         }
     },
-    "expected": "d6 j5aa:12 d6 j5aa:12 9 j5a:12 j8a",
+    "expected": "d6:5 j5aa:12 !6[5] d6 j5aa:12 !6[5] d6/9 j5a:12 j8a",
     "music": "data/bgm/st17.ogg",
     "player": {
         "character": "flandre",

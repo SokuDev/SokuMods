@@ -69,6 +69,16 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_trialEditorSystem.rect.height = this->_trialEditorSystem.getSize().y;
 	this->_trialEditorSystem.setPosition({20, 0});
 
+	this->_comboEditFG.texture.loadFromResource(myModule, MAKEINTRESOURCE(104));
+	this->_comboEditFG.setSize(this->_comboEditFG.texture.getSize());
+	this->_comboEditFG.rect.width = this->_comboEditFG.getSize().x;
+	this->_comboEditFG.rect.height = this->_comboEditFG.getSize().y;
+
+	this->_comboEditBG.texture.loadFromResource(myModule, MAKEINTRESOURCE(108));
+	this->_comboEditBG.setSize(this->_comboEditBG.texture.getSize());
+	this->_comboEditBG.rect.width = this->_comboEditBG.getSize().x;
+	this->_comboEditBG.rect.height = this->_comboEditBG.getSize().y;
+
 	if (json.contains("dolls") && json["dolls"].is_array()) {
 		for (int i = 0; i < json["dolls"].size(); i++) {
 			auto &obj = json["dolls"][i];
@@ -228,6 +238,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (*(char*)0x89a88c == 2)
+		return true;
 	if ((this->_quit || this->_needReload) && battleMgr.leftCharacterManager.objectBase.hp == 1) {
 		canHaveNextFrame = false;
 		return true;
@@ -340,6 +352,29 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 				SokuLib::playSEWaveBuffer(0x27);
 			}
 		}
+	} else if (this->_comboPageDisplayed && !this->_playingIntro) {
+		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			this->_comboEditCursor = static_cast<int>((this->_comboEditCursor + 3) + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis)) % 3;
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		if (SokuLib::inputMgrs.input.b == 1) {
+			this->_openPause();
+			SokuLib::playSEWaveBuffer(0x29);
+		}
+		if (SokuLib::inputMgrs.input.a == 1) {
+			SokuLib::playSEWaveBuffer(0x28);
+			switch (this->_comboEditCursor) {
+			case 0:
+				break;
+			case 1:
+				this->_typeNewCombo();
+				break;
+			case 2:
+				this->_playComboAfterIntro = true;
+				this->_initGameStart();
+				return true;
+			}
+		}
 	}
 
 	if (this->_tickTimer);
@@ -352,11 +387,11 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	else if (this->_privateSquare)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
 
-	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30) {
+	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30 && !this->_comboPageDisplayed) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
-		return false;
+		goto disableLimit;
 	}
 	if (this->_waitCounter) {
 		this->_waitCounter--;
@@ -486,7 +521,6 @@ void ComboTrialEditor::render() const
 
 	if (this->_finished && !this->_playingIntro)
 		return;
-
 	if (this->_managingDolls && this->_dollCursorPos < this->_dolls.size()) {
 		auto pos = this->_dolls[this->_dollCursorPos].pos - SokuLib::Vector2f{32 - 7, -32};
 		pos.y *= -1;
@@ -498,14 +532,29 @@ void ComboTrialEditor::render() const
 		);
 	}
 
-	SokuLib::Vector2i pos = {160, 60};
-
 	if (!this->_playingIntro)
 		this->_attemptText.draw();
 	else
 		return;
 
+	if (this->_comboPageDisplayed) {
+		this->_comboEditBG.draw();
+		displaySokuCursor({331, static_cast<int>(111 + 26 * this->_comboEditCursor)}, {112, 16});
+		this->_comboEditFG.draw();
+	}
+
+	SokuLib::Vector2i pos = {160, 60};
 	auto last = 0;
+
+	if (this->_recordingCombo) {
+		for (const auto &elem : this->_recordBuffer) {
+			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0x60, 0x60};
+			elem->sprite.setPosition(pos);
+			elem->sprite.draw();
+			pos.y += elem->sprite.getSize().y;
+		}
+		return;
+	}
 
 	for (int i = 0; i < this->_exceptedActions.size(); i++) {
 		auto &elem = this->_exceptedActions[i];
@@ -736,7 +785,7 @@ void ComboTrialEditor::_playIntro()
 
 void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
-	if (this->_managingDolls) {
+	if (this->_managingDolls || (this->_comboPageDisplayed && !this->_playingIntro)) {
 		memset(&originalInputs, 0, sizeof(originalInputs));
 		return;
 	}
@@ -815,7 +864,7 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 
 SokuLib::KeyInput ComboTrialEditor::getDummyInputs()
 {
-	return {0, this->_crouching - this->_jump, 0, 0, 0, 0, 0, 0};
+	return {0, this->_crouching - (this->_jump && this->_waitCounter < 30), 0, 0, 0, 0, 0, 0};
 }
 
 SokuLib::Action ComboTrialEditor::_getMoveAction(SokuLib::Character chr, std::string &name)
@@ -853,7 +902,6 @@ SokuLib::Action ComboTrialEditor::_getMoveAction(SokuLib::Character chr, std::st
 		if (error)
 			throw;
 	}
-
 
 	int start = name[0] == 'j';
 	int realStart = (name[start] == 'a' ? 2 : 1) + start;
@@ -951,6 +999,18 @@ void ComboTrialEditor::_initVanillaGame()
 
 int ComboTrialEditor::pauseOnUpdate()
 {
+	if (this->_playingIntro) {
+		this->_initGameStart();
+		if (this->_comboPageDisplayed)
+			return false;
+	}
+	if (this->_comboPageDisplayed)
+		this->_comboPageDisplayed = false;
+	if (this->_recordingCombo) {
+		this->_comboPageDisplayed = true;
+		SokuLib::playSEWaveBuffer(0x28);
+		return false;
+	}
 	if (this->_managingDolls) {
 		this->_managingDolls = false;
 		SokuLib::camera = this->_oldCamera;
@@ -1031,6 +1091,8 @@ int ComboTrialEditor::pauseOnUpdate()
 
 int ComboTrialEditor::pauseOnRender() const
 {
+	if (this->_comboPageDisplayed)
+		return true;
 	if (this->_selectedSubcategory)
 		displaySokuCursor({
 			61,
@@ -1345,7 +1407,7 @@ bool ComboTrialEditor::setDummyDeck()
 bool ComboTrialEditor::setDummyCrouch()
 {
 	if (this->_dummyStartPos.y)
-		return SokuLib::playSEWaveBuffer(0x29), false;
+		return SokuLib::playSEWaveBuffer(0x29), true;
 	this->_crouching = !this->_crouching;
 	this->_jump = false;
 	SokuLib::playSEWaveBuffer(0x28);
@@ -1355,7 +1417,7 @@ bool ComboTrialEditor::setDummyCrouch()
 bool ComboTrialEditor::setDummyJump()
 {
 	if (this->_dummyStartPos.y)
-		return SokuLib::playSEWaveBuffer(0x29), false;
+		return SokuLib::playSEWaveBuffer(0x29), true;
 	this->_jump = !this->_jump;
 	this->_crouching = false;
 	SokuLib::playSEWaveBuffer(0x28);
@@ -1414,7 +1476,10 @@ bool ComboTrialEditor::setCardCosts()
 
 bool ComboTrialEditor::setCombo()
 {
-	return notImplemented();
+	this->_comboPageDisplayed = true;
+	this->_comboEditCursor = 0;
+	SokuLib::playSEWaveBuffer(0x28);
+	return false;
 }
 
 bool ComboTrialEditor::setStage()
@@ -1487,9 +1552,10 @@ bool ComboTrialEditor::playOutro()
 
 bool ComboTrialEditor::playPreview()
 {
-	this->_playComboAfterIntro = true;
 	this->_menuCursorPos = 0;
 	this->_selectedSubcategory = 0;
+	this->_playComboAfterIntro = true;
+	this->_initGameStart();
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
 }
@@ -1695,7 +1761,7 @@ std::string ComboTrialEditor::_transformComboToString() const
 			if (i != 0)
 				str += "/";
 			if (it == actionsFromStr.end())
-				throw std::invalid_argument("Cannot find action for action " + std::to_string(action));
+				throw std::invalid_argument("Cannot find action string for action " + std::to_string(action));
 			if (action == SokuLib::ACTION_FLY)
 				str += move->actionsStr[i];
 			else if (it->first == "44")
@@ -1932,10 +1998,33 @@ bool ComboTrialEditor::_copyDeckToPlayerHand()
 	for (auto &pair : *this->_deckEditMenu->editedDeck)
 		for (int i = 0; i < pair.second; i++)
 			this->_hand.push_back(pair.first);
-	assert(SokuLib::rightPlayerInfo.effectiveDeck.size == this->_hand.size());
+	assert(this->_hand.size() == this->_deckEditMenu->displayedNumberOfCards);
 	this->_needReload = true;
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
+}
+
+void ComboTrialEditor::_typeNewCombo()
+{
+	std::string old = this->_transformComboToString();
+	std::string str = InputBox("Enter new combo", "New combo", old);
+
+	if (str.empty())
+		return SokuLib::playSEWaveBuffer(0x29);
+	try {
+		this->_loadExpected(str);
+		this->_comboSprite.texture.createFromText(str.c_str(), defaultFont12, {250, 30});
+		this->_comboSprite.setSize(this->_comboSprite.texture.getSize());
+		this->_comboSprite.rect.width = this->_comboSprite.texture.getSize().x;
+		this->_comboSprite.rect.height = this->_comboSprite.texture.getSize().y;
+		return SokuLib::playSEWaveBuffer(0x28);
+	} catch (std::exception &e) {
+		MessageBox(SokuLib::window, ("Invalid combo string: " + std::string(e.what())).c_str(), "Invalid combo", MB_ICONERROR);
+	}
+	try {
+		this->_loadExpected(old);
+	} catch (...) {}
+	SokuLib::playSEWaveBuffer(0x29);
 }
 
 void ComboTrialEditor::SpecialAction::parse()
@@ -2092,121 +2181,5 @@ bool ComboTrialEditor::ScorePrerequisites::met(unsigned currentAttempts) const
 		return false;
 	if (this->minLimit > battle.leftCharacterManager.combo.limit)
 		return false;
-	//if (this->maxLimit < battle.leftCharacterManager.combo.limit)
-	//	return false;
 	return true;
-}
-
-ComboTrialEditorResult::ComboTrialEditorResult(ComboTrialEditor &trial) :
-	ResultMenu(trial.getScore()),
-	_parent(trial)
-{
-	for (int i = 0; i < this->_parts.size(); i++)
-		this->_parts[i].load(0, trial._scores[i], i);
-}
-
-int ComboTrialEditorResult::onRender()
-{
-	auto ret = ResultMenu::onRender();
-
-	for (auto &part : this->_parts)
-		part.draw(1);
-	return ret;
-}
-
-#define BOTTOM_POS 332
-#define SIZE 29
-
-void ComboTrialEditorResult::ScorePart::load(int ttlattempts, const ComboTrialEditor::ScorePrerequisites &prerequ, int index)
-{
-	SokuLib::Vector2i size;
-	int ogIndex = index;
-
-	this->_ttlAttempts = ttlattempts;
-	this->_prerequ = prerequ;
-
-	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
-	this->_score.setPosition({92 + 141 * index, BOTTOM_POS});
-	this->_score.setSize({32, 32});
-	this->_score.rect.left = ogIndex * this->_score.texture.getSize().x / 4;
-	this->_score.rect.width = this->_score.texture.getSize().x / 4;
-	this->_score.rect.height = this->_score.texture.getSize().y;
-
-	this->_attempts.texture.createFromText(
-		("At most " + std::to_string(prerequ.attempts) + " attempt" + (prerequ.attempts == 1 ? "" : "s")).c_str(),
-		defaultFont12,
-		{130, 14},
-		&size
-	);
-	this->_attempts.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 3});
-	this->_attempts.setSize(this->_attempts.texture.getSize());
-	this->_attempts.rect.width = this->_attempts.texture.getSize().x;
-	this->_attempts.rect.height = this->_attempts.texture.getSize().y;
-
-	this->_hits.texture.createFromText(
-		("At least " + std::to_string(prerequ.hits) + " hit" + (prerequ.hits == 1 ? "" : "s")).c_str(),
-		defaultFont12,
-		{130, 14},
-		&size
-	);
-	this->_hits.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 0});
-	this->_hits.setSize(this->_hits.texture.getSize());
-	this->_hits.rect.width = this->_hits.texture.getSize().x;
-	this->_hits.rect.height = this->_hits.texture.getSize().y;
-
-	this->_damages.texture.createFromText(
-		("At least " + std::to_string(prerequ.damage) + " damage" + (prerequ.damage <= 1 ? "" : "s")).c_str(),
-		defaultFont12,
-		{130, 14},
-		&size
-	);
-	this->_damages.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 1});
-	this->_damages.setSize(this->_damages.texture.getSize());
-	this->_damages.rect.width = this->_damages.texture.getSize().x;
-	this->_damages.rect.height = this->_damages.texture.getSize().y;
-
-	this->_limit.texture.createFromText(
-		("At least " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
-		defaultFont12,
-		{130, 14},
-		&size
-	);
-	//if (prerequ.minLimit == prerequ.maxLimit)
-	//	this->_limit.texture.createFromText(
-	//		("Exactly " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
-	//		defaultFont12,
-	//		{130, 14},
-	//		&size
-	//	);
-	//else
-	//	this->_limit.texture.createFromText(
-	//		("Between " + std::to_string(prerequ.minLimit) + "% and " + std::to_string(prerequ.maxLimit) + "% limit").c_str(),
-	//		defaultFont12,
-	//		{130, 14},
-	//		&size
-	//	);
-	this->_limit.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 2});
-	this->_limit.setSize(this->_limit.texture.getSize());
-	this->_limit.rect.width = this->_limit.texture.getSize().x;
-	this->_limit.rect.height = this->_limit.texture.getSize().y;
-}
-
-void ComboTrialEditorResult::ScorePart::draw(float alpha)
-{
-	auto &battle= SokuLib::getBattleMgr();
-	auto white  = SokuLib::DrawUtils::DxSokuColor::White * alpha;
-	auto green  = SokuLib::DrawUtils::DxSokuColor::Green * alpha;
-	auto red    = SokuLib::DrawUtils::DxSokuColor::Red   * alpha;
-
-	this->_score.tint = white;
-	this->_score.draw();
-	this->_attempts.tint = this->_prerequ.attempts == -1 ? SokuLib::DrawUtils::DxSokuColor::Transparent : (this->_ttlAttempts < this->_prerequ.attempts ? green : red);
-	this->_attempts.draw();
-	this->_damages.tint = battle.leftCharacterManager.combo.damages >= this->_prerequ.damage ? green : red;
-	this->_damages.draw();
-	this->_hits.tint = battle.leftCharacterManager.combo.nbHits >= this->_prerequ.hits ? green : red;
-	this->_hits.draw();
-	//this->_limit.tint = battle.leftCharacterManager.combo.limit >= this->_prerequ.minLimit && battle.leftCharacterManager.combo.limit <= this->_prerequ.maxLimit ? green : red;
-	this->_limit.tint = battle.leftCharacterManager.combo.limit >= this->_prerequ.minLimit ? green : red;
-	this->_limit.draw();
 }
