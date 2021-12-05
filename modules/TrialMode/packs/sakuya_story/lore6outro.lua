@@ -23,102 +23,72 @@ local dialogs = {
 local flashRect = RectangleShape.new()
 local stageBg = Sprite.new()
 local stageBottom = Sprite.new()
-local ctr = 240
+local ctr = 0
 local currentStage = 0
 local dialog
 local keyPressed = false
 local stop = false
-
+local gravity = 0
+local playerInfo = PlayerInfo.new(enums.characters.yukari, 0, false)
 -- CHR 26 -> 1
 
 local function stage0()
-	if ctr == 240 then
-		playBGM("data/bgm/ta03.ogg")
-		battleMgr.leftChr.position.x = -100
-		battleMgr.rightChr.position.x = 800
-		battleMgr.rightChr.position.y = 600
-	end
-	if ctr < 60 then
-		if stageBg.tint.a ~= 0 then
-			stageBg.tint.a = stageBg.tint.a - 0xF
-		end
-		if stageBottom.tint.a ~= 0 then
-			stageBottom.tint.a = stageBottom.tint.a - 0xF
-		end
-	else
-		if stageBg.tint.a ~= 0xFF then
-			stageBg.tint.a = stageBg.tint.a + 0xF
-		end
-		if stageBottom.tint.a ~= 0xFF then
-			stageBottom.tint.a = stageBottom.tint.a + 0xF
-		end
-	end
-	if ctr % 2 == 1 then
-		stageBottom.position = stageBottom.position + Vector2i.new(1, 0)
-	end
-	ctr = ctr - 1
-	if ctr == 0 then
-		currentStage = currentStage + 1
-		battleMgr.leftChr.action = enums.actions.ACTION_FORWARD_JUMP
-		battleMgr.leftChr:initAnimation()
-		battleMgr.leftChr.speed.x = 15
-		battleMgr.leftChr.speed.y = 15
-	end
+	playBGM("data/bgm/ta03.ogg")
+	battleMgr.leftChr.position.x = 500
+	battleMgr.rightChr.position.x = 800
+	battleMgr.leftChr.action = enums.actions.ACTION_IDLE
+	battleMgr.leftChr:initAnimation()
+	battleMgr.leftChr.direction = enums.directions.RIGHT
+	battleMgr.rightChr.action = enums.actions.ACTION_KNOCKED_DOWN_STATIC
+	battleMgr.rightChr:initAnimation()
+	battleMgr.rightChr.direction = enums.directions.LEFT
+	currentStage = currentStage + 1
 end
 
 local function stage1()
 	battleMgr.leftChr:updateAnimation()
-	battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
-	battleMgr.leftChr.speed.y = battleMgr.leftChr.speed.y - 0.7
-	if battleMgr.leftChr.position.y <= 0 then
+	battleMgr.rightChr:updateAnimation()
+	dialog.hidden = false
+	if #dialog == #dialogs - 7 then
 		currentStage = currentStage + 1
-		playSfx(enums.sfxs.land)
-		battleMgr.leftChr.position.y = 0
-		battleMgr.leftChr.action = enums.actions.ACTION_LANDING
-		battleMgr.leftChr:initAnimation()
-		battleMgr.leftChr.speed.x = 0
-		battleMgr.leftChr.speed.y = 0
 	end
 end
 
 local function stage2()
+	battleMgr.rightChr:updateAnimation()
 	battleMgr.leftChr:updateAnimation()
-	if
-		battleMgr.leftChr.action == enums.actions.ACTION_LANDING and
-		battleMgr.leftChr.actionBlockId == 0 and
-		battleMgr.leftChr.animationCounter == 0 and
-		battleMgr.leftChr.animationSubFrame == 0
-	then
-		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
+	if dialog:onKeyPress() == true then
+		dialog.hidden = true
+		battleMgr.leftChr.action = enums.actions.ACTION_FORWARD_HIGH_JUMP
 		battleMgr.leftChr:initAnimation()
+		playSfx(enums.sfxs.highJump)
+		battleMgr.leftChr.direction = enums.directions.LEFT
 		currentStage = currentStage + 1
-		ctr = 30
 	end
 end
 
 local function stage3()
-	ctr = ctr - 1
+	battleMgr.rightChr:updateAnimation()
 	battleMgr.leftChr:updateAnimation()
-	if ctr == 0 then
-		dialog.hidden = false
-	end
-	if keyPressed then
-		currentStage = currentStage + 1
-		dialog.hidden = true
-		battleMgr.rightChr.action = enums.actions.ACTION_j2A
-		playSfx(enums.sfxs.longMelee)
+	gravity = gravity + 0.5
+	battleMgr.leftChr.position.x = battleMgr.leftChr.position.x - 15
+	battleMgr.leftChr.position.y = battleMgr.leftChr.position.y + 15 - gravity
+	if 	battleMgr.leftChr.position.x <= -100 and battleMgr.leftChr.position.x >= -115 then
+		battleMgr.rightChr.action = enums.actions.ACTION_NEUTRAL_TECH
 		battleMgr.rightChr:initAnimation()
+	end
+	if 	battleMgr.leftChr.position.x <= -400 then
+		currentStage = currentStage + 1
 	end
 end
 
 local function stage4()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
-	battleMgr.rightChr.position.y = battleMgr.rightChr.position.y - 30
-	if battleMgr.rightChr.position.y <= 0 then
-		battleMgr.rightChr.position.y = 0
-		battleMgr.rightChr:animate()
-		battleMgr.rightChr:playSfx(012)
+	if battleMgr.rightChr.animationCounter == 0 then
+		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
+		battleMgr.rightChr:initAnimation()
+		print("test2")
 		currentStage = currentStage + 1
 	end
 end
@@ -126,12 +96,7 @@ end
 local function stage5()
 	battleMgr.leftChr:updateAnimation()
 	battleMgr.rightChr:updateAnimation()
-	if battleMgr.rightChr.actionBlockId == 0 then
-		battleMgr.rightChr.action = enums.actions.ACTION_DEFAULT_SKILL4_B
-		battleMgr.rightChr:initAnimation()
-		playSfx(enums.sfxs.mediumMelee)
-		currentStage = currentStage + 1
-	end
+	dialog.hidden = false
 end
 
 local function stage6()

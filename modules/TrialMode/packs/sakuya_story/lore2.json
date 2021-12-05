@@ -17,7 +17,7 @@
         }
     },
 	    "intro": "lore6intro.lua",
-    "outro": "lore6outro.lua",
+    "outro": "lore6Outro.dll",
     "type": "combo",
 
     "expected": "6a 2b hj9/hj8 j6a",
