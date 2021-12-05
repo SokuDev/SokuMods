@@ -10,7 +10,7 @@ local dialogs = {
 	"LSWYuyuko?",
 	"RSHI've seen you spare with Youmu,<br>it was quite interesting!",
 	"LHHIt seems you truly like messing with her don't you?",
-	"RHhWhat can I say,<br>she is just a peculiar plant who needs more wind than water.",
+	"RHhWhat can I say,she is just a peculiar plant<br>who needs more wind than water.",
 	"RHCBut perhaps you are of the same kind?",
 	"LCCAnyway, I need answers from you.",
 	"RChI'm sorry but I'm in a hurry, come back later!",
