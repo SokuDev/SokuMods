@@ -25,3 +25,5 @@
 100 RCDATA "assets/trialEditorSystem.png"
 104 RCDATA "assets/comboEdiFG.png"
 108 RCDATA "assets/comboEditBG.png"
+112 RCDATA "assets/twilight.png"
+116 RCDATA "assets/normal.png"
