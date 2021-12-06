@@ -115,8 +115,8 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_twilight.rect.width = this->_twilight.getSize().x;
 	this->_twilight.rect.height = this->_twilight.getSize().y;
 	this->_twilight.setPosition({
-		static_cast<int>(300 + this->_weatherArrows.getSize().x / 2 - this->_twilight.getSize().x / 2),
-		194
+		static_cast<int>(404 + (this->_weatherArrows.getSize().x - this->_twilight.getSize().x) / 2),
+		192
 	});
 
 	this->_normal.texture.loadFromResource(myModule, MAKEINTRESOURCE(116));
