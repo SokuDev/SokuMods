@@ -23,6 +23,7 @@
 #define printf(...)
 #endif
 
+static bool displayCards = true;
 static int (SokuLib::Title::*s_originalTitleOnProcess)();
 static int (SokuLib::Select::*s_originalSelectOnProcess)();
 static int (SokuLib::SelectClient::*s_originalSelectCLOnProcess)();
@@ -859,7 +860,7 @@ void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck>
 	if (overridingName)
 		name = overridingName;
 
-	if (!deck.empty()) {
+	if (!deck.empty() && displayCards) {
 		for (int i = 0; i < 10; i++) {
 			DrawUtils::Sprite &sprite = (deck[i] < 100 ? cardsTextures[SokuLib::CHARACTER_RANDOM][deck[i]] : cardsTextures[chr][deck[i]]);
 
@@ -1085,7 +1086,7 @@ static int selectProcessCommon(int v)
 			downSelectedDeck = 0;
 		lastRight = SokuLib::rightChar;
 	}
-	if (v != SokuLib::SCENE_SELECT && v != SokuLib::SCENE_SELECTSV && v != SokuLib::SCENE_SELECTCL) {
+	if (v == SokuLib::SCENE_LOADING || v == SokuLib::SCENE_LOADINGSV || v == SokuLib::SCENE_LOADINGCL) {
 		bool pickedRandom = false;
 
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER) {
@@ -1125,6 +1126,9 @@ int __fastcall CSelect_OnProcess(SokuLib::Select *This) {
 			editSelectedProfile = selected - 2;
 		else
 			editSelectedProfile = 2;
+	} else if ((This->leftSelect.keys && This->leftSelect.keys->spellcard == 1) || (This->rightSelect.keys && This->rightSelect.keys->spellcard == 1)) {
+		displayCards = !displayCards;
+		SokuLib::playSEWaveBuffer(0x27);
 	}
 	return selectProcessCommon((This->*s_originalSelectOnProcess)());
 }
