@@ -73,7 +73,7 @@ const std::vector<unsigned> ComboTrialEditor::_stagesIds{
 	SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH,
 	100,
 };
-//data/csv/system/music.csv
+
 bool deckSaved()
 {
 	auto &trial = reinterpret_cast<ComboTrialEditor &>(*loadedTrial);
@@ -337,6 +337,28 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_stageRect.setPosition({140, 204});
 	this->_stageRect.setBorderColor(SokuLib::Color::Transparent);
 	this->_stageRect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+
+	SokuLib::CSVParser parser(SokuLib::SWRUnlinked ? "data/csv/system/music_limit.csv" : "data/csv/system/music.csv");
+	SokuLib::Vector2i size;
+
+	do {
+		this->_musics.emplace_back(parser.getNextCell(), parser.getNextCell(), new SokuLib::DrawUtils::Sprite());
+
+		auto &sprite = std::get<2>(this->_musics.back());
+
+		sprite->texture.createFromText(std::get<0>(this->_musics.back()).c_str(), defaultFont12, {220, 16}, &size);
+		sprite->setSize({200, 16});
+		sprite->rect.width = 200;
+		sprite->rect.height = 16;
+	} while (parser.goToNextLine());
+	this->_musics.emplace_back("", "", new SokuLib::DrawUtils::Sprite());
+
+	auto &sprite = std::get<2>(this->_musics.back());
+
+	sprite->texture.createFromText("Custom music", defaultFont12, {200, 16}, &size);
+	sprite->setSize(size.to<unsigned>());
+	sprite->rect.width = size.x;
+	sprite->rect.height = size.y;
 }
 
 ComboTrialEditor::~ComboTrialEditor()
@@ -754,6 +776,8 @@ void ComboTrialEditor::_initGameStart()
 	this->_playingIntro = this->_playComboAfterIntro;
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
+	if (this->_first)
+		this->_playBGM();
 	this->_first = false;
 	if (this->_playingIntro) {
 		this->_waitCounter += 30;
@@ -1203,6 +1227,77 @@ int ComboTrialEditor::pauseOnUpdate()
 		return true;
 	}
 
+	if (this->_selectingMusic) {
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
+			SokuLib::playSEWaveBuffer(0x29);
+			this->_selectingMusic = false;
+			return true;
+		}
+		if (SokuLib::inputMgrs.input.a == 1) {
+			if (this->_musicCursor == this->_musics.size() - 1) {
+				auto music = InputBox("Enter music path", "New music", this->_musicReal);
+
+				if (music.empty())
+					return SokuLib::playSEWaveBuffer(0x29), true;
+
+				auto musicLStart = InputBox("Enter music loop start position (in seconds)", "Loop start", std::to_string(this->_loopStart));
+
+				if (music.empty())
+					return SokuLib::playSEWaveBuffer(0x29), true;
+
+				auto musicLEnd = InputBox("Enter music loop end position (in seconds)", "Loop end", std::to_string(this->_loopEnd));
+
+				if (musicLEnd.empty())
+					return SokuLib::playSEWaveBuffer(0x29), true;
+
+				try {
+					std::stod(musicLEnd);
+					this->_loopStart = std::stod(musicLStart);
+					this->_loopEnd = std::stod(musicLEnd);
+				} catch (std::invalid_argument &) {
+					SokuLib::playSEWaveBuffer(0x29);
+					return true;
+				} catch (std::out_of_range &) {
+					SokuLib::playSEWaveBuffer(0x29);
+					return true;
+				}
+				this->_music = this->_musicReal = music;
+				for (auto pos = this->_music.find("{{pack_path}}"); pos != std::string::npos; pos = this->_music.find("{{pack_path}}"))
+					this->_music.replace(pos, strlen("{{pack_path}}"), this->_folder);
+			} else {
+				this->_music = this->_musicReal = std::get<1>(this->_musics[this->_musicCursor]);
+				this->_loopStart = 0;
+				this->_loopEnd = 0;
+			}
+			this->_playBGM();
+			SokuLib::playSEWaveBuffer(0x28);
+		}
+		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			if (SokuLib::inputMgrs.input.verticalAxis < 0 && this->_musicCursor <= 1) {
+				while (this->_musicCursor < this->_musics.size() - 2)
+					this->_musicCursor += 2;
+				if (this->_musics.size() > 38)
+					this->_musicTop = (this->_musicCursor - 36) - (this->_musicCursor % 2);
+			} else if (SokuLib::inputMgrs.input.verticalAxis > 0 && this->_musicCursor >= this->_musics.size() - 2) {
+				while (this->_musicCursor > 1)
+					this->_musicCursor -= 2;
+				this->_musicTop = 0;
+			} else
+				this->_musicCursor += std::copysign(2, SokuLib::inputMgrs.input.verticalAxis);
+			while (this->_musicTop > this->_musicCursor)
+				this->_musicTop -= 2;
+			while (this->_musicTop + 38 <= this->_musicCursor)
+				this->_musicTop += 2;
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			if (this->_musicCursor != this->_musics.size() - 1 || this->_musics.size() % 2 == 0)
+				this->_musicCursor ^= 1;
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		return true;
+	}
+
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
 		if (!this->_selectedSubcategory) {
@@ -1298,6 +1393,31 @@ int ComboTrialEditor::pauseOnRender() const
 		this->_stageRect.draw();
 		current.first->draw();
 		current.second->draw();
+	}
+	if (this->_selectingMusic) {
+		editSeatEmpty.draw();
+		for (int j = this->_musicTop, i = 0; j < this->_musics.size() && i < 38; j++, i++) {
+			auto &sprite = std::get<2>(this->_musics[j]);
+			SokuLib::Vector2i pos{
+				static_cast<int>(i % 2 == 0 ? editSeatEmpty.getPosition().x + 10 : editSeatEmpty.getPosition().x + editSeatEmpty.getSize().x - 210),
+				editSeatEmpty.getPosition().y + 10 + i / 2 * 20
+			};
+
+			sprite->setPosition(pos);
+			if (j == this->_musicCursor)
+				displaySokuCursor(pos, {256, 16});
+			sprite->draw();
+		}
+		if (this->_musicTop) {
+			upArrow.setPosition({304, editSeatEmpty.getPosition().y + 5});
+			upArrow.setSize({32, 32});
+			upArrow.draw();
+		}
+		if (this->_musicTop + 38 < this->_musics.size()) {
+			downArrow.setPosition({304, static_cast<int>(editSeatEmpty.getPosition().y + editSeatEmpty.getSize().y - 37)});
+			downArrow.setSize({32, 32});
+			downArrow.draw();
+		}
 	}
 	return true;
 }
@@ -1684,7 +1804,18 @@ bool ComboTrialEditor::setStage()
 
 bool ComboTrialEditor::setMusic()
 {
-	return notImplemented();
+	auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
+		return this->_musicReal == std::get<1>(t);
+	});
+
+	SokuLib::playSEWaveBuffer(0x28);
+	this->_selectingMusic = true;
+	this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 1 : it - this->_musics.begin();
+	if (this->_musicCursor > 38)
+		this->_musicTop = (this->_musicCursor - 36) - (this->_musicCursor % 2);
+	else
+		this->_musicTop = 0;
+	return true;
 }
 
 bool ComboTrialEditor::setWeather()
@@ -1902,6 +2033,10 @@ bool ComboTrialEditor::save() const
 		if (this->_crouching)
 			json["dummy"]["crouch"]  = this->_crouching;
 
+		if (this->_loopStart)
+			json["music_loop_start"] = this->_loopStart;
+		if (this->_loopEnd)
+			json["music_loop_end"] = this->_loopEnd;
 		if (this->_counterHit)
 			json["counter_hit"] = this->_counterHit;
 		if (this->_uniformCardCost)

@@ -51,7 +51,6 @@ static SokuLib::Vector2i nameFilterSize;
 static SokuLib::Vector2i modeFilterSize;
 static SokuLib::Vector2i topicFilterSize;
 static SokuLib::DrawUtils::Sprite lock;
-static SokuLib::DrawUtils::Sprite arrow;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite frame;
@@ -87,6 +86,8 @@ static unsigned band2Start = 0;
 SokuLib::DrawUtils::Sprite editSeatEmpty;
 SokuLib::DrawUtils::Sprite stickTop;
 SokuLib::DrawUtils::Sprite tickSprite;
+SokuLib::DrawUtils::Sprite upArrow;
+SokuLib::DrawUtils::Sprite downArrow;
 std::map<unsigned int, std::string> chrs;
 std::vector<std::string> orderChrs;
 std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> charactersFaces;
@@ -1565,10 +1566,15 @@ void menuLoadAssets()
 	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 	missingIcon.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 
-	arrow.texture.loadFromGame("data/profile/deck2/000_Cursor.bmp");
-	arrow.setSize(arrow.texture.getSize());
-	arrow.rect.width = arrow.texture.getSize().x;
-	arrow.rect.height = arrow.texture.getSize().y;
+	upArrow.texture.loadFromGame("data/scene/select/bg/bg_cursor0.bmp");
+	upArrow.setSize(upArrow.texture.getSize());
+	upArrow.rect.width = upArrow.texture.getSize().x;
+	upArrow.rect.height = upArrow.texture.getSize().y;
+
+	downArrow.texture.loadFromGame("data/scene/select/bg/bg_cursor1.bmp");
+	downArrow.setSize(downArrow.texture.getSize());
+	downArrow.rect.width = downArrow.texture.getSize().x;
+	downArrow.rect.height = downArrow.texture.getSize().y;
 
 	score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
 	score.setSize({32, 32});
@@ -1932,7 +1938,8 @@ void menuUnloadAssets()
 	defaultFont16.destruct();
 
 	lock.texture.destroy();
-	arrow.texture.destroy();
+	upArrow.texture.destroy();
+	downArrow.texture.destroy();
 	title.texture.destroy();
 	score.texture.destroy();
 	arrowSprite.texture.destroy();
@@ -3263,16 +3270,14 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 			break;
 	};
 	if (entryStart) {
-		arrow.setRotation(-M_PI_2 - 0.063);
-		arrow.setMirroring(false, false);
-		arrow.setPosition({72, 148});
-		arrow.draw();
+		upArrow.setPosition({72, 148});
+		upArrow.setSize({16, 16});
+		upArrow.draw();
 	}
 	if (i < pack.scenarios.size() - 1) {
-		arrow.setRotation(M_PI_2 + 0.062);
-		arrow.setMirroring(false, false);
-		arrow.setPosition({72, 372});
-		arrow.draw();
+		downArrow.setPosition({72, 372});
+		downArrow.setSize({16, 16});
+		downArrow.draw();
 	}
 }
 
