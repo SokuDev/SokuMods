@@ -114,6 +114,8 @@ private:
 
 	//Editor
 	std::string _path;
+	unsigned _musicTop = 0;
+	unsigned _musicCursor = 0;
 	unsigned _dollSelected = 0;
 	unsigned _chrCursorPos = 0;
 	unsigned _dollCursorPos = 0;
@@ -144,6 +146,7 @@ private:
 	SokuLib::DrawUtils::Sprite _twilight;
 	SokuLib::DrawUtils::Sprite _normal;
 	SokuLib::Camera _oldCamera;
+	std::vector<std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _musics;
 	std::map<unsigned, std::pair<std::unique_ptr<SokuLib::DrawUtils::Sprite>, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _stagesSprites;
 
 	static const std::vector<unsigned> _stagesIds;

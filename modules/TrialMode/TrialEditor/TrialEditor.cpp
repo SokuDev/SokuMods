@@ -114,21 +114,21 @@ void TrialEditor::_introOnUpdate()
 	(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22; // Remove HUD
 	if (!this->_intro) {
 		this->_introPlayed = true;
-		SokuLib::playBGM(this->_music.c_str());
+		this->_playBGM();
 		return;
 	}
 
 	auto result = this->_intro->update();
 
 	if (!result && !this->_introPlayed)
-		SokuLib::playBGM(this->_music.c_str());
+		this->_playBGM();
 	this->_introPlayed |= !result;
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_intro->onKeyPressed();
 	if (SokuLib::inputMgrs.pause == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
 		this->_introPlayed = true;
-		SokuLib::playBGM(this->_music.c_str());
+		this->_playBGM();
 	};
 }
 

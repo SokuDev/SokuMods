@@ -49,6 +49,8 @@ extern std::map<unsigned int, std::string> chrs;
 extern std::vector<std::string> orderChrs;
 extern std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> charactersFaces;
 extern SokuLib::DrawUtils::Sprite editSeatEmpty;
+extern SokuLib::DrawUtils::Sprite upArrow;
+extern SokuLib::DrawUtils::Sprite downArrow;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
