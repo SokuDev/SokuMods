@@ -42,9 +42,8 @@ public:
 
 std::string getLastErrorAsString(DWORD errorMessageID)
 {
-	if (errorMessageID == 0) {
-		return nullptr;
-	}
+	if (errorMessageID == 0)
+		return "No error";
 
 	LPSTR messageBuffer = nullptr;
 
@@ -58,6 +57,9 @@ std::string getLastErrorAsString(DWORD errorMessageID)
 		nullptr
 	);
 
+	if (!messageBuffer)
+		return "Unknown error " + std::to_string(errorMessageID);
+
 	std::string str = messageBuffer;
 
 	LocalFree(messageBuffer);
@@ -68,15 +70,18 @@ ExternalBattleAnimation *loadBattleAnimationFromExternalModule(const char *path,
 {
 	HMODULE handle = LoadLibraryA(path);
 
-	if (handle == nullptr)
-		throw std::invalid_argument("LoadLibrary failed with code " + std::to_string(GetLastError()) + ": " + getLastErrorAsString(GetLastError()));
+	if (handle == nullptr) {
+		auto err = GetLastError();
+
+		throw std::invalid_argument("LoadLibrary failed with code " + std::to_string(err) + ": " + getLastErrorAsString(err));
+	}
 
 	std::string name = isIntro ? "getIntro" : "getOutro";
 	auto fct = reinterpret_cast<BattleAnimation *(*)()>(GetProcAddress(handle, name.c_str()));
 
 	if (!fct) {
 		FreeLibrary(handle);
-		throw std::invalid_argument("GetProcAddress(\"" + name + "\") failed with code " + std::to_string(GetLastError()) + ": " + getLastErrorAsString(GetLastError()));
+		throw std::invalid_argument("GetProcAddress(\"" + name + "\") failed.");
 	}
 
 	BattleAnimation *val = fct();

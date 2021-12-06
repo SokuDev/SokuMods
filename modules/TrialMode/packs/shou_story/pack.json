@@ -1,33 +1,34 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Shou Toramaru",
-    "modes": ["Combo", "Story"],
     "characters": [
         "shou"
     ],
-    "stand": {
-        "isPath": false,
-        "path": "data/stand/shou.bmp"
-    },
-    "description": "",
-    "author": "PinkySmile",
     "icon": {
         "isPath": false,
-        "path": "data/character/shou/face/face000.bmp",
         "offset": {
-            "x": 1,
-            "y": 0
+            "x": 1.0,
+            "y": 0.0
         },
-        "scale": 0.60,
+        "path": "data/character/shou/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002288818359,
         "xMirror": true,
         "yMirror": false
     },
-    "scenarios": [
-	{
-            "name": "",
-            "file": "bnbmid3.json",
-            "preview": "",
-            "description": ""
-	}
-    ]
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/shou.bmp"
+    }
 }

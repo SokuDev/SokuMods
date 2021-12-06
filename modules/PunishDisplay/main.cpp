@@ -6,7 +6,6 @@
 #include <SokuLib.hpp>
 #include <dinput.h>
 #include <fstream>
-static void (SokuLib::BattleManager::*og_BattleManagerOnRoundstart)();
 static void (SokuLib::BattleManager::*og_BattleManagerOnRender)();
 static int (SokuLib::BattleManager::*og_BattleManagerOnProcess)();
 static int (SokuLib::CharacterManager::*original_onHit)(int param);
@@ -30,7 +29,6 @@ static std::pair<unsigned, unsigned> displayCounter = {1000, 1000};
 
 SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &character)
 {
-	char* punishMessage;
 	if ((character.objectBase.action >= SokuLib::ACTION_NEUTRAL_HIGH_JUMP && character.objectBase.action <= SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH)
 			|| (character.objectBase.action >= SokuLib::ACTION_NEUTRAL_JUMP && character.objectBase.action <= SokuLib::ACTION_BACKWARD_JUMP))
 	{
@@ -172,7 +170,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 #endif
 
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	//og_BattleManagerOnRoundstart = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRoundStart, BattleOnRoundstart);
 	og_BattleManagerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, BattleOnProcess);
 	og_BattleManagerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  BattleOnRender);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);

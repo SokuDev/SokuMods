@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <process.h>
+#include <thread>
 #include "Pack.hpp"
 #include "Menu.hpp"
 #include "version.h"
@@ -51,8 +52,8 @@ const std::map<unsigned, std::string> swrCharacters{
 };
 char packsLocation[1024 + MAX_PATH];
 
-static std::vector<std::string> authors{
-	"Baka Cirno",
+std::vector<std::string> authors{
+	"9 Baka Cirno",
 	"Illuminated Catfish",
 	"Fun frog that never wakes back up",
 	"Marisa's tongue",
@@ -67,7 +68,7 @@ static std::vector<std::string> authors{
 	"Frightened Youmu",
 };
 
-bool isInvalidPath(const std::string &path)
+bool Pack::isInvalidPath(const std::string &path)
 {
 	if (path.find("/../") != std::string::npos)
 		return true;
@@ -76,6 +77,14 @@ bool isInvalidPath(const std::string &path)
 	if (path.find("/..\\") != std::string::npos)
 		return true;
 	if (path.find("\\..\\") != std::string::npos)
+		return true;
+	if (path.substr(0, 3) == "../")
+		return true;
+	if (path.substr(0, 3) == "..\\")
+		return true;
+	if (path.substr(path.size() - 3) == "/..")
+		return true;
+	if (path.substr(path.size() - 3) == "\\..")
 		return true;
 	if (path.find(':') != std::string::npos)
 		return true;
@@ -87,7 +96,7 @@ static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::
 	std::string msg;
 
 	if (version)
-		msg = "Mod version >" + *version + " required.";
+		msg = "Mod version >=" + *version + " required.";
 	else if (swrNeeded && !missingChars.empty()) {
 		if (!hasSoku2)
 			msg = "Soku2 and SWR are missing";
@@ -132,7 +141,7 @@ static void makeAuthorStr(Pack &pack, const std::string &str)
 	pack.author.setSize((size - 1).to<unsigned>());
 }
 
-int getVersionFromStr(const std::string &str)
+int Pack::getVersionFromStr(const std::string &str)
 {
 	size_t pos = 0;
 	int version = 0;
@@ -169,11 +178,13 @@ int getVersionFromStr(const std::string &str)
 	return version;
 }
 
-bool checkVersion(const std::string &version)
+bool Pack::checkVersion(const std::string &version)
 {
 	if (version == VERSION_STR)
 		return true;
 
+	if (version.substr(0, strlen("beta ")) != "beta " && version.substr(0, strlen("alpha ")) != "alpha " && !std::isdigit(version[0]))
+		throw std::invalid_argument("Invalid version modifier found at start of version string (" + version + ")");
 	int reqReleaseState = 3 - (version.substr(0, strlen("beta ")) == "beta ") - (version.substr(0, strlen("alpha ")) == "alpha ") * 2;
 	int releaseState = 3 - (strncmp(VERSION_STR, "beta ", strlen("beta ")) == 0) - (strncmp(VERSION_STR, "alpha ", strlen("alpha ")) == 0) * 2;
 
@@ -189,6 +200,8 @@ bool checkVersion(const std::string &version)
 Pack::Pack(const std::string &path, const nlohmann::json &object)
 {
 	SokuLib::Vector2i size;
+	bool swrNeeded = false;
+	std::vector<std::string> invalidChars;
 
 	if (!object.is_object()) {
 		MessageBox(
@@ -215,8 +228,16 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	if (object.contains("outro") && object["outro"].is_string()) {
 		std::string relative = object["outro"];
 
-		if (!isInvalidPath(relative))
+		if (!isInvalidPath(relative)) {
+			this->outroRelPath = relative;
 			this->outroPath = path + "/" + relative;
+		} else
+			MessageBox(
+				SokuLib::window,
+				("Warning: Trial pack " + path + " has an invalid outro path \"" + relative + "\".").c_str(),
+				"Trial pack warning",
+				MB_ICONWARNING
+			);
 	}
 
 	if (object.contains("icon")) {
@@ -234,12 +255,18 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 			std::string relative = obj["path"];
 
 			if (isInvalidPath(relative)) {
-				printf("%s is not a valid path\n", relative.c_str());
+				MessageBox(
+					SokuLib::window,
+					("Warning: Trial pack " + path + " has an invalid preview path \"" + relative + "\".").c_str(),
+					"Trial pack warning",
+					MB_ICONWARNING
+				);
 				goto invalidPreview;
 			}
-			this->preview.texture.loadFromFile((path + "/" + relative).c_str());
+			this->preview.texture.loadFromFile((path + "/" + (this->previewPath = relative)).c_str());
+			this->previewFSAsset = true;
 		} else
-			this->preview.texture.loadFromGame(obj["path"].get<std::string>().c_str());
+			this->preview.texture.loadFromGame((this->previewPath = obj["path"]).c_str());
 		this->preview.rect = {
 			0, 0,
 			static_cast<int>(this->preview.texture.getSize().x),
@@ -250,10 +277,8 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	}
 
 invalidPreview:
-	this->description.texture.createFromText(
-		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
-		defaultFont12, {300, 150}
-	);
+	this->descriptionStr = object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided";
+	this->description.texture.createFromText(this->descriptionStr.c_str(),defaultFont12, {300, 150});
 	this->description.rect = {
 		0, 0,
 		static_cast<int>(this->description.texture.getSize().x),
@@ -272,15 +297,13 @@ invalidPreview:
 	}
 
 	if (object.contains("characters") && object["characters"].is_array()) {
-		bool swrNeeded = false;
-		std::vector<std::string> invalidChars;
-
 		for (auto &elem : object["characters"]) {
 			if (!elem.is_string())
 				continue;
 
 			std::string str = elem;
 
+			this->characters.push_back(str);
 			if (
 				std::find_if(
 					swrCharacters.begin(),
@@ -307,33 +330,6 @@ invalidPreview:
 			)
 				invalidChars.push_back(str);
 		}
-
-		std::string version = object.contains("min_version") ? object["min_version"] : VERSION_STR;
-
-		try {
-			if (!checkVersion(version))
-				generateErrorMsg(*this, swrNeeded, invalidChars, &version);
-			else if (!invalidChars.empty() || swrNeeded)
-				generateErrorMsg(*this, swrNeeded, invalidChars);
-			else {
-				makeAuthorStr(
-					*this,
-					object.contains("author") && object["author"].is_string() ?
-					object["author"].get<std::string>() :
-					authors[rand() % authors.size()]
-				);
-				this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = BLUE_COLOR;
-				this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = BLUE_COLOR;
-			}
-		} catch (std::exception &e) {
-			MessageBox(
-				SokuLib::window,
-				("Trial pack " + path + " is not valid: pack.json: " + e.what()).c_str(),
-				"Trial pack loading error",
-				MB_ICONERROR
-			);
-			return;
-		}
 	} else
 		MessageBox(
 			SokuLib::window,
@@ -342,6 +338,37 @@ invalidPreview:
 			"Trial pack warning",
 			MB_ICONWARNING
 		);
+
+	std::string version = VERSION_STR;
+
+	if (object.contains("min_version") && object["min_version"].is_string())
+		version = this->minVersion = object["min_version"];
+	try {
+		if (!checkVersion(version))
+			generateErrorMsg(*this, swrNeeded, invalidChars, &version);
+		else if (!invalidChars.empty() || swrNeeded)
+			generateErrorMsg(*this, swrNeeded, invalidChars);
+		else {
+			if (object.contains("author") && object["author"].is_string())
+				this->authorStr = object["author"];
+			makeAuthorStr(
+				*this,
+				object.contains("author") && object["author"].is_string() ?
+				object["author"].get<std::string>() :
+				authors[rand() % authors.size()]
+			);
+			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = BLUE_COLOR;
+			this->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = BLUE_COLOR;
+		}
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("Trial pack " + path + " is not valid: pack.json: " + e.what()).c_str(),
+			"Trial pack loading error",
+			MB_ICONERROR
+		);
+		return;
+	}
 
 	if (!object.contains("scenarios") || !object["scenarios"].is_array()) {
 		MessageBox(
@@ -369,7 +396,7 @@ invalidPreview:
 			delete scene;
 			MessageBox(
 				SokuLib::window,
-				("Warning: Trial pack " + path + ": scenario preview #" + std::to_string(i) + " is invalid.\n").c_str(),
+				("Warning: Trial pack " + path + ": scenario file #" + std::to_string(i) + " is invalid.\n").c_str(),
 				"Trial pack warning",
 				MB_ICONWARNING
 			);
@@ -401,7 +428,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	if (!object.contains("file") || !object["file"].is_string())
 		return;
 	this->folder = path + "\\";
-	this->file = this->folder + object["file"].get<std::string>();
+	this->fileRel = object["file"];
+	this->file = this->folder + this->fileRel;
 	this->nameStr = (object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : object["file"].get<std::string>());
 	this->name.texture.createFromText(
 		this->nameStr.c_str(),
@@ -414,6 +442,8 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	};
 	this->name.setSize(this->name.texture.getSize());
 
+	if (object.contains("description") && object["description"].is_string())
+		this->descriptionStr = object["description"];
 	this->description.texture.createFromText(
 		object.contains("description") && object["description"].is_string() ? object["description"].get<std::string>().c_str() : "No description provided",
 		defaultFont12, {300, 150}
@@ -426,8 +456,10 @@ Scenario::Scenario(char score, int i, const std::string &path, const nlohmann::j
 	this->description.setPosition({356, 286});
 	this->description.setSize(this->description.texture.getSize());
 
-	if (object.contains("preview") && object["preview"].is_string())
-		this->previewFile = path + object["preview"].get<std::string>();
+	if (object.contains("preview") && object["preview"].is_string()) {
+		this->previewFileRel = object["preview"];
+		this->previewFile = path + this->previewFileRel;
+	}
 
 	if (object.contains("may_be_locked") && object["may_be_locked"].is_boolean())
 		this->canBeLocked = object["may_be_locked"];
@@ -453,29 +485,31 @@ void Scenario::setScore(char score)
 
 void loadPreview(Scenario *scenario)
 {
-	if (scenario->previewFile.size() > 4 && scenario->previewFile.substr(scenario->previewFile.size() - 4, 4) == ".gif")
-		scenario->preview = std::make_unique<AnimatedImage>(scenario->previewFile, SokuLib::Vector2i{398, 128}, true);
+	std::string file = scenario->previewFile;
+
+	while (scenario->loading)
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+	scenario->loading = true;
+	if (file.size() > 4 && file.substr(file.size() - 4, 4) == ".gif")
+		scenario->preview = std::make_unique<AnimatedImage>(file, SokuLib::Vector2i{398, 128}, true);
 	else
-		scenario->preview = std::make_unique<SimpleImage>(scenario->previewFile, SokuLib::Vector2i{398, 128});
+		scenario->preview = std::make_unique<SimpleImage>(file, SokuLib::Vector2i{398, 128});
 	scenario->loading = false;
 	::loading--;
 }
 
-void Scenario::loadPreview()
+void Scenario::loadPreview(bool force)
 {
 	if (this->loading || this->preview)
-		return;
-	this->loading = true;
+		if (!force)
+			return;
 	::loading++;
 	_beginthread(reinterpret_cast<_beginthread_proc_type>(::loadPreview), 0, this);
 }
 
 Icon::Icon(const std::string &path, const nlohmann::json &object)
 {
-	float scale = 1;
-	SokuLib::DrawUtils::TextureRect rect = {0, 0, 0, 0};
-	SokuLib::Vector2<bool> mirror{false, false};
-
 	if (!object.is_object())
 		return;
 
@@ -490,18 +524,18 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 			this->translate.y = off["y"];
 	}
 	if (object.contains("scale") && object["scale"].is_number())
-		scale = object["scale"];
+		this->scale = object["scale"];
 
 	if (object.contains("xMirror") && object["xMirror"].is_boolean())
-		mirror.x = object["xMirror"];
+		this->mirror.x = object["xMirror"];
 	if (object.contains("yMirror") && object["yMirror"].is_boolean())
-		mirror.y = object["yMirror"];
+		this->mirror.y = object["yMirror"];
 
-	this->sprite.setMirroring(mirror.x, mirror.y);
+	this->sprite.setMirroring(this->mirror.x, this->mirror.y);
 	if (object.contains("isPath") && object["isPath"]) {
 		std::string relative = object["path"];
 
-		if (isInvalidPath(relative)) {
+		if (Pack::isInvalidPath(relative)) {
 			MessageBox(
 				SokuLib::window,
 				("Warning: Trial pack " + path + " has an invalid icon path \"" + relative + "\".").c_str(),
@@ -510,30 +544,36 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 			);
 			return;
 		}
-		this->sprite.texture.loadFromFile((path + "/" + relative).c_str());
-	} else
-		this->sprite.texture.loadFromGame(object["path"].get<std::string>().c_str());
+		this->path = relative;
+		this->sprite.texture.loadFromFile((path + "/" + this->path).c_str());
+		this->fsPath = true;
+	} else {
+		this->path = object["path"];
+		this->sprite.texture.loadFromGame(this->path.c_str());
+	}
 
-	rect.width = min(68 / scale, this->sprite.texture.getSize().x);
-	rect.height = min(27 / scale, this->sprite.texture.getSize().y);
+	this->untransformedRect.x = this->sprite.texture.getSize().x;
+	this->untransformedRect.y = this->sprite.texture.getSize().y;
 	if (object.contains("rect") && object["rect"].is_object()) {
 		auto &rec = object["rect"];
 
 		if (rec.contains("top") && rec["top"].is_number())
-			rect.top = rec["top"];
+			this->rect.top = rec["top"];
 		if (rec.contains("left") && rec["left"].is_number())
-			rect.left = rec["left"];
+			this->rect.left = rec["left"];
 		if (rec.contains("width") && rec["width"].is_number())
-			rect.width = min(68 / scale, rec["width"].get<float>());
+			this->untransformedRect.x = rec["width"];
 		if (rec.contains("height") && rec["height"].is_number())
-			rect.height = min(27 / scale, rec["height"].get<float>());
+			this->untransformedRect.y = rec["height"];
 	}
 
+	this->rect.width = min(68 / this->scale, this->untransformedRect.x);
+	this->rect.height = min(28 / this->scale, this->untransformedRect.y);
 	this->sprite.setSize({
-		static_cast<unsigned int>(rect.width * scale),
-		static_cast<unsigned int>(rect.height * scale)
+		static_cast<unsigned int>(this->rect.width * this->scale),
+		static_cast<unsigned int>(this->rect.height * this->scale)
 	});
-	this->sprite.rect = rect;
+	this->sprite.rect = this->rect;
 	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor::White * 0.25;
 }
@@ -589,23 +629,18 @@ void loadPacks()
 
 		auto pack = new Pack(std::string(buffer), val);
 
-		if (!pack->scenarios.empty()) {
-			loadedPacks.emplace_back(pack);
+		loadedPacks.emplace_back(pack);
 
-			packsByName[pack->nameStr].push_back(loadedPacks.back());
-			packsByCategory[pack->category].push_back(loadedPacks.back());
-			if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
-				uniqueCategories.push_back(pack->category);
-			if (std::find(uniqueNames.begin(), uniqueNames.end(), pack->nameStr) == uniqueNames.end())
-				uniqueNames.push_back(pack->nameStr);
-			for (auto &mode : pack->modes) {
-				packsByName[mode].push_back(loadedPacks.back());
-				if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
-					uniqueModes.push_back(mode);
-			}
-		} else {
-			puts("Invalid pack :(");
-			delete pack;
+		packsByName[pack->nameStr].push_back(loadedPacks.back());
+		packsByCategory[pack->category].push_back(loadedPacks.back());
+		if (std::find(uniqueCategories.begin(), uniqueCategories.end(), pack->category) == uniqueCategories.end())
+			uniqueCategories.push_back(pack->category);
+		if (std::find(uniqueNames.begin(), uniqueNames.end(), pack->nameStr) == uniqueNames.end())
+			uniqueNames.push_back(pack->nameStr);
+		for (auto &mode : pack->modes) {
+			packsByName[mode].push_back(loadedPacks.back());
+			if (std::find(uniqueModes.begin(), uniqueModes.end(), mode) == uniqueModes.end())
+				uniqueModes.push_back(mode);
 		}
 		buffer[starPos] = 0;
 	} while (FindNextFileA(findHandle, &data));

@@ -1,62 +1,65 @@
 {
-    "music": 43,
-    "stage": 14,
-    "player": {
-        "character": "remilia",
-        "palette": 0,
-        "deck": [],
-        "pos": 680
-    },
+    "counter_hit": true,
     "dummy": {
         "character": "patchouli",
-        "palette": 0,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 900,
-            "y": 0
+            "x": 900.0,
+            "y": 0.0
         }
     },
-    "intro": "bnbmid4intro.lua",
-    "outro": "bnbmid4outro.lua",
-    "type": "combo",
-
     "expected": "d6 j2a:15 2c/5c:35 hj9 j5c j66 j8a",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "counter_hit": true,
-    "weather": "clear",
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
+    "intro": "bnbmid4intro.lua",
+    "music": "data/bgm/st43.ogg",
+    "outro": "bnbmid4outro.lua",
+    "player": {
+        "character": "remilia",
+        "deck": [],
+        "palette": 0,
+        "pos": 680.0
+    },
     "score": [
         {
-            "min_hits": 15,
             "min_damage": 2000,
-            "min_limit": 104,
-            "max_limit": 120
+            "min_hits": 15,
+            "min_limit": 104
         },
         {
             "min_hits": 17,
             "min_limit": 108
         },
         {
+            "max_attempts": 10,
             "min_hits": 19,
-            "min_limit": 112,
-            "max_attempts": 10
+            "min_limit": 112
         },
         {
-            "min_hits": 22,
+            "max_attempts": 5,
             "min_damage": 2547,
-            "min_limit": 120,
-            "max_attempts": 5
+            "min_hits": 22,
+            "min_limit": 120
         }
     ],
-    "hint": [
-
-    ]
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 14,
+    "type": "combo",
+    "uniform_card_cost": 1
 }

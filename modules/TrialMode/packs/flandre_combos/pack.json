@@ -1,33 +1,43 @@
 {
-    "name": "Basic combos",
+    "author": "PinkySmile",
     "category": "Flandre Scarlet",
     "characters": [
         "flandre",
         "reimu"
     ],
-    "stand": {
-        "isPath": false,
-        "path": "data/stand/flandre.bmp"
-    },
     "description": "Flandre's bread and butters",
-    "author": "PinkySmile",
     "icon": {
         "isPath": false,
-        "path": "data/character/flandre/face/face000.bmp",
         "offset": {
-            "x": 1,
-            "y": 0
+            "x": 2.0,
+            "y": 0.0
         },
-        "scale": 0.60,
+        "path": "data/character/flandre/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002884864807,
         "xMirror": true,
         "yMirror": false
     },
+    "modes": [],
+    "name": "Basic combos",
     "scenarios": [
         {
-            "name": "Ground j5a starter",
+            "description": "d6 j5aa d6 j5aa 9 j5a j8a",
+            "extra": false,
             "file": "bnbmid1.json",
-            "preview": "bnbmid1.png",
-            "description": "d6 j5aa d6 j5aa 9 j5a j8a"
+            "may_be_locked": true,
+            "name": "Ground j5a starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnbmid1.png"
         }
-    ]
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/flandre.bmp"
+    }
 }

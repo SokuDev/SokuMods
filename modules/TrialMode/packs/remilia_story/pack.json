@@ -1,7 +1,6 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile, second degree",
     "category": "Remilia Scarlet",
-    "modes": ["Combo", "Story"],
     "characters": [
         "remilia",
         "aya",
@@ -11,95 +10,128 @@
         "patchouli",
         "flandre",
         "marisa",
-        "reimu"
+        "reimu",
+        "udonge"
+    ],
+    "description": "Another boring day for Remilia...<br>Or so she thought, until half of Gensokyo get<br>into her own mansion after hearing a strange<br>rumor. But who is this mysterious intruder<br>everyone is talking about?",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/remilia/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100004076957703,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "min_version": "alpha 0.4.0",
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "outro": "outro.lua",
+    "scenarios": [
+        {
+            "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>",
+            "extra": false,
+            "file": "bnbmid1.json",
+            "may_be_locked": true,
+            "name": "The Soul Capturing Intruder",
+            "name_hidden_when_locked": false,
+            "preview": "bnbmid1.gif"
+        },
+        {
+            "description": "d6 j5aa d6 j5aa d6 j5aa    | Works everywhere<br>d6 j5aa d6 j5aa d6 j5a j8a | Optimized version<br><br>",
+            "extra": false,
+            "file": "bnbmid2.json",
+            "may_be_locked": true,
+            "name": "A Crimson Maid Day-to-Day",
+            "name_hidden_when_locked": true,
+            "preview": "bnbmid2.gif"
+        },
+        {
+            "description": "5aaaa 4SC(Gungnir) hj9 j8a<br>Ender only midscreen, near corner and corner<br><br>",
+            "extra": false,
+            "file": "bnbmid3.json",
+            "may_be_locked": true,
+            "name": "A Long Lullaby",
+            "name_hidden_when_locked": true,
+            "preview": "bnbmid3.gif"
+        },
+        {
+            "description": "j2a CH 2c hj9 j5c j66 j8a | Works everywhere<br><br>",
+            "extra": false,
+            "file": "bnbmid4.json",
+            "may_be_locked": true,
+            "name": "Her Voynich Enigma",
+            "name_hidden_when_locked": true,
+            "preview": "bnbmid4.gif"
+        },
+        {
+            "description": "3a 2a 5c d236b | Tip of 3a only<br><br>",
+            "extra": false,
+            "file": "bnbmid5.json",
+            "may_be_locked": true,
+            "name": "Salem's trick",
+            "name_hidden_when_locked": true,
+            "preview": "bnbmid5.gif"
+        },
+        {
+            "description": "5aaaa 6a 5c | Corner only<br><br>",
+            "extra": false,
+            "file": "bnbcorn1.json",
+            "may_be_locked": true,
+            "name": "The Iron Masked Girl",
+            "name_hidden_when_locked": true,
+            "preview": "bnbcorn1.gif"
+        },
+        {
+            "description": "Rising j5aa j6a j5b | Works everywhere<br><br>",
+            "extra": false,
+            "file": "bnbcorn2.json",
+            "may_be_locked": true,
+            "name": "A Tomboyish Maid",
+            "name_hidden_when_locked": true,
+            "preview": "bnbcorn2.gif"
+        },
+        {
+            "description": "d6 j5aa d6 j5aa 2c hj9 j5aa | Corner only<br><br>",
+            "extra": false,
+            "file": "bnbcorn3.json",
+            "may_be_locked": true,
+            "name": "The Curtain Fall?",
+            "name_hidden_when_locked": true,
+            "preview": "bnbcorn3.gif"
+        },
+        {
+            "description": "4a 4a 4a 4a 5SC | Works everywhere<br><br>",
+            "extra": true,
+            "file": "bnbany1.json",
+            "may_be_locked": true,
+            "name": "Extra1",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": true,
+            "file": "test.json",
+            "may_be_locked": false,
+            "name": "test.json",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        }
     ],
     "stand": {
         "isPath": true,
         "path": "title.png"
-    },
-    "min_version": "alpha 0.4.0",
-    "outro": "outro.lua",
-    "description": "Another boring day for Remilia...<br>Or so she thought, until half of Gensokyo get<br>into her own mansion after hearing a strange<br>rumor. But who is this mysterious intruder<br>everyone is talking about?",
-    "author": "PinkySmile, second degree",
-    "icon": {
-        "isPath": false,
-        "path": "data/character/remilia/face/face000.bmp",
-        "offset": {
-            "x": 1,
-            "y": 0
-        },
-        "scale": 0.60,
-        "xMirror": true,
-        "yMirror": false
-    },
-    "scenarios": [
-        {
-            "name": "The Soul Capturing Intruder",
-            "file": "bnbmid1.json",
-            "preview": "bnbmid1.gif",
-            "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>"
-        },
-        {
-            "name": "A Crimson Maid Day-to-Day",
-            "file": "bnbmid2.json",
-            "preview": "bnbmid2.gif",
-            "description": "d6 j5aa d6 j5aa d6 j5aa    | Works everywhere<br>d6 j5aa d6 j5aa d6 j5a j8a | Optimized version<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "A Long Lullaby",
-            "file": "bnbmid3.json",
-            "preview": "bnbmid3.gif",
-            "description": "5aaaa 4SC(Gungnir) hj9 j8a<br>Ender only midscreen, near corner and corner<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "Her Voynich Enigma",
-            "file": "bnbmid4.json",
-            "preview": "bnbmid4.gif",
-            "description": "j2a CH 2c hj9 j5c j66 j8a | Works everywhere<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "Salem's trick",
-            "file": "bnbmid5.json",
-            "preview": "bnbmid5.gif",
-            "description": "3a 2a 5c d236b | Tip of 3a only<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "The Iron Masked Girl",
-            "file": "bnbcorn1.json",
-            "preview": "bnbcorn1.gif",
-            "description": "5aaaa 6a 5c | Corner only<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "A Tomboyish Maid",
-            "file": "bnbcorn2.json",
-            "preview": "bnbcorn2.gif",
-            "description": "Rising j5aa j6a j5b | Works everywhere<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "The Curtain Fall?",
-            "file": "bnbcorn3.json",
-            "preview": "bnbcorn3.gif",
-            "description": "d6 j5aa d6 j5aa 2c hj9 j5aa | Corner only<br><br>",
-            "may_be_locked":  true,
-            "name_hidden_when_locked":  true
-        },
-        {
-            "name": "Extra1",
-            "file": "bnbany1.json",
-            "description": "4a 4a 4a 4a 5SC | Works everywhere<br><br>",
-            "extra":  true
-        }
-    ]
+    }
 }

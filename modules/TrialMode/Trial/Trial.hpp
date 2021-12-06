@@ -42,6 +42,7 @@ public:
 	Trial(const char *folder, const nlohmann::json &json);
 	~Trial() override;
 
+	static bool isTypeValid(const std::string &type);
 	static TrialBase *create(const char *folder, SokuLib::Character player, const nlohmann::json &json);
 };
 

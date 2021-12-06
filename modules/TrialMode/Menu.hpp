@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <SokuLib.hpp>
+#include <nlohmann/json.hpp>
 #include "TrialBase.hpp"
 #include "PackOutro.hpp"
 
@@ -42,12 +43,37 @@ extern std::unique_ptr<TrialBase> loadedTrial;
 extern std::unique_ptr<PackOutro> loadedOutro;
 extern bool editorMode;
 extern unsigned loading;
+extern SokuLib::DrawUtils::Sprite stickTop;
+extern SokuLib::DrawUtils::Sprite tickSprite;
+extern std::map<unsigned int, std::string> chrs;
+extern std::vector<std::string> orderChrs;
+extern std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> charactersFaces;
+extern SokuLib::DrawUtils::Sprite editSeatEmpty;
+extern SokuLib::DrawUtils::Sprite upArrow;
+extern SokuLib::DrawUtils::Sprite downArrow;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);
 void menuOnRender(SokuLib::MenuResult *This);
 void menuUnloadAssets();
 std::vector<unsigned> getCurrentPackScores();
+void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
 
+template<typename T, typename ...Args>
+T getField(nlohmann::json json, T defaultValue, bool (nlohmann::json::*checker)() const, std::string field, Args... fields)
+{
+	std::vector<std::string> vec{fields...};
+
+	if (!json.is_object())
+		return defaultValue;
+	for (auto &val : vec) {
+		if (!json.contains(val) || !json[val].is_object())
+			return defaultValue;
+		json = json[val];
+	}
+	if (!json.contains(field) || !(json[field].*checker)())
+		return defaultValue;
+	return json[field];
+}
 
 #endif //SWRSTOYS_MENU_HPP

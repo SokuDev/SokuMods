@@ -15,16 +15,25 @@ private:
 	struct SpecialAction {
 		bool optional;
 		std::vector<SokuLib::Action> actions;
+		std::vector<std::string> actionsStr;
 		unsigned chargeTime;
 		unsigned delay;
 		std::vector<SokuLib::KeyInput> inputs;
 		SokuLib::DrawUtils::Sprite sprite;
 		unsigned int counter = 0;
 		unsigned int chargeCounter = 0;
+		std::string realMoveName;
 		std::string moveName;
 		std::string name;
 
 		void parse();
+	};
+
+	struct RecordedAction {
+		SokuLib::Inputs lastInput;
+		unsigned frameCount;
+		SokuLib::Action action;
+		SokuLib::DrawUtils::Sprite sprite;
 	};
 
 	struct ScorePrerequisites {
@@ -69,6 +78,7 @@ private:
 	unsigned _outroRequ = 0;
 
 	//State
+	bool _needInit = false;
 	unsigned char _dollAnim = 0;
 	unsigned _freezeCounter = 0;
 	unsigned _waitCounter = 0;
@@ -84,11 +94,121 @@ private:
 	bool _dummyHit = false;
 	bool _playingIntro = false;
 	bool _finished = false;
+	bool _quit = false;
 	SokuLib::Scene _next = SokuLib::SCENE_BATTLE;
 
 	//Render
+	SokuLib::DrawUtils::Sprite _pause;
+	SokuLib::DrawUtils::Sprite _comboEditFG;
+	SokuLib::DrawUtils::Sprite _comboEditBG;
+	SokuLib::DrawUtils::Sprite _comboSprite;
+	SokuLib::DrawUtils::Sprite _introSprite;
+	SokuLib::DrawUtils::Sprite _outroSprite;
+	SokuLib::DrawUtils::Sprite _trialEditorMockup;
+	SokuLib::DrawUtils::Sprite _trialEditorPlayer;
+	SokuLib::DrawUtils::Sprite _trialEditorDummy;
+	SokuLib::DrawUtils::Sprite _trialEditorSystem;
+	SokuLib::DrawUtils::Sprite _trialEditorMisc;
 	mutable SokuLib::DrawUtils::Sprite _attemptText;
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
+
+	//Editor
+	std::string _path;
+	unsigned _musicTop = 0;
+	unsigned _musicCursor = 0;
+	unsigned _dollSelected = 0;
+	unsigned _chrCursorPos = 0;
+	unsigned _dollCursorPos = 0;
+	unsigned _menuCursorPos = 0;
+	unsigned _comboEditCursor = 0;
+	unsigned _selectedSubcategory = 0;
+	unsigned _stageCursor = 0;
+	float _fakePlayerPos = 0;
+	bool _managingDolls = false;
+	bool _changingPlayerPos = false;
+	bool _changingDummyPos = false;
+	bool _selectingStage = false;
+	bool _selectingMusic = false;
+	bool _selectingCharacters = false;
+	bool _needReload = false;
+	bool _comboPageDisplayed = false;
+	bool _recordingCombo = false;
+	std::vector<std::unique_ptr<RecordedAction>> _recordBuffer;
+	SokuLib::Profile _fakeProfile;
+	SokuLib::ProfileDeckEdit *_deckEditMenu = nullptr;
+	SokuLib::Vector2f _dummyStartPosTmp;
+	SokuLib::Character *_characterEdit = nullptr;
+	SokuLib::Sprite _characterSprite;
+	mutable SokuLib::DrawUtils::Sprite _digits[6];
+	mutable SokuLib::DrawUtils::Sprite _weathers;
+	SokuLib::DrawUtils::RectangleShape _stageRect;
+	SokuLib::DrawUtils::Sprite _weatherArrows;
+	SokuLib::DrawUtils::Sprite _twilight;
+	SokuLib::DrawUtils::Sprite _normal;
+	SokuLib::Camera _oldCamera;
+	std::vector<std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _musics;
+	std::map<unsigned, std::pair<std::unique_ptr<SokuLib::DrawUtils::Sprite>, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _stagesSprites;
+
+	static const std::vector<unsigned> _stagesIds;
+	static const std::map<unsigned, const char *> _stagesNames;
+
+	void _setupStageSprites();
+	bool _copyDeckToPlayerSkills();
+	bool _copyDeckToPlayerHand();
+	bool _copyDeckToPlayerDeck();
+	bool _copyDeckToDummyDeck();
+	std::string _transformComboToString() const;
+	std::vector<std::array<unsigned int, 2>> _getSkills() const;
+	nlohmann::json _getScoresJson() const;
+	void _selectingCharacterUpdate();
+	void _selectingCharacterRender() const;
+	void _openPause() const;
+	void _typeNewCombo();
+
+	//Menu callbacks
+	bool notImplemented();
+	bool returnToCharSelect();
+	bool returnToGame();
+	bool returnToTitleScreen();
+	bool setPlayerCharacter();
+	bool setPlayerPosition();
+	bool setPlayerDeck();
+	bool setPlayerSkills();
+	bool setPlayerHand();
+	bool setPlayerWeather();
+	bool setPlayerDolls();
+	bool setDummyCharacter();
+	bool setDummyPosition();
+	bool setDummyDeck();
+	bool setDummyCrouch();
+	bool setDummyJump();
+	bool setDummyWeather();
+	bool setCRankRequ();
+	bool setBRankRequ();
+	bool setARankRequ();
+	bool setSRankRequ();
+	bool setCounterHit();
+	bool setLimitDisabled();
+	bool setCardCosts();
+	bool setCombo();
+	bool setStage();
+	bool setMusic();
+	bool setWeather();
+	bool setFailTimer();
+	bool setOutro();
+	bool setIntro();
+	bool saveReturnToCharSelect();
+	bool playIntro();
+	bool playOutro();
+	bool playPreview();
+	static const std::vector<bool (ComboTrialEditor::*)()> callbacks[];
+
+	void noRender() const;
+	void playerRender() const;
+	void dummyRender() const;
+	void systemRender() const;
+	void miscRender() const;
+	static void (ComboTrialEditor::* const renderCallbacks[])() const;
 
 	void _playIntro();
 	void _initGameStart();
@@ -98,9 +218,10 @@ private:
 	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &name);
 
 public:
-	ComboTrialEditor(const char *folder, SokuLib::Character player, const nlohmann::json &json);
-	~ComboTrialEditor() override = default;
+	ComboTrialEditor(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json);
+	~ComboTrialEditor() override;
 
+	bool (ComboTrialEditor::*onDeckSaved)();
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 	SokuLib::KeyInput getDummyInputs() override;
 	bool update(bool &canHaveNextFrame) override;
@@ -108,34 +229,9 @@ public:
 	int getScore() override;
 	void onMenuClosed(MenuAction action) override;
 	SokuLib::Scene getNextScene() override;
-
-	friend class ComboTrialEditorResult;
-};
-
-class ComboTrialEditorResult : public ResultMenu {
-private:
-	struct ScorePart {
-	private:
-		int _ttlAttempts;
-		SokuLib::DrawUtils::Sprite _score;
-		SokuLib::DrawUtils::Sprite _hits;
-		SokuLib::DrawUtils::Sprite _damages;
-		SokuLib::DrawUtils::Sprite _attempts;
-		SokuLib::DrawUtils::Sprite _limit;
-		ComboTrialEditor::ScorePrerequisites _prerequ;
-
-	public:
-		void load(int ttlattempts, const ComboTrialEditor::ScorePrerequisites &prerequ, int index);
-		void draw(float alpha);
-	};
-
-	ComboTrialEditor &_parent;
-	std::array<ScorePart, 4> _parts;
-
-public:
-	ComboTrialEditorResult(ComboTrialEditor &trial);
-	~ComboTrialEditorResult() override = default;
-	int onRender() override;
+	int pauseOnUpdate() override;
+	int pauseOnRender() const override;
+	bool save() const;
 };
 
 

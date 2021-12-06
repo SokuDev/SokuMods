@@ -1,55 +1,38 @@
 {
-    "music": 34,
-    "stage": 12,
-    "player": {
-        "character": "alice",
-        "palette": 0,
-        "deck": [],
-        "pos": 550
-    },
-    "dummy": {
-        "character": "meirin",
-        "palette": 0,
-        "deck": [],
-        "pos": {
-            "x": 600,
-            "y": 0
-        }
-    },
-    "type": "combo",
-
     "dolls": [
         {
-            "x": 150,
-            "y": 160,
-            "dir": 1
+            "dir": 1,
+            "x": 748.0,
+            "y": 102.0
         },
         {
-            "x": 350,
-            "y": 260,
-            "dir": -1
-        },
-        {
-            "x": 650,
-            "y": 360,
-            "dir": 1
+            "dir": 1,
+            "x": 784.0,
+            "y": 72.0
         }
     ],
-    "expected": "5aaaa",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "uniform_card_cost": 1,
-    "hand": [],
+    "dummy": {
+        "character": "meirin",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 600.0,
+            "y": 0.0
+        }
+    },
+    "expected": "5aaaa d22b 66b:53",
+    "music": "data/bgm/st34.ogg",
+    "player": {
+        "character": "alice",
+        "deck": [],
+        "palette": 0,
+        "pos": 550.0
+    },
     "score": [
         {
-            "min_hits": 11,
             "min_damage": 4267,
-            "min_limit": 130,
-            "max_limit": 130
+            "min_hits": 11,
+            "min_limit": 130
         },
         {
             "max_attempts": 20
@@ -61,7 +44,25 @@
             "max_attempts": 5
         }
     ],
-    "hint": [
-
-    ]
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 12,
+    "type": "combo",
+    "uniform_card_cost": 1
 }

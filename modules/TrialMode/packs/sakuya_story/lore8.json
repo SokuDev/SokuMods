@@ -1,58 +1,62 @@
 {
-    "music": "{{pack_path}}/suika.ogg",
-    "music_loop_start": 3.792,
-    "music_loop_end": 195.655,
-    "stage": 12,
-    "player": {
-        "character": "sakuya",
-        "palette": 0,
-        "deck": [],
-        "pos": 700
-    },
     "dummy": {
         "character": "suika",
-        "palette": 0,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 750,
-            "y": 0
+            "x": 750.0,
+            "y": 0.0
         }
     },
-    "type": "combo",
-
-    "expected": "d6! 5aaa 2b hj9 j5b/j2b j66/j6d:30 j5a:20 5aaaa",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "weather": 21,
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
-    "hint": [
-
-    ],
+    "expected": "!d6 5aaa 2b hj9 j5b/j2b j66/j6d:30 j5a:20 5aaaa",
+    "music": "{{pack_path}}/suika.ogg",
+    "music_loop_end": 195.655,
+    "music_loop_start": 3.7920000000000003,
+    "player": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": 700.0
+    },
     "score": [
         {
-            "min_hits": 26,
             "min_damage": 2300,
+            "min_hits": 26,
             "min_limit": 100
         },
         {
+            "min_damage": 2403,
             "min_hits": 29,
-            "min_damage" : 2403,
             "min_limit": 103
         },
         {
+            "min_damage": 2410,
             "min_hits": 32,
-            "min_damage" : 2410,
             "min_limit": 110
         },
         {
             "max_attempts": 10
         }
-    ]
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 12,
+    "type": "combo",
+    "uniform_card_cost": 1
 }

@@ -1,41 +1,27 @@
 {
-    "music": 17,
-    "stage": 16,
-    "player": {
-        "character": "flandre",
-        "palette": 0,
-        "deck": [],
-        "pos": 400
-    },
     "dummy": {
-        "character": "reimu",
-        "palette": 0,
+        "character": "remilia",
         "deck": [],
+        "jump": true,
+        "palette": 0,
         "pos": {
-            "x": 600,
-            "y": 100
+            "x": 312.0,
+            "y": 0.0
         }
     },
-    "type": "combo",
-
-    "expected": "d6 j5aa:12 d6 j5aa:12 9 j5a:12 j8a",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "weather": "clear",
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
+    "expected": "d6:5 j5aa:12 !6[5] d6 j5aa:12 !6[5] d6/9 j5a:12 j8a",
+    "music": "data/bgm/st17.ogg",
+    "player": {
+        "character": "flandre",
+        "deck": [],
+        "palette": 0,
+        "pos": 66.0
+    },
     "score": [
         {
-            "min_hits": 6,
             "min_damage": 2329,
-            "min_limit": 120,
-            "max_limit": 120
+            "min_hits": 6,
+            "min_limit": 120
         },
         {
             "max_attempts": 5
@@ -47,7 +33,25 @@
             "max_attempts": 1
         }
     ],
-    "hint": [
-
-    ]
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo",
+    "uniform_card_cost": 1
 }

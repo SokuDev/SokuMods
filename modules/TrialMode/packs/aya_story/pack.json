@@ -1,33 +1,35 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Aya Shameimaru",
-    "modes": ["Combo", "Story"],
     "characters": [
         "aya"
     ],
-    "stand": {
-        "isPath": false,
-        "path": "data/stand/aya.bmp"
-    },
-    "description": "",
-    "author": "PinkySmile",
+    "description": "No description provided",
     "icon": {
         "isPath": false,
-        "path": "data/character/aya/face/face000.bmp",
         "offset": {
-            "x": 1,
-            "y": 0
+            "x": 4.0,
+            "y": 0.0
         },
-        "scale": 0.60,
+        "path": "data/character/aya/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002884864807,
         "xMirror": true,
         "yMirror": false
     },
-    "scenarios": [
-	{
-            "name": "",
-            "file": "bnbmid3.json",
-            "preview": "",
-            "description": ""
-	}
-    ]
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/aya.bmp"
+    }
 }

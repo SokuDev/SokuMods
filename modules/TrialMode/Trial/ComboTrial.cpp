@@ -22,12 +22,10 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 {
 	int text;
 
-	if (!editorMode) {
-		if (!json.contains("score") || !json["score"].is_array())
-			throw std::invalid_argument("The \"score\" field is not present or invalid.");
-		if (json["score"].size() != 4)
-			throw std::invalid_argument("The \"score\" field doesn't have exactly 4 elements.");
-	}
+	if (!json.contains("score") || !json["score"].is_array())
+		throw std::invalid_argument("The \"score\" field is not present or invalid.");
+	if (json["score"].size() != 4)
+		throw std::invalid_argument("The \"score\" field doesn't have exactly 4 elements.");
 	if (!json.contains("expected") || !json["expected"].is_string())
 		throw std::invalid_argument("The \"expected\" field is not present or invalid.");
 	if (json.contains("hint") && !json["hint"].is_array())
@@ -206,6 +204,8 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (*(char*)0x89a88c == 2)
+		return true;
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
 		SokuLib::displayedWeather = this->_weather;
@@ -649,7 +649,7 @@ void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 
 SokuLib::KeyInput ComboTrial::getDummyInputs()
 {
-	return {0, this->_crouching - this->_jump, 0, 0, 0, 0, 0, 0};
+	return {0, this->_crouching - (this->_jump && this->_waitCounter < 30), 0, 0, 0, 0, 0, 0};
 }
 
 SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
@@ -846,16 +846,14 @@ void ComboTrial::SpecialAction::parse()
 ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, const ComboTrial::ScorePrerequisites *other)
 {
 	if (!other) {
-		if (!editorMode) {
-			if (json.contains("max_attempts"))
-				throw std::invalid_argument("First score element shouldn't have the field \"max_attempts\"");
-			if (!json.contains("min_hits"))
-				throw std::invalid_argument("First score element is missing the field \"min_hits\"");
-			if (!json.contains("min_damage"))
-				throw std::invalid_argument("First score element is missing the field \"min_damage\"");
-			if (!json.contains("min_limit"))
-				throw std::invalid_argument("First score element is missing the field \"min_limit\"");
-		}
+		if (json.contains("max_attempts"))
+			throw std::invalid_argument("First score element shouldn't have the field \"max_attempts\"");
+		if (!json.contains("min_hits"))
+			throw std::invalid_argument("First score element is missing the field \"min_hits\"");
+		if (!json.contains("min_damage"))
+			throw std::invalid_argument("First score element is missing the field \"min_damage\"");
+		if (!json.contains("min_limit"))
+			throw std::invalid_argument("First score element is missing the field \"min_limit\"");
 	} else
 		*this = *other;
 
@@ -864,7 +862,7 @@ ComboTrial::ScorePrerequisites::ScorePrerequisites(const nlohmann::json &json, c
 			throw std::invalid_argument("Field \"max_attempts\" is specified but not a number");
 		this->attempts = json["max_attempts"];
 		if (!this->attempts)
-			throw std::invalid_argument("It's impossible to win without trying ! THINK MARK ! THINK!");
+			throw std::invalid_argument("It's impossible to win without trying! THINK MARK! THINK!");
 	}
 	if (json.contains("min_hits")) {
 		if (!json["min_hits"].is_number())

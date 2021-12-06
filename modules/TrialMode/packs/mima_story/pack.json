@@ -1,33 +1,35 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Mima",
-    "modes": ["Combo", "Story"],
     "characters": [
         "mima"
     ],
-    "stand": {
-        "isPath": false,
-        "path": "data/stand/mima.bmp"
-    },
-    "description": "",
-    "author": "PinkySmile",
+    "description": "No description provided",
     "icon": {
         "isPath": false,
-        "path": "data/character/mima/face/face000.bmp",
         "offset": {
-            "x": 1,
-            "y": 0
+            "x": 1.0,
+            "y": 0.0
         },
-        "scale": 0.60,
+        "path": "data/character/mima/face/face000.bmp",
+        "rect": {
+            "height": 52,
+            "left": 0,
+            "top": 0,
+            "width": 128
+        },
+        "scale": 0.5300003290176392,
         "xMirror": true,
         "yMirror": false
     },
-    "scenarios": [
-	{
-            "name": "",
-            "file": "bnbmid3.json",
-            "preview": "",
-            "description": ""
-	}
-    ]
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/mima.bmp"
+    }
 }

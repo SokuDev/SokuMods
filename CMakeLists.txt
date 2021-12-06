@@ -289,8 +289,6 @@ target_sources(
         "InfiniteDecks" PRIVATE
         modules/InfiniteDecks/InfiniteDecks.rc
         modules/InfiniteDecks/main.cpp
-        modules/InfiniteDecks/DrawUtils.cpp
-        modules/InfiniteDecks/DrawUtils.hpp
 )
 target_link_libraries(
         InfiniteDecks
@@ -498,6 +496,8 @@ add_library(
         modules/TrialMode/TrialBase.cpp
         modules/TrialMode/PackOutro.cpp
         modules/TrialMode/PackOutro.hpp
+        modules/TrialMode/InputBox.cpp
+        modules/TrialMode/InputBox.hpp
 )
 target_compile_options(TrialMode PRIVATE /Zi /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
@@ -516,6 +516,34 @@ target_link_libraries(
 install(TARGETS "TrialMode" LIBRARY DESTINATION "SWRSToys/modules/TrialMode/")
 install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
 
+
+add_library(
+        "saku_basic_sakuyaOutro6"
+        MODULE
+        modules/TrialMode/Animations/BattleAnimation.hpp
+        modules/TrialMode/Animations/SakuyaBasicCombos/SakuyaOut6.cpp
+        modules/TrialMode/Animations/BattleAnimFramework.cpp
+)
+target_compile_options(saku_basic_sakuyaOutro6 PRIVATE /Zi)
+target_compile_definitions("saku_basic_sakuyaOutro6" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("saku_basic_sakuyaOutro6" PRIVATE include include/directx "modules/TrialMode/")
+target_link_directories("saku_basic_sakuyaOutro6" PRIVATE lib)
+target_link_libraries(
+        saku_basic_sakuyaOutro6
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        lua54
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+set_target_properties(saku_basic_sakuyaOutro6 PROPERTIES OUTPUT_NAME lore6Outro)
+set_target_properties(saku_basic_sakuyaOutro6 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/sakuya_story" PREFIX "")
+
+add_dependencies(TrialMode saku_basic_sakuyaOutro6)
+
+#-----------------------------------------------------#
 
 #add_library(
 #        "remi_basic_bnbcorn1"
@@ -544,6 +572,7 @@ install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
 #add_dependencies(TrialMode remi_basic_bnbcorn1)
 
 #-----------------------------------------------------#
+
 add_library(
         "PunishDisplay"
         MODULE

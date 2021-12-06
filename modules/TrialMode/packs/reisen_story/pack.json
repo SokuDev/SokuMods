@@ -1,33 +1,35 @@
 {
-    "name": "Babylone's Aurora",
+    "author": "PinkySmile",
     "category": "Reisen Udongein Inaba",
-    "modes": ["Combo", "Story"],
     "characters": [
         "udonge"
     ],
-    "stand": {
-        "isPath": false,
-        "path": "data/stand/udonge.bmp"
-    },
-    "description": "",
-    "author": "PinkySmile",
+    "description": "No description provided",
     "icon": {
         "isPath": false,
-        "path": "data/character/udonge/face/face000.bmp",
         "offset": {
-            "x": 1,
-            "y": 0
+            "x": 1.0,
+            "y": 0.0
         },
-        "scale": 0.60,
+        "path": "data/character/udonge/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002288818359,
         "xMirror": true,
         "yMirror": false
     },
-    "scenarios": [
-	{
-            "name": "",
-            "file": "bnbmid3.json",
-            "preview": "",
-            "description": ""
-	}
-    ]
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Babylone's Aurora",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/udonge.bmp"
+    }
 }
