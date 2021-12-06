@@ -20,7 +20,7 @@
             "y": 0.0
         }
     },
-    "expected": "5aaaa d22b 66b",
+    "expected": "5aaaa d22b 66b:53",
     "music": "data/bgm/st34.ogg",
     "player": {
         "character": "alice",

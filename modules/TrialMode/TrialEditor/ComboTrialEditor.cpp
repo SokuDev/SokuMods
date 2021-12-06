@@ -19,6 +19,61 @@
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 static char data[10];
 
+const std::map<unsigned, const char *> ComboTrialEditor::_stagesNames{
+	{ SokuLib::STAGE_HAKUREI_SHRINE_BROKEN,                       "Hakurei Shrine (Broken)" },
+	{ SokuLib::STAGE_FOREST_OF_MAGIC,                             "Forest of Magic" },
+	{ SokuLib::STAGE_CREEK_OF_GENBU,                              "Creek of Genbu" },
+	{ SokuLib::STAGE_YOUKAI_MOUNTAIN,                             "Youkai Mountain" },
+	{ SokuLib::STAGE_MYSTERIOUS_SEA_OF_CLOUD,                     "Mysterious Sea of Cloud" },
+	{ SokuLib::STAGE_BHAVA_AGRA,                                  "Bhava Agra" },
+	{ SokuLib::STAGE_SPACE,                                       "Space" },
+	{ SokuLib::STAGE_HAKUREI_SHRINE,                              "Hakurei Shrine" },
+	{ SokuLib::STAGE_KIRISAME_MAGIC_SHOP,                         "Kirisame Magic Shop" },
+	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER,           "Scarlet Devil Mansion: Clock Tower" },
+	{ SokuLib::STAGE_FOREST_OF_DOLLS,                             "Forest of Dolls" },
+	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_LIBRARY,               "Scarlet Devil Mansion: Library" },
+	{ SokuLib::STAGE_NETHERWORLD,                                 "Netherworld" },
+	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_FOYER,                 "Scarlet Devil Mansion: Foyer" },
+	{ SokuLib::STAGE_HAKUGYOKUROU_SNOWY_GARDEN,                   "Hakugyokurou Snowy Garden" },
+	{ SokuLib::STAGE_BAMBOO_FOREST_OF_THE_LOST,                   "Bamboo Forest of the Lost" },
+	{ SokuLib::STAGE_SHORE_OF_MISTY_LAKE,                         "Shore of Misty Lake" },
+	{ SokuLib::STAGE_MORIYA_SHRINE,                               "Moriya Shrine" },
+	{ SokuLib::STAGE_MOUTH_OF_GEYSER,                             "Mouth of Geyser" },
+	{ SokuLib::STAGE_CATWALK_OF_GEYSER,                           "Catwalk of Geyser" },
+	{ SokuLib::STAGE_FUSION_REACTOR_CORE,                         "Fusion Reactor Core" },
+	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH_BG, "Scarlet Devil Mansion: Clock Tower<br>(Sketch Background)" },
+	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_BLURRY,    "Scarlet Devil Mansion: Clock Tower<br>(Blurry)" },
+	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH,    "Scarlet Devil Mansion: Clock Tower<br>(Sketch)" },
+	{ 100,                                                        "Custom Stage" }
+};
+const std::vector<unsigned> ComboTrialEditor::_stagesIds{
+	SokuLib::STAGE_HAKUREI_SHRINE_BROKEN,
+	SokuLib::STAGE_FOREST_OF_MAGIC,
+	SokuLib::STAGE_CREEK_OF_GENBU,
+	SokuLib::STAGE_YOUKAI_MOUNTAIN,
+	SokuLib::STAGE_MYSTERIOUS_SEA_OF_CLOUD,
+	SokuLib::STAGE_BHAVA_AGRA,
+	SokuLib::STAGE_SPACE,
+	SokuLib::STAGE_HAKUREI_SHRINE,
+	SokuLib::STAGE_KIRISAME_MAGIC_SHOP,
+	SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER,
+	SokuLib::STAGE_FOREST_OF_DOLLS,
+	SokuLib::STAGE_SCARLET_DEVIL_MANSION_LIBRARY,
+	SokuLib::STAGE_NETHERWORLD,
+	SokuLib::STAGE_SCARLET_DEVIL_MANSION_FOYER,
+	SokuLib::STAGE_HAKUGYOKUROU_SNOWY_GARDEN,
+	SokuLib::STAGE_BAMBOO_FOREST_OF_THE_LOST,
+	SokuLib::STAGE_SHORE_OF_MISTY_LAKE,
+	SokuLib::STAGE_MORIYA_SHRINE,
+	SokuLib::STAGE_MOUTH_OF_GEYSER,
+	SokuLib::STAGE_CATWALK_OF_GEYSER,
+	SokuLib::STAGE_FUSION_REACTOR_CORE,
+	SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH_BG,
+	SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_BLURRY,
+	SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH,
+	100,
+};
+//data/csv/system/music.csv
 bool deckSaved()
 {
 	auto &trial = reinterpret_cast<ComboTrialEditor &>(*loadedTrial);
@@ -34,6 +89,41 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_path = path;
 	this->_introPlayed = true;
 	this->_outroPlayed = true;
+
+	this->_weatherArrows.texture.loadFromGame("data/menu/practice/WeatherTriangle.bmp");
+	this->_weatherArrows.setSize(this->_weatherArrows.texture.getSize());
+	this->_weatherArrows.rect.width = this->_weatherArrows.getSize().x;
+	this->_weatherArrows.rect.height = this->_weatherArrows.getSize().y;
+	this->_weatherArrows.setPosition({404, 188});
+
+	this->_weathers.texture.loadFromGame("data/menu/practice/Weather_list.bmp");
+	this->_weathers.setSize({this->_weathers.texture.getSize().x, 24});
+	this->_weathers.rect.width = this->_weathers.getSize().x;
+	this->_weathers.rect.height = this->_weathers.getSize().y;
+	this->_weathers.setPosition({422, 188});
+
+	for (int i = 0; i < sizeof(this->_digits) / sizeof(*this->_digits); i++) {
+		this->_digits[i].texture.loadFromGame(("data/menu/practice/" + std::to_string(i) + ".bmp").c_str());
+		this->_digits[i].setSize({this->_digits[i].texture.getSize().x, 24});
+		this->_digits[i].rect.width = this->_digits[i].getSize().x;
+		this->_digits[i].rect.height = this->_digits[i].getSize().y;
+		this->_digits[i].setPosition({static_cast<int>(429 + 86 / 2 - this->_digits[i].getSize().x / 4), 317});
+	}
+
+	this->_twilight.texture.loadFromResource(myModule, MAKEINTRESOURCE(112));
+	this->_twilight.setSize(this->_twilight.texture.getSize());
+	this->_twilight.rect.width = this->_twilight.getSize().x;
+	this->_twilight.rect.height = this->_twilight.getSize().y;
+	this->_twilight.setPosition({
+		static_cast<int>(300 + this->_weatherArrows.getSize().x / 2 - this->_twilight.getSize().x / 2),
+		194
+	});
+
+	this->_normal.texture.loadFromResource(myModule, MAKEINTRESOURCE(116));
+	this->_normal.setSize(this->_normal.texture.getSize());
+	this->_normal.rect.width = this->_normal.getSize().x;
+	this->_normal.rect.height = this->_normal.getSize().y;
+	this->_normal.setPosition({443, 322});
 
 	this->_pause.texture.loadFromResource(myModule, MAKEINTRESOURCE(80));
 	this->_pause.setSize(this->_pause.texture.getSize());
@@ -222,6 +312,31 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	SokuLib::TamperNearJmp(0x00450126, 0x0045017F);
 	::VirtualProtect((void *)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, oldV, &oldV);
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+
+	for (auto &pair : ComboTrialEditor::_stagesNames) {
+		auto sprites = std::pair<std::unique_ptr<SokuLib::DrawUtils::Sprite>, std::unique_ptr<SokuLib::DrawUtils::Sprite>>(
+			new SokuLib::DrawUtils::Sprite(),
+			new SokuLib::DrawUtils::Sprite()
+		);
+
+		if (!sprites.first->texture.loadFromGame(("data/scene/select/bg/bg_pict" + (pair.first < 10 ? std::string("0") : std::string()) + std::to_string(pair.first) + ".bmp").c_str()))
+			sprites.first->texture.loadFromGame("data/scene/select/bg/bg_pict99.bmp");
+		sprites.first->setSize({352, 64});
+		sprites.first->rect.width = sprites.first->getSize().x;
+		sprites.first->rect.height = sprites.first->getSize().y;
+
+		if (!sprites.second->texture.loadFromGame(("data/scene/select/bg/bg_name" + (pair.first < 10 ? std::string("0") : std::string()) + std::to_string(pair.first) + ".bmp").c_str()))
+			sprites.second->texture.createFromText((std::string("<br><br>") + (strstr(pair.second, "<br>") ? "" : "<br>") + pair.second).c_str(), defaultFont16, {352, 70});
+		sprites.second->setSize(sprites.second->texture.getSize());
+		sprites.second->rect.width = sprites.second->getSize().x;
+		sprites.second->rect.height = sprites.second->getSize().y;
+		this->_stagesSprites[pair.first].first.swap(sprites.first);
+		this->_stagesSprites[pair.first].second.swap(sprites.second);
+	}
+	this->_stageRect.setSize({360, 72});
+	this->_stageRect.setPosition({140, 204});
+	this->_stageRect.setBorderColor(SokuLib::Color::Transparent);
+	this->_stageRect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
 }
 
 ComboTrialEditor::~ComboTrialEditor()
@@ -365,6 +480,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			SokuLib::playSEWaveBuffer(0x28);
 			switch (this->_comboEditCursor) {
 			case 0:
+				notImplemented();
 				break;
 			case 1:
 				this->_typeNewCombo();
@@ -876,7 +992,7 @@ SokuLib::Action ComboTrialEditor::_getMoveAction(SokuLib::Character chr, std::st
 		auto pos = name.find("sc2");
 
 		if (act >= SokuLib::ACTION_DEFAULT_SKILL1_B && act <= SokuLib::ACTION_ALT2_SKILL5_AIR_C) {
-			auto input = characterSkills[chr].at(name[name.size() - 3]);
+			auto input = characterSkills[chr].at(name[name.size() - 2] - '1');
 			auto move = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
 			auto skillName = characterCards[chr][100 + (move % 3) * characterSkills[chr].size() + move / 3].first;
 
@@ -1048,6 +1164,45 @@ int ComboTrialEditor::pauseOnUpdate()
 		return true;
 	}
 
+	if (this->_selectingStage) {
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
+			SokuLib::playSEWaveBuffer(0x29);
+			this->_selectingStage = false;
+			return true;
+		}
+		if (SokuLib::inputMgrs.input.a == 1) {
+			if (this->_stageCursor == ComboTrialEditor::_stagesIds.size() - 1) {
+				auto id = InputBox("Enter stage id", "New stage id", std::to_string((int)*(char *)0x899D0C));
+
+				try {
+					auto i = std::stoul(id);
+
+					if (i > 255)
+						throw std::out_of_range("");
+					*(unsigned char *)0x899D0C = i;
+				} catch (std::invalid_argument &) {
+					SokuLib::playSEWaveBuffer(0x29);
+					return true;
+				} catch (std::out_of_range &) {
+					SokuLib::playSEWaveBuffer(0x29);
+					return true;
+				}
+			} else
+				*(char *)0x899D0C = ComboTrialEditor::_stagesIds[this->_stageCursor];
+			SokuLib::playSEWaveBuffer(0x28);
+			this->_needReload = true;
+			this->_selectingStage = false;
+			return true;
+		}
+		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			this->_stageCursor += ComboTrialEditor::_stagesIds.size() + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+			this->_stageCursor %= ComboTrialEditor::_stagesIds.size();
+			this->_setupStageSprites();
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		return true;
+	}
+
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
 		if (!this->_selectedSubcategory) {
@@ -1086,6 +1241,21 @@ int ComboTrialEditor::pauseOnUpdate()
 		}
 		SokuLib::playSEWaveBuffer(0x27);
 	}
+
+	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+		if (this->_selectedSubcategory == 3) {
+			if (this->_menuCursorPos == 6) {
+				this->_uniformCardCost = static_cast<SokuLib::Weather>(static_cast<int>(this->_uniformCardCost + 6 + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % 6);
+				this->_initGameStart();
+				SokuLib::playSEWaveBuffer(0x27);
+			}
+		} else if (this->_selectedSubcategory == 4) {
+			if (this->_menuCursorPos == 2) {
+				this->_weather = static_cast<SokuLib::Weather>(static_cast<int>(this->_weather + 22 + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % 22);
+				SokuLib::playSEWaveBuffer(0x27);
+			}
+		}
+	}
 	return true;
 }
 
@@ -1109,6 +1279,26 @@ int ComboTrialEditor::pauseOnRender() const
 	(this->*ComboTrialEditor::renderCallbacks[this->_selectedSubcategory])();
 	if (this->_selectingCharacters)
 		this->_selectingCharacterRender();
+	if (this->_selectingStage) {
+		auto &last1 = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor <= 1 ? ComboTrialEditor::_stagesIds.size() - (2 - this->_stageCursor) : this->_stageCursor - 2]);
+		auto &last = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor == 0 ? ComboTrialEditor::_stagesIds.size() - 1 : this->_stageCursor - 1]);
+		auto &current = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor]);
+		auto &next = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor == ComboTrialEditor::_stagesIds.size() - 1 ? 0 : this->_stageCursor + 1]);
+		auto &next1 = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor >= ComboTrialEditor::_stagesIds.size() - 2 ? (ComboTrialEditor::_stagesIds.size() - this->_stageCursor) : this->_stageCursor + 2]);
+
+		editSeatEmpty.draw();
+		last1.first->draw();
+		last1.second->draw();
+		last.first->draw();
+		last.second->draw();
+		next.first->draw();
+		next.second->draw();
+		next1.first->draw();
+		next1.second->draw();
+		this->_stageRect.draw();
+		current.first->draw();
+		current.second->draw();
+	}
 	return true;
 }
 
@@ -1471,7 +1661,7 @@ bool ComboTrialEditor::setLimitDisabled()
 
 bool ComboTrialEditor::setCardCosts()
 {
-	return notImplemented();
+	return true;
 }
 
 bool ComboTrialEditor::setCombo()
@@ -1484,7 +1674,12 @@ bool ComboTrialEditor::setCombo()
 
 bool ComboTrialEditor::setStage()
 {
-	return notImplemented();
+	auto it = std::find(ComboTrialEditor::_stagesIds.begin(), ComboTrialEditor::_stagesIds.end(), *(char *)0x899D0C);
+
+	this->_stageCursor = ((it == ComboTrialEditor::_stagesIds.end()) ? (ComboTrialEditor::_stagesIds.size() - 1) : (it - ComboTrialEditor::_stagesIds.begin()));
+	this->_setupStageSprites();
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
 }
 
 bool ComboTrialEditor::setMusic()
@@ -1494,7 +1689,7 @@ bool ComboTrialEditor::setMusic()
 
 bool ComboTrialEditor::setWeather()
 {
-	return notImplemented();
+	return true;
 }
 
 bool ComboTrialEditor::setFailTimer()
@@ -1587,6 +1782,63 @@ bool ComboTrialEditor::returnToTitleScreen()
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	this->_next = SokuLib::SCENE_TITLE;
 	return false;
+}
+
+void ComboTrialEditor::_setupStageSprites()
+{
+	auto &last1 = this->_stagesSprites[ComboTrialEditor::_stagesIds[this->_stageCursor <= 1 ? ComboTrialEditor::_stagesIds.size() - (2 - this->_stageCursor) : this->_stageCursor - 2]];
+	auto &last  = this->_stagesSprites[ComboTrialEditor::_stagesIds[this->_stageCursor == 0 ? ComboTrialEditor::_stagesIds.size() - 1 : this->_stageCursor - 1]];
+	auto &next  = this->_stagesSprites[ComboTrialEditor::_stagesIds[this->_stageCursor == ComboTrialEditor::_stagesIds.size() - 1 ? 0 : this->_stageCursor + 1]];
+	auto &next1 = this->_stagesSprites[ComboTrialEditor::_stagesIds[this->_stageCursor >= ComboTrialEditor::_stagesIds.size() - 2 ? (ComboTrialEditor::_stagesIds.size() - this->_stageCursor) : this->_stageCursor + 2]];
+	auto &current = this->_stagesSprites[ComboTrialEditor::_stagesIds[this->_stageCursor]];
+
+	this->_selectingStage = true;
+	last1.first->setPosition({144, 208 - 128});
+	last1.second->setPosition({144, 208 - 128});
+	last1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0x00;
+	last1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0x00;
+	last1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0xA0;
+	last1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0xA0;
+	last1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0x00;
+	last1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0x00;
+	last1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0xA0;
+	last1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0xA0;
+	last.first->setPosition({144, 208 - 64});
+	last.second->setPosition({144, 208 - 64});
+	last.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0xA0;
+	last.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0xA0;
+	last.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0xFF;
+	last.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0xFF;
+	last.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0xA0;
+	last.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0xA0;
+	last.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0xFF;
+	last.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0xFF;
+	current.first->setPosition({144, 208});
+	current.second->setPosition({144, 208});
+	for (auto &tint : current.first->fillColors)
+		tint.a = 0xFF;
+	for (auto &tint : current.second->fillColors)
+		tint.a = 0xFF;
+	next.first->setPosition({144, 208 + 64});
+	next.second->setPosition({144, 208 + 64});
+	next.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0xFF;
+	next.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0xFF;
+	next.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0xA0;
+	next.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0xA0;
+	next.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0xFF;
+	next.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0xFF;
+	next.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0xA0;
+	next.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0xA0;
+	next1.first->setPosition({144, 208 + 128});
+	next1.second->setPosition({144, 208 + 128});
+	next1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0xA0;
+	next1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0xA0;
+	next1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0x00;
+	next1.first->fillColors[ SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0x00;
+	next1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_LEFT_CORNER    ].a = 0xA0;
+	next1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_TOP_RIGHT_CORNER   ].a = 0xA0;
+	next1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER].a = 0x00;
+	next1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0x00;
 }
 
 bool ComboTrialEditor::save() const
@@ -1762,7 +2014,7 @@ std::string ComboTrialEditor::_transformComboToString() const
 				str += "/";
 			if (it == actionsFromStr.end())
 				throw std::invalid_argument("Cannot find action string for action " + std::to_string(action));
-			if (action == SokuLib::ACTION_FLY)
+			if (action == SokuLib::ACTION_FLY || (action >= SokuLib::ACTION_DEFAULT_SKILL1_B && action < SokuLib::ACTION_USING_SC_ID_200))
 				str += move->actionsStr[i];
 			else if (it->first == "44")
 				str += "d4";
@@ -1902,12 +2154,23 @@ void ComboTrialEditor::systemRender() const
 		tickSprite.draw();
 	}
 	this->_comboSprite.draw();
+	if (this->_uniformCardCost == 0)
+		this->_normal.draw();
+	else
+		this->_digits[this->_uniformCardCost % (sizeof(this->_digits) / sizeof(*this->_digits))].draw();
 }
 
 void ComboTrialEditor::miscRender() const
 {
 	this->_introSprite.draw();
 	this->_outroSprite.draw();
+	this->_weatherArrows.draw();
+	if (this->_weather == SokuLib::WEATHER_TWILIGHT)
+		this->_twilight.draw();
+	else {
+		this->_weathers.rect.top = (this->_weather + 1) % 22 * 24;
+		this->_weathers.draw();
+	}
 }
 
 bool ComboTrialEditor::_copyDeckToPlayerDeck()
@@ -1994,12 +2257,23 @@ bool ComboTrialEditor::_copyDeckToPlayerHand()
 		this->_deckEditMenu->saveDialogDisplayed = false;
 		return true;
 	}
+	for (auto &pair : *this->_deckEditMenu->editedDeck) {
+		for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++)
+			if (SokuLib::leftPlayerInfo.effectiveDeck[i] == pair.first)
+				goto allGood;
+		MessageBox(SokuLib::window, ("Your deck doesn't contain any " + characterCards[SokuLib::leftChar][pair.first].first + ".").c_str(), "Invalid hand", MB_ICONERROR);
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_deckEditMenu->saveDialogDisplayed = false;
+		return true;
+allGood:
+		continue;
+	}
 	this->_hand.clear();
 	for (auto &pair : *this->_deckEditMenu->editedDeck)
 		for (int i = 0; i < pair.second; i++)
 			this->_hand.push_back(pair.first);
 	assert(this->_hand.size() == this->_deckEditMenu->displayedNumberOfCards);
-	this->_needReload = true;
+	this->_initGameStart();
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
 }

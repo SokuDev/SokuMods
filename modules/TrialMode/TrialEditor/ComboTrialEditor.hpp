@@ -120,10 +120,13 @@ private:
 	unsigned _menuCursorPos = 0;
 	unsigned _comboEditCursor = 0;
 	unsigned _selectedSubcategory = 0;
+	unsigned _stageCursor = 0;
 	float _fakePlayerPos = 0;
 	bool _managingDolls = false;
 	bool _changingPlayerPos = false;
 	bool _changingDummyPos = false;
+	bool _selectingStage = false;
+	bool _selectingMusic = false;
 	bool _selectingCharacters = false;
 	bool _needReload = false;
 	bool _comboPageDisplayed = false;
@@ -134,8 +137,19 @@ private:
 	SokuLib::Vector2f _dummyStartPosTmp;
 	SokuLib::Character *_characterEdit = nullptr;
 	SokuLib::Sprite _characterSprite;
+	mutable SokuLib::DrawUtils::Sprite _digits[6];
+	mutable SokuLib::DrawUtils::Sprite _weathers;
+	SokuLib::DrawUtils::RectangleShape _stageRect;
+	SokuLib::DrawUtils::Sprite _weatherArrows;
+	SokuLib::DrawUtils::Sprite _twilight;
+	SokuLib::DrawUtils::Sprite _normal;
 	SokuLib::Camera _oldCamera;
+	std::map<unsigned, std::pair<std::unique_ptr<SokuLib::DrawUtils::Sprite>, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _stagesSprites;
 
+	static const std::vector<unsigned> _stagesIds;
+	static const std::map<unsigned, const char *> _stagesNames;
+
+	void _setupStageSprites();
 	bool _copyDeckToPlayerSkills();
 	bool _copyDeckToPlayerHand();
 	bool _copyDeckToPlayerDeck();
