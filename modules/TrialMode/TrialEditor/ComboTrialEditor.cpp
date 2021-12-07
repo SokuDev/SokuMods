@@ -169,6 +169,17 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_comboEditBG.rect.width = this->_comboEditBG.getSize().x;
 	this->_comboEditBG.rect.height = this->_comboEditBG.getSize().y;
 
+	this->_scoreEditFG.texture.loadFromResource(myModule, MAKEINTRESOURCE(120));
+	this->_scoreEditFG.setSize(this->_comboEditFG.texture.getSize());
+	this->_scoreEditFG.rect.width = this->_comboEditFG.getSize().x;
+	this->_scoreEditFG.rect.height = this->_comboEditFG.getSize().y;
+
+	this->_score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+	this->_score.setPosition({static_cast<int>(editSeatEmpty.getPosition().x + editSeatEmpty.getSize().x - 69), editSeatEmpty.getPosition().y + 5});
+	this->_score.setSize({64, 64});
+	this->_score.rect.width = this->_score.texture.getSize().x / 4;
+	this->_score.rect.height = this->_score.texture.getSize().y;
+
 	if (json.contains("dolls") && json["dolls"].is_array()) {
 		for (int i = 0; i < json["dolls"].size(); i++) {
 			auto &obj = json["dolls"][i];
@@ -359,6 +370,9 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	sprite->setSize(size.to<unsigned>());
 	sprite->rect.width = size.x;
 	sprite->rect.height = size.y;
+
+	for (int i = 0; i < 4; i++)
+		this->_refreshScoreSprites(i);
 }
 
 ComboTrialEditor::~ComboTrialEditor()
@@ -377,6 +391,11 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 
 	if (*(char*)0x89a88c == 2)
 		return true;
+	if (this->_isRecordingScore) {
+		this->_scores[this->_scoreEdited].hits     = max(this->_scores[this->_scoreEdited].hits,     battleMgr.leftCharacterManager.combo.nbHits);
+		this->_scores[this->_scoreEdited].damage   = max(this->_scores[this->_scoreEdited].damage,   battleMgr.leftCharacterManager.combo.damages);
+		this->_scores[this->_scoreEdited].minLimit = max(this->_scores[this->_scoreEdited].minLimit, battleMgr.leftCharacterManager.combo.limit);
+	}
 	if ((this->_quit || this->_needReload) && battleMgr.leftCharacterManager.objectBase.hp == 1) {
 		canHaveNextFrame = false;
 		return true;
@@ -427,6 +446,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
 	if (this->_isStart || this->_quit || this->_needReload || this->_needInit) {
+		this->_first |= this->_needReload;
 		this->_quit = false;
 		this->_needReload = false;
 		this->_initGameStart();
@@ -525,7 +545,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	else if (this->_privateSquare)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
 
-	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30 && !this->_comboPageDisplayed) {
+	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30 && !this->_comboPageDisplayed && !this->_isRecordingScore) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
@@ -554,7 +574,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	}
 
 checkFinish:
-	if (!this->_finished && this->_scores.front().met(0)) {
+	if (!this->_finished && this->_scores.front().met(0) && !this->_isRecordingScore) {
 		auto i = this->_actionCounter;
 
 		while (i < this->_exceptedActions.size()) {
@@ -766,14 +786,20 @@ void ComboTrialEditor::_initGameStart()
 		this->_needInit = true;
 		return;
 	}
-
 	this->_dollSelected = false;
 	this->_needInit = false;
 	this->_currentDoll = 0;
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
-	this->_playingIntro = this->_playComboAfterIntro;
+	this->_playingIntro = false;
+	if (this->_isRecordingScore) {
+		this->_refreshScoreSprites(this->_scoreEdited);
+		this->_openPause();
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+	this->_isRecordingScore = this->_editingScore && !this->_isRecordingScore;
+	this->_playingIntro = this->_playComboAfterIntro || this->_isRecordingScore;
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
 	if (this->_first)
@@ -1297,6 +1323,38 @@ int ComboTrialEditor::pauseOnUpdate()
 		}
 		return true;
 	}
+	if (this->_editingScore) {
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
+			SokuLib::playSEWaveBuffer(0x29);
+			this->_editingScore = false;
+			return true;
+		}
+		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			if (this->_scoreCursorPos == 4 && SokuLib::inputMgrs.input.verticalAxis < 0)
+				this->_scoreCursorPos--;
+			else if (this->_scoreCursorPos >= 4)
+				this->_scoreCursorPos += std::copysign(2, SokuLib::inputMgrs.input.verticalAxis);
+			else
+				this->_scoreCursorPos += std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+			if (this->_scoreCursorPos < 0)
+				this->_scoreCursorPos = 6;
+			else if (this->_scoreCursorPos > 7)
+				this->_scoreCursorPos = 0;
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			if (this->_scoreCursorPos >= 4)
+				this->_scoreCursorPos ^= 1;
+			if (this->_scoreCursorPos < 4 || this->_scoreCursorPos % 2 == (SokuLib::inputMgrs.input.horizontalAxis < 0)) {
+				this->_scoreEdited = static_cast<int>(this->_scoreEdited + 4 + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % 4;
+				this->_score.rect.left = this->_scoreEdited * this->_score.texture.getSize().x / 4;
+			}
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		if (SokuLib::inputMgrs.input.a == 1)
+			return this->_selectScoreMenuItem();
+		return true;
+	}
 
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
@@ -1418,6 +1476,26 @@ int ComboTrialEditor::pauseOnRender() const
 			downArrow.setSize({32, 32});
 			downArrow.draw();
 		}
+	}
+
+	if (this->_editingScore) {
+		editSeatEmpty.draw();
+		this->_score.draw();
+		if (this->_scoreCursorPos < 4)
+			displaySokuCursor({122, static_cast<int>(this->_scoreCursorPos * 32 + 64)}, {300, 16});
+		else
+			displaySokuCursor({
+				this->_damages[(this->_scoreCursorPos - 4) * 4 + this->_scoreEdited].getPosition().x - 4,
+				static_cast<int>(64  + (this->_scoreCursorPos / 2) * 94)
+			}, {
+				this->_damages[(this->_scoreCursorPos - 4) * 4 + this->_scoreEdited].getSize().x * 3 / 2,
+				16
+			});
+		this->_scoreEditFG.draw();
+		this->_attempts[this->_scoreEdited].draw();
+		this->_hits[this->_scoreEdited].draw();
+		this->_damages[this->_scoreEdited].draw();
+		this->_limits[this->_scoreEdited].draw();
 	}
 	return true;
 }
@@ -1743,22 +1821,38 @@ bool ComboTrialEditor::setDummyWeather()
 
 bool ComboTrialEditor::setCRankRequ()
 {
-	return notImplemented();
+	SokuLib::playSEWaveBuffer(0x28);
+	this->_editingScore = true;
+	this->_scoreEdited = 0;
+	this->_score.rect.left = 0;
+	return true;
 }
 
 bool ComboTrialEditor::setBRankRequ()
 {
-	return notImplemented();
+	SokuLib::playSEWaveBuffer(0x28);
+	this->_editingScore = true;
+	this->_scoreEdited = 1;
+	this->_score.rect.left = this->_score.texture.getSize().x / 4;
+	return true;
 }
 
 bool ComboTrialEditor::setARankRequ()
 {
-	return notImplemented();
+	SokuLib::playSEWaveBuffer(0x28);
+	this->_editingScore = true;
+	this->_scoreEdited = 2;
+	this->_score.rect.left = this->_score.texture.getSize().x / 2;
+	return true;
 }
 
 bool ComboTrialEditor::setSRankRequ()
 {
-	return notImplemented();
+	SokuLib::playSEWaveBuffer(0x28);
+	this->_editingScore = true;
+	this->_scoreEdited = 3;
+	this->_score.rect.left = 3 * this->_score.texture.getSize().x / 4;
+	return true;
 }
 
 bool ComboTrialEditor::setCounterHit()
@@ -2247,6 +2341,7 @@ void ComboTrialEditor::_selectingCharacterRender() const
 
 void ComboTrialEditor::_openPause() const
 {
+	puts("Opening pause");
 	SokuLib::activateMenu(((void *(__thiscall *)(void *, SokuLib::BattleManager &))0x444F40)(SokuLib::NewFct(0x78), SokuLib::getBattleMgr()));
 }
 
@@ -2434,6 +2529,161 @@ void ComboTrialEditor::_typeNewCombo()
 		this->_loadExpected(old);
 	} catch (...) {}
 	SokuLib::playSEWaveBuffer(0x29);
+}
+
+bool ComboTrialEditor::_selectScoreMenuItem()
+{
+	std::string str;
+
+	switch (this->_scoreCursorPos) {
+	case 0:
+		if (this->_scoreEdited == 0)
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		this->_scores[this->_scoreEdited] = this->_scores[this->_scoreEdited - 1];
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	case 1:
+		if (this->_scoreEdited == 3)
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		this->_scores[this->_scoreEdited] = this->_scores[this->_scoreEdited + 1];
+		if (this->_scoreEdited == 0)
+			this->_scores[this->_scoreEdited].attempts = -1;
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	case 2:
+		this->_scores[this->_scoreEdited].attempts = -1;
+		this->_scores[this->_scoreEdited].hits = 0;
+		this->_scores[this->_scoreEdited].damage = 0;
+		this->_scores[this->_scoreEdited].minLimit = 0;
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	case 3:
+		this->_scores[this->_scoreEdited].hits = 0;
+		this->_scores[this->_scoreEdited].damage = 0;
+		this->_scores[this->_scoreEdited].minLimit = 0;
+		this->_initGameStart();
+		SokuLib::playSEWaveBuffer(0x28);
+		return false;
+	case 4:
+		str = InputBox("Input new minimum damage requirement", "Min damage", std::to_string(this->_scores[this->_scoreEdited].damage));
+		if (str.empty())
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		try {
+			this->_scores[this->_scoreEdited].damage = std::stoul(str);
+		} catch (...) {
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		}
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	case 5:
+		str = InputBox("Input new minimum limit requirement", "Min limit", std::to_string(this->_scores[this->_scoreEdited].minLimit));
+		if (str.empty())
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		try {
+			this->_scores[this->_scoreEdited].minLimit = std::stoul(str);
+		} catch (...) {
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		}
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	case 6:
+		str = InputBox("Input new minimum hit count requirement", "Hit count", std::to_string(this->_scores[this->_scoreEdited].hits));
+		if (str.empty())
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		try {
+			this->_scores[this->_scoreEdited].hits = std::stoul(str);
+		} catch (...) {
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		}
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	case 7:
+		if (this->_scoreEdited == 0)
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		str = InputBox("Input new maximum attempts requirement", "Maximum attempts", this->_scores[this->_scoreEdited].attempts == -1 ? "Infinite" : std::to_string(this->_scores[this->_scoreEdited].attempts));
+		if (str.empty())
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		try {
+			unsigned i = str == "Infinite" ? -1 : std::stoul(str);
+
+			if (i == 0)
+				throw MessageBox(SokuLib::window, "Wait... That's illegal!", "Nope", MB_ICONERROR);
+			this->_scores[this->_scoreEdited].attempts = i;
+		} catch (...) {
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		}
+		this->_refreshScoreSprites(this->_scoreEdited);
+		SokuLib::playSEWaveBuffer(0x28);
+		return true;
+	default:
+		abort();
+	}
+}
+
+void ComboTrialEditor::_refreshScoreSprites(int i)
+{
+	SokuLib::Vector2i size;
+
+	if (i == 0) {
+		this->_attempts[i].texture.createFromText(
+			"Infinite number of attempt",
+			defaultFont12,
+			{230, 14},
+			&size
+		);
+		this->_attempts[i].tint = SokuLib::Color::Yellow;
+	} else
+		this->_attempts[i].texture.createFromText(
+			this->_scores[i].attempts == -1 ?
+			"Infinite number of attempt" :
+			("At most " + std::to_string(this->_scores[i].attempts) + " attempt" + (this->_scores[i].attempts == 1 ? "" : "s")).c_str(),
+			defaultFont12,
+			{230, 14},
+			&size
+		);
+	this->_attempts[i].setPosition({412 - size.x / 2, 346});
+	this->_attempts[i].setSize(size.to<unsigned>());
+	this->_attempts[i].rect.width = this->_attempts[i].getSize().x;
+	this->_attempts[i].rect.height = this->_attempts[i].getSize().y;
+
+	this->_hits[i].texture.createFromText(
+		("At least " + std::to_string(this->_scores[i].hits) + " hit" + (this->_scores[i].hits == 1 ? "" : "s")).c_str(),
+		defaultFont12,
+		{230, 14},
+		&size
+	);
+	this->_hits[i].setPosition({184 - size.x / 2, 346});
+	this->_hits[i].setSize(size.to<unsigned>());
+	this->_hits[i].rect.width = this->_hits[i].getSize().x;
+	this->_hits[i].rect.height = this->_hits[i].getSize().y;
+
+	this->_damages[i].texture.createFromText(
+		("At least " + std::to_string(this->_scores[i].damage) + " damage" + (this->_scores[i].damage <= 1 ? "" : "s")).c_str(),
+		defaultFont12,
+		{230, 14},
+		&size
+	);
+	this->_damages[i].setPosition({184 - size.x / 2, 252});
+	this->_damages[i].setSize(size.to<unsigned>());
+	this->_damages[i].rect.width = this->_damages[i].getSize().x;
+	this->_damages[i].rect.height = this->_damages[i].getSize().y;
+
+	this->_limits[i].texture.createFromText(
+		("At least " + std::to_string(this->_scores[i].minLimit) + "% limit").c_str(),
+		defaultFont12,
+		{130, 14},
+		&size
+	);
+	this->_limits[i].setPosition({412 - size.x / 2, 252});
+	this->_limits[i].setSize(size.to<unsigned>());
+	this->_limits[i].rect.width = this->_limits[i].getSize().x;
+	this->_limits[i].rect.height = this->_limits[i].getSize().y;
 }
 
 void ComboTrialEditor::SpecialAction::parse()

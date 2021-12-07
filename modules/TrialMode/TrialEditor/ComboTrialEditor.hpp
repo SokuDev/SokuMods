@@ -98,7 +98,9 @@ private:
 	SokuLib::Scene _next = SokuLib::SCENE_BATTLE;
 
 	//Render
+	SokuLib::DrawUtils::Sprite _score;
 	SokuLib::DrawUtils::Sprite _pause;
+	SokuLib::DrawUtils::Sprite _scoreEditFG;
 	SokuLib::DrawUtils::Sprite _comboEditFG;
 	SokuLib::DrawUtils::Sprite _comboEditBG;
 	SokuLib::DrawUtils::Sprite _comboSprite;
@@ -109,11 +111,16 @@ private:
 	SokuLib::DrawUtils::Sprite _trialEditorDummy;
 	SokuLib::DrawUtils::Sprite _trialEditorSystem;
 	SokuLib::DrawUtils::Sprite _trialEditorMisc;
+	SokuLib::DrawUtils::Sprite _damages[4];
+	SokuLib::DrawUtils::Sprite _limits[4];
+	SokuLib::DrawUtils::Sprite _hits[4];
+	SokuLib::DrawUtils::Sprite _attempts[4];
 	mutable SokuLib::DrawUtils::Sprite _attemptText;
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
 
 	//Editor
 	std::string _path;
+	int _scoreCursorPos = 0;
 	unsigned _musicTop = 0;
 	unsigned _musicCursor = 0;
 	unsigned _dollSelected = 0;
@@ -123,6 +130,7 @@ private:
 	unsigned _comboEditCursor = 0;
 	unsigned _selectedSubcategory = 0;
 	unsigned _stageCursor = 0;
+	unsigned _scoreEdited = 0;
 	float _fakePlayerPos = 0;
 	bool _managingDolls = false;
 	bool _changingPlayerPos = false;
@@ -133,6 +141,8 @@ private:
 	bool _needReload = false;
 	bool _comboPageDisplayed = false;
 	bool _recordingCombo = false;
+	bool _editingScore = false;
+	bool _isRecordingScore = false;
 	std::vector<std::unique_ptr<RecordedAction>> _recordBuffer;
 	SokuLib::Profile _fakeProfile;
 	SokuLib::ProfileDeckEdit *_deckEditMenu = nullptr;
@@ -152,6 +162,8 @@ private:
 	static const std::vector<unsigned> _stagesIds;
 	static const std::map<unsigned, const char *> _stagesNames;
 
+	void _refreshScoreSprites(int i);
+	bool _selectScoreMenuItem();
 	void _setupStageSprites();
 	bool _copyDeckToPlayerSkills();
 	bool _copyDeckToPlayerHand();

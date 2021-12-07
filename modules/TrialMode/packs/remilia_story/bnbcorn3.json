@@ -1,56 +1,60 @@
 {
-    "music": 99,
-    "stage": 16,
-    "player": {
-        "character": "remilia",
-        "palette": 0,
-        "deck": [],
-        "pos": 1180
-    },
     "dummy": {
         "character": "reimu",
-        "palette": 0,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 1240,
-            "y": 100
+            "x": 1240.0,
+            "y": 100.0
         }
     },
-    "intro": "bnbcorn3intro.lua",
-    "outro": "bnbcorn3outro.lua",
-    "type": "combo",
-
     "expected": "d6/9/8 j5aa d6/9 j5aa 2c:20 hj9/hj8:35 j5aa",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "weather": "clear",
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
+    "intro": "bnbcorn3intro.lua",
+    "music": "data/bgm/st99.ogg",
+    "outro": "bnbcorn3outro.lua",
+    "player": {
+        "character": "remilia",
+        "deck": [],
+        "palette": 0,
+        "pos": 1180.0
+    },
     "score": [
         {
-            "min_hits": 14,
             "min_damage": 1866,
-            "min_limit": 136,
-            "max_limit": 138
+            "min_hits": 14,
+            "min_limit": 136
         },
         {
             "max_attempts": 15
         },
         {
-            "min_hits": 15,
-            "max_attempts": 10
+            "max_attempts": 10,
+            "min_damage": 1889,
+            "min_hits": 15
         },
         {
             "max_attempts": 5
         }
     ],
-    "hint": [
-
-    ]
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo",
+    "uniform_card_cost": 1
 }
