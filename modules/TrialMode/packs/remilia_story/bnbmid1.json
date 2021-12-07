@@ -36,7 +36,8 @@
         },
         {
             "max_attempts": 5,
-            "min_hits": 18,
+            "min_damage": 2180,
+            "min_hits": 22,
             "min_limit": 120
         }
     ],
