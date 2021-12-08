@@ -1789,7 +1789,7 @@ failed2:
 		nbMode != uniqueModes.size() ||
 		nbTopic != uniqueCategories.size()
 	) {
-		currentPack = -3;
+		currentPack = -loadedPacks.empty();
 		currentEntry = -1;
 		shownPack = 0;
 		nameFilter = -1;
@@ -1832,9 +1832,9 @@ failed2:
 		sprite->rect.height = sprite->texture.getSize().y;
 		sprite->setSize({80, 32});
 		sprite->setPosition({
-					    140 + 100 * (i / 9),
-					    60 + 40 * (i % 9),
-				    });
+			140 + 100 * (i / 9),
+			60 + 40 * (i % 9),
+		});
 		i++;
 	}
 }

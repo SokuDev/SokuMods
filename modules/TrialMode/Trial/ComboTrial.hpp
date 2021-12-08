@@ -30,7 +30,7 @@ private:
 	struct ScorePrerequisites {
 		unsigned attempts = -1;
 		unsigned hits = 0;
-		int damage = INT32_MIN;
+		int damage = 0;
 		unsigned minLimit = 0;
 
 		ScorePrerequisites() = default;

@@ -39,7 +39,7 @@ private:
 	struct ScorePrerequisites {
 		unsigned attempts = -1;
 		unsigned hits = 0;
-		int damage = INT32_MIN;
+		int damage = 0;
 		unsigned minLimit = 0;
 
 		ScorePrerequisites() = default;
@@ -143,12 +143,14 @@ private:
 	bool _recordingCombo = false;
 	bool _editingScore = false;
 	bool _isRecordingScore = false;
+	ScorePrerequisites _oldScore;
 	std::vector<std::unique_ptr<RecordedAction>> _recordBuffer;
 	SokuLib::Profile _fakeProfile;
 	SokuLib::ProfileDeckEdit *_deckEditMenu = nullptr;
 	SokuLib::Vector2f _dummyStartPosTmp;
 	SokuLib::Character *_characterEdit = nullptr;
 	SokuLib::Sprite _characterSprite;
+	mutable SokuLib::DrawUtils::Sprite _numbers;
 	mutable SokuLib::DrawUtils::Sprite _digits[6];
 	mutable SokuLib::DrawUtils::Sprite _weathers;
 	SokuLib::DrawUtils::RectangleShape _stageRect;
@@ -209,6 +211,7 @@ private:
 	bool setFailTimer();
 	bool setOutro();
 	bool setIntro();
+	bool saveOnly();
 	bool saveReturnToCharSelect();
 	bool playIntro();
 	bool playOutro();
