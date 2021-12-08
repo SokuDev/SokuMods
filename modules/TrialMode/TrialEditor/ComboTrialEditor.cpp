@@ -180,6 +180,12 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_score.rect.width = this->_score.texture.getSize().x / 4;
 	this->_score.rect.height = this->_score.texture.getSize().y;
 
+	this->_numbers.texture.loadFromGame("data/number/0000.bmp");
+	this->_numbers.setSize({10, 15});
+	this->_numbers.rect.top = 96;
+	this->_numbers.rect.width = 11;
+	this->_numbers.rect.height = 16;
+
 	if (json.contains("dolls") && json["dolls"].is_array()) {
 		for (int i = 0; i < json["dolls"].size(); i++) {
 			auto &obj = json["dolls"][i];
@@ -261,7 +267,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_privateSquare = getField(json, false, &nlohmann::json::is_boolean, "private_square", "player");
 
 	this->_disableLimit = getField(json, false, &nlohmann::json::is_boolean, "disable_limit");
-	this->_uniformCardCost = getField(json, -1, &nlohmann::json::is_number, "uniform_card_cost");
+	this->_uniformCardCost = getField(json, 0, &nlohmann::json::is_number, "uniform_card_cost");
 	this->_playerStartPos = getField(json, 480.f, &nlohmann::json::is_number, "pos", "player");
 	this->_dummyStartPos.x = getField(json, 800.f, &nlohmann::json::is_number, "x", "dummy", "pos");
 	this->_dummyStartPos.y = getField(json, 0.f, &nlohmann::json::is_number, "y", "dummy", "pos");
@@ -469,7 +475,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			SokuLib::playSEWaveBuffer(0x29);
 		}
 		if (SokuLib::inputMgrs.input.c == 1 && this->_dollCursorPos != this->_dolls.size()) {
-			SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->direction =
+			SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->direction = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
 			this->_dolls[this->_dollCursorPos].dir = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
 			SokuLib::playSEWaveBuffer(0x28);
 		}
@@ -545,6 +551,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	else if (this->_privateSquare)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
 
+	if (this->_playingIntro && this->_waitCounter == 31)
+		this->_initGameStart();
 	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30 && !this->_comboPageDisplayed && !this->_isRecordingScore) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
@@ -786,29 +794,33 @@ void ComboTrialEditor::_initGameStart()
 		this->_needInit = true;
 		return;
 	}
+	puts("Init");
 	this->_dollSelected = false;
 	this->_needInit = false;
 	this->_currentDoll = 0;
+	this->_actionWaitCounter = 0;
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
-	this->_playingIntro = false;
-	if (this->_isRecordingScore) {
-		this->_refreshScoreSprites(this->_scoreEdited);
-		this->_openPause();
-		SokuLib::playSEWaveBuffer(0x28);
+	if (!this->_playingIntro || this->_waitCounter != 31) {
+		this->_playingIntro = false;
+		if (this->_isRecordingScore) {
+			this->_refreshScoreSprites(this->_scoreEdited);
+			this->_openPause();
+			SokuLib::playSEWaveBuffer(0x28);
+		}
+		this->_isRecordingScore = this->_editingScore && !this->_isRecordingScore;
+		this->_playingIntro = this->_playComboAfterIntro || this->_isRecordingScore;
+		if (this->_playingIntro) {
+			this->_waitCounter += 32;
+			(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
+		}
 	}
-	this->_isRecordingScore = this->_editingScore && !this->_isRecordingScore;
-	this->_playingIntro = this->_playComboAfterIntro || this->_isRecordingScore;
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
 	if (this->_first)
 		this->_playBGM();
 	this->_first = false;
-	if (this->_playingIntro) {
-		this->_waitCounter += 30;
-		(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
-	}
 
 	this->_firstFirst = 0;
 	battleMgr.leftCharacterManager.combo.limit = 0;
@@ -890,6 +902,10 @@ void ComboTrialEditor::_initGameStart()
 	battleMgr.rightCharacterManager.objectBase.direction =
 		battleMgr.rightCharacterManager.objectBase.position.x > battleMgr.leftCharacterManager.objectBase.position.x ?
 		SokuLib::LEFT : SokuLib::RIGHT;
+	for (auto &action : this->_exceptedActions) {
+		action->chargeCounter = 0;
+		action->counter = 0;
+	}
 }
 
 void ComboTrialEditor::_loadExpected(const std::string &expected)
@@ -1166,7 +1182,13 @@ void ComboTrialEditor::_initVanillaGame()
 int ComboTrialEditor::pauseOnUpdate()
 {
 	if (this->_playingIntro) {
+		this->_scores[this->_scoreEdited] = this->_oldScore;
+		this->_isRecordingScore = false;
+		this->_waitCounter = 0;
 		this->_initGameStart();
+		this->_isRecordingScore = false;
+		this->_playingIntro = false;
+		this->_waitCounter = 0;
 		if (this->_comboPageDisplayed)
 			return false;
 	}
@@ -1389,8 +1411,8 @@ int ComboTrialEditor::pauseOnUpdate()
 			this->_menuCursorPos += ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
 			this->_menuCursorPos %= ComboTrialEditor::callbacks[this->_selectedSubcategory].size();
 		} else {
-			this->_menuCursorPos += 8 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
-			this->_menuCursorPos %= 8;
+			this->_menuCursorPos += 9 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+			this->_menuCursorPos %= 9;
 		}
 		SokuLib::playSEWaveBuffer(0x27);
 	}
@@ -1405,6 +1427,11 @@ int ComboTrialEditor::pauseOnUpdate()
 		} else if (this->_selectedSubcategory == 4) {
 			if (this->_menuCursorPos == 2) {
 				this->_weather = static_cast<SokuLib::Weather>(static_cast<int>(this->_weather + 22 + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % 22);
+				SokuLib::playSEWaveBuffer(0x27);
+			} else if (this->_menuCursorPos == 3) {
+				this->_failTimer = static_cast<int>(this->_failTimer + 310 + std::copysign(10, SokuLib::inputMgrs.input.horizontalAxis)) % 310;
+				if (this->_failTimer < 30)
+					this->_failTimer = SokuLib::inputMgrs.input.horizontalAxis > 0 ? 30 : 300;
 				SokuLib::playSEWaveBuffer(0x27);
 			}
 		}
@@ -1540,7 +1567,8 @@ const std::vector<bool (ComboTrialEditor::*)()> ComboTrialEditor::callbacks[] = 
 		&ComboTrialEditor::playOutro,   //Play outro
 		&ComboTrialEditor::playPreview  //Play preview
 	},
-	{&ComboTrialEditor::saveReturnToCharSelect},//Save
+	{&ComboTrialEditor::saveOnly},
+	{&ComboTrialEditor::saveReturnToCharSelect},
 	{&ComboTrialEditor::returnToCharSelect},
 	{&ComboTrialEditor::returnToTitleScreen}
 };
@@ -1980,6 +2008,14 @@ bool ComboTrialEditor::playPreview()
 	return false;
 }
 
+bool ComboTrialEditor::saveOnly()
+{
+	if (!this->save())
+		return SokuLib::playSEWaveBuffer(0x29), true;
+	SokuLib::playSEWaveBuffer(0x28);
+	return true;
+}
+
 bool ComboTrialEditor::saveReturnToCharSelect()
 {
 	if (!this->save())
@@ -2392,6 +2428,9 @@ void ComboTrialEditor::systemRender() const
 
 void ComboTrialEditor::miscRender() const
 {
+	auto size = 0;
+	unsigned buffer = this->_failTimer;
+
 	this->_introSprite.draw();
 	this->_outroSprite.draw();
 	this->_weatherArrows.draw();
@@ -2401,6 +2440,19 @@ void ComboTrialEditor::miscRender() const
 		this->_weathers.rect.top = (this->_weather + 1) % 22 * 24;
 		this->_weathers.draw();
 	}
+
+	do {
+		size++;
+		buffer /= 10;
+	} while (buffer);
+	buffer = this->_failTimer;
+	this->_numbers.setPosition({460 + size * 11 / 2, 226});
+	do {
+		this->_numbers.rect.left = 1 + 11 * (buffer % 10);
+		this->_numbers.draw();
+		this->_numbers.setPosition({this->_numbers.getPosition().x - 11, this->_numbers.getPosition().y});
+		buffer /= 10;
+	} while (buffer);
 }
 
 bool ComboTrialEditor::_copyDeckToPlayerDeck()
@@ -2561,6 +2613,7 @@ bool ComboTrialEditor::_selectScoreMenuItem()
 		SokuLib::playSEWaveBuffer(0x28);
 		return true;
 	case 3:
+		this->_oldScore = this->_scores[this->_scoreEdited];
 		this->_scores[this->_scoreEdited].hits = 0;
 		this->_scores[this->_scoreEdited].damage = 0;
 		this->_scores[this->_scoreEdited].minLimit = 0;
