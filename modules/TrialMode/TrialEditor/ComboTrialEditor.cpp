@@ -451,7 +451,9 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	if ((*reinterpret_cast<char **>(0x8985E8))[0x494] && !this->_playingIntro)
 		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
-	if (this->_isStart || this->_quit || this->_needReload || this->_needInit) {
+	if (this->_needInit)
+		return this->_initGameStart(), false;
+	if (this->_isStart || this->_quit || this->_needReload) {
 		this->_first |= this->_needReload;
 		this->_quit = false;
 		this->_needReload = false;
@@ -552,7 +554,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
 
 	if (this->_playingIntro && this->_waitCounter == 31)
-		this->_initGameStart();
+		return this->_initGameStart(), false;
 	if (this->_playingIntro && SokuLib::inputMgrs.input.a != 1 && this->_waitCounter == 30 && !this->_comboPageDisplayed && !this->_isRecordingScore) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
 		battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
@@ -815,7 +817,8 @@ void ComboTrialEditor::_initGameStart()
 			this->_waitCounter += 32;
 			(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
 		}
-	}
+	} else
+		this->_waitCounter--;
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
 	if (this->_first)
