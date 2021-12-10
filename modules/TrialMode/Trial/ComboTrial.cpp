@@ -265,15 +265,15 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 
 	if (this->_tickTimer);
 	else if (this->_mpp)
-		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 900;
+		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 480;
 	else if (this->_stones)
 		battleMgr.leftCharacterManager.philosophersStoneTime = 900;
 	else if (this->_orerries)
-		battleMgr.leftCharacterManager.orreriesTimeLeft = 900;
+		battleMgr.leftCharacterManager.orreriesTimeLeft = 600;
 	else if (this->_privateSquare)
-		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
+		battleMgr.leftCharacterManager.privateSquare = 300 - (battleMgr.leftCharacterManager.privateSquare & 1);
 	else if (this->_clones)
-		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 900;
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 600;
 
 	if (this->_waitCounter) {
 		this->_waitCounter--;

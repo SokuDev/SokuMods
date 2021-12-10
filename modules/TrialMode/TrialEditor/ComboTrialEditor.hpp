@@ -159,9 +159,11 @@ private:
 	SokuLib::DrawUtils::Sprite _twilight;
 	SokuLib::DrawUtils::Sprite _normal;
 	SokuLib::Camera _oldCamera;
+	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _installSprites;
 	std::vector<std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _musics;
 	std::map<unsigned, std::pair<std::unique_ptr<SokuLib::DrawUtils::Sprite>, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _stagesSprites;
 
+	static const std::vector<std::vector<bool ComboTrialEditor::*>> _installProperties;
 	static const std::vector<unsigned> _stagesIds;
 	static const std::map<unsigned, const char *> _stagesNames;
 

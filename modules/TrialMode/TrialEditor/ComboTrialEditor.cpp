@@ -19,6 +19,53 @@
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 static char data[10];
 
+const std::vector<std::vector<bool ComboTrialEditor::*>> ComboTrialEditor::_installProperties{
+	{}, //CHARACTER_REIMU,
+	{   //CHARACTER_MARISA,
+		&ComboTrialEditor::_orerries
+	},
+	{   //CHARACTER_SAKUYA,
+		&ComboTrialEditor::_privateSquare
+	},
+	{}, //CHARACTER_ALICE,
+	{   //CHARACTER_PATCHOULI,
+		&ComboTrialEditor::_stones
+	},
+	{   //CHARACTER_YOUMU,
+		&ComboTrialEditor::_clones
+	},
+	{}, //CHARACTER_REMILIA,
+	{}, //CHARACTER_YUYUKO,
+	{}, //CHARACTER_YUKARI,
+	{   //CHARACTER_SUIKA,
+		&ComboTrialEditor::_mpp
+	},
+	{}, //CHARACTER_REISEN,
+	{}, //CHARACTER_AYA,
+	{}, //CHARACTER_KOMACHI,
+	{}, //CHARACTER_IKU,
+	{}, //CHARACTER_TENSHI,
+	{}, //CHARACTER_SANAE,
+	{}, //CHARACTER_CIRNO,
+	{}, //CHARACTER_MEILING,
+	{}, //CHARACTER_UTSUHO,
+	{}, //CHARACTER_SUWAKO,
+	{}, //CHARACTER_RANDOM,
+	{}, //CHARACTER_NAMAZU,
+	{}, //CHARACTER_MOMIJI,
+	{}, //CHARACTER_CLOWNPIECE,
+	{}, //CHARACTER_FLANDRE,
+	{}, //CHARACTER_ORIN,
+	{}, //CHARACTER_YUUKA,
+	{}, //CHARACTER_KAGUYA,
+	{}, //CHARACTER_MOKOU,
+	{}, //CHARACTER_MIMA,
+	{}, //CHARACTER_SHOU,
+	{}, //CHARACTER_MURASA,
+	{}, //CHARACTER_SEKIBANKI,
+	{}, //CHARACTER_SATORI,
+	{}, //CHARACTER_SHINKI
+};
 const std::map<unsigned, const char *> ComboTrialEditor::_stagesNames{
 	{ SokuLib::STAGE_HAKUREI_SHRINE_BROKEN,                       "Hakurei Shrine (Broken)" },
 	{ SokuLib::STAGE_FOREST_OF_MAGIC,                             "Forest of Magic" },
@@ -377,6 +424,17 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	sprite->setSize(size.to<unsigned>());
 	sprite->rect.width = size.x;
 	sprite->rect.height = size.y;
+	for (int i = 0; i < _installProperties.size(); i++) {
+		this->_installSprites.emplace_back(new SokuLib::DrawUtils::Sprite());
+
+		auto &sprite = *this->_installSprites.back();
+
+		sprite.texture.loadFromResource(myModule, MAKEINTRESOURCE(124 + 4 * i));
+		sprite.setPosition({305, 353});
+		sprite.setSize(sprite.texture.getSize());
+		sprite.rect.width = sprite.getSize().x;
+		sprite.rect.height = sprite.getSize().y;
+	}
 
 	for (int i = 0; i < 4; i++)
 		this->_refreshScoreSprites(i);
@@ -545,16 +603,16 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	}
 
 	if (this->_tickTimer && this->_waitCounter < 30);
-	else if (this->_mpp)
-		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 900;
-	else if (this->_stones)
+	else if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
+		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 480;
+	else if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
 		battleMgr.leftCharacterManager.philosophersStoneTime = 900;
-	else if (this->_orerries)
-		battleMgr.leftCharacterManager.orreriesTimeLeft = 900;
-	else if (this->_privateSquare)
-		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
-	else if (this->_clones)
-		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 900;
+	else if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
+		battleMgr.leftCharacterManager.orreriesTimeLeft = 600;
+	else if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
+		battleMgr.leftCharacterManager.privateSquare = 300 - (battleMgr.leftCharacterManager.privateSquare & 1);
+	else if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 600;
 
 	if (this->_playingIntro && this->_waitCounter == 31)
 		return this->_initGameStart(), false;
@@ -846,28 +904,28 @@ void ComboTrialEditor::_initGameStart()
 	battleMgr.leftCharacterManager.currentSpirit = 1000;
 	battleMgr.leftCharacterManager.maxSpirit = 1000;
 
-	if (this->_mpp) {
+	if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA) {
 		puts("Init MPP");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		battleMgr.leftCharacterManager.objectBase.animate();
 		while (battleMgr.leftCharacterManager.objectBase.frameCount != 80)
 			battleMgr.leftCharacterManager.objectBase.doAnimation();
-	} else if (this->_stones) {
+	} else if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI) {
 		puts("Init Philosophers' Stone");
 		if (battleMgr.leftCharacterManager.philosophersStoneTime <= 1 || this->_tickTimer)
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		else
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
-	} else if (this->_orerries) {
+	} else if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA) {
 		puts("Init Orreries");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_215;
 		battleMgr.leftCharacterManager.objectBase.animate();
-	} else if (this->_privateSquare) {
+	} else if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA) {
 		puts("Init Private Square");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
 		battleMgr.leftCharacterManager.objectBase.animate();
-	} else if (this->_clones) {
+	} else if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU) {
 		puts("Init Clones");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		battleMgr.leftCharacterManager.objectBase.animate();
@@ -2041,6 +2099,7 @@ bool ComboTrialEditor::returnToCharSelect()
 {
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_quit = true;
+	this->_needReload = false;
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	this->_next = SokuLib::SCENE_SELECT;
 	return false;
@@ -2153,7 +2212,7 @@ bool ComboTrialEditor::save() const
 			{ "score", this->_getScoresJson() }
 		};
 
-		if (this->_mpp)
+		if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
 			json["player"]["mpp"]                 = this->_mpp;
 		if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
 			json["player"]["stones"]              = this->_stones;
@@ -2403,6 +2462,8 @@ void ComboTrialEditor::playerRender() const
 		tickSprite.setPosition({304, 287});
 		tickSprite.draw();
 	}
+	if (SokuLib::leftChar < _installProperties.size() && !_installProperties[SokuLib::leftChar].empty())
+		this->_installSprites[SokuLib::leftChar]->draw();
 }
 
 void ComboTrialEditor::dummyRender() const
