@@ -119,6 +119,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 
 	this->_mpp           = json["player"].contains("mpp")            && json["player"]["mpp"].is_boolean()            && json["player"]["mpp"].get<bool>();
 	this->_stones        = json["player"].contains("stones")         && json["player"]["stones"].is_boolean()         && json["player"]["stones"].get<bool>();
+	this->_clones        = json["player"].contains("clones")         && json["player"]["clones"].is_boolean()         && json["player"]["clones"].get<bool>();
 	this->_orerries      = json["player"].contains("orreries")       && json["player"]["orreries"].is_boolean()       && json["player"]["orreries"].get<bool>();
 	this->_tickTimer     = json["player"].contains("tick_timer")     && json["player"]["tick_timer"].is_boolean()     && json["player"]["tick_timer"].get<bool>();
 	this->_privateSquare = json["player"].contains("private_square") && json["player"]["private_square"].is_boolean() && json["player"]["private_square"].get<bool>();
@@ -131,6 +132,8 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 		throw std::invalid_argument("Orerries's Sun is only allowed for Marisa");
 	if (this->_privateSquare && player != SokuLib::CHARACTER_SAKUYA)
 		throw std::invalid_argument("Private Square is only allowed for Sakuya");
+	if (this->_clones && player != SokuLib::CHARACTER_YOUMU)
+		throw std::invalid_argument("Spirit Clone is only allowed for Youmu");
 
 	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() && json["disable_limit"].get<bool>();
 	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
@@ -269,6 +272,8 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		battleMgr.leftCharacterManager.orreriesTimeLeft = 900;
 	else if (this->_privateSquare)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
+	else if (this->_clones)
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 900;
 
 	if (this->_waitCounter) {
 		this->_waitCounter--;
@@ -512,6 +517,10 @@ void ComboTrial::_initGameStart()
 	} else if (this->_privateSquare) {
 		puts("Init Private Square");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		battleMgr.leftCharacterManager.objectBase.animate();
+	} else if (this->_clones) {
+		puts("Init Clones");
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		battleMgr.leftCharacterManager.objectBase.animate();
 	} else {
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;

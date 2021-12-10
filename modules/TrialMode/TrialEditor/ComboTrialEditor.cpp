@@ -262,6 +262,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 
 	this->_mpp           = getField(json, false, &nlohmann::json::is_boolean, "mpp",            "player");
 	this->_stones        = getField(json, false, &nlohmann::json::is_boolean, "stones",         "player");
+	this->_clones        = getField(json, false, &nlohmann::json::is_boolean, "clones",         "player");
 	this->_orerries      = getField(json, false, &nlohmann::json::is_boolean, "orreries",       "player");
 	this->_tickTimer     = getField(json, false, &nlohmann::json::is_boolean, "tick_timer",     "player");
 	this->_privateSquare = getField(json, false, &nlohmann::json::is_boolean, "private_square", "player");
@@ -543,7 +544,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		}
 	}
 
-	if (this->_tickTimer);
+	if (this->_tickTimer && this->_waitCounter < 30);
 	else if (this->_mpp)
 		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 900;
 	else if (this->_stones)
@@ -552,6 +553,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		battleMgr.leftCharacterManager.orreriesTimeLeft = 900;
 	else if (this->_privateSquare)
 		battleMgr.leftCharacterManager.privateSquare = 900 - (battleMgr.leftCharacterManager.privateSquare & 1);
+	else if (this->_clones)
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 900;
 
 	if (this->_playingIntro && this->_waitCounter == 31)
 		return this->_initGameStart(), false;
@@ -785,7 +788,7 @@ void ComboTrialEditor::_initGameStart()
 			}
 		}
 	}
-	if (this->_currentDoll != this->_dolls.size()) {
+	if (this->_currentDoll != this->_dolls.size() && SokuLib::leftChar == SokuLib::CHARACTER_ALICE) {
 		battleMgr.leftCharacterManager.objectBase.position.y = 0;
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_5C;
 		battleMgr.leftCharacterManager.objectBase.animate();
@@ -863,6 +866,10 @@ void ComboTrialEditor::_initGameStart()
 	} else if (this->_privateSquare) {
 		puts("Init Private Square");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		battleMgr.leftCharacterManager.objectBase.animate();
+	} else if (this->_clones) {
+		puts("Init Clones");
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		battleMgr.leftCharacterManager.objectBase.animate();
 	} else {
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
@@ -2148,14 +2155,16 @@ bool ComboTrialEditor::save() const
 
 		if (this->_mpp)
 			json["player"]["mpp"]                 = this->_mpp;
-		if (this->_stones)
+		if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
 			json["player"]["stones"]              = this->_stones;
-		if (this->_orerries)
+		if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
 			json["player"]["orerries"]            = this->_orerries;
 		if (this->_tickTimer)
 			json["player"]["tickTimer"]           = this->_tickTimer;
-		if (this->_privateSquare)
+		if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
 			json["player"]["privateSquare"]       = this->_privateSquare;
+		if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
+			json["player"]["clones"]              = this->_clones;
 		if (!this->_leftWeather)
 			json["player"]["affected_by_weather"] = this->_leftWeather;
 
