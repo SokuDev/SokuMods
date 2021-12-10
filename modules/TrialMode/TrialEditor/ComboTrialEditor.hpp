@@ -73,6 +73,7 @@ private:
 	bool _orerries = false;
 	bool _privateSquare = false;
 	bool _stones = false;
+	bool _clones = false;
 	bool _tickTimer = false;
 	unsigned _introRequ = 0;
 	unsigned _outroRequ = 0;

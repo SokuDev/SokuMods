@@ -1,0 +1,56 @@
+{
+    "dummy": {
+        "character": "meirin",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 600.0,
+            "y": 0.0
+        }
+    },
+    "expected": "5a 5aa:20 5aaa:20 3a:20 d623c:30",
+    "music": "data/bgm/st34.ogg",
+    "player": {
+        "character": "youmu",
+        "clones": true,
+        "deck": [],
+        "palette": 0,
+        "pos": 550.0
+    },
+    "score": [
+        {
+            "min_damage": 3337,
+            "min_hits": 11,
+            "min_limit": 120
+        },
+        {
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 12,
+    "type": "combo"
+}
