@@ -1,58 +1,62 @@
 {
-    "music": 0,
-    "stage": 32,
-    "player": {
-        "character": "sakuya",
-        "palette": 0,
-        "deck": [],
-        "pos": 400
-    },
     "dummy": {
         "character": "yuyuko",
-        "palette": 0,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 650,
-            "y": 0
+            "x": 650.0,
+            "y": 0.0
         }
     },
-	    "intro": "lore6intro.lua",
-    "outro": "lore6Outro.dll",
-    "type": "combo",
-
     "expected": "6a 2b hj9/hj8 j6a",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "weather": 21,
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
-    "hint": [
-
-    ],
+    "intro": "lore6intro.lua",
+    "music": "data/bgm/st00.ogg",
+    "outro": "lore6Outro.dll",
+    "player": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": 400.0
+    },
     "score": [
         {
+            "min_damage": 1717,
             "min_hits": 15,
-            "min_damage" : 1717,
             "min_limit": 119
         },
         {
+            "min_damage": 1736,
             "min_hits": 16,
-            "min_damage" : 1736,
             "min_limit": 122
         },
         {
+            "min_damage": 1755,
             "min_hits": 17,
-            "min_damage" : 1755,
             "min_limit": 125
         },
         {
             "max_attempts": 25
         }
-    ]
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 32,
+    "type": "combo",
+    "uniform_card_cost": 1
 }
