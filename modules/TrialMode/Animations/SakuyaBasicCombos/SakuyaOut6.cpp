@@ -7,9 +7,9 @@
 #include "../BattleAnimation.hpp"
 
 #define TRANSLATE_MAX 120
-#define REISEN_START_LOCATION 570
+#define YUKARI_START_LOCATION -500
 #define CAM_START_LOCATION (-20)
-#define BG_START_LOCATION 850
+#define BG_START_LOCATION 700
 #define HIT_STOP 7
 #define PUSH_RATIO 2
 
@@ -24,21 +24,18 @@
 
 char profilePath[1024];
 static const std::vector<std::string> dialogs{
-	//Flandre walking happily
-	//Remilia coming in
-	"r SOh, hello",
-	"r HI didn't know you were making a party!",
-	"lEHWell, me neither.",
-	"lCHLet me guess, you're here to \"play\" with the guests?",
-	"rChOf course!",
-	"lchCould you not involve yourself in this?",
-	"lChIt is already hard to keep track of the situation",
-	"rCEBut, sister...",
-	"lhE*sigh* Fine, I will play with you.",
-	"rhHReally?",
-	"lHHOf course! I'm not a bad sister after all.",
-	"lAHNow don't move."
-	//Battle here
+	"LHDSo now will you tell me what is going on?",
+	"RHDYou should come back to your first clue,<br>that will help you I'm sure.",
+	"LcDCan't you just explain to me right now?",
+	"REEI could,<br>but I believe it would be best to find out by yourself.",
+	"LHEIt is fine,<br>your explanations are always too cryptic anyway.",
+	"LWEWell I have someone else to ask questions thanks to you now,<br>so I must take my leave.",
+	"R CIt seems she is going for the right source...",
+	"R CSadly for her it is the flow,<br>and not the spring that matters this time...",
+	"R CSadly for her it is the flow,<br>and not the spring that matters this time...<br>isn't it?",
+	"R ASadly for her it is the flow,<br>and not the spring that matters this time...<br>isn't it?",
+	"R CSadly for her it is the flow,<br>and not the spring that matters this time...<br>isn't it?",
+	"   Here you are!"
 };
 
 class Intro : public BattleAnimation {
@@ -58,51 +55,15 @@ private:
 	bool _stop = false;
 	SokuLib::PlayerInfo _playerInfo;
 	int buffer[0xA];
-	SokuLib::CharacterManager *_reisen = nullptr;
+	SokuLib::CharacterManager *_yukari = nullptr;
 
-	void fightStage0(SokuLib::BattleManager &battleMgr)
-	{
-	}
-
-	void fightStage1(SokuLib::BattleManager &battleMgr)
-	{
-	}
-
-	void fightStage2(SokuLib::BattleManager &battleMgr)
-	{
-	}
-
-	std::vector<void (Intro::*)(SokuLib::BattleManager &)> _fightStages{
-		&Intro::fightStage0,
-		&Intro::fightStage1,
-		&Intro::fightStage2
-	};
-
-	bool updateFight()
-	{
-		auto &battleMgr = SokuLib::getBattleMgr();
-
-		if (this->_fightCtr) {
-			this->_fightCtr--;
-			return true;
-		}
-		//if (this->_fightStage == 2 && !this->_keyPressed) {
-		//	return true;
-		//}
-		this->_keyPressed = false;
-		updateSubObjects(*this->_reisen);
-		this->_reisen->objectBase.doAnimation();
-		battleMgr.rightCharacterManager.objectBase.doAnimation();
-		(this->*this->_fightStages[this->_fightStage])(battleMgr);
-		return this->_fightStage < this->_fightStages.size();
-	}
 
 	void stage0()
 	{
 		auto &battleMgr = SokuLib::getBattleMgr();
 
 		if (this->_ctr == 240) {
-			this->_playerInfo.character = SokuLib::CHARACTER_REISEN;
+			this->_playerInfo.character = SokuLib::CHARACTER_YUKARI;
 			this->_playerInfo.isRight = false;
 			this->_playerInfo.palette = 0;
 			this->_playerInfo.padding2 = 0;
@@ -115,55 +76,35 @@ private:
 			this->_playerInfo.keyManager = nullptr;
 
 			((void (__thiscall *)(int *, bool, SokuLib::PlayerInfo &))0x46da40)(this->buffer, false, this->_playerInfo);
-			(*(void (__thiscall **)(SokuLib::CharacterManager *))(*(int *)this->_reisen + 0x44))(this->_reisen);
-			*(SokuLib::CharacterManager **)&this->_reisen->objectBase.offset_0x168[8] = &battleMgr.rightCharacterManager;
+			(*(void (__thiscall **)(SokuLib::CharacterManager *))(*(int *)this->_yukari + 0x44))(this->_yukari);
+			*(SokuLib::CharacterManager **)&this->_yukari->objectBase.offset_0x168[8] = &battleMgr.rightCharacterManager;
 
 			SokuLib::camera.scale = 0.8;
 			SokuLib::camera.translate.x = CAM_START_LOCATION;
-			SokuLib::camera.translate.y = 525;
+			SokuLib::camera.translate.y = 0;
 			SokuLib::camera.backgroundTranslate.x = BG_START_LOCATION;
 
 			battleMgr.leftCharacterManager.objectBase.position.x = -500;
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_DEFAULT_SKILL1_B;
 
-			battleMgr.rightCharacterManager.objectBase.position.y = 525;
-			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
+			battleMgr.rightCharacterManager.objectBase.position.y = 0;
+			battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 			battleMgr.rightCharacterManager.objectBase.animate();
 
-			this->_reisen->objectBase.position.x = REISEN_START_LOCATION;
-			this->_reisen->objectBase.position.y = 525;
-			this->_reisen->objectBase.action = SokuLib::ACTION_FALLING;
-			this->_reisen->objectBase.animate();
+			this->_yukari->objectBase.position.x = YUKARI_START_LOCATION;
+			this->_yukari->objectBase.position.y = 0;
+			this->_yukari->objectBase.action = SokuLib::ACTION_WALK_FORWARD;
+			this->_yukari->objectBase.animate();
 
 			((void (*)(const char *))0x43ff10)("data/bgm/st20.ogg");
 		}
 
-		if (this->_ctr < 60) {
-			if (this->_stageBg.tint.a)
-				this->_stageBg.tint.a -= 0xF;
-			if (this->_stageBottom.tint.a)
-				this->_stageBottom.tint.a -= 0xF;
-		} else {
-			if (this->_stageBg.tint.a != 0xFF)
-				this->_stageBg.tint.a += 0xF;
-			if (this->_stageBottom.tint.a != 0xFF)
-				this->_stageBottom.tint.a += 0xF;
-		}
-
-		updateFight();
-		if (this->_ctr % 2)
-			this->_stageBottom.setPosition(this->_stageBottom.getPosition() + SokuLib::Vector2i{1, 0});
-		this->_ctr--;
-		if (!this->_ctr)
 			this->_currentStage++;
 	}
 
 	void stage1()
 	{
-		if (!updateFight()) {
 			this->_currentStage++;
-			((void (*)(const char *))0x43ff10)("data/bgm/ta08.ogg");
-		}
 	}
 
 	void stage2()
@@ -210,9 +151,9 @@ public:
 
 	~Intro()
 	{
-		if (this->_reisen) {
-			(*(void (__thiscall **)(SokuLib::CharacterManager *, char))this->_reisen->objectBase.vtable)(this->_reisen, 0);
-			SokuLib::Delete(this->_reisen);
+		if (this->_yukari) {
+			(*(void (__thiscall **)(SokuLib::CharacterManager *, char))this->_yukari->objectBase.vtable)(this->_yukari, 0);
+			SokuLib::Delete(this->_yukari);
 		}
 	}
 
@@ -234,13 +175,13 @@ public:
 
 	void render() const override
 	{
-		if (this->_currentStage <= 1 && this->_reisen) {
+		if (this->_currentStage <= 1 && this->_yukari) {
 			// Display the CharacterManager
-			((void (__thiscall *)(SokuLib::CharacterManager &))0x438d20)(*this->_reisen);
+			((void (__thiscall *)(SokuLib::CharacterManager &))0x438d20)(*this->_yukari);
 
 			// Display the CharacterManager subobjects
-			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_reisen->objects, -1);
-			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_reisen->objects, 1);
+			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_yukari->objects, -1);
+			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_yukari->objects, 1);
 
 			// We redraw Remilia because Reisen's subobjects mess up the DirectX context and this will clean it up
 			((void (__thiscall *)(SokuLib::CharacterManager &))0x438d20)(SokuLib::getBattleMgr().leftCharacterManager);
