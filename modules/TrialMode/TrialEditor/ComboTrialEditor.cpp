@@ -355,6 +355,10 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_attemptText.rect.width = this->_attemptText.texture.getSize().x;
 	this->_attemptText.rect.height = this->_attemptText.texture.getSize().y;
 
+	this->_rect.setSize({16, 16});
+	this->_rect.setFillColor(SokuLib::Color::White);
+	this->_rect.setBorderColor(SokuLib::Color::Black);
+
 	ScorePrerequisites *old = nullptr;
 
 	if (!json.contains("score") || !json["score"].is_array() || json["score"].size() != 4)
@@ -430,10 +434,10 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 		auto &sprite = *this->_installSprites.back();
 
 		sprite.texture.loadFromResource(myModule, MAKEINTRESOURCE(124 + 4 * i));
-		sprite.setPosition({305, 353});
-		sprite.setSize(sprite.texture.getSize());
-		sprite.rect.width = sprite.getSize().x;
-		sprite.rect.height = sprite.getSize().y;
+		sprite.setPosition({325, 353});
+		sprite.setSize({sprite.texture.getSize().x, sprite.texture.getSize().y - 1});
+		sprite.rect.width = sprite.texture.getSize().x;
+		sprite.rect.height = sprite.texture.getSize().y;
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -601,6 +605,17 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			}
 		}
 	}
+
+	if (!this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
+		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = !!battleMgr.leftCharacterManager.missingPurplePowerTimeLeft;
+	else if (!this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
+		battleMgr.leftCharacterManager.philosophersStoneTime = !!battleMgr.leftCharacterManager.philosophersStoneTime;
+	else if (!this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
+		battleMgr.leftCharacterManager.orreriesTimeLeft = !!battleMgr.leftCharacterManager.orreriesTimeLeft;
+	else if (!this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
+		battleMgr.leftCharacterManager.privateSquare = !!battleMgr.leftCharacterManager.privateSquare;
+	else if (!this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = !!battleMgr.leftCharacterManager.youmuCloneTimeLeft;
 
 	if (this->_tickTimer && this->_waitCounter < 30);
 	else if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
@@ -1297,6 +1312,8 @@ int ComboTrialEditor::pauseOnUpdate()
 			SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 			SokuLib::playSEWaveBuffer(0x28);
 			this->_selectingCharacters = false;
+			if (this->_selectedSubcategory == 1 && this->_menuCursorPos >= ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + ComboTrialEditor::_installProperties[SokuLib::leftChar].size())
+				this->_menuCursorPos = ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + ComboTrialEditor::_installProperties[SokuLib::leftChar].size() - 1;
 			*this->_characterEdit = static_cast<SokuLib::Character>(it->first);
 			return true;
 		}
@@ -1458,8 +1475,19 @@ int ComboTrialEditor::pauseOnUpdate()
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
 		if (this->_selectedSubcategory) {
-			if ((this->*ComboTrialEditor::callbacks[this->_selectedSubcategory][this->_menuCursorPos])())
+			if (this->_menuCursorPos < ComboTrialEditor::callbacks[this->_selectedSubcategory].size()) {
+				if ((this->*ComboTrialEditor::callbacks[this->_selectedSubcategory][this->_menuCursorPos])())
+					return true;
+			} else {
+				auto &b = (this->*ComboTrialEditor::_installProperties[SokuLib::leftChar][
+					this->_menuCursorPos - ComboTrialEditor::callbacks[this->_selectedSubcategory].size()
+				]);
+
+				b = !b;
+				this->_needInit = true;
+				SokuLib::playSEWaveBuffer(0x28);
 				return true;
+			}
 			reloadRequest = this->_needReload;
 			return false;
 		}
@@ -1476,8 +1504,12 @@ int ComboTrialEditor::pauseOnUpdate()
 
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 		if (this->_selectedSubcategory) {
-			this->_menuCursorPos += ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
-			this->_menuCursorPos %= ComboTrialEditor::callbacks[this->_selectedSubcategory].size();
+			auto size = ComboTrialEditor::callbacks[this->_selectedSubcategory].size();
+
+			if (this->_selectedSubcategory == 1)
+				size += ComboTrialEditor::_installProperties[SokuLib::leftChar].size();
+			this->_menuCursorPos += size + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+			this->_menuCursorPos %= size;
 		} else {
 			this->_menuCursorPos += 9 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
 			this->_menuCursorPos %= 9;
@@ -2462,8 +2494,17 @@ void ComboTrialEditor::playerRender() const
 		tickSprite.setPosition({304, 287});
 		tickSprite.draw();
 	}
-	if (SokuLib::leftChar < _installProperties.size() && !_installProperties[SokuLib::leftChar].empty())
+	if (SokuLib::leftChar < _installProperties.size() && !_installProperties[SokuLib::leftChar].empty()) {
 		this->_installSprites[SokuLib::leftChar]->draw();
+		for (int i = 0; i < _installProperties[SokuLib::leftChar].size(); i++) {
+			this->_rect.setPosition({305, 353 + 32 * i});
+			this->_rect.draw();
+			if (this->*_installProperties[SokuLib::leftChar][i]) {
+				tickSprite.setPosition({304, 351 + 32 * i});
+				tickSprite.draw();
+			}
+		}
+	}
 }
 
 void ComboTrialEditor::dummyRender() const

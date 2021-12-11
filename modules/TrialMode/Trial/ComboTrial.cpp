@@ -129,7 +129,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (this->_stones && player != SokuLib::CHARACTER_PATCHOULI)
 		throw std::invalid_argument("Philosopher's Stones is only allowed for Patchouli");
 	if (this->_orerries && player != SokuLib::CHARACTER_MARISA)
-		throw std::invalid_argument("Orerries's Sun is only allowed for Marisa");
+		throw std::invalid_argument("Orreries Sun is only allowed for Marisa");
 	if (this->_privateSquare && player != SokuLib::CHARACTER_SAKUYA)
 		throw std::invalid_argument("Private Square is only allowed for Sakuya");
 	if (this->_clones && player != SokuLib::CHARACTER_YOUMU)
