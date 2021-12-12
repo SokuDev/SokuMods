@@ -2449,6 +2449,9 @@ void openTrialEditPage()
 {
 	auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
 
+	for (auto &guide : editorGuides)
+		guide->active = false;
+	editorGuides[3]->active = true;
 	SokuLib::playSEWaveBuffer(0x28);
 	packEditScenario.opened = true;
 
@@ -2645,8 +2648,11 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 	if (packEditScenario.opened) {
 		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
 			SokuLib::playSEWaveBuffer(0x29);
-			if (saveCurrentPack())
+			if (saveCurrentPack()) {
 				packEditScenario.opened = false;
+				editorGuides[3]->active = false;
+				editorGuides[2]->active = true;
+			}
 			return false;
 		}
 		if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
