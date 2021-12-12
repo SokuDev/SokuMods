@@ -12,6 +12,23 @@
 #include "TrialBase.hpp"
 #include "PackOutro.hpp"
 
+class Guide {
+private:
+	SokuLib::DrawUtils::Sprite _sprite;
+	unsigned _timer = 0;
+
+	void _init();
+
+public:
+	bool active = false;
+
+	Guide(const char *gamePath);
+	Guide(HMODULE module, const char *resource);
+	SokuLib::Vector2i getPosition() const;
+	void update();
+	void render() const;
+};
+
 class ResultMenu : public SokuLib::IMenu {
 private:
 	bool _done = true;
