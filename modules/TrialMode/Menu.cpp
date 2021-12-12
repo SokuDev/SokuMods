@@ -75,6 +75,8 @@ static SokuLib::DrawUtils::Sprite version;
 static SokuLib::DrawUtils::Sprite editSeat;
 static SokuLib::DrawUtils::Sprite editScenarioSeat;
 static SokuLib::DrawUtils::Sprite editSeatForeground;
+static std::vector<std::unique_ptr<Guide>> noEditorGuides;
+static std::vector<std::unique_ptr<Guide>> editorGuides;
 
 static IDirect3DTexture9 **pphandle = nullptr;
 static IDirect3DTexture9 **pphandle2 = nullptr;
@@ -346,12 +348,16 @@ static struct PackEditPage {
 	void changeScale()
 	{
 		this->selectingScale = static_cast<bool>(loadedPacks[currentPack]->icon);
+		editorGuides[5]->active = true;
+		editorGuides[3]->active = false;
 		SokuLib::playSEWaveBuffer(0x29 - this->selectingScale);
 	}
 
 	void changePos()
 	{
 		this->selectingPos = static_cast<bool>(loadedPacks[currentPack]->icon);
+		editorGuides[4]->active = true;
+		editorGuides[3]->active = false;
 		SokuLib::playSEWaveBuffer(0x29 - this->selectingPos);
 	}
 
@@ -359,6 +365,8 @@ static struct PackEditPage {
 	{
 		this->chrCursorPos = 0;
 		this->selectingCharacters = true;
+		editorGuides[6]->active = true;
+		editorGuides[3]->active = false;
 		SokuLib::playSEWaveBuffer(0x29 - this->selectingCharacters);
 	}
 
@@ -1715,10 +1723,6 @@ void menuLoadAssets()
 #endif
 		defaultFont10, {300, 20}, &versionStrSize
 	);
-	version.setPosition({
-		639 - versionStrSize.x,
-		479 - versionStrSize.y
-	});
 	version.setSize({
 		static_cast<unsigned int>(versionStrSize.x),
 		static_cast<unsigned int>(versionStrSize.y)
@@ -1783,6 +1787,19 @@ failed:
 failed2:
 	loadPacks();
 
+	noEditorGuides.resize(3);
+	noEditorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(264));
+	noEditorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(268));
+	noEditorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(272));
+	editorGuides.resize(7);
+	editorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(276));
+	editorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(280));
+	editorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(284));
+	editorGuides[3] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(288));
+	editorGuides[4] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(292));
+	editorGuides[5] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(296));
+	editorGuides[6] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(300));
+
 	if (
 		nbPacks != loadedPacks.size() ||
 		nbName != uniqueNames.size() ||
@@ -1790,6 +1807,7 @@ failed2:
 		nbTopic != uniqueCategories.size()
 	) {
 		currentPack = -loadedPacks.empty();
+		noEditorGuides[loadedPacks.empty()]->active = true;
 		currentEntry = -1;
 		shownPack = 0;
 		nameFilter = -1;
@@ -1801,7 +1819,12 @@ failed2:
 		nbName = uniqueNames.size();
 		nbMode = uniqueModes.size();
 		nbTopic = uniqueCategories.size();
+		expended = false;
 	} else {
+		if (expended)
+			noEditorGuides[2]->active = true;
+		else
+			noEditorGuides[currentPack < 0]->active = true;
 		nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(), defaultFont12, {300, 20}, &nameFilterSize);
 		modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(), defaultFont12, {300, 20}, &modeFilterSize);
 		topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
@@ -1985,6 +2008,8 @@ void menuUnloadAssets()
 	uniqueCategories.clear();
 	packsByName.clear();
 	packsByCategory.clear();
+	noEditorGuides.clear();
+	editorGuides.clear();
 
 	editorMode = false;
 	packEditScenario.opened = false;
@@ -2080,6 +2105,19 @@ static void switchEditorMode()
 	packEditPage.opened = false;
 	packEditPage.selectingPos = false;
 	packEditPage.selectingScale = false;
+	if (editorMode)
+		for (int i = 0 ; i < noEditorGuides.size(); i++) {
+			editorGuides[i]->active = noEditorGuides[i]->active;
+			noEditorGuides[i]->active = false;
+		}
+	else {
+		for (int i = 0; i < noEditorGuides.size(); i++) {
+			noEditorGuides[i]->active = editorGuides[i]->active;
+			editorGuides[i]->active = false;
+		}
+		for (auto &guide : editorGuides)
+			guide->active = false;
+	}
 }
 
 void checkScrollDown()
@@ -2214,6 +2252,9 @@ static void handleGoUp()
 			//	loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 			break;
 		} while (true);
+		for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+			guide->active = false;
+		(editorMode ? editorGuides : noEditorGuides)[currentPack < 0]->active = true;
 	} else {
 		currentEntry--;
 		if (currentEntry == -1)
@@ -2255,6 +2296,9 @@ static void handleGoDown()
 				continue;
 			break;
 		} while (true);
+		for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+			guide->active = false;
+		(editorMode ? editorGuides : noEditorGuides)[currentPack < 0]->active = true;
 	} else {
 		currentEntry++;
 		if (currentEntry == loadedPacks[currentPack]->scenarios.size()) {
@@ -2290,6 +2334,9 @@ void openPackEditPage()
 
 	SokuLib::playSEWaveBuffer(0x28);
 	packEditPage.opened = true;
+	for (auto &guide : editorGuides)
+		guide->active = false;
+	editorGuides[3]->active = true;
 
 	packEditPage.name.texture.createFromText(pack->nameStr.c_str(), defaultFont12, {153, 23}, &size);
 	packEditPage.name.setSize({133, 13});
@@ -2642,6 +2689,8 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 				packEditPage.characters.texture.createFromText(result.c_str(), defaultFont12, {381, 23}, nullptr);
 				SokuLib::playSEWaveBuffer(0x29);
 				packEditPage.selectingCharacters = false;
+				editorGuides[6]->active = false;
+				editorGuides[3]->active = true;
 				return false;
 			}
 			if (SokuLib::inputMgrs.input.a == 1) {
@@ -2710,6 +2759,8 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 			if (SokuLib::inputMgrs.input.a == 1 || cond) {
 				SokuLib::playSEWaveBuffer(0x28 + cond);
 				packEditPage.selectingPos = false;
+				editorGuides[4]->active = false;
+				editorGuides[3]->active = true;
 				return true;
 			}
 			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
@@ -2739,6 +2790,8 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 			if (SokuLib::inputMgrs.input.a == 1 || cond) {
 				SokuLib::playSEWaveBuffer(0x28 + cond);
 				packEditPage.selectingScale = false;
+				editorGuides[5]->active = false;
+				editorGuides[3]->active = true;
 				return true;
 			}
 			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
@@ -2775,8 +2828,11 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 		} else {
 			if (cond) {
 				SokuLib::playSEWaveBuffer(0x29);
-				if (saveCurrentPack())
+				if (saveCurrentPack()) {
 					packEditPage.opened = false;
+					editorGuides[2]->active = true;
+					editorGuides[3]->active = false;
+				}
 				return false;
 			}
 			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
@@ -2800,7 +2856,7 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 		}
 		return true;
 	}
-	if (SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0) {
+	if (SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0 && !expended) {
 		try {
 			loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
 		} catch (std::exception &e) {
@@ -2809,7 +2865,7 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 		}
 		return true;
 	}
-	if (SokuLib::inputMgrs.input.c == 1) {
+	if (SokuLib::inputMgrs.input.c == 1 && !expended) {
 		std::string folder{packsLocation, packsLocation + strlen(packsLocation) - 1};
 		auto result = InputBox("Enter a folder name", "Folder name", "");
 		auto path = folder + result;
@@ -3007,6 +3063,9 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 			packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
 			if (currentEntry > 15)
 				entryStart = currentEntry - 15;
+			for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+				guide->active = false;
+			(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
 		} else {
 			if (!isLocked(currentEntry) || editorMode) {
 				puts("Start game !");
@@ -3061,7 +3120,12 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	}
 	updateNoiseTexture();
 	updateBandTexture();
-
+	for (auto &guide : noEditorGuides)
+		if (guide)
+			guide->update();
+	for (auto &guide : editorGuides)
+		if (guide)
+			guide->update();
 	if (!loadedOutro) {
 		if (editorMode && !editorUpdate())
 			return true;
@@ -3071,6 +3135,9 @@ int menuOnProcess(SokuLib::MenuResult *This)
 				if (expended) {
 					expended = false;
 					currentEntry = -1;
+					for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+						guide->active = false;
+					(editorMode ? editorGuides : noEditorGuides)[currentPack < 0]->active = true;
 				} else {
 					puts("Quit");
 					return loading;
@@ -3304,7 +3371,26 @@ void menuOnRender(SokuLib::MenuResult *This)
 			break;
 	}
 
+	Guide *guide = nullptr;
+
+	for (auto &g : noEditorGuides)
+		if (g) {
+			g->render();
+			if (g->active)
+				guide = &*g;
+		}
+	for (auto &g : editorGuides)
+		if (g) {
+			g->render();
+			if (g->active)
+				guide = &*g;
+		}
+
 	previewContainer.draw();
+	version.setPosition({
+		639 - versionStrSize.x,
+		(guide ? guide->getPosition().y : 480) - versionStrSize.y - 1
+	});
 	version.draw();
 	if (loadedPacks.empty()) {
 		goto displayOutro;
@@ -3352,4 +3438,57 @@ displayOutro:
 		loadedOutro->draw();
 	if (editorMode)
 		editorRender();
+}
+
+void Guide::_init()
+{
+	this->_sprite.setPosition({0, static_cast<int>(480 - this->_sprite.texture.getSize().y)});
+	this->_sprite.setSize({639, this->_sprite.texture.getSize().y - 1});
+	this->_sprite.rect.width = this->_sprite.getSize().x + 1;
+	this->_sprite.rect.height = this->_sprite.getSize().y + 1;
+	this->_sprite.tint.a = 0;
+}
+
+Guide::Guide(const char *gamePath)
+{
+	this->_sprite.texture.loadFromGame(gamePath);
+	this->_init();
+}
+
+Guide::Guide(HMODULE module, const char *resource)
+{
+	this->_sprite.texture.loadFromResource(module, resource);
+	this->_init();
+}
+
+#define GUIDE_SCROLL_TIME_START 60
+#define GUIDE_SCROLL_TIME_END 120
+
+void Guide::update()
+{
+	if (this->active && this->_sprite.tint.a != 255)
+		this->_sprite.tint.a += 15;
+	else if (!this->active && this->_sprite.tint.a)
+		this->_sprite.tint.a -= 15;
+	if ((!this->active && !this->_sprite.tint.a) || this->_timer >= GUIDE_SCROLL_TIME_START + GUIDE_SCROLL_TIME_END) {
+		this->_sprite.rect.left = 0;
+		this->_timer = 0;
+	} else if (
+		this->_timer < GUIDE_SCROLL_TIME_START ||
+		(this->_sprite.texture.getSize().x - 1 <= this->_sprite.getSize().x + this->_sprite.rect.left && this->_timer == GUIDE_SCROLL_TIME_START) ||
+		(this->_timer < GUIDE_SCROLL_TIME_START + GUIDE_SCROLL_TIME_END && this->_timer != GUIDE_SCROLL_TIME_START)
+	)
+		this->_timer++;
+	else
+		this->_sprite.rect.left++;
+}
+
+void Guide::render() const
+{
+	this->_sprite.draw();
+}
+
+SokuLib::Vector2i Guide::getPosition() const
+{
+	return this->_sprite.getPosition();
 }
