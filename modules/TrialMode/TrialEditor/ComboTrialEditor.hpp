@@ -120,6 +120,7 @@ private:
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
 
 	//Editor
+	std::vector<std::unique_ptr<Guide>> _guides;
 	std::string _path;
 	int _scoreCursorPos = 0;
 	unsigned _musicTop = 0;
@@ -206,12 +207,9 @@ private:
 	bool setSRankRequ();
 	bool setCounterHit();
 	bool setLimitDisabled();
-	bool setCardCosts();
 	bool setCombo();
 	bool setStage();
 	bool setMusic();
-	bool setWeather();
-	bool setFailTimer();
 	bool setOutro();
 	bool setIntro();
 	bool saveOnly();
@@ -219,6 +217,7 @@ private:
 	bool playIntro();
 	bool playOutro();
 	bool playPreview();
+	bool noEffect();
 	static const std::vector<bool (ComboTrialEditor::*)()> callbacks[];
 
 	void noRender() const;

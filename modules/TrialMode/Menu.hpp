@@ -27,6 +27,7 @@ public:
 	SokuLib::Vector2i getPosition() const;
 	void update();
 	void render() const;
+	void reset();
 };
 
 class ResultMenu : public SokuLib::IMenu {

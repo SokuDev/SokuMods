@@ -1788,17 +1788,17 @@ failed2:
 	loadPacks();
 
 	noEditorGuides.resize(3);
-	noEditorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(264));
-	noEditorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(268));
-	noEditorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(272));
+	noEditorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(300));
+	noEditorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(304));
+	noEditorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(308));
 	editorGuides.resize(7);
-	editorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(276));
-	editorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(280));
-	editorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(284));
-	editorGuides[3] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(288));
-	editorGuides[4] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(292));
-	editorGuides[5] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(296));
-	editorGuides[6] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(300));
+	editorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(312));
+	editorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(316));
+	editorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(320));
+	editorGuides[3] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(324));
+	editorGuides[4] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(328));
+	editorGuides[5] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(332));
+	editorGuides[6] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(336));
 
 	if (
 		nbPacks != loadedPacks.size() ||
@@ -1808,6 +1808,10 @@ failed2:
 	) {
 		currentPack = -loadedPacks.empty();
 		noEditorGuides[loadedPacks.empty()]->active = true;
+		for (auto &guide : noEditorGuides)
+			guide->reset();
+		for (auto &guide : editorGuides)
+			guide->reset();
 		currentEntry = -1;
 		shownPack = 0;
 		nameFilter = -1;
@@ -1825,6 +1829,10 @@ failed2:
 			noEditorGuides[2]->active = true;
 		else
 			noEditorGuides[currentPack < 0]->active = true;
+		for (auto &guide : noEditorGuides)
+			guide->reset();
+		for (auto &guide : editorGuides)
+			guide->reset();
 		nameFilterText.texture.createFromText( nameFilter == -1  ? "Any name" : uniqueNames[nameFilter].c_str(), defaultFont12, {300, 20}, &nameFilterSize);
 		modeFilterText.texture.createFromText( modeFilter == -1  ? "Any mode" : uniqueModes[modeFilter].c_str(), defaultFont12, {300, 20}, &modeFilterSize);
 		topicFilterText.texture.createFromText(topicFilter == -1 ? "Any topic" : uniqueCategories[topicFilter].c_str(), defaultFont12, {300, 20}, &topicFilterSize);
@@ -2117,6 +2125,12 @@ static void switchEditorMode()
 		}
 		for (auto &guide : editorGuides)
 			guide->active = false;
+
+		if (currentEntry != -1 && isLocked(currentEntry)) {
+			auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
+
+			lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
+		}
 	}
 }
 
@@ -3497,4 +3511,11 @@ void Guide::render() const
 SokuLib::Vector2i Guide::getPosition() const
 {
 	return this->_sprite.getPosition();
+}
+
+void Guide::reset()
+{
+	this->_timer = 0;
+	this->_sprite.rect.left = 0;
+	this->_sprite.tint.a = this->active * 255;
 }

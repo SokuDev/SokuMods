@@ -30,21 +30,18 @@
     },
     "score": [
         {
-            "min_damage": 0,
-            "min_hits": 0,
-            "min_limit": 0
-        },
-        {
-            "max_attempts": 20,
-            "min_damage": 4267,
-            "min_hits": 11,
-            "min_limit": 130
+            "min_damage": 2737,
+            "min_hits": 17,
+            "min_limit": 80
         },
         {
             "max_attempts": 10
         },
         {
             "max_attempts": 5
+        },
+        {
+            "max_attempts": 1
         }
     ],
     "skills": [

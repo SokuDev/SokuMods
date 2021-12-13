@@ -442,6 +442,20 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 
 	for (int i = 0; i < 4; i++)
 		this->_refreshScoreSprites(i);
+	this->_guides.resize(12);
+	this->_guides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(340));
+	this->_guides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(344));
+	this->_guides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(348));
+	this->_guides[3] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(352));
+	this->_guides[4] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(356));
+	this->_guides[5] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(360));
+	this->_guides[6] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(364));
+	this->_guides[7] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(368));
+	this->_guides[8] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(372));
+	this->_guides[9] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(376));
+	this->_guides[10]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(380));
+	this->_guides[11]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(384));
+	this->_guides[0]->active = true;
 }
 
 ComboTrialEditor::~ComboTrialEditor()
@@ -460,6 +474,9 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 
 	if (*(char*)0x89a88c == 2)
 		return true;
+	if (this->_managingDolls || this->_changingPlayerPos || this->_changingDummyPos || this->_comboPageDisplayed)
+		for (auto &guide : this->_guides)
+			guide->update();
 	if (this->_isRecordingScore) {
 		this->_scores[this->_scoreEdited].hits     = max(this->_scores[this->_scoreEdited].hits,     battleMgr.leftCharacterManager.combo.nbHits);
 		this->_scores[this->_scoreEdited].damage   = max(this->_scores[this->_scoreEdited].damage,   battleMgr.leftCharacterManager.combo.damages);
@@ -471,6 +488,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	}
 	if (this->_changingPlayerPos)
 		battleMgr.leftCharacterManager.objectBase.position.x = this->_fakePlayerPos;
+	else if (this->_changingDummyPos)
+		SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
 		SokuLib::displayedWeather = this->_weather;
@@ -530,20 +549,6 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		SokuLib::camera.backgroundTranslate.x = 640;
 		SokuLib::camera.backgroundTranslate.y = 0;
 		SokuLib::camera.scale = 0.5;
-		if (SokuLib::inputMgrs.input.spellcard == 1 && this->_dollCursorPos != this->_dolls.size()) {
-			this->_dolls.erase(this->_dolls.begin() + this->_dollCursorPos);
-			this->_initGameStart();
-			SokuLib::playSEWaveBuffer(0x29);
-		}
-		if (SokuLib::inputMgrs.input.b == 1) {
-			this->_openPause();
-			SokuLib::playSEWaveBuffer(0x29);
-		}
-		if (SokuLib::inputMgrs.input.c == 1 && this->_dollCursorPos != this->_dolls.size()) {
-			SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->direction = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
-			this->_dolls[this->_dollCursorPos].dir = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
-			SokuLib::playSEWaveBuffer(0x28);
-		}
 		if (SokuLib::inputMgrs.input.a == 1) {
 			if (this->_dollCursorPos == this->_dolls.size()) {
 				SokuLib::playSEWaveBuffer(0x28);
@@ -552,9 +557,13 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 					SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction
 				});
 				this->_initGameStart();
+				this->_guides[11]->active = false;
+				this->_guides[10]->active = true;
 			} else {
-				SokuLib::playSEWaveBuffer(0x28 + this->_dollSelected);
+				SokuLib::playSEWaveBuffer(0x28);
 				this->_dollSelected = !this->_dollSelected;
+				this->_guides[9]->active = this->_dollSelected;
+				this->_guides[10]->active = !this->_dollSelected;
 			}
 		}
 		if (this->_dollSelected) {
@@ -565,19 +574,45 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			if (SokuLib::inputMgrs.input.verticalAxis)
 				pos.y += std::copysign(6, -SokuLib::inputMgrs.input.verticalAxis);
 			this->_dolls[this->_dollCursorPos].pos = pos;
+			if (SokuLib::inputMgrs.input.b == 1) {
+				SokuLib::playSEWaveBuffer(0x29);
+				this->_dollSelected = false;
+				this->_guides[9]->active = false;
+				this->_guides[10]->active = true;
+			}
 		} else {
 			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || SokuLib::inputMgrs.input.verticalAxis == -1) {
 				if (this->_dollCursorPos == 0)
 					this->_dollCursorPos = this->_dolls.size();
 				else
 					this->_dollCursorPos--;
+				this->_guides[10]->active = this->_dollCursorPos != this->_dolls.size();
+				this->_guides[11]->active = this->_dollCursorPos == this->_dolls.size();
 				SokuLib::playSEWaveBuffer(0x27);
 			} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || SokuLib::inputMgrs.input.verticalAxis == 1) {
 				if (this->_dollCursorPos == this->_dolls.size())
 					this->_dollCursorPos = 0;
 				else
 					this->_dollCursorPos++;
+				this->_guides[10]->active = this->_dollCursorPos != this->_dolls.size();
+				this->_guides[11]->active = this->_dollCursorPos == this->_dolls.size();
 				SokuLib::playSEWaveBuffer(0x27);
+			}
+			if (SokuLib::inputMgrs.input.spellcard == 1 && this->_dollCursorPos != this->_dolls.size()) {
+				this->_dolls.erase(this->_dolls.begin() + this->_dollCursorPos);
+				this->_initGameStart();
+				SokuLib::playSEWaveBuffer(0x29);
+				this->_guides[10]->active = this->_dollCursorPos != this->_dolls.size();
+				this->_guides[11]->active = this->_dollCursorPos == this->_dolls.size();
+			}
+			if (SokuLib::inputMgrs.input.c == 1 && this->_dollCursorPos != this->_dolls.size()) {
+				SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->direction = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
+				this->_dolls[this->_dollCursorPos].dir = static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
+				SokuLib::playSEWaveBuffer(0x28);
+			}
+			if (SokuLib::inputMgrs.input.b == 1) {
+				this->_openPause();
+				SokuLib::playSEWaveBuffer(0x29);
 			}
 		}
 	} else if (this->_comboPageDisplayed && !this->_playingIntro) {
@@ -776,6 +811,10 @@ void ComboTrialEditor::render() const
 		);
 	}
 
+	if (this->_managingDolls || this->_changingPlayerPos || this->_changingDummyPos)
+		for (auto &guide : this->_guides)
+			guide->render();
+
 	if (!this->_playingIntro)
 		this->_attemptText.draw();
 	else
@@ -785,6 +824,8 @@ void ComboTrialEditor::render() const
 		this->_comboEditBG.draw();
 		displaySokuCursor({331, static_cast<int>(111 + 26 * this->_comboEditCursor)}, {112, 16});
 		this->_comboEditFG.draw();
+		for (auto &guide : this->_guides)
+			guide->render();
 	}
 
 	SokuLib::Vector2i pos = {160, 60};
@@ -1068,6 +1109,8 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 			this->_openPause();
 			this->_playerStartPos = this->_fakePlayerPos;
 			this->_changingPlayerPos = false;
+			this->_guides[4]->active = true;
+			this->_guides[8]->active = false;
 			SokuLib::playSEWaveBuffer(0x28);
 			originalInputs.a = 0;
 		}
@@ -1088,6 +1131,8 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 		if (originalInputs.a == 1) {
 			this->_openPause();
 			this->_changingDummyPos = false;
+			this->_guides[4]->active = true;
+			this->_guides[9]->active = false;
 			this->_jump &= this->_dummyStartPos.y == 0;
 			this->_crouching &= this->_dummyStartPos.y == 0;
 			SokuLib::playSEWaveBuffer(0x28);
@@ -1275,20 +1320,32 @@ int ComboTrialEditor::pauseOnUpdate()
 		if (this->_comboPageDisplayed)
 			return false;
 	}
-	if (this->_comboPageDisplayed)
+	if (this->_comboPageDisplayed) {
 		this->_comboPageDisplayed = false;
+		this->_guides[4]->active = true;
+		this->_guides[0]->active = false;
+	}
 	if (this->_recordingCombo) {
 		this->_comboPageDisplayed = true;
 		SokuLib::playSEWaveBuffer(0x28);
 		return false;
 	}
+	for (auto &guide : this->_guides)
+		guide->update();
 	if (this->_managingDolls) {
 		this->_managingDolls = false;
 		SokuLib::camera = this->_oldCamera;
+		this->_guides[4]->active = true;
+		this->_guides[9]->active = false;
+		this->_guides[10]->active = false;
+		this->_guides[11]->active = false;
 	}
 	if (this->_changingPlayerPos || this->_changingDummyPos) {
 		this->_changingPlayerPos = false;
 		this->_changingDummyPos = false;
+		this->_guides[4]->active = true;
+		this->_guides[8]->active = false;
+		this->_guides[9]->active = false;
 		this->_dummyStartPos = this->_dummyStartPosTmp;
 		SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	}
@@ -1296,6 +1353,8 @@ int ComboTrialEditor::pauseOnUpdate()
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
 			this->_selectingCharacters = false;
+			this->_guides[2]->active = false;
+			this->_guides[4]->active = true;
 			return true;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
@@ -1312,6 +1371,8 @@ int ComboTrialEditor::pauseOnUpdate()
 			SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 			SokuLib::playSEWaveBuffer(0x28);
 			this->_selectingCharacters = false;
+			this->_guides[4]->active = false;
+			this->_guides[2]->active = true;
 			if (this->_selectedSubcategory == 1 && this->_menuCursorPos >= ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + ComboTrialEditor::_installProperties[SokuLib::leftChar].size())
 				this->_menuCursorPos = ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + ComboTrialEditor::_installProperties[SokuLib::leftChar].size() - 1;
 			*this->_characterEdit = static_cast<SokuLib::Character>(it->first);
@@ -1325,6 +1386,8 @@ int ComboTrialEditor::pauseOnUpdate()
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
 			this->_selectingStage = false;
+			this->_guides[4]->active = true;
+			this->_guides[0]->active = false;
 			return true;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
@@ -1364,6 +1427,8 @@ int ComboTrialEditor::pauseOnUpdate()
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
 			this->_selectingMusic = false;
+			this->_guides[4]->active = true;
+			this->_guides[2]->active = false;
 			return true;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
@@ -1434,6 +1499,9 @@ int ComboTrialEditor::pauseOnUpdate()
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
 			this->_editingScore = false;
+			for (auto &guide : this->_guides)
+				guide->active = false;
+			this->_guides[4]->active = true;
 			return true;
 		}
 		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
@@ -1447,6 +1515,12 @@ int ComboTrialEditor::pauseOnUpdate()
 				this->_scoreCursorPos = 6;
 			else if (this->_scoreCursorPos > 7)
 				this->_scoreCursorPos = 0;
+			for (auto &guide : this->_guides)
+				guide->active = false;
+			if (this->_scoreCursorPos >= 4)
+				this->_guides[6 + this->_scoreCursorPos % 2]->active = true;
+			else
+				this->_guides[5]->active = true;
 			SokuLib::playSEWaveBuffer(0x27);
 		}
 		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
@@ -1456,6 +1530,12 @@ int ComboTrialEditor::pauseOnUpdate()
 				this->_scoreEdited = static_cast<int>(this->_scoreEdited + 4 + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % 4;
 				this->_score.rect.left = this->_scoreEdited * this->_score.texture.getSize().x / 4;
 			}
+			for (auto &guide : this->_guides)
+				guide->active = false;
+			if (this->_scoreCursorPos >= 4)
+				this->_guides[6 + this->_scoreCursorPos % 2]->active = true;
+			else
+				this->_guides[5]->active = true;
 			SokuLib::playSEWaveBuffer(0x27);
 		}
 		if (SokuLib::inputMgrs.input.a == 1)
@@ -1463,12 +1543,20 @@ int ComboTrialEditor::pauseOnUpdate()
 		return true;
 	}
 
-	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
+	auto c = SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false);
+
+	if (c || SokuLib::inputMgrs.input.b == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
-		if (!this->_selectedSubcategory) {
+		for (auto &guide : this->_guides)
+			guide->active = false;
+		if (!this->_selectedSubcategory || c) {
 			reloadRequest = this->_needReload;
+			this->_guides[0]->active = true;
+			for (auto &guide : this->_guides)
+				guide->reset();
 			return this->_menuCursorPos = 0;
 		}
+		this->_guides[1]->active = true;
 		this->_menuCursorPos = this->_selectedSubcategory;
 		this->_selectedSubcategory = 0;
 		return true;
@@ -1498,6 +1586,9 @@ int ComboTrialEditor::pauseOnUpdate()
 			return false;
 		}
 		this->_selectedSubcategory = this->_menuCursorPos;
+		for (auto &guide : this->_guides)
+			guide->active = false;
+		this->_guides[4]->active = true;
 		this->_menuCursorPos = 0;
 		SokuLib::playSEWaveBuffer(0x28);
 	}
@@ -1510,9 +1601,18 @@ int ComboTrialEditor::pauseOnUpdate()
 				size += ComboTrialEditor::_installProperties[SokuLib::leftChar].size();
 			this->_menuCursorPos += size + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
 			this->_menuCursorPos %= size;
+			for (auto &guide : this->_guides)
+				guide->active = false;
+			this->_guides[4 - (
+				this->_menuCursorPos < ComboTrialEditor::callbacks[this->_selectedSubcategory].size() &&
+				ComboTrialEditor::callbacks[this->_selectedSubcategory][this->_menuCursorPos] == &ComboTrialEditor::noEffect
+			)]->active = true;
 		} else {
 			this->_menuCursorPos += 9 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
 			this->_menuCursorPos %= 9;
+			for (auto &guide : this->_guides)
+				guide->active = false;
+			this->_guides[ComboTrialEditor::callbacks[this->_menuCursorPos].size() > 1]->active = true;
 		}
 		SokuLib::playSEWaveBuffer(0x27);
 	}
@@ -1624,6 +1724,8 @@ int ComboTrialEditor::pauseOnRender() const
 		this->_damages[this->_scoreEdited].draw();
 		this->_limits[this->_scoreEdited].draw();
 	}
+	for (auto &guide : this->_guides)
+		guide->render();
 	return true;
 }
 
@@ -1653,14 +1755,14 @@ const std::vector<bool (ComboTrialEditor::*)()> ComboTrialEditor::callbacks[] = 
 		&ComboTrialEditor::setSRankRequ,    //S rank
 		&ComboTrialEditor::setCounterHit,   //Counter hit
 		&ComboTrialEditor::setLimitDisabled,//Limit disable
-		&ComboTrialEditor::setCardCosts,    //Card cost
+		&ComboTrialEditor::noEffect,        //Card cost
 		&ComboTrialEditor::setCombo         //Combo
 	},
 	{	//Misc
 		&ComboTrialEditor::setStage,    //Stage
 		&ComboTrialEditor::setMusic,    //Music
-		&ComboTrialEditor::setWeather,  //Weather
-		&ComboTrialEditor::setFailTimer,//Fail timer
+		&ComboTrialEditor::noEffect,    //Weather
+		&ComboTrialEditor::noEffect,    //Fail timer
 		&ComboTrialEditor::setIntro,    //Intro
 		&ComboTrialEditor::setOutro,    //Outro
 		&ComboTrialEditor::playIntro,   //Play intro
@@ -1696,6 +1798,8 @@ bool ComboTrialEditor::returnToGame()
 bool ComboTrialEditor::setPlayerCharacter()
 {
 	this->_selectingCharacters = true;
+	this->_guides[4]->active = false;
+	this->_guides[2]->active = true;
 	this->_characterEdit = &SokuLib::leftChar;
 	this->_chrCursorPos = std::find(orderChrs.begin(), orderChrs.end(), chrs[SokuLib::leftChar]) - orderChrs.begin();
 	SokuLib::playSEWaveBuffer(0x28);
@@ -1706,6 +1810,8 @@ bool ComboTrialEditor::setPlayerPosition()
 {
 	this->_changingPlayerPos = true;
 	this->_dummyStartPosTmp = this->_dummyStartPos;
+	this->_guides[4]->active = false;
+	this->_guides[8]->active = true;
 	this->_fakePlayerPos = SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
@@ -1853,6 +1959,8 @@ bool ComboTrialEditor::setPlayerDolls()
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_dollCursorPos = 0;
 	this->_managingDolls = true;
+	this->_guides[4]->active = false;
+	this->_guides[10 + this->_dolls.empty()]->active = true;
 	this->_initGameStart();
 	return false;
 }
@@ -1860,6 +1968,8 @@ bool ComboTrialEditor::setPlayerDolls()
 bool ComboTrialEditor::setDummyCharacter()
 {
 	this->_selectingCharacters = true;
+	this->_guides[4]->active = false;
+	this->_guides[2]->active = true;
 	this->_characterEdit = &SokuLib::rightChar;
 	this->_chrCursorPos = std::find(orderChrs.begin(), orderChrs.end(), chrs[SokuLib::rightChar]) - orderChrs.begin();
 	SokuLib::playSEWaveBuffer(0x28);
@@ -1870,6 +1980,8 @@ bool ComboTrialEditor::setDummyPosition()
 {
 	this->_changingDummyPos = true;
 	this->_dummyStartPosTmp = this->_dummyStartPos;
+	this->_guides[4]->active = false;
+	this->_guides[9 - this->_jump]->active = true;
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
@@ -1952,6 +2064,12 @@ bool ComboTrialEditor::setCRankRequ()
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_editingScore = true;
 	this->_scoreEdited = 0;
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	if (this->_scoreCursorPos >= 4)
+		this->_guides[6 + this->_scoreCursorPos % 2]->active = true;
+	else
+		this->_guides[5]->active = true;
 	this->_score.rect.left = 0;
 	return true;
 }
@@ -1961,6 +2079,12 @@ bool ComboTrialEditor::setBRankRequ()
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_editingScore = true;
 	this->_scoreEdited = 1;
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	if (this->_scoreCursorPos >= 4)
+		this->_guides[6 + this->_scoreCursorPos % 2]->active = true;
+	else
+		this->_guides[5]->active = true;
 	this->_score.rect.left = this->_score.texture.getSize().x / 4;
 	return true;
 }
@@ -1970,6 +2094,12 @@ bool ComboTrialEditor::setARankRequ()
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_editingScore = true;
 	this->_scoreEdited = 2;
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	if (this->_scoreCursorPos >= 4)
+		this->_guides[6 + this->_scoreCursorPos % 2]->active = true;
+	else
+		this->_guides[5]->active = true;
 	this->_score.rect.left = this->_score.texture.getSize().x / 2;
 	return true;
 }
@@ -1979,6 +2109,12 @@ bool ComboTrialEditor::setSRankRequ()
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_editingScore = true;
 	this->_scoreEdited = 3;
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	if (this->_scoreCursorPos >= 4)
+		this->_guides[6 + this->_scoreCursorPos % 2]->active = true;
+	else
+		this->_guides[5]->active = true;
 	this->_score.rect.left = 3 * this->_score.texture.getSize().x / 4;
 	return true;
 }
@@ -2001,15 +2137,12 @@ bool ComboTrialEditor::setLimitDisabled()
 	return true;
 }
 
-bool ComboTrialEditor::setCardCosts()
-{
-	return true;
-}
-
 bool ComboTrialEditor::setCombo()
 {
 	this->_comboPageDisplayed = true;
 	this->_comboEditCursor = 0;
+	this->_guides[4]->active = false;
+	this->_guides[0]->active = true;
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
 }
@@ -2018,6 +2151,8 @@ bool ComboTrialEditor::setStage()
 {
 	auto it = std::find(ComboTrialEditor::_stagesIds.begin(), ComboTrialEditor::_stagesIds.end(), *(char *)0x899D0C);
 
+	this->_guides[4]->active = false;
+	this->_guides[0]->active = true;
 	this->_stageCursor = ((it == ComboTrialEditor::_stagesIds.end()) ? (ComboTrialEditor::_stagesIds.size() - 1) : (it - ComboTrialEditor::_stagesIds.begin()));
 	this->_setupStageSprites();
 	SokuLib::playSEWaveBuffer(0x28);
@@ -2030,6 +2165,8 @@ bool ComboTrialEditor::setMusic()
 		return this->_musicReal == std::get<1>(t);
 	});
 
+	this->_guides[4]->active = false;
+	this->_guides[2]->active = true;
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_selectingMusic = true;
 	this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 1 : it - this->_musics.begin();
@@ -2038,16 +2175,6 @@ bool ComboTrialEditor::setMusic()
 	else
 		this->_musicTop = 0;
 	return true;
-}
-
-bool ComboTrialEditor::setWeather()
-{
-	return true;
-}
-
-bool ComboTrialEditor::setFailTimer()
-{
-	return notImplemented();
 }
 
 bool ComboTrialEditor::setIntro()
@@ -2083,6 +2210,11 @@ bool ComboTrialEditor::setOutro()
 bool ComboTrialEditor::playIntro()
 {
 	this->_introRequ++;
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	this->_guides[0]->active = true;
+	for (auto &guide : this->_guides)
+		guide->reset();
 	this->_menuCursorPos = 0;
 	this->_selectedSubcategory = 0;
 	SokuLib::playSEWaveBuffer(0x28);
@@ -2092,7 +2224,12 @@ bool ComboTrialEditor::playIntro()
 bool ComboTrialEditor::playOutro()
 {
 	this->_outroRequ++;
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	this->_guides[0]->active = true;
 	this->_menuCursorPos = 0;
+	for (auto &guide : this->_guides)
+		guide->reset();
 	this->_selectedSubcategory = 0;
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
@@ -2100,7 +2237,12 @@ bool ComboTrialEditor::playOutro()
 
 bool ComboTrialEditor::playPreview()
 {
+	for (auto &guide : this->_guides)
+		guide->active = false;
+	this->_guides[0]->active = true;
 	this->_menuCursorPos = 0;
+	for (auto &guide : this->_guides)
+		guide->reset();
 	this->_selectedSubcategory = 0;
 	this->_playComboAfterIntro = true;
 	this->_initGameStart();
@@ -2851,6 +2993,11 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_limits[i].setSize(size.to<unsigned>());
 	this->_limits[i].rect.width = this->_limits[i].getSize().x;
 	this->_limits[i].rect.height = this->_limits[i].getSize().y;
+}
+
+bool ComboTrialEditor::noEffect()
+{
+	return true;
 }
 
 void ComboTrialEditor::SpecialAction::parse()
