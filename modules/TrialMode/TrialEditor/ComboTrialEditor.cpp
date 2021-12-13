@@ -1375,6 +1375,11 @@ int ComboTrialEditor::pauseOnUpdate()
 			this->_guides[2]->active = true;
 			if (this->_selectedSubcategory == 1 && this->_menuCursorPos >= ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + ComboTrialEditor::_installProperties[SokuLib::leftChar].size())
 				this->_menuCursorPos = ComboTrialEditor::callbacks[this->_selectedSubcategory].size() + ComboTrialEditor::_installProperties[SokuLib::leftChar].size() - 1;
+			if (this->_selectedSubcategory == 1) {
+				this->_hand.clear();
+				SokuLib::leftPlayerInfo.effectiveDeck.clear();
+			} else
+				SokuLib::rightPlayerInfo.effectiveDeck.clear();
 			*this->_characterEdit = static_cast<SokuLib::Character>(it->first);
 			return true;
 		}
@@ -2732,6 +2737,7 @@ bool ComboTrialEditor::_copyDeckToPlayerDeck()
 	}
 	assert(SokuLib::leftPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
 	this->_needReload = true;
+	this->_hand.clear();
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
 }
