@@ -279,13 +279,13 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		this->_waitCounter--;
 	} else if (this->_playingIntro)
 		this->_playIntro();
-	else if (this->_actionCounter != this->_exceptedActions.size()) {
+	else if (this->_actionCounter != this->_expectedActions.size()) {
 		auto i = this->_actionCounter;
 
-		while (i == this->_actionCounter || this->_exceptedActions[i - 1]->optional) {
-			if (i >= this->_exceptedActions.size())
+		while (i == this->_actionCounter || this->_expectedActions[i - 1]->optional) {
+			if (i >= this->_expectedActions.size())
 				break;
-			for (auto act : this->_exceptedActions[i]->actions)
+			for (auto act : this->_expectedActions[i]->actions)
 				if (
 					addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == act &&
 					isStartOfMove(act, battleMgr.leftCharacterManager, SokuLib::leftChar)
@@ -301,8 +301,8 @@ checkFinish:
 	if (!this->_finished && this->_scores.front().met(this->_attempts)) {
 		auto i = this->_actionCounter;
 
-		while (i < this->_exceptedActions.size()) {
-			if (!this->_exceptedActions[i]->optional)
+		while (i < this->_expectedActions.size()) {
+			if (!this->_expectedActions[i]->optional)
 				goto disableLimit;
 			i++;
 		}
@@ -392,8 +392,8 @@ void ComboTrial::render() const
 
 	auto last = 0;
 
-	for (int i = 0; i < this->_exceptedActions.size(); i++) {
-		auto &elem = this->_exceptedActions[i];
+	for (int i = 0; i < this->_expectedActions.size(); i++) {
+		auto &elem = this->_expectedActions[i];
 
 		if (this->_actionCounter == i)
 			elem->sprite.tint = SokuLib::DrawUtils::DxSokuColor{0x60, 0xFF, 0x60};
@@ -404,7 +404,7 @@ void ComboTrial::render() const
 		else {
 			bool good = false;
 
-			for (int j = i; j > 0 && this->_exceptedActions[j - 1]->optional; j--)
+			for (int j = i; j > 0 && this->_expectedActions[j - 1]->optional; j--)
 				good |= (j - 1) == this->_actionCounter;
 
 			if (good)
@@ -570,29 +570,29 @@ void ComboTrial::_loadExpected(const std::string &expected)
 	bool par = false;
 	char last = ' ';
 
-	this->_exceptedActions.clear();
-	this->_exceptedActions.emplace_back(new SpecialAction());
+	this->_expectedActions.clear();
+	this->_expectedActions.emplace_back(new SpecialAction());
 	for (auto c : expected) {
 		par |= c == '(';
 		par &= c != ')';
 		if (!par && c == ' ') {
 			if (last != ' ')
-				this->_exceptedActions.emplace_back(new SpecialAction());
+				this->_expectedActions.emplace_back(new SpecialAction());
 		} else
-			this->_exceptedActions.back()->name += c;
+			this->_expectedActions.back()->name += c;
 		last = c;
 	}
-	for (auto &action : this->_exceptedActions)
+	for (auto &action : this->_expectedActions)
 		action->parse();
 }
 
 void ComboTrial::_playIntro()
 {
-	if (this->_actionCounter == this->_exceptedActions.size())
+	if (this->_actionCounter == this->_expectedActions.size())
 		return;
 
 	auto &battleMgr = SokuLib::getBattleMgr();
-	auto &arr = this->_exceptedActions[this->_actionCounter];
+	auto &arr = this->_expectedActions[this->_actionCounter];
 
 	if (this->_actionWaitCounter < arr->delay) {
 		this->_actionWaitCounter++;
@@ -625,12 +625,12 @@ void ComboTrial::_playIntro()
 void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
 	if (this->_playingIntro) {
-		if (this->_actionCounter == this->_exceptedActions.size())
+		if (this->_actionCounter == this->_expectedActions.size())
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 		if (this->_waitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 
-		auto &arr = this->_exceptedActions[this->_actionCounter];
+		auto &arr = this->_expectedActions[this->_actionCounter];
 
 		if (arr->delay > this->_actionWaitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
@@ -726,7 +726,7 @@ void ComboTrial::onMenuClosed(MenuAction action)
 	case RETRY:
 		this->_attempts = 0;
 		this->_playingIntro = true;
-		this->_actionCounter = this->_exceptedActions.size();
+		this->_actionCounter = this->_expectedActions.size();
 		break;
 	case GO_TO_NEXT_TRIAL:
 	case RETURN_TO_TRIAL_SELECT:

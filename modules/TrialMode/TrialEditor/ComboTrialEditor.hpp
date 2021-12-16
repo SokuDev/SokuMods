@@ -20,6 +20,7 @@ private:
 		unsigned delay;
 		std::vector<SokuLib::KeyInput> inputs;
 		SokuLib::DrawUtils::Sprite sprite;
+		SokuLib::DrawUtils::Sprite attributes;
 		unsigned int counter = 0;
 		unsigned int chargeCounter = 0;
 		std::string realMoveName;
@@ -59,7 +60,7 @@ private:
 	float _playerStartPos;
 	unsigned _failTimer;
 	SokuLib::Vector2f _dummyStartPos;
-	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;
+	std::vector<std::unique_ptr<SpecialAction>> _expectedActions;
 	SokuLib::Weather _weather;
 	SokuLib::Skill _skills[15];
 	bool _disableLimit;
@@ -129,11 +130,13 @@ private:
 	unsigned _chrCursorPos = 0;
 	unsigned _dollCursorPos = 0;
 	unsigned _menuCursorPos = 0;
+	unsigned _comboCursor = 0;
 	unsigned _comboEditCursor = 0;
 	unsigned _selectedSubcategory = 0;
 	unsigned _stageCursor = 0;
 	unsigned _scoreEdited = 0;
 	float _fakePlayerPos = 0;
+	bool _comboOnLeft = false;
 	bool _managingDolls = false;
 	bool _changingPlayerPos = false;
 	bool _changingDummyPos = false;

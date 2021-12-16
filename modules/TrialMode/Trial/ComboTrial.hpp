@@ -50,7 +50,7 @@ private:
 	float _playerStartPos;
 	unsigned _failTimer;
 	SokuLib::Vector2f _dummyStartPos;
-	std::vector<std::unique_ptr<SpecialAction>> _exceptedActions;
+	std::vector<std::unique_ptr<SpecialAction>> _expectedActions;
 	SokuLib::Weather _weather;
 	SokuLib::Skill _skills[15];
 	bool _disableLimit;

@@ -87,3 +87,4 @@
 376 RCDATA "assets/guides/editorEditDummyPos.png"
 380 RCDATA "assets/guides/editorManageDollSelected.png"
 384 RCDATA "assets/guides/editorManageDollNotSelected.png"
+388 RCDATA "assets/guides/editorComboValueEdit.png"
