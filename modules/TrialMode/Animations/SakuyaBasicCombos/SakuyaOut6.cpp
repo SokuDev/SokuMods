@@ -109,7 +109,7 @@ private:
 //		battleMgr.leftCharacterManager.objectBase.doAnimation();
 //		battleMgr.rightCharacterManager.objectBase.doAnimation();
 //		updateSubObjects(*_yukari);
-		this->_currentStage++
+		this->_currentStage++;
 //		spawnSubObject(*_yukari, 0x41, 500, 0);
 	}
 
