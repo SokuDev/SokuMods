@@ -5,16 +5,21 @@
 local bool = false
 
 local dialogs = {
-	"LA Where could she be?",
-	"RAWAre you looking for someone?",
-	"LSWYuyuko?",
-	"RSHI've seen you spare with Youmu,<br>it was quite interesting!",
-	"LHHIt seems you truly like messing with her don't you?",
-	"RHhWhat can I say,she is just a peculiar plant<br>who needs more wind than water.",
-	"RHCBut perhaps you are of the same kind?",
-	"LCCAnyway, I need answers from you.",
-	"RChI'm sorry but I'm in a hurry, come back later!",
-	"LAhYou won't get away!"
+	"LWDSo? Will you tell me?",
+	"RWD...",
+	"RWHFine, It will add a bit more flavor to the story.",
+	"LSHWhat do you mean?",
+	"RScI do not know who it is that infiltrated the manor...<br>But I do know that this mysterious individual<br>passed by the hakurei shrine untouched.",
+	"LccDid he beat Reimu?",
+	"RcENot at all, he didn't fight her.",
+	"LSEHow strange,<br>Reimu does have a sixth sense when it comes to trouble.",
+	"LcEShe wouldn't let anyone suspicious go by,<br>however lazy she can be...",
+	"LHEI was right, it must be someone quite stealthy...<br>Or someone able to manipulate others...",
+	"LCEThere is one person,<br>and she fits the description quite nicely...",
+	"RCDthat sure is a long day. At least it must be good for you?",
+	"LCDIt is Perfect!",
+	"RCcDo you know who she is assuming to be the culprit?",
+	"LHcYes I do, truth is,<br>I have already made an arrangement with her.",
 	--Battle here
 }
 

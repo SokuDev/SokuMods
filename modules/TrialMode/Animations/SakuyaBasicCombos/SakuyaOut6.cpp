@@ -104,7 +104,13 @@ private:
 
 	void stage1()
 	{
-			this->_currentStage++;
+//		auto &battleMgr = SokuLib::getBattleMgr();
+
+//		battleMgr.leftCharacterManager.objectBase.doAnimation();
+//		battleMgr.rightCharacterManager.objectBase.doAnimation();
+//		updateSubObjects(*_yukari);
+		this->_currentStage++
+//		spawnSubObject(*_yukari, 0x41, 500, 0);
 	}
 
 	void stage2()
@@ -190,7 +196,7 @@ public:
 			this->_stageBg.draw();
 			this->_stageBottom.draw();
 		}
-		this->_dialog->render();
+//		this->_dialog->render();
 	}
 
 	void onKeyPressed() override
