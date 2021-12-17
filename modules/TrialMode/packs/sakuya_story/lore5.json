@@ -1,56 +1,62 @@
 {
-    "music": 21,
-    "stage": 12,
-    "player": {
-        "character": "sakuya",
-        "palette": 0,
-        "deck": [],
-        "pos": 1000
-    },
     "dummy": {
         "character": "aya",
-        "palette": 0,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 1100,
-            "y": 400
+            "x": 1100.0,
+            "y": 400.0
         }
     },
-    "type": "combo",
-
-    "expected": "!hj8 j8A:30 j5B:28 j66/j9D:30 j8A/j6A",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "weather": 21,
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
-    "hint": [
-
-    ],
+    "expected": "!hj8 j8a:30 j5b:28 j66/j9d:30 j8a/j6a",
+    "intro": "lore7intro.lua",
+    "music": "data/bgm/st05.ogg",
+    "outro": "lore7outro.lua",
+    "player": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": 1000.0
+    },
     "score": [
-	    {
-		"min_hits": 10,
-		"min_damage": 1650,
-		"min_limit": 100
-	    },
-	    {
-		"min_hits": 13,
-		"min_damage": 1720,
-		"min_limit": 111
-	    },
-	    {
-		"min_hits": 17,
-		"min_damage": 1800,
-		"min_limit": 120
-	    },
-	    {
-		"max_attempts": 5
-	    }
-    ]
+        {
+            "min_damage": 1650,
+            "min_hits": 10,
+            "min_limit": 100
+        },
+        {
+            "min_damage": 1720,
+            "min_hits": 13,
+            "min_limit": 111
+        },
+        {
+            "min_damage": 1800,
+            "min_hits": 17,
+            "min_limit": 120
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 12,
+    "type": "combo",
+    "uniform_card_cost": 1
 }
