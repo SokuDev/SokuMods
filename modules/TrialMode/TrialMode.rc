@@ -88,3 +88,6 @@
 380 RCDATA "assets/guides/editorManageDollSelected.png"
 384 RCDATA "assets/guides/editorManageDollNotSelected.png"
 388 RCDATA "assets/guides/editorComboValueEdit.png"
+392 RCDATA "assets/guides/editorCardDeckSelect.png"
+396 RCDATA "assets/guides/editorCardHandSelect.png"
+400 RCDATA "assets/underObjB.png"
