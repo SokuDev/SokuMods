@@ -134,8 +134,11 @@ private:
 	unsigned _comboEditCursor = 0;
 	unsigned _selectedSubcategory = 0;
 	unsigned _stageCursor = 0;
+	unsigned _handCursor = 0;
 	unsigned _scoreEdited = 0;
 	float _fakePlayerPos = 0;
+	bool _modified = false;
+	bool _editingHand = false;
 	bool _comboOnLeft = false;
 	bool _managingDolls = false;
 	bool _changingPlayerPos = false;
@@ -155,6 +158,8 @@ private:
 	SokuLib::Vector2f _dummyStartPosTmp;
 	SokuLib::Character *_characterEdit = nullptr;
 	SokuLib::Sprite _characterSprite;
+	mutable SokuLib::DrawUtils::Sprite _cardStand;
+	mutable SokuLib::DrawUtils::Sprite _cardSlot;
 	mutable SokuLib::DrawUtils::Sprite _numbers;
 	mutable SokuLib::DrawUtils::Sprite _digits[6];
 	mutable SokuLib::DrawUtils::Sprite _weathers;
@@ -165,6 +170,7 @@ private:
 	SokuLib::Camera _oldCamera;
 	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _installSprites;
 	std::vector<std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _musics;
+	std::vector<std::pair<unsigned short, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _cardSprites;
 	std::map<unsigned, std::pair<std::unique_ptr<SokuLib::DrawUtils::Sprite>, std::unique_ptr<SokuLib::DrawUtils::Sprite>>> _stagesSprites;
 
 	static const std::vector<std::vector<bool ComboTrialEditor::*>> _installProperties;
@@ -175,7 +181,6 @@ private:
 	bool _selectScoreMenuItem();
 	void _setupStageSprites();
 	bool _copyDeckToPlayerSkills();
-	bool _copyDeckToPlayerHand();
 	bool _copyDeckToPlayerDeck();
 	bool _copyDeckToDummyDeck();
 	std::string _transformComboToString() const;

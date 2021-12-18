@@ -1,45 +1,56 @@
 {
-    "music": 32,
-    "stage": 12,
-    "player": {
-        "character": "remilia",
-        "palette": 0,
-        "affected_by_weather": false,
-        "deck": [204, 204, 204, 204, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4],
-        "pos": 550
-    },
     "dummy": {
         "character": "meirin",
-        "palette": 0,
-        "affected_by_weather": true,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 600,
-            "y": 0
+            "x": 600.0,
+            "y": 0.0
         }
     },
-    "intro": "bnbmid3intro.lua",
-    "outro": "bnbmid3outro.lua",
-    "type": "combo",
-
-    "expected": "5aaaa sc204 hj9 j8a:30",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
+    "expected": "5aaaa sc204 !hj9 !j8a/a122c:30",
+    "hand": [
+        204,
+        204,
+        204,
+        204
     ],
-    "weather": 6,
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [204],
-    "play_combo_after_intro": true,
+    "intro": "bnbmid3intro.lua",
+    "music": "data/bgm/st32.ogg",
+    "outro": "bnbmid3outro.lua",
+    "player": {
+        "affected_by_weather": false,
+        "character": "remilia",
+        "deck": [
+            204,
+            204,
+            204,
+            204,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2,
+            2,
+            2,
+            3,
+            3,
+            3,
+            3,
+            4,
+            4,
+            4,
+            4
+        ],
+        "palette": 0,
+        "pos": 550.0
+    },
     "score": [
         {
-            "min_hits": 11,
             "min_damage": 4267,
-            "min_limit": 130,
-            "max_limit": 130
+            "min_hits": 11,
+            "min_limit": 130
         },
         {
             "max_attempts": 20
@@ -51,7 +62,25 @@
             "max_attempts": 5
         }
     ],
-    "hint": [
-
-    ]
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            1,
+            1
+        ]
+    ],
+    "stage": 12,
+    "type": "combo",
+    "weather": 6
 }

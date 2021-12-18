@@ -235,6 +235,14 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_numbers.rect.width = 11;
 	this->_numbers.rect.height = 16;
 
+	this->_cardStand.texture.loadFromResource(myModule, MAKEINTRESOURCE(400));
+	this->_cardStand.rect.width = this->_cardStand.texture.getSize().x;
+	this->_cardStand.rect.height = this->_cardStand.texture.getSize().y;
+
+	this->_cardSlot.texture.loadFromGame("data/battle/cardGaugeBigB.bmp");
+	this->_cardSlot.rect.width = this->_cardSlot.texture.getSize().x;
+	this->_cardSlot.rect.height = this->_cardSlot.texture.getSize().y;
+
 	if (json.contains("dolls") && json["dolls"].is_array()) {
 		for (int i = 0; i < json["dolls"].size(); i++) {
 			auto &obj = json["dolls"][i];
@@ -444,7 +452,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 
 	for (int i = 0; i < 4; i++)
 		this->_refreshScoreSprites(i);
-	this->_guides.resize(13);
+	this->_guides.resize(15);
 	this->_guides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(340));
 	this->_guides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(344));
 	this->_guides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(348));
@@ -458,6 +466,8 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_guides[10]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(380));
 	this->_guides[11]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(384));
 	this->_guides[12]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(388));
+	this->_guides[13]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(392));
+	this->_guides[14]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(396));
 	this->_guides[0]->active = true;
 }
 
@@ -1489,6 +1499,70 @@ int ComboTrialEditor::pauseOnUpdate()
 		this->_dummyStartPos = this->_dummyStartPosTmp;
 		SokuLib::getBattleMgr().leftCharacterManager.objectBase.position.x = this->_playerStartPos;
 	}
+	if (this->_editingHand) {
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
+			SokuLib::playSEWaveBuffer(0x29);
+			this->_editingHand = false;
+			this->_guides[13]->active = false;
+			this->_guides[14]->active = false;
+			this->_guides[4]->active = true;
+			return true;
+		}
+		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			if (this->_handCursor >= this->_cardSprites.size())
+				this->_handCursor = SokuLib::inputMgrs.input.verticalAxis > 0 ? 0 : (this->_cardSprites.size() - (this->_cardSprites.size() % 11 ? this->_cardSprites.size() % 11 : 11));
+			else if (
+				(this->_handCursor < 11 && SokuLib::inputMgrs.input.verticalAxis < 0) ||
+				(this->_handCursor > this->_cardSprites.size() - 11 && SokuLib::inputMgrs.input.verticalAxis > 0)
+			)
+				this->_handCursor = this->_cardSprites.size();
+			else
+				this->_handCursor += std::copysign(11, SokuLib::inputMgrs.input.verticalAxis);
+			this->_guides[13]->active = this->_handCursor < this->_cardSprites.size();
+			this->_guides[14]->active = !this->_guides[13]->active;
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			if (this->_handCursor < this->_cardSprites.size()) {
+				if (this->_handCursor % 11 == 0 && SokuLib::inputMgrs.input.horizontalAxis < 0) {
+					this->_handCursor += 10;
+					if (this->_handCursor >= this->_cardSprites.size())
+						this->_handCursor = this->_cardSprites.size() - 1;
+				} else if ((this->_handCursor % 11 == 10 || this->_handCursor == this->_cardSprites.size() - 1) && SokuLib::inputMgrs.input.horizontalAxis > 0)
+					this->_handCursor -= this->_handCursor % 11;
+				else
+					this->_handCursor += std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis);
+			} else {
+				this->_handCursor -= this->_cardSprites.size() - 5 - std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis);
+				this->_handCursor %= 5;
+				this->_handCursor += this->_cardSprites.size();
+			}
+			SokuLib::playSEWaveBuffer(0x27);
+		}
+
+		if (SokuLib::inputMgrs.input.a == 1) {
+			if (this->_handCursor < this->_cardSprites.size()) {
+				if (this->_hand.size() >= 5)
+					return true;
+				this->_hand.push_back(this->_cardSprites[this->_handCursor].first);
+				SokuLib::playSEWaveBuffer(36);
+				this->_modified = true;
+				this->_needInit = true;
+				return true;
+			}
+
+			auto pos = this->_handCursor - this->_cardSprites.size();
+
+			if (this->_hand.size() <= pos)
+				return true;
+			this->_hand.erase(this->_hand.begin() + pos);
+			SokuLib::playSEWaveBuffer(58);
+			this->_modified = true;
+			this->_needInit = true;
+		}
+		return true;
+	}
+
 	if (this->_selectingCharacters) {
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false) || SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
@@ -1804,6 +1878,64 @@ int ComboTrialEditor::pauseOnRender() const
 	(this->*ComboTrialEditor::renderCallbacks[this->_selectedSubcategory])();
 	if (this->_selectingCharacters)
 		this->_selectingCharacterRender();
+	if (this->_editingHand) {
+		editSeatEmpty.draw();
+		for (int i = 0; i < this->_cardSprites.size(); i++) {
+			auto &sprite = this->_cardSprites[i];
+
+			sprite.second->setPosition({110 + 40 * (i % 11), 60 + 60 * (i / 11)});
+			if (this->_handCursor == i)
+				displaySokuCursor({
+					static_cast<int>(110 + 40 * (this->_handCursor % 11)),
+					static_cast<int>(60 + 60 * (this->_handCursor / 11))
+				}, {30, 40});
+			sprite.second->setSize({25, 40});
+			sprite.second->draw();
+		}
+
+		this->_cardStand.setPosition({130, 330});
+		this->_cardStand.setSize(this->_cardStand.texture.getSize());
+		this->_cardStand.draw();
+		this->_cardSlot.setSize({45, 70});
+		this->_cardSlot.setPosition({130 + 9, 330 - 52});
+		this->_cardSlot.draw();
+		if (this->_handCursor == this->_cardSprites.size())
+			displaySokuCursor({130 + 9 + 2, 330 - 52 + 2}, {60, 65});
+		if (!this->_hand.empty()) {
+			auto cardId = this->_hand[0];
+			auto it = std::find_if(this->_cardSprites.begin(), this->_cardSprites.end(), [cardId](const std::pair<unsigned short, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &pair){
+				return pair.first == cardId;
+			});
+
+			it->second->setPosition({130 + 9 + 2, 330 - 52 + 2});
+			it->second->setSize({41, 65});
+			it->second->draw();
+		}
+
+		this->_cardStand.setSize(this->_cardStand.texture.getSize() / 2);
+		for (int i = 1; i < 5; i++) {
+			this->_cardStand.setPosition({static_cast<int>(164 + i * this->_cardStand.getSize().x), 348});
+			this->_cardSlot.setSize({45 / 2, 70 / 2});
+			this->_cardSlot.setPosition({
+				static_cast<int>(this->_cardStand.getPosition().x + 4),
+				static_cast<int>(this->_cardStand.getPosition().y - 26)
+			});
+			this->_cardStand.draw();
+			this->_cardSlot.draw();
+			if (this->_handCursor == this->_cardSprites.size() + i)
+				displaySokuCursor(this->_cardSlot.getPosition() + SokuLib::Vector2i{1, 1}, {30, 33});
+			if (i < this->_hand.size()) {
+				auto cardId = this->_hand[i];
+				auto it = std::find_if(this->_cardSprites.begin(), this->_cardSprites.end(), [cardId](const std::pair<unsigned short, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &pair){
+					return pair.first == cardId;
+				});
+
+				it->second->setPosition(this->_cardSlot.getPosition() + SokuLib::Vector2i{1, 1});
+				it->second->setSize({41 / 2, 65 / 2});
+				it->second->draw();
+			}
+		}
+	}
 	if (this->_selectingStage) {
 		auto &last1 = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor <= 1 ? ComboTrialEditor::_stagesIds.size() - (2 - this->_stageCursor) : this->_stageCursor - 2]);
 		auto &last = this->_stagesSprites.at(ComboTrialEditor::_stagesIds[this->_stageCursor == 0 ? ComboTrialEditor::_stagesIds.size() - 1 : this->_stageCursor - 1]);
@@ -2045,46 +2177,47 @@ bool ComboTrialEditor::setPlayerSkills()
 	return true;
 }
 
+inline const char *getChrCodeName(SokuLib::Character chr)
+{
+	return ((const char *(*)(unsigned))0x43f3f0)(chr);
+}
+
 bool ComboTrialEditor::setPlayerHand()
 {
-	int ret;
-	int width;
-	int height;
-	int count = 0;
+	char buffer[] = "data/card/long_character_name/card000.bmp";
 
-	if (SokuLib::textureMgr.loadTexture(&ret, ("data/stand/" + chrs[SokuLib::leftChar] + ".bmp").c_str(), &width, &height)) {
-		this->_characterSprite.init(ret, 0, 0, width, height);
-		for (auto &vertice: this->_characterSprite.vertices)
-			vertice.color = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+	this->_cardSprites.clear();
+	this->_guides[4]->active = false;
+	this->_guides[13]->active = true;
+	for (int i = 0; i < 21; i++) {
+		auto *sprite = new SokuLib::DrawUtils::Sprite();
+
+		this->_cardSprites.emplace_back(i, std::unique_ptr<SokuLib::DrawUtils::Sprite>(sprite));
+		sprintf(buffer, "data/card/common/card%03i.bmp", i);
+		sprite->texture.loadFromGame(buffer);
+		sprite->rect.width = sprite->texture.getSize().x;
+		sprite->rect.height = sprite->texture.getSize().y;
 	}
+	for (int j = 0, i = 0; j < SokuLib::leftPlayerInfo.effectiveDeck.size; j++) {
+		auto cardId = SokuLib::leftPlayerInfo.effectiveDeck[j];
+		auto it = std::find_if(this->_cardSprites.begin(), this->_cardSprites.end(), [cardId](const std::pair<unsigned short, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &pair){
+			return pair.first == cardId;
+		});
 
-	this->_fakeProfile = SokuLib::profile1;
-	SokuLib::textureMgr.createTextTexture(&ret, "Temporary Profile", *reinterpret_cast<SokuLib::SWRFont *>(0x897020), 300, 50, &width, &height);
-	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
-	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
-	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
-	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
-		SokuLib::NewFct(0x840),
-		this->_fakeProfile,
-		SokuLib::leftChar,
-		this->_characterSprite
-	);
+		if (it != this->_cardSprites.end())
+			continue;
 
-	this->_deckEditMenu->editedDeck->clear();
-	for (auto card : this->_hand) {
-		auto iter = this->_deckEditMenu->editedDeck->find(card);
+		auto *sprite = new SokuLib::DrawUtils::Sprite();
 
-		if (iter == this->_deckEditMenu->editedDeck->end())
-			(*this->_deckEditMenu->editedDeck)[card] = 1;
-		else
-			iter->second++;
-		count++;
+		this->_cardSprites.emplace_back(cardId, std::unique_ptr<SokuLib::DrawUtils::Sprite>(sprite));
+		sprintf(buffer, "data/card/%s/card%03i.bmp", getChrCodeName(SokuLib::leftChar), cardId);
+		sprite->texture.loadFromGame(buffer);
+		sprite->rect.width = sprite->texture.getSize().x;
+		sprite->rect.height = sprite->texture.getSize().y;
+		i++;
 	}
-	this->_deckEditMenu->displayedNumberOfCards = count;
-
-	this->onDeckSaved = &ComboTrialEditor::_copyDeckToPlayerHand;
+	this->_editingHand = true;
 	SokuLib::playSEWaveBuffer(0x28);
-	SokuLib::activateMenu(this->_deckEditMenu);
 	return true;
 }
 
@@ -2879,6 +3012,7 @@ bool ComboTrialEditor::_copyDeckToPlayerDeck()
 	}
 	assert(SokuLib::leftPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
 	this->_needReload = true;
+	this->_modified = true;
 	this->_hand.clear();
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
@@ -2905,6 +3039,7 @@ bool ComboTrialEditor::_copyDeckToDummyDeck()
 	}
 	assert(SokuLib::rightPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
 	this->_needReload = true;
+	this->_modified = true;
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
 }
@@ -2931,36 +3066,8 @@ bool ComboTrialEditor::_copyDeckToPlayerSkills()
 			this->_skills[i].level = 0;
 		}
 	}
+	this->_modified = true;
 	memcpy(&SokuLib::getBattleMgr().leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
-	return false;
-}
-
-bool ComboTrialEditor::_copyDeckToPlayerHand()
-{
-	if (this->_deckEditMenu->displayedNumberOfCards > 5) {
-		MessageBox(SokuLib::window, "A hand cannot contain more than 5 cards.", "Invalid hand", MB_ICONERROR);
-		SokuLib::playSEWaveBuffer(0x29);
-		this->_deckEditMenu->saveDialogDisplayed = false;
-		return true;
-	}
-	for (auto &pair : *this->_deckEditMenu->editedDeck) {
-		for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++)
-			if (SokuLib::leftPlayerInfo.effectiveDeck[i] == pair.first)
-				goto allGood;
-		MessageBox(SokuLib::window, ("Your deck doesn't contain any " + characterCards[SokuLib::leftChar][pair.first].first + ".").c_str(), "Invalid hand", MB_ICONERROR);
-		SokuLib::playSEWaveBuffer(0x29);
-		this->_deckEditMenu->saveDialogDisplayed = false;
-		return true;
-allGood:
-		continue;
-	}
-	this->_hand.clear();
-	for (auto &pair : *this->_deckEditMenu->editedDeck)
-		for (int i = 0; i < pair.second; i++)
-			this->_hand.push_back(pair.first);
-	assert(this->_hand.size() == this->_deckEditMenu->displayedNumberOfCards);
-	this->_initGameStart();
-	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
 }
 
