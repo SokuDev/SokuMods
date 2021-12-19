@@ -683,6 +683,8 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 
 bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &character, SokuLib::Character characterId)
 {
+	if (action != character.objectBase.action)
+		return false;
 	if (action == FAKE_ACTION_ORRERIES_REACTIVATE)
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 1;
 	if (characterId == SokuLib::CHARACTER_YUKARI && (action == SokuLib::ACTION_4A || action == SokuLib::ACTION_5A))

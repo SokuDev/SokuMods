@@ -13,11 +13,11 @@
 class ComboTrialEditor : public TrialEditor {
 private:
 	struct SpecialAction {
-		bool optional;
+		bool optional = false;
 		std::vector<SokuLib::Action> actions;
 		std::vector<std::string> actionsStr;
-		unsigned chargeTime;
-		unsigned delay;
+		unsigned chargeTime = 0;
+		unsigned delay = 0;
 		std::vector<SokuLib::KeyInput> inputs;
 		SokuLib::DrawUtils::Sprite sprite;
 		SokuLib::DrawUtils::Sprite attributes;
@@ -31,10 +31,13 @@ private:
 	};
 
 	struct RecordedAction {
-		SokuLib::Inputs lastInput;
-		unsigned frameCount;
+		unsigned delay;
+		unsigned charge;
 		SokuLib::Action action;
 		SokuLib::DrawUtils::Sprite sprite;
+		std::vector<std::pair<int, int>> dirs;
+
+		SpecialAction *createAction();
 	};
 
 	struct ScorePrerequisites {
@@ -130,6 +133,7 @@ private:
 	unsigned _chrCursorPos = 0;
 	unsigned _dollCursorPos = 0;
 	unsigned _menuCursorPos = 0;
+	unsigned _comboRecTimer = 0;
 	unsigned _comboCursor = 0;
 	unsigned _comboEditCursor = 0;
 	unsigned _selectedSubcategory = 0;
@@ -190,6 +194,8 @@ private:
 	void _selectingCharacterRender() const;
 	void _openPause() const;
 	void _typeNewCombo();
+	void _saveRecordedCombo();
+	void _checkCurrentAction();
 
 	//Menu callbacks
 	bool notImplemented();
@@ -240,7 +246,7 @@ private:
 	void _loadExpected(const std::string &expected);
 
 	static void _initVanillaGame();
-	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &name);
+	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &move, std::string &name);
 
 public:
 	ComboTrialEditor(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json);

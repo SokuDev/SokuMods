@@ -54,7 +54,7 @@ private:
 	SokuLib::Weather _weather;
 	SokuLib::Skill _skills[15];
 	bool _disableLimit;
-	int _uniformCardCost;
+	int _uniformCardCost = 0;
 	std::vector<unsigned short> _hand;
 	std::vector<ScorePrerequisites> _scores;
 	bool _playComboAfterIntro = true;
