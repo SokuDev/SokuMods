@@ -2141,6 +2141,8 @@ bool ComboTrialEditor::setPlayerDeck()
 	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
 	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
 	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	SokuLib::textureMgr.loadTexture((int *)0x89701C, "data/battle/cardbar.bmp", nullptr, nullptr);
+	*(int *)0x89701C = 0;
 	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
 		SokuLib::NewFct(0x840),
 		this->_fakeProfile,
@@ -2186,6 +2188,8 @@ bool ComboTrialEditor::setPlayerSkills()
 	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
 	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
 	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	SokuLib::textureMgr.loadTexture((int *)0x89701C, "data/battle/cardbar.bmp", nullptr, nullptr);
+	*(int *)0x89701C = 0;
 	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
 		SokuLib::NewFct(0x840),
 		this->_fakeProfile,
@@ -2313,6 +2317,9 @@ bool ComboTrialEditor::setDummyDeck()
 	this->_fakeProfile.sprite.init(ret, 0, 0, width, height);
 	this->_fakeProfile.sprite.vertices[2].color = SokuLib::Color::Yellow;
 	this->_fakeProfile.sprite.vertices[3].color = SokuLib::Color::Yellow;
+	//We do this so it doesn't crash when creating the Deck Construction menu after using a card and it doesn't mess up the card background
+	SokuLib::textureMgr.loadTexture((int *)0x89701C, "data/battle/cardbar.bmp", nullptr, nullptr);
+	*(int *)0x89701C = 0;
 	this->_deckEditMenu = ((SokuLib::ProfileDeckEdit *(__thiscall *)(void *, SokuLib::Profile &, SokuLib::Character, SokuLib::Sprite &))(*(unsigned *)0x44D52A + 0x44D52E))(
 		SokuLib::NewFct(0x840),
 		this->_fakeProfile,
