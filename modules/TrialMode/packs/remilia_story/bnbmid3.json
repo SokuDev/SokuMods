@@ -8,7 +8,7 @@
             "y": 0.0
         }
     },
-    "expected": "5aaaa sc204 !hj9 !j8a/a122c:30",
+    "expected": "5aaaa sc204 hj9 j8a:30",
     "hand": [
         204,
         204,
@@ -48,12 +48,15 @@
     },
     "score": [
         {
+            "min_damage": 0,
+            "min_hits": 0,
+            "min_limit": 0
+        },
+        {
+            "max_attempts": 20,
             "min_damage": 4267,
             "min_hits": 11,
             "min_limit": 130
-        },
-        {
-            "max_attempts": 20
         },
         {
             "max_attempts": 10

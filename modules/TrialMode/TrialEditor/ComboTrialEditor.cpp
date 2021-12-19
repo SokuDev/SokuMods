@@ -1375,6 +1375,7 @@ SokuLib::Action ComboTrialEditor::_getMoveAction(SokuLib::Character chr, std::st
 				auto &entry = characterCards[chr].at(scId);
 
 				name = myMove.substr(0, pos) + std::to_string(entry.second) + "SC (" + entry.first + ")";
+				return act;
 			}
 		} catch (...) {
 			printf("%u %s %s\n", myMove.size(), myMove.c_str(), myMove.substr(pos + 2, 3).c_str());
@@ -3352,8 +3353,12 @@ void ComboTrialEditor::_checkCurrentAction()
 
 void ComboTrialEditor::SpecialAction::parse()
 {
+	SokuLib::Vector2i realSize;
+	std::string firstMove;
 	std::string chargeStr;
 	std::string delayStr;
+	std::string move;
+	std::string name;
 	bool d = false;
 	bool p = false;
 
@@ -3384,10 +3389,6 @@ void ComboTrialEditor::SpecialAction::parse()
 			this->moveName += std::tolower(c);
 	}
 	printf("Move %s -> %s [%s] :%s: -> ", this->name.c_str(), this->moveName.c_str(), chargeStr.c_str(), delayStr.c_str());
-
-	std::string move;
-	std::string firstMove;
-	std::string name;
 
 	this->actionsStr.clear();
 	this->actions.clear();
@@ -3447,8 +3448,6 @@ void ComboTrialEditor::SpecialAction::parse()
 		throw std::invalid_argument(firstMove + " is not yet implemented");
 	}
 
-	SokuLib::Vector2i realSize;
-
 	if (this->chargeTime) {
 		int dig = std::isdigit(this->moveName.back());
 		int index = this->moveName.size() - 2;
@@ -3480,7 +3479,6 @@ ComboTrialEditor::SpecialAction *ComboTrialEditor::RecordedAction::createAction(
 
 	speAction->actions.push_back(this->action);
 	speAction->chargeTime = this->charge - (this->charge == 1);
-	speAction->delay = this->delay;
 	if (this->action == SokuLib::ACTION_FLY)
 		return MessageBox(SokuLib::window, "Flight is not supported", "Not implemented", MB_ICONERROR), nullptr;
 	else if (it->first == "44")
@@ -3499,6 +3497,7 @@ ComboTrialEditor::SpecialAction *ComboTrialEditor::RecordedAction::createAction(
 	speAction->sprite.rect.width = realSize.x;
 	speAction->sprite.rect.height = realSize.y;
 	speAction->inputs = actionStrToInputs.at(speAction->moveName);
+	speAction->delay = max((int)(this->delay - speAction->inputs.size() + 1), 0);
 
 	speAction->attributes.texture.createFromText(("Charge " + std::to_string(speAction->chargeTime) + "|Delay " + std::to_string(speAction->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
 	speAction->attributes.setSize(realSize.to<unsigned>());
