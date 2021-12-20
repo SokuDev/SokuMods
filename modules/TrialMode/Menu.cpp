@@ -1844,15 +1844,17 @@ failed2:
 		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
 	}
 
-	if (!chrs.empty())
-		return;
-	if (!SokuLib::SWRUnlinked)
-		for (auto &infos : swrCharacters)
+	if (chrs.empty()) {
+		if (!SokuLib::SWRUnlinked)
+			for (auto &infos: swrCharacters)
+				chrs[infos.first] = infos.second;
+		for (auto &infos: validCharacters)
 			chrs[infos.first] = infos.second;
-	for (auto &infos : validCharacters)
-		chrs[infos.first] = infos.second;
+	}
 
 	int i = 0;
+
+	charactersFaces.reserve(chrs.size());
 	for (auto &chr : chrs) {
 		auto *sprite = new SokuLib::DrawUtils::Sprite();
 
