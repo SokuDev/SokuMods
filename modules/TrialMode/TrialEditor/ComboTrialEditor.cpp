@@ -902,7 +902,7 @@ disableLimit:
 			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		} else if (this->_recordingCombo && this->_recordBuffer.empty()) {
 			if (isStartOfMove(SokuLib::ACTION_NEUTRAL_JUMP, battleMgr.rightCharacterManager, SokuLib::rightChar))
-				this->_comboRecTimer = 0;
+				this->_comboRecTimer = 1;
 			else
 				this->_comboRecTimer++;
 		}
@@ -1506,6 +1506,7 @@ int ComboTrialEditor::pauseOnUpdate()
 	}
 	if (this->_recordingCombo) {
 		this->_comboPageDisplayed = true;
+		this->_recordingCombo = false;
 		SokuLib::playSEWaveBuffer(0x29);
 		return false;
 	}
@@ -3321,9 +3322,20 @@ void ComboTrialEditor::_saveRecordedCombo()
 void ComboTrialEditor::_checkCurrentAction()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
-	auto action = battleMgr.leftCharacterManager.objectBase.action;
+	auto action = addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar);
+	std::vector<SokuLib::Action> whitelist{
+		SokuLib::ACTION_WALK_FORWARD,
+		SokuLib::ACTION_WALK_BACKWARD,
+		SokuLib::ACTION_FLY,
+		FAKE_ACTION_MPP_IDLE,
+		FAKE_ACTION_MPP_WALK
+	};
 
-	if (action != SokuLib::ACTION_IDLE && isStartOfMove(action, battleMgr.leftCharacterManager, SokuLib::leftChar)) {
+	if (!this->_recordBuffer.empty() && this->_recordBuffer.back()->action == SokuLib::ACTION_FLY && !this->_recordBuffer.back()->speed.x && !this->_recordBuffer.back()->speed.y)
+		this->_recordBuffer.back()->speed = battleMgr.leftCharacterManager.objectBase.speed;
+	if (!this->_recordBuffer.empty() && this->_recordBuffer.back()->action == action && std::find(whitelist.begin(), whitelist.end(), action) != whitelist.end())
+		this->_recordBuffer.back()->charge = this->_recordBuffer.back()->charge + 1 + (this->_recordBuffer.back()->charge == 0);
+	else if (action != SokuLib::ACTION_IDLE && isStartOfMove(action, battleMgr.leftCharacterManager, SokuLib::leftChar)) {
 		std::string str;
 		SokuLib::Vector2i realSize;
 		auto recAction = new RecordedAction();
@@ -3486,9 +3498,18 @@ ComboTrialEditor::SpecialAction *ComboTrialEditor::RecordedAction::createAction(
 
 	speAction->actions.push_back(this->action);
 	speAction->chargeTime = this->charge - (this->charge == 1);
-	if (this->action == SokuLib::ACTION_FLY)
-		return MessageBox(SokuLib::window, "Flight is not supported", "Not implemented", MB_ICONERROR), nullptr;
-	else if (it->first == "44")
+	if (this->action == SokuLib::ACTION_FLY) {
+		auto dir = 5;
+
+		if (SokuLib::leftChar == SokuLib::CHARACTER_REMILIA || SokuLib::leftChar == SokuLib::CHARACTER_FLANDRE)
+			speAction->chargeTime -= 26;
+		if (this->speed.x)
+			dir += std::copysign(1, this->speed.x);
+		if (this->speed.y)
+			dir += std::copysign(3, this->speed.y);
+		speAction->moveName = "j" + std::to_string(dir) + "d";
+		printf("%f %f -> %i\n", this->speed.x, this->speed.y, dir);
+	} else if (it->first == "44")
 		speAction->moveName = "d4";
 	else if (it->first == "66")
 		speAction->moveName = "d6";
@@ -3496,15 +3517,27 @@ ComboTrialEditor::SpecialAction *ComboTrialEditor::RecordedAction::createAction(
 		speAction->moveName = "2a";
 	else
 		speAction->moveName = it->first;
+	puts(speAction->moveName.c_str());
 	speAction->actionsStr.push_back(speAction->moveName);
 	speAction->realMoveName = speAction->moveName;
 	ComboTrialEditor::_getMoveAction(SokuLib::leftChar, speAction->moveName, name);
+	speAction->inputs = actionStrToInputs.at(speAction->moveName);
+	speAction->delay = max((int)(this->delay - speAction->inputs.size() + 1), 0);
+
+	if (speAction->chargeTime) {
+		int dig = std::isdigit(name.back());
+		int index = name.size() - 2;
+
+		while (index >= 0 && !dig && !std::isdigit(name[index]))
+			index--;
+		name = name.substr(0, index + 1) + "[" + name.substr(index + 1) + "]";
+	}
+	speAction->moveName = name;
+
 	speAction->sprite.texture.createFromText(name.c_str(), defaultFont16, {400, 20}, &realSize);
 	speAction->sprite.setSize(realSize.to<unsigned>());
 	speAction->sprite.rect.width = realSize.x;
 	speAction->sprite.rect.height = realSize.y;
-	speAction->inputs = actionStrToInputs.at(speAction->moveName);
-	speAction->delay = max((int)(this->delay - speAction->inputs.size() + 1), 0);
 
 	speAction->attributes.texture.createFromText(("Charge " + std::to_string(speAction->chargeTime) + "|Delay " + std::to_string(speAction->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
 	speAction->attributes.setSize(realSize.to<unsigned>());
