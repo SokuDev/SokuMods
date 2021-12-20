@@ -34,8 +34,8 @@ private:
 		unsigned delay;
 		unsigned charge;
 		SokuLib::Action action;
+		SokuLib::Vector2f speed = {0, 0};
 		SokuLib::DrawUtils::Sprite sprite;
-		std::vector<std::pair<int, int>> dirs;
 
 		SpecialAction *createAction();
 	};
