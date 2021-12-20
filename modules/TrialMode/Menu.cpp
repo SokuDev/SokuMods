@@ -1141,8 +1141,8 @@ void addCharacterToBufferEditor(const std::string &name, const nlohmann::json &j
 		info.keyManager = (SokuLib::KeyManager **)0x0089918c;
 	} else {
 		*((SokuLib::KeyManager **)0x00898680) = *(char *)0x898678 < '\0' ?
-							reinterpret_cast<SokuLib::KeyManager *>(0x8986a8) :
-							((SokuLib::KeyManager *(__thiscall *)(int, char))0x43e3b0)(0x899cec, *(char *)0x898678);
+			reinterpret_cast<SokuLib::KeyManager *>(0x8986a8) :
+			((SokuLib::KeyManager *(__thiscall *)(int, char))0x43e3b0)(0x899cec, *(char *)0x898678);
 		FUN_00434bf0(&SokuLib::profile1, *(char *)0x898678);
 		info.keyManager = (SokuLib::KeyManager **)0x008989A0;
 	}
@@ -1283,17 +1283,6 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 		return false;
 	if (!addCharacterToBuffer("dummy", value["dummy"], SokuLib::rightPlayerInfo, true))
 		return false;
-	try {
-		loadedTrial.reset(Trial::create(folder, SokuLib::leftPlayerInfo.character, value));
-	} catch (std::exception &e) {
-		MessageBox(
-			SokuLib::window,
-			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
-			"Trial loading error",
-			MB_ICONERROR
-		);
-		return false;
-	}
 
 	*(char *)0x899D0C = value["stage"].get<char>();
 	if (value["music"].is_number())
@@ -1307,6 +1296,17 @@ bool prepareReplayBuffer(const std::string &path, const char *folder)
 				nb = std::stoul(str.substr(11, 2));
 			} catch (...) {}
 		*(char *)0x899D0D = nb;
+	}
+	try {
+		loadedTrial.reset(Trial::create(folder, SokuLib::leftPlayerInfo.character, value));
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
+			"Trial loading error",
+			MB_ICONERROR
+		);
+		return false;
 	}
 	return true;
 }
@@ -1343,17 +1343,6 @@ bool prepareReplayBufferEditor(const std::string &path, const char *folder)
 
 	addCharacterToBufferEditor("player", value, SokuLib::leftPlayerInfo, false);
 	addCharacterToBufferEditor("dummy", value, SokuLib::rightPlayerInfo, true);
-	try {
-		loadedTrial.reset(TrialEditor::create(folder, path.c_str(), SokuLib::leftPlayerInfo.character, value));
-	} catch (std::exception &e) {
-		MessageBox(
-			SokuLib::window,
-			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
-			"Trial loading error",
-			MB_ICONERROR
-		);
-		return false;
-	}
 
 	*(char *)0x899D0C = getField(value, 6, &nlohmann::json::is_number, "stage");
 	if (value.contains("music")) {
@@ -1371,6 +1360,18 @@ bool prepareReplayBufferEditor(const std::string &path, const char *folder)
 		}
 	} else
 		*(char *)0x899D0D = 6;
+
+	try {
+		loadedTrial.reset(TrialEditor::create(folder, path.c_str(), SokuLib::leftPlayerInfo.character, value));
+	} catch (std::exception &e) {
+		MessageBox(
+			SokuLib::window,
+			("File " + path + " is not valid: " + e.what() + ".\n").c_str(),
+			"Trial loading error",
+			MB_ICONERROR
+		);
+		return false;
+	}
 	return true;
 }
 
@@ -2914,6 +2915,51 @@ afterCInput:
 		else
 			openTrialEditPage();
 	}
+	if (SokuLib::inputMgrs.input.c == 1 && expended) {
+		auto &pack = loadedPacks[currentPack];
+		std::string jsonfile = InputBox("Enter file name.", "File name", "");
+		struct stat s;
+		std::ifstream from;
+		std::ofstream to;
+		char buffer[1024];
+
+		if (jsonfile.empty())
+			return SokuLib::playSEWaveBuffer(0x29), true;
+		if (stat((pack->path + "/" + jsonfile).c_str(), &s) == 0) {
+			MessageBox(SokuLib::window, (pack->path + "/" + jsonfile + " already exists.").c_str(), "Copy error", MB_ICONERROR);
+			return true;
+		}
+		stat(pack->scenarios[currentEntry]->file.c_str(), &s);
+		from.open(pack->scenarios[currentEntry]->file);
+		if (from.fail()) {
+			MessageBox(SokuLib::window, ("Cannot open file " + pack->scenarios[currentEntry]->file + " to read.").c_str(), "Copy error", MB_ICONERROR);
+			return true;
+		}
+		to.open(pack->path + "/" + jsonfile);
+		if (to.fail()) {
+			MessageBox(SokuLib::window, ("Cannot open file " + pack->path + "/" + jsonfile + " to write.").c_str(), "Copy error", MB_ICONERROR);
+			return true;
+		}
+		while (s.st_size) {
+			auto size = max(sizeof(buffer), s.st_size);
+
+			from.read(buffer, size);
+			to.write(buffer, size);
+			s.st_size -= size;
+		}
+
+		pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
+		currentEntry = pack->scenarios.size() - 1;
+		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+		if (currentEntry > 15)
+			entryStart = currentEntry - 15;
+		for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+			guide->active = false;
+		(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
+		expended = true;
+		SokuLib::playSEWaveBuffer(0x28);
+		saveCurrentPack();
+	}
 	if (SokuLib::inputMgrs.input.d == 1 && currentPack >= 0) {
 		auto &pack = loadedPacks[currentPack];
 
@@ -2960,6 +3006,12 @@ afterCInput:
 			}
 			pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
 			currentEntry = pack->scenarios.size() - 1;
+			packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+			if (currentEntry > 15)
+				entryStart = currentEntry - 15;
+			for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+				guide->active = false;
+			(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
 			expended = true;
 		}
 		SokuLib::playSEWaveBuffer(0x28);

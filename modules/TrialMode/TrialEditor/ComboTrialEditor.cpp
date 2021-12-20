@@ -469,6 +469,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 	this->_guides[13]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(392));
 	this->_guides[14]= std::make_unique<Guide>(myModule, MAKEINTRESOURCE(396));
 	this->_guides[0]->active = true;
+	this->_myJson = this->_getMyJson();
 }
 
 ComboTrialEditor::~ComboTrialEditor()
@@ -1501,8 +1502,9 @@ int ComboTrialEditor::pauseOnUpdate()
 	}
 	if (this->_comboPageDisplayed) {
 		this->_comboPageDisplayed = false;
+		for (auto &guide : this->_guides)
+			guide->active = false;
 		this->_guides[4]->active = true;
-		this->_guides[2]->active = false;
 	}
 	if (this->_recordingCombo) {
 		this->_comboPageDisplayed = true;
@@ -1576,7 +1578,6 @@ int ComboTrialEditor::pauseOnUpdate()
 					return true;
 				this->_hand.push_back(this->_cardSprites[this->_handCursor].first);
 				SokuLib::playSEWaveBuffer(36);
-				this->_modified = true;
 				this->_needInit = true;
 				return true;
 			}
@@ -1587,7 +1588,6 @@ int ComboTrialEditor::pauseOnUpdate()
 				return true;
 			this->_hand.erase(this->_hand.begin() + pos);
 			SokuLib::playSEWaveBuffer(58);
-			this->_modified = true;
 			this->_needInit = true;
 		}
 		return true;
@@ -1890,8 +1890,6 @@ int ComboTrialEditor::pauseOnUpdate()
 
 int ComboTrialEditor::pauseOnRender() const
 {
-	if (this->_comboPageDisplayed)
-		return true;
 	if (this->_selectedSubcategory)
 		displaySokuCursor({
 			61,
@@ -2588,6 +2586,11 @@ bool ComboTrialEditor::saveReturnToCharSelect()
 
 bool ComboTrialEditor::returnToCharSelect()
 {
+	if (
+		this->_myJson != this->_getMyJson() &&
+		MessageBox(SokuLib::window, "Trial has been edited.\nAre you sure you want to quit without saving?", "Unsaved changes.", MB_ICONQUESTION | MB_YESNO) != IDYES
+	)
+		return SokuLib::playSEWaveBuffer(0x29), true;
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_quit = true;
 	this->_needReload = false;
@@ -2598,6 +2601,11 @@ bool ComboTrialEditor::returnToCharSelect()
 
 bool ComboTrialEditor::returnToTitleScreen()
 {
+	if (
+		this->_myJson != this->_getMyJson() &&
+		MessageBox(SokuLib::window, "Trial has been edited and contains unsaved changes.\nAre you sure you want to quit without saving?", "Unsaved changes.", MB_ICONQUESTION | MB_YESNO) != IDYES
+	)
+		return SokuLib::playSEWaveBuffer(0x29), true;
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_quit = true;
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
@@ -2665,95 +2673,7 @@ void ComboTrialEditor::_setupStageSprites()
 bool ComboTrialEditor::save() const
 {
 	try {
-		auto itls = swrCharacters.find(SokuLib::leftChar);
-		auto itrs = swrCharacters.find(SokuLib::rightChar);
-		auto itlv = validCharacters.find(SokuLib::leftChar);
-		auto itrv = validCharacters.find(SokuLib::rightChar);
-		std::vector<unsigned short> ldeck;
-		std::vector<unsigned short> rdeck;
-
-		ldeck.reserve(SokuLib::leftPlayerInfo.effectiveDeck.size);
-		for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++)
-			ldeck.push_back(SokuLib::leftPlayerInfo.effectiveDeck[i]);
-		rdeck.reserve(SokuLib::rightPlayerInfo.effectiveDeck.size);
-		for (int i = 0; i < SokuLib::rightPlayerInfo.effectiveDeck.size; i++)
-			rdeck.push_back(SokuLib::rightPlayerInfo.effectiveDeck[i]);
-
-		nlohmann::json json{
-			{ "type", "combo" },
-			{ "player", {
-				{ "pos",                this->_playerStartPos },
-				{ "character",          itls == swrCharacters.end() ? itlv->second : itls->second},
-				{ "palette",            SokuLib::leftPlayerInfo.palette },
-				{ "deck",               ldeck }
-			}},
-			{ "dummy", {
-				{ "pos",{
-					{ "x", this->_dummyStartPos.x },
-					{ "y", this->_dummyStartPos.y }
-				}},
-				{ "character",          itrs == swrCharacters.end() ? itrv->second : itrs->second},
-				{ "palette",            SokuLib::rightPlayerInfo.palette },
-				{ "deck",               rdeck },
-			}},
-			{ "stage", (int)*(char *)0x899D0C },
-			{ "music", this->_musicReal },
-			{ "expected", this->_transformComboToString() },
-			{ "skills", this->_getSkills() },
-			{ "score", this->_getScoresJson() }
-		};
-
-		if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
-			json["player"]["mpp"]                 = this->_mpp;
-		if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
-			json["player"]["stones"]              = this->_stones;
-		if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
-			json["player"]["orerries"]            = this->_orerries;
-		if (this->_tickTimer)
-			json["player"]["tickTimer"]           = this->_tickTimer;
-		if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
-			json["player"]["privateSquare"]       = this->_privateSquare;
-		if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
-			json["player"]["clones"]              = this->_clones;
-		if (!this->_leftWeather)
-			json["player"]["affected_by_weather"] = this->_leftWeather;
-
-		if (!this->_rightWeather)
-			json["dummy"]["affected_by_weather"]  = this->_rightWeather;
-		if (this->_jump)
-			json["dummy"]["jump"]  = this->_jump;
-		if (this->_crouching)
-			json["dummy"]["crouch"]  = this->_crouching;
-
-		if (this->_loopStart)
-			json["music_loop_start"] = this->_loopStart;
-		if (this->_loopEnd)
-			json["music_loop_end"] = this->_loopEnd;
-		if (this->_counterHit)
-			json["counter_hit"] = this->_counterHit;
-		if (this->_uniformCardCost)
-			json["uniform_card_cost"] = this->_uniformCardCost;
-		if (this->_disableLimit)
-			json["disable_limit"] = this->_disableLimit;
-		if (this->_weather != SokuLib::WEATHER_CLEAR)
-			json["weather"] = this->_weather;
-		if (!this->_hand.empty())
-			json["hand"] = this->_hand;
-		if (!this->_introPath.empty())
-			json["intro"] = this->_introRelPath;
-		if (!this->_outroPath.empty())
-			json["outro"] = this->_outroRelPath;
-		if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE && !this->_dolls.empty()) {
-			nlohmann::json dolls = nlohmann::json::array();
-
-			for (auto &doll : this->_dolls)
-				dolls.push_back({
-					{"dir", doll.dir},
-					{"x",   doll.pos.x},
-					{"y",   doll.pos.y}
-				});
-			json["dolls"] = dolls;
-		}
+		nlohmann::json json = this->_getMyJson();
 
 		unlink((this->_path + ".backup").c_str());
 		if (rename(this->_path.c_str(), (this->_path + ".backup").c_str()) != 0)
@@ -2767,6 +2687,7 @@ bool ComboTrialEditor::save() const
 		}
 		stream << json.dump(4);
 		stream.close();
+		this->_myJson = json;
 		return true;
 	} catch (std::exception &e) {
 		MessageBox(SokuLib::window, e.what(), "Saving error", MB_ICONERROR);
@@ -3049,7 +2970,6 @@ bool ComboTrialEditor::_copyDeckToPlayerDeck()
 	}
 	assert(SokuLib::leftPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
 	this->_needReload = true;
-	this->_modified = true;
 	this->_hand.clear();
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
@@ -3076,7 +2996,6 @@ bool ComboTrialEditor::_copyDeckToDummyDeck()
 	}
 	assert(SokuLib::rightPlayerInfo.effectiveDeck.size == this->_deckEditMenu->displayedNumberOfCards);
 	this->_needReload = true;
-	this->_modified = true;
 	SokuLib::getBattleMgr().leftCharacterManager.objectBase.hp = 1;
 	return false;
 }
@@ -3103,7 +3022,6 @@ bool ComboTrialEditor::_copyDeckToPlayerSkills()
 			this->_skills[i].level = 0;
 		}
 	}
-	this->_modified = true;
 	memcpy(&SokuLib::getBattleMgr().leftCharacterManager.skillMap, &this->_skills, sizeof(this->_skills));
 	return false;
 }
@@ -3368,6 +3286,100 @@ void ComboTrialEditor::_checkCurrentAction()
 		this->_comboRecTimer = 0;
 	} else if (!this->_recordBuffer.empty())
 		this->_comboRecTimer++;
+}
+
+nlohmann::json ComboTrialEditor::_getMyJson() const
+{
+	auto itls = swrCharacters.find(SokuLib::leftChar);
+	auto itrs = swrCharacters.find(SokuLib::rightChar);
+	auto itlv = validCharacters.find(SokuLib::leftChar);
+	auto itrv = validCharacters.find(SokuLib::rightChar);
+	std::vector<unsigned short> ldeck;
+	std::vector<unsigned short> rdeck;
+
+	ldeck.reserve(SokuLib::leftPlayerInfo.effectiveDeck.size);
+	for (int i = 0; i < SokuLib::leftPlayerInfo.effectiveDeck.size; i++)
+		ldeck.push_back(SokuLib::leftPlayerInfo.effectiveDeck[i]);
+	rdeck.reserve(SokuLib::rightPlayerInfo.effectiveDeck.size);
+	for (int i = 0; i < SokuLib::rightPlayerInfo.effectiveDeck.size; i++)
+		rdeck.push_back(SokuLib::rightPlayerInfo.effectiveDeck[i]);
+
+	nlohmann::json json{
+		{ "type", "combo" },
+		{ "player", {
+			{ "pos",                this->_playerStartPos },
+			{ "character",          itls == swrCharacters.end() ? itlv->second : itls->second},
+			{ "palette",            SokuLib::leftPlayerInfo.palette },
+			{ "deck",               ldeck }
+		}},
+		{ "dummy", {
+			{ "pos",{
+				{ "x", this->_dummyStartPos.x },
+				{ "y", this->_dummyStartPos.y }
+			}},
+			{ "character",          itrs == swrCharacters.end() ? itrv->second : itrs->second},
+			{ "palette",            SokuLib::rightPlayerInfo.palette },
+			{ "deck",               rdeck },
+		}},
+		{ "stage", (int)*(char *)0x899D0C },
+		{ "music", this->_musicReal },
+		{ "expected", this->_transformComboToString() },
+		{ "skills", this->_getSkills() },
+		{ "score", this->_getScoresJson() }
+	};
+
+	if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
+		json["player"]["mpp"]                 = this->_mpp;
+	if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
+		json["player"]["stones"]              = this->_stones;
+	if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
+		json["player"]["orerries"]            = this->_orerries;
+	if (this->_tickTimer)
+		json["player"]["tickTimer"]           = this->_tickTimer;
+	if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
+		json["player"]["privateSquare"]       = this->_privateSquare;
+	if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
+		json["player"]["clones"]              = this->_clones;
+	if (!this->_leftWeather)
+		json["player"]["affected_by_weather"] = this->_leftWeather;
+
+	if (!this->_rightWeather)
+		json["dummy"]["affected_by_weather"]  = this->_rightWeather;
+	if (this->_jump)
+		json["dummy"]["jump"]  = this->_jump;
+	if (this->_crouching)
+		json["dummy"]["crouch"]  = this->_crouching;
+
+	if (this->_loopStart)
+		json["music_loop_start"] = this->_loopStart;
+	if (this->_loopEnd)
+		json["music_loop_end"] = this->_loopEnd;
+	if (this->_counterHit)
+		json["counter_hit"] = this->_counterHit;
+	if (this->_uniformCardCost)
+		json["uniform_card_cost"] = this->_uniformCardCost;
+	if (this->_disableLimit)
+		json["disable_limit"] = this->_disableLimit;
+	if (this->_weather != SokuLib::WEATHER_CLEAR)
+		json["weather"] = this->_weather;
+	if (!this->_hand.empty())
+		json["hand"] = this->_hand;
+	if (!this->_introPath.empty())
+		json["intro"] = this->_introRelPath;
+	if (!this->_outroPath.empty())
+		json["outro"] = this->_outroRelPath;
+	if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE && !this->_dolls.empty()) {
+		nlohmann::json dolls = nlohmann::json::array();
+
+		for (auto &doll : this->_dolls)
+			dolls.push_back({
+				{"dir", doll.dir},
+				{"x",   doll.pos.x},
+				{"y",   doll.pos.y}
+			});
+		json["dolls"] = dolls;
+	}
+	return json;
 }
 
 void ComboTrialEditor::SpecialAction::parse()
