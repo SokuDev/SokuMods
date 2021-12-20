@@ -124,6 +124,7 @@ private:
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
 
 	//Editor
+	mutable nlohmann::json _myJson;
 	std::vector<std::unique_ptr<Guide>> _guides;
 	std::string _path;
 	int _scoreCursorPos = 0;
@@ -141,7 +142,6 @@ private:
 	unsigned _handCursor = 0;
 	unsigned _scoreEdited = 0;
 	float _fakePlayerPos = 0;
-	bool _modified = false;
 	bool _editingHand = false;
 	bool _comboOnLeft = false;
 	bool _managingDolls = false;
@@ -181,6 +181,7 @@ private:
 	static const std::vector<unsigned> _stagesIds;
 	static const std::map<unsigned, const char *> _stagesNames;
 
+	nlohmann::json _getMyJson() const;
 	void _refreshScoreSprites(int i);
 	bool _selectScoreMenuItem();
 	void _setupStageSprites();
