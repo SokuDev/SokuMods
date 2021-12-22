@@ -8,7 +8,8 @@
             "y": 0.0
         }
     },
-    "expected": "3a 2a:55 5c d236b:32",
+    "expected": "3a:1 2a:51 5c:18 dskill1b:32",
+    "fail_timer": 60,
     "intro": "bnbmid5intro.lua",
     "music": "data/bgm/st41.ogg",
     "outro": "bnbmid5outro.lua",
