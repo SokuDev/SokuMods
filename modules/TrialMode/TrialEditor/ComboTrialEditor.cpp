@@ -898,10 +898,9 @@ disableLimit:
 	this->_dummyHit |= hit;
 	if (!this->_dummyHit && !this->_finished) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
-		if (!this->_jump) {
+		if (!this->_jump || this->_dummyStartPos.y != 0)
 			battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
-			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
-		} else if (this->_recordingCombo && this->_recordBuffer.empty()) {
+		if (this->_jump && this->_recordingCombo && this->_recordBuffer.empty()) {
 			if (isStartOfMove(SokuLib::ACTION_NEUTRAL_JUMP, battleMgr.rightCharacterManager, SokuLib::rightChar))
 				this->_comboRecTimer = 1;
 			else
@@ -1149,18 +1148,31 @@ void ComboTrialEditor::_initGameStart()
 		else
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
 	} else if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA) {
 		puts("Init Orreries");
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_215;
+		if (battleMgr.leftCharacterManager.orreriesTimeLeft <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_215;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
 	} else if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA) {
 		puts("Init Private Square");
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		if (battleMgr.leftCharacterManager.privateSquare <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
 	} else if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU) {
 		puts("Init Clones");
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
+		if (battleMgr.leftCharacterManager.youmuCloneTimeLeft <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
 	} else {
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
@@ -1293,10 +1305,19 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 		return;
 	}
 	if (this->_changingDummyPos) {
+		auto old = this->_dummyStartPos.y;
+
 		this->_dummyStartPos.x += 6 * originalInputs.horizontalAxis;
-		this->_dummyStartPos.x = min(1300, max(0, this->_dummyStartPos.x));
+		this->_dummyStartPos.x = min(1240, max(40, this->_dummyStartPos.x));
 		this->_dummyStartPos.y -= 6 * originalInputs.verticalAxis;
-		this->_dummyStartPos.y = min(1300, max(0, this->_dummyStartPos.y));
+		this->_dummyStartPos.y = min(1200, max(0, this->_dummyStartPos.y));
+		if (old != 0 && this->_dummyStartPos.y == 0) {
+			SokuLib::getBattleMgr().rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+			SokuLib::getBattleMgr().rightCharacterManager.objectBase.animate();
+		} else if (old == 0 && this->_dummyStartPos.y != 0) {
+			SokuLib::getBattleMgr().rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
+			SokuLib::getBattleMgr().rightCharacterManager.objectBase.animate();
+		}
 		originalInputs.b = 0;
 		originalInputs.c = 0;
 		originalInputs.d = 0;
@@ -3350,6 +3371,8 @@ nlohmann::json ComboTrialEditor::_getMyJson() const
 	if (this->_crouching)
 		json["dummy"]["crouch"]  = this->_crouching;
 
+	if (this->_failTimer)
+		json["fail_timer"] = this->_failTimer;
 	if (this->_loopStart)
 		json["music_loop_start"] = this->_loopStart;
 	if (this->_loopEnd)
@@ -3364,9 +3387,9 @@ nlohmann::json ComboTrialEditor::_getMyJson() const
 		json["weather"] = this->_weather;
 	if (!this->_hand.empty())
 		json["hand"] = this->_hand;
-	if (!this->_introPath.empty())
+	if (!this->_introRelPath.empty())
 		json["intro"] = this->_introRelPath;
-	if (!this->_outroPath.empty())
+	if (!this->_outroRelPath.empty())
 		json["outro"] = this->_outroRelPath;
 	if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE && !this->_dolls.empty()) {
 		nlohmann::json dolls = nlohmann::json::array();
@@ -3432,9 +3455,9 @@ void ComboTrialEditor::SpecialAction::parse()
 		do {
 			pos = str.find('/');
 			move = str.substr(0, pos);
+			this->actions.push_back(_getMoveAction(SokuLib::leftChar, move, name));
 			if (firstMove.empty())
 				firstMove = move;
-			this->actions.push_back(_getMoveAction(SokuLib::leftChar, move, name));
 			this->actionsStr.push_back(move);
 			if (pos != std::string::npos) {
 				str = str.substr(pos + 1);

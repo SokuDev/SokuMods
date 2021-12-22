@@ -136,7 +136,7 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 		throw std::invalid_argument("Spirit Clone is only allowed for Youmu");
 
 	this->_disableLimit = json.contains("disable_limit") && json["disable_limit"].is_boolean() && json["disable_limit"].get<bool>();
-	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : -1;
+	this->_uniformCardCost = json.contains("uniform_card_cost") && json["uniform_card_cost"].is_number() ? json["uniform_card_cost"].get<int>() : 0;
 	this->_playerStartPos = json["player"]["pos"];
 	this->_dummyStartPos.x = json["dummy"]["pos"]["x"];
 	this->_dummyStartPos.y = json["dummy"]["pos"]["y"];
@@ -497,31 +497,45 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.currentSpirit = 1000;
 	battleMgr.leftCharacterManager.maxSpirit = 1000;
 
-	if (this->_mpp) {
+
+	if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA) {
 		puts("Init MPP");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		battleMgr.leftCharacterManager.objectBase.animate();
 		while (battleMgr.leftCharacterManager.objectBase.frameCount != 80)
 			battleMgr.leftCharacterManager.objectBase.doAnimation();
-	} else if (this->_stones) {
+	} else if (this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI) {
 		puts("Init Philosophers' Stone");
 		if (battleMgr.leftCharacterManager.philosophersStoneTime <= 1 || this->_tickTimer)
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
 		else
 			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
-	} else if (this->_orerries) {
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
+	} else if (this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA) {
 		puts("Init Orreries");
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_215;
+		if (battleMgr.leftCharacterManager.orreriesTimeLeft <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_215;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
-	} else if (this->_privateSquare) {
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
+	} else if (this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA) {
 		puts("Init Private Square");
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		if (battleMgr.leftCharacterManager.privateSquare <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_201;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
-	} else if (this->_clones) {
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
+	} else if (this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU) {
 		puts("Init Clones");
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
+		if (battleMgr.leftCharacterManager.youmuCloneTimeLeft <= 1 || this->_tickTimer)
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
+		else
+			battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
+		battleMgr.leftCharacterManager.objectBase.doAnimation();
 	} else {
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
@@ -661,65 +675,6 @@ SokuLib::KeyInput ComboTrial::getDummyInputs()
 	return {0, this->_crouching - (this->_jump && this->_waitCounter < 30), 0, 0, 0, 0, 0, 0};
 }
 
-SokuLib::Action ComboTrial::getMoveAction(SokuLib::Character chr, std::string &name)
-{
-	auto error = false;
-
-	try {
-		auto act = actionsFromStr.at(name);
-		auto pos = name.find("sc2");
-
-		if (act >= SokuLib::ACTION_DEFAULT_SKILL1_B && act <= SokuLib::ACTION_ALT2_SKILL5_AIR_C) {
-			auto input = characterSkills[chr].at(name[name.size() - 3]);
-			auto move = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
-			auto skillName = characterCards[chr][100 + (move % 3) * characterSkills[chr].size() + move / 3].first;
-
-			name = input + name.back() + " (" + (skillName.empty() ? "Unknown skill" : skillName) + ")";
-		}
-		try {
-			if (pos != std::string::npos) {
-				auto scId = std::stoul(name.substr(pos + 2, 3));
-				auto &entry = characterCards[chr].at(scId);
-
-				name = name.substr(0, pos) + std::to_string(entry.second) + "SC (" + entry.first + ")";
-			}
-		} catch (...) {
-			printf("%u %s %s\n", name.size(), name.c_str(), name.substr(pos + 2, 3).c_str());
-			error = true;
-			if (error) {
-				assert(false);
-				throw;
-			}
-		}
-		return act;
-	} catch (...) {
-		if (error)
-			throw;
-	}
-
-
-	int start = name[0] == 'j';
-	int realStart = (name[start] == 'a' ? 2 : 1) + start;
-	auto move = name.substr(realStart, name.size() - realStart - 1);
-	auto &inputs = characterSkills[chr];
-	auto it = std::find(inputs.begin(), inputs.end(), move);
-
-	if (it == inputs.end())
-		throw std::exception();
-	try {
-		auto act = actionsFromStr.at(name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name[name.size() - 1]);
-		auto moveId = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
-		auto skillName = characterCards[chr][100 + (moveId % 3) * characterSkills[chr].size() + moveId / 3].first;
-
-		name = name.substr(realStart, name.size() - realStart - 1) + name.back() + " (" + (skillName.empty() ? "Unknown skill" : skillName) + ")";
-		return act;
-	} catch (std::exception &e) {
-		printf("%s\n", (name.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + name.back()).c_str());
-		assert(false);
-		throw;
-	}
-}
-
 void ComboTrial::onMenuClosed(MenuAction action)
 {
 	switch (action) {
@@ -743,10 +698,76 @@ SokuLib::Scene ComboTrial::getNextScene()
 	return this->_next;
 }
 
+SokuLib::Action ComboTrial::_getMoveAction(SokuLib::Character chr, std::string &myMove, std::string &name)
+{
+	auto error = false;
+
+	try {
+		auto act = actionsFromStr.at(myMove);
+		auto pos = myMove.find("sc2");
+
+		if (act >= SokuLib::ACTION_DEFAULT_SKILL1_B && act <= SokuLib::ACTION_ALT2_SKILL5_AIR_C) {
+			auto input = characterSkills[chr].at(myMove[myMove.size() - 2] - '1');
+			auto move = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
+			auto skillName = characterCards[chr][100 + (move % 3) * characterSkills[chr].size() + move / 3].first;
+
+			myMove.replace(myMove.find("skill"), 6, input);
+			name = input + myMove.back() + " (" + (skillName.empty() ? "Unknown skill" : skillName) + ")";
+			return act;
+		}
+		try {
+			if (pos != std::string::npos) {
+				auto scId = std::stoul(myMove.substr(pos + 2, 3));
+				auto &entry = characterCards[chr].at(scId);
+
+				name = myMove.substr(0, pos) + std::to_string(entry.second) + "SC (" + entry.first + ")";
+				return act;
+			}
+		} catch (...) {
+			printf("%u %s %s\n", myMove.size(), myMove.c_str(), myMove.substr(pos + 2, 3).c_str());
+			error = true;
+			if (error) {
+				assert(false);
+				throw;
+			}
+		}
+		name = myMove;
+		return act;
+	} catch (...) {
+		if (error)
+			throw;
+	}
+
+	int start = myMove[0] == 'j';
+	int realStart = (myMove[start] == 'a' ? 2 : 1) + start;
+	auto move = myMove.substr(realStart, myMove.size() - realStart - 1);
+	auto &inputs = characterSkills[chr];
+	auto it = std::find(inputs.begin(), inputs.end(), move);
+
+	if (it == inputs.end())
+		throw std::exception();
+	try {
+		auto act = actionsFromStr.at(myMove.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + myMove[myMove.size() - 1]);
+		auto moveId = ((act - 500) / 20) * 3 + ((act - 500) % 20 / 5);
+		auto skillName = characterCards[chr][100 + (moveId % 3) * characterSkills[chr].size() + moveId / 3].first;
+
+		name = myMove.substr(realStart, myMove.size() - realStart - 1) + myMove.back() + " (" + (skillName.empty() ? "Unknown skill" : skillName) + ")";
+		return act;
+	} catch (std::exception &e) {
+		printf("%s\n", (myMove.substr(0, realStart) + "skill" + std::to_string(it - inputs.begin() + 1) + myMove.back()).c_str());
+		assert(false);
+		throw;
+	}
+}
+
 void ComboTrial::SpecialAction::parse()
 {
+	SokuLib::Vector2i realSize;
+	std::string firstMove;
 	std::string chargeStr;
 	std::string delayStr;
+	std::string move;
+	std::string name;
 	bool d = false;
 	bool p = false;
 
@@ -778,9 +799,7 @@ void ComboTrial::SpecialAction::parse()
 	}
 	printf("Move %s -> %s [%s] :%s: -> ", this->name.c_str(), this->moveName.c_str(), chargeStr.c_str(), delayStr.c_str());
 
-	std::string move;
-	std::string firstMove;
-
+	this->actions.clear();
 	try {
 		size_t pos;
 		std::string str = this->moveName;
@@ -789,16 +808,16 @@ void ComboTrial::SpecialAction::parse()
 		do {
 			pos = str.find('/');
 			move = str.substr(0, pos);
+			this->actions.push_back(_getMoveAction(SokuLib::leftChar, move, name));
 			if (firstMove.empty())
 				firstMove = move;
-			this->actions.push_back(getMoveAction(SokuLib::leftChar, move));
 			if (pos != std::string::npos) {
 				str = str.substr(pos + 1);
 				printf("%i/", this->actions.back());
-				real += move + "/";
+				real += name + "/";
 			} else {
 				printf("%i ", this->actions.back());
-				real += move;
+				real += name;
 			}
 		} while (pos != std::string::npos);
 		this->moveName = real;
@@ -834,8 +853,6 @@ void ComboTrial::SpecialAction::parse()
 	} catch (...) {
 		throw std::invalid_argument(firstMove + " is not yet implemented");
 	}
-
-	SokuLib::Vector2i realSize;
 
 	if (this->chargeTime) {
 		int dig = std::isdigit(this->moveName.back());

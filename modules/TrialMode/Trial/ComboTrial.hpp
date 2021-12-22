@@ -97,7 +97,7 @@ private:
 	void _initGameStart();
 	void _loadExpected(const std::string &expected);
 
-	static SokuLib::Action getMoveAction(SokuLib::Character chr, std::string &name);
+	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &move, std::string &name);
 
 public:
 	ComboTrial(const char *folder, SokuLib::Character player, const nlohmann::json &json);
