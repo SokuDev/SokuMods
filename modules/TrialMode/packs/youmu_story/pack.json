@@ -4,6 +4,7 @@
     "characters": [
         "youmu"
     ],
+    "description": "No description provided",
     "icon": {
         "isPath": false,
         "offset": {
@@ -27,7 +28,24 @@
     ],
     "name": "Babylone's Aurora",
     "scenarios": [
-        {"file": "bnbmid5.json"}
+        {
+            "description": "",
+            "extra": false,
+            "file": "bnbmid5.json",
+            "may_be_locked": true,
+            "name": "bnbmid5.json",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "test.json",
+            "may_be_locked": true,
+            "name": "test.json",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        }
     ],
     "stand": {
         "isPath": false,
