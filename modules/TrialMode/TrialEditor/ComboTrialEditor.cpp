@@ -1084,10 +1084,13 @@ void ComboTrialEditor::_initGameStart()
 		return;
 	}
 	puts("Init");
-	if (this->_check && (
-		!this->_scores[0].met(0) || !this->_scores[1].met(0) || !this->_scores[2].met(0) || !this->_scores[3].met(0)
-	))
-		MessageBox(SokuLib::window, "Dummy did not get S rank. The preview should always get S rank.", "S rank requirement error", MB_ICONWARNING);
+	if (this->_check > 1)
+		this->_check--;
+	else if (this->_check) {
+		if (!this->_scores[0].met(0) || !this->_scores[1].met(0) || !this->_scores[2].met(0) || !this->_scores[3].met(0))
+			MessageBox(SokuLib::window, "Dummy did not get S rank. The preview should always get S rank.", "S rank requirement error", MB_ICONWARNING);
+		this->_check = 0;
+	}
 	if (this->_recordingCombo)
 		this->_saveRecordedCombo();
 	this->_dollSelected = false;
@@ -1097,7 +1100,6 @@ void ComboTrialEditor::_initGameStart()
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
-	this->_check = false;
 	if (!this->_playingIntro || this->_waitCounter != 31) {
 		this->_playingIntro = false;
 		if (this->_isRecordingScore) {
@@ -2584,7 +2586,7 @@ bool ComboTrialEditor::playPreview()
 		guide->reset();
 	this->_selectedSubcategory = 0;
 	this->_playComboAfterIntro = true;
-	this->_check = true;
+	this->_check = 3;
 	this->_initGameStart();
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
