@@ -13,10 +13,19 @@
 #include <algorithm>
 #include <dinput.h>
 
+static bool gameStarted = false;
+static bool sessionStarted = false;
+
 int __fastcall CTitle_OnProcess(SokuLib::Title *This) {
 	// super
 	int ret = (This->*s_origCTitle_Process)();
 
+	if (gameStarted)
+		broadcastOpcode(GAME_ENDED, "null");
+	if (sessionStarted)
+		broadcastOpcode(SESSION_ENDED, "null");
+	gameStarted = false;
+	sessionStarted = false;
 	needReset = true;
 	needRefresh = true;
 	checkKeyInputs();
@@ -27,6 +36,12 @@ int __fastcall CBattleWatch_OnProcess(SokuLib::BattleWatch *This) {
 	// super
 	int ret = (This->*s_origCBattleWatch_Process)();
 
+	if (!gameStarted)
+		broadcastOpcode(GAME_STARTED, "null");
+	if (!sessionStarted)
+		broadcastOpcode(SESSION_STARTED, "null");
+	gameStarted = true;
+	sessionStarted = true;
 	updateCache(true);
 	return ret;
 }
@@ -35,12 +50,24 @@ int __fastcall CBattle_OnProcess(SokuLib::Battle *This) {
 	// super
 	int ret = (This->*s_origCBattle_Process)();
 
+	if (!gameStarted)
+		broadcastOpcode(GAME_STARTED, "null");
+	if (!sessionStarted)
+		broadcastOpcode(SESSION_STARTED, "null");
+	gameStarted = true;
+	sessionStarted = true;
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSPLAYER)
 		updateCache(false);
 	return ret;
 }
 
 void loadCommon() {
+	if (gameStarted)
+		broadcastOpcode(GAME_ENDED, "null");
+	if (!sessionStarted)
+		broadcastOpcode(SESSION_STARTED, "null");
+	gameStarted = false;
+	sessionStarted = true;
 	needRefresh = true;
 	checkKeyInputs();
 }
