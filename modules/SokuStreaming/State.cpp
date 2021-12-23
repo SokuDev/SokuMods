@@ -334,6 +334,10 @@ std::string cacheToJson(CachedMatchData cache) {
 		rightHand = cache.rightHand;
 	}
 
+	result["isPlaying"] = SokuLib::sceneId == SokuLib::SCENE_BATTLE ||
+		SokuLib::sceneId == SokuLib::SCENE_BATTLECL ||
+		SokuLib::sceneId == SokuLib::SCENE_BATTLESV ||
+		SokuLib::sceneId == SokuLib::SCENE_BATTLEWATCH;
 	result["left"] = {
 		{"palette", SokuLib::leftPlayerInfo.palette},
 		{"character", cache.left},
