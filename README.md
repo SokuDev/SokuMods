@@ -13,14 +13,14 @@ The code in this repository comes from various contributors:
 - *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader](https://github.com/enebe-nb/shady-packer), UPnPNat
 - *FireSeal* made SokuRoll
 - *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
-- *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming
+- *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming, InfiniteDecks, TrialMode, AdvancedPraticeMode, HostInBackground
 - *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll, EasyDecks
 - *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
 - *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
 - *Fear Nagae*, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
-- *Nepoke* made ReDelay
+- *[PinkySmile](https://github.com/Gegel85)* made ReDelay (Original idea by *Nepoke*)
 - *mauve* made th123e (and its loader, in `th123eloader/`)
 - *[delthas](https://github.com/delthas)* made Autopunch, GetIP, SokuReplays, as well as all the plumbing: adding CMake, CI, formatting, ...
 
