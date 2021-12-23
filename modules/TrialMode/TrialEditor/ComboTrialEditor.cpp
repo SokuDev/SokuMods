@@ -567,9 +567,9 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			if (this->_dollCursorPos == this->_dolls.size()) {
 				SokuLib::playSEWaveBuffer(0x28);
 				this->_dolls.push_back({
-							       SokuLib::getBattleMgr().leftCharacterManager.objectBase.position,
-							       SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction
-						       });
+					SokuLib::getBattleMgr().leftCharacterManager.objectBase.position,
+					SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction
+				});
 				this->_initGameStart();
 				this->_guides[11]->active = false;
 				this->_guides[10]->active = true;
@@ -596,8 +596,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 				this->_guides[10]->active = true;
 			}
 		} else {
-			if (SokuLib::inputMgrs.input.horizontalAxis == -1 ||
-			    SokuLib::inputMgrs.input.verticalAxis == -1) {
+			if (SokuLib::inputMgrs.input.horizontalAxis == -1 || SokuLib::inputMgrs.input.verticalAxis == -1) {
 				if (this->_dollCursorPos == 0)
 					this->_dollCursorPos = this->_dolls.size();
 				else
@@ -605,8 +604,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 				this->_guides[10]->active = this->_dollCursorPos != this->_dolls.size();
 				this->_guides[11]->active = this->_dollCursorPos == this->_dolls.size();
 				SokuLib::playSEWaveBuffer(0x27);
-			} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 ||
-				   SokuLib::inputMgrs.input.verticalAxis == 1) {
+			} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || SokuLib::inputMgrs.input.verticalAxis == 1) {
 				if (this->_dollCursorPos == this->_dolls.size())
 					this->_dollCursorPos = 0;
 				else
@@ -623,11 +621,10 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 				this->_guides[11]->active = this->_dollCursorPos == this->_dolls.size();
 			}
 			if (SokuLib::inputMgrs.input.c == 1 && this->_dollCursorPos != this->_dolls.size()) {
-				SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[
-					this->_dollCursorPos * 2]->direction = static_cast<SokuLib::Direction>(
-					this->_dolls[this->_dollCursorPos].dir * -1);
-				this->_dolls[this->_dollCursorPos].dir = static_cast<SokuLib::Direction>(
-					this->_dolls[this->_dollCursorPos].dir * -1);
+				SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[this->_dollCursorPos * 2]->direction =
+					static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
+				this->_dolls[this->_dollCursorPos].dir =
+					static_cast<SokuLib::Direction>(this->_dolls[this->_dollCursorPos].dir * -1);
 				SokuLib::playSEWaveBuffer(0x28);
 			}
 			if (SokuLib::inputMgrs.input.b == 1) {
