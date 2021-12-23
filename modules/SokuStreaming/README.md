@@ -135,6 +135,21 @@ Data type: None
 
 A new game session just ended.
 ## Data
+### <u>ConnectionRequest</u> object
+```JSON
+{
+    "ip": "27.189.90.102",
+    "port": 10800,
+    "spec": true
+}
+```
+ip: String -> The IP address to connect to.
+
+port: Integer -> The port on which to connect.
+
+spec: Boolean -> If this is false, the game will try to connect as a player, otherwise,
+it will connect as a spectator.
+
 ### <u>PartialState</u> object
 ```JSON
 {
