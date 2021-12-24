@@ -652,32 +652,36 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 				this->_comboCursor = static_cast<int>((this->_comboCursor + this->_expectedActions.size()) + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis)) % this->_expectedActions.size();
 				SokuLib::playSEWaveBuffer(0x27);
 			}
-			if (SokuLib::inputMgrs.input.a == 1) {
+			if (SokuLib::inputMgrs.input.changeCard == 1) {
 				std::string expected = InputBox("Enter new moves", "New moves", "");
 				bool par = false;
 				char last = ' ';
-				unsigned start = this->_expectedActions.size();
+				int j = 0;
 
 				if (!expected.empty()) {
-					this->_expectedActions.emplace_back(new SpecialAction());
+					this->_comboCursor++;
+					j++;
+					this->_expectedActions.insert(this->_expectedActions.begin() + this->_comboCursor, std::unique_ptr<SpecialAction>(new SpecialAction()));
 					for (auto c : expected) {
 						par |= c == '(';
 						par &= c != ')';
 						if (!par && c == ' ') {
-							if (last != ' ')
-								this->_expectedActions.emplace_back(new SpecialAction());
+							if (last != ' ') {
+								this->_expectedActions.insert(this->_expectedActions.begin() + this->_comboCursor + j, std::unique_ptr<SpecialAction>(new SpecialAction()));
+								j++;
+							}
 						} else
 							this->_expectedActions.back()->name += c;
 						last = c;
 					}
 					try {
-						for (int i = start; i < this->_expectedActions.size(); i++)
-							this->_expectedActions[i]->parse();
-						this->_comboCursor = start;
+						for (int i = 0; i < j; i++)
+							this->_expectedActions[this->_comboCursor + i]->parse();
 						SokuLib::playSEWaveBuffer(0x28);
 					} catch (std::exception &e) {
 						MessageBox(SokuLib::window, e.what(), "Invalid move string", MB_ICONERROR);
-						this->_expectedActions.erase(this->_expectedActions.begin() + start, this->_expectedActions.end());
+						this->_expectedActions.erase(this->_expectedActions.begin() + this->_comboCursor, this->_expectedActions.begin() + this->_comboCursor + j);
+						this->_comboCursor--;
 						SokuLib::playSEWaveBuffer(0x29);
 					}
 				} else
@@ -691,52 +695,115 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			}
 			if (SokuLib::inputMgrs.input.d == 1) {
 				auto &move = this->_expectedActions[this->_comboCursor];
-				auto &charge = move->chargeTime;
-				std::string str = InputBox("Enter new charge time", "New charge time", std::to_string(charge));
+				auto &delay = move->delay;
+				auto charge = move->chargeTime;
+				std::string str = InputBox("Enter new charge time & delay", "New charge time and delay", std::to_string(charge) + "&" + std::to_string(delay));
 
-				if (!str.empty())
-					try {
-						SokuLib::Vector2i realSize;
+				if (!str.empty()) {
+					auto pos = str.find('&');
 
-						charge = std::stoul(str);
-						move->attributes.texture.createFromText(("Charge " + std::to_string(move->chargeTime) + "|Delay " + std::to_string(move->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
-						move->attributes.setSize(realSize.to<unsigned>());
-						move->attributes.rect.width = realSize.x;
-						move->attributes.rect.height = realSize.y;
-						SokuLib::playSEWaveBuffer(0x28);
-					} catch (std::out_of_range &e) {
-						MessageBox(SokuLib::window, "The charge value must be between 0 and 4294967295", "Invalid charge string", MB_ICONERROR);
+					if (pos == std::string::npos) {
+						MessageBox(SokuLib::window, "Missing separator.", "Invalid charge&delay string", MB_ICONERROR);
 						SokuLib::playSEWaveBuffer(0x29);
-					} catch (std::invalid_argument &e) {
-						MessageBox(SokuLib::window, "The charge value is not a valid number.", "Invalid charge string", MB_ICONERROR);
-						SokuLib::playSEWaveBuffer(0x29);
+					} else {
+						try {
+							charge = std::stoul(str.substr(0, pos));
+						} catch (std::out_of_range &e) {
+							MessageBox(SokuLib::window, "The charge value must be between 0 and 4294967295", "Invalid charge string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+							goto afterInput;
+						} catch (std::invalid_argument &e) {
+							MessageBox(SokuLib::window, "The charge value is not a valid number.", "Invalid charge string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+							goto afterInput;
+						}
+						try {
+							SokuLib::Vector2i realSize;
+
+							delay = std::stoul(str.substr(pos + 1));
+							move->chargeTime = charge;
+							move->attributes.texture.createFromText(("Charge " + std::to_string(move->chargeTime) + "|Delay " + std::to_string(move->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
+							move->attributes.setSize(realSize.to<unsigned>());
+							move->attributes.rect.width = realSize.x;
+							move->attributes.rect.height = realSize.y;
+							SokuLib::playSEWaveBuffer(0x28);
+						} catch (std::out_of_range &e) {
+							MessageBox(SokuLib::window, "The delay value must be between 0 and 4294967295", "Invalid delay string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+						} catch (std::invalid_argument &e) {
+							MessageBox(SokuLib::window, "The delay value is not a valid number.", "Invalid delay string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+						}
 					}
-				else
+				} else
 					SokuLib::playSEWaveBuffer(0x29);
 			}
-			if (SokuLib::inputMgrs.input.changeCard == 1) {
+			if (SokuLib::inputMgrs.input.a == 1) {
+				std::string str;
+				bool start = true;
 				auto &move = this->_expectedActions[this->_comboCursor];
-				auto &delay = move->delay;
-				std::string str = InputBox("Enter new delay time", "New delay time", std::to_string(delay));
 
-				if (!str.empty())
+				if (!start)
+					str += " ";
+				start = false;
+				if (move->optional)
+					str += "!";
+				for (int i = 0; i < move->actions.size(); i++) {
+					auto action = move->actions[i];
+					auto it = std::find_if(actionsFromStr.begin(), actionsFromStr.end(), [action](const std::pair<std::string, SokuLib::Action> &p1){
+						return p1.second == action;
+					});
+
+					if (i != 0)
+						str += "/";
+					if (it == actionsFromStr.end())
+						throw std::invalid_argument("Cannot find action string for action " + std::to_string(action));
+					if (action == SokuLib::ACTION_FLY || (action >= SokuLib::ACTION_DEFAULT_SKILL1_B && action < SokuLib::ACTION_USING_SC_ID_200))
+						str += move->actionsStr[i];
+					else if (it->first == "44")
+						str += "d4";
+					else if (it->first == "66")
+						str += "d6";
+					else if (it->first == "1a" && SokuLib::leftChar != SokuLib::CHARACTER_YOUMU)
+						str += "2a";
+					else
+						str += it->first;
+				}
+				if (move->chargeTime)
+					str += "[" + std::to_string(move->chargeTime) + "]";
+				if (move->delay)
+					str += ":" + std::to_string(move->delay);
+
+				std::string expected = InputBox("Enter corrected move", "Edit move", str);
+				bool par = false;
+				char last = ' ';
+				int j = 0;
+
+				if (!expected.empty()) {
+					move->name.clear();
+					for (auto c : expected) {
+						par |= c == '(';
+						par &= c != ')';
+						if (!par && c == ' ') {
+							if (last != ' ') {
+								MessageBox(SokuLib::window, "You cannot have multiple moves when editing a move.", "Too many moves", MB_ICONERROR);
+								SokuLib::playSEWaveBuffer(0x29);
+								goto afterInput;
+							}
+						} else
+							move->name += c;
+						last = c;
+					}
 					try {
-						SokuLib::Vector2i realSize;
-
-						delay = std::stoul(str);
-						move->attributes.texture.createFromText(("Charge " + std::to_string(move->chargeTime) + "|Delay " + std::to_string(move->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
-						move->attributes.setSize(realSize.to<unsigned>());
-						move->attributes.rect.width = realSize.x;
-						move->attributes.rect.height = realSize.y;
+						move->parse();
 						SokuLib::playSEWaveBuffer(0x28);
-					} catch (std::out_of_range &e) {
-						MessageBox(SokuLib::window, "The charge value must be between 0 and 4294967295", "Invalid charge string", MB_ICONERROR);
-						SokuLib::playSEWaveBuffer(0x29);
-					} catch (std::invalid_argument &e) {
-						MessageBox(SokuLib::window, "The charge value is not a valid number.", "Invalid charge string", MB_ICONERROR);
+					} catch (std::exception &e) {
+						MessageBox(SokuLib::window, e.what(), "Invalid move string", MB_ICONERROR);
+						move->name = str;
+						move->parse();
 						SokuLib::playSEWaveBuffer(0x29);
 					}
-				else
+				} else
 					SokuLib::playSEWaveBuffer(0x29);
 			}
 			if (SokuLib::inputMgrs.input.spellcard == 1) {
@@ -783,6 +850,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		}
 	}
 
+afterInput:
 	if (!this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
 		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = !!battleMgr.leftCharacterManager.missingPurplePowerTimeLeft;
 	else if (!this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
@@ -870,7 +938,7 @@ disableLimit:
 		return false;
 	}
 
-	if ((this->_actionCounter || (!this->_recordBuffer.empty() && this->_recordingCombo)) && !this->_dummyHit && !battleMgr.leftCharacterManager.timeStop && !battleMgr.rightCharacterManager.timeStop)
+	if ((this->_actionCounter || (!this->_recordBuffer.empty() && this->_recordingCombo)) && !this->_dummyHit)
 		this->_timer++;
 	else
 		this->_timer = 0;
