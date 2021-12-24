@@ -16,8 +16,8 @@ local dialogs = {
 	"LcEShe wouldn't let anyone suspicious go by,<br>however lazy she can be...",
 	"LHEI was right, it must be someone quite stealthy...<br>Or someone able to manipulate others...",
 	"LCEThere is one person,<br>and she fits the description quite nicely...",
-	"RCDthat sure is a long day. At least it must be good for you?",
-	"LCDIt is Perfect!",
+	"RCDThat sure is a long day.<br>At least it must be good for you?",
+	"LCDIt is perfect!",
 	"RCcDo you know who she is assuming to be the culprit?",
 	"LHcYes I do, truth is,<br>I have already made an arrangement with her.",
 	--Battle here

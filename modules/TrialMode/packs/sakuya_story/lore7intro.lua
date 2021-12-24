@@ -7,10 +7,11 @@ local bool = false
 local dialogs = {
 	"LW I know you are here Aya.",
 	"RWAWell obviously.",
-	"RWhAre you in a hurry to get the next article?<br>So impatient.",
-	"LHhYou are wrong, I have all the time in the world.",
-	"LhhHowever,<br>I do want to know who infiltrated the lady's mansion first.",
-	"RhWIf you are so patient,<br>then you should just have to wait for the journal release.",
+	"RWhAre you in a hurry to get the next article?",
+	"RWHSo impatient.",
+	"LHHYou are wrong, I have all the time in the world.",
+	"LhHHowever, I do want to know<br>who infiltrated the lady's mansion first.",
+	"RhWIf you are so patient, then you<br>should just have to wait for the journal release.",
 	"LcWCouldn't I have some information in advance?<br>You do know that my master is one<br>of the only people to read your news?",
 	"RcAIf you're here to make fun of me then I'll show you!",
 	"LEAGood grief, a journalist that can't face the facts..."
@@ -153,7 +154,7 @@ local anims = {
 	stage4
 }
 
-stageBg.texture:loadFromFile(packPath.."/lore6intro.png")
+stageBg.texture:loadFromFile(packPath.."/lore7intro.png")
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),
@@ -163,7 +164,7 @@ stageBg.rect.width  = stageBg.texture.size.x
 stageBg.rect.height = stageBg.texture.size.y
 stageBg.tint.a = 0
 
-stageBottom.texture:loadFromGame("data/scenario/effect/Stage6.png")
+stageBottom.texture:loadFromGame("data/scenario/effect/Stage7.png")
 stageBottom.size = stageBottom.texture.size
 stageBottom.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),

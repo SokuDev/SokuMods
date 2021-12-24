@@ -486,6 +486,7 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.combo.rate = 0;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
+	battleMgr.leftCharacterManager.cardCount = 0;
 	for (auto card : this->_hand) {
 		auto obj = battleMgr.leftCharacterManager.addCard(card);
 
