@@ -11,7 +11,7 @@
     "expected": "6a 2b hj9/hj8 j6a",
     "intro": "lore6intro.lua",
     "music": "data/bgm/st00.ogg",
-    "outro": "lore6Outro.dll",
+    "outro": "lore6outro.lua",
     "player": {
         "character": "sakuya",
         "deck": [],

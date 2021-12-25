@@ -178,6 +178,14 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 				objs.push_back(reinterpret_cast<FakeCharacterManager *>(obj));
 			return objs;
 		},
+		sol::meta_function::length, [](SokuLib::ObjListManager &object) {
+			return object.list.size;
+		},
+		sol::meta_function::index, [](SokuLib::ObjListManager &object, int index) {
+			if (index < 1 || index > object.list.size)
+				throw sol::error("Out of bound access to a ObjListManager");
+			return object.list.vector()[index - 1];
+		},
 		"draw", SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00),
 		"update", SokuLib::union_cast<void (SokuLib::ObjListManager::*)()>(0x633ce0)
 	);
