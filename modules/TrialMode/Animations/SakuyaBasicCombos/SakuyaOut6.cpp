@@ -6,6 +6,8 @@
 #include <memory>
 #include "../BattleAnimation.hpp"
 
+#define lobj battleMgr.leftCharacterManager.objectBase
+#define robj battleMgr.rightCharacterManager.objectBase
 #define TRANSLATE_MAX 120
 #define YUKARI_START_LOCATION 500
 #define CAM_START_LOCATION (-20)
@@ -24,17 +26,15 @@
 
 char profilePath[1024];
 static const std::vector<std::string> dialogs{
-	"LHDSo now will you tell me what is going on?",
+	"LHDNow... Will you tell me what is going on?",
 	"RHDYou should come back to your first clue,<br>that will help you I'm sure.",
 	"LcDCan't you just explain to me right now?",
-	"REEI could,<br>but I believe it would be best to find out by yourself.",
-	"LHEIt is fine,<br>your explanations are always too cryptic anyway.",
-	"LWEWell I have someone else to ask questions thanks to you now,<br>so I must take my leave.",
+	"REEI could, but I believe it would<br>be best to find out by yourself.",
+	"LHEIt is fine, your explanations<br>are always too cryptic anyway.",
+	"LWEWell. I have someone else to ask questions thanks<br>to you now, so I must take my leave.",
 	"R CIt seems she is going for the right source...",
-	"R CSadly for her it is the flow,<br>and not the spring that matters this time...",
-	"R CSadly for her it is the flow,<br>and not the spring that matters this time...<br>isn't it?",
-	"R ASadly for her it is the flow,<br>and not the spring that matters this time...<br>isn't it?",
-	"R CSadly for her it is the flow,<br>and not the spring that matters this time...<br>isn't it?",
+	"R hSadly for her, it is the flow,<br>not the spring that matters this time...",
+	"R CIsn't it?",
 	"   Here you are!"
 };
 
@@ -56,6 +56,7 @@ private:
 
 	void _init()
 	{
+		puts("Init!");
 		auto &battleMgr = SokuLib::getBattleMgr();
 
 		this->_playerInfo.character = SokuLib::CHARACTER_YUKARI;
@@ -70,28 +71,33 @@ private:
 		this->_playerInfo.effectiveDeck.size = 0;
 		this->_playerInfo.keyManager = nullptr;
 
+		puts("Create Yukari");
 		((void (__thiscall *)(int *, bool, SokuLib::PlayerInfo &))0x46da40)(this->buffer, false, this->_playerInfo);
+		puts("Init Yukari");
 		(*(void (__thiscall **)(SokuLib::CharacterManager *))(*(int *)this->_yukari + 0x44))(this->_yukari);
 		*(SokuLib::CharacterManager **)&this->_yukari->objectBase.offset_0x168[8] = &battleMgr.rightCharacterManager;
 
-		SokuLib::camera.scale = 1;
-		//SokuLib::camera.translate.x = CAM_START_LOCATION;
-		//SokuLib::camera.translate.y = 0;
-		//SokuLib::camera.backgroundTranslate.x = BG_START_LOCATION;
+		SokuLib::camera.translate.x = -320;
+		SokuLib::camera.translate.y = 420;
+		SokuLib::camera.backgroundTranslate.x = 640;
+		SokuLib::camera.backgroundTranslate.y = 0;
 
-		battleMgr.leftCharacterManager.objectBase.position.x = -500;
-		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_DEFAULT_SKILL1_B;
+		battleMgr.leftCharacterManager.objectBase.position.x = 420;
+		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+		battleMgr.leftCharacterManager.objectBase.animate();
 
+		battleMgr.rightCharacterManager.objectBase.position.x = 800;
 		battleMgr.rightCharacterManager.objectBase.position.y = 0;
-		battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
+		battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_KNOCKED_DOWN_STATIC;
 		battleMgr.rightCharacterManager.objectBase.animate();
 
-		this->_yukari->objectBase.position.x = 600;
+		this->_yukari->objectBase.position.x = 500;
 		this->_yukari->objectBase.position.y = 800;
 		this->_yukari->objectBase.action = SokuLib::ACTION_ALT2_SKILL4_C;
 		this->_yukari->objectBase.animate();
 		//this->_yukari->objectBase.animate2();
 		this->_yukari->objectBase.renderInfos.color = SokuLib::Color::Black;
+		puts("Init done");
 	}
 
 	void stage0()
@@ -102,6 +108,120 @@ private:
 		battleMgr.leftCharacterManager.objectBase.doAnimation();
 		battleMgr.rightCharacterManager.objectBase.doAnimation();
 		if (!color.a && !this->_ctr && this->_side) {
+			this->_dialog->setHidden(false);
+			this->_currentStage++;
+		}
+		if (!this->_side) {
+			color.a += 0x11;
+			if (color.a == 0xFF) {
+				this->_side = true;
+				this->_init();
+			}
+		} else if (this->_flashRect.getFillColor().a)
+			color.a -= 0x11;
+		else if (this->_ctr)
+			this->_ctr--;
+		this->_flashRect.setFillColor(color);
+	}
+
+	void stage1()
+	{
+		auto &battleMgr = SokuLib::getBattleMgr();
+
+		lobj.doAnimation();
+		if (this->_keyPressed && this->_dialog->getCurrentDialog() == 4) {
+			this->_keyPressed = false;
+			this->_dialog->setHidden(true);
+			lobj.action = SokuLib::ACTION_DEFAULT_SKILL4_B;
+			lobj.animate();
+			this->_currentStage++;
+		}
+	}
+
+	void stage2()
+	{
+		auto &battleMgr = SokuLib::getBattleMgr();
+
+		lobj.doAnimation();
+		updateSubObjects(battleMgr.leftCharacterManager);
+		if (lobj.actionBlockId == 1 && lobj.animationCounter == 0 && lobj.animationSubFrame == 0 && lobj.frameCount == 0) {
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x - 8, 115);
+
+			auto objs = battleMgr.leftCharacterManager.objects.list.vector();
+			auto start = battleMgr.leftCharacterManager.objects.list.size - 7;
+
+			for (int i = 6; i; i--) {
+				printf("To %i\n", i-1);
+				while (objs[start + i]->actionBlockId != i - 1)
+					objs[start + i]->animate2();
+			}
+		}
+		if (lobj.actionBlockId == 1 && lobj.animationCounter == 1 && lobj.animationSubFrame == 1 && lobj.frameCount == 10) {
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x, 0);
+			spawnSubObject(battleMgr.leftCharacterManager, 0x32D, lobj.position.x, 0);
+
+			auto objs = battleMgr.leftCharacterManager.objects.list.vector();
+			auto start = battleMgr.leftCharacterManager.objects.list.size - 3;
+
+			for (int i = 2; i; i--) {
+				printf("To %i\n", i+5);
+				objs[start + i]->renderInfos.xRotation = 0;
+				objs[start + i]->renderInfos.yRotation = 0;
+				objs[start + i]->renderInfos.zRotation = 0;
+				while (objs[start + i]->actionBlockId != i + 5)
+					objs[start + i]->animate2();
+			}
+			battleMgr.leftCharacterManager.playSE(13);
+			lobj.position.x = -500;
+			this->_currentStage++;
+		}
+		this->_keyPressed = false;
+	}
+
+	void stage3()
+	{
+		auto &battleMgr = SokuLib::getBattleMgr();
+
+		updateSubObjects(battleMgr.leftCharacterManager);
+		if (battleMgr.leftCharacterManager.objects.list.size == 0) {
+			robj.action = SokuLib::ACTION_NEUTRAL_TECH;
+			robj.animate();
+			this->_currentStage++;
+		}
+	}
+
+	void stage4()
+	{
+		auto &battleMgr = SokuLib::getBattleMgr();
+
+		robj.doAnimation();
+		if (this->_ctr)
+			this->_ctr--;
+		if (robj.frameCount == 0) {
+			robj.action = SokuLib::ACTION_IDLE;
+			robj.animate();
+			this->_ctr = 30;
+		}
+		if (robj.action == SokuLib::ACTION_IDLE && this->_ctr == 0) {
+			this->_dialog->setHidden(false);
+			this->_dialog->onKeyPress();
+			this->_currentStage++;
+		}
+	}
+
+	void stage5()
+	{
+		SokuLib::getBattleMgr().rightCharacterManager.objectBase.doAnimation();
+		if (this->_dialog->getCurrentDialog() == 1 && this->_keyPressed) {
+			this->_keyPressed = false;
+			this->_dialog->setHidden(true);
+
 			// Yukari arrives init
 			this->_yukari->objectBase.position.y = 250;
 			this->_yukari->playSE(1);
@@ -117,46 +237,47 @@ private:
 			this->_yukari->objectBase.animate2();
 			this->_currentStage++;
 		}
-		if (!this->_side) {
-			color.a += 0x11;
-			if (color.a == 0xFF) {
-				this->_side = true;
-				this->_init();
-				while (battleMgr.rightCharacterManager.objectBase.actionBlockId != 3 && battleMgr.rightCharacterManager.objectBase.animationCounter != 2)
-					battleMgr.rightCharacterManager.objectBase.doAnimation();
-			}
-		} else if (this->_flashRect.getFillColor().a)
-			color.a -= 0x11;
-		else if (this->_ctr)
-			this->_ctr--;
-		this->_flashRect.setFillColor(color);
 	}
 
-	void stage1()
+	void stagey1()
 	{
-		updateSubObjects(*this->_yukari);
+		auto &battleMgr = SokuLib::getBattleMgr();
+
+		robj.doAnimation();
+		if (!this->_ctr)
+			updateSubObjects(*this->_yukari);
 		if (this->_yukari->objects.list.size && this->_yukari->objects.list.head->next->val->animationCounter == 14) {
-			this->_yukari->playSE(4);
-			this->_yukari->playSE(5);
-			this->_yukari->objectBase.position.y = 0;
-			this->_currentStage++;
+			if (this->_ctr == 0)
+				this->_ctr = 30;
+			else if (this->_ctr == 1) {
+				this->_yukari->playSE(4);
+				this->_yukari->playSE(5);
+				this->_yukari->objectBase.position.y = 0;
+				this->_currentStage++;
+				this->_ctr = 0;
+			} else
+				this->_ctr--;
 		}
 	}
 
-	void stage2()
+	void stagey2()
 	{
+		SokuLib::getBattleMgr().rightCharacterManager.objectBase.doAnimation();
 		this->_ctr ^= 1;
-		if (this->_ctr)
+		if (!this->_ctr)
 			this->_yukari->objectBase.doAnimation();
 		else if (this->_yukari->objectBase.actionBlockId == 0) {
 			this->_yukari->objectBase.action = SokuLib::ACTION_IDLE;
 			this->_yukari->objectBase.animate();
+			this->_dialog->setHidden(false);
+			this->_dialog->onKeyPress();
 			this->_currentStage++;
 		}
 	}
 
-	void stage3()
+	void stagey3()
 	{
+		SokuLib::getBattleMgr().rightCharacterManager.objectBase.doAnimation();
 		updateSubObjects(*this->_yukari);
 		this->_yukari->objectBase.doAnimation();
 	}
@@ -165,7 +286,12 @@ private:
 		&Outro::stage0,
 		&Outro::stage1,
 		&Outro::stage2,
-		&Outro::stage3
+		&Outro::stage3,
+		&Outro::stage4,
+		&Outro::stage5,
+		&Outro::stagey1,
+		&Outro::stagey2,
+		&Outro::stagey3
 	};
 
 public:
@@ -226,7 +352,6 @@ public:
 
 	void render() const override
 	{
-		this->_flashRect.draw();
 		if (this->_yukari) {
 			// Display the CharacterManager subobjects
 			((void (__thiscall *)(SokuLib::ObjListManager &, int))0x59be00)(this->_yukari->objects, -2);
@@ -246,6 +371,7 @@ public:
 			this->_stageBottom.draw();
 		}
 		this->_dialog->render();
+		this->_flashRect.draw();
 	}
 
 	void onKeyPressed() override
