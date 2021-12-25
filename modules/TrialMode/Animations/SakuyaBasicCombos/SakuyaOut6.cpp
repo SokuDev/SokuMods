@@ -10,10 +10,6 @@
 #define robj battleMgr.rightCharacterManager.objectBase
 #define TRANSLATE_MAX 120
 #define YUKARI_START_LOCATION 500
-#define CAM_START_LOCATION (-20)
-#define BG_START_LOCATION 700
-#define HIT_STOP 7
-#define PUSH_RATIO 2
 
 #define spawnSubObject(chr, id, x, y) do {        \
 	float something[3];                        \
@@ -91,7 +87,7 @@ private:
 		battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_KNOCKED_DOWN_STATIC;
 		battleMgr.rightCharacterManager.objectBase.animate();
 
-		this->_yukari->objectBase.position.x = 500;
+		this->_yukari->objectBase.position.x = YUKARI_START_LOCATION;
 		this->_yukari->objectBase.position.y = 800;
 		this->_yukari->objectBase.action = SokuLib::ACTION_ALT2_SKILL4_C;
 		this->_yukari->objectBase.animate();
