@@ -79,6 +79,7 @@ void WebSocket::send(const std::string &value) {
 	if (this->_masks)
 		stream << key;
 	stream << result;
+	printf("Sending %i bytes\n", stream.str().size());
 	Socket::send(stream.str());
 }
 
@@ -89,8 +90,10 @@ void WebSocket::_pong(const std::string &validator) {
 	if (validator.size() > 125)
 		throw InvalidPongException("Pong validator cannot be longer than 125B");
 	stream << byte;
-	byte = 0x80 + validator.size();
+	byte = validator.size();
 	stream << byte;
+	stream << validator;
+	printf("Pong: %i bytes\n", stream.str().size());
 	Socket::send(stream.str());
 }
 
@@ -130,17 +133,17 @@ std::string WebSocket::getAnswer() {
 	if (isMasked)
 		key = this->strictRead(4);
 
-	if (opcode == 0x9) {
-		this->_pong(result);
-		return this->getAnswer();
-	}
-
 	result = this->strictRead(length);
 	if (isMasked) {
 		for (unsigned i = 0; i < result.size(); i++)
 			result.at(i) ^= key.at(i % 4);
 	}
 
+	printf("%s -> Received opcode %i\n", inet_ntoa(this->_remote.sin_addr), opcode);
+	if (opcode == 0x9) {
+		this->_pong(result);
+		return this->getAnswer();
+	}
 	if (opcode == 0x8) {
 		this->disconnect();
 		int code = (static_cast<unsigned char>(result[0]) << 8U) + static_cast<unsigned char>(result[1]);
