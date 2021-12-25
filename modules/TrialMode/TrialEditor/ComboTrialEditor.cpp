@@ -3446,7 +3446,7 @@ nlohmann::json ComboTrialEditor::_getMyJson() const
 	if (this->_crouching)
 		json["dummy"]["crouch"]  = this->_crouching;
 
-	if (this->_failTimer)
+	if (this->_failTimer != 60)
 		json["fail_timer"] = this->_failTimer;
 	if (this->_loopStart)
 		json["music_loop_start"] = this->_loopStart;
