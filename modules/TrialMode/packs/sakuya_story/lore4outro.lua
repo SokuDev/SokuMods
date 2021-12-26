@@ -3,7 +3,7 @@
 --
 
 local dialogs = {
-	"lcDAs a rabbit shouldn't running be<br>a more efficient strategy?",
+	"lcDAs a rabbit, shouldn't running be<br>a more effective strategy?",
 	"rcAMy purpose is to protect the princess!",
 	"lHAThen you should get stronger.",
 	"rHDWhy did you attack me anyway?!",
