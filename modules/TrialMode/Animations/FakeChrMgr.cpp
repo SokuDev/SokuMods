@@ -23,12 +23,25 @@ void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager 
 		printf("Allocated character %p\n", chr);
 		return chr;
 	};
-	type["createSubObject"] = [](FakeCharacterManager *chr, int id, float x, float y){
+	type["createSubObject"] = [](FakeCharacterManager *chr, int id, float x, float y, std::optional<int8_t> dir, std::optional<int> var1, std::optional<int> var2, std::optional<float> var3, std::optional<float> var4, std::optional<float> var5){
 		float something[3];
 
+		if (!dir)
+			dir.emplace(chr->direction);
+		if (!var1)
+			var1.emplace(1);
+		if (!var2)
+			var2.emplace(3);
 		memset(something, 0, sizeof(something));
-		something[2] = 1;
-		((void (__thiscall *)(FakeCharacterManager *, int, float, float, char, int, float *, int))0x46EB30)(chr, id, x, y, 1, 1, something, 3);
+		if (var3)
+			something[0] = *var3;
+		if (var4)
+			something[1] = *var4;
+		if (var5)
+			something[2] = *var5;
+		else
+			something[2] = 1;
+		((void (__thiscall *)(FakeCharacterManager *, int, float, float, char, int, float *, int))0x46EB30)(chr, id, x, y, *dir, *var1, something, *var2);
 		return chr->objects->list.vector().back();
 	};
 	type["position"] = &FakeCharacterManager::position;
