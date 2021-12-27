@@ -9,9 +9,11 @@
         }
     },
     "expected": "!d6 5aaa 2b hj9 j5b/j2b j66/j6d:30 j5a:20 5aaaa",
+    "intro": "lore8intro.lua",
     "music": "{{pack_path}}/suika.ogg",
     "music_loop_end": 195.655,
-    "music_loop_start": 3.7920000000000003,
+    "music_loop_start": 3.7920000000000007,
+    "outro": "lore8outro.lua",
     "player": {
         "character": "sakuya",
         "deck": [],
@@ -56,7 +58,7 @@
             0
         ]
     ],
-    "stage": 12,
+    "stage": 5,
     "type": "combo",
     "uniform_card_cost": 1
 }
