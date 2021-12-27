@@ -60,8 +60,6 @@ local function stage0()
 	end
 	ctr = ctr - 1
 	if ctr == 0 then
-		battleMgr.leftChr.action = enums.actions.ACTION_IDLE
-		battleMgr.leftChr:initAnimation()
 		currentStage = currentStage + 1
 		battleMgr.leftChr.action = enums.actions.ACTION_FORWARD_JUMP
 		playSfx(enums.sfxs.highJump)

@@ -3,21 +3,17 @@
 --
 
 local dialogs = {
-	"LWDSo? Will you tell me?",
-	"RWD...",
-	"R HFine, It will add a bit more flavor to the story.",
-	"LSHWhat do you mean?",
-	"RScI do not know who it is that infiltrated the manor...<br>But I do know that this mysterious individual<br>passed by the Hakurei shrine untouched.",
-	"LccDid he beat Reimu?",
-	"RcENot at all, he didn't fight her.",
-	"LSEHow strange, Reimu does have a sixth sense<br>when it comes to trouble.",
-	"LcEShe wouldn't let anyone suspicious go by,<br>however lazy she can be...",
-	"LHEI was right, it must be someone quite <color FFFFFF>stealthy</color>...<br>Or someone able to <color FFFFFF>manipulate</color> others...",
-	"LCEThere is one person,<br>and she fits the description quite nicely...",
-	"RCDThat sure is a long day.<br>At least it must be good for you?",
-	"LCDIt is perfect!",
-	"RCcDo you know who she is assuming to be the culprit?",
-	"LHcYes I do. Truth is, I have already made an<br>arrangement with her.",
+	"lH And now my job is finished! You won't attract anyone<br>to our mansion anymore right?",
+	"rHDYep I will definitely stop doing that.",
+	"lSDWell... I guess this is the end...",
+	"rSHYou are the true hero of Gensokyo! You've dealt with this<br>problem entirely by yourself, how impressive!",
+	"lEHAre you hiding something by any chance...",
+	"rEAOf course not!",
+	"lhAI guess it is time to come back home for me then.",
+	"rhhIndeed you should come back, there is much<br>to come after all.",
+	"lchYou were saying something?",
+	"rchI want to prepare another party! Want to help me?",
+	"lEhNo, I have better things to do.",
 	--Battle here
 }
 
@@ -36,12 +32,10 @@ local function init()
 	camera.backgroundTranslate.x = 640
 	camera.backgroundTranslate.y = 0
 
-	battleMgr.leftChr.direction = enums.directions.RIGHT
 	battleMgr.leftChr.position.x = 420
 	battleMgr.leftChr.action = enums.actions.ACTION_IDLE
 	battleMgr.leftChr:initAnimation()
 
-	battleMgr.rightChr.direction = enums.directions.LEFT
 	battleMgr.rightChr.position.x = 800
 	battleMgr.rightChr.position.y = 0
 	battleMgr.rightChr.action = enums.actions.ACTION_KNOCKED_DOWN_STATIC
@@ -74,36 +68,6 @@ end
 
 local function stage1()
 	battleMgr.leftChr:updateAnimation()
-	if keyPressed and #dialog == #dialogs - 2 then
-		keyPressed = false
-		dialog.hidden = true
-		battleMgr.rightChr.action = enums.actions.ACTION_NEUTRAL_TECH
-		battleMgr.rightChr:initAnimation()
-		currentStage = currentStage + 1
-	end
-end
-
-local function stage4()
-	battleMgr.leftChr:updateAnimation()
-	battleMgr.rightChr:updateAnimation()
-	if ctr ~= 0 then
-		ctr = ctr - 1
-	end
-	if battleMgr.rightChr.frameCount == 0 then
-		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
-		battleMgr.rightChr:initAnimation()
-		ctr = 30
-	end
-	if battleMgr.rightChr.action == enums.actions.ACTION_IDLE and ctr == 0 then
-		dialog.hidden = false
-		dialog:onKeyPress()
-		currentStage = currentStage + 1
-	end
-end
-
-local function stage5()
-	battleMgr.leftChr:updateAnimation()
-	battleMgr.rightChr:updateAnimation()
 end
 
 local anims = {
