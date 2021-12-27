@@ -8,11 +8,11 @@ local dialogs = {
 	"LSDShe is quite lazy after all,<br>and she does seem to enjoy seeing you try.",
 	"RSAHow am I supposed to serve her,<br>when she never says what she truly wants?",
 	"LWAThough your master is quite lazy, she's not dumb,<br>I'm sure she has a good reason<br>for sending you on those missions.",
-	"LHAAs a servant you should always support your master.<br>Even if she is not perfect and her orders are not the best,<br>be confident that she will better herself in failure. ",
+	"LHAAs a servant you should always support your master. Even<br>if she is not perfect and her orders are not the best,<br>be confident that she will better herself in failure. ",
 	"LHAAnd if she continues,<br>it may simply be how she is and what she wants.",
 	"RHh...",
 	"LhhWhat I'm trying to say is:<br>you should believe in Yuyuko's decisions.",
-	"RhWI see, it seems it is my mind that needs some sharpening.",
+	"RhWI see, it seems it is my mind that<br>needs some sharpening.",
 	"RhH I'll go investigate then.",
 	"LH They sure are complementary.",
 	"LW I should get going too."

@@ -239,6 +239,12 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	if (!this->_rightWeather)
 		battleMgr.rightCharacterManager.swordOfRaptureDebuffTimeLeft = 3;
 	if (!this->_outroPlayed && this->_finished && !this->_playingIntro) {
+		auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+		auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+		// Hide the combo counter
+		*(int *)ptr = 0x00;
+		*(int *)ptr2 = 0x00;
 		if (!this->_dummyHit) {
 			if ((*reinterpret_cast<char **>(0x8985E8))[0x494] < 22) {
 				(*reinterpret_cast<char **>(0x8985E8))[0x494]++;
@@ -484,6 +490,13 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.combo.damages = 0;
 	battleMgr.leftCharacterManager.combo.nbHits = 0;
 	battleMgr.leftCharacterManager.combo.rate = 0;
+
+	auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+	auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+	// Hide the combo counter
+	*(int *)ptr = 0x00;
+	*(int *)ptr2 = 0x00;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
 	battleMgr.leftCharacterManager.cardCount = 0;
