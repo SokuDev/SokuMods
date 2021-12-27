@@ -978,6 +978,13 @@ disableLimit:
 				this->_initAnimations(false, true);
 				this->_outroPlayed = false;
 				this->_finished = true;
+
+				auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+				auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+				// Hide the combo counter
+				*(int *)ptr = 0x00;
+				*(int *)ptr2 = 0x00;
 			} catch (std::exception &e) {
 				MessageBox(
 					SokuLib::window,
@@ -1194,6 +1201,13 @@ void ComboTrialEditor::_initGameStart()
 	battleMgr.leftCharacterManager.combo.damages = 0;
 	battleMgr.leftCharacterManager.combo.nbHits = 0;
 	battleMgr.leftCharacterManager.combo.rate = 0;
+
+	auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+	auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+	// Hide the combo counter
+	*(int *)ptr = 0x00;
+	*(int *)ptr2 = 0x00;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
 	battleMgr.leftCharacterManager.cardCount = 0;

@@ -4,9 +4,9 @@
 
 local dialogs = {
 	"lH And now my job is finished! You won't attract anyone<br>to our mansion anymore right?",
-	"rHDYep I will definitely stop doing that.",
+	"rHDYep. I will definitely stop doing that.",
 	"lSDWell... I guess this is the end...",
-	"rSHYou are the true hero of Gensokyo! You've dealt with this<br>problem entirely by yourself, how impressive!",
+	"rSHYou are the true hero of Gensokyo! You've dealt with<br>this problem entirely by yourself, how impressive!",
 	"lEHAre you hiding something by any chance...",
 	"rEAOf course not!",
 	"lhAI guess it is time to come back home for me then.",
