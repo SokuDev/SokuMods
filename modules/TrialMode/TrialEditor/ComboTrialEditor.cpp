@@ -547,8 +547,6 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	if ((*reinterpret_cast<char **>(0x8985E8))[0x494] && !this->_playingIntro && !this->_recordingCombo)
 		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
-	if (this->_needInit)
-		return this->_initGameStart(), false;
 	if (this->_isStart || this->_quit || this->_needReload) {
 		this->_first |= this->_needReload;
 		this->_quit = false;
@@ -556,6 +554,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		this->_initGameStart();
 		return false;
 	}
+	if (this->_needInit)
+		return this->_initGameStart(), false;
 
 	if (this->_dolls.size() * 2 != SokuLib::getBattleMgr().leftCharacterManager.objects.list.size && this->_managingDolls)
 		this->_initGameStart();
@@ -1125,6 +1125,10 @@ void ComboTrialEditor::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (this->_needReload) {
+		this->_needInit = true;
+		return;
+	}
 	if (this->_currentDoll && battleMgr.leftCharacterManager.objects.list.size) {
 		auto obj = battleMgr.leftCharacterManager.objects.list.vector()[battleMgr.leftCharacterManager.objects.list.size - 2];
 
