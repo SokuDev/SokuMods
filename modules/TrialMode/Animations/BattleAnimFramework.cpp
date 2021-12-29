@@ -2,6 +2,7 @@
 // Created by PinkySmile on 12/08/2021.
 //
 
+#include "Menu.hpp"
 #include "BattleAnimation.hpp"
 
 #define LEFT_TALK_POS    SokuLib::Vector2f{-96, -32}
@@ -68,7 +69,7 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 	desc.r2 = 0xA0;
 	desc.g2 = 0xA0;
 	desc.b2 = 0xFF;
-	desc.height = 20;
+	desc.height = 20 + hasEnglishPatch * 2;
 	desc.weight = FW_NORMAL;
 	desc.italic = 0;
 	desc.shadow = 1;
