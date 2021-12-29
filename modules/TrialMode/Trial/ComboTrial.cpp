@@ -474,7 +474,7 @@ void ComboTrial::_initGameStart()
 		this->_attempts++;
 
 	this->_currentDoll = 0;
-	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
+	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 30});
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;

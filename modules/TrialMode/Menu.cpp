@@ -172,6 +172,7 @@ HMODULE myModule;
 bool editorMode = false;
 char profilePath[1024 + MAX_PATH];
 char profileFolderPath[1024 + MAX_PATH];
+bool hasEnglishPatch;
 
 void addFileToTree(const char *elem)
 {
@@ -2036,7 +2037,7 @@ void loadFont()
 	desc.g2 = 255;
 	desc.b1 = 255;
 	desc.b2 = 255;
-	desc.height = 10;
+	desc.height = 10 + hasEnglishPatch * 2;
 	desc.weight = FW_NORMAL;
 	desc.italic = 0;
 	desc.shadow = 1;
@@ -2051,11 +2052,11 @@ void loadFont()
 	defaultFont10.create();
 	defaultFont10.setIndirect(desc);
 
-	desc.height = 12;
+	desc.height = 12 + hasEnglishPatch * 2;
 	defaultFont12.create();
 	defaultFont12.setIndirect(desc);
 
-	desc.height = 16;
+	desc.height = 16 + hasEnglishPatch * 2;
 	defaultFont16.create();
 	defaultFont16.setIndirect(desc);
 }
@@ -2067,7 +2068,7 @@ void menuLoadAssets()
 	loaded = true;
 	loadAllExistingCards();
 	puts("Loading assets");
-
+	hasEnglishPatch = (*(int *)0x411c64 == 1);
 	loadFont();
 
 	previewContainer.texture.loadFromGame("data/menu/profile_list_seat.bmp");
