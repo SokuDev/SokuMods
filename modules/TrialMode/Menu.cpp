@@ -21,7 +21,22 @@
 #endif
 
 #define FILTER_TEXT_SIZE 120
+#define EXPLORER_SCREEN_SIZE 17
 
+struct Data {
+	const char *resourceName;
+	int packageIndex;
+	int size;
+	int offset;
+	int unknown;
+};
+struct DataTree {
+	std::string resourceName;
+	std::string ext;
+	std::map<std::string, struct DataTree> subfiles;
+};
+
+static std::map<std::string, std::map<std::string, DataTree>> gameAssets;
 static SokuLib::Vector2i offsetTable[9] = {
 	{-8, 8},
 	{0, 10},
@@ -33,8 +48,23 @@ static SokuLib::Vector2i offsetTable[9] = {
 	{0, -10},
 	{8, -8}
 };
+struct ExplorerFileEntry {
+	std::string name;
+	std::string fullPath;
+	std::string nameCap;
+	SokuLib::DrawUtils::Sprite pathSprite;
+	std::map<std::string, DataTree> *entry;
+	unsigned extension;
+};
+struct ExplorerReturnEntry {
+	std::string path;
+	unsigned cursor;
+	unsigned top;
+	std::map<std::string, DataTree> *entry;
+};
 static int currentPack = -3;
 static int currentEntry = -1;
+static bool explorerShown = false;
 static bool expended = false;
 static bool loaded = false;
 static bool loadNextTrial = false;
@@ -75,8 +105,46 @@ static SokuLib::DrawUtils::Sprite version;
 static SokuLib::DrawUtils::Sprite editSeat;
 static SokuLib::DrawUtils::Sprite editScenarioSeat;
 static SokuLib::DrawUtils::Sprite editSeatForeground;
+static SokuLib::DrawUtils::Sprite extSprites[10];
+static SokuLib::DrawUtils::Sprite extType[10];
+static SokuLib::DrawUtils::Sprite fileExplorerSeat;
+static SokuLib::DrawUtils::Sprite explorerFileName;
+static SokuLib::DrawUtils::Sprite explorerFileSize;
+static SokuLib::DrawUtils::Sprite explorerPathSprite;
+static SokuLib::DrawUtils::Sprite explorerImage;
+static SokuLib::DrawUtils::RectangleShape explorerImageRect;
 static std::vector<std::unique_ptr<Guide>> noEditorGuides;
 static std::vector<std::unique_ptr<Guide>> editorGuides;
+static std::string explorerPath;
+static unsigned explorerCursor;
+static unsigned explorerTop;
+static std::vector<std::unique_ptr<ExplorerFileEntry>> explorerEntries;
+static std::vector<ExplorerReturnEntry> explorerReturnEntries;
+static std::map<std::string, DataTree> *currentFolder;
+static std::function<void (std::string)> explorerLoader;
+static bool explorerPlayingMusic = false;
+static const std::map<std::string, int> exts = {
+	{"cv0", 1}, // Dialog
+	{"cv1", 0}, // Csv
+	{"cv2", 3}, // Image
+	{"cv3", 6}, // Sfx
+	{"ogg", 4}, // Music
+	{"pal", 5}, // Palette
+	{"pat", 7}, // Player framedata
+	{"dat", 8}, // Menu layout
+};
+static const char *extTypeStrs[] = {
+	"Type: Csv",
+	"Type: Dialog",
+	"Type: Folder",
+	"Type: Image",
+	"Type: Music",
+	"Type: Palette",
+	"Type: Sfx",
+	"Type: Character Data",
+	"Type: Menu Layout",
+	"Type: Unknown"
+};
 
 static IDirect3DTexture9 **pphandle = nullptr;
 static IDirect3DTexture9 **pphandle2 = nullptr;
@@ -104,6 +172,287 @@ HMODULE myModule;
 bool editorMode = false;
 char profilePath[1024 + MAX_PATH];
 char profileFolderPath[1024 + MAX_PATH];
+
+void addFileToTree(const char *elem)
+{
+	std::vector<std::string> path;
+
+	while (auto p = strchr(elem, '/')) {
+		path.emplace_back(elem, p);
+		elem = p + 1;
+	}
+
+	std::string ext{strchr(elem, '.') + 1, elem + strlen(elem)};
+	auto *tree = &gameAssets[ext];
+	auto *tree2 = &gameAssets["All files"];
+
+	for (auto &folder : path) {
+		tree  = &(*tree )[folder].subfiles;
+		tree2 = &(*tree2)[folder].subfiles;
+	}
+	(*tree )[elem].resourceName = elem;
+	(*tree2)[elem].resourceName = elem;
+	(*tree )[elem].ext = ext;
+	(*tree2)[elem].ext = ext;
+}
+
+void getAssetTree()
+{
+	auto mapA = reinterpret_cast<SokuLib::Map<int, Data> *>(0x8a0078);
+
+	if (!gameAssets.empty())
+		return;
+	puts("Fetching asset list");
+	for (auto &v : *mapA)
+		addFileToTree(v.second.resourceName);
+}
+
+void renderExplorerPreview()
+{
+	SokuLib::Vector2i size;
+
+	explorerFileName.texture.createFromText(explorerEntries[explorerCursor]->nameCap.c_str(), defaultFont12, {400, 16}, &size);
+	explorerFileName.setSize(explorerFileName.texture.getSize());
+	explorerFileName.rect.width = explorerFileName.texture.getSize().x;
+	explorerFileName.rect.height = explorerFileName.texture.getSize().y;
+	explorerFileName.setPosition({447 - size.x / 2, 86});
+
+	explorerImage.texture.destroy();
+	explorerFileSize.texture.destroy();
+	if (explorerEntries[explorerCursor]->extension == 4) {
+		explorerPlayingMusic = true;
+		SokuLib::playBGM(explorerEntries[explorerCursor]->fullPath.c_str());
+		return;
+	} else if (explorerPlayingMusic) {
+		explorerPlayingMusic = false;
+		SokuLib::playBGM("data/bgm/op2.ogg");
+	}
+	if (explorerEntries[explorerCursor]->extension == 3 && explorerImage.texture.loadFromGame(explorerEntries[explorerCursor]->fullPath.c_str())) {
+		explorerFileSize.texture.createFromText(
+			(std::to_string(explorerImage.texture.getSize().x) + "x" + std::to_string(explorerImage.texture.getSize().y)).c_str(),
+			defaultFont12, {400, 16}, &size
+		);
+		explorerFileSize.setPosition({447 - size.x / 2, 236});
+		explorerFileSize.setSize(explorerFileSize.texture.getSize());
+		explorerFileSize.rect.width = explorerFileSize.getSize().x;
+		explorerFileSize.rect.height = explorerFileSize.getSize().y;
+
+		SokuLib::Vector2f optimalSize{188, 128};
+		SokuLib::Vector2f scale{
+			optimalSize.x / explorerImage.texture.getSize().x,
+			optimalSize.y / explorerImage.texture.getSize().y
+		};
+		float best = min(scale.x, scale.y);
+
+		explorerImage.setSize((explorerImage.texture.getSize() * best).to<unsigned>());
+		explorerImage.setPosition({
+			static_cast<int>(354 + optimalSize.x / 2 - explorerImage.getSize().x / 2),
+			static_cast<int>(106 + optimalSize.y / 2 - explorerImage.getSize().y / 2)
+		});
+		explorerImage.rect.width = explorerImage.texture.getSize().x;
+		explorerImage.rect.height = explorerImage.texture.getSize().y;
+		explorerImageRect.setSize(explorerImage.getSize());
+		explorerImageRect.setPosition(explorerImage.getPosition());
+	}
+}
+
+void loadExplorerEntries()
+{
+	explorerTop = 0;
+	explorerCursor = 0;
+	explorerEntries.clear();
+	explorerEntries.reserve(currentFolder->size());
+	explorerPathSprite.texture.createFromText(explorerPath.c_str(), defaultFont12, {300, 16});
+	explorerPathSprite.setPosition({109, 56});
+	explorerPathSprite.setSize(explorerPathSprite.texture.getSize());
+	explorerPathSprite.rect.width = explorerPathSprite.texture.getSize().x;
+	explorerPathSprite.rect.height = explorerPathSprite.texture.getSize().y;
+	for (auto &pair : *currentFolder) {
+		auto entry = new ExplorerFileEntry();
+
+		explorerEntries.emplace_back(entry);
+		entry->name = pair.first;
+		entry->nameCap = pair.first;
+		for (auto &c : entry->name)
+			c = tolower(c);
+		entry->fullPath = explorerPath + pair.first;
+		if (pair.second.subfiles.empty())
+			entry->extension = exts.find(pair.second.ext) == exts.end() ? 9 : exts.at(pair.second.ext);
+		else
+			entry->extension = 2;
+		entry->pathSprite.texture.createFromText(pair.first.c_str(), defaultFont12, {300, 16});
+		entry->pathSprite.setSize(entry->pathSprite.texture.getSize());
+		entry->pathSprite.rect.width = entry->pathSprite.texture.getSize().x;
+		entry->pathSprite.rect.height = entry->pathSprite.texture.getSize().y;
+		entry->entry = &pair.second.subfiles;
+	}
+	std::sort(explorerEntries.begin(), explorerEntries.end(), [](const std::unique_ptr<ExplorerFileEntry> &entry1, const std::unique_ptr<ExplorerFileEntry> &entry2){
+		if ((entry1->extension == 2 || entry2->extension == 2) && entry1->extension != entry2->extension)
+			return entry1->extension == 2;
+		return entry1->name < entry2->name;
+	});
+	renderExplorerPreview();
+}
+
+void loadExplorerRoot(const std::string &root)
+{
+	SokuLib::playSEWaveBuffer(0x28);
+	getAssetTree();
+	explorerReturnEntries.clear();
+	explorerPath.clear();
+	currentFolder = &gameAssets[root];
+	loadExplorerEntries();
+	explorerShown = true;
+}
+
+void loadExplorerFile(const std::string &path, const std::string &root)
+{
+	loadExplorerRoot(root);
+}
+
+void explorerRender()
+{
+	fileExplorerSeat.draw();
+	explorerPathSprite.draw();
+	for (int i = explorerTop, j = 0; i < explorerEntries.size() && j < EXPLORER_SCREEN_SIZE; j++, i++) {
+		if (i == explorerCursor)
+			displaySokuCursor({130, 86 + 20 * j}, {300, 16});
+		explorerEntries[i]->pathSprite.setPosition({153, 88 + 20 * j});
+		explorerEntries[i]->pathSprite.draw();
+		extSprites[explorerEntries[i]->extension].setPosition({133, 86 + 20 * j});
+		extSprites[explorerEntries[i]->extension].draw();
+	}
+	extType[explorerEntries[explorerCursor]->extension].draw();
+	explorerFileName.draw();
+	if (explorerImage.texture.hasTexture()) {
+		explorerImage.draw();
+		explorerImageRect.draw();
+	}
+	if (explorerFileSize.texture.hasTexture())
+		explorerFileSize.draw();
+}
+
+void explorerUpdate()
+{
+	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
+		SokuLib::playSEWaveBuffer(0x29);
+		explorerShown = false;
+		if (explorerPlayingMusic) {
+			explorerPlayingMusic = false;
+			SokuLib::playBGM("data/bgm/op2.ogg");
+		}
+		return;
+	}
+	if (SokuLib::inputMgrs.input.b == 1) {
+		SokuLib::playSEWaveBuffer(0x29);
+		if (!explorerReturnEntries.empty()) {
+			explorerPath = explorerReturnEntries.back().path;
+			currentFolder = explorerReturnEntries.back().entry;
+			loadExplorerEntries();
+			explorerCursor = explorerReturnEntries.back().cursor;
+			explorerTop = explorerReturnEntries.back().top;
+			explorerReturnEntries.pop_back();
+		} else  {
+			explorerShown = false;
+			if (explorerPlayingMusic) {
+				explorerPlayingMusic = false;
+				SokuLib::playBGM("data/bgm/op2.ogg");
+			}
+			return;
+		}
+	}
+	if (!explorerEntries.empty()) {
+		if (SokuLib::inputMgrs.input.a == 1) {
+			SokuLib::playSEWaveBuffer(0x28);
+			if (explorerEntries[explorerCursor]->extension == 2) {
+				explorerReturnEntries.push_back({explorerPath, explorerCursor, explorerTop, currentFolder});
+				explorerPath = explorerEntries[explorerCursor]->fullPath + "/";
+				currentFolder = explorerEntries[explorerCursor]->entry;
+				loadExplorerEntries();
+			} else {
+				explorerLoader(explorerEntries[explorerCursor]->fullPath);
+				explorerShown = false;
+				if (explorerPlayingMusic) {
+					explorerPlayingMusic = false;
+					SokuLib::playBGM("data/bgm/op2.ogg");
+				}
+				return;
+			}
+		}
+		if (SokuLib::inputMgrs.input.verticalAxis == -1 || (SokuLib::inputMgrs.input.verticalAxis < -36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			if (explorerCursor == 0)
+				explorerCursor = explorerEntries.size() - 1;
+			else
+				explorerCursor--;
+			renderExplorerPreview();
+		} else if (SokuLib::inputMgrs.input.verticalAxis == 1 || (SokuLib::inputMgrs.input.verticalAxis > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			explorerCursor++;
+			explorerCursor %= explorerEntries.size();
+			renderExplorerPreview();
+		}
+		if (SokuLib::inputMgrs.input.horizontalAxis == -1 || (SokuLib::inputMgrs.input.horizontalAxis < -36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			if (explorerCursor < EXPLORER_SCREEN_SIZE)
+				explorerCursor = 0;
+			else
+				explorerCursor -= EXPLORER_SCREEN_SIZE;
+			renderExplorerPreview();
+		} else if (SokuLib::inputMgrs.input.horizontalAxis == 1 || (SokuLib::inputMgrs.input.horizontalAxis > 36 && SokuLib::inputMgrs.input.horizontalAxis % 6 == 0)) {
+			SokuLib::playSEWaveBuffer(0x27);
+			explorerCursor += EXPLORER_SCREEN_SIZE;
+			if (explorerCursor > explorerEntries.size() - 1)
+				explorerCursor = explorerEntries.size() - 1;
+			renderExplorerPreview();
+		}
+		if (explorerCursor < explorerTop)
+			explorerTop = explorerCursor;
+		if (explorerCursor >= explorerTop + EXPLORER_SCREEN_SIZE)
+			explorerTop = explorerCursor - (EXPLORER_SCREEN_SIZE - 1);
+	}
+}
+
+void openFileDialog(const std::function<void(const std::string &path)> &fct)
+{
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[MAX_PATH];  // buffer for file name
+	char szDir[MAX_PATH];   // buffer for dir name
+	char szCWD[MAX_PATH];   // buffer for dir name
+	bool result;
+
+	// Initialize OPENFILENAME
+	getcwd(szCWD, sizeof(szCWD));
+	puts(packsLocation);
+	memset(&ofn, 0, sizeof(ofn));
+	memset(&szFile, 0, sizeof(szFile));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = SokuLib::window;
+	ofn.lpstrFile = szFile;
+	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not
+	// use the contents of szFile to initialize itself.
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "All files\0*.*\0"
+			  "Portable Network Graphics\0*.PNG\0"
+			  "Joint Photographic Experts Group\0*.JPG;*.JPEG;*.JIF;*.JFIF;.JFI;.JPE\0"
+			  "Windows Bitmap\0*.BMP\0"
+			  "Graphics Interchange Format\0*.GIF\0\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = nullptr;
+	ofn.nMaxFileTitle = 0;
+	GetFullPathNameA(loadedPacks[currentPack]->path.c_str(), sizeof(szDir), szDir, nullptr);
+	ofn.lpstrInitialDir = szDir;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	ofn.lpstrTitle = "Open image file";
+
+	// Display the Open dialog box.
+	result = GetOpenFileName(&ofn);
+	chdir(szCWD);
+	if (!result)
+		return SokuLib::playSEWaveBuffer(0x29);
+	if (fct)
+		fct(ofn.lpstrFile);
+}
 
 static struct PackEditScenario {
 	bool opened = false;
@@ -220,17 +569,73 @@ static struct PackEditScenario {
 
 	void setPreviewPath()
 	{
-		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
-		auto input = InputBox("Enter new preview path", "New preview path", scenario->previewFileRel);
+		openFileDialog([this](const std::string &path){
+			std::string input = path;
+			auto &pack = loadedPacks[currentPack];
+			auto &scenario = pack->scenarios[currentEntry];
+			SokuLib::Vector2i size;
+			char buffer[1024];      // buffer for file content
+			char szDir[MAX_PATH];   // buffer for dir name
+			char szPath[MAX_PATH];  // buffer for path name
+			char szFile2[MAX_PATH];
+			char *szFile;           // buffer for path file
+			struct stat s;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
+			if (input.empty())
+				return SokuLib::playSEWaveBuffer(0x29);
+			GetFullPathNameA(pack->path.c_str(), sizeof(szDir), szDir, nullptr);
+			GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+			if (!szFile)
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+				input = (szPath + strlen(szDir));
+			else {
+				if (stat((pack->path + "/" + szFile).c_str(), &s) == 0) {
+					char ext[40];
 
-		scenario->previewFileRel = input;
-		scenario->previewFile = scenario->folder + "/" + scenario->previewFileRel;
-		scenario->loadPreview(true);
-		this->previewPath.texture.createFromText(scenario->previewFileRel.c_str(), defaultFont12, {153, 23});
-		SokuLib::playSEWaveBuffer(0x28);
+					strcpy(szFile2, szFile);
+					szFile = szFile2;
+					if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+						strcpy(ext, strchr(szFile, '.'));
+						*strchr(szFile, '.') = 0;
+					}
+					szFile[strlen(szFile) + 2] = 0;
+					szFile[strlen(szFile) + 1] = '0';
+					szFile[strlen(szFile) + 0] = '_';
+
+					while (stat((pack->path + "/" + szFile + ext).c_str(), &s) == 0)
+						szFile[strlen(szFile) - 1]++;
+					strcat(szFile, ext);
+				}
+
+				std::ifstream istream{szPath, std::fstream::binary};
+
+				if (istream.fail() || stat(szPath, &s))
+					return SokuLib::playSEWaveBuffer(0x29);
+
+				std::ofstream ostream{pack->path + "/" + szFile, std::fstream::binary};
+
+				if (ostream.fail())
+					return SokuLib::playSEWaveBuffer(0x29);
+
+				while (s.st_size) {
+					istream.read(buffer, sizeof(buffer));
+					ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+					s.st_size -= min(s.st_size, sizeof(buffer));
+				}
+				if (ostream.fail())
+					return SokuLib::playSEWaveBuffer(0x29);
+				istream.close();
+				ostream.close();
+				input = szFile;
+			}
+
+			scenario->previewFileRel = input;
+			scenario->previewFile = pack->path + "/" + scenario->previewFileRel;
+			scenario->loadPreview(true);
+			this->previewPath.texture.createFromText(scenario->previewFileRel.c_str(), defaultFont12, {153, 23});
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void switchExtra()
@@ -517,121 +922,239 @@ static struct PackEditPage {
 	void selectPreviewSoku()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new preview game asset", "Preview file", pack->previewFSAsset ? "data/" : pack->previewPath);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (!pack->preview.texture.loadFromGame(input.c_str()))
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->previewPath = input;
-		pack->previewFSAsset = false;
-		pack->preview.rect = {
-			0, 0,
-			static_cast<int>(pack->preview.texture.getSize().x),
-			static_cast<int>(pack->preview.texture.getSize().y),
+		if (pack->previewFSAsset)
+			loadExplorerFile(pack->previewPath, "cv2");
+		else
+			loadExplorerRoot("cv2");
+		explorerLoader = [this, &pack](std::string input){
+			SokuLib::Vector2i size;
+
+			if (input.empty())
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (!pack->preview.texture.loadFromGame(input.c_str()))
+				return SokuLib::playSEWaveBuffer(0x29);
+			pack->previewPath = input;
+			pack->previewFSAsset = false;
+			pack->preview.rect = {
+				0, 0,
+				static_cast<int>(pack->preview.texture.getSize().x),
+				static_cast<int>(pack->preview.texture.getSize().y),
+				};
+			pack->preview.setPosition({398, 128});
+			pack->preview.setSize({200, 150});
+			this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
 		};
-		pack->preview.setPosition({398, 128});
-		pack->preview.setSize({200, 150});
-		this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
 	}
 
 	void selectPreviewFS()
 	{
-		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new preview file", "Preview file", pack->previewFSAsset ? pack->previewPath : "");
+		openFileDialog([this](const std::string &path){
+			std::string input = path;
+			auto &pack = loadedPacks[currentPack];
+			SokuLib::Vector2i size;
+			char buffer[1024];      // buffer for file content
+			char szDir[MAX_PATH];   // buffer for dir name
+			char szPath[MAX_PATH];  // buffer for path name
+			char szFile2[MAX_PATH];
+			char *szFile;           // buffer for path file
+			struct stat s;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (Pack::isInvalidPath(input))
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (!pack->preview.texture.loadFromFile((pack->path + "/" + input).c_str()))
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->previewPath = input;
-		pack->previewFSAsset = true;
-		pack->preview.rect = {
-			0, 0,
-			static_cast<int>(pack->preview.texture.getSize().x),
-			static_cast<int>(pack->preview.texture.getSize().y),
-		};
-		this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+			if (input.empty())
+				return SokuLib::playSEWaveBuffer(0x29);
+			GetFullPathNameA(pack->path.c_str(), sizeof(szDir), szDir, nullptr);
+			GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+			if (!szFile)
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+				input = (szPath + strlen(szDir));
+			else {
+				if (stat((pack->path + "/" + szFile).c_str(), &s) == 0) {
+					char ext[40];
+
+					strcpy(szFile2, szFile);
+					szFile = szFile2;
+					if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+						strcpy(ext, strchr(szFile, '.'));
+						*strchr(szFile, '.') = 0;
+					}
+					szFile[strlen(szFile) + 2] = 0;
+					szFile[strlen(szFile) + 1] = '0';
+					szFile[strlen(szFile) + 0] = '_';
+
+					while (stat((pack->path + "/" + szFile + ext).c_str(), &s) == 0)
+						szFile[strlen(szFile) - 1]++;
+					strcat(szFile, ext);
+				}
+
+				std::ifstream istream{szPath, std::fstream::binary};
+
+				if (istream.fail() || stat(szPath, &s))
+					return SokuLib::playSEWaveBuffer(0x29);
+
+				std::ofstream ostream{pack->path + "/" + szFile, std::fstream::binary};
+
+				if (ostream.fail())
+					return SokuLib::playSEWaveBuffer(0x29);
+
+				while (s.st_size) {
+					istream.read(buffer, sizeof(buffer));
+					ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+					s.st_size -= min(s.st_size, sizeof(buffer));
+				}
+				if (ostream.fail())
+					return SokuLib::playSEWaveBuffer(0x29);
+				istream.close();
+				ostream.close();
+				input = szFile;
+			}
+
+			if (!pack->preview.texture.loadFromFile((pack->path + "/" + input).c_str()))
+				return SokuLib::playSEWaveBuffer(0x29);
+			pack->previewPath = input;
+			pack->previewFSAsset = true;
+			pack->preview.rect = {
+				0, 0,
+				static_cast<int>(pack->preview.texture.getSize().x),
+				static_cast<int>(pack->preview.texture.getSize().y),
+			};
+			this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void selectIconSoku()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new icon game asset", "Icon file", pack->icon && !pack->icon->fsPath ? pack->icon->path : "data/");
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (pack->icon) {
-			if (!pack->icon->sprite.texture.loadFromGame(input.c_str()))
-				return SokuLib::playSEWaveBuffer(0x29);
-			pack->icon->path = input;
-			pack->icon->fsPath = false;
-			pack->icon->sprite.rect = {
-				0, 0,
-				static_cast<int>(pack->icon->sprite.texture.getSize().x),
-				static_cast<int>(pack->icon->sprite.texture.getSize().y),
-			};
-		} else {
-			pack->icon.reset(new Icon(pack->path, {
-				{"path",   input},
-				{"isPath", false}
-			}));
-			if (!pack->icon->sprite.texture.hasTexture())
-				return SokuLib::playSEWaveBuffer(0x29);
-		}
+		if (pack->icon && !pack->icon->fsPath)
+			loadExplorerFile(pack->icon->path, "cv2");
+		else
+			loadExplorerRoot("cv2");
+		explorerLoader = [this, &pack](std::string input){
+			SokuLib::Vector2i size;
 
-		pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
-		pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
-		pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
-		pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
-		pack->icon->sprite.setSize({
-			static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
-			static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
-		});
-		pack->icon->sprite.rect = pack->icon->rect;
-		this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+			if (input.empty())
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (pack->icon) {
+				if (!pack->icon->sprite.texture.loadFromGame(input.c_str()))
+					return SokuLib::playSEWaveBuffer(0x29);
+				pack->icon->path = input;
+				pack->icon->fsPath = false;
+				pack->icon->sprite.rect = {
+					0, 0,
+					static_cast<int>(pack->icon->sprite.texture.getSize().x),
+					static_cast<int>(pack->icon->sprite.texture.getSize().y),
+					};
+			} else {
+				pack->icon.reset(new Icon(pack->path, {
+					{"path",   input},
+					{"isPath", false}
+				}));
+				if (!pack->icon->sprite.texture.hasTexture())
+					return SokuLib::playSEWaveBuffer(0x29);
+			}
+
+			pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
+			pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
+			pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
+			pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
+			pack->icon->sprite.setSize({
+				static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
+				static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+			});
+			pack->icon->sprite.rect = pack->icon->rect;
+			this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		};
 	}
 
 	void selectIconFS()
 	{
-		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new icon file", "Icon file", pack->icon && pack->icon->fsPath ? pack->icon->path : "");
+		openFileDialog([this](const std::string &path){
+			std::string input = path;
+			auto &pack = loadedPacks[currentPack];
+			SokuLib::Vector2i size;
+			char buffer[1024];      // buffer for file content
+			char szDir[MAX_PATH];   // buffer for dir name
+			char szPath[MAX_PATH];  // buffer for path name
+			char szFile2[MAX_PATH];
+			char *szFile;           // buffer for path file
+			struct stat s;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (Pack::isInvalidPath(input))
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (pack->icon) {
-			if (!pack->icon->sprite.texture.loadFromFile((pack->path + "/" + input).c_str()))
+			if (input.empty())
 				return SokuLib::playSEWaveBuffer(0x29);
-			pack->icon->path = input;
-			pack->icon->fsPath = true;
-		} else
-			pack->icon.reset(new Icon(pack->path, {
-				{"path", input},
-				{"isPath", true}
-			}));
+			GetFullPathNameA(pack->path.c_str(), sizeof(szDir), szDir, nullptr);
+			GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+			if (!szFile)
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+				input = (szPath + strlen(szDir));
+			else {
+				if (stat((pack->path + "/" + szFile).c_str(), &s) == 0) {
+					char ext[40];
 
-		pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
-		pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
-		pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
-		pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
-		pack->icon->sprite.setSize({
-			static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
-			static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+					strcpy(szFile2, szFile);
+					szFile = szFile2;
+					if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+						strcpy(ext, strchr(szFile, '.'));
+						*strchr(szFile, '.') = 0;
+					}
+					szFile[strlen(szFile) + 2] = 0;
+					szFile[strlen(szFile) + 1] = '0';
+					szFile[strlen(szFile) + 0] = '_';
+
+					while (stat((pack->path + "/" + szFile + ext).c_str(), &s) == 0)
+						szFile[strlen(szFile) - 1]++;
+					strcat(szFile, ext);
+				}
+
+				std::ifstream istream{szPath, std::fstream::binary};
+
+				if (istream.fail() || stat(szPath, &s))
+					return SokuLib::playSEWaveBuffer(0x29);
+
+				std::ofstream ostream{pack->path + "/" + szFile, std::fstream::binary};
+
+				if (ostream.fail())
+					return SokuLib::playSEWaveBuffer(0x29);
+
+				while (s.st_size) {
+					istream.read(buffer, sizeof(buffer));
+					ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+					s.st_size -= min(s.st_size, sizeof(buffer));
+				}
+				if (ostream.fail())
+					return SokuLib::playSEWaveBuffer(0x29);
+				istream.close();
+				ostream.close();
+				input = szFile;
+			}
+
+			if (pack->icon) {
+				if (!pack->icon->sprite.texture.loadFromFile((pack->path + "/" + input).c_str()))
+					return SokuLib::playSEWaveBuffer(0x29);
+				pack->icon->path = input;
+				pack->icon->fsPath = true;
+			} else
+				pack->icon.reset(new Icon(pack->path, {
+					{"path", input},
+					{"isPath", true}
+				}));
+
+			pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
+			pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
+			pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
+			pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
+			pack->icon->sprite.setSize({
+				static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
+				static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+			});
+			pack->icon->sprite.rect = pack->icon->rect;
+			this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
 		});
-		pack->icon->sprite.rect = pack->icon->rect;
-		this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
 	}
 
 	void setModes()
@@ -1452,7 +1975,6 @@ int ResultMenu::onProcess()
 		this->_selected = TrialBase::RETURN_TO_TITLE_SCREEN;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
-
 		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL) {
 			if (this->_disabled && !this->_done) {
 				SokuLib::playSEWaveBuffer(0x29);
@@ -1682,6 +2204,35 @@ void menuLoadAssets()
 	editScenarioSeat.setPosition({122, 226});
 	editScenarioSeat.rect.width = editScenarioSeat.texture.getSize().x;
 	editScenarioSeat.rect.height = editScenarioSeat.texture.getSize().y;
+
+	for (int i = 0; i < sizeof(extSprites) / sizeof(*extSprites); i++) {
+		extSprites[i].texture.loadFromResource(myModule, MAKEINTRESOURCE(408 + i * 4));
+		extSprites[i].setSize(extSprites[i].texture.getSize());
+		extSprites[i].rect.width = extSprites[i].texture.getSize().x;
+		extSprites[i].rect.height = extSprites[i].texture.getSize().y;
+	}
+
+	for (int i = 0; i < sizeof(extType) / sizeof(*extType); i++) {
+		SokuLib::Vector2i size;
+
+		extType[i].texture.createFromText(extTypeStrs[i], defaultFont12, {400, 16}, &size);
+		extType[i].setSize(extType[i].texture.getSize());
+		extType[i].rect.width = extType[i].texture.getSize().x;
+		extType[i].rect.height = extType[i].texture.getSize().y;
+		extType[i].setPosition({447 - size.x / 2, 266});
+	}
+
+	fileExplorerSeat.texture.loadFromResource(myModule, MAKEINTRESOURCE(404));
+	fileExplorerSeat.setSize(fileExplorerSeat.texture.getSize());
+	fileExplorerSeat.rect.width = fileExplorerSeat.texture.getSize().x;
+	fileExplorerSeat.rect.height = fileExplorerSeat.texture.getSize().y;
+	fileExplorerSeat.setPosition({
+		(640 - static_cast<int>(fileExplorerSeat.getSize().x)) / 2,
+		(480 - static_cast<int>(fileExplorerSeat.getSize().y)) / 2
+	});
+
+	explorerImageRect.setFillColor(SokuLib::Color::Transparent);
+	explorerImageRect.setBorderColor(SokuLib::Color::Black);
 
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
@@ -3022,6 +3573,8 @@ afterCInput:
 
 bool editorUpdate()
 {
+	if (explorerShown)
+		return explorerUpdate(), false;
 	if (!checkEditorKeys(SokuLib::inputMgrs.input))
 		return false;
 	if (packEditScenario.opened)
@@ -3041,7 +3594,9 @@ bool editorUpdate()
 
 void editorRender()
 {
-	if (packEditScenario.opened) {
+	if (explorerShown)
+		explorerRender();
+	else if (packEditScenario.opened) {
 		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
 
 		editScenarioSeat.draw();
