@@ -12,7 +12,7 @@
             "x": 2.0,
             "y": 0.0
         },
-        "path": "data/character/remilia/face/face000.bmp",
+        "path": "data/character/remilia/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -104,6 +104,6 @@
     ],
     "stand": {
         "isPath": false,
-        "path": "data/stand/remilia.bmp"
+        "path": "data/stand/remilia.cv2"
     }
 }

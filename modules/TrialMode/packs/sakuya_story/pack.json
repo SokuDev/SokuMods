@@ -11,7 +11,9 @@
         "yuyuko",
         "aya",
         "suika",
-        "remilia"
+        "remilia",
+        "yukari",
+        "chirno"
     ],
     "description": "Incident at the Scarlet Devil Mansion",
     "icon": {
@@ -20,7 +22,7 @@
             "x": 1.0,
             "y": 0.0
         },
-        "path": "data/character/sakuya/face/face000.bmp",
+        "path": "data/character/sakuya/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -113,6 +115,6 @@
     ],
     "stand": {
         "isPath": false,
-        "path": "data/stand/sakuya.bmp"
+        "path": "data/stand/sakuya.cv2"
     }
 }

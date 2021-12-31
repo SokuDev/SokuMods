@@ -11,7 +11,7 @@
             "x": 1.0,
             "y": 0.0
         },
-        "path": "data/character/mima/face/face000.bmp",
+        "path": "data/character/mima/face/face000.cv2",
         "rect": {
             "height": 52,
             "left": 0,
@@ -30,6 +30,6 @@
     "scenarios": [],
     "stand": {
         "isPath": false,
-        "path": "data/stand/mima.bmp"
+        "path": "data/stand/mima.cv2"
     }
 }

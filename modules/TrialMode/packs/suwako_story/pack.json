@@ -10,7 +10,7 @@
             "x": 1.0,
             "y": 0.0
         },
-        "path": "data/character/suwako/face/face000.bmp",
+        "path": "data/character/suwako/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -29,6 +29,6 @@
     "scenarios": [],
     "stand": {
         "isPath": false,
-        "path": "data/stand/suwako.bmp"
+        "path": "data/stand/suwako.cv2"
     }
 }
