@@ -576,6 +576,7 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 	(*this->_lua)["packPath"] = packPath;
 	(*this->_lua)["playSFX"] = SokuLib::playSEWaveBuffer;
 	(*this->_lua)["playSfx"] = SokuLib::playSEWaveBuffer;
+	(*this->_lua)["math"]["randomseed"](time(nullptr));
 
 	this->_lua->script_file(script);
 }

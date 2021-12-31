@@ -45,6 +45,9 @@ void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager 
 		((void (__thiscall *)(FakeCharacterManager *, int, float, float, char, int, ParamStruct *, int))0x46EB30)(chr, moveId, x, y, *dir, *var1, &paramStruct, *var2);
 		return chr->objects->list.vector().back();
 	};
+	type["updateMove"] = [](FakeCharacterManager *chr){
+		return (*(int (__thiscall **)(FakeCharacterManager *))(*(int *)&chr->vtable + 0x28))(chr);
+	};
 	type["position"] = &FakeCharacterManager::position;
 	type["speed"] = &FakeCharacterManager::speed;
 	type["gravity"] = &FakeCharacterManager::gravity;
