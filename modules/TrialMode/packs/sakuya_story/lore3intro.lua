@@ -122,7 +122,8 @@ end
 
 local function stage5()
 	battleMgr.leftChr:updateAnimation()
-	battleMgr.rightChr:updateAnimation()
+	---battleMgr.rightChr:updateAnimation()
+	battleMgr.rightChr:updateMove()
 	battleMgr.rightChr.objects:update()
 	if battleMgr.leftChr.frameCount == 8 then
 		playSfx(enums.sfxs.longMelee)
@@ -135,70 +136,17 @@ local function stage5()
 			battleMgr.leftChr.speed.x = battleMgr.leftChr.speed.x - 0.5
 		end
 	end
-	if battleMgr.rightChr.actionBlockId == 0 then
-		if battleMgr.rightChr.frameCount == 11 then
-			battleMgr.rightChr:playSfx(6)
-			battleMgr.rightChr.speed.y = 7
-			battleMgr.rightChr:animate()
-		end
-	elseif battleMgr.rightChr.actionBlockId == 1 then
-		if battleMgr.rightChr.frameCount % 5 == 0 then
-			battleMgr.rightChr:createSubObject(0x334, battleMgr.rightChr.position.x, battleMgr.rightChr.position.y + 100, battleMgr.rightChr.direction, 3)
-		end
-		--This is supposed to display puffs of smoke but it's really working as I would like
-		--if battleMgr.rightChr.frameCount % 10 == 0 then
-		--	local iVar5 = 0
-		--	local in_stack_000001a0
-		--	local in_stack_000001a8 = 0
-		--	local in_stack_000001a4 = 0x41400000
-		--	repeat
-		--		local iVar3 = math.random(0, 0x8888888)
-		--		in_stack_000001a0 = (iVar3 + iVar5)
-		--		if iVar3 + iVar5 < 0 then
-		--			in_stack_000001a0 = in_stack_000001a0 + 4294967296.00000000
-		--		end
 
-		--		local fVar7 = math.random()--FUN_00409580()
-		--		local uVar4 = battleMgr.rightChr.direction
-		--		local fVar6 = math.random()--FUN_004397f0()
-		--		local yPos = (fVar6 + (fVar7 * 75 * 0.25))
-
-		--		fVar7 = math.random()--FUN_004095f0()
-		--		battleMgr.rightChr:createSubObject(0x334, fVar7 * 75 + battleMgr.rightChr.position.x, yPos, uVar4, 3):animate()
-		--		iVar5 = iVar5 + 0x2d
-		--	until not (iVar5 < 0x168)
-		--end
-		--if (0x21 < *(int *)&(unaff_ESI->ObjectBase).field_0x144) {
-		--	(**(code **)(*(int *)&unaff_ESI->ObjectBase + 0x14))()
-		--	return
-		--}
+	if battleMgr.rightChr.actionBlockId >= 1 then
 		ctr = ctr + 1
-		battleMgr.rightChr.speed.y = battleMgr.rightChr.speed.y - 0.4
-		if battleMgr.rightChr.speed.y == 0.2 then
-			battleMgr.rightChr:animate()
-		end
-	elseif battleMgr.rightChr.actionBlockId == 2 then
-		ctr = ctr + 1
-		battleMgr.rightChr.speed.y = battleMgr.rightChr.speed.y - 0.4
-		if battleMgr.rightChr.speed.y == -1.8 then
-			battleMgr.rightChr:animate()
-		end
-	elseif battleMgr.rightChr.actionBlockId == 3 then
-		ctr = ctr + 1
-		battleMgr.rightChr.speed.y = battleMgr.rightChr.speed.y - 0.4
-		if battleMgr.rightChr.position.y <= 0 then
-			playSfx(enums.sfxs.land)
-			battleMgr.rightChr.speed.y = 0
-			battleMgr.rightChr.position.y = 0
-			battleMgr.rightChr:animate()
-		end
-	elseif battleMgr.rightChr.actionBlockId == 4 then
-		ctr = ctr + 1
-		if battleMgr.rightChr.frameCount == 5 then
-			battleMgr.rightChr.action = enums.actions.ACTION_IDLE
-			battleMgr.rightChr:initAnimation()
-			currentStage = currentStage + 1
-			ctr = 0
+		if battleMgr.rightChr.actionBlockId == 4 then
+			ctr = ctr + 1
+			if battleMgr.rightChr.frameCount == 5 then
+				battleMgr.rightChr.action = enums.actions.ACTION_IDLE
+				battleMgr.rightChr:initAnimation()
+				currentStage = currentStage + 1
+				ctr = 0
+			end
 		end
 	end
 	battleMgr.leftChr.position.x  = battleMgr.leftChr.position.x  + battleMgr.leftChr.speed.x
