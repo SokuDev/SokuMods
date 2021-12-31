@@ -4,6 +4,7 @@
 
 #include <dinput.h>
 #include <fstream>
+#include "Explorer.hpp"
 #include "InputBox.hpp"
 #include "Patches.hpp"
 #include "ComboTrialEditor.hpp"
@@ -434,10 +435,19 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 
 	auto &sprite = std::get<2>(this->_musics.back());
 
-	sprite->texture.createFromText("Custom music", defaultFont12, {200, 16}, &size);
+	sprite->texture.createFromText("Explore game files", defaultFont12, {200, 16}, &size);
 	sprite->setSize(size.to<unsigned>());
 	sprite->rect.width = size.x;
 	sprite->rect.height = size.y;
+	this->_musics.emplace_back("", "", new SokuLib::DrawUtils::Sprite());
+
+	auto &sprite2 = std::get<2>(this->_musics.back());
+
+	sprite2->texture.createFromText("Custom music", defaultFont12, {200, 16}, &size);
+	sprite2->setSize(size.to<unsigned>());
+	sprite2->rect.width = size.x;
+	sprite2->rect.height = size.y;
+
 	for (int i = 0; i < _installProperties.size(); i++) {
 		this->_installSprites.emplace_back(new SokuLib::DrawUtils::Sprite());
 
@@ -1601,6 +1611,8 @@ void ComboTrialEditor::_initVanillaGame()
 
 int ComboTrialEditor::pauseOnUpdate()
 {
+	if (explorerShown)
+		return explorerUpdate(), true;
 	if (this->_playingIntro) {
 		this->_scores[this->_scoreEdited] = this->_oldScore;
 		this->_isRecordingScore = false;
@@ -1794,43 +1806,123 @@ int ComboTrialEditor::pauseOnUpdate()
 			return true;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
-			if (this->_musicCursor == this->_musics.size() - 1) {
-				auto music = InputBox("Enter music path", "New music", this->_musicReal);
+			if (this->_musicCursor == this->_musics.size() - 2) {
+				loadExplorerFile(this->_musicReal, "ogg");
+				setExplorerDefaultMusic([this]{
+					this->_playBGM();
+				});
+				setExplorerCallback([this](std::string input){
+					this->_musicReal = this->_music = input;
+					auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
+						return this->_musicReal == std::get<1>(t);
+					});
 
-				if (music.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
+					this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 2 : it - this->_musics.begin();
+					if (this->_musicCursor > 38)
+						this->_musicTop = (this->_musicCursor - 36) - (this->_musicCursor % 2);
+					else
+						this->_musicTop = 0;
+					this->_loopStart = 0;
+					this->_loopEnd = 0;
+					SokuLib::playSEWaveBuffer(0x28);
+				});
+			} else if (this->_musicCursor == this->_musics.size() - 1) {
+				openFileDialog(
+					"OGG File\0*.ogg\0",
+					this->_folder.c_str(),
+					[this](const std::string &music) {
+						std::string input = music;
+						SokuLib::Vector2i size;
+						char buffer[1024];      // buffer for file content
+						char szDir[MAX_PATH];   // buffer for dir name
+						char szPath[MAX_PATH];  // buffer for path name
+						char szFile2[MAX_PATH];
+						char *szFile;           // buffer for path file
+						struct stat s;
 
-				auto musicLStart = InputBox("Enter music loop start position (in seconds)", "Loop start", std::to_string(this->_loopStart));
+						GetFullPathNameA(this->_folder.c_str(), sizeof(szDir), szDir, nullptr);
+						GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+						if (!szFile)
+							return SokuLib::playSEWaveBuffer(0x29);
+						if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+							input = (szPath + strlen(szDir));
+						else {
+							if (stat((this->_folder + "/" + szFile).c_str(), &s) == 0) {
+								char ext[40];
 
-				if (music.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
+								strcpy(szFile2, szFile);
+								szFile = szFile2;
+								if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+									strcpy(ext, strchr(szFile, '.'));
+									*strchr(szFile, '.') = 0;
+								}
+								szFile[strlen(szFile) + 2] = 0;
+								szFile[strlen(szFile) + 1] = '0';
+								szFile[strlen(szFile) + 0] = '_';
 
-				auto musicLEnd = InputBox("Enter music loop end position (in seconds)", "Loop end", std::to_string(this->_loopEnd));
+								while (stat((this->_folder + "/" + szFile + ext).c_str(), &s) == 0)
+									szFile[strlen(szFile) - 1]++;
+								strcat(szFile, ext);
+							}
 
-				if (musicLEnd.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
+							std::ifstream istream{szPath, std::fstream::binary};
 
-				try {
-					std::stod(musicLEnd);
-					this->_loopStart = std::stod(musicLStart);
-					this->_loopEnd = std::stod(musicLEnd);
-				} catch (std::invalid_argument &) {
-					SokuLib::playSEWaveBuffer(0x29);
-					return true;
-				} catch (std::out_of_range &) {
-					SokuLib::playSEWaveBuffer(0x29);
-					return true;
-				}
-				this->_music = this->_musicReal = music;
-				for (auto pos = this->_music.find("{{pack_path}}"); pos != std::string::npos; pos = this->_music.find("{{pack_path}}"))
-					this->_music.replace(pos, strlen("{{pack_path}}"), this->_folder);
+							if (istream.fail() || stat(szPath, &s))
+								return SokuLib::playSEWaveBuffer(0x29);
+
+							std::ofstream ostream{this->_folder + "/" + szFile, std::fstream::binary};
+
+							if (ostream.fail())
+								return SokuLib::playSEWaveBuffer(0x29);
+
+							while (s.st_size) {
+								istream.read(buffer, sizeof(buffer));
+								ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+								s.st_size -= min(s.st_size, sizeof(buffer));
+							}
+							if (ostream.fail())
+								return SokuLib::playSEWaveBuffer(0x29);
+							istream.close();
+							ostream.close();
+							input = szFile;
+						}
+
+						auto musicLStart = InputBox("Enter music loop start position (in seconds)", "Loop start", std::to_string(this->_loopStart));
+
+						if (music.empty())
+							return SokuLib::playSEWaveBuffer(0x29);
+
+						auto musicLEnd = InputBox("Enter music loop end position (in seconds)", "Loop end", std::to_string(this->_loopEnd));
+
+						if (musicLEnd.empty())
+							return SokuLib::playSEWaveBuffer(0x29);
+
+						try {
+							auto l = std::stod(musicLEnd);
+
+							this->_loopStart = std::stod(musicLStart);
+							this->_loopEnd = l;
+						} catch (std::invalid_argument &) {
+							SokuLib::playSEWaveBuffer(0x29);
+							return;
+						} catch (std::out_of_range &) {
+							SokuLib::playSEWaveBuffer(0x29);
+							return;
+						}
+						this->_music = this->_folder + "/" + input;
+						this->_musicReal = "{{pack_path}}/" + input;
+						this->_playBGM();
+						SokuLib::playSEWaveBuffer(0x28);
+					}
+				);
+				return true;
 			} else {
 				this->_music = this->_musicReal = std::get<1>(this->_musics[this->_musicCursor]);
 				this->_loopStart = 0;
 				this->_loopEnd = 0;
+				this->_playBGM();
+				SokuLib::playSEWaveBuffer(0x28);
 			}
-			this->_playBGM();
-			SokuLib::playSEWaveBuffer(0x28);
 		}
 		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 			if (SokuLib::inputMgrs.input.verticalAxis < 0 && this->_musicCursor <= 1) {
@@ -2144,6 +2236,7 @@ int ComboTrialEditor::pauseOnRender() const
 	}
 	for (auto &guide : this->_guides)
 		guide->render();
+	explorerRender();
 	return true;
 }
 
@@ -2589,15 +2682,19 @@ bool ComboTrialEditor::setStage()
 
 bool ComboTrialEditor::setMusic()
 {
-	auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
-		return this->_musicReal == std::get<1>(t);
-	});
-
 	this->_guides[4]->active = false;
 	this->_guides[2]->active = true;
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_selectingMusic = true;
-	this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 1 : it - this->_musics.begin();
+	if (this->_musicReal.find("{{pack_path}}") != std::string::npos)
+		this->_musicCursor = this->_musics.size() - 1;
+	else {
+		auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
+			return this->_musicReal == std::get<1>(t);
+		});
+
+		this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 2 : it - this->_musics.begin();
+	}
 	if (this->_musicCursor > 38)
 		this->_musicTop = (this->_musicCursor - 36) - (this->_musicCursor % 2);
 	else
