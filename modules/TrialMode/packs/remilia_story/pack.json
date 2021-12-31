@@ -20,7 +20,7 @@
             "x": 2.0,
             "y": 0.0
         },
-        "path": "data/character/remilia/face/face000.bmp",
+        "path": "data/character/remilia/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -117,15 +117,6 @@
             "file": "bnbany1.json",
             "may_be_locked": true,
             "name": "Extra1",
-            "name_hidden_when_locked": false,
-            "preview": ""
-        },
-        {
-            "description": "",
-            "extra": true,
-            "file": "test.json",
-            "may_be_locked": false,
-            "name": "test.json",
             "name_hidden_when_locked": false,
             "preview": ""
         }

@@ -13,7 +13,7 @@
             "x": 1.0,
             "y": 0.0
         },
-        "path": "data/character/marisa/face/face000.bmp",
+        "path": "data/character/marisa/face/face000.cv2",
         "rect": {
             "height": 55,
             "left": 0,
@@ -69,6 +69,6 @@
     ],
     "stand": {
         "isPath": false,
-        "path": "data/stand/marisa.bmp"
+        "path": "data/stand/marisa.cv2"
     }
 }
