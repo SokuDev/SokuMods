@@ -976,7 +976,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_attempts.texture.createFromText(
 		("At most " + std::to_string(prerequ.attempts) + " attempt" + (prerequ.attempts == 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_attempts.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 3});
@@ -987,7 +987,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_hits.texture.createFromText(
 		("At least " + std::to_string(prerequ.hits) + " hit" + (prerequ.hits == 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_hits.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 0});
@@ -998,7 +998,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_damages.texture.createFromText(
 		("At least " + std::to_string(prerequ.damage) + " damage" + (prerequ.damage <= 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_damages.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 1});
@@ -1009,21 +1009,21 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_limit.texture.createFromText(
 		("At least " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	//if (prerequ.minLimit == prerequ.maxLimit)
 	//	this->_limit.texture.createFromText(
 	//		("Exactly " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
 	//		defaultFont12,
-	//		{130, 14},
+	//		{130, 20},
 	//		&size
 	//	);
 	//else
 	//	this->_limit.texture.createFromText(
 	//		("Between " + std::to_string(prerequ.minLimit) + "% and " + std::to_string(prerequ.maxLimit) + "% limit").c_str(),
 	//		defaultFont12,
-	//		{130, 14},
+	//		{130, 20},
 	//		&size
 	//	);
 	this->_limit.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 2});

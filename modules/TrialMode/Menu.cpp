@@ -1599,7 +1599,6 @@ ResultMenu::ResultMenu(int score)
 {
 	loadedPacks[currentPack]->scenarios[currentEntry]->setScore(max(loadedPacks[currentPack]->scenarios[currentEntry]->score, score));
 	saveScores();
-	this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
 
 	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
 	this->_resultTop.setPosition({128, 94});
@@ -1635,10 +1634,12 @@ ResultMenu::ResultMenu(int score)
 		sprite.rect.width = sprite.texture.getSize().x;
 		sprite.rect.height = sprite.texture.getSize().y;
 	}
-	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1 || isLocked(currentEntry + 1)) {
-		this->_text[0].tint = SokuLib::DrawUtils::DxSokuColor{0x40, 0x40, 0x40};
-		this->_disabled = true;
-	}
+	if (!this->_done || loadedPacks[currentPack]->outroPath.empty())
+		if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1 || isLocked(currentEntry + 1)) {
+			this->_text[0].tint = SokuLib::DrawUtils::DxSokuColor{0x40, 0x40, 0x40};
+			this->_disabled = true;
+		}
+	this->_selected = this->_disabled;
 }
 
 void ResultMenu::_()
@@ -1655,7 +1656,7 @@ int ResultMenu::onProcess()
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
 		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL) {
-			if (this->_disabled && !this->_done) {
+			if (this->_disabled) {
 				SokuLib::playSEWaveBuffer(0x29);
 				return true;
 			}
