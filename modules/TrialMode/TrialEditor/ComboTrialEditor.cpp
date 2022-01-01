@@ -1614,7 +1614,8 @@ int ComboTrialEditor::pauseOnUpdate()
 	if (explorerShown)
 		return explorerUpdate(), true;
 	if (this->_playingIntro) {
-		this->_scores[this->_scoreEdited] = this->_oldScore;
+		if (this->_editingScore)
+			this->_scores[this->_scoreEdited] = this->_oldScore;
 		this->_isRecordingScore = false;
 		this->_waitCounter = 0;
 		this->_check = false;
@@ -3366,7 +3367,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 		this->_attempts[i].texture.createFromText(
 			"Infinite number of attempt",
 			defaultFont12,
-			{230, 14},
+			{230, 20},
 			&size
 		);
 		this->_attempts[i].tint = SokuLib::Color::Yellow;
@@ -3376,7 +3377,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 			"Infinite number of attempt" :
 			("At most " + std::to_string(this->_scores[i].attempts) + " attempt" + (this->_scores[i].attempts == 1 ? "" : "s")).c_str(),
 			defaultFont12,
-			{230, 14},
+			{230, 20},
 			&size
 		);
 	this->_attempts[i].setPosition({412 - size.x / 2, 346});
@@ -3387,7 +3388,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_hits[i].texture.createFromText(
 		("At least " + std::to_string(this->_scores[i].hits) + " hit" + (this->_scores[i].hits == 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{230, 14},
+		{230, 20},
 		&size
 	);
 	this->_hits[i].setPosition({184 - size.x / 2, 346});
@@ -3398,7 +3399,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_damages[i].texture.createFromText(
 		("At least " + std::to_string(this->_scores[i].damage) + " damage" + (this->_scores[i].damage <= 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{230, 14},
+		{230, 20},
 		&size
 	);
 	this->_damages[i].setPosition({184 - size.x / 2, 252});
@@ -3409,7 +3410,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_limits[i].texture.createFromText(
 		("At least " + std::to_string(this->_scores[i].minLimit) + "% limit").c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_limits[i].setPosition({412 - size.x / 2, 252});
