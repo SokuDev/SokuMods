@@ -10,7 +10,7 @@
             "x": 3.0,
             "y": 0.0
         },
-        "path": "data/character/chirno/face/face000.bmp",
+        "path": "data/character/chirno/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -29,6 +29,6 @@
     "scenarios": [],
     "stand": {
         "isPath": false,
-        "path": "data/stand/chirno.bmp"
+        "path": "data/stand/chirno.cv2"
     }
 }

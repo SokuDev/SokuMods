@@ -239,6 +239,12 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	if (!this->_rightWeather)
 		battleMgr.rightCharacterManager.swordOfRaptureDebuffTimeLeft = 3;
 	if (!this->_outroPlayed && this->_finished && !this->_playingIntro) {
+		auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+		auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+		// Hide the combo counter
+		*(int *)ptr = 0x00;
+		*(int *)ptr2 = 0x00;
 		if (!this->_dummyHit) {
 			if ((*reinterpret_cast<char **>(0x8985E8))[0x494] < 22) {
 				(*reinterpret_cast<char **>(0x8985E8))[0x494]++;
@@ -468,7 +474,7 @@ void ComboTrial::_initGameStart()
 		this->_attempts++;
 
 	this->_currentDoll = 0;
-	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 24});
+	this->_attemptText.texture.createFromText(("214a -> Review demo<br>Attempt #" + std::to_string(this->_attempts + 1)).c_str(), defaultFont10, {116, 30});
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
@@ -484,8 +490,16 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.combo.damages = 0;
 	battleMgr.leftCharacterManager.combo.nbHits = 0;
 	battleMgr.leftCharacterManager.combo.rate = 0;
+
+	auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+	auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+	// Hide the combo counter
+	*(int *)ptr = 0x00;
+	*(int *)ptr2 = 0x00;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
+	battleMgr.leftCharacterManager.cardCount = 0;
 	for (auto card : this->_hand) {
 		auto obj = battleMgr.leftCharacterManager.addCard(card);
 
@@ -962,7 +976,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_attempts.texture.createFromText(
 		("At most " + std::to_string(prerequ.attempts) + " attempt" + (prerequ.attempts == 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_attempts.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 3});
@@ -973,7 +987,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_hits.texture.createFromText(
 		("At least " + std::to_string(prerequ.hits) + " hit" + (prerequ.hits == 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_hits.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 0});
@@ -984,7 +998,7 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_damages.texture.createFromText(
 		("At least " + std::to_string(prerequ.damage) + " damage" + (prerequ.damage <= 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_damages.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 1});
@@ -995,21 +1009,21 @@ void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScoreP
 	this->_limit.texture.createFromText(
 		("At least " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	//if (prerequ.minLimit == prerequ.maxLimit)
 	//	this->_limit.texture.createFromText(
 	//		("Exactly " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
 	//		defaultFont12,
-	//		{130, 14},
+	//		{130, 20},
 	//		&size
 	//	);
 	//else
 	//	this->_limit.texture.createFromText(
 	//		("Between " + std::to_string(prerequ.minLimit) + "% and " + std::to_string(prerequ.maxLimit) + "% limit").c_str(),
 	//		defaultFont12,
-	//		{130, 14},
+	//		{130, 20},
 	//		&size
 	//	);
 	this->_limit.setPosition({76 + 141 * index - size.x / 2 + 32, BOTTOM_POS + SIZE + 14 * 2});

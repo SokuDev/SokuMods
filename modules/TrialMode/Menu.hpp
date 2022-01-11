@@ -69,6 +69,7 @@ extern std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> charactersFaces;
 extern SokuLib::DrawUtils::Sprite editSeatEmpty;
 extern SokuLib::DrawUtils::Sprite upArrow;
 extern SokuLib::DrawUtils::Sprite downArrow;
+extern bool hasEnglishPatch;
 
 void menuLoadAssets();
 int menuOnProcess(SokuLib::MenuResult *This);

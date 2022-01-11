@@ -10,6 +10,7 @@
 #include <thread>
 #include "Menu.hpp"
 #include "Pack.hpp"
+#include "Explorer.hpp"
 #include "version.h"
 #include "Trial/Trial.hpp"
 #include "TrialEditor/TrialEditor.hpp"
@@ -104,6 +105,7 @@ HMODULE myModule;
 bool editorMode = false;
 char profilePath[1024 + MAX_PATH];
 char profileFolderPath[1024 + MAX_PATH];
+bool hasEnglishPatch;
 
 static struct PackEditScenario {
 	bool opened = false;
@@ -220,17 +222,81 @@ static struct PackEditScenario {
 
 	void setPreviewPath()
 	{
-		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
-		auto input = InputBox("Enter new preview path", "New preview path", scenario->previewFileRel);
+		openFileDialog(
+			"All files\0*.*\0"
+			"Portable Network Graphics\0*.PNG\0"
+			"Joint Photographic Experts Group\0*.JPG;*.JPEG;*.JIF;*.JFIF;.JFI;.JPE\0"
+			"Windows Bitmap\0*.BMP\0"
+			"Graphics Interchange Format\0*.GIF\0\0",
+			loadedPacks[currentPack]->path,
+			[this](const std::string &path){
+				std::string input = path;
+				auto &pack = loadedPacks[currentPack];
+				auto &scenario = pack->scenarios[currentEntry];
+				SokuLib::Vector2i size;
+				char buffer[1024];      // buffer for file content
+				char szDir[MAX_PATH];   // buffer for dir name
+				char szPath[MAX_PATH];  // buffer for path name
+				char szFile2[MAX_PATH];
+				char *szFile;           // buffer for path file
+				struct stat s;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
+				if (input.empty())
+					return SokuLib::playSEWaveBuffer(0x29);
+				GetFullPathNameA(pack->path.c_str(), sizeof(szDir), szDir, nullptr);
+				GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+				if (!szFile)
+					return SokuLib::playSEWaveBuffer(0x29);
+				if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+					input = (szPath + strlen(szDir));
+				else {
+					if (stat((pack->path + "/" + szFile).c_str(), &s) == 0) {
+						char ext[40];
 
-		scenario->previewFileRel = input;
-		scenario->previewFile = scenario->folder + "/" + scenario->previewFileRel;
-		scenario->loadPreview(true);
-		this->previewPath.texture.createFromText(scenario->previewFileRel.c_str(), defaultFont12, {153, 23});
-		SokuLib::playSEWaveBuffer(0x28);
+						strcpy(szFile2, szFile);
+						szFile = szFile2;
+						if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+							strcpy(ext, strchr(szFile, '.'));
+							*strchr(szFile, '.') = 0;
+						}
+						szFile[strlen(szFile) + 2] = 0;
+						szFile[strlen(szFile) + 1] = '0';
+						szFile[strlen(szFile) + 0] = '_';
+
+						while (stat((pack->path + "/" + szFile + ext).c_str(), &s) == 0)
+							szFile[strlen(szFile) - 1]++;
+						strcat(szFile, ext);
+					}
+
+					std::ifstream istream{szPath, std::fstream::binary};
+
+					if (istream.fail() || stat(szPath, &s))
+						return SokuLib::playSEWaveBuffer(0x29);
+
+					std::ofstream ostream{pack->path + "/" + szFile, std::fstream::binary};
+
+					if (ostream.fail())
+						return SokuLib::playSEWaveBuffer(0x29);
+
+					while (s.st_size) {
+						istream.read(buffer, sizeof(buffer));
+						ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+						s.st_size -= min(s.st_size, sizeof(buffer));
+					}
+					if (ostream.fail())
+						return SokuLib::playSEWaveBuffer(0x29);
+					istream.close();
+					ostream.close();
+					input = szFile;
+				}
+
+				scenario->previewFileRel = input;
+				scenario->previewFile = pack->path + "/" + scenario->previewFileRel;
+				scenario->loadPreview(true);
+				this->previewPath.texture.createFromText(scenario->previewFileRel.c_str(), defaultFont12, {153, 23});
+				SokuLib::playSEWaveBuffer(0x28);
+			}
+		);
 	}
 
 	void switchExtra()
@@ -517,121 +583,257 @@ static struct PackEditPage {
 	void selectPreviewSoku()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new preview game asset", "Preview file", pack->previewFSAsset ? "data/" : pack->previewPath);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (!pack->preview.texture.loadFromGame(input.c_str()))
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->previewPath = input;
-		pack->previewFSAsset = false;
-		pack->preview.rect = {
-			0, 0,
-			static_cast<int>(pack->preview.texture.getSize().x),
-			static_cast<int>(pack->preview.texture.getSize().y),
-		};
-		pack->preview.setPosition({398, 128});
-		pack->preview.setSize({200, 150});
-		this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		if (!pack->previewFSAsset)
+			loadExplorerFile(pack->previewPath, "cv2");
+		else
+			loadExplorerRoot("cv2");
+		setExplorerDefaultMusic(nullptr);
+		setExplorerCallback([this, &pack](std::string input){
+			SokuLib::Vector2i size;
+
+			if (input.empty())
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (!pack->preview.texture.loadFromGame(input.c_str()))
+				return SokuLib::playSEWaveBuffer(0x29);
+			pack->previewPath = input;
+			pack->previewFSAsset = false;
+			pack->preview.rect = {
+				0, 0,
+				static_cast<int>(pack->preview.texture.getSize().x),
+				static_cast<int>(pack->preview.texture.getSize().y),
+				};
+			pack->preview.setPosition({398, 128});
+			pack->preview.setSize({200, 150});
+			this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void selectPreviewFS()
 	{
-		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new preview file", "Preview file", pack->previewFSAsset ? pack->previewPath : "");
+		openFileDialog(
+			"All files\0*.*\0"
+			"Portable Network Graphics\0*.PNG\0"
+			"Joint Photographic Experts Group\0*.JPG;*.JPEG;*.JIF;*.JFIF;.JFI;.JPE\0"
+			"Windows Bitmap\0*.BMP\0"
+			"Graphics Interchange Format\0*.GIF\0\0",
+			loadedPacks[currentPack]->path,
+			[this](const std::string &path){
+				std::string input = path;
+				auto &pack = loadedPacks[currentPack];
+				SokuLib::Vector2i size;
+				char buffer[1024];      // buffer for file content
+				char szDir[MAX_PATH];   // buffer for dir name
+				char szPath[MAX_PATH];  // buffer for path name
+				char szFile2[MAX_PATH];
+				char *szFile;           // buffer for path file
+				struct stat s;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (Pack::isInvalidPath(input))
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (!pack->preview.texture.loadFromFile((pack->path + "/" + input).c_str()))
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->previewPath = input;
-		pack->previewFSAsset = true;
-		pack->preview.rect = {
-			0, 0,
-			static_cast<int>(pack->preview.texture.getSize().x),
-			static_cast<int>(pack->preview.texture.getSize().y),
-		};
-		this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+				if (input.empty())
+					return SokuLib::playSEWaveBuffer(0x29);
+				GetFullPathNameA(pack->path.c_str(), sizeof(szDir), szDir, nullptr);
+				GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+				if (!szFile)
+					return SokuLib::playSEWaveBuffer(0x29);
+				if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+					input = (szPath + strlen(szDir));
+				else {
+					if (stat((pack->path + "/" + szFile).c_str(), &s) == 0) {
+						char ext[40];
+
+						strcpy(szFile2, szFile);
+						szFile = szFile2;
+						if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+							strcpy(ext, strchr(szFile, '.'));
+							*strchr(szFile, '.') = 0;
+						}
+						szFile[strlen(szFile) + 2] = 0;
+						szFile[strlen(szFile) + 1] = '0';
+						szFile[strlen(szFile) + 0] = '_';
+
+						while (stat((pack->path + "/" + szFile + ext).c_str(), &s) == 0)
+							szFile[strlen(szFile) - 1]++;
+						strcat(szFile, ext);
+					}
+
+					std::ifstream istream{szPath, std::fstream::binary};
+
+					if (istream.fail() || stat(szPath, &s))
+						return SokuLib::playSEWaveBuffer(0x29);
+
+					std::ofstream ostream{pack->path + "/" + szFile, std::fstream::binary};
+
+					if (ostream.fail())
+						return SokuLib::playSEWaveBuffer(0x29);
+
+					while (s.st_size) {
+						istream.read(buffer, sizeof(buffer));
+						ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+						s.st_size -= min(s.st_size, sizeof(buffer));
+					}
+					if (ostream.fail())
+						return SokuLib::playSEWaveBuffer(0x29);
+					istream.close();
+					ostream.close();
+					input = szFile;
+				}
+
+				if (!pack->preview.texture.loadFromFile((pack->path + "/" + input).c_str()))
+					return SokuLib::playSEWaveBuffer(0x29);
+				pack->previewPath = input;
+				pack->previewFSAsset = true;
+				pack->preview.rect = {
+					0, 0,
+					static_cast<int>(pack->preview.texture.getSize().x),
+					static_cast<int>(pack->preview.texture.getSize().y),
+				};
+				this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
+				SokuLib::playSEWaveBuffer(0x28);
+			}
+		);
 	}
 
 	void selectIconSoku()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new icon game asset", "Icon file", pack->icon && !pack->icon->fsPath ? pack->icon->path : "data/");
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (pack->icon) {
-			if (!pack->icon->sprite.texture.loadFromGame(input.c_str()))
-				return SokuLib::playSEWaveBuffer(0x29);
-			pack->icon->path = input;
-			pack->icon->fsPath = false;
-			pack->icon->sprite.rect = {
-				0, 0,
-				static_cast<int>(pack->icon->sprite.texture.getSize().x),
-				static_cast<int>(pack->icon->sprite.texture.getSize().y),
-			};
-		} else {
-			pack->icon.reset(new Icon(pack->path, {
-				{"path",   input},
-				{"isPath", false}
-			}));
-			if (!pack->icon->sprite.texture.hasTexture())
-				return SokuLib::playSEWaveBuffer(0x29);
-		}
+		if (pack->icon && !pack->icon->fsPath)
+			loadExplorerFile(pack->icon->path, "cv2");
+		else
+			loadExplorerRoot("cv2");
+		setExplorerDefaultMusic(nullptr);
+		setExplorerCallback([this, &pack](std::string input){
+			SokuLib::Vector2i size;
 
-		pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
-		pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
-		pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
-		pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
-		pack->icon->sprite.setSize({
-			static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
-			static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+			if (input.empty())
+				return SokuLib::playSEWaveBuffer(0x29);
+			if (pack->icon) {
+				if (!pack->icon->sprite.texture.loadFromGame(input.c_str()))
+					return SokuLib::playSEWaveBuffer(0x29);
+				pack->icon->path = input;
+				pack->icon->fsPath = false;
+				pack->icon->sprite.rect = {
+					0, 0,
+					static_cast<int>(pack->icon->sprite.texture.getSize().x),
+					static_cast<int>(pack->icon->sprite.texture.getSize().y),
+					};
+			} else {
+				pack->icon.reset(new Icon(pack->path, {
+					{"path",   input},
+					{"isPath", false}
+				}));
+				if (!pack->icon->sprite.texture.hasTexture())
+					return SokuLib::playSEWaveBuffer(0x29);
+			}
+
+			pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
+			pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
+			pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
+			pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
+			pack->icon->sprite.setSize({
+				static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
+				static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+			});
+			pack->icon->sprite.rect = pack->icon->rect;
+			this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
 		});
-		pack->icon->sprite.rect = pack->icon->rect;
-		this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
 	}
 
 	void selectIconFS()
 	{
-		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new icon file", "Icon file", pack->icon && pack->icon->fsPath ? pack->icon->path : "");
+		openFileDialog(
+			"All files\0*.*\0"
+			"Portable Network Graphics\0*.PNG\0"
+			"Joint Photographic Experts Group\0*.JPG;*.JPEG;*.JIF;*.JFIF;.JFI;.JPE\0"
+			"Windows Bitmap\0*.BMP\0"
+			"Graphics Interchange Format\0*.GIF\0\0",
+			loadedPacks[currentPack]->path,
+			[this](const std::string &path){
+				std::string input = path;
+				auto &pack = loadedPacks[currentPack];
+				SokuLib::Vector2i size;
+				char buffer[1024];      // buffer for file content
+				char szDir[MAX_PATH];   // buffer for dir name
+				char szPath[MAX_PATH];  // buffer for path name
+				char szFile2[MAX_PATH];
+				char *szFile;           // buffer for path file
+				struct stat s;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (Pack::isInvalidPath(input))
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (pack->icon) {
-			if (!pack->icon->sprite.texture.loadFromFile((pack->path + "/" + input).c_str()))
-				return SokuLib::playSEWaveBuffer(0x29);
-			pack->icon->path = input;
-			pack->icon->fsPath = true;
-		} else
-			pack->icon.reset(new Icon(pack->path, {
-				{"path", input},
-				{"isPath", true}
-			}));
+				if (input.empty())
+					return SokuLib::playSEWaveBuffer(0x29);
+				GetFullPathNameA(pack->path.c_str(), sizeof(szDir), szDir, nullptr);
+				GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+				if (!szFile)
+					return SokuLib::playSEWaveBuffer(0x29);
+				if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+					input = (szPath + strlen(szDir));
+				else {
+					if (stat((pack->path + "/" + szFile).c_str(), &s) == 0) {
+						char ext[40];
 
-		pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
-		pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
-		pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
-		pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
-		pack->icon->sprite.setSize({
-			static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
-			static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
-		});
-		pack->icon->sprite.rect = pack->icon->rect;
-		this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+						strcpy(szFile2, szFile);
+						szFile = szFile2;
+						if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+							strcpy(ext, strchr(szFile, '.'));
+							*strchr(szFile, '.') = 0;
+						}
+						szFile[strlen(szFile) + 2] = 0;
+						szFile[strlen(szFile) + 1] = '0';
+						szFile[strlen(szFile) + 0] = '_';
+
+						while (stat((pack->path + "/" + szFile + ext).c_str(), &s) == 0)
+							szFile[strlen(szFile) - 1]++;
+						strcat(szFile, ext);
+					}
+
+					std::ifstream istream{szPath, std::fstream::binary};
+
+					if (istream.fail() || stat(szPath, &s))
+						return SokuLib::playSEWaveBuffer(0x29);
+
+					std::ofstream ostream{pack->path + "/" + szFile, std::fstream::binary};
+
+					if (ostream.fail())
+						return SokuLib::playSEWaveBuffer(0x29);
+
+					while (s.st_size) {
+						istream.read(buffer, sizeof(buffer));
+						ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+						s.st_size -= min(s.st_size, sizeof(buffer));
+					}
+					if (ostream.fail())
+						return SokuLib::playSEWaveBuffer(0x29);
+					istream.close();
+					ostream.close();
+					input = szFile;
+				}
+
+				if (pack->icon) {
+					if (!pack->icon->sprite.texture.loadFromFile((pack->path + "/" + input).c_str()))
+						return SokuLib::playSEWaveBuffer(0x29);
+					pack->icon->path = input;
+					pack->icon->fsPath = true;
+				} else
+					pack->icon.reset(new Icon(pack->path, {
+						{"path", input},
+						{"isPath", true}
+					}));
+
+				pack->icon->untransformedRect.x = pack->icon->sprite.texture.getSize().x;
+				pack->icon->untransformedRect.y = pack->icon->sprite.texture.getSize().y;
+				pack->icon->rect.width = min(68 / pack->icon->scale, pack->icon->untransformedRect.x);
+				pack->icon->rect.height = min(28 / pack->icon->scale, pack->icon->untransformedRect.y);
+				pack->icon->sprite.setSize({
+					static_cast<unsigned int>(pack->icon->rect.width * pack->icon->scale),
+					static_cast<unsigned int>(pack->icon->rect.height * pack->icon->scale)
+				});
+				pack->icon->sprite.rect = pack->icon->rect;
+				this->iconPath.texture.createFromText(pack->icon->path.c_str(), defaultFont12, {153, 23}, &size);
+				SokuLib::playSEWaveBuffer(0x28);
+			}
+		);
 	}
 
 	void setModes()
@@ -1397,7 +1599,6 @@ ResultMenu::ResultMenu(int score)
 {
 	loadedPacks[currentPack]->scenarios[currentEntry]->setScore(max(loadedPacks[currentPack]->scenarios[currentEntry]->score, score));
 	saveScores();
-	this->_selected += currentEntry == loadedPacks[currentPack]->scenarios.size() - 1;
 
 	this->_resultTop.texture.loadFromGame("data/infoeffect/result/resultTitle.bmp");
 	this->_resultTop.setPosition({128, 94});
@@ -1433,10 +1634,12 @@ ResultMenu::ResultMenu(int score)
 		sprite.rect.width = sprite.texture.getSize().x;
 		sprite.rect.height = sprite.texture.getSize().y;
 	}
-	if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1 || isLocked(currentEntry + 1)) {
-		this->_text[0].tint = SokuLib::DrawUtils::DxSokuColor{0x40, 0x40, 0x40};
-		this->_disabled = true;
-	}
+	if (!this->_done || loadedPacks[currentPack]->outroPath.empty())
+		if (currentEntry == loadedPacks[currentPack]->scenarios.size() - 1 || isLocked(currentEntry + 1)) {
+			this->_text[0].tint = SokuLib::DrawUtils::DxSokuColor{0x40, 0x40, 0x40};
+			this->_disabled = true;
+		}
+	this->_selected = this->_disabled;
 }
 
 void ResultMenu::_()
@@ -1452,9 +1655,8 @@ int ResultMenu::onProcess()
 		this->_selected = TrialBase::RETURN_TO_TITLE_SCREEN;
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
-
 		if (this->_selected == TrialBase::GO_TO_NEXT_TRIAL) {
-			if (this->_disabled && !this->_done) {
+			if (this->_disabled) {
 				SokuLib::playSEWaveBuffer(0x29);
 				return true;
 			}
@@ -1514,7 +1716,7 @@ void loadFont()
 	desc.g2 = 255;
 	desc.b1 = 255;
 	desc.b2 = 255;
-	desc.height = 10;
+	desc.height = 10 + hasEnglishPatch * 2;
 	desc.weight = FW_NORMAL;
 	desc.italic = 0;
 	desc.shadow = 1;
@@ -1529,11 +1731,11 @@ void loadFont()
 	defaultFont10.create();
 	defaultFont10.setIndirect(desc);
 
-	desc.height = 12;
+	desc.height = 12 + hasEnglishPatch * 2;
 	defaultFont12.create();
 	defaultFont12.setIndirect(desc);
 
-	desc.height = 16;
+	desc.height = 16 + hasEnglishPatch * 2;
 	defaultFont16.create();
 	defaultFont16.setIndirect(desc);
 }
@@ -1545,7 +1747,7 @@ void menuLoadAssets()
 	loaded = true;
 	loadAllExistingCards();
 	puts("Loading assets");
-
+	hasEnglishPatch = (*(int *)0x411c64 == 1);
 	loadFont();
 
 	previewContainer.texture.loadFromGame("data/menu/profile_list_seat.bmp");
@@ -1682,6 +1884,8 @@ void menuLoadAssets()
 	editScenarioSeat.setPosition({122, 226});
 	editScenarioSeat.rect.width = editScenarioSeat.texture.getSize().x;
 	editScenarioSeat.rect.height = editScenarioSeat.texture.getSize().y;
+
+	explorerLoadAssets();
 
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
@@ -2022,6 +2226,7 @@ void menuUnloadAssets()
 	noEditorGuides.clear();
 	editorGuides.clear();
 
+	explorerUnloadAssets();
 	editorMode = false;
 	packEditScenario.opened = false;
 	packEditPage.opened = false;
@@ -2614,7 +2819,12 @@ bool saveCurrentPack()
 			{"extra", scenario->extra},
 		});
 	}
-	str = json.dump(4);
+	try {
+		str = json.dump(4);
+	} catch (std::exception &e) {
+		MessageBox(SokuLib::window, ("Error: Cannot save pack: " + std::string(e.what())).c_str(), "Saving error", MB_ICONERROR);
+		return false;
+	}
 	if (rename(
 		(pack->path + "/pack.json").c_str(),
 		(pack->path + "/pack_backup.json").c_str()
@@ -3022,6 +3232,8 @@ afterCInput:
 
 bool editorUpdate()
 {
+	if (explorerShown)
+		return explorerUpdate(), false;
 	if (!checkEditorKeys(SokuLib::inputMgrs.input))
 		return false;
 	if (packEditScenario.opened)
@@ -3041,7 +3253,9 @@ bool editorUpdate()
 
 void editorRender()
 {
-	if (packEditScenario.opened) {
+	if (explorerShown)
+		explorerRender();
+	else if (packEditScenario.opened) {
 		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
 
 		editScenarioSeat.draw();

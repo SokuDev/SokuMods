@@ -12,10 +12,10 @@ local dialogs = {
 	"lADIt's no time to stay unconscious.",
 	"lhDSo, who beat you?",
 	"rhEI'm not sure...",
-	"rhSBut I was put unconscious so suddenly that it<br>can't be anyone!",
-	"lASIt could have been anyone since they attacked<br>you in your sleep, doesn't they?",
+	"rhSIn any case, I was put unconscious so<br>suddenly that it can't be anyone!",
+	"lASIt could have been anyone since they attacked<br>you in your sleep, didn't they?",
 	"lCSYou truly are useless, so just accept your punishment.",
-	"rCcBut I wasn't sleeping this time...",
+	"rCcI swear I wasn't sleeping this time!",
 	--Battle here
 }
 

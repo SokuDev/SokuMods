@@ -4,6 +4,7 @@
 
 #include <dinput.h>
 #include <fstream>
+#include "Explorer.hpp"
 #include "InputBox.hpp"
 #include "Patches.hpp"
 #include "ComboTrialEditor.hpp"
@@ -434,10 +435,19 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 
 	auto &sprite = std::get<2>(this->_musics.back());
 
-	sprite->texture.createFromText("Custom music", defaultFont12, {200, 16}, &size);
+	sprite->texture.createFromText("Explore game files", defaultFont12, {200, 16}, &size);
 	sprite->setSize(size.to<unsigned>());
 	sprite->rect.width = size.x;
 	sprite->rect.height = size.y;
+	this->_musics.emplace_back("", "", new SokuLib::DrawUtils::Sprite());
+
+	auto &sprite2 = std::get<2>(this->_musics.back());
+
+	sprite2->texture.createFromText("Custom music", defaultFont12, {200, 16}, &size);
+	sprite2->setSize(size.to<unsigned>());
+	sprite2->rect.width = size.x;
+	sprite2->rect.height = size.y;
+
 	for (int i = 0; i < _installProperties.size(); i++) {
 		this->_installSprites.emplace_back(new SokuLib::DrawUtils::Sprite());
 
@@ -547,8 +557,6 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	if ((*reinterpret_cast<char **>(0x8985E8))[0x494] && !this->_playingIntro && !this->_recordingCombo)
 		(*reinterpret_cast<char **>(0x8985E8))[0x494]--;
 
-	if (this->_needInit)
-		return this->_initGameStart(), false;
 	if (this->_isStart || this->_quit || this->_needReload) {
 		this->_first |= this->_needReload;
 		this->_quit = false;
@@ -556,6 +564,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		this->_initGameStart();
 		return false;
 	}
+	if (this->_needInit)
+		return this->_initGameStart(), false;
 
 	if (this->_dolls.size() * 2 != SokuLib::getBattleMgr().leftCharacterManager.objects.list.size && this->_managingDolls)
 		this->_initGameStart();
@@ -652,32 +662,36 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 				this->_comboCursor = static_cast<int>((this->_comboCursor + this->_expectedActions.size()) + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis)) % this->_expectedActions.size();
 				SokuLib::playSEWaveBuffer(0x27);
 			}
-			if (SokuLib::inputMgrs.input.a == 1) {
+			if (SokuLib::inputMgrs.input.changeCard == 1) {
 				std::string expected = InputBox("Enter new moves", "New moves", "");
 				bool par = false;
 				char last = ' ';
-				unsigned start = this->_expectedActions.size();
+				int j = 0;
 
 				if (!expected.empty()) {
-					this->_expectedActions.emplace_back(new SpecialAction());
+					this->_comboCursor++;
+					j++;
+					this->_expectedActions.insert(this->_expectedActions.begin() + this->_comboCursor, std::unique_ptr<SpecialAction>(new SpecialAction()));
 					for (auto c : expected) {
 						par |= c == '(';
 						par &= c != ')';
 						if (!par && c == ' ') {
-							if (last != ' ')
-								this->_expectedActions.emplace_back(new SpecialAction());
+							if (last != ' ') {
+								this->_expectedActions.insert(this->_expectedActions.begin() + this->_comboCursor + j, std::unique_ptr<SpecialAction>(new SpecialAction()));
+								j++;
+							}
 						} else
 							this->_expectedActions.back()->name += c;
 						last = c;
 					}
 					try {
-						for (int i = start; i < this->_expectedActions.size(); i++)
-							this->_expectedActions[i]->parse();
-						this->_comboCursor = start;
+						for (int i = 0; i < j; i++)
+							this->_expectedActions[this->_comboCursor + i]->parse();
 						SokuLib::playSEWaveBuffer(0x28);
 					} catch (std::exception &e) {
 						MessageBox(SokuLib::window, e.what(), "Invalid move string", MB_ICONERROR);
-						this->_expectedActions.erase(this->_expectedActions.begin() + start, this->_expectedActions.end());
+						this->_expectedActions.erase(this->_expectedActions.begin() + this->_comboCursor, this->_expectedActions.begin() + this->_comboCursor + j);
+						this->_comboCursor--;
 						SokuLib::playSEWaveBuffer(0x29);
 					}
 				} else
@@ -691,52 +705,115 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			}
 			if (SokuLib::inputMgrs.input.d == 1) {
 				auto &move = this->_expectedActions[this->_comboCursor];
-				auto &charge = move->chargeTime;
-				std::string str = InputBox("Enter new charge time", "New charge time", std::to_string(charge));
+				auto &delay = move->delay;
+				auto charge = move->chargeTime;
+				std::string str = InputBox("Enter new charge time & delay", "New charge time and delay", std::to_string(charge) + "&" + std::to_string(delay));
 
-				if (!str.empty())
-					try {
-						SokuLib::Vector2i realSize;
+				if (!str.empty()) {
+					auto pos = str.find('&');
 
-						charge = std::stoul(str);
-						move->attributes.texture.createFromText(("Charge " + std::to_string(move->chargeTime) + "|Delay " + std::to_string(move->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
-						move->attributes.setSize(realSize.to<unsigned>());
-						move->attributes.rect.width = realSize.x;
-						move->attributes.rect.height = realSize.y;
-						SokuLib::playSEWaveBuffer(0x28);
-					} catch (std::out_of_range &e) {
-						MessageBox(SokuLib::window, "The charge value must be between 0 and 4294967295", "Invalid charge string", MB_ICONERROR);
+					if (pos == std::string::npos) {
+						MessageBox(SokuLib::window, "Missing separator.", "Invalid charge&delay string", MB_ICONERROR);
 						SokuLib::playSEWaveBuffer(0x29);
-					} catch (std::invalid_argument &e) {
-						MessageBox(SokuLib::window, "The charge value is not a valid number.", "Invalid charge string", MB_ICONERROR);
-						SokuLib::playSEWaveBuffer(0x29);
+					} else {
+						try {
+							charge = std::stoul(str.substr(0, pos));
+						} catch (std::out_of_range &e) {
+							MessageBox(SokuLib::window, "The charge value must be between 0 and 4294967295", "Invalid charge string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+							goto afterInput;
+						} catch (std::invalid_argument &e) {
+							MessageBox(SokuLib::window, "The charge value is not a valid number.", "Invalid charge string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+							goto afterInput;
+						}
+						try {
+							SokuLib::Vector2i realSize;
+
+							delay = std::stoul(str.substr(pos + 1));
+							move->chargeTime = charge;
+							move->attributes.texture.createFromText(("Charge " + std::to_string(move->chargeTime) + "|Delay " + std::to_string(move->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
+							move->attributes.setSize(realSize.to<unsigned>());
+							move->attributes.rect.width = realSize.x;
+							move->attributes.rect.height = realSize.y;
+							SokuLib::playSEWaveBuffer(0x28);
+						} catch (std::out_of_range &e) {
+							MessageBox(SokuLib::window, "The delay value must be between 0 and 4294967295", "Invalid delay string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+						} catch (std::invalid_argument &e) {
+							MessageBox(SokuLib::window, "The delay value is not a valid number.", "Invalid delay string", MB_ICONERROR);
+							SokuLib::playSEWaveBuffer(0x29);
+						}
 					}
-				else
+				} else
 					SokuLib::playSEWaveBuffer(0x29);
 			}
-			if (SokuLib::inputMgrs.input.changeCard == 1) {
+			if (SokuLib::inputMgrs.input.a == 1) {
+				std::string str;
+				bool start = true;
 				auto &move = this->_expectedActions[this->_comboCursor];
-				auto &delay = move->delay;
-				std::string str = InputBox("Enter new delay time", "New delay time", std::to_string(delay));
 
-				if (!str.empty())
+				if (!start)
+					str += " ";
+				start = false;
+				if (move->optional)
+					str += "!";
+				for (int i = 0; i < move->actions.size(); i++) {
+					auto action = move->actions[i];
+					auto it = std::find_if(actionsFromStr.begin(), actionsFromStr.end(), [action](const std::pair<std::string, SokuLib::Action> &p1){
+						return p1.second == action;
+					});
+
+					if (i != 0)
+						str += "/";
+					if (it == actionsFromStr.end())
+						throw std::invalid_argument("Cannot find action string for action " + std::to_string(action));
+					if (action == SokuLib::ACTION_FLY || (action >= SokuLib::ACTION_DEFAULT_SKILL1_B && action < SokuLib::ACTION_USING_SC_ID_200))
+						str += move->actionsStr[i];
+					else if (it->first == "44")
+						str += "d4";
+					else if (it->first == "66")
+						str += "d6";
+					else if (it->first == "1a" && SokuLib::leftChar != SokuLib::CHARACTER_YOUMU)
+						str += "2a";
+					else
+						str += it->first;
+				}
+				if (move->chargeTime)
+					str += "[" + std::to_string(move->chargeTime) + "]";
+				if (move->delay)
+					str += ":" + std::to_string(move->delay);
+
+				std::string expected = InputBox("Enter corrected move", "Edit move", str);
+				bool par = false;
+				char last = ' ';
+				int j = 0;
+
+				if (!expected.empty()) {
+					move->name.clear();
+					for (auto c : expected) {
+						par |= c == '(';
+						par &= c != ')';
+						if (!par && c == ' ') {
+							if (last != ' ') {
+								MessageBox(SokuLib::window, "You cannot have multiple moves when editing a move.", "Too many moves", MB_ICONERROR);
+								SokuLib::playSEWaveBuffer(0x29);
+								goto afterInput;
+							}
+						} else
+							move->name += c;
+						last = c;
+					}
 					try {
-						SokuLib::Vector2i realSize;
-
-						delay = std::stoul(str);
-						move->attributes.texture.createFromText(("Charge " + std::to_string(move->chargeTime) + "|Delay " + std::to_string(move->delay)).c_str(), defaultFont16, {400, 20}, &realSize);
-						move->attributes.setSize(realSize.to<unsigned>());
-						move->attributes.rect.width = realSize.x;
-						move->attributes.rect.height = realSize.y;
+						move->parse();
 						SokuLib::playSEWaveBuffer(0x28);
-					} catch (std::out_of_range &e) {
-						MessageBox(SokuLib::window, "The charge value must be between 0 and 4294967295", "Invalid charge string", MB_ICONERROR);
-						SokuLib::playSEWaveBuffer(0x29);
-					} catch (std::invalid_argument &e) {
-						MessageBox(SokuLib::window, "The charge value is not a valid number.", "Invalid charge string", MB_ICONERROR);
+					} catch (std::exception &e) {
+						MessageBox(SokuLib::window, e.what(), "Invalid move string", MB_ICONERROR);
+						move->name = str;
+						move->parse();
 						SokuLib::playSEWaveBuffer(0x29);
 					}
-				else
+				} else
 					SokuLib::playSEWaveBuffer(0x29);
 			}
 			if (SokuLib::inputMgrs.input.spellcard == 1) {
@@ -783,6 +860,7 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 		}
 	}
 
+afterInput:
 	if (!this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
 		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = !!battleMgr.leftCharacterManager.missingPurplePowerTimeLeft;
 	else if (!this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
@@ -870,7 +948,7 @@ disableLimit:
 		return false;
 	}
 
-	if ((this->_actionCounter || (!this->_recordBuffer.empty() && this->_recordingCombo)) && !this->_dummyHit && !battleMgr.leftCharacterManager.timeStop && !battleMgr.rightCharacterManager.timeStop)
+	if ((this->_actionCounter || (!this->_recordBuffer.empty() && this->_recordingCombo)) && !this->_dummyHit)
 		this->_timer++;
 	else
 		this->_timer = 0;
@@ -910,6 +988,13 @@ disableLimit:
 				this->_initAnimations(false, true);
 				this->_outroPlayed = false;
 				this->_finished = true;
+
+				auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+				auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+				// Hide the combo counter
+				*(int *)ptr = 0x00;
+				*(int *)ptr2 = 0x00;
 			} catch (std::exception &e) {
 				MessageBox(
 					SokuLib::window,
@@ -1050,6 +1135,10 @@ void ComboTrialEditor::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (this->_needReload) {
+		this->_needInit = true;
+		return;
+	}
 	if (this->_currentDoll && battleMgr.leftCharacterManager.objects.list.size) {
 		auto obj = battleMgr.leftCharacterManager.objects.list.vector()[battleMgr.leftCharacterManager.objects.list.size - 2];
 
@@ -1084,10 +1173,13 @@ void ComboTrialEditor::_initGameStart()
 		return;
 	}
 	puts("Init");
-	if (this->_check && (
-		!this->_scores[0].met(0) || !this->_scores[1].met(0) || !this->_scores[2].met(0) || !this->_scores[3].met(0)
-	))
-		MessageBox(SokuLib::window, "Dummy did not get S rank. The preview should always get S rank.", "S rank requirement error", MB_ICONWARNING);
+	if (this->_check > 1)
+		this->_check--;
+	else if (this->_check) {
+		if (!this->_scores[0].met(0) || !this->_scores[1].met(0) || !this->_scores[2].met(0) || !this->_scores[3].met(0))
+			MessageBox(SokuLib::window, "Dummy did not get S rank. The preview should always get S rank.", "S rank requirement error", MB_ICONWARNING);
+		this->_check = 0;
+	}
 	if (this->_recordingCombo)
 		this->_saveRecordedCombo();
 	this->_dollSelected = false;
@@ -1097,7 +1189,6 @@ void ComboTrialEditor::_initGameStart()
 	this->_isStart = false;
 	this->_dummyHit = false;
 	this->_finished = false;
-	this->_check = false;
 	if (!this->_playingIntro || this->_waitCounter != 31) {
 		this->_playingIntro = false;
 		if (this->_isRecordingScore) {
@@ -1124,8 +1215,16 @@ void ComboTrialEditor::_initGameStart()
 	battleMgr.leftCharacterManager.combo.damages = 0;
 	battleMgr.leftCharacterManager.combo.nbHits = 0;
 	battleMgr.leftCharacterManager.combo.rate = 0;
+
+	auto ptr = *(unsigned *)(0x8985E8) + 0x16C + 0x18;
+	auto ptr2 = *(unsigned *)(0x8985E8) + 0x190 + 0x18;
+
+	// Hide the combo counter
+	*(int *)ptr = 0x00;
+	*(int *)ptr2 = 0x00;
 	battleMgr.leftCharacterManager.cardGauge = 0;
 	battleMgr.leftCharacterManager.hand.size = 0;
+	battleMgr.leftCharacterManager.cardCount = 0;
 	for (auto card : this->_hand) {
 		auto obj = battleMgr.leftCharacterManager.addCard(card);
 
@@ -1512,8 +1611,11 @@ void ComboTrialEditor::_initVanillaGame()
 
 int ComboTrialEditor::pauseOnUpdate()
 {
+	if (explorerShown)
+		return explorerUpdate(), true;
 	if (this->_playingIntro) {
-		this->_scores[this->_scoreEdited] = this->_oldScore;
+		if (this->_editingScore)
+			this->_scores[this->_scoreEdited] = this->_oldScore;
 		this->_isRecordingScore = false;
 		this->_waitCounter = 0;
 		this->_check = false;
@@ -1705,43 +1807,123 @@ int ComboTrialEditor::pauseOnUpdate()
 			return true;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
-			if (this->_musicCursor == this->_musics.size() - 1) {
-				auto music = InputBox("Enter music path", "New music", this->_musicReal);
+			if (this->_musicCursor == this->_musics.size() - 2) {
+				loadExplorerFile(this->_musicReal, "ogg");
+				setExplorerDefaultMusic([this]{
+					this->_playBGM();
+				});
+				setExplorerCallback([this](std::string input){
+					this->_musicReal = this->_music = input;
+					auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
+						return this->_musicReal == std::get<1>(t);
+					});
 
-				if (music.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
+					this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 2 : it - this->_musics.begin();
+					if (this->_musicCursor > 38)
+						this->_musicTop = (this->_musicCursor - 36) - (this->_musicCursor % 2);
+					else
+						this->_musicTop = 0;
+					this->_loopStart = 0;
+					this->_loopEnd = 0;
+					SokuLib::playSEWaveBuffer(0x28);
+				});
+			} else if (this->_musicCursor == this->_musics.size() - 1) {
+				openFileDialog(
+					"OGG File\0*.ogg\0",
+					this->_folder.c_str(),
+					[this](const std::string &music) {
+						std::string input = music;
+						SokuLib::Vector2i size;
+						char buffer[1024];      // buffer for file content
+						char szDir[MAX_PATH];   // buffer for dir name
+						char szPath[MAX_PATH];  // buffer for path name
+						char szFile2[MAX_PATH];
+						char *szFile;           // buffer for path file
+						struct stat s;
 
-				auto musicLStart = InputBox("Enter music loop start position (in seconds)", "Loop start", std::to_string(this->_loopStart));
+						GetFullPathNameA(this->_folder.c_str(), sizeof(szDir), szDir, nullptr);
+						GetFullPathNameA(input.c_str(), sizeof(szPath), szPath, &szFile);
+						if (!szFile)
+							return SokuLib::playSEWaveBuffer(0x29);
+						if (strncmp(szPath, szDir, strlen(szDir)) == 0)
+							input = (szPath + strlen(szDir));
+						else {
+							if (stat((this->_folder + "/" + szFile).c_str(), &s) == 0) {
+								char ext[40];
 
-				if (music.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
+								strcpy(szFile2, szFile);
+								szFile = szFile2;
+								if (strchr(szFile, '.') && strlen(strchr(szFile, '.')) < 40) {
+									strcpy(ext, strchr(szFile, '.'));
+									*strchr(szFile, '.') = 0;
+								}
+								szFile[strlen(szFile) + 2] = 0;
+								szFile[strlen(szFile) + 1] = '0';
+								szFile[strlen(szFile) + 0] = '_';
 
-				auto musicLEnd = InputBox("Enter music loop end position (in seconds)", "Loop end", std::to_string(this->_loopEnd));
+								while (stat((this->_folder + "/" + szFile + ext).c_str(), &s) == 0)
+									szFile[strlen(szFile) - 1]++;
+								strcat(szFile, ext);
+							}
 
-				if (musicLEnd.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
+							std::ifstream istream{szPath, std::fstream::binary};
 
-				try {
-					std::stod(musicLEnd);
-					this->_loopStart = std::stod(musicLStart);
-					this->_loopEnd = std::stod(musicLEnd);
-				} catch (std::invalid_argument &) {
-					SokuLib::playSEWaveBuffer(0x29);
-					return true;
-				} catch (std::out_of_range &) {
-					SokuLib::playSEWaveBuffer(0x29);
-					return true;
-				}
-				this->_music = this->_musicReal = music;
-				for (auto pos = this->_music.find("{{pack_path}}"); pos != std::string::npos; pos = this->_music.find("{{pack_path}}"))
-					this->_music.replace(pos, strlen("{{pack_path}}"), this->_folder);
+							if (istream.fail() || stat(szPath, &s))
+								return SokuLib::playSEWaveBuffer(0x29);
+
+							std::ofstream ostream{this->_folder + "/" + szFile, std::fstream::binary};
+
+							if (ostream.fail())
+								return SokuLib::playSEWaveBuffer(0x29);
+
+							while (s.st_size) {
+								istream.read(buffer, sizeof(buffer));
+								ostream.write(buffer, min(s.st_size, sizeof(buffer)));
+								s.st_size -= min(s.st_size, sizeof(buffer));
+							}
+							if (ostream.fail())
+								return SokuLib::playSEWaveBuffer(0x29);
+							istream.close();
+							ostream.close();
+							input = szFile;
+						}
+
+						auto musicLStart = InputBox("Enter music loop start position (in seconds)", "Loop start", std::to_string(this->_loopStart));
+
+						if (music.empty())
+							return SokuLib::playSEWaveBuffer(0x29);
+
+						auto musicLEnd = InputBox("Enter music loop end position (in seconds)", "Loop end", std::to_string(this->_loopEnd));
+
+						if (musicLEnd.empty())
+							return SokuLib::playSEWaveBuffer(0x29);
+
+						try {
+							auto l = std::stod(musicLEnd);
+
+							this->_loopStart = std::stod(musicLStart);
+							this->_loopEnd = l;
+						} catch (std::invalid_argument &) {
+							SokuLib::playSEWaveBuffer(0x29);
+							return;
+						} catch (std::out_of_range &) {
+							SokuLib::playSEWaveBuffer(0x29);
+							return;
+						}
+						this->_music = this->_folder + "/" + input;
+						this->_musicReal = "{{pack_path}}/" + input;
+						this->_playBGM();
+						SokuLib::playSEWaveBuffer(0x28);
+					}
+				);
+				return true;
 			} else {
 				this->_music = this->_musicReal = std::get<1>(this->_musics[this->_musicCursor]);
 				this->_loopStart = 0;
 				this->_loopEnd = 0;
+				this->_playBGM();
+				SokuLib::playSEWaveBuffer(0x28);
 			}
-			this->_playBGM();
-			SokuLib::playSEWaveBuffer(0x28);
 		}
 		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
 			if (SokuLib::inputMgrs.input.verticalAxis < 0 && this->_musicCursor <= 1) {
@@ -2055,6 +2237,7 @@ int ComboTrialEditor::pauseOnRender() const
 	}
 	for (auto &guide : this->_guides)
 		guide->render();
+	explorerRender();
 	return true;
 }
 
@@ -2500,15 +2683,19 @@ bool ComboTrialEditor::setStage()
 
 bool ComboTrialEditor::setMusic()
 {
-	auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
-		return this->_musicReal == std::get<1>(t);
-	});
-
 	this->_guides[4]->active = false;
 	this->_guides[2]->active = true;
 	SokuLib::playSEWaveBuffer(0x28);
 	this->_selectingMusic = true;
-	this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 1 : it - this->_musics.begin();
+	if (this->_musicReal.find("{{pack_path}}") != std::string::npos)
+		this->_musicCursor = this->_musics.size() - 1;
+	else {
+		auto it = std::find_if(this->_musics.begin(), this->_musics.end(), [this](const std::tuple<std::string, std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> &t){
+			return this->_musicReal == std::get<1>(t);
+		});
+
+		this->_musicCursor = it == this->_musics.end() ? this->_musics.size() - 2 : it - this->_musics.begin();
+	}
 	if (this->_musicCursor > 38)
 		this->_musicTop = (this->_musicCursor - 36) - (this->_musicCursor % 2);
 	else
@@ -2584,7 +2771,7 @@ bool ComboTrialEditor::playPreview()
 		guide->reset();
 	this->_selectedSubcategory = 0;
 	this->_playComboAfterIntro = true;
-	this->_check = true;
+	this->_check = 3;
 	this->_initGameStart();
 	SokuLib::playSEWaveBuffer(0x28);
 	return false;
@@ -3180,7 +3367,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 		this->_attempts[i].texture.createFromText(
 			"Infinite number of attempt",
 			defaultFont12,
-			{230, 14},
+			{230, 20},
 			&size
 		);
 		this->_attempts[i].tint = SokuLib::Color::Yellow;
@@ -3190,7 +3377,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 			"Infinite number of attempt" :
 			("At most " + std::to_string(this->_scores[i].attempts) + " attempt" + (this->_scores[i].attempts == 1 ? "" : "s")).c_str(),
 			defaultFont12,
-			{230, 14},
+			{230, 20},
 			&size
 		);
 	this->_attempts[i].setPosition({412 - size.x / 2, 346});
@@ -3201,7 +3388,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_hits[i].texture.createFromText(
 		("At least " + std::to_string(this->_scores[i].hits) + " hit" + (this->_scores[i].hits == 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{230, 14},
+		{230, 20},
 		&size
 	);
 	this->_hits[i].setPosition({184 - size.x / 2, 346});
@@ -3212,7 +3399,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_damages[i].texture.createFromText(
 		("At least " + std::to_string(this->_scores[i].damage) + " damage" + (this->_scores[i].damage <= 1 ? "" : "s")).c_str(),
 		defaultFont12,
-		{230, 14},
+		{230, 20},
 		&size
 	);
 	this->_damages[i].setPosition({184 - size.x / 2, 252});
@@ -3223,7 +3410,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_limits[i].texture.createFromText(
 		("At least " + std::to_string(this->_scores[i].minLimit) + "% limit").c_str(),
 		defaultFont12,
-		{130, 14},
+		{130, 20},
 		&size
 	);
 	this->_limits[i].setPosition({412 - size.x / 2, 252});
@@ -3375,7 +3562,7 @@ nlohmann::json ComboTrialEditor::_getMyJson() const
 	if (this->_crouching)
 		json["dummy"]["crouch"]  = this->_crouching;
 
-	if (this->_failTimer)
+	if (this->_failTimer != 60)
 		json["fail_timer"] = this->_failTimer;
 	if (this->_loopStart)
 		json["music_loop_start"] = this->_loopStart;

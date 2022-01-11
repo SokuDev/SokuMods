@@ -141,8 +141,8 @@ private:
 	unsigned _stageCursor = 0;
 	unsigned _handCursor = 0;
 	unsigned _scoreEdited = 0;
+	unsigned _check = 0;
 	float _fakePlayerPos = 0;
-	bool _check = false;
 	bool _editingHand = false;
 	bool _comboOnLeft = false;
 	bool _managingDolls = false;

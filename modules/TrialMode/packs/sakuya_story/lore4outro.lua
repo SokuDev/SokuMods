@@ -3,14 +3,14 @@
 --
 
 local dialogs = {
-	"lcDAs a rabbit shouldn't running be<br>a more efficient strategy?",
+	"lcDAs a rabbit, shouldn't running be<br>a more effective strategy?",
 	"rcAMy purpose is to protect the princess!",
 	"lHAThen you should get stronger.",
 	"rHDWhy did you attack me anyway?!",
 	"lSDIt seems that I got carried away...",
 	"lhDDid you go to our manor by any chance?",
 	"rhANo I did not!<br>I wouldn't leave here without good reasons.",
-	"lHAI see, you're a serious servant.",
+	"lHAI see. You're a serious servant.",
 	"lcAWell then it seems it was not you.<br>But here is one other suspect I can think about..."
 }
 

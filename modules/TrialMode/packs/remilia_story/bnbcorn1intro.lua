@@ -93,7 +93,7 @@ function fightStage1()
 			reisen.speed.y = 20
 			playSfx(43)
 		elseif reisen.actionBlockId >= 1 then
-			reisen.speed.y = reisen.speed.y - 0.75
+		--	reisen.speed.y = reisen.speed.y - 0.75
 		end
 	end
 
@@ -127,7 +127,7 @@ function fightStage1()
 			reisen.speed.y = 20
 			playSfx(enums.sfxs.highJump)
 		elseif reisen.actionBlockId >= 1 then
-			reisen.speed.y = reisen.speed.y - 0.75
+		--	reisen.speed.y = reisen.speed.y - 0.75
 		end
 	end
 
@@ -143,7 +143,7 @@ function fightStage1()
 			battleMgr.rightChr.speed.y = 23
 			playSfx(43)
 		elseif battleMgr.rightChr.actionBlockId >= 1 then
-			battleMgr.rightChr.speed.y = battleMgr.rightChr.speed.y - 1
+		--	battleMgr.rightChr.speed.y = battleMgr.rightChr.speed.y - 1
 		end
 	elseif battleMgr.rightChr.action == enums.actions.ACTION_3A then
 		ctr2 = ctr2 + 1
@@ -265,6 +265,7 @@ local function fightStage2()
 	end
 
 	battleMgr.leftChr:updateAnimation()
+	print(battleMgr.rightChr.action, battleMgr.rightChr.actionBlockId, battleMgr.rightChr.frameCount)
 	if battleMgr.rightChr.action == enums.actions.ACTION_NEUTRAL_HIGH_JUMP then
 		if battleMgr.rightChr.actionBlockId == 1 and battleMgr.rightChr.frameCount == 0 then
 			battleMgr.rightChr.speed.y = 23
@@ -301,12 +302,10 @@ local function fightStage2()
 		battleMgr.rightChr.speed = Vector2f.new(0, 0)
 		playSfx(enums.sfxs.land)
 	elseif
-		battleMgr.rightChr.action == enums.actions.ACTION_LANDING and
+		battleMgr.rightChr.action == enums.actions.ACTION_IDLE and
 		battleMgr.rightChr.actionBlockId == 0 and
 		battleMgr.rightChr.frameCount == 0
 	then
-		battleMgr.rightChr.action = enums.actions.ACTION_IDLE
-		battleMgr.rightChr:initAnimation()
 		dialog:onKeyPress()
 		fightStage = fightStage + 1
 	elseif battleMgr.rightChr.action == enums.actions.ACTION_FALLING then
@@ -329,7 +328,8 @@ local function fightStage2()
 			reisen:initAnimation()
 			reisen.damageLimited = true
 			reisen.realLimit = 100
-			reisen.speed.x = -20
+			reisen.speed.x = -50
+			reisen.speed.y = 0
 			fightCtr = HIT_STOP * 2
 		elseif battleMgr.rightChr.actionBlockId ~= 0 or battleMgr.rightChr.frameCount > 12 then
 			battleMgr.rightChr.speed.y = battleMgr.rightChr.speed.y - 0.6
@@ -350,8 +350,8 @@ local function updateFight()
 	end
 	keyPressed = false
 	reisen.objects:update()
-	reisen:updateAnimation()
-	battleMgr.rightChr:updateAnimation()
+	reisen:updateMove()
+	battleMgr.rightChr:updateMove()
 	fightStages[fightStage + 1]()
 	return fightStage < #fightStages
 end

@@ -2,6 +2,7 @@
 // Created by PinkySmile on 12/08/2021.
 //
 
+#include "Menu.hpp"
 #include "BattleAnimation.hpp"
 
 #define LEFT_TALK_POS    SokuLib::Vector2f{-96, -32}
@@ -68,7 +69,7 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 	desc.r2 = 0xA0;
 	desc.g2 = 0xA0;
 	desc.b2 = 0xFF;
-	desc.height = 20;
+	desc.height = 20 + hasEnglishPatch * 2;
 	desc.weight = FW_NORMAL;
 	desc.italic = 0;
 	desc.shadow = 1;
@@ -235,9 +236,9 @@ bool SokuStand::onKeyPress()
 	puts("Next dialog");
 	this->_isLeftTalking = std::get<1>(this->_metaData.front());
 	this->_text.texture.createFromText(std::get<0>(this->_metaData.front()).c_str(), this->_isLeftTalking ? this->_lfont : this->_rfont, this->_text.texture.getSize());
-	this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  =
-		this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] =
-			this->_isLeftTalking ? SokuLib::DrawUtils::DxSokuColor{0xA0, 0xA0, 0xFF} : SokuLib::DrawUtils::DxSokuColor{0xFF, 0xA0, 0xA0};
+	//this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  =
+	//	this->_text.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] =
+	//		this->_isLeftTalking ? SokuLib::DrawUtils::DxSokuColor{0xA0, 0xA0, 0xFF} : SokuLib::DrawUtils::DxSokuColor{0xFF, 0xA0, 0xA0};
 	this->_leftExpectedPos  = LEFT_TALK_POS + (this->_isLeftTalking ? SokuLib::Vector2f{0, 0} : OFF_NOT_TALK_POS);
 	this->_rightExpectedPos = RIGHT_TALK_POS + (this->_isLeftTalking ? OFF_NOT_TALK_POS : SokuLib::Vector2f{0, 0});
 	this->_leftStep  = 5;

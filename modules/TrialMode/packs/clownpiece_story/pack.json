@@ -11,7 +11,7 @@
             "x": 2.0,
             "y": 0.0
         },
-        "path": "data/character/clownpiece/face/face000.bmp",
+        "path": "data/character/clownpiece/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -30,6 +30,6 @@
     "scenarios": [],
     "stand": {
         "isPath": false,
-        "path": "data/stand/clownpiece.bmp"
+        "path": "data/stand/clownpiece.cv2"
     }
 }

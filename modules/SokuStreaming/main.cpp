@@ -114,10 +114,12 @@ int __fastcall CBattleManager_Render(SokuLib::BattleManager *This) {
 
 // �ݒ胍�[�h
 void LoadSettings(LPCSTR profilePath, LPCSTR parentPath) {
-	/*FILE *_;
+#ifdef _DEBUG
+	FILE *_;
 
 	AllocConsole();
-	freopen_s(&_, "CONOUT$", "w", stdout);*/
+	freopen_s(&_, "CONOUT$", "w", stdout);
+#endif
 	port = GetPrivateProfileInt("Server", "Port", 80, profilePath);
 	keys[KEY_DECREASE_L_SCORE] = GetPrivateProfileInt("Keys", "DecreaseLeftScore", '1', profilePath);
 	keys[KEY_INCREASE_L_SCORE] = GetPrivateProfileInt("Keys", "IncreaseLeftScore", '2', profilePath);

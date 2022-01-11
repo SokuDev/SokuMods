@@ -23,31 +23,31 @@ void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager 
 		printf("Allocated character %p\n", chr);
 		return chr;
 	};
-	type["position"] = &FakeCharacterManager::position;
-	type["speed"] = &FakeCharacterManager::speed;
-	type["gravity"] = &FakeCharacterManager::gravity;
-	type["direction"] = &FakeCharacterManager::direction;
-	type["renderInfos"] = &FakeCharacterManager::renderInfos;
-	type["action"] = &FakeCharacterManager::action;
-	type["actionBlockId"] = &FakeCharacterManager::actionBlockId;
-	type["animationCounter"] = &FakeCharacterManager::animationCounter;
-	type["animationSubFrame"] = &FakeCharacterManager::animationSubFrame;
-	type["frameCount"] = &FakeCharacterManager::frameCount;
-	type["animationCounterMax"] = &FakeCharacterManager::animationCounterMax;
-	type["animationSubFrameMax"] = &FakeCharacterManager::animationSubFrameMax;
-	type["image"] = &FakeCharacterManager::image;
-	type["frameData"] = &FakeCharacterManager::frameData;
-	type["frameDataReader"] = &FakeCharacterManager::frameDataReader;
-	type["opponent"] = &FakeCharacterManager::opponent;
-	type["soundTable"] = &FakeCharacterManager::soundTable;
-	type["hp"] = &FakeCharacterManager::hp;
-	type["superarmorDamageTaken"] = &FakeCharacterManager::superarmorDamageTaken;
-	type["hitCount"] = &FakeCharacterManager::hitCount;
-	type["hitstop"] = &FakeCharacterManager::hitstop;
-	type["hitBoxCount"] = &FakeCharacterManager::hitBoxCount;
-	type["hurtBoxCount"] = &FakeCharacterManager::hurtBoxCount;
-	type["hurtBoxes"] = &FakeCharacterManager::hurtBoxes;
-	type["hitBoxes"] = &FakeCharacterManager::hitBoxes;
+	type["createSubObject"] = [](FakeCharacterManager *chr, int moveId, float x, float y, std::optional<int8_t> dir, std::optional<int> var1, std::optional<int> var2, std::optional<float> speedX, std::optional<float> speedY, std::optional<float> objectId){
+		struct ParamStruct {
+			SokuLib::Vector2f speed;
+			float objectId;
+		} paramStruct;
+
+		if (!dir)
+			dir.emplace(chr->direction);
+		if (!var1)
+			var1.emplace(1);
+		if (!var2)
+			var2.emplace(3);
+		memset(&paramStruct, 0, sizeof(paramStruct));
+		if (speedX)
+			paramStruct.speed.x = *speedX;
+		if (speedY)
+			paramStruct.speed.y = *speedY;
+		if (objectId)
+			paramStruct.objectId = *objectId;
+		((void (__thiscall *)(FakeCharacterManager *, int, float, float, char, int, ParamStruct *, int))0x46EB30)(chr, moveId, x, y, *dir, *var1, &paramStruct, *var2);
+		return chr->objects->list.vector().back();
+	};
+	type["updateMove"] = [](FakeCharacterManager *chr){
+		return (*(int (__thiscall **)(FakeCharacterManager *))(*(int *)&chr->vtable + 0x28))(chr);
+	};
 	type["position"] = &FakeCharacterManager::position;
 	type["speed"] = &FakeCharacterManager::speed;
 	type["gravity"] = &FakeCharacterManager::gravity;
@@ -144,4 +144,38 @@ void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager 
 	type["addCard"] = &FakeCharacterManager::addCard;
 	type["playSfx"] = &FakeCharacterManager::playSE;
 	type["draw"] = SokuLib::union_cast<void (FakeCharacterManager::*)()>(0x438d20);
+
+
+	auto type2 = state.new_usertype<SokuLib::ObjectManager>("Object");
+
+	type2["position"] = &SokuLib::ObjectManager::position;
+	type2["speed"] = &SokuLib::ObjectManager::speed;
+	type2["gravity"] = &SokuLib::ObjectManager::gravity;
+	type2["direction"] = &SokuLib::ObjectManager::direction;
+	type2["renderInfos"] = &SokuLib::ObjectManager::renderInfos;
+	type2["action"] = &SokuLib::ObjectManager::action;
+	type2["actionBlockId"] = &SokuLib::ObjectManager::actionBlockId;
+	type2["animationCounter"] = &SokuLib::ObjectManager::animationCounter;
+	type2["animationSubFrame"] = &SokuLib::ObjectManager::animationSubFrame;
+	type2["frameCount"] = &SokuLib::ObjectManager::frameCount;
+	type2["animationCounterMax"] = &SokuLib::ObjectManager::animationCounterMax;
+	type2["animationSubFrameMax"] = &SokuLib::ObjectManager::animationSubFrameMax;
+	type2["image"] = &SokuLib::ObjectManager::image;
+	type2["frameData"] = &SokuLib::ObjectManager::frameData;
+	type2["frameDataReader"] = &SokuLib::ObjectManager::frameDataReader;
+	//type2["soundTable"] = &SokuLib::ObjectManager::soundTable;
+	type2["hp"] = &SokuLib::ObjectManager::hp;
+	type2["superarmorDamageTaken"] = &SokuLib::ObjectManager::superarmorDamageTaken;
+	type2["hitCount"] = &SokuLib::ObjectManager::hitCount;
+	type2["hitstop"] = &SokuLib::ObjectManager::hitstop;
+	type2["hitBoxCount"] = &SokuLib::ObjectManager::hitBoxCount;
+	type2["hurtBoxCount"] = &SokuLib::ObjectManager::hurtBoxCount;
+	type2["hurtBoxes"] = &SokuLib::ObjectManager::hurtBoxes;
+	type2["hitBoxes"] = &SokuLib::ObjectManager::hitBoxes;
+	//ty2pe["hitBoxesRotation"] = &SokuLib::ObjectManager::hitBoxesRotation;
+	//ty2pe["hurtBoxesRotation"] = &SokuLib::ObjectManager::hurtBoxesRotation;
+	type2["initAnimation"] = &SokuLib::ObjectManager::animate;
+	type2["animate"] = &SokuLib::ObjectManager::animate2;
+	type2["updateAnimation"] = &SokuLib::ObjectManager::doAnimation;
+	type2["draw"] = SokuLib::union_cast<void (SokuLib::ObjectManager::*)()>(0x438d20);
 }

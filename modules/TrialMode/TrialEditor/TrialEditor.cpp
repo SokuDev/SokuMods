@@ -69,7 +69,6 @@ TrialEditor::TrialEditor(const char *folder, const nlohmann::json &json)
 		this->_loopStart = json["music_loop_start"];
 	if (json.contains("music_loop_end") && json["music_loop_end"].is_number())
 		this->_loopEnd = json["music_loop_end"];
-	this->_initAnimations();
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
 	this->_ogOnUpdate = SokuLib::TamperDword(&SokuLib::VTable_PauseMenu.onProcess, onUpdate);
 	this->_ogOnRender = SokuLib::TamperDword(&SokuLib::VTable_PauseMenu.onRender, onRender);

@@ -11,7 +11,7 @@
             "x": 1.0,
             "y": 0.0
         },
-        "path": "data/character/youmu/face/face000.bmp",
+        "path": "data/character/youmu/face/face000.cv2",
         "rect": {
             "height": 54,
             "left": 0,
@@ -49,6 +49,6 @@
     ],
     "stand": {
         "isPath": false,
-        "path": "data/stand/youmu.bmp"
+        "path": "data/stand/youmu.cv2"
     }
 }

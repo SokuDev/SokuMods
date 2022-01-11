@@ -316,6 +316,7 @@ void WebServer::_addWebSocket(Socket &sock, const Socket::HttpRequest &requ) {
 					this->_onMessage(wsock_weak.lock()->wsock, msg);
 			}
 		} catch (const std::exception &e) {
+			puts(e.what());
 			wsock_weak.lock()->wsock.disconnect();
 			if (this->_onError)
 				this->_onError(wsock_weak.lock()->wsock, e);

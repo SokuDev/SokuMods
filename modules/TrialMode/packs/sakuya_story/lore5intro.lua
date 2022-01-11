@@ -10,7 +10,7 @@ local dialogs = {
 	"LHCI'm no criminal.",
 	"RHSSo you've come right to me!<br>I have some questions to ask you.",
 	"LWSGood, so do I.",
-	"RWWWhat is going on in the Scarlet mansion?",
+	"RWWWhat is going on in the Scarlet Mansion?",
 	"LSWHmmm",
 	"LEWI hoped you would be the one to answer this question...",
 	"REEAren't you the one supposed to guard the place?",
