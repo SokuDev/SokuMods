@@ -3175,7 +3175,7 @@ afterCInput:
 			return true;
 		}
 		while (s.st_size) {
-			auto size = max(sizeof(buffer), s.st_size);
+			auto size = min(sizeof(buffer), s.st_size);
 
 			from.read(buffer, size);
 			to.write(buffer, size);
