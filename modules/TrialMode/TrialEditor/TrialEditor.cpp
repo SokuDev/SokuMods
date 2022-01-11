@@ -172,3 +172,8 @@ void TrialEditor::_playBGM()
 	og = SokuLib::TamperNearJmpOpr(0x418cc5, editLoop);
 	SokuLib::playBGM(this->_music.c_str());
 }
+
+unsigned TrialEditor::getAttempt()
+{
+	return 0;
+}

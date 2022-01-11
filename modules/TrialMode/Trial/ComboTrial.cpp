@@ -774,6 +774,11 @@ SokuLib::Action ComboTrial::_getMoveAction(SokuLib::Character chr, std::string &
 	}
 }
 
+unsigned ComboTrial::getAttempt()
+{
+	return this->_attempts;
+}
+
 void ComboTrial::SpecialAction::parse()
 {
 	SokuLib::Vector2i realSize;

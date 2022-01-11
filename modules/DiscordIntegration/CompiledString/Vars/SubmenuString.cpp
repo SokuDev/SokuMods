@@ -12,5 +12,7 @@ std::string SubmenuString::getString() const {
 
 	if (menu == SokuLib::MENU_COUNT)
 		return "Unknown menu";
+	if (menu == SokuLib::MENU_RESULT && (LoadLibraryA("TrialMode") || LoadLibraryA("TrialModeDebug")))
+		menu = SokuLib::MENU_COUNT;
 	return submenusNames[menu];
 }

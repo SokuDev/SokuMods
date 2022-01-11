@@ -1138,6 +1138,30 @@ static struct PackEditPage {
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
+bool __declspec(dllexport) isInTrial()
+{
+	return loadedTrial.operator bool();
+}
+
+std::string __declspec(dllexport) getTrialName()
+{
+	if (!loadedTrial)
+		return "";
+	return loadedPacks[currentPack]->scenarios[currentEntry]->nameStr;
+}
+
+unsigned __declspec(dllexport) getCurrentAttempts()
+{
+	if (!loadedTrial)
+		return 0;
+	return loadedTrial->getAttempt();
+}
+
+bool __declspec(dllexport) isEditor()
+{
+	return editorMode;
+}
+
 void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 {
 	SokuLib::Sprite (&CursorSprites)[3] = *(SokuLib::Sprite (*)[3])0x89A6C0;
