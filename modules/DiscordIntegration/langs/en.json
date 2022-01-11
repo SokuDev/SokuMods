@@ -8,7 +8,8 @@
         "Changing profile",
         "Editing configs",
         "Constructing decks",
-        "Changing keys"
+        "Changing keys",
+        "Selecting a trial"
     ],
     "stages": [
         "Hakurei Shrine",
@@ -232,6 +233,46 @@
     },
     "loading_timetrial": {
         "title": "Playing time trial ({{myProfileName}})",
+        "description": "Loading...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialmode": {
+        "title": "Playing a trial ({{myProfileName}})",
+        "description": "{{trialname}} (Attempt #{{trialattempt}})",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialmode": {
+        "title": "Playing a trial ({{myProfileName}})",
+        "description": "Loading...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialeditor": {
+        "title": "Editing a trial ({{myProfileName}})",
+        "description": "{{trialName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialeditor": {
+        "title": "Editing a trial ({{myProfileName}})",
         "description": "Loading...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",

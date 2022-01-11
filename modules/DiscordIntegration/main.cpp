@@ -54,6 +54,10 @@ enum StringIndex {
 	STRING_INDEX_ENDING,
 	STRING_INDEX_HOSTING,
 	STRING_INDEX_CONNECTING,
+	STRING_INDEX_BATTLE_TRIALMODE,
+	STRING_INDEX_LOADING_TRIALMODE,
+	STRING_INDEX_BATTLE_TRIALEDITOR,
+	STRING_INDEX_LOADING_TRIALEDITOR,
 	STRING_INDEX_MAX
 };
 
@@ -90,6 +94,10 @@ static const char *const allElems[]{
 	"ending",
 	"hosting",
 	"connecting",
+	"battle_timemode",
+	"loading_timemode",
+	"battle_timeeditor",
+	"loading_timeeditor",
 };
 
 static std::string _ip;
@@ -299,6 +307,40 @@ void updateActivity(StringIndex index, unsigned party) {
 	state.lastActivity = activity;
 }
 
+static StringIndex getTrialLoad()
+{
+	HMODULE handle  = LoadLibraryA("TrialMode");
+
+	if (!handle)
+		handle = LoadLibraryA("TrialModeDebug");
+	if (!handle)
+		return STRING_INDEX_LOADING_VSPLAYER;
+
+	auto isInTrial = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isInTrial"));
+	auto isEditor  = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isEditor"));
+
+	if (!isInTrial || !isEditor || !isInTrial())
+		return STRING_INDEX_LOADING_VSPLAYER;
+	return isEditor() ? STRING_INDEX_LOADING_TRIALEDITOR : STRING_INDEX_LOADING_TRIALMODE;
+}
+
+static StringIndex getTrialBattle()
+{
+	HMODULE handle  = LoadLibraryA("TrialMode");
+
+	if (!handle)
+		handle = LoadLibraryA("TrialModeDebug");
+	if (!handle)
+		return STRING_INDEX_BATTLE_VSPLAYER;
+
+	auto isInTrial = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isInTrial"));
+	auto isEditor  = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isEditor"));
+
+	if (!isInTrial || !isEditor || !isInTrial())
+		return STRING_INDEX_BATTLE_VSPLAYER;
+	return isEditor() ? STRING_INDEX_BATTLE_TRIALEDITOR : STRING_INDEX_BATTLE_TRIALMODE;
+}
+
 void getActivityParams(StringIndex &index, unsigned &party) {
 	party = 0;
 
@@ -332,7 +374,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
 				index = STRING_INDEX_LOADING_REPLAY;
 			else
-				index = STRING_INDEX_LOADING_VSPLAYER;
+				index = getTrialLoad();
 			return;
 		case SokuLib::BATTLE_MODE_STORY:
 			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
@@ -371,7 +413,7 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)
 				index = STRING_INDEX_BATTLE_REPLAY;
 			else
-				index = STRING_INDEX_BATTLE_VSPLAYER;
+				index = getTrialBattle();
 			return;
 		case SokuLib::BATTLE_MODE_STORY:
 			if (SokuLib::subMode == SokuLib::BATTLE_SUBMODE_REPLAY)

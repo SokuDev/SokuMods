@@ -7,8 +7,9 @@
         "Seleccionando desafío del tiempo",
         "Cambiando perfil",
         "Editando configuración",
-	"Construyendo barajas",
-	"Cambiando controles"
+        "Construyendo barajas",
+        "Cambiando controles",
+        "Selecting a trial"
     ],
     "stages": [
         "Templo Hakurei",
@@ -232,6 +233,46 @@
     "loading_timetrial": {
         "title": "Jugando desafío del tiempo ({{myProfileName}})",
         "description": "Cargando...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialmode": {
+        "title": "Playing a trial ({{myProfileName}})",
+        "description": "{{trialname}} (Attempt #{{trialattempt}})",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialmode": {
+        "title": "Playing a trial ({{myProfileName}})",
+        "description": "Loading...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialeditor": {
+        "title": "Editing a trial ({{myProfileName}})",
+        "description": "{{trialName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialeditor": {
+        "title": "Editing a trial ({{myProfileName}})",
+        "description": "Loading...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",

@@ -7,8 +7,9 @@
         "Selezionando Prova a Tempo",
         "Modificando Profili",
         "Modificando le Opzioni",
-	"Creando Mazzo",
-	"Modificando Comandi"
+        "Creando Mazzo",
+        "Modificando Comandi",
+        "Selezionando una Sfida"
     ],
     "stages": [
         "Santuario Hakurei",
@@ -231,6 +232,46 @@
     },
     "loading_timetrial": {
         "title": "Giocando Prova a Tempo ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialmode": {
+        "title": "Giocando Modalità Sfide ({{myProfileName}})",
+        "description": "{{trialname}} (Attempt #{{trialattempt}})",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialmode": {
+        "title": "Giocando Modalità Sfide ({{myProfileName}})",
+        "description": "Caricamento...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialeditor": {
+        "title": "Modificando una Sfida ({{myProfileName}})",
+        "description": "{{trialName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialeditor": {
+        "title": "Modificando una Sfida ({{myProfileName}})",
         "description": "Caricamento...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",

@@ -2,13 +2,14 @@
     "submenus": [
         "Ecran titre",
         "Ecran réseau",
-        "Sélectionne replay",
+        "Sélectionne un replay",
         "Ecoute de la musique",
         "Sélectionne un contre la montre",
         "Change de profile",
         "Modifie les options",
         "Construit un deck",
-        "Configure ses touches"
+        "Configure ses touches",
+        "Sélectionne un challenge"
     ],
     "stages": [
         "Temple Hakurei",
@@ -232,6 +233,46 @@
     },
     "loading_timetrial": {
         "title": "Joue en contre la montre ({{myProfileName}})",
+        "description": "Chargement...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialmode": {
+        "title": "Effectue un challenge ({{myProfileName}})",
+        "description": "{{trialname}} (Attempt #{{trialattempt}})",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialmode": {
+        "title": "Effectue un challenge ({{myProfileName}})",
+        "description": "Chargement...",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialeditor": {
+        "title": "Modifie un challenge ({{myProfileName}})",
+        "description": "{{trialName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_trialeditor": {
+        "title": "Modifie un challenge ({{myProfileName}})",
         "description": "Chargement...",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",

@@ -29,6 +29,7 @@ public:
 	virtual ~TrialBase() = default;
 	virtual bool update(bool &canHaveNextFrame) = 0;
 	virtual void render() const = 0;
+	virtual unsigned getAttempt() = 0;
 	virtual int getScore() = 0;
 	virtual void editPlayerInputs(SokuLib::KeyInput &originalInputs) = 0;
 	virtual SokuLib::KeyInput getDummyInputs() = 0;

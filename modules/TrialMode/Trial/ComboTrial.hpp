@@ -109,6 +109,7 @@ public:
 	int getScore() override;
 	void onMenuClosed(MenuAction action) override;
 	SokuLib::Scene getNextScene() override;
+	unsigned getAttempt() override;
 
 	friend class ComboTrialResult;
 };

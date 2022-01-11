@@ -249,6 +249,8 @@ target_sources(DiscordIntegration PRIVATE
         modules/DiscordIntegration/CompiledString/Vars/SubmenuString.cpp
         modules/DiscordIntegration/CompiledString/Vars/StageImgString.cpp
         modules/DiscordIntegration/CompiledString/Vars/StageNameString.cpp
+        modules/DiscordIntegration/CompiledString/Vars/TrialName.cpp
+        modules/DiscordIntegration/CompiledString/Vars/TrialAttempt.cpp
         modules/DiscordIntegration/CompiledString/Vars/vars.cpp
         modules/DiscordIntegration/CompiledString/CompiledStringFactory.cpp)
 install(DIRECTORY "modules/DiscordIntegration/langs" DESTINATION "SWRSToys/modules/DiscordIntegration")
