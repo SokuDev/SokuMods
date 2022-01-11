@@ -3,9 +3,9 @@
 //
 
 #include <windows.h>
-#include "TrialName.hpp"
+#include "TrialAttempt.hpp"
 
-std::string TrialName::getString() const {
+std::string TrialAttempt::getString() const {
 	HMODULE handle  = LoadLibraryA("TrialMode");
 
 	if (!handle)

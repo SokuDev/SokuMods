@@ -94,10 +94,10 @@ static const char *const allElems[]{
 	"ending",
 	"hosting",
 	"connecting",
-	"battle_timemode",
-	"loading_timemode",
-	"battle_timeeditor",
-	"loading_timeeditor",
+	"battle_trialmode",
+	"loading_trialmode",
+	"battle_trialeditor",
+	"loading_trialeditor",
 };
 
 static std::string _ip;
@@ -689,11 +689,15 @@ void loadJsonStrings(const std::string &path) {
 		throw std::invalid_argument("Stage list is too small");
 	logMessagef("Loading submenus\n");
 	submenusNames = value["submenus"].get<std::vector<std::string>>();
-	if (submenusNames.size() < 7)
+	if (submenusNames.size() < 8)
 		throw std::invalid_argument("Submenus list is too small");
 	config.strings.clear();
 	config.strings.reserve(sizeof(allElems) / sizeof(*allElems));
 	for (auto &elem : allElems) {
+		if (!value.contains(elem)) {
+			config.strings.emplace_back();
+			continue;
+		}
 		auto &val = value[elem];
 		StringConfig cfg;
 

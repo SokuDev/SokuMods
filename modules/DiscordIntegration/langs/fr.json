@@ -242,44 +242,44 @@
         "has_set_length_timer": true
     },
     "battle_trialmode": {
-        "title": "Effectue un challenge ({{myProfileName}})",
-        "description": "{{trialname}} (Attempt #{{trialattempt}})",
+        "title": "Effectue un challenge ({{myProfileName}}) | Contre {{opChrFullName}}",
+        "description": "{{trialPack}} | {{trialName}} (Essai n°{{trialAttempt}})",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
         "small_image_text": "{{stageName}}",
-        "has_timer": true,
-        "has_set_length_timer": false
+        "has_timer": false,
+        "has_set_length_timer": true
     },
     "loading_trialmode": {
         "title": "Effectue un challenge ({{myProfileName}})",
-        "description": "Chargement...",
+        "description": "{{trialPack}} | {{trialName}} (Chargement...)",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": false
+    },
+    "battle_trialeditor": {
+        "title": "Modifie un challenge ({{myProfileName}}) | Contre {{opChrFullName}}",
+        "description": "{{trialPack}} | {{trialName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
         "small_image_text": "{{stageName}}",
         "has_timer": false,
         "has_set_length_timer": true
-    },
-    "battle_trialeditor": {
-        "title": "Modifie un challenge ({{myProfileName}})",
-        "description": "{{trialName}}",
-        "image": "{{myChrImg}}",
-        "small_image": "{{stageImg}}",
-        "image_text": "{{myChrFullName}}",
-        "small_image_text": "{{stageName}}",
-        "has_timer": true,
-        "has_set_length_timer": false
     },
     "loading_trialeditor": {
         "title": "Modifie un challenge ({{myProfileName}})",
-        "description": "Chargement...",
+        "description": "{{trialPack}} | {{trialName}} (Chargement...)",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
         "small_image_text": "{{stageName}}",
         "has_timer": false,
-        "has_set_length_timer": true
+        "has_set_length_timer": false
     },
     "select_vsplayer": {
         "title": "Joue en multijoueur (Hors ligne) ({{myProfileName}})",

@@ -28,5 +28,8 @@
 #include "StageImgString.hpp"
 #include "StageNameString.hpp"
 #include "SubmenuString.hpp"
+#include "TrialName.hpp"
+#include "TrialPack.hpp"
+#include "TrialAttempt.hpp"
 
 #endif // SWRSTOYS_STRINGS_HPP
