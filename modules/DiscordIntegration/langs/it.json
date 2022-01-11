@@ -241,44 +241,44 @@
         "has_set_length_timer": true
     },
     "battle_trialmode": {
-        "title": "Giocando Modalità Sfide ({{myProfileName}})",
-        "description": "{{trialname}} (Attempt #{{trialattempt}})",
+        "title": "Giocando Modalità Sfide ({{myProfileName}}) | Combattendo {{opChrFullName}}",
+        "description": "{{trialPack}} | {{trialName}} (Tentativo #{{trialAttempt}})",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
         "small_image_text": "{{stageName}}",
-        "has_timer": true,
-        "has_set_length_timer": false
+        "has_timer": false,
+        "has_set_length_timer": true
     },
     "loading_trialmode": {
         "title": "Giocando Modalità Sfide ({{myProfileName}})",
-        "description": "Caricamento...",
+        "description": "{{trialPack}} | {{trialName}} (Caricamento...)",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": false
+    },
+    "battle_trialeditor": {
+        "title": "Modificando una Sfida ({{myProfileName}}) | Combattendo {{opChrFullName}}",
+        "description": "{{trialPack}} | {{trialName}}",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
         "small_image_text": "{{stageName}}",
         "has_timer": false,
         "has_set_length_timer": true
-    },
-    "battle_trialeditor": {
-        "title": "Modificando una Sfida ({{myProfileName}})",
-        "description": "{{trialName}}",
-        "image": "{{myChrImg}}",
-        "small_image": "{{stageImg}}",
-        "image_text": "{{myChrFullName}}",
-        "small_image_text": "{{stageName}}",
-        "has_timer": true,
-        "has_set_length_timer": false
     },
     "loading_trialeditor": {
         "title": "Modificando una Sfida ({{myProfileName}})",
-        "description": "Caricamento...",
+        "description": "{{trialPack}} | {{trialName}} (Caricamento...)",
         "image": "{{myChrImg}}",
         "small_image": "{{stageImg}}",
         "image_text": "{{myChrFullName}}",
         "small_image_text": "{{stageName}}",
         "has_timer": false,
-        "has_set_length_timer": true
+        "has_set_length_timer": false
     },
     "select_vsplayer": {
         "title": "Giocando MultiGiocatore (Offline) ({{myProfileName}})",

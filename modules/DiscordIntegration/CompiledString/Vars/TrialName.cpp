@@ -13,7 +13,7 @@ std::string TrialName::getString() const {
 	if (!handle)
 		return "TrialMode not detected";
 
-	auto getTrialName = reinterpret_cast<std::string (*)()>(GetProcAddress(handle, "getTrialName"));
+	auto getTrialName = reinterpret_cast<const char *(*)()>(GetProcAddress(handle, "getTrialName"));
 
 	return getTrialName ? getTrialName() : "getTrialName not found in TrialMode dll";
 }

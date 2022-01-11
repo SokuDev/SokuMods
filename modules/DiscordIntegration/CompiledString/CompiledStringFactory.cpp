@@ -37,6 +37,9 @@ const std::map<std::string, std::function<CompiledString *()>> CompiledStringFac
 	{"submenu", [] { return new SubmenuString(); }},
 	{"stageImg", [] { return new StageImgString(); }},
 	{"stageName", [] { return new StageNameString(); }},
+	{"trialName", [] { return new TrialName(); }},
+	{"trialPack", [] { return new TrialPack(); }},
+	{"trialAttempt", [] { return new TrialAttempt(); }},
 };
 
 std::shared_ptr<CompiledString> CompiledStringFactory::compileString(const char *str) {

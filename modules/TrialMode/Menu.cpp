@@ -1138,26 +1138,36 @@ static struct PackEditPage {
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
-bool __declspec(dllexport) isInTrial()
+extern "C" __declspec(dllexport) bool isInTrial()
 {
 	return loadedTrial.operator bool();
 }
 
-std::string __declspec(dllexport) getTrialName()
+extern "C" __declspec(dllexport) const char *getTrialName()
 {
 	if (!loadedTrial)
 		return "";
-	return loadedPacks[currentPack]->scenarios[currentEntry]->nameStr;
+	return loadedPacks[currentPack]->scenarios[currentEntry]->nameStr.c_str();
 }
 
-unsigned __declspec(dllexport) getCurrentAttempts()
+static std::string tmp;
+
+extern "C" __declspec(dllexport) const char *getTrialPack()
+{
+	if (!loadedTrial)
+		return "";
+	tmp = loadedPacks[currentPack]->category + ": " + loadedPacks[currentPack]->nameStr;
+	return tmp.c_str();
+}
+
+extern "C" __declspec(dllexport) unsigned getCurrentAttempts()
 {
 	if (!loadedTrial)
 		return 0;
-	return loadedTrial->getAttempt();
+	return loadedTrial->getAttempt() + 1;
 }
 
-bool __declspec(dllexport) isEditor()
+extern "C" __declspec(dllexport) bool isEditor()
 {
 	return editorMode;
 }
