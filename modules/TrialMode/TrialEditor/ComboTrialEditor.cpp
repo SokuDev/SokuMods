@@ -861,17 +861,6 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 	}
 
 afterInput:
-	if (!this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
-		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = !!battleMgr.leftCharacterManager.missingPurplePowerTimeLeft;
-	else if (!this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
-		battleMgr.leftCharacterManager.philosophersStoneTime = !!battleMgr.leftCharacterManager.philosophersStoneTime;
-	else if (!this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
-		battleMgr.leftCharacterManager.orreriesTimeLeft = !!battleMgr.leftCharacterManager.orreriesTimeLeft;
-	else if (!this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
-		battleMgr.leftCharacterManager.privateSquare = !!battleMgr.leftCharacterManager.privateSquare;
-	else if (!this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
-		battleMgr.leftCharacterManager.youmuCloneTimeLeft = !!battleMgr.leftCharacterManager.youmuCloneTimeLeft;
-
 	if (this->_tickTimer && this->_waitCounter < 30);
 	else if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
 		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = 480;
@@ -1235,6 +1224,17 @@ void ComboTrialEditor::_initGameStart()
 	battleMgr.leftCharacterManager.objectBase.hp = 10000;
 	battleMgr.leftCharacterManager.currentSpirit = 1000;
 	battleMgr.leftCharacterManager.maxSpirit = 1000;
+
+	if (!this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
+		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = !!battleMgr.leftCharacterManager.missingPurplePowerTimeLeft;
+	else if (!this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
+		battleMgr.leftCharacterManager.philosophersStoneTime = !!battleMgr.leftCharacterManager.philosophersStoneTime;
+	else if (!this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
+		battleMgr.leftCharacterManager.orreriesTimeLeft = !!battleMgr.leftCharacterManager.orreriesTimeLeft;
+	else if (!this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
+		battleMgr.leftCharacterManager.privateSquare = !!battleMgr.leftCharacterManager.privateSquare;
+	else if (!this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = !!battleMgr.leftCharacterManager.youmuCloneTimeLeft;
 
 	if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA) {
 		puts("Init MPP");
