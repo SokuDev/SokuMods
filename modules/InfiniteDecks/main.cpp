@@ -9,6 +9,7 @@
 #include <Shlwapi.h>
 #include <sstream>
 #include <SokuLib.hpp>
+#include <random>
 
 template<typename T, typename T2>
 struct MapNode {
@@ -53,6 +54,7 @@ static SokuLib::SelectServer *(SokuLib::SelectServer::*og_CSelectSV_Init)();
 static SokuLib::SelectClient *(SokuLib::SelectClient::*og_CSelectCL_Init)();
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*s_originalCProfileDeckEdit_Destructor)(unsigned char param);
 static SokuLib::ProfileDeckEdit *(SokuLib::ProfileDeckEdit::*og_CProfileDeckEdit_Init)(int param_2, int param_3, SokuLib::Sprite *param_4);
+static std::random_device random;
 
 std::map<unsigned char, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
 std::map<unsigned, std::vector<unsigned short>> characterSpellCards;
@@ -204,7 +206,7 @@ unsigned short getRandomCard(const std::vector<unsigned short> &list, const std:
 
 	try {
 		do
-			card = list[rand() % list.size()];
+			card = list[random() % list.size()];
 		while (other.at(card) >= 4);
 	} catch (std::out_of_range &) {}
 	return card;
@@ -262,7 +264,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 	if (lastChr == SokuLib::CHARACTER_RANDOM) {
 		if (bases.empty())
 			return generateFakeDeck(chr, chr, &defaultDecks[chr], buffer);
-		return generateFakeDeck(chr, lastChr, &bases[rand() % bases.size()].cards, buffer);
+		return generateFakeDeck(chr, lastChr, &bases[random() % bases.size()].cards, buffer);
 	}
 	if (id == bases.size())
 		return generateFakeDeck(chr, lastChr, &defaultDecks[chr], buffer);
@@ -271,7 +273,7 @@ void generateFakeDeck(SokuLib::Character chr, SokuLib::Character lastChr, unsign
 	if (id == bases.size() + 2)
 		return generateFakeDeck(chr, lastChr, &randomDeck, buffer);
 	if (id == bases.size() + 3)
-		return generateFakeDeck(chr, lastChr, &bases[rand() % bases.size()].cards, buffer);
+		return generateFakeDeck(chr, lastChr, &bases[random() % bases.size()].cards, buffer);
 	return generateFakeDeck(chr, lastChr, &bases[id].cards, buffer);
 }
 
@@ -747,7 +749,7 @@ static int weirdRand(int key, int delay)
 	auto it = elems.find(key);
 
 	if (it == elems.end() || it->second.first == 0) {
-		int v = rand();
+		int v = random();
 
 		elems[key] = {delay, v};
 		return v;
@@ -960,10 +962,8 @@ static void loadTexture(SokuLib::DrawUtils::Texture &container, const char *path
 	printf("Loading texture %s\n", path);
 	if (!ret || !text) {
 		puts("Couldn't load texture...");
-		if (shouldExist) {
-			MessageBoxA(SokuLib::window, ("Cannot load " + std::string(path)).c_str(), "Fatal error", MB_ICONERROR);
-			abort();
-		}
+		if (shouldExist)
+			MessageBoxA(SokuLib::window, ("Cannot load game asset " + std::string(path)).c_str(), "Game texture loading failed", MB_ICONWARNING);
 	}
 	container.setHandle(text, size);
 }
@@ -1800,7 +1800,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 		auto realX = 53;
 
 		if (errorCounter >= 105) {
-			realX += rand() % 31 - 15;
+			realX += random() % 31 - 15;
 			if (errorCounter >= 115)
 				alpha = 1 - (errorCounter - 115.f) / 5;
 		}
