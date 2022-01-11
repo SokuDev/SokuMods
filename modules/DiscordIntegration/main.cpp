@@ -108,25 +108,6 @@ static bool _warped = false;
 
 volatile long long discord_id;
 
-bool isHosting()
-{
-	auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-	HMODULE handle = LoadLibraryA("HostInBackground");
-
-	if (!handle)
-		return menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2;
-
-	auto _isHosting   = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isHosting"));
-	auto _getHostPort = reinterpret_cast<unsigned short (*)()>(GetProcAddress(handle, "getHostPort"));
-
-	logMessagef("HostInBackground detected %p %p\n", _isHosting, _getHostPort);
-	if (!_isHosting || !_getHostPort || !_isHosting())
-		return menuObj->choice == SokuLib::MenuConnect::CHOICE_HOST && menuObj->subchoice == 2;
-	_port = _getHostPort();
-	logMessagef("HostInBackground hosting on port %u\n", _port);
-	return true;
-}
-
 struct StringConfig {
 	bool timestamp;
 	bool set_timestamp;
@@ -153,6 +134,48 @@ struct State {
 
 static State state;
 static Config config;
+static std::hash<std::string> hasher{};
+
+bool isHosting()
+{
+	auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
+	HMODULE handle = LoadLibraryA("HostInBackground");
+
+	if (!handle) {
+		if (!SokuLib::MenuConnect::isInNetworkMenu())
+			return false;
+		if (menuObj->choice != SokuLib::MenuConnect::CHOICE_HOST || menuObj->subchoice != 2)
+			return false;
+		if (state.roomIp.empty())
+			try {
+				state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
+			} catch (...) {}
+		return true;
+	}
+
+	auto _isHosting   = reinterpret_cast<bool (*)()>(GetProcAddress(handle, "isHosting"));
+	auto _getHostPort = reinterpret_cast<unsigned short (*)()>(GetProcAddress(handle, "getHostPort"));
+
+	logMessagef("HostInBackground detected %p %p\n", _isHosting, _getHostPort);
+	if (!_isHosting || !_getHostPort || !_isHosting()) {
+		if (!SokuLib::MenuConnect::isInNetworkMenu())
+			return false;
+		if (menuObj->choice != SokuLib::MenuConnect::CHOICE_HOST || menuObj->subchoice != 2)
+			return false;
+		if (state.roomIp.empty())
+			try {
+				state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
+			} catch (...) {}
+		return true;
+	}
+	_port = _getHostPort();
+	logMessagef("HostInBackground hosting on port %u\n", _port);
+	if (state.roomIp.empty())
+		try {
+			state.roomIp = getMyIp() + std::string(":") + std::to_string(_port);
+		} catch (...) {}
+	return true;
+}
 
 static const std::vector<const char *> discordResultToString{
 	"Ok",
@@ -263,14 +286,12 @@ void updateActivity(StringIndex index, unsigned party) {
 	auto &secrets = activity.GetSecrets();
 	auto &elem = config.strings[index];
 
-	if (party) {
-		if (!state.roomIp.empty()) {
-			if (party == 1)
-				secrets.SetJoin(("join" + state.roomIp).c_str());
-			secrets.SetSpectate(("spec" + state.roomIp).c_str());
-		}
-
+	if (party && !state.roomIp.empty()) {
+		if (party == 1)
+			secrets.SetJoin(("join" + state.roomIp).c_str());
+		secrets.SetSpectate(("spec" + state.roomIp).c_str());
 		partyObj.SetId(state.roomIp.c_str());
+		//partyObj.SetId(std::to_string(hasher(state.roomIp)).c_str());
 		partyObj.GetSize().SetCurrentSize(party);
 		partyObj.GetSize().SetMaxSize(2);
 	}
@@ -344,9 +365,15 @@ static StringIndex getTrialBattle()
 void getActivityParams(StringIndex &index, unsigned &party) {
 	party = 0;
 
+	state.host = 0;
+	if (isHosting()) {
+		if (state.host != 1 && SokuLib::sceneId == SokuLib::SCENE_TITLE)
+			state.totalTimestamp = time(nullptr);
+		state.host = 1;
+		party = 1;
+	}
 	switch (SokuLib::sceneId) {
 	case SokuLib::SCENE_SELECT:
-		state.host = 0;
 		switch (SokuLib::mainMode) {
 		case SokuLib::BATTLE_MODE_PRACTICE:
 			index = STRING_INDEX_SELECT_PRACTICE;
@@ -360,12 +387,10 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		}
 	case SokuLib::SCENE_SELECTSV:
 	case SokuLib::SCENE_SELECTCL:
-		state.host = 0;
 		index = STRING_INDEX_SELECT_VSNETWORK;
 		party = 2;
 		return;
 	case SokuLib::SCENE_LOADING:
-		state.host = 0;
 		switch (SokuLib::mainMode) {
 		case SokuLib::BATTLE_MODE_PRACTICE:
 			index = STRING_INDEX_LOADING_PRACTICE;
@@ -394,17 +419,14 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 		}
 	case SokuLib::SCENE_LOADINGSV:
 	case SokuLib::SCENE_LOADINGCL:
-		state.host = 0;
 		index = STRING_INDEX_LOADING_VSNETWORK;
 		party = 2;
 		return;
 	case SokuLib::SCENE_LOADINGWATCH:
-		state.host = 0;
 		index = STRING_INDEX_LOADING_SPECTATOR;
 		party = 2;
 		return;
 	case SokuLib::SCENE_BATTLE:
-		state.host = 0;
 		switch (SokuLib::mainMode) {
 		case SokuLib::BATTLE_MODE_PRACTICE:
 			index = STRING_INDEX_BATTLE_PRACTICE;
@@ -432,37 +454,30 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 			return;
 		}
 	case SokuLib::SCENE_BATTLEWATCH:
-		state.host = 0;
 		index = STRING_INDEX_BATTLE_SPECTATOR;
 		party = 2;
 		return;
 	case SokuLib::SCENE_BATTLESV:
 	case SokuLib::SCENE_BATTLECL:
-		state.host = 0;
 		index = STRING_INDEX_BATTLE_VSNETWORK;
 		party = 2;
 		return;
 	case SokuLib::SCENE_SELECTSCENARIO:
-		state.host = 0;
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_ARCADE)
 			index = STRING_INDEX_SELECT_ARCADE;
 		else
 			index = STRING_INDEX_SELECT_STORY;
 		return;
 	case SokuLib::SCENE_ENDING:
-		state.host = 0;
 		index = STRING_INDEX_ENDING;
 		return;
 	case SokuLib::SCENE_LOGO:
-		state.host = 0;
 		index = STRING_INDEX_LOGO;
 		return;
 	case SokuLib::SCENE_OPENING:
-		state.host = 0;
 		index = STRING_INDEX_OPENING;
 		return;
 	default:
-		state.host = 0;
 		return;
 	case SokuLib::SCENE_TITLE:
 		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
@@ -479,14 +494,8 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 			state.host = 2;
 			index = STRING_INDEX_CONNECTING;
 			party = 2;
-		} else if (isHosting()) {
-			if (state.host != 1)
-				state.totalTimestamp = time(nullptr);
-			state.host = 1;
+		} else if (isHosting())
 			index = STRING_INDEX_HOSTING;
-			party = 1;
-		} else
-			state.host = 0;
 	}
 }
 
@@ -505,10 +514,6 @@ void titleScreenStateUpdate() {
 		if (state.roomIp.empty())
 			state.roomIp = menuObj->IPString + (":" + std::to_string(menuObj->port));
 	} else if (isHosting()) {
-		if (state.roomIp.empty())
-			try {
-				state.roomIp = getMyIp() + std::string(":") + std::to_string(menuObj->port);
-			} catch (...) {}
 		logMessagef("Hosting. Room ip is %s. Spectator are %sallowed\n", state.roomIp.c_str(), menuObj->spectate ? "" : "not ");
 	} else if (!state.roomIp.empty())
 		state.roomIp.clear();
