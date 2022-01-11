@@ -605,7 +605,7 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 
 bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &character, SokuLib::Character characterId)
 {
-	if (action != character.objectBase.action)
+	if (action != addCustomActions(character, characterId))
 		return false;
 	if (action == FAKE_ACTION_ORRERIES_REACTIVATE)
 		return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 1;
@@ -678,7 +678,7 @@ bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &char
 	return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 0;
 }
 
-SokuLib::Action addCustomActions(SokuLib::CharacterManager &character, SokuLib::Character characterId)
+SokuLib::Action addCustomActions(const SokuLib::CharacterManager &character, SokuLib::Character characterId)
 {
 	if (characterId == SokuLib::CHARACTER_MARISA && character.orreriesTimeLeft && character.objectBase.action == SokuLib::ACTION_USING_SC_ID_215)
 		return FAKE_ACTION_ORRERIES_REACTIVATE;

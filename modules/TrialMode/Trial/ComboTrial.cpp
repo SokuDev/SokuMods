@@ -511,7 +511,16 @@ void ComboTrial::_initGameStart()
 	battleMgr.leftCharacterManager.currentSpirit = 1000;
 	battleMgr.leftCharacterManager.maxSpirit = 1000;
 
-
+	if (!this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA)
+		battleMgr.leftCharacterManager.missingPurplePowerTimeLeft = !!battleMgr.leftCharacterManager.missingPurplePowerTimeLeft;
+	else if (!this->_stones && SokuLib::leftChar == SokuLib::CHARACTER_PATCHOULI)
+		battleMgr.leftCharacterManager.philosophersStoneTime = !!battleMgr.leftCharacterManager.philosophersStoneTime;
+	else if (!this->_orerries && SokuLib::leftChar == SokuLib::CHARACTER_MARISA)
+		battleMgr.leftCharacterManager.orreriesTimeLeft = !!battleMgr.leftCharacterManager.orreriesTimeLeft;
+	else if (!this->_privateSquare && SokuLib::leftChar == SokuLib::CHARACTER_SAKUYA)
+		battleMgr.leftCharacterManager.privateSquare = !!battleMgr.leftCharacterManager.privateSquare;
+	else if (!this->_clones && SokuLib::leftChar == SokuLib::CHARACTER_YOUMU)
+		battleMgr.leftCharacterManager.youmuCloneTimeLeft = !!battleMgr.leftCharacterManager.youmuCloneTimeLeft;
 	if (this->_mpp && SokuLib::leftChar == SokuLib::CHARACTER_SUIKA) {
 		puts("Init MPP");
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_USING_SC_ID_205;
