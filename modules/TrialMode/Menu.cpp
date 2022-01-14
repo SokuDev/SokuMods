@@ -207,6 +207,7 @@ static struct PackEditScenario {
 			return SokuLib::playSEWaveBuffer(0x29);
 
 		scenario->fileRel = input;
+		scenario->file = scenario->folder + "/" + input;
 		if (scenario->nameStr.empty()) {
 			scenario->name.texture.createFromText(scenario->fileRel.c_str(), defaultFont10, {0x100, 30});
 			scenario->name.rect = {
