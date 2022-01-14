@@ -39,6 +39,45 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	if (!json["dummy"]["pos"].contains("y") || !json["dummy"]["pos"]["y"].is_number())
 		throw std::invalid_argument(R"(The field "y" of the field "pos" in the "dummy" field is not present or invalid.)");
 
+	if (json.contains("inputs") && json["inputs"].is_array()) {
+		int i = 1;
+
+		for (auto &input : json["inputs"]) {
+			if (!input.is_array())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + " is not an array");
+			if (input.size() < 9)
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + " does not contain 9 elements");
+			if (!input[0].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #1 is not a number");
+			if (!input[1].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #2 is not a number");
+			if (!input[2].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #3 is not a number");
+			if (!input[3].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #4 is not a number");
+			if (!input[4].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #5 is not a number");
+			if (!input[5].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #6 is not a number");
+			if (!input[6].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #7 is not a number");
+			if (!input[7].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #8 is not a number");
+			if (!input[8].is_number())
+				throw std::invalid_argument("Input macro item #" + std::to_string(i) + ": Elem #9 is not a number");
+			this->_previewInputs.emplace_back(SokuLib::KeyInput{
+				input[0],
+				input[1],
+				input[2],
+				input[3],
+				input[4],
+				input[5],
+				input[6],
+				input[7],
+			}, input[8].get<int>());
+		}
+	}
+
 	if (json.contains("dolls") && json["dolls"].is_array()) {
 		if (player != SokuLib::CHARACTER_ALICE)
 			throw std::invalid_argument("Can only specify doll placement for alice");
@@ -281,9 +320,9 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 	else if (this->_clones)
 		battleMgr.leftCharacterManager.youmuCloneTimeLeft = 600;
 
-	if (this->_waitCounter) {
+	if (this->_waitCounter)
 		this->_waitCounter--;
-	} else if (this->_playingIntro)
+	else if (this->_playingIntro && this->_previewInputs.empty())
 		this->_playIntro();
 	else if (this->_actionCounter != this->_expectedActions.size()) {
 		auto i = this->_actionCounter;
@@ -662,29 +701,38 @@ void ComboTrial::_playIntro()
 void ComboTrial::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
 	if (this->_playingIntro) {
-		if (this->_actionCounter == this->_expectedActions.size())
-			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 		if (this->_waitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 
-		auto &arr = this->_expectedActions[this->_actionCounter];
+		if (this->_previewInputs.empty()) {
+			if (this->_actionCounter == this->_expectedActions.size())
+				return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 
-		if (arr->delay > this->_actionWaitCounter)
-			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
-		if (arr->chargeCounter == 0)
-			originalInputs = arr->inputs[arr->counter];
-		else {
-			originalInputs = arr->inputs.back();
-			originalInputs.a *= 2;
-			originalInputs.b *= 2;
-			originalInputs.c *= 2;
-			originalInputs.d *= 2;
-			originalInputs.horizontalAxis *= 2;
-			originalInputs.verticalAxis *= 2;
-			originalInputs.changeCard *= 2;
-			originalInputs.spellcard *= 2;
+			auto &arr = this->_expectedActions[this->_actionCounter];
+
+			if (arr->delay > this->_actionWaitCounter)
+				return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
+			if (arr->chargeCounter == 0)
+				originalInputs = arr->inputs[arr->counter];
+			else {
+				originalInputs = arr->inputs.back();
+				originalInputs.a *= 2;
+				originalInputs.b *= 2;
+				originalInputs.c *= 2;
+				originalInputs.d *= 2;
+				originalInputs.horizontalAxis *= 2;
+				originalInputs.verticalAxis *= 2;
+				originalInputs.changeCard *= 2;
+				originalInputs.spellcard *= 2;
+			}
+			originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
+		} else if (this->_inputPos < this->_previewInputs.size()) {
+			memcpy(&originalInputs, &this->_previewInputs[this->_inputPos].first, sizeof(originalInputs));
+			if (++this->_inputCurrent > this->_previewInputs[this->_inputPos].second) {
+				this->_inputPos++;
+				this->_inputCurrent = 0;
+			}
 		}
-		originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
 		return;
 	}
 	if (this->_playComboAfterIntro || this->_finished || this->_firstFirst) {

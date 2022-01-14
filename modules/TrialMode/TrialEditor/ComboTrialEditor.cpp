@@ -20,6 +20,8 @@
 static SokuLib::KeyInput empty{0, 0, 0, 0, 0, 0, 0, 0};
 static char data[10];
 
+#define getSign(x) (((x) > 0) - ((x) < 0))
+
 const std::vector<std::vector<bool ComboTrialEditor::*>> ComboTrialEditor::_installProperties{
 	{}, //CHARACTER_REIMU,
 	{   //CHARACTER_MARISA,
@@ -92,7 +94,7 @@ const std::map<unsigned, const char *> ComboTrialEditor::_stagesNames{
 	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH_BG, "Scarlet Devil Mansion: Clock Tower<br>(Sketch Background)" },
 	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_BLURRY,    "Scarlet Devil Mansion: Clock Tower<br>(Blurry)" },
 	{ SokuLib::STAGE_SCARLET_DEVIL_MANSION_CLOCK_TOWER_SKETCH,    "Scarlet Devil Mansion: Clock Tower<br>(Sketch)" },
-	{ 100,                                                        "Custom Stage" }
+	{ 100,                                                        "Custom Stage ID" }
 };
 const std::vector<unsigned> ComboTrialEditor::_stagesIds{
 	SokuLib::STAGE_HAKUREI_SHRINE_BROKEN,
@@ -257,6 +259,35 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 			if (!obj.contains("dir") && obj["dir"].is_number())
 				continue;
 			this->_dolls.push_back({SokuLib::Vector2f{obj["x"], obj["y"]}, obj["dir"].get<SokuLib::Direction>()});
+		}
+	}
+
+	if (json.contains("inputs") && json["inputs"].is_array()) {
+		for (auto &input : json["inputs"]) {
+			if (
+				input.is_array() &&
+				input.size() >= 9 &&
+				input[0].is_number() &&
+				input[1].is_number() &&
+				input[2].is_number() &&
+				input[3].is_number() &&
+				input[4].is_number() &&
+				input[5].is_number() &&
+				input[6].is_number() &&
+				input[7].is_number() &&
+				input[8].is_number()
+			) {
+				this->_previewInputs.emplace_back(SokuLib::KeyInput{
+					input[0],
+					input[1],
+					input[2],
+					input[3],
+					input[4],
+					input[5],
+					input[6],
+					input[7],
+				}, input[8].get<int>());
+			}
 		}
 	}
 
@@ -594,10 +625,8 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			auto &pos = SokuLib::getBattleMgr().leftCharacterManager.objects.list.vector()[
 				this->_dollCursorPos * 2]->position;
 
-			if (SokuLib::inputMgrs.input.horizontalAxis)
-				pos.x += std::copysign(6, SokuLib::inputMgrs.input.horizontalAxis);
-			if (SokuLib::inputMgrs.input.verticalAxis)
-				pos.y += std::copysign(6, -SokuLib::inputMgrs.input.verticalAxis);
+			pos.x += 6 *  getSign(SokuLib::inputMgrs.input.horizontalAxis);
+			pos.y += 6 * -getSign(SokuLib::inputMgrs.input.verticalAxis);
 			this->_dolls[this->_dollCursorPos].pos = pos;
 			if (SokuLib::inputMgrs.input.b == 1) {
 				SokuLib::playSEWaveBuffer(0x29);
@@ -881,11 +910,11 @@ afterInput:
 		battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 		goto disableLimit;
 	}
-	if (this->_waitCounter) {
+	if (this->_waitCounter)
 		this->_waitCounter--;
-	} else if (this->_playingIntro)
+	else if (this->_playingIntro && this->_previewInputs.empty())
 		this->_playIntro();
-	else if (this->_recordingCombo)
+	else if (!this->_playingIntro && this->_recordingCombo)
 		this->_checkCurrentAction();
 	else if (this->_actionCounter != this->_expectedActions.size()) {
 		auto i = this->_actionCounter;
@@ -906,7 +935,7 @@ afterInput:
 	}
 
 checkFinish:
-	if (!this->_finished && this->_scores.front().met(0) && !this->_isRecordingScore && !this->_recordingCombo) {
+	if (!this->_finished && this->_scores.front().met(0) && !this->_isRecordingScore && !this->_recordingCombo && !this->_previewMode) {
 		auto i = this->_actionCounter;
 
 		while (i < this->_expectedActions.size()) {
@@ -1162,6 +1191,31 @@ void ComboTrialEditor::_initGameStart()
 		return;
 	}
 	puts("Init");
+	if (this->_previewMode == 4) {
+		this->_previewMode = 0;
+		if (!this->_expectedScore.met(0)) {
+			this->save((this->_path + "_errored.json").c_str());
+			MessageBoxA(
+				SokuLib::window,
+				("The dummy couldn't reproduce your combo even with macro inputs.\n\n"
+				"This is a bug. The trial has been saved to " + this->_path + "_errored.json.\n"
+				"Please report it by sending this file in the trial mode community discord server or to PinkySmile#3506.\n\n"
+				"Your recorded combo has been saved without the macro inputs so you are free to try to fix it using the combo editor.").c_str(),
+				"Macro input recording failed",
+				MB_ICONWARNING
+			);
+			this->_previewInputs.clear();
+		}
+		SokuLib::playSEWaveBuffer(0x29 - this->_expectedScore.met(0));
+	} else if (this->_previewMode == 2) {
+		if (!this->_expectedScore.met(0)) {
+			this->_previewMode = 3;
+			this->_previewInputs = this->_recordBuffer2;
+		} else
+			this->_previewMode = 0;
+		SokuLib::playSEWaveBuffer(0x29 - this->_expectedScore.met(0));
+	} else if (this->_previewMode)
+		this->_previewMode++;
 	if (this->_check > 1)
 		this->_check--;
 	else if (this->_check) {
@@ -1171,6 +1225,8 @@ void ComboTrialEditor::_initGameStart()
 	}
 	if (this->_recordingCombo)
 		this->_saveRecordedCombo();
+	this->_inputPos = 0;
+	this->_inputCurrent = 0;
 	this->_dollSelected = false;
 	this->_needInit = false;
 	this->_currentDoll = 0;
@@ -1186,7 +1242,7 @@ void ComboTrialEditor::_initGameStart()
 			SokuLib::playSEWaveBuffer(0x28);
 		}
 		this->_isRecordingScore = this->_editingScore && !this->_isRecordingScore;
-		this->_playingIntro = this->_playComboAfterIntro || this->_isRecordingScore;
+		this->_playingIntro = this->_playComboAfterIntro || this->_isRecordingScore || this->_previewMode;
 		if (this->_playingIntro) {
 			this->_waitCounter += 32;
 			(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
@@ -1359,9 +1415,9 @@ void ComboTrialEditor::_playIntro()
 		addCustomActions(battleMgr.leftCharacterManager, SokuLib::leftChar) == arr->actions[0] &&
 		isStartOfMove(arr->actions[0], battleMgr.leftCharacterManager, SokuLib::leftChar)
 	) {
-		if (arr->chargeTime) {
+		if (arr->chargeTime)
 			arr->chargeCounter++;
-		} else {
+		else {
 			arr->counter = 0;
 			this->_actionWaitCounter = 0;
 			this->_actionCounter++;
@@ -1378,8 +1434,35 @@ void ComboTrialEditor::_playIntro()
 	}
 }
 
+inline bool compareInputs(const SokuLib::KeyInput &i1, const SokuLib::KeyInput &i2)
+{
+	return getSign(i1.horizontalAxis) == getSign(i2.horizontalAxis) &&
+		getSign(i1.verticalAxis) == getSign(i2.verticalAxis) &&
+		!!i1.a == !!i2.a &&
+		!!i1.b == !!i2.b &&
+		!!i1.c == !!i2.c &&
+		!!i1.d == !!i2.d &&
+		!!i1.spellcard == !!i2.spellcard &&
+		!!i1.changeCard == !!i2.changeCard;
+}
+
 void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 {
+	if (this->_recordingCombo && !this->_comboPageDisplayed) {
+		if (this->_recordBuffer2.empty() || !compareInputs(this->_recordBuffer2.back().first, originalInputs))
+			this->_recordBuffer2.emplace_back(SokuLib::KeyInput{
+				getSign(originalInputs.horizontalAxis),
+				getSign(originalInputs.verticalAxis),
+				!!originalInputs.a,
+				!!originalInputs.b,
+				!!originalInputs.c,
+				!!originalInputs.d,
+				!!originalInputs.spellcard,
+				!!originalInputs.changeCard
+			}, 0);
+		else
+			this->_recordBuffer2.back().second++;
+	}
 	if (this->_managingDolls || (this->_comboPageDisplayed && !this->_playingIntro)) {
 		memset(&originalInputs, 0, sizeof(originalInputs));
 		return;
@@ -1439,29 +1522,38 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 		return;
 	}
 	if (this->_playingIntro) {
-		if (this->_actionCounter == this->_expectedActions.size())
-			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 		if (this->_waitCounter)
 			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 
-		auto &arr = this->_expectedActions[this->_actionCounter];
+		if (this->_previewInputs.empty()) {
+			if (this->_actionCounter == this->_expectedActions.size())
+				return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
 
-		if (arr->delay > this->_actionWaitCounter)
-			return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
-		if (arr->chargeCounter == 0)
-			originalInputs = arr->inputs[arr->counter];
-		else {
-			originalInputs = arr->inputs.back();
-			originalInputs.a *= 2;
-			originalInputs.b *= 2;
-			originalInputs.c *= 2;
-			originalInputs.d *= 2;
-			originalInputs.horizontalAxis *= 2;
-			originalInputs.verticalAxis *= 2;
-			originalInputs.changeCard *= 2;
-			originalInputs.spellcard *= 2;
+			auto &arr = this->_expectedActions[this->_actionCounter];
+
+			if (arr->delay > this->_actionWaitCounter)
+				return static_cast<void>(memset(&originalInputs, 0, sizeof(originalInputs)));
+			if (arr->chargeCounter == 0)
+				originalInputs = arr->inputs[arr->counter];
+			else {
+				originalInputs = arr->inputs.back();
+				originalInputs.a *= 2;
+				originalInputs.b *= 2;
+				originalInputs.c *= 2;
+				originalInputs.d *= 2;
+				originalInputs.horizontalAxis *= 2;
+				originalInputs.verticalAxis *= 2;
+				originalInputs.changeCard *= 2;
+				originalInputs.spellcard *= 2;
+			}
+			originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
+		} else if (this->_inputPos < this->_previewInputs.size()) {
+			memcpy(&originalInputs, &this->_previewInputs[this->_inputPos].first, sizeof(originalInputs));
+			if (++this->_inputCurrent > this->_previewInputs[this->_inputPos].second) {
+				this->_inputPos++;
+				this->_inputCurrent = 0;
+			}
 		}
-		originalInputs.horizontalAxis *= SokuLib::getBattleMgr().leftCharacterManager.objectBase.direction;
 		return;
 	}
 	if (this->_playComboAfterIntro || this->_finished || this->_firstFirst) {
@@ -1619,6 +1711,7 @@ int ComboTrialEditor::pauseOnUpdate()
 		this->_isRecordingScore = false;
 		this->_waitCounter = 0;
 		this->_check = false;
+		this->_previewMode = 0;
 		this->_initGameStart();
 		this->_isRecordingScore = false;
 		this->_playingIntro = false;
@@ -2882,20 +2975,24 @@ void ComboTrialEditor::_setupStageSprites()
 	next1.second->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER ].a = 0x00;
 }
 
-bool ComboTrialEditor::save() const
+bool ComboTrialEditor::save(const char *path) const
 {
+	auto realPath = path ? path : this->_path;
+
 	try {
 		nlohmann::json json = this->_getMyJson();
 
-		unlink((this->_path + ".backup").c_str());
-		if (rename(this->_path.c_str(), (this->_path + ".backup").c_str()) != 0)
-			throw std::invalid_argument("Cannot rename " + this->_path + " to " + this->_path + ".backup");
+		unlink((realPath + ".backup").c_str());
+		if (rename(realPath.c_str(), (realPath + ".backup").c_str()) != 0 && errno != ENOENT) {
+			printf("Errno: %i\n", errno);
+			throw std::invalid_argument("Cannot rename " + realPath + " to " + realPath + ".backup: " + strerror(errno));
+		}
 
-		std::ofstream stream{this->_path};
+		std::ofstream stream{realPath};
 
 		if (stream.fail()) {
-			rename((this->_path + ".backup").c_str(), this->_path.c_str());
-			throw std::invalid_argument(this->_path + ": " + strerror(errno));
+			rename((realPath + ".backup").c_str(), realPath.c_str());
+			throw std::invalid_argument(realPath + ": " + strerror(errno));
 		}
 		stream << json.dump(4);
 		stream.close();
@@ -3427,6 +3524,7 @@ bool ComboTrialEditor::noEffect()
 void ComboTrialEditor::_saveRecordedCombo()
 {
 	std::vector<SpecialAction *> actions;
+	auto &battleMgr = SokuLib::getBattleMgr();
 
 	for (auto &action : this->_recordBuffer) {
 		actions.push_back(action->createAction());
@@ -3439,6 +3537,9 @@ void ComboTrialEditor::_saveRecordedCombo()
 			return;
 		}
 	}
+	this->_expectedScore.damage = battleMgr.leftCharacterManager.combo.damages;
+	this->_expectedScore.hits = battleMgr.leftCharacterManager.combo.nbHits;
+	this->_expectedScore.minLimit = battleMgr.leftCharacterManager.combo.limit;
 	this->_expectedActions.clear();
 	this->_expectedActions.reserve(this->_recordBuffer.size());
 	for (auto &action : actions)
@@ -3446,6 +3547,8 @@ void ComboTrialEditor::_saveRecordedCombo()
 	this->_comboPageDisplayed = true;
 	this->_recordingCombo = false;
 	this->_playComboAfterIntro = true;
+	this->_previewMode = 1;
+	this->_previewInputs.clear();
 	SokuLib::playSEWaveBuffer(0x28);
 }
 
@@ -3498,6 +3601,8 @@ void ComboTrialEditor::_checkCurrentAction()
 		this->_comboRecTimer = 0;
 	} else if (!this->_recordBuffer.empty())
 		this->_comboRecTimer++;
+	if (this->_recordBuffer.empty())
+		this->_recordBuffer2.clear();
 }
 
 nlohmann::json ComboTrialEditor::_getMyJson() const
@@ -3592,6 +3697,23 @@ nlohmann::json ComboTrialEditor::_getMyJson() const
 				{"y",   doll.pos.y}
 			});
 		json["dolls"] = dolls;
+	}
+	if (!this->_previewInputs.empty()) {
+		nlohmann::json inputs = nlohmann::json::array();
+
+		for (auto &input : this->_previewInputs)
+			inputs.push_back({
+				input.first.horizontalAxis,
+				input.first.verticalAxis,
+				input.first.a,
+				input.first.b,
+				input.first.c,
+				input.first.d,
+				input.first.changeCard,
+				input.first.spellcard,
+				input.second
+			});
+		json["inputs"] = inputs;
 	}
 	return json;
 }
@@ -3729,10 +3851,8 @@ ComboTrialEditor::SpecialAction *ComboTrialEditor::RecordedAction::createAction(
 
 		if (SokuLib::leftChar == SokuLib::CHARACTER_REMILIA || SokuLib::leftChar == SokuLib::CHARACTER_FLANDRE)
 			speAction->chargeTime -= 26;
-		if (this->speed.x)
-			dir += std::copysign(1, this->speed.x);
-		if (this->speed.y)
-			dir += std::copysign(3, this->speed.y);
+		dir += getSign(this->speed.x);
+		dir += 3 * getSign(this->speed.y);
 		speAction->moveName = "j" + std::to_string(dir) + "d";
 		printf("%f %f -> %i\n", this->speed.x, this->speed.y, dir);
 	} else if (it->first == "44")

@@ -56,6 +56,8 @@ private:
 		SokuLib::Direction dir;
 	};
 
+	typedef std::vector<std::pair<SokuLib::KeyInput, unsigned>> MacroData;
+
 	//Init params
 	bool _crouching;
 	bool _leftWeather;
@@ -63,6 +65,7 @@ private:
 	float _playerStartPos;
 	unsigned _failTimer;
 	SokuLib::Vector2f _dummyStartPos;
+	MacroData _previewInputs;
 	std::vector<std::unique_ptr<SpecialAction>> _expectedActions;
 	SokuLib::Weather _weather;
 	SokuLib::Skill _skills[15];
@@ -94,6 +97,8 @@ private:
 	unsigned _firstFirst = 1;
 	unsigned _currentDoll = 0;
 	unsigned _lastSize = 0;
+	unsigned _inputPos = 0;
+	unsigned _inputCurrent = 0;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;
@@ -156,7 +161,10 @@ private:
 	bool _recordingCombo = false;
 	bool _editingScore = false;
 	bool _isRecordingScore = false;
+	unsigned _previewMode = 0;
+	ScorePrerequisites _expectedScore;
 	ScorePrerequisites _oldScore;
+	MacroData _recordBuffer2;
 	std::vector<std::unique_ptr<RecordedAction>> _recordBuffer;
 	SokuLib::Profile _fakeProfile;
 	SokuLib::ProfileDeckEdit *_deckEditMenu = nullptr;
@@ -264,7 +272,7 @@ public:
 	SokuLib::Scene getNextScene() override;
 	int pauseOnUpdate() override;
 	int pauseOnRender() const override;
-	bool save() const;
+	bool save(const char *path = nullptr) const;
 };
 
 

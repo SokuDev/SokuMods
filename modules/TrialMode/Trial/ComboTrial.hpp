@@ -43,6 +43,8 @@ private:
 		SokuLib::Direction dir;
 	};
 
+	typedef std::vector<std::pair<SokuLib::KeyInput, unsigned>> MacroData;
+
 	//Init params
 	bool _crouching;
 	bool _leftWeather;
@@ -55,6 +57,7 @@ private:
 	SokuLib::Skill _skills[15];
 	bool _disableLimit;
 	int _uniformCardCost = 0;
+	MacroData _previewInputs;
 	std::vector<unsigned short> _hand;
 	std::vector<ScorePrerequisites> _scores;
 	bool _playComboAfterIntro = true;
@@ -79,6 +82,8 @@ private:
 	unsigned _firstFirst = 1;
 	unsigned _currentDoll = 0;
 	unsigned _lastSize = 0;
+	unsigned _inputPos = 0;
+	unsigned _inputCurrent = 0;
 	bool _first = true;
 	bool _isStart = true;
 	bool _dummyHit = false;
