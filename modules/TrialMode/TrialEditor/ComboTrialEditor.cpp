@@ -2177,9 +2177,13 @@ int ComboTrialEditor::pauseOnUpdate()
 				this->_weather = static_cast<SokuLib::Weather>(static_cast<int>(this->_weather + 22 + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % 22);
 				SokuLib::playSEWaveBuffer(0x27);
 			} else if (this->_menuCursorPos == 3) {
-				this->_failTimer = static_cast<int>(this->_failTimer + 310 + std::copysign(10, SokuLib::inputMgrs.input.horizontalAxis)) % 310;
-				if (this->_failTimer < 30)
-					this->_failTimer = SokuLib::inputMgrs.input.horizontalAxis > 0 ? 30 : 300;
+				this->_failTimer = static_cast<int>(this->_failTimer + 36010 + std::copysign(10, SokuLib::inputMgrs.input.horizontalAxis)) % 36010;
+				if (this->_failTimer > 600)
+					this->_failTimer = SokuLib::inputMgrs.input.horizontalAxis > 0 ? 36000 : 600;
+				else if (this->_failTimer > 300)
+					this->_failTimer = SokuLib::inputMgrs.input.horizontalAxis > 0 ? 600 : 300;
+				else if (this->_failTimer < 30)
+					this->_failTimer = SokuLib::inputMgrs.input.horizontalAxis > 0 ? 30 : 36000;
 				SokuLib::playSEWaveBuffer(0x27);
 			}
 		}
