@@ -20,7 +20,7 @@ The code in this repository comes from various contributors:
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
 - *Fear Nagae*, *[PC_volt](https://github.com/PCvolt)*, *[PinkySmile](https://github.com/Gegel85)*, *[S-len](https://github.com/S-len)* made FixMeiling236
-- *Nepoke* made ReDelay
+- *[PinkySmile](https://github.com/Gegel85)* made ReDelay, rewritten based on an original version by *Nepoke*
 - *mauve* made th123e (and its loader, in `th123eloader/`)
 - *[delthas](https://github.com/delthas)* made Autopunch, GetIP, SokuReplays, as well as all the plumbing: adding CMake, CI, formatting, ...
 
