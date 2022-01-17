@@ -25,7 +25,6 @@ local dialogs = {
 }
 
 local function init()
-	print("Init!")
 	yukari = Character.new(playerInfo)
 
 	camera.translate.x = -320
@@ -47,7 +46,6 @@ local function init()
 	yukari.action = enums.actions.ACTION_ALT2_SKILL4_C
 	yukari:initAnimation()
 	yukari.renderInfos.color = enums.colors.Black
-	print("Init done")
 end
 
 local function stage0()
@@ -98,7 +96,6 @@ local function stage2()
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x - 8, 115)
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x - 8, 115)
 		for i = 5, 0, -1 do
-			print("To ", i)
 			while battleMgr.leftChr.objects[start + i].actionBlockId ~= i do
 				battleMgr.leftChr.objects[start + i]:animate()
 			end
@@ -110,7 +107,6 @@ local function stage2()
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x, 0)
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x, 0)
 		for i = 1, 0, -1 do
-			print("To ", i + 6)
 			battleMgr.leftChr.objects[start + i].speed.x = -10 * (i * 2 - 1)
 			battleMgr.leftChr.objects[start + i].speed.y = 0
 			battleMgr.leftChr.objects[start + i].renderInfos.xRotation = 0
@@ -257,7 +253,6 @@ local anims = {
 	stagey3
 }
 
-print("Init intro.")
 
 stand.texture:loadFromGame("data/character/yukari/stand/\x8a\xf0.bmp")
 stand.size = stand.texture.size

@@ -116,7 +116,7 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 	addVector<bool>(*this->_lua, "Vector2b");
 
 	this->_lua->new_usertype<SokuStand>(
-		"StandDialog", sol::constructors<void(std::vector<std::string>)>(),
+		"StandDialog", sol::constructors<void(std::vector<std::string>), void(std::vector<std::string>, SokuLib::Character, SokuLib::Character)>(),
 		"render", &SokuStand::render,
 		"update", &SokuStand::update,
 		"onKeyPress", &SokuStand::onKeyPress,
