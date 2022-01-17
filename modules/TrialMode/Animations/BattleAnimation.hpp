@@ -104,6 +104,7 @@ private:
 
 public:
 	SokuStand(std::vector<std::string> dialogLoad);
+	SokuStand(std::vector<std::string> dialogLoad, SokuLib::Character lChr, SokuLib::Character rChr);
 	~SokuStand();
 	void render() const override;
 	void update() override;

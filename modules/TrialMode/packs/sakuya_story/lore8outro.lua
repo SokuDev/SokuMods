@@ -26,7 +26,6 @@ local keyPressed = false
 local stop = false
 
 local function init()
-	print("Init!")
 	camera.translate.x = -320
 	camera.translate.y = 420
 	camera.backgroundTranslate.x = 640
@@ -40,7 +39,6 @@ local function init()
 	battleMgr.rightChr.position.y = 0
 	battleMgr.rightChr.action = enums.actions.ACTION_KNOCKED_DOWN_STATIC
 	battleMgr.rightChr:initAnimation()
-	print("Init done")
 end
 
 local function stage0()
@@ -77,7 +75,6 @@ local anims = {
 	stage5
 }
 
-print("Init intro.")
 
 flashRect.fillColor = enums.colors.Transparent
 flashRect.borderColor = enums.colors.Transparent
@@ -93,7 +90,6 @@ function update()
 
 	if keyPressed then
 		stop = stop or not dialog:onKeyPress()
-		print(stop and "Stop" or "Not stop")
 		if stop then
 			dialog.hidden = true
 		end

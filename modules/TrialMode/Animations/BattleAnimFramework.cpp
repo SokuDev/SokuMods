@@ -44,7 +44,12 @@ inline const char *getChrCodeName(SokuLib::Character chr)
 	return ((const char *(*)(unsigned))0x43f3f0)(chr);
 }
 
-SokuStand::SokuStand(std::vector<std::string> dialogLoad)
+SokuStand::SokuStand(std::vector<std::string> dialogLoad) :
+	SokuStand(dialogLoad, SokuLib::leftChar, SokuLib::rightChar)
+{
+}
+
+SokuStand::SokuStand(std::vector<std::string> dialogLoad, SokuLib::Character lChr, SokuLib::Character rChr)
 {
 	puts("Loading dialogs");
 	static const char *stands[] = {
@@ -59,8 +64,8 @@ SokuStand::SokuStand(std::vector<std::string> dialogLoad)
 		"data/character/%s/stand/\x98\x66.bmp"
 	};
 	char buffer[256];
-	const char *leftChar = getChrCodeName(SokuLib::leftChar);
-	const char *rightChar = getChrCodeName(SokuLib::rightChar);
+	const char *leftChar = getChrCodeName(lChr);
+	const char *rightChar = getChrCodeName(rChr);
 	SokuLib::FontDescription desc;
 
 	desc.r1 = 0xFF;
