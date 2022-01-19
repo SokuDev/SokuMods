@@ -635,6 +635,9 @@ public:
 	}
 
 	void loop() const {
+		if (!this->_connected)
+			return;
+
 		logMessagef("Current scene is %i vs new scene %i\n", SokuLib::sceneId, SokuLib::newSceneId);
 		if (SokuLib::sceneId != SokuLib::newSceneId)
 			state.totalTimestamp = time(nullptr);
