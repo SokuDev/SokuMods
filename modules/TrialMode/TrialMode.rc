@@ -102,3 +102,4 @@
 436 RCDATA "assets/icons/chr.png"
 440 RCDATA "assets/icons/menu.png"
 444 RCDATA "assets/icons/unknown.png"
+448 RCDATA "assets/trialPause.png"

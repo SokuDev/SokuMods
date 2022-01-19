@@ -48,8 +48,6 @@ public:
 	~TrialEditor() override;
 
 	unsigned getAttempt() override;
-	virtual int pauseOnUpdate() = 0;
-	virtual int pauseOnRender() const = 0;
 	static TrialBase *create(const char *folder, const char *path, SokuLib::Character player, const nlohmann::json &json);
 };
 

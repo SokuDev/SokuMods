@@ -27,6 +27,8 @@ private:
 	void _playBGM();
 
 protected:
+	int (SokuLib::PauseMenu::*_ogOnUpdate)();
+	int (SokuLib::PauseMenu::*_ogOnRender)();
 	std::unique_ptr<BattleAnimation> _intro;
 	std::unique_ptr<BattleAnimation> _outro;
 	bool _introPlayed = false;

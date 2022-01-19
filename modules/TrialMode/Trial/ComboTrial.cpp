@@ -2,6 +2,7 @@
 // Created by PinkySmile on 23/07/2021.
 //
 
+#include <dinput.h>
 #include "ComboTrial.hpp"
 #include "Actions.hpp"
 #include "Menu.hpp"
@@ -240,12 +241,17 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 			"Incompatible parameters",
 			MB_ICONWARNING
 		);
+	this->_loadPauseAssets();
 }
 
 bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	if (this->_quit) {
+		canHaveNextFrame = false;
+		return true;
+	}
 	if (*(char*)0x89a88c == 2)
 		return true;
 	battleMgr.rightCharacterManager.nameHidden = true;
@@ -834,6 +840,72 @@ SokuLib::Action ComboTrial::_getMoveAction(SokuLib::Character chr, std::string &
 unsigned ComboTrial::getAttempt()
 {
 	return this->_attempts;
+}
+
+void ComboTrial::_loadPauseAssets()
+{
+	this->_title.texture.loadFromGame("data/menu/battle/100_Pause.bmp");
+	this->_title.setSize(this->_title.texture.getSize());
+	this->_title.rect.width = this->_title.texture.getSize().x;
+	this->_title.rect.height = this->_title.texture.getSize().y;
+
+	this->_pause.texture.loadFromResource(myModule, MAKEINTRESOURCE(448));
+	this->_pause.setSize(this->_pause.texture.getSize());
+	this->_pause.rect.width = this->_pause.getSize().x;
+	this->_pause.rect.height = this->_pause.getSize().y;
+}
+
+int ComboTrial::pauseOnUpdate()
+{
+	auto c = SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false);
+
+	if (c || SokuLib::inputMgrs.input.b == 1)
+		return SokuLib::playSEWaveBuffer(0x29), false;
+	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
+		this->_cursorPos += 4 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+		this->_cursorPos %= 4;
+		SokuLib::playSEWaveBuffer(0x27);
+	}
+	if (SokuLib::inputMgrs.input.a == 1)
+		return this->_pauseOnKeyPressed();
+	return true;
+}
+
+int ComboTrial::pauseOnRender() const
+{
+	displaySokuCursor({
+		61,
+		static_cast<int>(129 + 32 * this->_cursorPos)
+	}, {256, 16});
+	this->_title.draw();
+	this->_pause.draw();
+	return true;
+}
+
+bool ComboTrial::_pauseOnKeyPressed()
+{
+	switch (this->_cursorPos) {
+	case 0:
+		SokuLib::playSEWaveBuffer(0x28);
+		return false;
+	case 1:
+		SokuLib::playSEWaveBuffer(0x28);
+		this->_playComboAfterIntro = true;
+		this->_initGameStart();
+		return false;
+	case 2:
+		SokuLib::playSEWaveBuffer(0x28);
+		this->_quit = true;
+		this->_next = SokuLib::SCENE_SELECT;
+		return false;
+	case 3:
+		SokuLib::playSEWaveBuffer(0x28);
+		SokuLib::playSEWaveBuffer(0x28);
+		this->_quit = true;
+		this->_next = SokuLib::SCENE_TITLE;
+		return false;
+	}
+	return true;
 }
 
 void ComboTrial::SpecialAction::parse()
