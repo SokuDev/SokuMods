@@ -732,8 +732,11 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			if (SokuLib::inputMgrs.input.c == 1) {
 				auto old = this->_expectedActions[this->_comboCursor]->optional;
 
-				this->_expectedActions[this->_comboCursor]->optional = !old;
-				SokuLib::playSEWaveBuffer(0x28);
+				if (this->_comboCursor != this->_expectedActions.size() - 1 || old) {
+					this->_expectedActions[this->_comboCursor]->optional = !old;
+					SokuLib::playSEWaveBuffer(0x28);
+				} else
+					SokuLib::playSEWaveBuffer(0x29);
 			}
 			if (SokuLib::inputMgrs.input.d == 1) {
 				auto &move = this->_expectedActions[this->_comboCursor];
@@ -3449,8 +3452,7 @@ bool ComboTrialEditor::_selectScoreMenuItem()
 		try {
 			unsigned i = str == "Infinite" ? -1 : std::stoul(str);
 
-			if (i == 0)
-				throw MessageBox(SokuLib::window, "Wait... That's illegal!", "Nope", MB_ICONERROR);
+			i -= i == 0;
 			this->_scores[this->_scoreEdited].attempts = i;
 		} catch (...) {
 			return SokuLib::playSEWaveBuffer(0x29), true;
@@ -3474,7 +3476,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 			{230, 20},
 			&size
 		);
-		this->_attempts[i].tint = SokuLib::Color::Yellow;
+		this->_attempts[i].tint = SokuLib::Color{0x40, 0x40, 0x40};
 	} else
 		this->_attempts[i].texture.createFromText(
 			this->_scores[i].attempts == -1 ?
