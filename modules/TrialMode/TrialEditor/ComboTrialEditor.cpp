@@ -429,6 +429,7 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 			new SokuLib::DrawUtils::Sprite(),
 			new SokuLib::DrawUtils::Sprite()
 		);
+		SokuLib::Vector2i size;
 
 		if (!sprites.first->texture.loadFromGame(("data/scene/select/bg/bg_pict" + (pair.first < 10 ? std::string("0") : std::string()) + std::to_string(pair.first) + ".bmp").c_str()))
 			sprites.first->texture.loadFromGame("data/scene/select/bg/bg_pict99.bmp");
@@ -436,9 +437,11 @@ ComboTrialEditor::ComboTrialEditor(const char *folder, const char *path, SokuLib
 		sprites.first->rect.width = sprites.first->getSize().x;
 		sprites.first->rect.height = sprites.first->getSize().y;
 
-		if (!sprites.second->texture.loadFromGame(("data/scene/select/bg/bg_name" + (pair.first < 10 ? std::string("0") : std::string()) + std::to_string(pair.first) + ".bmp").c_str()))
-			sprites.second->texture.createFromText((std::string("<br><br>") + (strstr(pair.second, "<br>") ? "" : "<br>") + pair.second).c_str(), defaultFont16, {352, 70});
-		sprites.second->setSize(sprites.second->texture.getSize());
+		if (!sprites.second->texture.loadFromGame(("data/scene/select/bg/bg_name" + (pair.first < 10 ? std::string("0") : std::string()) + std::to_string(pair.first) + ".bmp").c_str())) {
+			sprites.second->texture.createFromText(((hasEnglishPatch ? std::string("<br>") : std::string("<br><br>")) + (strstr(pair.second, "<br>") ? "" : "<br>") + pair.second).c_str(), defaultFont16, {352, 100}, &size);
+			sprites.second->setSize(size.to<unsigned>());
+		} else
+			sprites.second->setSize(sprites.second->texture.getSize());
 		sprites.second->rect.width = sprites.second->getSize().x;
 		sprites.second->rect.height = sprites.second->getSize().y;
 		this->_stagesSprites[pair.first].first.swap(sprites.first);
