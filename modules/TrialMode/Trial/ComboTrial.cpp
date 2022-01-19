@@ -405,7 +405,7 @@ disableLimit:
 		this->_dummyHit = false;
 	this->_dummyHit |= hit;
 	if (!this->_dummyHit && !this->_finished) {
-		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
+		battleMgr.rightCharacterManager.objectBase.position.x = (this->_mirror ? 1280 - this->_dummyStartPos.x : this->_dummyStartPos.x);
 		if (!this->_jump) {
 			battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
@@ -481,6 +481,8 @@ int ComboTrial::getScore()
 void ComboTrial::_initGameStart()
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
+	float scale = this->_mirror ? -1.f : 1.f;
+	float off = this->_mirror ? 1280.f : 0.f;
 
 	if (this->_currentDoll) {
 		auto obj = battleMgr.leftCharacterManager.objects.list.vector()[battleMgr.leftCharacterManager.objects.list.size - 2];
@@ -491,6 +493,9 @@ void ComboTrial::_initGameStart()
 			obj->animate2();
 		obj->position = this->_dolls[this->_currentDoll - 1].pos;
 		obj->direction = this->_dolls[this->_currentDoll - 1].dir;
+		obj->position.x *= scale;
+		obj->position.x += off;
+		obj->direction = static_cast<SokuLib::Direction>(static_cast<int>(obj->direction * scale));
 		battleMgr.leftCharacterManager.aliceDollCount = 0;
 	} else if (SokuLib::leftChar == SokuLib::CHARACTER_ALICE) {
 		for (auto &obj : battleMgr.leftCharacterManager.objects.list.vector()) {
@@ -513,6 +518,7 @@ void ComboTrial::_initGameStart()
 		this->_currentDoll++;
 		return;
 	}
+	this->_waitCounter = 0;
 	if (this->_first)
 		this->_waitCounter = 180;
 	else if (!this->_playingIntro)
@@ -608,7 +614,7 @@ void ComboTrial::_initGameStart()
 		battleMgr.leftCharacterManager.objectBase.action = SokuLib::ACTION_IDLE;
 		battleMgr.leftCharacterManager.objectBase.animate();
 	}
-	battleMgr.leftCharacterManager.objectBase.position.x = this->_playerStartPos;
+	battleMgr.leftCharacterManager.objectBase.position.x = this->_playerStartPos * scale + off;
 	battleMgr.leftCharacterManager.objectBase.position.y = 0;
 	battleMgr.leftCharacterManager.objectBase.speed.x = 0;
 	battleMgr.leftCharacterManager.objectBase.speed.y = 0;
@@ -637,11 +643,15 @@ void ComboTrial::_initGameStart()
 	else
 		battleMgr.rightCharacterManager.objectBase.action = SokuLib::ACTION_FALLING;
 	battleMgr.rightCharacterManager.objectBase.animate();
-	battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
+	battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x * scale + off;
 	battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
 	battleMgr.rightCharacterManager.objectBase.speed.x = 0;
 	battleMgr.rightCharacterManager.objectBase.speed.y = 0;
 	battleMgr.rightCharacterManager.objectBase.animate();
+
+	battleMgr.leftCharacterManager.objectBase.direction =
+		battleMgr.rightCharacterManager.objectBase.position.x > battleMgr.leftCharacterManager.objectBase.position.x ?
+		SokuLib::RIGHT : SokuLib::LEFT;
 	battleMgr.rightCharacterManager.objectBase.direction =
 		battleMgr.rightCharacterManager.objectBase.position.x > battleMgr.leftCharacterManager.objectBase.position.x ?
 		SokuLib::LEFT : SokuLib::RIGHT;
@@ -853,6 +863,11 @@ void ComboTrial::_loadPauseAssets()
 	this->_pause.setSize(this->_pause.texture.getSize());
 	this->_pause.rect.width = this->_pause.getSize().x;
 	this->_pause.rect.height = this->_pause.getSize().y;
+
+	this->_tick.texture.loadFromResource(myModule, MAKEINTRESOURCE(68));
+	this->_tick.setSize(this->_tick.texture.getSize());
+	this->_tick.rect.width = this->_tick.getSize().x;
+	this->_tick.rect.height = this->_tick.getSize().y;
 }
 
 int ComboTrial::pauseOnUpdate()
@@ -862,8 +877,8 @@ int ComboTrial::pauseOnUpdate()
 	if (c || SokuLib::inputMgrs.input.b == 1)
 		return SokuLib::playSEWaveBuffer(0x29), false;
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
-		this->_cursorPos += 4 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
-		this->_cursorPos %= 4;
+		this->_cursorPos += 5 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+		this->_cursorPos %= 5;
 		SokuLib::playSEWaveBuffer(0x27);
 	}
 	if (SokuLib::inputMgrs.input.a == 1)
@@ -879,6 +894,10 @@ int ComboTrial::pauseOnRender() const
 	}, {256, 16});
 	this->_title.draw();
 	this->_pause.draw();
+	if (this->_mirror) {
+		this->_tick.setPosition({42, 191});
+		this->_tick.draw();
+	}
 	return true;
 }
 
@@ -889,17 +908,25 @@ bool ComboTrial::_pauseOnKeyPressed()
 		SokuLib::playSEWaveBuffer(0x28);
 		return false;
 	case 1:
+		if (this->_waitCounter)
+			return SokuLib::playSEWaveBuffer(0x29), false;
 		SokuLib::playSEWaveBuffer(0x28);
 		this->_playComboAfterIntro = true;
-		this->_initGameStart();
 		return false;
 	case 2:
+		if (this->_waitCounter)
+			return SokuLib::playSEWaveBuffer(0x29), false;
+		SokuLib::playSEWaveBuffer(0x28);
+		this->_mirror = !this->_mirror;
+		this->_attempts--;
+		this->_initGameStart();
+		return true;
+	case 3:
 		SokuLib::playSEWaveBuffer(0x28);
 		this->_quit = true;
 		this->_next = SokuLib::SCENE_SELECT;
 		return false;
-	case 3:
-		SokuLib::playSEWaveBuffer(0x28);
+	case 4:
 		SokuLib::playSEWaveBuffer(0x28);
 		this->_quit = true;
 		this->_next = SokuLib::SCENE_TITLE;
