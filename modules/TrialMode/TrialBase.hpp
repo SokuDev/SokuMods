@@ -35,6 +35,8 @@ public:
 	virtual SokuLib::KeyInput getDummyInputs() = 0;
 	virtual void onMenuClosed(MenuAction action) = 0;
 	virtual SokuLib::Scene getNextScene() = 0;
+	virtual int pauseOnUpdate() = 0;
+	virtual int pauseOnRender() const = 0;
 };
 
 

@@ -25,6 +25,16 @@ static void __stdcall editLoop(int ptr) {
 	VirtualProtect((PVOID)0x418cc5, 5, old, &old);
 }
 
+static int __fastcall onUpdate(SokuLib::PauseMenu *)
+{
+	return loadedTrial->pauseOnUpdate();
+}
+
+static int __fastcall onRender(SokuLib::PauseMenu *)
+{
+	return loadedTrial->pauseOnRender();
+}
+
 const std::map<std::string, std::function<Trial *(const char *folder, SokuLib::Character player, const nlohmann::json &json)>> Trial::_factory{
 	{ "combo", [](const char *folder, SokuLib::Character player, const nlohmann::json &json){ return new ComboTrial(folder, player, json); } }
 };
@@ -52,6 +62,10 @@ Trial::Trial(const char *folder, const nlohmann::json &json)
 	if (json.contains("music_loop_end") && json["music_loop_end"].is_number())
 		this->_loopEnd = json["music_loop_end"];
 	this->_initAnimations();
+	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_READWRITE, &old);
+	this->_ogOnUpdate = SokuLib::TamperDword(&SokuLib::VTable_PauseMenu.onProcess, onUpdate);
+	this->_ogOnRender = SokuLib::TamperDword(&SokuLib::VTable_PauseMenu.onRender, onRender);
+	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 }
 
 Trial::~Trial()

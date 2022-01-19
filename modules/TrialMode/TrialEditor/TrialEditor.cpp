@@ -30,14 +30,14 @@ static void __stdcall editLoop(int ptr) {
 	VirtualProtect((PVOID)0x418cc5, 5, old, &old);
 }
 
-int __fastcall onUpdate(SokuLib::PauseMenu *)
+static int __fastcall onUpdate(SokuLib::PauseMenu *)
 {
-	return reinterpret_cast<TrialEditor &>(*loadedTrial).pauseOnUpdate();
+	return loadedTrial->pauseOnUpdate();
 }
 
-int __fastcall onRender(SokuLib::PauseMenu *)
+static int __fastcall onRender(SokuLib::PauseMenu *)
 {
-	return reinterpret_cast<TrialEditor &>(*loadedTrial).pauseOnRender();
+	return loadedTrial->pauseOnRender();
 }
 
 TrialEditor::TrialEditor(const char *folder, const nlohmann::json &json)

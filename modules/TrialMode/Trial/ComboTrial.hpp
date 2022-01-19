@@ -98,8 +98,16 @@ private:
 	mutable SokuLib::DrawUtils::Sprite _attemptText;
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
 
+	//Pause
+	bool _quit = false;
+	unsigned _cursorPos = 0;
+	SokuLib::DrawUtils::Sprite _title;
+	SokuLib::DrawUtils::Sprite _pause;
+
 	void _playIntro();
 	void _initGameStart();
+	void _loadPauseAssets();
+	bool _pauseOnKeyPressed();
 	void _loadExpected(const std::string &expected);
 
 	static SokuLib::Action _getMoveAction(SokuLib::Character chr, std::string &move, std::string &name);
@@ -115,6 +123,8 @@ public:
 	void onMenuClosed(MenuAction action) override;
 	SokuLib::Scene getNextScene() override;
 	unsigned getAttempt() override;
+	int pauseOnUpdate() override;
+	int pauseOnRender() const override;
 
 	friend class ComboTrialResult;
 };
