@@ -100,9 +100,11 @@ private:
 
 	//Pause
 	bool _quit = false;
+	bool _mirror = false;
 	unsigned _cursorPos = 0;
 	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _pause;
+	mutable SokuLib::DrawUtils::Sprite _tick;
 
 	void _playIntro();
 	void _initGameStart();
