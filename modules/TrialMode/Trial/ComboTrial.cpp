@@ -872,6 +872,11 @@ void ComboTrial::_loadPauseAssets()
 
 int ComboTrial::pauseOnUpdate()
 {
+	if (this->_finished)
+		return false;
+	if (this->_playingIntro)
+		return this->_initGameStart(), false;
+
 	auto c = SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false);
 
 	if (c || SokuLib::inputMgrs.input.b == 1)
