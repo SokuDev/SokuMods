@@ -598,3 +598,22 @@ target_link_libraries(
 )
 install(TARGETS "PunishDisplay" LIBRARY DESTINATION "SWRSToys/modules/PunishDisplay/")
 install(TARGETS "PunishDisplay" LIBRARY DESTINATION "SokuEngine/modules/PunishDisplay/")
+
+add_library(
+        "HostInBackground"
+        MODULE
+        modules/HostInBackground/main.cpp
+)
+target_compile_options(HostInBackground PRIVATE /Zi)
+target_compile_definitions("HostInBackground" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
+target_include_directories("HostInBackground" PRIVATE include include/directx "modules/HostInBackground/")
+target_link_directories("HostInBackground" PRIVATE lib)
+target_link_libraries(
+        HostInBackground
+        SokuLib
+        shlwapi
+        ws2_32
+	d3dx9
+)
+install(TARGETS "HostInBackground" LIBRARY DESTINATION "SWRSToys/modules/HostInBackground/")
+install(TARGETS "HostInBackground" LIBRARY DESTINATION "SokuEngine/modules/HostInBackground/")
