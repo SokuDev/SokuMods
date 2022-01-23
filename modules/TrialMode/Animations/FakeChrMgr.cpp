@@ -76,7 +76,7 @@ void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager 
 	//type["hurtBoxesRotation"] = &FakeCharacterManager::hurtBoxesRotation;
 	type["characterIndex"] = &FakeCharacterManager::characterIndex;
 	type["playerIndex"] = &FakeCharacterManager::playerIndex;
-	type["isRightPlayer"] = &FakeCharacterManager::isRightPlayer;
+	type["isRightPglayer"] = &FakeCharacterManager::isRightPlayer;
 	type["airdashCount"] = &FakeCharacterManager::airdashCount;
 	type["currentSpirit"] = &FakeCharacterManager::currentSpirit;
 	type["maxSpirit"] = &FakeCharacterManager::maxSpirit;
