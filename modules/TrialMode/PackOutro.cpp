@@ -54,18 +54,18 @@ PackOutro::PackOutro(const std::string &packPath, const std::string &file)
 	(*this->_lua)["packPath"] = packPath;
 	(*this->_lua)["loadBackground"] = [this](const std::string &path){
 		auto sprite = new SokuLib::DrawUtils::Sprite{};
+		bool result = path.find(':') == std::string::npos ?
+			sprite->texture.loadFromGame(path.c_str()) :
+			sprite->texture.loadFromFile(path.c_str());
 
-		if (!sprite->texture.loadFromFile(path.c_str())) {
-			delete sprite;
-			throw std::invalid_argument("Cannot load file " + path);
-		}
 		this->_sprites.emplace_back(sprite);
 		sprite->setPosition({94, 15});
-		sprite->setSize({450, 338});
+		sprite->setSize({480, 368});
 		sprite->rect.width = sprite->texture.getSize().x;
 		sprite->rect.height = sprite->texture.getSize().y;
 		if (this->_sprites.size() > 1)
 			sprite->tint.a = 0;
+		return result;
 	};
 	(*this->_lua)["addCommand"] = [this](const std::string &command){
 		this->_commands.push_back(command);
@@ -204,7 +204,7 @@ void PackOutro::_textCmd(const std::string &args)
 	sprite->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = this->_colorDown;
 	sprite->fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = this->_colorDown;
 	sprite->tint.a = 0;
-	this->_textWait = args.size() * 2;
+	this->_textWait = 120;
 }
 
 void PackOutro::_clearCmd(const std::string &args)
@@ -259,6 +259,7 @@ void PackOutro::_backgroundCmd(const std::string &args)
 	} catch (...) {
 		throw std::invalid_argument(args + " is not a valid background number.");
 	}
+	this->_clearCmd(args);
 }
 
 void PackOutro::_setBGMCmd(const std::string &args)
