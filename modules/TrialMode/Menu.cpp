@@ -34,11 +34,13 @@ static SokuLib::Vector2i offsetTable[9] = {
 	{0, -10},
 	{8, -8}
 };
+static int baseCursor = 0;
 static int currentPack = -3;
 static int currentEntry = -1;
 static bool expended = false;
 static bool loaded = false;
 static bool loadNextTrial = false;
+static bool movingScenario = false;
 static unsigned shownPack = 0;
 static unsigned nameFilter = -1;
 static unsigned modeFilter = -1;
@@ -2031,7 +2033,7 @@ failed2:
 	noEditorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(300));
 	noEditorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(304));
 	noEditorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(308));
-	editorGuides.resize(7);
+	editorGuides.resize(8);
 	editorGuides[0] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(312));
 	editorGuides[1] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(316));
 	editorGuides[2] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(320));
@@ -2039,6 +2041,7 @@ failed2:
 	editorGuides[4] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(328));
 	editorGuides[5] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(332));
 	editorGuides[6] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(336));
+	editorGuides[7] = std::make_unique<Guide>(myModule, MAKEINTRESOURCE(340));
 
 	if (
 		nbPacks != loadedPacks.size() ||
@@ -2340,6 +2343,8 @@ static void displayFilters()
 
 static void switchEditorMode()
 {
+	if (movingScenario)
+		return;
 	editorMode = !editorMode;
 
 	auto color = editorMode ? SokuLib::DrawUtils::DxSokuColor{0x80, 0xFF, 0x80} : SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
@@ -2516,10 +2521,12 @@ static void handleGoUp()
 		currentEntry--;
 		if (currentEntry == -1)
 			currentEntry = loadedPacks[currentPack]->scenarios.size() - 1;
-		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
-			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
-		else
-			loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+		if (!movingScenario) {
+			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+			else
+				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+		}
 	}
 	checkScrollUp();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
@@ -2568,10 +2575,12 @@ static void handleGoDown()
 				packStart = currentPack - 6;
 			entryStart = 0;
 		}
-		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
-			loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
-		else
-			loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+		if (!movingScenario) {
+			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
+			else
+				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+		}
 	}
 	checkScrollDown();
 	printf("Pack: %i, Entry %i, Shown %i\n", currentPack, currentEntry, shownPack);
@@ -3123,13 +3132,46 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 				(packEditPage.*PackEditPage::resetHandlers[packEditPage.cursorPos])();
 		}
 		return true;
-	}
-	if (SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0 && !expended) {
-		try {
-			loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
-		} catch (std::exception &e) {
+	} else if (movingScenario) {
+		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false)) {
 			SokuLib::playSEWaveBuffer(0x29);
-			MessageBox(SokuLib::window, ("Error when loading pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+			movingScenario = false;
+			editorGuides[7]->active = false;
+			editorGuides[2]->active = true;
+			currentEntry = baseCursor;
+			return false;
+		}
+		if (SokuLib::inputMgrs.input.a == 1) {
+			SokuLib::playSEWaveBuffer(0x28);
+			movingScenario = false;
+			editorGuides[7]->active = false;
+			editorGuides[2]->active = true;
+			if (currentEntry < baseCursor) {
+				for (int i = currentEntry + 1; i <= baseCursor; i++)
+					loadedPacks[currentPack]->scenarios[currentEntry].swap(loadedPacks[currentPack]->scenarios[i]);
+			} else if (baseCursor < currentEntry) {
+				for (int i = currentEntry; i > baseCursor; i--)
+					loadedPacks[currentPack]->scenarios[baseCursor].swap(loadedPacks[currentPack]->scenarios[i]);
+			}
+			saveCurrentPack();
+			return false;
+		}
+		return true;
+	}
+	if (SokuLib::inputMgrs.input.changeCard == 1 && currentPack >= 0) {
+		if (!expended) {
+			try {
+				loadedOutro.reset(new PackOutro(loadedPacks[currentPack]->path, loadedPacks[currentPack]->outroPath));
+			} catch (std::exception &e) {
+				SokuLib::playSEWaveBuffer(0x29);
+				MessageBox(SokuLib::window, ("Error when loading pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+			}
+		} else {
+			SokuLib::playSEWaveBuffer(0x28);
+			movingScenario = true;
+			editorGuides[7]->active = true;
+			editorGuides[2]->active = false;
+			baseCursor = currentEntry;
 		}
 		return true;
 	}
@@ -3433,11 +3475,13 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	}
 	menuLoadAssets();
 	if (currentEntry >= 0) {
-		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
-			loadedPacks[shownPack]->scenarios[currentEntry]->preview->update();
+		auto curr = movingScenario ? baseCursor : currentEntry;
+
+		if (!loadedPacks[currentPack]->scenarios[curr]->loading && loadedPacks[currentPack]->scenarios[curr]->preview)
+			loadedPacks[shownPack]->scenarios[curr]->preview->update();
 		else {
-			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading)
-				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+			if (!loadedPacks[currentPack]->scenarios[curr]->loading)
+				loadedPacks[currentPack]->scenarios[curr]->loadPreview();
 			loadingGear.setRotation(loadingGear.getRotation() + 0.1);
 		}
 	}
@@ -3597,7 +3641,18 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 	}
 
 	for (i = entryStart; i < pack.scenarios.size(); i++) {
-		auto &scenario = pack.scenarios[i];
+		auto curr = i;
+
+		if (movingScenario) {
+			if (curr == currentEntry)
+				curr = baseCursor;
+			else if (curr <= baseCursor && curr > currentEntry)
+				curr--;
+			else if (curr >= baseCursor && curr < currentEntry)
+				curr++;
+		}
+
+		auto &scenario = pack.scenarios[curr];
 
 		if (pos.y >= 100) {
 			if (scenario->extra && scenario->score == -1) {
@@ -3727,9 +3782,11 @@ void menuOnRender(SokuLib::MenuResult *This)
 		goto displayOutro;
 	}
 	if (!isLocked(currentEntry) || editorMode) {
-		if (!loadedPacks[shownPack]->scenarios[currentEntry]->loading) {
-			if (loadedPacks[shownPack]->scenarios[currentEntry]->preview && loadedPacks[shownPack]->scenarios[currentEntry]->preview->isValid())
-				loadedPacks[shownPack]->scenarios[currentEntry]->preview->render();
+		auto curr = movingScenario ? baseCursor : currentEntry;
+
+		if (!loadedPacks[shownPack]->scenarios[curr]->loading) {
+			if (loadedPacks[shownPack]->scenarios[curr]->preview && loadedPacks[shownPack]->scenarios[curr]->preview->isValid())
+				loadedPacks[shownPack]->scenarios[curr]->preview->render();
 			else {
 				lockedNoise.draw();
 				blackSilouettes.draw();
@@ -3743,8 +3800,8 @@ void menuOnRender(SokuLib::MenuResult *This)
 			loadingGear.setPosition({563, 225});
 			loadingGear.draw();
 		}
-		if (loadedPacks[shownPack]->scenarios[currentEntry]->description.texture.hasTexture())
-			loadedPacks[shownPack]->scenarios[currentEntry]->description.draw();
+		if (loadedPacks[shownPack]->scenarios[curr]->description.texture.hasTexture())
+			loadedPacks[shownPack]->scenarios[curr]->description.draw();
 		CRTBands.draw();
 	} else {
 		lockedNoise.draw();
