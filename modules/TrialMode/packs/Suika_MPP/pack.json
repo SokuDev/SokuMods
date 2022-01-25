@@ -1,0 +1,98 @@
+{
+    "author": "Mallard",
+    "category": "Suika Ibuki",
+    "characters": [
+        "suika"
+    ],
+    "description": "Combos and setups for MPP",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/suika/face/face000.cv2",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002288818359,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo"
+    ],
+    "name": "Missing Purple Power (MPP)",
+    "scenarios": [
+        {
+            "description": "5aaa MPP mpp5a <br>5aaa MPP works anywhere as long as you are fairly <br>close to your opponent. Try to do these setups closer <br>to the corner so they have less room to escape",
+            "extra": false,
+            "file": "bnbmid1.json",
+            "may_be_locked": true,
+            "name": "Basic midscreen setups",
+            "name_hidden_when_locked": false,
+            "preview": "MPP1.gif"
+        },
+        {
+            "description": "5aa 5b MPP mpp8/9 mppj5c <br>High damage corner only at point blank",
+            "extra": false,
+            "file": "bnbcorn1.json",
+            "may_be_locked": true,
+            "name": "Corner 5aa setup",
+            "name_hidden_when_locked": false,
+            "preview": "MPP2.gif"
+        },
+        {
+            "description": "CH MPP mpp9 mppj5a <br>Normally it is difficult to catch the opponent <br>if you counterhit the them using MPP as a reversal <br>If they are near the corner however, you can do this",
+            "extra": false,
+            "file": "bnbcorn3.json",
+            "may_be_locked": true,
+            "name": "Near corner CH confirm",
+            "name_hidden_when_locked": false,
+            "preview": "MPP3.gif"
+        },
+        {
+            "description": "CH mpp5a/mppj5b mpp5a/mpp5c <br>On CH mpp5a and mppj5b can be followed up on for <br>massive damage",
+            "extra": false,
+            "file": "bnbcorn2.json",
+            "may_be_locked": true,
+            "name": "Punish mashing opponents/DS confirm",
+            "name_hidden_when_locked": false,
+            "preview": "MPP4.gif"
+        },
+        {
+            "description": "mpp5a mpp5c and mppj5a are all AUB <br>make sure to punish jumpy opponents",
+            "extra": false,
+            "file": "bnbcorn6.json",
+            "may_be_locked": true,
+            "name": "Its all AUB",
+            "name_hidden_when_locked": false,
+            "preview": "MPP5.gif"
+        },
+        {
+            "description": "mpp5 mpp5(optional) mpp5a/mpp5c MPP's idle animation can hit opponents the horn <br>which is unblockabe. Make sure to follow up. <br>if going for two horn hits, delay the second one <br>slightly to follow up with mpp5a",
+            "extra": false,
+            "file": "bnbcorn4.json",
+            "may_be_locked": true,
+            "name": "The horn",
+            "name_hidden_when_locked": false,
+            "preview": "MPP6.gif"
+        },
+        {
+            "description": "Normally mppj5a whiffs against crouching opponents. <br>However, against Iku, Yukari, and Utsuho it will connect <br>mppj5a can be used as an overhead mixup against them",
+            "extra": false,
+            "file": "bnbcorn5.json",
+            "may_be_locked": true,
+            "name": "Tall people beware",
+            "name_hidden_when_locked": false,
+            "preview": "MPP7.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/suika.bmp"
+    }
+}

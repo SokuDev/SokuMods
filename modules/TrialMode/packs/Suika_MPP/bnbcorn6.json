@@ -1,0 +1,55 @@
+{
+    "music": 19,
+    "stage": 10,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [205, 205, 205, 205, 1, 1 , 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4],
+        "pos": 700,
+	"mpp": true
+    },
+    "dummy": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 950,
+            "y": 200
+        }
+    },
+    "type": "combo",
+    "intro": "MPPAUB.lua",
+    "expected": "mpp8/mpp5a/mpp5c !mppj5a",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 0,
+    "hand": [205, 205, 205, 205],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 1,
+        "min_damage": 2000,
+        "min_limit": 40
+    },
+    {   
+ 
+
+    },
+    {
+	
+        "max_attempts" : 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

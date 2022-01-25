@@ -1,0 +1,288 @@
+{
+    "author": "Exioloz, Dakawalf, Elos",
+    "category": "Sakuya Izayoi",
+    "characters": [
+        "sakuya",
+        "meirin"
+    ],
+    "description": "Sakuya's combos<br><br>For more information: <br><color AAAAFF>https://hisouten.koumakan.jp/wiki/<br>Sakuya_Izayoi/Combos</color>",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 2.0,
+            "y": 0.0
+        },
+        "path": "data/character/sakuya/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002288818359,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "5AAA 2B hjc.9 j.2B/j.5B j.66/D6/D3 j.5A Dial A | <br>Common Midscreen BnB. <br>Doesn't work on midgets and most crouching<br>characters.",
+            "extra": false,
+            "file": "bnbmid2.json",
+            "may_be_locked": true,
+            "name": "5AAA starter 1",
+            "name_hidden_when_locked": false,
+            "preview": "trial1.gif"
+        },
+        {
+            "description": "5AAA d623B j.5B j.66 j.6A | <br>Doesn't work on a lot of characters, <br>but can be fixed by dashing into the opponent <br>before starting 5A. <br>The additional momentum will <br>make the combo work on small characters like <br>standing Youmu as well, <br>but will still drop on small crouches. <br>Also works in the corner.",
+            "extra": false,
+            "file": "bnbmid8.json",
+            "may_be_locked": true,
+            "name": "5AAA starter 2",
+            "name_hidden_when_locked": false,
+            "preview": "trial2.gif"
+        },
+        {
+            "description": "5AAA 2B[1] 5C hj.9 j.6C | <br>5AAA alt route for midgets.<br>j.6C can be replaced for d236B<br>but only from midscreen.",
+            "extra": false,
+            "file": "bnbmid3.json",
+            "may_be_locked": true,
+            "name": "5AAA starter 3",
+            "name_hidden_when_locked": false,
+            "preview": "trial3.gif"
+        },
+        {
+            "description": "f.5A/2A 3A 66B | <br>Combo options after f5A and 2A <br>from far without CH are limited to 3A ",
+            "extra": false,
+            "file": "bnbmid1.json",
+            "may_be_locked": true,
+            "name": "f.5A/2A starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial4.gif"
+        },
+        {
+            "description": "6A 2B hj.9 j.6A | <br>j.6A ender is a decent corner carry, <br>however you might land behind your enemy. <br>Also works in the corner.",
+            "extra": false,
+            "file": "bnbmid4.json",
+            "may_be_locked": true,
+            "name": "6A starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial5.gif"
+        },
+        {
+            "description": "f.5A/2A 6A 2B d623B | <br>Simple BnB 6A, <br>Which can combo after a f5A or 2A CH.",
+            "extra": false,
+            "file": "CH2.json",
+            "may_be_locked": true,
+            "name": "f.5A/2A CH starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial6.gif"
+        },
+        {
+            "description": "6A 5C hjc.9 j.5A j.6A j.6C | <br>Sometimes when you try a 6A 5C corner carry <br>during pressure, the 6A gets a CH, <br>in which case you can do this combo.",
+            "extra": false,
+            "file": "CH3.json",
+            "may_be_locked": true,
+            "name": "6A CH Starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial7.gif"
+        },
+        {
+            "description": "66A d623B j.5B j.66 j.6A | <br>Sakuya's only meterless <br>combo option after hitting 66A. <br>66A needs to hit deep enough <br>or 623B won't connect. <br>Make sure that all B knives come out, <br>otherwise it won't limit. <br>If your opponent ends up too high, <br>finish with j.6C instead.",
+            "extra": false,
+            "file": "bnbmid5.json",
+            "may_be_locked": true,
+            "name": "66A starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial8.gif"
+        },
+        {
+            "description": "3A hj.9 j.5A j.6A j.6C | <br>Mostly used to combo off of an airtech punish. <br>Timing is quite strict and depending <br>on the distance to your enemy <br>this combo easily drops. <br>Way easier if the opponent is caught <br>in the air with 3A as an anti-air combo. <br>Also works in the corner, <br>but use j5B/j2B/j2C as finisher.",
+            "extra": false,
+            "file": "bnbmid9.json",
+            "may_be_locked": true,
+            "name": "3A starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial9.gif"
+        },
+        {
+            "description": "j.2B D2 j.2B D3 Dial A | Universal j2B starter",
+            "extra": false,
+            "file": "air5.json",
+            "may_be_locked": true,
+            "name": "j2B starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial10.gif"
+        },
+        {
+            "description": "Dial A hj.9 j.5A j.6A j.2B D2/D1 | <br>Universal BnB D2 to setup oki.",
+            "extra": false,
+            "file": "bnbcorn0.json",
+            "may_be_locked": true,
+            "name": "Dial A Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial11.gif"
+        },
+        {
+            "description": "j.2A j.9 j.5A j.2A 66A d623B | <br>Basic corner combo ender for most characters.<br>You will often get this starter<br>as j.2A is a great frametrap option.",
+            "extra": false,
+            "file": "bnbcorn1.json",
+            "may_be_locked": true,
+            "name": "j.2A Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial12.gif"
+        },
+        {
+            "description": "f.5A/2A 3A j.5A j.2A 66A d623B |<br>You can omit f.5A/2A.<br>Mostly used to combo off of an airtech punish. <br>You can also leave out the finisher (66A d623B) <br>and try to bait another airtech, <br>essentially resetting this combo into itself.",
+            "extra": false,
+            "file": "bnbcorn2.json",
+            "may_be_locked": true,
+            "name": "(f.5A/2A)3A Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial13.gif"
+        },
+        {
+            "description": "3A j.9 j.5A j.2A j9 j.2A 66A d623B | <br>In case you only hit the second part of 3A, <br>useful if the opponent is too far",
+            "extra": false,
+            "file": "bnbcorn6.json",
+            "may_be_locked": true,
+            "name": "3A[1] Corner anti-air starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial14.gif"
+        },
+        {
+            "description": "5AAA 2B hjc.9 j.6A j.6C | <br>Works off of a low 4A anti-air. <br>If your opponent is too high, <br>you should rather go for the chase.",
+            "extra": false,
+            "file": "bnbAA1.json",
+            "may_be_locked": true,
+            "name": "5AAA Corner anti-air starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial15.gif"
+        },
+        {
+            "description": "6A 6C hj.9 j.5A j.6C j.66 j.5A j.6A | <br>More damaging variant of the basic 6A, <br>will however drop if started with CH f.5A. <br>Also works some distance away from the corner. <br>Ender can be replaced by j2A 66A d623B, <br>for easier execution.",
+            "extra": false,
+            "file": "bnbcorn7.json",
+            "may_be_locked": true,
+            "name": "6A Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial16.gif"
+        },
+        {
+            "description": "j.5A j.2A j.9 j.5A j.2A 66A d623B | <br>Optimized version of the corner BnB.",
+            "extra": false,
+            "file": "bnbcorn8.json",
+            "may_be_locked": true,
+            "name": "j.5A Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial17.gif"
+        },
+        {
+            "description": "5AAAA j.9 j.2A 66A d623B | <br>Near corner, spacing specific dial A combo. <br>Gives good damage and okizeme.",
+            "extra": false,
+            "file": "bnbcorn4.json",
+            "may_be_locked": true,
+            "name": "Dial A Near-Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial18.gif"
+        },
+        {
+            "description": "j.6A hj.9 j.5A j.2A 66A 623B | <br>Optimized j6A land cancel near corner. <br>If you're close enough.",
+            "extra": false,
+            "file": "bnbcorn12.json",
+            "may_be_locked": true,
+            "name": "j.6A LC Near corner",
+            "name_hidden_when_locked": false,
+            "preview": "trial19.gif"
+        },
+        {
+            "description": "j.5A j.6C j.6D/j.66 j.6C j.d236B| <br>Basic air-to-air j5A combo. <br>Delay the j236b. Pray it limits.",
+            "extra": false,
+            "file": "air4.json",
+            "may_be_locked": true,
+            "name": "j.5A Air starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial20.gif"
+        },
+        {
+            "description": "j.5A j.6A j.6C j.d236B | <br>Basic air-to-air j5A combo. <br>Delay the j236b. Pray it limits.",
+            "extra": false,
+            "file": "air2.json",
+            "may_be_locked": true,
+            "name": "j.5A/j.6A Air starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial21.gif"
+        },
+        {
+            "description": "j.6A j.6C j.66/j.D6 j.6C j.D9 j.6C | <br>Another basic air-to-air j.6A combo.",
+            "extra": false,
+            "file": "air1.json",
+            "may_be_locked": true,
+            "name": "j.6A Air starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial22.gif"
+        },
+        {
+            "description": "j.8A j.5B j.9D/j.66 j.6A/j.8A | <br>j.8A combo near-corner/corner.",
+            "extra": false,
+            "file": "air3.json",
+            "may_be_locked": true,
+            "name": "j.8A Air starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial23.gif"
+        },
+        {
+            "description": "66C hj.9/hj.8/j.8/j.9 j.2A 66C | <br>Midscreen conversion off 66C CH. <br>Spacing on hit changes the timing a lot. <br>You can try to adjust using D6. <br>You can go for the 66A ender, <br>if you're close enough to the corner.",
+            "extra": false,
+            "file": "CH5.json",
+            "may_be_locked": true,
+            "name": "66C CH starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial24.gif"
+        },
+        {
+            "description": "66C hj.9/hj.8/j.8/j.9 j.5A j.6A j.6C |<br>Alt route for midscreen conversion off 66C CH. <br>It can be easier to hit depending on your<br>spacing and the opponent height.",
+            "extra": false,
+            "file": "CH6.json",
+            "may_be_locked": true,
+            "name": "66C CH starter 2",
+            "name_hidden_when_locked": false,
+            "preview": "trial25.gif"
+        },
+        {
+            "description": "66C hj.9/D6 j.5A j.2A 66A d623B | <br>More optimized combo off of 66C CH. <br>If you move into the corner due to 66C, <br>you have to walk back a little, <br>otherwise you will be facing out of the corner.",
+            "extra": false,
+            "file": "CH1.json",
+            "may_be_locked": true,
+            "name": "66C CH starter Near-Corner",
+            "name_hidden_when_locked": false,
+            "preview": "trial26.gif"
+        },
+        {
+            "description": "5AAA 2B hj.9 j.5C D6 j.5A 5AAAA | <br>Near corner, More optimized version with 5A <br>starter.",
+            "extra": false,
+            "file": "bnbcorn9.json",
+            "may_be_locked": true,
+            "name": "5AAA Near-Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial27.gif"
+        },
+        {
+            "description": "5AAA 2B(1) 5C hj.9 j.5A j.2B D3/j.66 j.5A Dial A | <br>Variations of 5A BnB for tall characters.",
+            "extra": false,
+            "file": "bnbcorn01.json",
+            "may_be_locked": true,
+            "name": "5A Corner starter",
+            "name_hidden_when_locked": false,
+            "preview": "trial28.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/sakuya.bmp"
+    }
+}

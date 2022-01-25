@@ -1,0 +1,52 @@
+{
+    "music": 19,
+    "stage": 12,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [201,201,201,201,1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4],
+        "pos": 700
+    },
+    "dummy": {
+        "character": "meirin",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 800,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "expected": "5aa !5b sc201 6[10] 5aaaa",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [201],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 8,
+        "min_damage": 2800,
+        "min_limit": 100
+    },
+	{
+	"max_attempts": 20
+	},
+    {
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

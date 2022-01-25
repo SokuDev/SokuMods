@@ -1,0 +1,54 @@
+{
+    "music": 19,
+    "stage": 6,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": 1180
+    },
+    "dummy": {
+        "character": "tenshi",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 1240,
+            "y": 50
+        }
+    },
+    "type": "combo",
+
+    "expected": "4a 5b hj9 j5a j6a j5b jd623b/ja1236b",
+    "skills": [
+        [1, 1],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 6,
+        "min_damage": 2700,
+        "min_limit": 100
+    },
+    {   
+        "min_hits" : 7,
+        "min_limit" : 100,
+        "min_damage" : 2900
+    },
+    {
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}
