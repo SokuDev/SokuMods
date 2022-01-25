@@ -1,0 +1,54 @@
+{
+    "music": 19,
+    "stage": 1,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": 1000
+    },
+    "dummy": {
+        "character": "marisa",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 1100,
+            "y": 120
+        }
+    },
+    "type": "combo",
+
+    "expected": "!8 j5a:10 j6a j5b[20] j66 !j5a j6a",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 6,
+        "min_damage": 2700,
+        "min_limit": 100
+    },
+    {   
+        "min_hits" : 7,
+        "min_limit" : 100,
+        "min_damage" : 2900
+    },
+    {
+        "max_attempts" : 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

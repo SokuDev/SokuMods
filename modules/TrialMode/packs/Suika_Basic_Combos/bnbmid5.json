@@ -1,0 +1,52 @@
+{
+    "music": 19,
+    "stage": 4,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": 700
+    },
+    "dummy": {
+        "character": "iku",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 800,
+            "y": 140
+        }
+    },
+    "type": "combo",
+
+    "expected": "!8 j5a j6a j6b ja1236b:15",
+    "skills": [
+        [1, 1],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 5,
+        "min_damage": 2400,
+        "min_limit": 100
+    },
+	{
+	"max_attempts": 20
+	},
+    {
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

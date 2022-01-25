@@ -1,0 +1,53 @@
+{
+    "music": 19,
+    "stage": 2,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": 750
+    },
+    "dummy": {
+        "character": "komachi",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 800,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "expected": "6a 5b hj9 j5a:10 j6a j6b",
+    "skills": [
+        [0, 0],
+        [2, 1],
+        [0, 0],
+        [0, 0]
+    ],
+    "counter_hit": true,
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 5,
+        "min_damage": 2800,
+        "min_limit": 100
+    },
+    {
+        "max_attempts": 20
+    },
+    {
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

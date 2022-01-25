@@ -1,0 +1,54 @@
+{
+    "music": 12,
+    "stage": 12,
+    "player": {
+        "character": "sakuya",
+        "palette": 0,
+        "deck": [],
+        "pos": 700
+    },
+    "dummy": {
+        "character": "meirin",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 750,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "expected": "!d6 5aaa 2b hj9/hj8 j5b/j2b j66/j6d:30 j5a:20 5aaaa",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 25,
+        "min_damage": 2200,
+        "min_limit": 90
+    },
+    {
+        "min_limit": 103,
+        "min_hits": 29,
+        "min_damage" : 2403
+    },
+    {
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

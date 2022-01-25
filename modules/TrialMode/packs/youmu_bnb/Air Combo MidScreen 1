@@ -1,0 +1,55 @@
+{
+    "dummy": {
+        "character": "yuyuko",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 698.0,
+            "y": 162.0
+        }
+    },
+    "expected": "hj9 j5a:19 j8a:15 j6c:27 j66:31 j5a:14 j8a:20",
+    "music": "data/bgm/st14.ogg",
+    "player": {
+        "character": "youmu",
+        "deck": [],
+        "palette": 0,
+        "pos": 480.0
+    },
+    "score": [
+        {
+            "min_damage": 2393,
+            "min_hits": 5,
+            "min_limit": 120
+        },
+        {
+            "max_attempts": 9
+        },
+        {
+            "max_attempts": 6
+        },
+        {
+            "max_attempts": 3
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 15,
+    "type": "combo"
+}

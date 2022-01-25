@@ -1,0 +1,57 @@
+{
+    "music": 19,
+    "stage": 10,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [205, 205, 205, 205, 1, 1 , 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4],
+        "pos": 850,
+	"mpp": true
+    },
+    "dummy": {
+        "character": "yukari",
+        "palette": 0,
+	"crouch":true,
+        "deck": [],
+        "pos": {
+            "x": 1100,
+            "y": 0
+        }
+    },
+    "intro": "UniversalCutsceneTemplate.lua",
+    "type": "combo",
+
+    "expected": "mpp8/mpp9 mppj5a:50",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 21,
+    "counter_hit": false,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [205, 205, 205, 205],
+    "play_combo_after_intro": true,
+    "fail_timer": 100,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 1,
+        "min_damage": 2000,
+        "min_limit": 40
+    },
+    {   
+    },
+    {
+	"min_damage": 2000,
+        "max_attempts" : 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

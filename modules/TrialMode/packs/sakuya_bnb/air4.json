@@ -1,0 +1,60 @@
+{
+    "dummy": {
+        "character": "meirin",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 800.0,
+            "y": 200.0
+        }
+    },
+    "expected": "!8/9 j5a j6c j66/j3d j6c !jd236b:20",
+    "music": "data/bgm/st12.ogg",
+    "player": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": 700.0
+    },
+    "score": [
+        {
+            "min_damage": 1650,
+            "min_hits": 10,
+            "min_limit": 50
+        },
+        {
+            "min_damage": 1750,
+            "min_hits": 12,
+            "min_limit": 60
+        },
+        {
+            "min_damage": 2050,
+            "min_hits": 18,
+            "min_limit": 94
+        },
+        {
+            "max_attempts": 15
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 12,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

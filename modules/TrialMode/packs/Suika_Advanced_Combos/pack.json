@@ -1,0 +1,107 @@
+{
+    "author": "Mallard",
+    "category": "Suika Ibuki",
+    "characters": [
+        "suika"
+    ],
+    "description": "Intermediate Suika Combos",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/suika/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002288818359,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo"
+    ],
+    "name": "Advanced Combos",
+    "scenarios": [
+        {
+            "description": "5aa 5b j2a j5b d623b/a236/j44 j2a <br>Using d623 is much more consistant near corner. <br>Timing on j2a can be rather tight",
+            "extra": false,
+            "file": "bnbcorn2.json",
+            "may_be_locked": true,
+            "name": "Near corner/midscreen 5aa",
+            "name_hidden_when_locked": false,
+            "preview": "adv1.gif"
+        },
+        {
+            "description": "4a 5b j6a j5[b] j66 j5a j6a <br>AUB limit in corner without d623 <br>a bit tighter on timing/spacing but no alt<br>skills required",
+            "extra": false,
+            "file": "bnbcorn6.json",
+            "may_be_locked": true,
+            "name": "Corner AUB skilless",
+            "name_hidden_when_locked": false,
+            "preview": "adv2.gif"
+        },
+        {
+            "description": "j5a j6a j5c d623b <br>High damage air-to-air near corner",
+            "extra": false,
+            "file": "bnbcorn1.json",
+            "may_be_locked": true,
+            "name": "Corner air-to_air d623",
+            "name_hidden_when_locked": false,
+            "preview": "adv3.gif"
+        },
+        {
+            "description": "j5a j6a j5[b] j66 j5a j6a <br>Another high damage air-to-air near the corner <br>doesn't require skills, but spacing is more<br>strict.",
+            "extra": false,
+            "file": "bnbcorn3.json",
+            "may_be_locked": true,
+            "name": "Corner air-to-air skilless",
+            "name_hidden_when_locked": false,
+            "preview": "adv4.gif"
+        },
+        {
+            "description": "j5a j6a a236b/c jd3 j5a j6a <br>Yet another air-to-air confirm using oni<br>spirit bomb.",
+            "extra": false,
+            "file": "bnbcorn4.json",
+            "may_be_locked": true,
+            "name": "Corner air-to-air oni spirit bomb",
+            "name_hidden_when_locked": false,
+            "preview": "adv5.gif"
+        },
+        {
+            "description": "j8a a236b/c jd3 j5a j6a <br>A j8a confirm with oni spirit bomb, <br>good to know for when j5[b] drops.",
+            "extra": false,
+            "file": "bnbcorn5.json",
+            "may_be_locked": true,
+            "name": "Corner j8a oni spirit bomb",
+            "name_hidden_when_locked": false,
+            "preview": "adv6.gif"
+        },
+        {
+            "description": "5aa a623b hj9 j2a j6c jd9 j6c jd9 j6a <br>A difficult combo that grants high damage if<br>done right needs fire oni at level 2.",
+            "extra": false,
+            "file": "combomid.json",
+            "may_be_locked": false,
+            "name": "Midscreen lvl 2 fire oni",
+            "name_hidden_when_locked": false,
+            "preview": "adv7.gif"
+        },
+        {
+            "description": "hj9 j44 j2a<br>A simple crossup setup that leads to standard<br>j2a combos.",
+            "extra": false,
+            "file": "crossup.json",
+            "may_be_locked": true,
+            "name": "Crossup setup",
+            "name_hidden_when_locked": false,
+            "preview": "adv8.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/suika.bmp"
+    }
+}

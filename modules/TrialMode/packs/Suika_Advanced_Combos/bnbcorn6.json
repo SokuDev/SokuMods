@@ -1,0 +1,56 @@
+{
+    "dummy": {
+        "character": "tenshi",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 1240.0,
+            "y": 50.0
+        }
+    },
+    "expected": "4a 5b hj7 j6a j5b[20] j66 j5a j6a",
+    "music": "data/bgm/st06.ogg",
+    "player": {
+        "character": "suika",
+        "deck": [],
+        "palette": 0,
+        "pos": 1180.0
+    },
+    "score": [
+        {
+            "min_damage": 3000,
+            "min_hits": 8,
+            "min_limit": 100
+        },
+        {
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "skills": [
+        [
+            1,
+            1
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 6,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

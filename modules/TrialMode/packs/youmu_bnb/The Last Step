@@ -1,0 +1,59 @@
+{
+    "dummy": {
+        "character": "youmu",
+        "deck": [],
+        "palette": 7,
+        "pos": {
+            "x": 644.0,
+            "y": 0.0
+        }
+    },
+    "expected": "d6 4a/1a:10 4a/1a:18 !4a/1a:18 !4a/1a:15 d623c",
+    "music": "data/bgm/ta07.ogg",
+    "player": {
+        "character": "youmu",
+        "deck": [],
+        "palette": 0,
+        "pos": 480.0
+    },
+    "score": [
+        {
+            "min_damage": 1506,
+            "min_hits": 4,
+            "min_limit": 40
+        },
+        {
+            "min_damage": 1666,
+            "min_hits": 5
+        },
+        {
+            "min_damage": 1822,
+            "min_hits": 6
+        },
+        {
+            "min_damage": 1975,
+            "min_hits": 7
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 17,
+    "type": "combo",
+    "weather": 15
+}
