@@ -1,0 +1,52 @@
+{
+    "music": 19,
+    "stage": 14,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": 720
+    },
+    "dummy": {
+        "character": "patchouli",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 800,
+            "y": 0
+        }
+    },
+    "type": "combo",
+
+    "expected":"5aa 2b d214c:15 hj9 j6a",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": 18,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 8,
+        "min_damage": 2600,
+        "min_limit": 100
+    },
+	{
+	"max_attempts": 20
+	},
+    {
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

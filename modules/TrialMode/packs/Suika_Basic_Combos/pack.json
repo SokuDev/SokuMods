@@ -1,0 +1,188 @@
+{
+    "author": "Mallard",
+    "category": "Suika Ibuki",
+    "characters": [
+        "suika"
+    ],
+    "description": "Simple Suika Stuff",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/suika/face/face000.bmp",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100001692771912,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "5aaaa <br>Literally just dial A, does decent damage",
+            "extra": false,
+            "file": "bnbmid1.json",
+            "may_be_locked": true,
+            "name": "5AAA",
+            "name_hidden_when_locked": false,
+            "preview": "basic1.gif"
+        },
+        {
+            "description": "5aa 5b d236b <br>No limit without leveling d236, but its a hard<br>kd anyways won't knock down at further spacings",
+            "extra": false,
+            "file": "bnbmid2.json",
+            "may_be_locked": true,
+            "name": "5AA starter",
+            "name_hidden_when_locked": false,
+            "preview": "basic2.gif"
+        },
+        {
+            "description": "5aa a623b hj9 j5a j6a j6b <br>Works point blank only",
+            "extra": false,
+            "file": "bnbmid3.json",
+            "may_be_locked": true,
+            "name": "Midscreen starter fire oni",
+            "name_hidden_when_locked": false,
+            "preview": "basic3.gif"
+        },
+        {
+            "description": "5aa 5b a623c hj9 j5a j6a j2b/j6b <br>Slight variation of the other starter, can be<br>used to >limit if too far from the<br>other corner",
+            "extra": false,
+            "file": "bnbmid3.5.json",
+            "may_be_locked": true,
+            "name": "Midscreen starter fire oni 2",
+            "name_hidden_when_locked": false,
+            "preview": "basic4.gif"
+        },
+        {
+            "description": "66a d214b/a623b hj9 j5a j6a <br>Highest damage options off of a 66a hit, <br>many other skills work here <br>note: d214 is slightly rng dependant",
+            "extra": false,
+            "file": "bnbmid7.json",
+            "may_be_locked": true,
+            "name": "66a confirm",
+            "name_hidden_when_locked": false,
+            "preview": "basic5.gif"
+        },
+        {
+            "description": "CH 6a 5b(whiff) hj9 j5a j6a j6b <br>CH 6a gives a lot of time to follow up <br>and can lead to a lot of damage <br>5b can be used to cancel the lag of moves, <br>even if it doesn't connect",
+            "extra": false,
+            "file": "bnbmid9.json",
+            "may_be_locked": true,
+            "name": "CH 6a",
+            "name_hidden_when_locked": false,
+            "preview": "basic6.gif"
+        },
+        {
+            "description": "CH2b/2[b] 2c hj8/hj9 j5a j6a <br>2b is a good tool to frametrap in your<br>blockstrings. On CH, it allows for heavy<br>damage. 2[b] can be comboed in a similar way <br>even without CH",
+            "extra": false,
+            "file": "bnbmid11.json",
+            "may_be_locked": true,
+            "name": "CH 2b/2[b]",
+            "name_hidden_when_locked": false,
+            "preview": "basic7.gif"
+        },
+        {
+            "description": "j2a j5b j66 j2a j2b/j5b <br>Standard j2a combo, can use j5a j6a if <br>opponent is close to the corner after j5b ",
+            "extra": false,
+            "file": "bnbmid4.json",
+            "may_be_locked": true,
+            "name": "j2a starter",
+            "name_hidden_when_locked": false,
+            "preview": "basic8.gif"
+        },
+        {
+            "description": "j8a j5[b] j66 j5a j6a j6b <br>Air confirm using j8a, may be finicky with<br>spacing opponent should be level with or<br>slightly below Suika during j5[b]",
+            "extra": false,
+            "file": "bnbmid10.json",
+            "may_be_locked": true,
+            "name": "Air-to-Air j8a",
+            "name_hidden_when_locked": false,
+            "preview": "basic9.gif"
+        },
+        {
+            "description": "j5a j6a j6b a236b/c <br>Simple air-to-air limit midscreen with oni<br>spirit bomb",
+            "extra": false,
+            "file": "bnbmid5.json",
+            "may_be_locked": true,
+            "name": "Midscreen Air-to-Air",
+            "name_hidden_when_locked": false,
+            "preview": "basic10.gif"
+        },
+        {
+            "description": "j5a j6a j6c a236/j44 j6b <br>Connecting with j6c after j6a is rather<br>spacing specific but grants excellent<br>damage if done properly.",
+            "extra": false,
+            "file": "bnbmid5.5.json",
+            "may_be_locked": true,
+            "name": "Midscreen Air-to-Air (close)",
+            "name_hidden_when_locked": false,
+            "preview": "basic11.gif"
+        },
+        {
+            "description": "5aa 5b a623b hj9 j5a j6a j6b <br>Strong, easy corner combo if fire oni<br>is leveled",
+            "extra": false,
+            "file": "bnbcorn0.json",
+            "may_be_locked": true,
+            "name": "Corner 5AA starter",
+            "name_hidden_when_locked": false,
+            "preview": "basic12.gif"
+        },
+        {
+            "description": "4a 5b hj9 j5a j6b j5b d623b/a236b/c <br>Basic combo off of aub 4a in corner, <br>oni spirit bomb can also be used to limit",
+            "extra": false,
+            "file": "bnbcorn1.json",
+            "may_be_locked": true,
+            "name": "Corner AUB starter",
+            "name_hidden_when_locked": false,
+            "preview": "basic13.gif"
+        },
+        {
+            "description": "5aa 2b d214c hj9 j6a <br>A strong midscreen combo option<br>available in monsoon",
+            "extra": false,
+            "file": "bnbmid8.json",
+            "may_be_locked": true,
+            "name": "Monsoon Midscreen",
+            "name_hidden_when_locked": false,
+            "preview": "basic14.gif"
+        },
+        {
+            "description": "5aaa 5aaaa <br>A simple combo that does massive damage in<br>monsoon needs a delay after 5aaa",
+            "extra": false,
+            "file": "bnbcorn3.json",
+            "may_be_locked": true,
+            "name": "Monsoon Corner",
+            "name_hidden_when_locked": false,
+            "preview": "basic15.gif"
+        },
+        {
+            "description": "5aa 5b chain 5aaaa <br>Simple, high damage confirm with 2sc chain;<br>A slight walk forward is needed after the<br>chain",
+            "extra": false,
+            "file": "bnbmid6.json",
+            "may_be_locked": true,
+            "name": "Basic chain confirm",
+            "name_hidden_when_locked": false,
+            "preview": "basic16.gif"
+        },
+        {
+            "description": "5aa 5b chain 5aa chain 5aa 5b<br>If two chain cards are held they can both be<br>used in the same combo for less damage, but<br>more orbs crushed",
+            "extra": false,
+            "file": "bnbmid6.5.json",
+            "may_be_locked": true,
+            "name": "Basic chain confirm cont.",
+            "name_hidden_when_locked": false,
+            "preview": "basic17.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/suika.bmp"
+    }
+}

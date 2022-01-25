@@ -1,0 +1,57 @@
+{
+    "music": 19,
+    "stage": 3,
+    "player": {
+        "character": "suika",
+        "palette": 0,
+        "deck": [],
+        "pos": 750
+    },
+    "dummy": {
+        "character": "aya",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 800,
+            "y": 200
+        }
+    },
+    "type": "combo",
+
+    "expected": "8 j8a:10 j5b[20]:45 j66 j5a j6a j6b",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "counter_hit": true,
+    "weather": 21,
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "hint": [
+
+    ],
+    "score": [
+    {
+        "min_hits": 8,
+        "min_damage": 2200,
+        "min_limit": 100
+    },
+    {
+	"min_hits": 10,
+        "max_attempts": 20,
+        "min_damage" : 2500
+    },
+    {
+	"min_hits":11,
+	"min_damage": 2600,
+        "max_attempts": 10
+    },
+    {
+        "max_attempts": 5
+    }
+    ]
+}

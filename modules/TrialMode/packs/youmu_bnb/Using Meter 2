@@ -1,0 +1,84 @@
+{
+    "dummy": {
+        "character": "yuyuko",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 506.0,
+            "y": 0.0
+        }
+    },
+    "expected": "5a 5aa:15 5aaa:15 sc203/sc201",
+    "hand": [
+        203,
+        201
+    ],
+    "music": "data/bgm/st14.ogg",
+    "player": {
+        "character": "youmu",
+        "deck": [
+            0,
+            0,
+            0,
+            0,
+            200,
+            200,
+            200,
+            200,
+            201,
+            201,
+            201,
+            201,
+            203,
+            203,
+            203,
+            203,
+            212,
+            212,
+            212,
+            212
+        ],
+        "palette": 0,
+        "pos": 480.0
+    },
+    "score": [
+        {
+            "min_damage": 3641,
+            "min_hits": 8,
+            "min_limit": 50
+        },
+        {
+            "max_attempts": 3
+        },
+        {
+            "max_attempts": 2
+        },
+        {
+            "max_attempts": 1,
+            "min_damage": 4803,
+            "min_hits": 21,
+            "min_limit": 100
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 15,
+    "type": "combo",
+    "uniform_card_cost": 2
+}
