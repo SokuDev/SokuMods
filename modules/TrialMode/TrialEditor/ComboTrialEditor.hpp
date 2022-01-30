@@ -147,6 +147,7 @@ private:
 	unsigned _handCursor = 0;
 	unsigned _scoreEdited = 0;
 	unsigned _check = 0;
+	unsigned _jumpLen = 0;
 	float _fakePlayerPos = 0;
 	bool _editingHand = false;
 	bool _comboOnLeft = false;
@@ -161,6 +162,7 @@ private:
 	bool _recordingCombo = false;
 	bool _editingScore = false;
 	bool _isRecordingScore = false;
+	bool _jumped = false;
 	unsigned _previewMode = 0;
 	ScorePrerequisites _expectedScore;
 	ScorePrerequisites _oldScore;

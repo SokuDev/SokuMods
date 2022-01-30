@@ -526,12 +526,23 @@ ComboTrialEditor::~ComboTrialEditor()
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 }
 
+static unsigned leftObjs = 0;
+static unsigned rightObjs = 0;
+
 bool ComboTrialEditor::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
 	if (*(char*)0x89a88c == 2)
 		return true;
+//	if (this->_recordingCombo && !SokuLib::checkKeyOneshot(DIK_F12, false, false, false)) {
+//		canHaveNextFrame = false;
+//		return true;
+//	}
+//	if (this->_playingIntro && !SokuLib::inputMgrs.input.a && SokuLib::inputMgrs.input.c != 1) {
+//		canHaveNextFrame = false;
+//		return true;
+//	}
 	if (this->_managingDolls || this->_changingPlayerPos || this->_changingDummyPos || this->_comboPageDisplayed)
 		for (auto &guide : this->_guides)
 			guide->update();
@@ -680,8 +691,11 @@ bool ComboTrialEditor::update(bool &canHaveNextFrame)
 			this->_initGameStart();
 			this->_recordingCombo = true;
 			this->_recordBuffer.clear();
+			this->_recordBuffer2.clear();
 			this->_comboRecTimer = 0;
 			this->_comboPageDisplayed = false;
+			this->_jumpLen = 0;
+			this->_jumped = false;
 			(*reinterpret_cast<char **>(0x8985E8))[0x494] = 22;
 		}
 	} else if (this->_comboPageDisplayed && !this->_playingIntro) {
@@ -997,13 +1011,18 @@ disableLimit:
 	this->_dummyHit |= hit;
 	if (!this->_dummyHit && !this->_finished) {
 		battleMgr.rightCharacterManager.objectBase.position.x = this->_dummyStartPos.x;
-		if (!this->_jump || this->_dummyStartPos.y != 0)
+		if (!this->_jump || this->_dummyStartPos.y != 0) {
 			battleMgr.rightCharacterManager.objectBase.position.y = this->_dummyStartPos.y;
+			battleMgr.rightCharacterManager.objectBase.speed.y = 0;
+		}
 		if (this->_jump && this->_recordingCombo && this->_recordBuffer.empty()) {
-			if (isStartOfMove(SokuLib::ACTION_NEUTRAL_JUMP, battleMgr.rightCharacterManager, SokuLib::rightChar))
+			if (isStartOfMove(SokuLib::ACTION_NEUTRAL_JUMP, battleMgr.rightCharacterManager, SokuLib::rightChar)) {
 				this->_comboRecTimer = 1;
-			else
+				this->_jumped = this->_jumped || this->_jumpLen;
+			} else
 				this->_comboRecTimer++;
+			if (!this->_jumped)
+				this->_jumpLen++;
 		}
 
 		if (!this->_playingIntro && this->_outroRequ == 1) {
@@ -1257,8 +1276,11 @@ void ComboTrialEditor::_initGameStart()
 		this->_waitCounter--;
 	this->_playComboAfterIntro = false;
 	this->_actionCounter = 0;
-	if (this->_first)
+	if (this->_first) {
 		this->_playBGM();
+		leftObjs  = battleMgr.leftCharacterManager.objects.list.size;
+		rightObjs = battleMgr.rightCharacterManager.objects.list.size;
+	}
 	this->_first = false;
 
 	this->_firstFirst = 0;
@@ -1463,8 +1485,8 @@ void ComboTrialEditor::editPlayerInputs(SokuLib::KeyInput &originalInputs)
 				!!originalInputs.b,
 				!!originalInputs.c,
 				!!originalInputs.d,
-				!!originalInputs.spellcard,
-				!!originalInputs.changeCard
+				!!originalInputs.changeCard,
+				!!originalInputs.spellcard
 			}, 0);
 		else
 			this->_recordBuffer2.back().second++;
@@ -3558,6 +3580,16 @@ void ComboTrialEditor::_saveRecordedCombo()
 	this->_playComboAfterIntro = true;
 	this->_previewMode = 1;
 	this->_previewInputs.clear();
+
+	auto &input = this->_recordBuffer2.front().first;
+
+	if (!input.a && !input.b && !input.c && !input.d && !input.spellcard && !input.changeCard && !input.horizontalAxis && !input.verticalAxis) {
+		if (this->_jump) {
+			if (this->_jumped)
+				this->_recordBuffer2.front().second %= this->_jumpLen;
+		} else
+			this->_recordBuffer2.erase(this->_recordBuffer2.begin());
+	}
 	SokuLib::playSEWaveBuffer(0x28);
 }
 
@@ -3569,6 +3601,8 @@ void ComboTrialEditor::_checkCurrentAction()
 		SokuLib::ACTION_WALK_FORWARD,
 		SokuLib::ACTION_WALK_BACKWARD,
 		SokuLib::ACTION_FLY,
+		SokuLib::ACTION_FORWARD_DASH,
+		SokuLib::ACTION_BACKDASH,
 		FAKE_ACTION_MPP_IDLE,
 		FAKE_ACTION_MPP_WALK
 	};
@@ -3610,8 +3644,6 @@ void ComboTrialEditor::_checkCurrentAction()
 		this->_comboRecTimer = 0;
 	} else if (!this->_recordBuffer.empty())
 		this->_comboRecTimer++;
-	if (this->_recordBuffer.empty())
-		this->_recordBuffer2.clear();
 }
 
 nlohmann::json ComboTrialEditor::_getMyJson() const

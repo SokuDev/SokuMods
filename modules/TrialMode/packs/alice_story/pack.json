@@ -4,6 +4,7 @@
     "characters": [
         "alice"
     ],
+    "description": "No description provided",
     "icon": {
         "isPath": false,
         "offset": {
@@ -33,6 +34,15 @@
             "file": "bnbmid3.json",
             "may_be_locked": true,
             "name": "test",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "j.5a_Starter_-_Midscreen_errored.json_errored.json",
+            "may_be_locked": true,
+            "name": "j.5a_Starter_-_Midscreen_errored.json",
             "name_hidden_when_locked": false,
             "preview": ""
         }
