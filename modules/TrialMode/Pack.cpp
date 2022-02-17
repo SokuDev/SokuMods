@@ -497,6 +497,8 @@ void loadPreview(Scenario *scenario)
 		scenario->preview = std::make_unique<SimpleImage>(file, SokuLib::Vector2i{398, 128});
 	scenario->loading = false;
 	::loading--;
+	if (!scenario->loaded)
+		scenario->preview.reset();
 }
 
 void Scenario::loadPreview(bool force)

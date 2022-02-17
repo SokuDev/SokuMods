@@ -2518,14 +2518,17 @@ static void handleGoUp()
 			guide->active = false;
 		(editorMode ? editorGuides : noEditorGuides)[currentPack < 0]->active = true;
 	} else {
+		auto oldEntry = currentEntry;
+
 		currentEntry--;
 		if (currentEntry == -1)
 			currentEntry = loadedPacks[currentPack]->scenarios.size() - 1;
 		if (!movingScenario) {
-			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
-				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
-			else
-				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+			loadedPacks[currentPack]->scenarios[oldEntry]->loaded = false;
+			if (!loadedPacks[currentPack]->scenarios[oldEntry]->loading && loadedPacks[currentPack]->scenarios[oldEntry]->preview)
+				loadedPacks[currentPack]->scenarios[oldEntry]->preview.reset();
+			loadedPacks[currentPack]->scenarios[currentEntry]->loaded = true;
+			loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 		}
 	}
 	checkScrollUp();
@@ -2564,6 +2567,8 @@ static void handleGoDown()
 			guide->active = false;
 		(editorMode ? editorGuides : noEditorGuides)[currentPack < 0]->active = true;
 	} else {
+		auto oldEntry = currentEntry;
+
 		currentEntry++;
 		if (currentEntry == loadedPacks[currentPack]->scenarios.size()) {
 			currentEntry = 0;
@@ -2576,10 +2581,11 @@ static void handleGoDown()
 			entryStart = 0;
 		}
 		if (!movingScenario) {
-			if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
-				loadedPacks[currentPack]->scenarios[currentEntry]->preview->reset();
-			else
-				loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
+			loadedPacks[currentPack]->scenarios[oldEntry]->loaded = false;
+			if (!loadedPacks[currentPack]->scenarios[oldEntry]->loading && loadedPacks[currentPack]->scenarios[oldEntry]->preview)
+				loadedPacks[currentPack]->scenarios[oldEntry]->preview.reset();
+			loadedPacks[currentPack]->scenarios[currentEntry]->loaded = true;
+			loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 		}
 	}
 	checkScrollDown();
@@ -3480,6 +3486,7 @@ int menuOnProcess(SokuLib::MenuResult *This)
 		if (!loadedPacks[currentPack]->scenarios[curr]->loading && loadedPacks[currentPack]->scenarios[curr]->preview)
 			loadedPacks[shownPack]->scenarios[curr]->preview->update();
 		else {
+			loadedPacks[currentPack]->scenarios[curr]->loaded = true;
 			if (!loadedPacks[currentPack]->scenarios[curr]->loading)
 				loadedPacks[currentPack]->scenarios[curr]->loadPreview();
 			loadingGear.setRotation(loadingGear.getRotation() + 0.1);
