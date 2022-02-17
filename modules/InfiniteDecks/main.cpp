@@ -671,10 +671,12 @@ static void convertProfile(const char *jsonPath)
 	decks = nullptr;
 }
 
-static bool loadProfileFile(const std::string &path, std::ifstream &stream, std::map<unsigned char, std::vector<Deck>> &map, int index)
+static bool loadProfileFile(const std::string &path, std::ifstream &stream, std::map<unsigned char, std::vector<Deck>> &map, int index, bool hasBackup = false)
 {
 	if (stream.fail()) {
 		printf("Failed to open file %s: %s\n", path.c_str(), strerror(errno));
+		if (hasBackup)
+			throw std::exception();
 		if (errno == ENOENT) {
 			puts("Let's fix that");
 			convertProfile(path.c_str());
@@ -1036,6 +1038,10 @@ static int selectProcessCommon(int v)
 	static int right = 0;
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
+	if ((scene.leftSelect.keys && scene.leftSelect.keys->spellcard == 1) || (scene.rightSelect.keys && scene.rightSelect.keys->spellcard == 1)) {
+		displayCards = !displayCards;
+		SokuLib::playSEWaveBuffer(0x27);
+	}
 	if (scene.leftSelectionStage == 3 && scene.rightSelectionStage == 3) {
 		if (counter < 60)
 			counter++;
@@ -1133,9 +1139,6 @@ int __fastcall CSelect_OnProcess(SokuLib::Select *This) {
 			editSelectedProfile = selected - 2;
 		else
 			editSelectedProfile = 2;
-	} else if ((This->leftSelect.keys && This->leftSelect.keys->spellcard == 1) || (This->rightSelect.keys && This->rightSelect.keys->spellcard == 1)) {
-		displayCards = !displayCards;
-		SokuLib::playSEWaveBuffer(0x27);
 	}
 	return selectProcessCommon((This->*s_originalSelectOnProcess)());
 }
@@ -1608,7 +1611,7 @@ static void handleProfileChange(SokuLib::Profile *This, SokuLib::String *str)
 
 	stream.open(profile, std::ifstream::in);
 	try {
-		result = loadProfileFile(profile, stream, arr, index);
+		result = loadProfileFile(profile, stream, arr, index, hasBackup);
 	} catch (std::exception &e) {
 		auto answer = IDNO;
 
@@ -1616,8 +1619,14 @@ static void handleProfileChange(SokuLib::Profile *This, SokuLib::String *str)
 			MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
 		else
 			answer = MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what() + "\n\nDo you want to load backup file ?").c_str(), "Loading error", MB_ICONERROR | MB_YESNO);
-		if (answer != IDYES)
-			throw;
+		if (answer != IDYES) {
+			try {
+				result = loadProfileFile(profile, stream, arr, index);
+			} catch (std::exception &e) {
+				MessageBoxA(SokuLib::window, ("Cannot load file " + profile + ": " + e.what()).c_str(), "Fatal error", MB_ICONERROR);
+				throw;
+			}
+		}
 	}
 	stream.close();
 
