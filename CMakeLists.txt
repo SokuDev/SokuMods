@@ -198,9 +198,12 @@ endif()
 module(BGMChanger)
 target_sources(BGMChanger PRIVATE modules/BGMChanger/BGMChanger.cpp)
 
-module(Blacklist)
-target_sources(Blacklist PRIVATE modules/Blacklist/main.cpp)
-target_link_libraries(Blacklist SokuLib shlwapi ws2_32)
+set(BUILD_BLACKLIST true CACHE BOOL "Whether to build the Blacklist mod")
+if(BUILD_BLACKLIST)
+    module(Blacklist)
+    target_sources(Blacklist PRIVATE modules/Blacklist/main.cpp)
+    target_link_libraries(Blacklist SokuLib shlwapi ws2_32)
+endif()
 
 module(CharactersInForeground)
 target_sources(CharactersInForeground PRIVATE modules/CharactersInForeground/CharactersInForeground.cpp)
@@ -287,6 +290,10 @@ module(GetIP)
 target_sources(GetIP PRIVATE modules/GetIP/main.c)
 target_link_libraries(GetIP CURL::libcurl shlwapi user32 ws2_32)
 
+module(HostInBackground)
+target_sources(HostInBackground PRIVATE modules/HostInBackground/main.cpp)
+target_link_libraries(HostInBackground SokuLib shlwapi user32 ws2_32 d3dx9)
+
 module(InfiniteDecks Default)
 target_sources(
         "InfiniteDecks" PRIVATE
@@ -308,6 +315,8 @@ add_executable(
         modules/InfiniteDecks/ProfileConverter.c
 )
 target_link_libraries(ProfileConverter shlwapi)
+install(TARGETS ProfileConverter RUNTIME DESTINATION "SWRSToys/modules/InfiniteDecks")
+install(TARGETS ProfileConverter RUNTIME DESTINATION "SokuEngine/modules/InfiniteDecks")
 
 module(InGameHostlist Default)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC")
@@ -354,6 +363,18 @@ target_link_libraries(NetBellChanger winmm)
 module(NetProfileView)
 target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 
+module(PunishDisplay)
+target_sources(PunishDisplay PRIVATE modules/PunishDisplay/main.cpp)
+target_link_libraries(
+        PunishDisplay
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+
 module(ReDelay Default)
 target_sources(ReDelay PRIVATE
         modules/ReDelay/ReDelay.cpp)
@@ -378,10 +399,10 @@ module(SkipIntro)
 target_sources(SkipIntro PRIVATE
         modules/SkipIntro/Soku-SkipIntro/dllmain.cpp)
 
-#module(SokuReplays Default)
-#target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
-#target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
-#target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
+module(SokuReplays Default)
+target_compile_definitions(SokuReplays PRIVATE PSAPI_VERSION=1)
+target_sources(SokuReplays PRIVATE modules/SokuReplays/main.cpp)
+target_link_libraries(SokuReplays CURL::libcurl psapi shlwapi user32 ws2_32)
 
 set(BUILD_SOKU_STREAMING true CACHE BOOL "Whether to build the SokuStreaming mod")
 if(BUILD_SOKU_STREAMING)
@@ -411,6 +432,42 @@ string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," SokuRollData ${SokuRollData})
 file(WRITE "${CMAKE_BINARY_DIR}/SokuRoll.inl" "const unsigned char sokuroll_data[] = {${SokuRollData}};\nconst unsigned sokuroll_size = sizeof(sokuroll_data);\n")
 target_include_directories(SWRSokuRoll PRIVATE "${CMAKE_BINARY_DIR}")
 target_link_libraries(SWRSokuRoll MemoryModule)
+
+module(TrialMode)
+target_sources(TrialMode PRIVATE
+        modules/TrialMode/TrialMode.rc
+        modules/TrialMode/main.cpp
+        modules/TrialMode/gif_load.h
+        modules/TrialMode/Menu.cpp
+        modules/TrialMode/Pack.cpp
+        modules/TrialMode/Trial/Trial.cpp
+        modules/TrialMode/Trial/ComboTrial.cpp
+        modules/TrialMode/TrialEditor/TrialEditor.cpp
+        modules/TrialMode/TrialEditor/ComboTrialEditor.cpp
+        modules/TrialMode/Actions.cpp
+        modules/TrialMode/Animations/BattleAnimation.cpp
+        modules/TrialMode/Animations/BattleAnimFramework.cpp
+        modules/TrialMode/Animations/LuaBattleAnimation.cpp
+        modules/TrialMode/Images.cpp
+        modules/TrialMode/Animations/FakeChrMgr.cpp
+        modules/TrialMode/Patches.cpp
+        modules/TrialMode/TrialBase.cpp
+        modules/TrialMode/PackOutro.cpp
+        modules/TrialMode/InputBox.cpp
+        modules/TrialMode/Explorer.cpp
+)
+target_compile_options(TrialMode PRIVATE /bigobj)
+target_link_libraries(TrialMode
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        lua54
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(DIRECTORY "modules/TrialMode/packs" DESTINATION "SWRSToys/modules/TrialMode")
+install(DIRECTORY "modules/TrialMode/packs" DESTINATION "SokuEngine/modules/TrialMode")
 
 module(UPnPNat)
 target_sources(UPnPNat PRIVATE modules/UPnPNat/UPnPNat.cpp)
@@ -461,158 +518,3 @@ target_link_libraries(th123eloader shlwapi user32)
 set_target_properties(th123eloader PROPERTIES
         OUTPUT_NAME th123e)
 install(TARGETS th123eloader RUNTIME DESTINATION ".")
-
-# WIP
-add_library(
-        "HostInBackground"
-        MODULE
-        modules/HostInBackground/main.cpp
-)
-target_compile_options(HostInBackground PRIVATE /Zi)
-target_compile_definitions("HostInBackground" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
-target_include_directories("HostInBackground" PRIVATE include include/directx "modules/HostInBackground/")
-target_link_directories("HostInBackground" PRIVATE lib)
-target_link_libraries(
-        HostInBackground
-        SokuLib
-        shlwapi
-        ws2_32
-	d3dx9
-)
-install(TARGETS "HostInBackground" LIBRARY DESTINATION "SWRSToys/modules/HostInBackground/")
-install(TARGETS "HostInBackground" LIBRARY DESTINATION "SokuEngine/modules/HostInBackground/")
-
-# WIP Module
-
-add_library(
-        "TrialMode"
-        MODULE
-        modules/TrialMode/TrialMode.rc
-        modules/TrialMode/main.cpp
-        modules/TrialMode/gif_load.h
-	modules/TrialMode/Menu.cpp
-        modules/TrialMode/Menu.hpp
-        modules/TrialMode/Pack.cpp
-        modules/TrialMode/Pack.hpp
-        modules/TrialMode/Trial/Trial.cpp
-        modules/TrialMode/Trial/Trial.hpp
-        modules/TrialMode/Trial/ComboTrial.cpp
-        modules/TrialMode/Trial/ComboTrial.hpp
-        modules/TrialMode/TrialEditor/TrialEditor.cpp
-        modules/TrialMode/TrialEditor/TrialEditor.hpp
-        modules/TrialMode/TrialEditor/ComboTrialEditor.cpp
-        modules/TrialMode/TrialEditor/ComboTrialEditor.hpp
-        modules/TrialMode/Actions.cpp
-        modules/TrialMode/Actions.hpp
-        modules/TrialMode/Animations/BattleAnimation.cpp
-        modules/TrialMode/Animations/BattleAnimation.hpp
-        modules/TrialMode/Animations/BattleAnimFramework.cpp
-        modules/TrialMode/Animations/LuaBattleAnimation.cpp
-        modules/TrialMode/Animations/LuaBattleAnimation.hpp
-        modules/TrialMode/Images.cpp
-        modules/TrialMode/Images.hpp
-	modules/TrialMode/Animations/FakeChrMgr.cpp
-        modules/TrialMode/Animations/FakeChrMgr.hpp
-        modules/TrialMode/Patches.cpp
-        modules/TrialMode/Patches.hpp
-        modules/TrialMode/TrialBase.hpp
-        modules/TrialMode/TrialBase.cpp
-        modules/TrialMode/PackOutro.cpp
-        modules/TrialMode/PackOutro.hpp
-        modules/TrialMode/InputBox.cpp
-        modules/TrialMode/InputBox.hpp
-	modules/TrialMode/Explorer.cpp
-        modules/TrialMode/Explorer.hpp
-)
-target_compile_options(TrialMode PRIVATE /Zi /bigobj)
-target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/")
-target_link_directories("TrialMode" PRIVATE lib)
-target_link_libraries(
-        TrialMode
-        SokuLib
-        shlwapi
-        ws2_32
-        user32
-        lua54
-        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
-        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
-)
-install(TARGETS "TrialMode" LIBRARY DESTINATION "SWRSToys/modules/TrialMode/")
-install(TARGETS "TrialMode" LIBRARY DESTINATION "SokuEngine/modules/TrialMode/")
-
-
-#add_library(
-        #"saku_basic_sakuyaOutro6"
-        #MODULE
-        #modules/TrialMode/Animations/BattleAnimation.hpp
-        #modules/TrialMode/Animations/SakuyaBasicCombos/SakuyaOut6.cpp
-        #modules/TrialMode/Animations/BattleAnimFramework.cpp
-#)
-#target_compile_options(saku_basic_sakuyaOutro6 PRIVATE /Zi)
-#target_compile_definitions("saku_basic_sakuyaOutro6" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-#target_include_directories("saku_basic_sakuyaOutro6" PRIVATE include include/directx "modules/TrialMode/")
-#target_link_directories("saku_basic_sakuyaOutro6" PRIVATE lib)
-#target_link_libraries(
-        #saku_basic_sakuyaOutro6
-        #SokuLib
-        #shlwapi
-        #ws2_32
-        #user32
-        #lua54
-        #"${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
-        #"${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
-#)
-#set_target_properties(saku_basic_sakuyaOutro6 PROPERTIES OUTPUT_NAME lore6Outro)
-#set_target_properties(saku_basic_sakuyaOutro6 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/sakuya_story" PREFIX "")
-#
-#add_dependencies(TrialMode saku_basic_sakuyaOutro6)
-
-#-----------------------------------------------------#
-
-#add_library(
-#        "remi_basic_bnbcorn1"
-#        MODULE
-#        modules/TrialMode/Animations/BattleAnimation.hpp
-#        modules/TrialMode/Animations/RemiliaBasicCombos/bnbcorn1.cpp
-#        modules/TrialMode/Animations/BattleAnimFramework.cpp
-#)
-#target_compile_options(remi_basic_bnbcorn1 PRIVATE /Zi)
-#target_compile_definitions("remi_basic_bnbcorn1" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-#target_include_directories("remi_basic_bnbcorn1" PRIVATE include include/directx "modules/TrialMode/")
-#target_link_directories("remi_basic_bnbcorn1" PRIVATE lib)
-#target_link_libraries(
-#        remi_basic_bnbcorn1
-#        SokuLib
-#        shlwapi
-#        ws2_32
-#        user32
-#        lua54
-#        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
-#        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
-#)
-#set_target_properties(remi_basic_bnbcorn1 PROPERTIES OUTPUT_NAME bnbcorn1intro)
-#set_target_properties(remi_basic_bnbcorn1 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/TrialMode/packs/remilia_story" PREFIX "")
-
-#add_dependencies(TrialMode remi_basic_bnbcorn1)
-
-add_library(
-        "PunishDisplay"
-        MODULE
-        modules/PunishDisplay/main.cpp
-)
-target_compile_options(PunishDisplay PRIVATE /Zi)
-target_compile_definitions("PunishDisplay" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_include_directories("PunishDisplay" PRIVATE include include/directx "modules/PunishDisplay/")
-target_link_directories("PunishDisplay" PRIVATE lib)
-target_link_libraries(
-        PunishDisplay
-        SokuLib
-        shlwapi
-        ws2_32
-        user32
-        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
-        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
-)
-install(TARGETS "PunishDisplay" LIBRARY DESTINATION "SWRSToys/modules/PunishDisplay/")
-install(TARGETS "PunishDisplay" LIBRARY DESTINATION "SokuEngine/modules/PunishDisplay/")

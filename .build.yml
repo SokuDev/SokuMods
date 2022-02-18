@@ -35,13 +35,13 @@ tasks:
       curl -s -O 'https://raw.githubusercontent.com/delthas/llvm-project/fix-winmsvc-rc/llvm/cmake/platforms/ClangClCMakeCompileRules.cmake'
   - build: |
       cd SokuMods
-      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=WinMsvc.cmake -DHOST_ARCH=x86 -DLLVM_NATIVE_TOOLCHAIN=/usr -DMSVC_BASE=$PWD/msvc -DWINSDK_BASE=$PWD/winsdk -DWINSDK_VER=10.0.17763.0 -DBUILD_SOKU_STREAMING=FALSE -DINSTALL_AUTOPUNCH_DAT=TRUE .
+      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=WinMsvc.cmake -DHOST_ARCH=x86 -DLLVM_NATIVE_TOOLCHAIN=/usr -DMSVC_BASE=$PWD/msvc -DWINSDK_BASE=$PWD/winsdk -DWINSDK_VER=10.0.17763.0 -DBUILD_BLACKLIST=FALSE -DBUILD_SOKU_STREAMING=FALSE -DINSTALL_AUTOPUNCH_DAT=TRUE .
       cmake --build .
       cmake --install .
       (cd install/SWRSToys && zip -r9 ../../swrstoys.zip *)
       (cd install/SokuEngine && zip -r9 ../../sokuengine.zip *)
   - deploy: |
       cd SokuMods
-      scp -P 2222 -o StrictHostKeyChecking=no -q swrstoys.zip user@delthas.fr:/srv/http/blog/swrstoys.zip
-      scp -P 2222 -o StrictHostKeyChecking=no -q sokuengine.zip user@delthas.fr:/srv/http/blog/sokuengine.zip
-      scp -P 2222 -o StrictHostKeyChecking=no -q install/th123e.exe user@delthas.fr:/srv/http/blog/th123e.exe
+      scp -P 2222 -o StrictHostKeyChecking=no -q swrstoys.zip user@delthas.fr:/srv/http/sokuazote/swrstoys.zip
+      scp -P 2222 -o StrictHostKeyChecking=no -q sokuengine.zip user@delthas.fr:/srv/http/sokuazote/sokuengine.zip
+      scp -P 2222 -o StrictHostKeyChecking=no -q install/th123e.exe user@delthas.fr:/srv/http/sokuazote/th123e.exe
