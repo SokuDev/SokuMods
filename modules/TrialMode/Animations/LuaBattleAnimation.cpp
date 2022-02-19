@@ -3,7 +3,6 @@
 //
 
 #include <SokuLib.hpp>
-#include <lua.hpp>
 #include <sol/sol.hpp>
 #include <map>
 #include "FakeChrMgr.hpp"

@@ -119,6 +119,44 @@ add_library(DiscordSDK
 target_include_directories(DiscordSDK INTERFACE DiscordSDK)
 target_link_libraries(DiscordSDK INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.dll.lib)
 
+# lua
+
+set(LUA_SOURCES
+        lua/lapi.c
+        lua/lauxlib.c
+        lua/lbaselib.c
+        lua/lcode.c
+        lua/lcorolib.c
+        lua/lctype.c
+        lua/ldblib.c
+        lua/ldebug.c
+        lua/ldo.c
+        lua/ldump.c
+        lua/lfunc.c
+        lua/lgc.c
+        lua/linit.c
+        lua/liolib.c
+        lua/llex.c
+        lua/lmathlib.c
+        lua/lmem.c
+        lua/loadlib.c
+        lua/lobject.c
+        lua/lopcodes.c
+        lua/loslib.c
+        lua/lparser.c
+        lua/lstate.c
+        lua/lstring.c
+        lua/lstrlib.c
+        lua/ltable.c
+        lua/ltablib.c
+        lua/ltm.c
+        lua/lundump.c
+        lua/lutf8lib.c
+        lua/lvm.c
+        lua/lzio.c)
+add_library(lua ${LUA_SOURCES})
+target_include_directories(lua PUBLIC lua)
+
 # MemoryModule
 
 add_library(MemoryModule
@@ -462,7 +500,7 @@ target_link_libraries(TrialMode
         shlwapi
         ws2_32
         user32
-        lua54
+        lua
         "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )

@@ -19,3 +19,6 @@
 [submodule "mbedtls"]
 	path = mbedtls
 	url = https://github.com/ARMmbed/mbedtls.git
+[submodule "lua"]
+	path = lua
+	url = https://github.com/lua/lua.git
