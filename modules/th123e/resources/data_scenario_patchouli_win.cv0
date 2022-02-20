@@ -1,0 +1,283 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSÇœÇøÇ•
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:reimuU0
+Face:lose,ïâ
+Face:win,ïÅ
+The shrine isn't a good place for using magic.
+It needs to be more chaotic.\
+End:
+
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisaU0
+Face:lose,ïâ
+Face:win,ó]
+The essence of magic is to determine the
+root cause of all things. There's no distinction
+between science and magic.\
+End:
+
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,òf
+Recently\, that rat has been doing more damage again.\
+End:
+
+
+
+## =======================================================================
+#VSódñ≤
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:youmuU0
+Face:lose,ïâ
+Face:win,ïÅ
+Explaining the existence of ghosts with magic\,
+that's a good first step in studying magic.\
+End:
+
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,ã¡
+Though you're using magical strings to control
+the dolls\, controlling so many is quite a feat.\
+End:
+
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouli0
+Face:lose,ïâ
+Face:win,ïÅ
+However\, image-splitting is tiring...\
+End:
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remiliaU0
+Face:lose,ïâ
+Face:win,ïÅ
+You want to go see the kappa's place again?
+But it's so close to the river.\
+End:
+
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,ïÅ
+When humans die they become able to use magic.
+That is the same as giving up humanity.\
+End:
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,ïÅ
+The magic outside sure has advanced.
+There are too few researchers in Gensokyo.\
+End:
+
+Label:yukariR0
+Face:lose,ïâ
+Face:win,ïÅ
+After that\, there's been various things
+spurting from the underworld\, it seems.\
+
+Face:win,òf
+There was something that came out in early spring.
+Did you notice?\
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suikaU0
+Face:lose,ïâ
+Face:win,äæ
+The eyes of the holly olive leaves are stuck?
+What a ridiculous line.\
+End:
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,åà
+If you want to sort them\,
+tengu are the magician types.
+They're the same in seeking the truth.\
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:udongeU0
+Face:lose,ïâ
+Face:win,òf
+Seems like those eyes are getting worse.\
+End:
+
+
+## =======================================================================
+#VSè¨í¨
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:komachiU0
+Face:lose,ïâ
+Face:win,ã¡
+The Higan has no day or night\, no winter or summer.
+I wonder what that means.\
+End:
+
+## =======================================================================
+#VSàﬂãË
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ikuU0
+Face:lose,ïâ
+Face:win,ó]
+Swimming through the clouds sure is convenient.
+You even get to meet a dragon.\
+End:
+
+
+## =======================================================================
+#VSìVéq
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,ïÅ
+Heaven has no weather?
+So you mean\, weather is something that was conjured?\
+End:
+
+
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,ïÅ
+Curses base themselves on imitating form.\
+
+Face:win,ïÅ
+From the start\, they're different from
+magic which exposes the truth.
+But I guess in the end they're the same thing.\
+End:
+
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,ó]
+Fairies are instances of natural phenomenon.
+And there are often cases of
+magic controlling fairies. Hence they are slaves.\
+End:
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,ïÅ
+So?
+Are you properly doing your job?\
+End:
+
+Label:meirinR0
+Face:lose,ïâ
+Face:win,òf
+Reading manga all the time makes you sleepy.
+That's because you don't use your head.\
+
+Face:win,ïÅ
+When you're sleepy\, is it because you're
+not thinking\, or is it that it doesn't
+require thinking at all?\
+
+Face:win,åà
+If you use your head\, then you won't become sleepy.\
+
+End:
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,ïÅ
+So\, how does nuclear fusion work?
+I wonder how it creates energy.\
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,åà
+The powers that gods use are basically curses\, huh?\
+End:
+
+
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+
+Face:win,åà
+The power of magic is like that of science.
+Meaning\, it's at the forefront of the times!\
+End:
+
+Label:common1
+
+Face:win,ïÅ
+Ahhh\, boiling water with magic today as well.\
+End:
+
+## =======================================================================
+

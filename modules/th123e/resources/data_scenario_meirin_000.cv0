@@ -1,0 +1,177 @@
+## =======================================================================
+#Stage:1
+#Title:「太歳星君の災禍」
+#Place:図書館
+
+Character:meirin,160,0,0,8888FF
+Character:patchouli,160,0,1,FF8888
+
+#背景　図書館
+Stage:14,0
+
+#自分初期配置
+Action:meirin,1
+#画面外待機
+
+#敵初期配置
+Action:patchouli,30
+#2P定位置待機
+
+#カメラ中央固定
+Action:meirin,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+
+
+PlayBgm:data/bgm/ta20.ogg
+Sleep:60;
+
+#ステージタイトル表示
+Object:data/scenario/meirin/effect/StageTitle001.bmp,0,192,-32
+Sleep:30
+Object:data/scenario/effect/Stage1.bmp,1,256,352
+Sleep:126
+
+Sleep:120;
+
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+#0１２３４５６７８９０１２３４５６７８９０１２３
+# パチュリーが立っている
+Action:meirin,50
+Action:meirin,51
+# そこに美鈴が入ってくる
+Balloon:meirin,1,0,-200
+Lady Patchouli!\
+
+#パチュ素立ち振り向き
+Action:patchouli,203
+Balloon:patchouli,1,0,-200
+What? So loud...\
+
+Action:meirin,406
+# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+It's terrible!
+Just now\, I saw something that should not be seen!\
+
+Action:patchouli,400
+# パチュリー　疑問
+Balloon:patchouli,1,0,-200
+Something that should not be seen?\
+
+Action:meirin,203
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+It was the Taisui Xingjun.
+We must assume the worst possible scenario!\
+
+# パチュリー　通常
+Balloon:patchouli,1,0,-200
+... so?\
+
+Action:meirin,405
+# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+Like\, an earthquake or something like that!\
+
+# パチュリー　通常
+Balloon:patchouli,1,0,-200
+...
+Earthquakes are getting old now.\
+
+Action:meirin,300
+# 美鈴　疑問
+Balloon:meirin,1,0,-200
+Huh?\
+
+Action:patchouli,401
+# パチュリー　決めポーズ
+Balloon:patchouli,1,0,-200
+Whatever you're doing\,
+it's interrupting my research.
+Get back to your guard post!\
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st43.ogg
+#　戦闘開始処理
+
+Action:meirin,203
+Action:patchouli,203
+Action:meirin,167
+#　フラッシュ
+Action:meirin,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:patchouli,200
+#攻撃側ニュートラル移行検知
+Action:meirin,202
+
+Action:meirin,164
+Sleep:15
+
+Action:meirin,204
+Action:patchouli,205
+
+#カメラ中央固定
+Action:meirin,2　
+
+Sleep:30
+Action:meirin,165
+
+Sleep:30
+
+# パチュリー　倒れた状態
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+It's true!\
+
+# パチュリー　
+Balloon:patchouli,1,0,-200
+I don't care if it's true.
+It's just an earthquake\, right?\
+
+Action:meirin,300
+# 美鈴　疑問
+Balloon:meirin,1,0,-200
+How can you say "just"?
+We mustn't make light of earthquakes!\
+
+Balloon:null,0,0,-200
+
+Sleep:30
+
+Result:
+FadeBgm:2000,0
+Action:meirin,160　#画面黒にフェードアウト
+
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

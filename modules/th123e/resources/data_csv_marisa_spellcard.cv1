@@ -1,0 +1,45 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Witch Leyline",1,1,"Augments the broom with magic and   uses it to charge. Marisa's basic   critical attack.",0,1,104,1,108,1,205,2,1,120
+101,"Miasma Sweep",1,2,"Catches opponent with the broom and propels them upwards in this anti   air attack. There is a little bit   of time where Marisa is invincible\, so this is a strong close-range     attack.",0,1,105,1,109,1,206,2,1,110
+102,"Grand Stardust",1,4,"Throws explosive magic bottles on   the ground. Holding the button down will make the bottle go farther.",0,1,106,1,110,1,0,0,1,140
+103,"Meteonic Debris",1,0,"Fires small magic missles\, covering a large area. A weakness of this    attack is that if not a lot of them hit the enemy\, there is little      damage done.",0,1,107,1,111,1,208,2,1,100
+104,"Radial Strike",1,1,"Uses the broom as a rifle and turns the flow of Ley Line into bullets.  Although it takes a while to fire\,  the speed and power of the bullets  are spectacular.",1,1,211,3,0,0,0,0,1,121
+105,"Bosky Sweeper",1,2,"A magic-enhanced broom sweep. The   broom's direct offensive power is   gone\, but the thrusters have attack power.",1,1,203,4,0,0,0,0,1,111
+106,"Devildom Torch",1,4,"An improved potion that scatters    flame about from the point of       impact. Its weak point is how its   heaviness decreases its flight      distance.",1,1,212,3,0,0,0,0,1,141
+107,"Narrow Spark",1,0,"Fires a laser straight ahead.       Firing is slow\, but it has high     piercing power\, making it useful in long exchanges of blows.",1,1,200,2,0,0,0,0,1,101
+108,"Up Sweeper",1,1,"A spinning\, rising move using broom thrusters. An acrobatic technique   where the thrusters also do damage. No invincible frames\, but its stronghitbox makes it good for counters.",1,1,207,5,0,0,0,0,1,122
+109,"Stellar Missile",1,2,"Aims straight up and fires a magic  missle. The bullet travels a fixed  distance and explodes; until then\,  it has no hit box\, but the explosionis long and widespread\, so it's     useful for controlling the air.",1,1,209,2,0,0,0,0,1,112
+110,"Magical Reusable Bomb",1,4,"The heaviest time bomb. Throws a    bomb which then jumps and tumbles.  After a while\, it explodes with     great force\, damaging even Marisa.",0,1,214,4,0,0,0,0,1,142
+111,"Green Spread",1,0,"Fires wide-range spread lasers      which converge to create a ball of  magic energy. The spread lasers haveno hit box\, but on the other hand\,  you don't have to worry about thingsgetting in the way of the blast.",1,1,215,2,0,0,0,0,1,102
+200,"Love Sign \"Master Spark\"",2,3,"When shooting her signature         gigantic laser\, be aware of the     risk of attacks from directions     other than straight ahead.",0,2,202,4,0,0,0,0,1,220
+202,"Magicannon \"Final Spark\"",2,5,"This high-output laser has very     little space to escape from; direct hit damage and power consumption    are both very high.",0,4,219,5,0,0,0,0,1,240
+203,"Star Sign \"Dragon Meteor\"<a> ",2,5,"Fires a high-output laser from the  sky. Power is high\, and you can     control the firing angle. Because   it takes some time to get into      position in the air\, it's possible  to evade.",1,4,0,0,0,0,0,0,1,241
+204,"Love Sign \"Non-Directional Laser\"",2,4,"Shoots concentrated\, powerful lasersforward. Lasers widen with time.    Mediocre results follow incorrect   usage.",0,3,0,0,0,0,0,0,1,230
+205,"Magic Sign \"Stardust Reverie\"<a> ",2,2,"This high-powered charging          technique is an upgraded version of Witch Leyline.",1,2,0,0,0,0,0,0,1,210
+206,"Star Sign \"Escape Velocity\"",2,3,"A wide revision of Miasma Sweep.    It can be used as a close-range     counter or to hit enemies in midair.",1,3,0,0,0,0,0,0,1,221
+207,"Comet \"Blazing Star\"",2,5,"Temporarily leaves the screen\, then reenters with a high speed attack   that hits almost the entire screen. This unstoppable technique can also be used to escape\, but it's slow to start.",1,5,0,0,0,0,0,0,1,242
+208,"Star Sign \"Meteonic Shower\"",2,1,"Fire a large number of scattering   shots forward. Fuel consumption is  low\, so you can use it easily.",0,2,204,3,0,0,0,0,1,200
+209,"Star Sign \"Gravity Beat\"",2,3,"Using the broom as a gun barrel\,    shoots a magic bullet straight up   into the sky\, which then falls on   the opponent's head and explodes on the ground. The bullet also does    some damage on its way up and down.",0,2,0,0,0,0,0,0,1,222
+211,"Light Sign \"Luminous Strike\"",2,2,"Using a broom as a gun barrel\,      fire a large and high speed magic   bullet. It's a different flavor     from lasers.",1,3,0,0,0,0,0,0,1,211
+212,"Light Sign \"Earthlight Ray\"",2,3,"Showers the stage with a large      number of magic bombs. The bombs hitthe ground and fly around in all    different directions\, but mostly    forwards.",0,3,0,0,0,0,0,0,1,223
+214,"Magical Research \"Deep Ecological Bomb\"",2,4,"The ultimate bomb\, the product of   meticulous research. The bomb       explodes after a time delay and can not be blocked. Definitely watch outfor splash damage!",1,4,0,0,0,0,0,0,1,231
+215,"Ritual Sign \"Orreries Sun\"",2,2,"Equips beads held in place by magic.Can be controlled to attack\, making them significantly stronger. She canalso attack by declaring this       spellcard more than once\, which     makes this move pretty powerful.",1,2,0,0,0,0,0,0,1,212
+219,"Perversion \"Sure-Fire Master Spark\"",2,5,"Using a narrow beam as a conductor\, you can amplify the power of a      Master Spark. It's possible to      attack with an immense blazing powerto the front.",1,5,0,0,0,0,0,0,1,243

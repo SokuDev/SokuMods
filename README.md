@@ -166,7 +166,7 @@ Available patches:
 
 **Run replay files easily from Windows.**
 
-*This associates .rep with Soku for easy watching in one click. You can also drag replays or folders containing replays to the th123.exe file (not th123e.exe!).*
+*This associates .rep with Soku for easy watching in one click. You can also drag replays or folders containing replays to the th123.exe file.*
 
 ### ReplayInputView+
 
@@ -211,6 +211,14 @@ Available patches:
 **Load SokuRoll automatically.**
 
 *This mod uses a configuration file in its module directory, not the `SokuRoll.ini` in the main game folder. This mod does not require installing SokuRoll (does not require `SokuRoll.dll` and `SokuRoll.ini`).*
+
+### th123e
+
+**Translate the game to English.**
+
+*This mod translates the game from Japanese to English. It is a replacement for the legacy `th123e.exe` loader file with identical functionality.*
+
+*This module does not have a configuration file.*
 
 ### UPnPNat
 

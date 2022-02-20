@@ -1,0 +1,233 @@
+## =======================================================================
+#Stage:5
+#Title:「本物のだいだらぼっち」
+#Place:地下センター入り口
+
+Character:chirno,160,0,0,8888FF
+Character:alice,160,0,1,FF8888
+Character:marisa,160,0,3,FF8888
+
+#背景　センター入り口
+Stage:32,0
+
+#自分初期配置
+Action:chirno,1　#画面外で待機
+
+Action:marisa,30　#画面定位置で待機
+Action:alice,100　#画面外で待機
+
+#カメラ中央固定
+Action:chirno,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+
+#画面黒からフェードイン
+Action:chirno,161
+PlayBgm:data/bgm/ta05.ogg
+Sleep:120
+
+# 魔理沙が立っている
+
+# チルノが登場する
+Action:chirno,50
+Action:chirno,51 #登場動作終了検知
+
+Action:marisa,203　#振り向く
+Balloon:marisa,1,0,-200
+Oh\, you certainly came back quickly.\
+
+Action:chirno,407# チルノ　驚いて
+Balloon:chirno,1,0,-200
+It was unbelievable! That place!\
+
+Balloon:marisa,1,0,-200
+I guess so.
+That is the hot spring's boiler after all.\
+
+Action:chirno,314# チルノ　落ち込む
+Balloon:chirno,1,0,-200
+If the Daidarabocchi is in that kinda place
+then I can't do anything but give up....\
+
+Action:marisa,400# 魔理沙
+Balloon:marisa,1,0,-200
+Come on\, wait a second.
+Don't get so depressed like that!\
+
+Action:chirno,315# チルノ　疑問に思う
+Balloon:chirno,1,0,-200
+?\
+
+# 魔理沙
+Balloon:marisa,1,0,-200
+I saw a big youkai in the forest's direction
+just now. It seems like
+it went over there unnoticed.\
+
+Action:chirno,303# チルノ　喜ぶ
+Balloon:chirno,1,0,-200
+Really!?\
+
+Action:marisa,203# 魔理沙
+Balloon:marisa,1,0,-200
+Yeah\, this time I'm not lying.
+It's over there. Look! See it?\
+
+Action:chirno,302# チルノ　驚く
+Balloon:chirno,1,0,-200
+Oh wow!
+Something big's there!\
+
+Balloon:null,1,0,-200
+Sleep:30
+
+Action:chirno,304# そして、チルノは魔理沙を置いて慌てて飛んでいく
+Sleep:90
+Balloon:marisa,1,0,-200
+That thing... I wonder what it could be.
+Somehow\, I can sort of imagine.\
+Balloon:null,1,0,-200
+
+FadeBgm:1000,0
+Action:chirno,160　#画面黒にフェードアウト
+
+
+# ---------------------------------------
+Sleep:120
+# 場面が変わる
+
+Stage:13,0
+#場所：アリスの家の前
+Action:chirno,1　#画面外で待機
+Action:alice,30　#画面定位置で待機
+Action:marisa,100　#画面外で待機
+
+Sleep:60
+#画面黒からフェードイン
+PlayBgm:data/bgm/ta22.ogg
+Action:chirno,161
+Sleep:30
+
+#ステージタイトル表示
+Object:data/scenario/chirno/effect/StageTitle005.bmp,0,144,-32
+Sleep:30;
+Object:data/scenario/effect/StageFinal.bmp,1,256,384
+Sleep:300;
+
+# アリスが立っている
+Balloon:alice,1,0,-200
+Further research is still necessary.\
+
+# チルノが登場する
+Action:chirno,50
+Action:chirno,51 #登場動作終了検知
+Balloon:chirno,1,0,-200
+It's here somewhere.\
+
+Action:chirno,302# チルノ　驚いて
+Balloon:chirno,1,0,-200
+Whoa!\
+
+Action:alice,203# アリス　通常
+Balloon:alice,1,0,-200
+Oh\, an unusual face.
+A lost child?\
+
+Action:chirno,203# チルノ　通常
+Balloon:chirno,1,0,-200
+N-no\, I'm not lost.
+Anyways\, around here...\
+
+Action:alice,400# アリス　疑問
+Balloon:alice,1,0,-200
+Around here?\
+
+# チルノ　通常
+Balloon:chirno,1,0,-200
+Didn't you see a Daidarabocchi?\
+
+# アリス　疑問
+Balloon:alice,1,0,-200
+A Daidarabocchi?\
+
+Action:chirno,309# チルノ　両手を広げて
+Balloon:chirno,1,0,-200
+A gigantically huge youkai!
+It was here just now!\
+
+Action:alice,401# アリス　驚き
+Balloon:alice,1,0,-200
+A big youkai....
+Ah\, I see.\
+
+Action:chirno,403# チルノ　驚いて
+Balloon:chirno,1,0,-200
+You've seen it?
+You know where it is?\
+
+Action:alice,203# アリス　普通
+Balloon:alice,1,0,-200
+I do know. Probably.
+You want to see it too?\
+
+Action:chirno,404# チルノ　喜んで
+Balloon:chirno,1,0,-200
+I wanna\, I wanna!
+I've been looking for it all day!\
+
+# アリス　普通
+Balloon:alice,1,0,-200
+It's still in an experimental phase but...
+but this might be just
+the right time for a test run.\
+
+Action:chirno,303# チルノ　喜んで
+Balloon:chirno,1,0,-200
+Hurry! Hurry! Daidarabocchi!\
+
+Action:alice,402# アリス　決めポーズ
+Balloon:alice,1,0,-200
+To replenish the magic\, a little energy
+is necessary. You have a lively personality.
+Let's take a bit of that!\
+
+PlayBgm:data/bgm/st35.ogg
+Action:chirno,203#　ニュートラル状態へ
+Action:alice,203#　ニュートラル状態へ
+Action:chirno,167#　フラッシュ
+Action:chirno,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+Action:chirno,168
+#やられキャラ完全ダウン検知
+Action:alice,200
+#攻撃側ニュートラル移行検知
+Action:chirno,202
+
+Sleep:30
+Result:
+
+#イベント　勝利演出フェード
+
+End:
+
+## =======================================================================

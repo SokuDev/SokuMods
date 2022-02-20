@@ -1,0 +1,343 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSñÇóùçπ
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:reimuU0
+Face:lose,ïâ
+Face:win,ïÅ
+Being drunk on peace is bad.
+Everyone's fighting aimlessly.\
+End:
+
+Label:reimuR0
+Face:lose,ïâ
+Face:win,ä
+Oh yeah\, I dug up something at the bazaar.\
+
+Face:win,ïÅ
+The Seed of Unknown Form.\
+
+Face:win,ä
+Maybe you can still find them lying around Gensokyo.\
+End:
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisa0
+Face:lose,ïâ
+Face:win,åà
+I'm winning 101 matches
+out of 100 in image training!\
+End:
+
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,ó]
+You're going to the bazaar? You're too late\,
+almost all the good stuff's gone.\
+End:
+
+
+## =======================================================================
+#VSódñ≤
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:youmuU0
+Face:lose,ïâ
+Face:win,ïÅ
+Though there are seasons in the Netherworld\,
+there aren't any in Higan\, huh.\
+End:
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,òf
+This sunshine is even making it
+hot in the forest this year.\
+End:
+
+Label:aliceU1
+Face:lose,ïâ
+Face:win,äæ
+Won't they explode if you leave them out for
+too long in this heat? Those dolls\, that is.\
+End:
+
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouliU0
+Face:lose,ïâ
+Face:win,ä
+You've got waterproof books as well.
+I bet you could even read those in the bath.\
+End:
+
+Label:patchouliR0
+Face:lose,ïâ
+Face:win,ïÅ
+Speaking of which\, I wrote a book too!\
+
+Face:win,ä
+It's bad of me to keep borrowing books\,
+so I'll put my book here at the library this time!\
+
+Face:win,åà
+How much will you pay for it?\
+End:
+
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remiliaU0
+Face:lose,ïâ
+Face:win,ó]
+Sorry I always come during the day\,
+I'm asleep at night.\
+End:
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,ó]
+Graveyards were the meccas of summer\, yeah.
+But... what's a mecca?\
+End:
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,ä
+How many eels should you eat in the midsummer day?
+If it's a lamprey eel\, one should be enough\, I bet.\
+End:
+
+Label:yukariR0
+Face:lose,ïâ
+Face:win,òf
+However\, who decides when midsummer is anyway?\
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suikaU0
+Face:lose,ïâ
+Face:win,òf
+A cloud is a gathering of things\, isn't it?
+Can't you ride one?\
+End:
+
+Label:suikaU1
+Face:lose,ïâ
+Face:win,ä
+Gather the ones who have free time for me tonight.
+When it gets cool after sundown\, we'll have a party!\
+End:
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,ä
+I've got a good idea for you. Why don't you try
+putting a weather forecast in the newspaper?
+Wouldn't that sell?\
+End:
+
+Label:ayaR0
+Face:lose,ïâ
+Face:win,ïÅ
+With newspapers\, you collect the stories yourself
+so no one else has to go anywhere.\
+
+Face:win,òf
+That's convenient\, but everyone 
+reading the same thing is boring.\
+
+Face:win,ä
+I could beat you at your own game by just
+walking around myself. Maybe you should try to
+write a paper like that too\, you know?\
+
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:udongeU0
+Face:lose,ïâ
+Face:win,òf
+Harvesting bamboo is a lot tougher
+than I thought it would be.
+It's about as hard as it is to eat.\
+End:
+
+Label:udongeR0
+Face:lose,ïâ
+Face:win,ïÅ
+I saw that fast-growin' bamboo.\
+
+Face:win,ïÅ
+When you run\, it's easy to run into them.\
+
+Face:win,äæ
+Your traps are more dangerous than a cat's.\
+End:
+
+
+## =======================================================================
+#VSè¨í¨
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:komachiU0
+Face:lose,ïâ
+Face:win,ó]
+How about have the kappa make you a motorboat?
+It'd make your job fun.\
+End:
+
+
+Label:komachiR0
+Face:lose,ïâ
+Face:win,òf
+Does your boat sink easily?\
+
+Face:win,ïÅ
+No\, it's just that I heard that the boats
+that spirits ride on sink easily.\
+
+Face:win,äæ
+Maybe it's not for all spirits\, just a certain one?\
+
+End:
+
+## =======================================================================
+#VSàﬂãË
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:ikuU0
+Face:lose,ïâ
+Face:win,ïÅ
+You're swimming in the clouds?
+That looks like it feels nice.\
+End:
+
+
+## =======================================================================
+#VSìVéq
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,ïÅ
+Living an elegant life in Heaven would be great\,
+unless you're afraid of heights.\
+End:
+
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,ïÅ
+So you're really starting to get the hang
+of youkai extermination\, huh?\
+End:
+
+Label:sanaeU1
+Face:lose,ïâ
+Face:win,ä
+If you do nothing but youkai hunting\,
+you might become close to one yourself.\
+End:
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,ä
+Ah\, my bad.
+I actually haven't seen a Daidarabocchi.\
+End:
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,ó]
+What's it to you if you beat me?
+I'm not letting you catch up to my skill level.\
+End:
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,äæ
+No\, it's just that\, it's so hot today.
+So hot\, I could die.\
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,åà
+Will you spare me some of that sometime?
+That nuclear energy.\
+End:
+
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+Face:win,òf
+When nothing happens\, everyone stays the same.
+It's such a boring situation.\
+End:
+
+Label:common1
+Face:win,ïÅ
+I'm mostly just afraid of not being able to win
+before the evening rain starts.\
+End:
+
+## =======================================================================
+

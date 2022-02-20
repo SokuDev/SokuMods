@@ -1,0 +1,45 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Flare Up",1,2,"Shoots nuclear radiation around\,    which then ascends in a helix and   burns enemies. At high levels\, Okuu herself also becomes a hitbox.",0,1,104,1,108,1,0,0,18,110
+101,"Ground Melt",1,0,"Sears the ground using her control  rod. The actual heat wave has no    hitbox\, but the ground explodes in  this attack.",0,1,105,1,109,1,0,0,18,100
+102,"Break Sun",1,4,"Creates a sun-like object above her head\, and pulses light particles at the enemy. Holding the button down  will make the attack stronger.",0,1,106,1,110,1,212,4,18,140
+103,"Shooting Star",1,1,"Moves diagonally upwards and leaves a trail of energy balls behind her. They begin moving outwards after a  short time delay. She has no idea   she's attacking\, she just thinks    she's moving.",0,1,107,1,111,1,0,0,18,120
+104,"Rocket Dive",1,2,"Propels herself forward using       nuclear fusion and attacks. Huge    hitbox and extremely powerful\, but  she's quite exposed after she moves off the screen\, which is a problem.",1,1,209,3,0,0,0,0,18,111
+105,"Hell Geyser",1,0,"Creates a nuclear reaction          underground and shoots the energy   diagonally upwards at the enemy. Canalso shoot towards the enemy from   the back\, so it's quite easy to try to use this skill in chains.",1,1,207,3,0,0,0,0,18,101
+106,"Shooting Sun",1,4,"Collects nuclear energy over her    head and throws it at the ground.   She can collect energy for as long  as she wants\, and the projectile is not affected by other bullets until it explodes.",1,1,205,3,0,0,0,0,18,141
+107,"Retro Atomic Model",1,1,"An energy ball spins and follows    Okuu. The ball itself can be used   as a shield or a weapon\, and is an  excellent tool for Okuu\, whose movesare usually very wide and sweeping.",1,1,203,2,0,0,0,0,18,121
+108,"Melting Pummel Kick",1,2,"Pins down the enemy and stomps her  with her left foot\, infused with    fission energy. The move is a kind  of throw\, so can't be blocked; the  enemy is at Okuu's mercy.",1,1,211,2,0,0,0,0,18,112
+109,"Radiant Blade",1,0,"Charges up energy until she gets    close to the enemy and then fires itat her. A move between a charge and a projectile\, useful for whittling  down the opponent's spirit.",1,1,208,2,0,0,0,0,18,102
+110,"Hell Wave Cannon",1,4,"Unleashes waves of light\, then      gathers and points them to fire in  any direction she wants. Holding    down the button concentrates fires  and makes the attack as powerful as possible.",1,1,200,3,0,0,0,0,18,142
+111,"Vengeful Nuclear Spirits",1,1,"The B button places a nuclear       marker. The C button unleashes a    wave of energy from the markers     using Okuu as a vertex. If you move after the attack starts\, the energy waves will adjust accordingly.",1,1,213,2,0,0,0,0,18,122
+200,"Explosion Sign \"Mega Flare\"",2,3,"Collects nuclear energy and fires. Avery simple and high-powered move\,  virtually impossible to erase from  the front.",0,3,201,4,0,0,0,0,18,220
+201,"Explosion Sign \"Giga Flare\"",2,5,"Collects a huge amount of nuclear   energy and burns everything in frontof her. Extremely powerful with a   huge range\, but Okuu is completely  exposed from the back.",0,4,0,0,0,0,0,0,18,240
+203,"Burning Star \"Fixed Star\"",2,3,"Throws a ring of nuclear energy at  the opponent. The energy ring moves backwards after a while\, and hits   the enemy a second time.",1,2,204,4,0,0,0,0,18,221
+204,"Burning Star \"The Ten Suns\"",2,4,"A ball of nuclear energy attacks    along a set path. Covers to the top of the screen so can also be used   for defense.",0,4,0,0,0,0,0,0,18,230
+205,"Nuclear Sign \"Creeping Sun\"",2,3,"Creates a nuclear reaction in the   sky and sun-like projectiles shoot  down from the heavens as a result ofthe nuclear reactions.",1,3,0,0,0,0,0,0,18,222
+206,"\"Hell's Artificial Sun\"",2,1,"Creates an energy mass that has     gravity\, and shoots it forwards. Shewill continue to inject energy into this mass. This massive attack uses up all the cards in her hand.",1,5,0,0,0,0,0,0,18,200
+207,"Geothermal \"Nuclear Blaze Geyser\"",2,4,"Infuses the ground with nuclear     energy\, turning the ground to magma and spewing it everywhere. New magmaspouts erupt from locations where   magma landed.",1,3,0,0,0,0,0,0,18,231
+208,"Light Energy \"High-Tension Blade\"",2,3,"Creates a blade-like energy beam    from Okuu's control rod. Limited    range\, but if used at close range\,  the move covers quite a large area. She sometime uses this as a big     flashlight... seriously now?",0,2,0,0,0,0,0,0,18,223
+209,"Crow Sign \"Yatagarasu Dive\"",2,4,"A fusion reaction occurs within     Okuu\, and a silhouette in the shape of a brilliantly shining bird       attacks the enemy. A skill that     shows the true spirit of the hell   crow.",0,3,210,4,0,0,0,0,18,232
+210,"Nuclear Heat \"Uncontrollable Dive\"",2,4,"Propels herself using a massive     amount of fusion energy in this     massive attack. Races back and forthacross the screen many times to hit the enemy in multiple places.",0,4,0,0,0,0,0,0,18,233
+211,"Control \"Self Tokamak\"",2,2,"Fusion energy surrounds Okuu and    activates when she flies or dashes  forward towards the enemy. Requires precision\, so a bird-brain like Okuucan't think of any other attacks    when attempting to use this one.",1,2,214,5,0,0,0,0,18,210
+212,"\"Subterranean Sun\"",2,4,"Draws energy from the earth and     creates a sun on the spot. The sun  manifests itself and burns          everything in the surrounding area.",0,4,0,0,0,0,0,0,18,234
+213,"Light Cover \"Nuclear Visor\"",2,2,"Creates a barrier in front of       herself\, which can take a few       attacks. Will continue to be in     front of Okuu until a certain amountof time passes.",0,2,206,5,0,0,0,0,18,211
+214,"\"Abyss Nova\"",2,5,"A nuclear chain reaction occurs     within Okuu and destroys everything in sight once critical mass is      reached. The explosion has a large  hitbox and can not be blocked. An   intense skill\, even for her.",0,5,0,0,0,0,0,0,18,241

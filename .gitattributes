@@ -1,3 +1,5 @@
 *.inl -diff -merge
 *.ini text eol=crlf
 *.ini.in text eol=crlf
+*.cv0 -text
+*.cv1 -text

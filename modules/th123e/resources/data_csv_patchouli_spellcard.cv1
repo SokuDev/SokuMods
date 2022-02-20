@@ -1,0 +1,46 @@
+#�X�y�J�i���o�[,�X�y�J��,"�^�C�v
+255 �G�J�[�h
+2 �X�y���J�[�h
+1 �X�L���J�[�h
+0 �V�X�e���J�[�h",����,"�J�[�h�����e�L�X�g
+�f�b�L�\�z��ʂŃJ�[�h��I������Əo�������","�o���X�e�[�W
+�����̃X�e�[�W�ȍ~����o������
+0�͏�������
+1�`6�@EASY
+11�`16�@NORMAL
+21�`26�@HARD
+31�`36�@LUNA","���A���e�B
+0�@�R����
+1�@�A���R����
+2�@���A
+�擾���I��
+�R����60��
+�A���R30��
+���A10��",,,,,,,,
+100,"Summer Red",1,0,"A basic form of fire-element magic. Shoots a large fireball straight    ahead. Superb in penetration\,       damage\, and ease of use\, but as it  travels straight\, it's also easy to dodge.",0,1,105,1,110,1,0,0,4,100
+101,"Winter Element",1,4,"A basic form of water-element magic.Summons a waterway at the enemy's   feet and attacks with a             high-pressure water spout.",0,1,106,1,111,1,0,0,4,140
+102,"Spring Wind",1,2,"A basic form of wood-element magic. Negates enemy attacks with air      pressure and pushes the opponent    back\, opening some distance between you.",0,1,107,1,112,1,0,0,4,110
+103,"Autumn Edge",1,1,"A basic form of metal-element magic.Uses the metal element to create    sharp blades and manipulate them to rush at the opponent. They're not   very powerful\, but make up for it innumber.",0,1,108,1,113,1,0,0,4,120
+104,"Dew Spear",1,3,"A basic form of earth-element magic.Crystal spears erupt from the       ground and rain down on the         opponent from the sky.",0,1,109,1,114,1,0,0,4,130
+105,"Summer Flame",1,0,"A special form of fire-element      magic. Sends flames in a great arc\, focusing not on power but on spread.It's not terribly powerful\, but     dodging it requires lots of         movement.",1,1,200,2,0,0,0,0,4,101
+106,"Condensed Bubble",1,4,"A form of water-element magic       specialized for defense. A bubble   shield that stops enemy attacks. It bursts after taking a certain amountof damage\, but that can deal damage back as a sort of counter.",1,1,206,3,0,0,0,0,4,141
+107,"Flash of Spring",1,2,"A form of wood-element magic        specialized for offense. Creates a  shot of high pressure air and throwsit at the opponent. Its high speed  makes it hard for those in the line of fire to even avert their eyes.",1,1,207,2,0,0,0,0,4,111
+108,"Autumn Blade",1,1,"An offensively specialized form of  metal-element magic. Gathers the    metal element to create a circular  saw blade\, which is thrown at the   enemy. When thrown both up and down it's easy to hit with.",1,1,202,2,0,0,0,0,4,121
+109,"Emerald City",1,3,"A defensively specialized form of   earth-element magic. Creates a wall of crystal from the earth and sends the opponent flying. Useful as a    counterattack as it has invincible  frames and a wide attack area.",1,1,212,3,0,0,0,0,4,131
+110,"Wipe Moisture",1,0,"A physical manifestation of fire    magic. Lashes fire at the enemy likea whip. Even though she has no      strength\, and the fire has no mass\, it is still incredibly strong.",0,1,211,3,0,0,0,0,4,102
+111,"Sticky Bubbles",1,4,"A restraint device created from     water magic. Sprays non-damaging    bubbles which trap the enemy in     mid-air. The bubbles can not be     blocked\, but won't have much of an  effect unless they all hit.",0,1,201,2,0,0,0,0,4,142
+112,"Static Green",1,2,"Anti-air wood magic. Balls of       lightning appear from her hands\,    shoot upward and explode. Because   the basis of this attack is wood    magic\, it seems that it could be    more stable.",0,1,210,3,0,0,0,0,4,112
+113,"Fall Slasher",1,1,"A shapeshifting metal attack.       Creates a sword from metal\, then    throws it towards the enemy. She canalso wield the sword while moving byholding down the button.",0,1,0,0,0,0,0,0,4,122
+114,"Diamond Hardness",1,3,"A resistance technique derived from earth magic. The body becomes hard  for a while\, and can deflect one    attack. Defense and attack can get abit crazy after this move\, since shecan take a lot of damage.",1,1,205,5,0,0,0,0,4,132
+200,"Fire Metal Sign \"St Elmo's Pillar\"",2,3,"Synthesis of fire and metal. Create a mass with high density and        temperature. Strikes the ground and creates a pillar of flame from      the enemy's feet. It's easy to      misstep.",0,2,203,5,0,0,0,0,4,220
+201,"Earth Water Sign \"Noachian Deluge\"",2,2,"Synthesis of earth and water. Spray compressed water shots forward at   low cost; effective in a firefight.",0,2,0,0,0,0,0,0,4,210
+202,"Metal Wood Sign \"Elemental Harvester\"",2,2,"Synthesis of metal and wood.        Protects the user with a            gear-shaped blade. A defensive      spell that can intercept nearby     enemies.",0,2,0,0,0,0,0,0,4,211
+203,"Sun Sign \"Royal Flare\"",2,5,"Creates a small sun which burns     everything with its light. One of   her greatest spells. Destiny-       defying magic of the Vampires'      mansion.",1,5,0,0,0,0,0,0,4,240
+204,"Moon Sign \"Silent Selene\"<a> ",2,4,"Condenses moonlight into arrows of  light\, shooting through everything  in its magic field. Magic that      protects Patchouli like an          impregnable fortress.",1,4,0,0,0,0,0,0,4,230
+205,"Five Elements \"Philosopher's Stone\"",2,5,"Elemental magic amplifier. When     using a special attack\, the gems    increase its power. Continues with  the passage of time.",1,5,0,0,0,0,0,0,4,241
+206,"Water Sign \"Jellyfish Princess\"<a> ",2,3,"Creates a protective bubble shield. The bubble stops enemy attacks. The user is invincible while the bubble exists\, but because you can't graze\,it's hard to maintain it for long.",1,3,0,0,0,0,0,0,4,221
+207,"Moon Wood Sign \"Satellite Sunflower\"",2,3,"Independent attack from above.      Light shots move upwards in a       spiral shape while scattering       attacks downwards.",1,2,213,4,0,0,0,0,4,222
+210,"Sun Wood Sign \"Photosynthesis\"",2,3,"Magic from the surrounding area     gathers together and heals her. As  her spirit replenishes\, the         benevolent light will follow Patchy around.",1,3,204,4,0,0,0,0,4,223
+211,"Fire Water Sign \"Phlogistic Pillar\"",2,3,"Releases fuses up and down to the   ceiling and floor. They have no     power until lit with a fire attack\, but can be used on ground or in     mid-air\, and the coverage is quite  large.",1,3,0,0,0,0,0,0,4,224
+212,"Earth Metal Sign \"Emerald Megalopolis\"",2,4,"Jeweled pillars rise from the earth and impale the opponent in          succession. The speed of this card  is quite slow\, but the player can   exploit this to keep the opponent   suppressed for a long time.",1,3,0,0,0,0,0,0,4,231
+213,"Sun Moon Sign \"Royal Diamond Ring\"",2,5,"Whirlpools of light form and attack from the side. They are individuallyweak\, but since they come in        succession and have a long duration\,it can overwhelm the opponent.",1,4,0,0,0,0,0,0,4,242

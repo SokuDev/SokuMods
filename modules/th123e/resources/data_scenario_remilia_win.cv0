@@ -1,0 +1,276 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:reimuU0
+Face:lose,ïâ
+Face:win,ì{
+You had a test of courage at the shrine?
+Why didn't you call me?\
+End:
+
+Label:reimuR0
+Face:lose,ïâ
+Face:win,ïÅ
+It seems there's a temple in the village now.\
+
+Face:win,òf
+What makes it different from a shrine?\
+
+End:
+
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisaU0
+Face:lose,ïâ
+Face:win,ó]
+Ah\, man. In the summer\, a huge hat like that
+must be good for blocking sunlight.\
+End:
+
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,ó]
+So bored.
+Go bring me someone interesting.\
+End:
+
+Label:sakuyaR0
+Face:lose,ïâ
+Face:win,òf
+I want to go to the bazaar\,
+but it's on the river plain...\
+
+Face:win,ó]
+I want to see the Hisou Tensoku...\
+
+End:
+
+
+## =======================================================================
+#VSódñ≤
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:youmuU0
+Face:lose,ïâ
+Face:win,ó]
+I heard a rumor that it's a trend
+to use ghosts for air conditioning...\
+End:
+
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,ä
+Oh\, I saw a golem doll.
+It looked really weak.\
+
+End:
+
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouliU0
+Face:lose,ïâ
+Face:win,ó]
+What\, you don't have any manga?
+These are the only books you have.\
+End:
+
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remilia0
+Face:lose,ïâ
+Face:win,òf
+Vampires don't have reflections.
+So this is simply an afterimage.\
+End:
+
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,òf
+Until now\, I thought of ghosts as just zombies\,
+but you seem different.
+I wonder where the male mummies are?\
+
+End:
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,ó]
+Huh? White or black?
+Aren't bats always black?\
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suikaU0
+Face:lose,ïâ
+Face:win,òf
+You know\, watermelons look more like
+slices of meat than grapes.\
+End:
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,äæ
+Writing is a pain.
+How do you write so neatly in newspapers?\
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:udongeU0
+Face:lose,ïâ
+Face:win,ó]
+Ah\, the dumpling maker.
+I'll take some holy water dumplings.\
+End:
+
+
+## =======================================================================
+#VSè¨í¨
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:komachiU0
+Face:lose,ïâ
+Face:win,ó]
+Unfortunately\, I can't cross the river.
+Too bad\, huh?\
+End:
+
+## =======================================================================
+#VSàﬂãË
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ikuU0
+Face:lose,ïâ
+Face:win,ïÅ
+I've heard that oarfish are really rare fish.\
+End:
+
+Label:ikuR0
+Face:lose,ïâ
+Face:win,ïÅ
+So...\
+
+Face:win,ó]
+I've heard that oarfish are really rare fish.\
+
+Face:win,ä
+Hmmm... I should let Sakuya know as soon as possible.
+She has a soft spot for rare ingredients.\
+End:
+
+
+## =======================================================================
+#VSìVéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,ã¡
+Ehh\, so other than peaches\, you also eat pills?
+Do you eagerly chew on Jintan and the such?\
+End:
+
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,ïÅ
+Heh\, so just causing wind to blow makes you a god?\
+End:
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,äæ
+Fairies are totally useless.\
+End:
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,ä
+How was the manga?
+Was it interesting?\
+End:
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,ïâ
+I rather dislike the sun...\
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,ïÅ
+You seem to be in constant motion.
+I thought fighting you would be interesting\, but...\
+End:
+
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+Face:win,òf
+Hmm\, I can't see anyone to kill time on...\
+End:
+
+
+## =======================================================================
+

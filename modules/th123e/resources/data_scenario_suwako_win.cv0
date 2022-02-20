@@ -1,0 +1,275 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSñÇóùçπ
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:reimuU0
+Face:lose,ïâ
+Face:win,ïÅ
+Ahh\, I wish you could share some of your
+recklessness with our Sanae.\
+End:
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisaU0
+Face:lose,ïâ
+Face:win,åà
+You should visit the shrine
+on the mountain too sometimes.\
+End:
+
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,ó]
+Have you offered your thanks to the god of food?
+You'll get cursed\, you know?\
+End:
+
+
+## =======================================================================
+#VSódñ≤
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:youmuU0
+Face:lose,ïâ
+Face:win,åà
+Ghosts better not hang around the shrine~\
+End:
+
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,ïÅ
+Oh? Do you make Oshirasama dolls?\
+End:
+
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouliU0
+Face:lose,ïâ
+Face:win,åà
+If gods lose their power then
+magic can't be used\, you know?\
+End:
+
+
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remiliaU0
+Face:lose,ïâ
+Face:win,ó]
+There also exist people who believe in bats
+as good omens. However even with such trivial
+amounts of faith\, one could become a god\, right?\
+End:
+
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,òf
+Leaving a dead ghost here like this.
+Maybe there are no gods in the afterlife.\
+End:
+
+
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,ó]
+Oh my\, our shrine really doesn't have
+any cracks you can slip through.\
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suika0
+Face:lose,ïâ
+Face:win,ó]
+Were you a resident of the underworld?
+It's flourishing now\, thanks to nuclear energy.\
+End:
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,äæ
+I have a feeling that there are many here
+whose photos have never been taken.\
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:udongeU0
+Face:lose,ïâ
+Face:win,ïÅ
+I heard that there are all kinds of gods
+where you come from.\
+End:
+
+
+## =======================================================================
+#VSè¨í¨
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:komachiU0
+Face:lose,ïâ
+Face:win,òf
+Death is impure~
+Shinigami are not gods.\
+End:
+
+## =======================================================================
+#VSàﬂãË
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ikuU0
+Face:lose,ïâ
+Face:win,ó]
+An oarfish?
+I've seen them dried.\
+End:
+
+## =======================================================================
+#VSìVéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,åà
+Celestials don't count on anything and have
+no expectations in life. So then\, they are always
+ready to worship properly\, right?\
+End:
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,òf
+Train more and more!
+Until you're so strong that those
+below the mountain are afraid of you!\
+End:
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,ó]
+Frogs are weak against cold.
+Not going against nature is the
+most natural way to live.\
+End:
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,äæ
+We Japanese Gods accept all kinds of followers!
+Because there's more than 8 million of us
+we can't really do any rejecting anymore...\
+End:
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,ó]
+Looking good! Looking good! Today\, as well\, thanks
+to the straight-forward and honest youkai\, nuclear
+energy is being used for peaceful purposes only.\
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,åà
+Gods can split themselves infinitely~\
+End:
+
+
+Label:suwakoR0
+Face:lose,ïâ
+Face:win,òf
+Ahh\, it's a good time to trick those who
+live aboveground into confronting
+their deepest fears isn't it?\
+End:
+
+
+
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+
+Face:win,ä
+Destroy the evidence! Destroy the evidence!
+Picking on someone in a place like this
+can't be good for a god's reputation!\
+End:
+
+Label:common1
+
+Face:win,åà
+Now now\, there's still more time!
+Rematch! Rematch!\
+End:
+
+Label:common2
+
+Face:win,ïÅ
+Pay more respect to the earth!
+Otherwise\, who knows?
+You might even get cursed. Heh heh. \
+End:
+
+
+## =======================================================================
+

@@ -1,0 +1,41 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Open\, Lamented Box of Urashima",1,0,"Opens a gap from the sky and drops  debris from it to cause damage.",0,1,104,1,108,1,204,2,8,100
+101,"Ghostly Butterfly Hidden in Zen Temple",1,2,"A melee attack that attacks by      whirling the umbrella. There is no  invincible period\, but its hitbox   is wide.",0,1,105,1,109,1,0,0,8,110
+102,"Ride the Waves\, Fight the Ocean",1,1,"(B) opens up a hole that sucks in   projectiles. The sucked-in objects  are stored\, and can be shot out     with force using (C)                'Fight the Ocean'",0,1,106,1,110,1,0,0,8,120
+103,"Illusional Rift",1,3,"Take refuge inside a gap\, then      appear from the exit while          attacking. The dash button and key  input allows you to control the formof the attack and where to emerge.",0,1,107,1,111,1,0,0,8,130
+104,"Bound to the Grave",1,0,"Blasts out debris from a gap in a   fan shape which spreads out. Becomesa diversion at medium range.",1,1,206,3,0,0,0,0,8,101
+105,"Illusion Manji Parasol",1,2,"Spirit power is converged into a    manji on the umbrella\, which is     spun into a projectile. Its large   hitbox makes it useful for zoning.  Charging it delays its release\, but it's harmless before it's fired.",1,1,0,0,0,0,0,0,8,111
+106,"Universe of Matter and Antimatter",1,1,"Places a gap that has no effect     whatsoever. When two of these gaps  come in contact with each other\, a  reaction occurs\, which causes a hugedistortion attack.",1,1,202,2,0,0,0,0,8,121
+107,"Flesh Dismantler",1,3,"Disappear into a gap and fly out\,   attacking the opponent. Holding the key will allow her to hide for a    while longer and move left and      right.",1,1,0,0,0,0,0,0,8,131
+108,"Bewitching Bait",1,0,"Creates a birds-eye through which   high-speed flying objects are       released. Its position is fixed\,    but the projectiles' paths are      random.",1,1,207,2,0,0,0,0,8,102
+109,"Border between Brains and Feet",1,2,"Yukari runs straight along the      border\, pulls high-powered objects  from it and unleashes them upon the enemy. This just proves that you canalways split something even smaller.",0,1,200,2,0,0,0,0,8,112
+110,"Eye of Changes",1,1,"An eye from the gap targets the     enemy. It becomes a stationary      platform that offers supporting     fire. It follows a designated path\, so it can be regarded as one of     Yukari's familiars.",0,1,208,3,0,0,0,0,8,122
+111,"Wings of the Chimera",1,3,"Places a gap door that can be used  to teleport when needed. Very fast  speed\, usable freely for escape and easy to carry around.",0,1,215,5,0,0,0,0,8,132
+200,"Border Sign \"Quadruple Barrier\"<a> ",2,3,"Creates multiple barriers in front\, attacking the enemy at short range. The move is quick so you can chain  it to other moves\, making it a      staple in close-range combat.",0,2,203,5,0,0,0,0,8,220
+201,"Shikigami \"Ran Yakumo\"",2,3,"Summons Ran and gives her the       attack command. Ran charges         straight ahead\, and adds damage     with her spinning attack if she     catches the enemy.",0,4,0,0,0,0,0,0,8,221
+202,"Boundary \"Border Between 2D and 3D\"",2,1,"A unique skill that creates a       boundary running along the screen   edge. It changes directions to      follow the screen. You can also fireit behind you by holding back.",1,2,205,4,0,0,0,0,8,200
+203,"Boundary \"Charming Quadruple Barrier\"",2,4,"A larger version of Quadruple       Barrier that also sucks the         opponent in\, making its effective   range much greater.",0,5,0,0,0,0,0,0,8,230
+204,"Shikigami \"Chen\"",2,1,"Borrows Ran's shikigami Chen for a  while. Chen bounces across the      screen and attacks the enemy        indirectly\, unlike Ran. Being a     low level shikigami\, her cost is    low too.",1,2,201,4,0,0,0,0,8,201
+205,"Boundary \"Objective Border\"",2,3,"Fires four linked boundaries that   traverse the edges of the screen.   Since it affects most of the screen\,it leaves little safe room for the  enemy.",1,4,0,0,0,0,0,0,8,222
+206,"Fantasy Nest \"Nest of Fireflies\"",2,3,"Opens numerous gaps around Yukari   that fire danmaku forward. Even     when the enemy gets behind Yukari\,  the firing direction will follow theenemy.",1,3,0,0,0,0,0,0,8,223
+207,"Aerial Bait \"Laced With Venom\"",2,2,"Opens up multiple sites at the top  of the screen through which high-   speed flying objects pass and       attack. Its effect is very wide-    range\, so it will be hard for the   opponent to move once it's started.",1,2,0,0,0,0,0,0,8,210
+208,"Magic Eye \"The Magic Eye of Laplace\"",2,4,"A large number of eyes appear\,      staring at the enemy. Once the eyes see an exploitable weakness\, they   attack. It seems this is how Yukari knows what's going on in all of     Gensokyo at all times.",1,3,0,0,0,0,0,0,8,231
+215,"Obsolete Line \"Trip to the Old Station\"",2,5,"An assault that sends an abandoned  train from the gap. The train can't be grazed or guarded and the damage is high. The downside is that       opening the gap takes a long time.",1,5,0,0,0,0,0,0,8,240

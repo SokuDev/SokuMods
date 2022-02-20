@@ -1,0 +1,230 @@
+## =======================================================================
+#Stage:4
+#Title:「業火絢爛」
+#Place:間欠泉地下センター通路
+
+Character:chirno,160,0,0,8888FF
+Character:utsuho,160,0,1,FF8888
+
+#背景　核融合炉心部
+Stage:34,0
+
+#自分初期配置
+Action:chirno,20　#1P画面外待機
+
+#敵初期配置
+Action:utsuho,100　#画面外で待機
+
+#カメラ上固定
+Action:utsuho,130
+
+#画面表示前処理終了============================
+
+Label:Start
+PlayBgm:data/bgm/room.ogg
+Sleep:60
+
+#画面黒からフェードイン
+Action:chirno,161
+#カメラ画面上部から下へパン
+Action:utsuho,131
+
+Sleep:60
+#ステージタイトル表示
+Object:data/scenario/chirno/effect/StageTitle004.bmp,0,216,-32
+Sleep:30;
+Object:data/scenario/effect/Stage4.bmp,1,256,352
+Sleep:30;
+
+#PlayBgm:data/bgm/ta03.ogg
+Sleep:300;
+
+
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+
+#0１２３４５６７８９０１２３４５６７８９０１２３
+
+Action:chirno,310# チルノ　落ちてくる
+Action:chirno,311
+Balloon:chirno,1,0,-200
+So hot! This is unbearable!\
+
+Balloon:null,1,0,-200
+
+# 空が前方から飛んで入ってくる
+Action:utsuho,400　#空画面外から早苗の位置めがけて火の玉を発射しつつ乱入
+Action:chirno,403　#チルノ驚く
+Sleep:10
+Action:chirno,312　#火の玉を避ける
+Action:chirno,313　#313終了検知
+
+Action:utsuho,401　#400終了タイミング検知
+
+Sleep:30
+
+#Action:utsuho,409　#カメラ空へ
+Balloon:utsuho,1,0,-200
+Sleep:10
+Foreign substance detected!\
+
+Significant drop in reactor core temperature
+requires urgent attention. The foreign substance
+is to be immediately eradicated!\
+Balloon:null,1,0,-200
+Sleep:10
+
+Action:chirno,403 #チルノ　驚く
+Balloon:chirno,1,0,-200
+Wawawawawa!\
+
+Balloon:null,1,0,-200
+
+Action:utsuho,202 #空ニュートラル検知
+# 速攻で戦闘に入る
+
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st33.ogg
+Action:chirno,203#　ニュートラル状態へ
+Action:utsuho,203#　ニュートラル状態へ
+Action:chirno,3
+
+End:
+
+# --------------------------------
+#中間デモ
+Label:Intermission10
+
+Action:utsuho,154
+
+#やられキャラ完全ダウン検知
+Action:utsuho,200
+#攻撃側ニュートラル移行検知
+Action:chirno,202
+
+# スペルカード一枚目終了時で戦闘中盤でいったん仕切り直し
+Action:chirno,403　#チルノ驚く
+# 空が倒れている
+
+Balloon:chirno,1,0,-200
+This is hot!
+I've got to get the heck out of here!\
+
+Action:utsuho,402　#空起き上がる
+Balloon:utsuho,1,0,-200
+Do you think I'll let you escape
+before I eradicate you?!\
+
+Action:chirno,407　# チルノ　慌てて
+Balloon:chirno,1,0,-200
+I'll escape before I get eradicated!\
+
+Balloon:null,1,0,-200
+Action:utsuho,405　#威嚇ポーズ
+Action:utsuho,406　#406終了
+
+Balloon:utsuho,1,0,-200
+Will you really manage to escape from me?
+Or will I simply force you to buzz off?\
+
+It's a fight!\
+
+Balloon:null,1,0,-200
+
+
+#戦闘開始処理
+
+Action:chirno,203#　ニュートラル状態へ
+Action:utsuho,203#　ニュートラル状態へ
+
+戦闘再開処理
+Action:utsuho,210#　死亡フラグ類初期化
+
+End:
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:utsuho,200
+#攻撃側ニュートラル移行検知
+Action:chirno,202
+
+#中央移動処理----
+Action:chirno,164
+Sleep:15
+
+Action:chirno,204
+Action:utsuho,205
+
+#カメラ中央固定
+Action:chirno,2　
+
+Sleep:30
+Action:chirno,165
+
+Sleep:30
+#---------
+
+# チルノ　決めポーズ
+Balloon:chirno,1,0,-200
+Action:chirno,303
+Now's my chance!
+I'm outta here!\
+
+Balloon:null,1,0,-200
+
+Action:chirno,304# チルノは慌てて上に去っていく
+
+Action:utsuho,402　#空起き上がる
+Action:utsuho,202  #ニュートラル検知
+#空ニュートラル移行検知
+Balloon:utsuho,1,0,-200
+Now then\, you can't possibly escape
+from my next attack!\
+
+Action:utsuho,404　#空　驚きのポーズ
+Eh\, what?
+Could it be...\
+
+Action:utsuho,403　#空　疑問　
+I raised the firepower so much that
+she got vaporized without a trace?\
+
+Action:utsuho,206# 空　普通
+
+I overdid it a bit. Well\, whatever.
+Let's get back to work.\
+
+Balloon:null,1,0,-200
+Action:utsuho,411# 空　去っていく
+
+Balloon:null,1,0,-200
+Sleep:60
+
+Result:
+FadeBgm:2000,0
+Action:chirno,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

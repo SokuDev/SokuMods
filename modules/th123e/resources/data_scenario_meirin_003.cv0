@@ -1,0 +1,197 @@
+## =======================================================================
+#Stage:4
+#Title:「退魔も恐れぬ霊夢」
+#Place:夢の中の時計台３
+
+Character:meirin,160,0,0,8888FF
+Character:reimu,160,0,1,FF8888
+
+#背景　夢の中の時計台３
+Stage:37,0
+
+#自分初期配置
+Action:meirin,20　#1P定位置待機
+Action:meirin,402　#美鈴考え事ポーズ
+
+#敵初期配置
+Action:reimu,100　#画面外で待機
+
+#カメラ中央固定
+Action:meirin,2
+
+#画面表示前処理終了============================
+
+Label:Start
+
+#画面黒からフェードイン
+Action:meirin,161
+PlayBgm:data/bgm/ta00.ogg
+
+Sleep:60
+
+#ステージタイトル表示
+Object:data/scenario/meirin/effect/StageTitle004.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/Stage4.bmp,1,256,352
+Sleep:300;
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+#0１２３４５６７８９０１２３４５６７８９０１２３
+
+# 美鈴が待っている
+
+Action:reimu,101# 霊夢が入ってくる
+Action:reimu,102
+Balloon:reimu,1,0,-200
+Well then\, today's another good day for
+exterminating some youkai. I'll disinfect all
+the devils at the Scarlet Devil Mansion!\
+
+Action:meirin,203# 美鈴　通常
+Balloon:meirin,1,0,-200
+Hmph. So you came!
+You monster of disasters.\
+
+Action:reimu,404# 霊夢　疑問
+Balloon:reimu,1,0,-200
+Did you say monster?\
+
+Action:meirin,405# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+No matter how skillfully you disguise yourself
+as a human\, it's futile!
+My eyes won't be deceived.\
+
+# 霊夢　通常
+Action:reimu,203# 霊夢　通常
+Balloon:reimu,1,0,-200
+Hoho. When I've taken this form
+of a shrine maiden\, you would
+call me a monster?\
+
+Action:reimu,409# 霊夢　笑う
+Isn't that an amusing thing to say.
+Even though you're the monster.\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+Hmph. Certainly I am a youkai.
+However...\
+
+Action:reimu,203# 霊夢　通常
+Balloon:reimu,1,0,-200
+However?\
+
+Action:meirin,306# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+I am a youkai who loves Gensokyo
+with all her heart! I have nothing to do
+with creatures of destruction like you!\
+
+Action:reimu,409# 霊夢　笑う
+Balloon:reimu,1,0,-200
+Splendid! Simply splendid!
+You're an example youkai.\
+
+Action:reimu,203# 霊夢　通常
+However\, do you think that pretty words alone
+can protect peace and harmony?\
+
+Action:reimu,405# 霊夢　決めポーズ
+We shall bring disaster
+into Gensokyo!\
+
+# 霊夢　決めポーズ
+A calamity that will
+make the Earth itself tremble!\
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st40.ogg
+Action:meirin,203#　ニュートラル状態へ
+Action:reimu,203#　ニュートラル状態へ
+Action:meirin,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:reimu,200
+#攻撃側ニュートラル移行検知
+Action:meirin,202
+
+#中央移動処理----
+Action:meirin,164
+Sleep:15
+
+Action:meirin,204
+Action:reimu,205
+
+#カメラ中央固定
+Action:meirin,2　
+
+Sleep:30
+Action:meirin,165
+
+Sleep:30
+#---------
+
+# 霊夢　倒れている
+Action:meirin,406# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+I didn't even approach the limits
+of my true powers\, but I guess
+such powers aren't even necessary!\
+
+Action:reimu,410# 霊夢は起き上がって胡座で座る（しゃがみで）
+Balloon:reimu,1,0,-200
+Mmph.
+As expected from you\, eh?\
+
+# 霊夢は起き上がって胡座で座る（しゃがみで）
+But it appears as if you've spent all your energy
+in a wanton series of battles.\
+
+Action:meirin,203# 美鈴　通常
+Balloon:meirin,1,0,-200
+Tch!\
+
+Action:reimu,411# 霊夢　起き上がって
+Balloon:reimu,1,0,-200
+Now then\, the time has come hasn't it\,
+to show you my true form!\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+Finally\, it seems to be
+revealing its true form...!\
+
+Balloon:null,1,0,-200
+
+Result:
+FadeBgm:2000,0
+Action:meirin,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

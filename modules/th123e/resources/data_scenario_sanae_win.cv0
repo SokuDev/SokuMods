@@ -1,0 +1,304 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSñÇóùçπ
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:reimuU0
+Face:lose,ïâ
+Face:win,ä
+This kind of destruction happened because you
+couldn't inspire enough faith.
+You should present yourself in a more divine manner.\
+End:
+
+Label:reimuR0
+Face:lose,ïâ
+Face:win,ïÅ
+Yes\, after that we pitched in
+to help build the temple.\
+
+Face:win,ó]
+I say that\, but there really wasn't
+much for us to do.\
+End:
+
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisaU0
+Face:lose,ïâ
+Face:win,ïÅ
+Why is it that the Forest of Magic is
+called the Forest of Magic?
+Well\, old-growth forests are certainly rare but...\
+End:
+
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,òf
+It doesn't seem like maids are really denizens
+of the fantasy world anymore\, don't you think?
+There are many in the streets.\
+End:
+
+
+## =======================================================================
+#VSódñ≤
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:youmuU0
+Face:lose,ïâ
+Face:win,ä
+It's so fun just to imagine what that large
+marshmallow-looking thing of yours tastes like.\
+End:
+
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,ã¡
+That's quite a lot of dolls.
+I admire artisans.\
+End:
+
+Label:aliceR0
+Face:lose,ïâ
+Face:win,ïÅ
+Can't you make a big doll or something?\
+
+Face:win,òf
+Well\, I only want to see one but...
+A life-sized giant robot\, that is.\
+End:
+
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouliU0
+Face:lose,ïâ
+Face:win,ã¡
+Oh my heavens\, there's books I've seen before!
+You have books from the outside world too.\
+End:
+
+Label:patchouliR0
+Face:lose,ïâ
+Face:win,äæ
+Ah\, this occult magazine...
+I used to read it often when I was younger.\
+
+Face:win,ïÅ
+I was concerned about it because I felt that
+these kinds of magazines suddenly disappeared
+after the turn of the century.\
+
+End:
+
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remiliaU0
+Face:lose,ïâ
+Face:win,äæ
+Don't those wings get in the way when you sleep?\
+End:
+
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,òf
+Traditional manors sure are nice.
+I want to live in a big manor too.\
+End:
+
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,ã¡
+Eh?
+A giant robot was built in the outside world?\
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suika0
+Face:lose,ïâ
+Face:win,òf
+That sake\, what was it made from?
+It's incredibly potent...\
+End:
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,ïÅ
+Recently\, fewer and fewer people are
+reading newspapers. It almost feels as if
+it were a relic of a bygone age\, right?\
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:udongeU0
+Face:lose,ïâ
+Face:win,äæ
+It's okay\, humans who catch rabbits to eat them
+don't even exist any more.\
+End:
+
+
+## =======================================================================
+#VSè¨í¨
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:komachiU0
+Face:lose,ïâ
+Face:win,ïÅ
+The Sanzu River or the Chikuma River\,
+which is longer?\
+End:
+
+## =======================================================================
+#VSàﬂãË
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ikuU0
+Face:lose,ïâ
+Face:win,òf
+You swim in the clouds?
+Don't lumps of ice stick to your body?\
+End:
+
+## =======================================================================
+#VSìVéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,ä
+Ah\, thank you so much for the refreshing peaches.\
+End:
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,åà
+I wonder how everyone trains~\
+End:
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,ä
+Oh my\, I heard fairies were just small fry but...\
+End:
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,ó]
+Tai chi quan sure is amazing.
+I've even seen goalkeepers that can do it.\
+End:
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,äæ
+You're good at controlling
+so much high-power energy.\
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,òf
+You're fond of taking action from
+behind the scenes\, right? But in that case\,
+I'll have to remain suspicious of you as well.\
+End:
+
+Label:suwakoU1
+Face:lose,ïâ
+Face:win,ïÅ
+Just a little more... Couldn't you please give me a
+little more training? Because it seems the residents
+of Gensokyo like to be self-disciplined.\
+End:
+
+
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+
+Face:win,ä
+Something like winning a match
+can't be compared to a miracle!\
+End:
+
+Label:common1
+
+Face:win,äæ
+Truly\, anywhere I go\, there always seems to be
+someone wanting to fight.
+Everyone in Gensokyo seems so rough.\
+End:
+
+
+Label:common2
+
+Face:win,òf
+Fortunes have no credibility if there isn't a fee.\
+End:
+
+
+## =======================================================================
+

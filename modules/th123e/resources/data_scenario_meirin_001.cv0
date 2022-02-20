@@ -1,0 +1,173 @@
+## =======================================================================
+#Stage:2
+#Title:「迎え撃て凶星の影」
+#Place:夢の中の時計台１
+
+Character:meirin,160,0,0,8888FF
+Character:alice,160,0,1,FF8888
+
+#背景　紅魔館時計塔
+Stage:12,0
+
+#自分初期配置
+Action:meirin,20　#定位置1P
+Action:meirin,402　#思案
+
+#敵初期配置
+Action:alice,100　#2P画面外で待機
+
+#カメラ中央固定
+Action:meirin,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+Sleep:60;
+
+#画面黒からフェードイン
+Action:meirin,161
+
+PlayBgm:data/bgm/ta01.ogg
+Sleep:60;
+
+#ステージタイトル表示
+Object:data/scenario/meirin/effect/StageTitle002.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/Stage2.bmp,1,256,352
+Sleep:300;
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+#0１２３４５６７８９０１２３４５６７８９０１２３
+# 美鈴　そわそわしている（一言ずつ行ったり来たり）
+Action:meirin,301#右へ移動
+Action:meirin,302
+Balloon:meirin,1,0,-200
+Now that it's come to this\,
+I have no choice but to ambush it!\
+
+Balloon:null,1,0,-200
+Action:meirin,303#左へ移動
+Action:meirin,304
+
+Balloon:meirin,1,0,-200
+The Taisui Xingjun will surely send
+all kinds of disaster-causing youkai!\
+
+Balloon:null,1,0,-200
+Action:alice,101# アリスが入ってくる
+Action:alice,102
+
+Balloon:alice,1,0,-200
+I'd like to go to the library\,
+could you lead me there?\
+
+Action:meirin,305# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+Whoa!
+It appeared already!\
+
+Action:alice,400# アリス　疑問
+Balloon:alice,1,0,-200
+What are you talking about?
+I just want to go to the library.\
+
+Action:meirin,203# 美鈴　通常
+Balloon:meirin,1,0,-200
+Heh heh heh.
+I'm completely aware of what's going on!
+You are...\
+
+Action:meirin,405# 美鈴　決めポーズ
+You are a youkai sent by the Taisui Xingjun!\
+
+Action:alice,403 アリス　嬉しそう
+Balloon:alice,1,0,-200
+Ahaha! As expected of the
+Scarlet Devil Mansion's gatekeeper!\
+
+Action:alice,402# アリス　決めポーズ
+This temporary appearance\,
+you saw through it immediately!\
+
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st42.ogg
+Action:meirin,203　#ニュートラル状態へ
+Action:alice,203　#ニュートラル状態へ
+Action:meirin,167#　フラッシュ
+Action:meirin,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:alice,200
+#攻撃側ニュートラル移行検知
+Action:meirin,202
+
+Action:meirin,164
+Sleep:15
+
+Action:meirin,204
+Action:alice,205
+
+#カメラ中央固定
+Action:meirin,2　
+
+Sleep:30
+Action:meirin,165
+
+Sleep:30
+
+# アリス、倒れた状態
+
+# 美鈴　
+Balloon:meirin,1,0,-200
+That was dangerous.
+Getting attacked by familiar forms is terrifying!\
+
+# アリス
+Balloon:alice,1,0,-200
+....\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+Of course you'd stay silent.
+It looks like you can't even move anymore.\
+
+Action:meirin,306# 美鈴　拳を握り
+But\, I don't think it'll end with this.
+I have to keep up the attack!\
+
+Balloon:null,1,0,-200
+Sleep:90
+
+Result:
+FadeBgm:2000,0
+#Action:meirin,159　#カメラ上方向にパン開始
+Action:meirin,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

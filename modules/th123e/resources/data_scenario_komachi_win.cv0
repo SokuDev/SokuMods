@@ -1,0 +1,300 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSè¨í¨
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:reimuU0
+Face:lose,ïâ
+Face:win,ïÅ
+Shinto shrines refrain from anything relating to
+death right? I mean\, you don't
+even hold funerals there...\
+End:
+
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisaU0
+Face:lose,ïâ
+Face:win,ïÅ
+It's not exaggerating to say humans who flee
+from destiny are humans who forfeit being human.\
+End:
+
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,ó]
+From cooking to washing\,
+cleaning to battling\,
+you're quite hard working.\
+End:
+
+
+## =======================================================================
+#VSódñ≤
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:youmuU0
+Face:lose,ïâ
+Face:win,òf
+Ahh\, living in the Netherworld is so much
+like living in the human world.
+Dying and ending up in the Netherworld is the best.\
+End:
+
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,òf
+Hanged people become small ghosts\,
+'cause the part between
+their heads and bodies get thin.\
+End:
+
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouliU0
+Face:lose,ïâ
+Face:win,ïÅ
+A book that kills the person
+whose name was written on it.
+That'd be a convenient thing to have.\
+End:
+
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remiliaU0
+Face:lose,ïâ
+Face:win,ã¡
+You stuff yourself in coffins
+even though you're not dead?
+Wow\, that sounds tight.\
+End:
+
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,ä
+The seasons in the Netherworld sure are interesting.\
+End:
+
+Label:yuyukoR0
+Face:lose,ïâ
+Face:win,ã¡
+Speaking of which\, my boss said
+there have been too few reincarnations lately.\
+Face:win,ïÅ
+When you're not busy\, why don't you go look
+and fix up some appropriate ghosts for me?\
+Face:win,ó]
+What? It's okay if they're only shells\,
+since it's hard for me if there are
+more humans around here.\
+End:
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,òf
+If I took you on my boat\,
+I wonder how long I'd have to row?\
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suikaU0
+Face:lose,ïâ
+Face:win,ã¡
+Oh\, I smell sake.
+Can't work any more\, nope.\
+End:
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,ã¡
+Ooh\, the breadth of the Sanzu River...
+This is interesting news.\
+End:
+
+Label:ayaR0
+Face:lose,ïâ
+Face:win,ïÅ
+The Ministry of What's Right and What's Wrong
+also has something like an internal news memo.\
+
+Face:win,òf
+The printing technology of the tengu is certainly
+very similar to that of the oni in Hell\, isn't it?\
+
+Face:win,ó]
+Just who in the heck came up
+with such technology\, huh?\
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:udongeU0
+Face:lose,ïâ
+Face:win,ó]
+Even if there's an illusion\,
+it can't interfere with my distance.\
+End:
+
+
+## =======================================================================
+#VSè¨í¨
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:komachi0
+Face:lose,ïâ
+Face:win,ó]
+It's a good idea to do some self-introspection
+every now and then\, 'cause I'm
+still alive enough to do it.\
+End:
+
+## =======================================================================
+#VSàﬂãË
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ikuU0
+Face:lose,ïâ
+Face:win,ïÅ
+Oh\, oarfish are rare.
+Don't see them much in my river.\
+End:
+
+## =======================================================================
+#VSìVéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,ó]
+It's time for a pleasant life!\
+End:
+
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,ã¡
+Oh? My expectations were that humans who
+presumed to speak for the gods themselves
+would be different somehow...\
+End:
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,åà
+You look so bored.
+Alright then\, I'll be your playmate from now on!\
+End:
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,ó]
+Living in the house of a devil like this
+is a pain\, right? What\, I'm just playing
+around a little bit. Don't get so angry.\
+End:
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,ã¡
+Oh my\, you say you are a hell raven of the Old Hell?
+Why would something that dangerous be aboveground?\
+End:
+
+Label:utsuhoR0
+Face:lose,ïâ
+Face:win,ïÅ
+The present Hell became a place where oni are
+well disciplined and injustices only rarely happen.\
+
+Face:win,òf
+The oni of Old Hell were in cahoots with the sinners\,
+such that there were even souls who didn't want to
+leave hell.\
+
+Face:win,ó]
+You guys should\, rather than a Hell like that\,
+try to look for work at the new Hell.
+How's that sound?\
+
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,òf
+The frog who awoke from within the Earth\,
+the snake who undyingly sheds.\
+In the stages of life and rebirth\, both of you
+can be seen as Gods who've completely transcended
+the cycle of suffering. Is that right? \
+End:
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+
+Face:win,òf
+Every lifespan is different.
+That's why they're always missing something.\
+End:
+
+
+## =======================================================================
+

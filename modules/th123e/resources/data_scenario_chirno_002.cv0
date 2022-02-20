@@ -1,0 +1,202 @@
+## =======================================================================
+#Stage:3
+#Title:「湯上がりに一杯」
+#Place:間欠泉地下センター入り口
+
+Character:chirno,160,0,0,8888FF
+Character:marisa,160,0,1,FF8888
+
+#背景　間欠泉地下センター入り口
+Stage:32,0
+
+#自分初期配置
+Action:chirno,1　#1P画面外待機
+
+#敵初期配置
+Action:marisa,30　#画面定位置で待機
+
+#カメラ中央固定
+
+#画面表示前処理終了============================
+
+Label:Start
+PlayBgm:data/bgm/ta05.ogg
+Sleep:60;
+
+#画面黒からフェードイン
+Action:chirno,161
+Sleep:30
+
+Face:null,普
+WindowColor:0,255,255,255
+WindowPos:8,192
+
+
+
+#ステージタイトル表示
+Object:data/scenario/chirno/effect/StageTitle003.bmp,0,224,-32
+Sleep:30;
+Object:data/scenario/effect/Stage3.bmp,1,256,352
+Sleep:300;
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+#0１２３４５６７８９０１２３４５６７８９０１２３
+
+# 魔理沙が間欠泉センターの前に居る
+Balloon:marisa,1,0,-200
+The hot spring here
+sure does wonders for the body.\
+
+Action:marisa,400 #酒くれポーズ
+Balloon:marisa,1,0,-200
+Now if there were only some well-chilled sake
+around then that'd be the best...\
+
+Balloon:null,1,0,-200
+Action:marisa,206　#魔理沙素立ち
+
+# チルノが登場する
+Action:chirno,50
+Action:chirno,51 #登場動作終了検知
+
+Balloon:chirno,1,0,-200
+Was it over here?\
+
+Action:marisa,401 # 魔理沙　驚き
+Balloon:marisa,1,0,-200
+Oh\, a well-chilled fairy.
+Seeing one in a place like this is rare.\
+
+# チルノ
+Balloon:chirno,1,0,-200
+Have you seen a Daidarabocchi around here?\
+
+Action:marisa,402 # 魔理沙　疑問
+Balloon:marisa,1,0,-200
+A Daidarabocchi?\
+
+Action:chirno,309# チルノ　大げさに手を開いて
+Balloon:chirno,1,0,-200
+A gigantically huge youkai!
+I saw it around here somewhere just now!\
+
+Action:marisa,203　#魔理沙素立ち
+Balloon:marisa,1,0,-200
+Ho ho! A big youkai\, is it?
+Hm\, I can't say I don't know.\
+
+Action:chirno,404# チルノ　嬉しそう
+Balloon:chirno,1,0,-200
+Eh? Really?
+Where\, where?\
+
+Action:marisa,403# 魔理沙　決めポーズ
+Balloon:marisa,1,0,-200
+Not telling.
+I have no obligation to tell a fairy.\
+
+Action:chirno,303# チルノ　決めポーズ
+Balloon:chirno,1,0,-200
+So then it'll be OK if I hurt you
+and force you spit it all out?\
+
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st41.ogg
+Action:chirno,203#　ニュートラル状態へ
+Action:marisa,203#　ニュートラル状態へ
+Action:chirno,167#　フラッシュ
+Action:chirno,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:marisa,200
+#攻撃側ニュートラル移行検知
+Action:chirno,202
+
+Action:chirno,164
+Sleep:15
+
+Action:chirno,204
+Action:marisa,205
+
+#カメラ中央固定
+Action:chirno,2　
+
+Sleep:30
+Action:chirno,165
+
+Sleep:30
+
+# 魔理沙、倒れた状態
+Action:chirno,404# チルノ　決めポーズ
+Balloon:chirno,1,0,-200
+C'mon! Where is it!\
+
+# 魔理沙　倒れた状態
+Balloon:marisa,1,0,-200
+Owww.
+I'll talk already\, so just hold up a sec.\
+
+That thing...
+went into this here Geyser Underground Center.\
+
+
+Action:chirno,403# チルノ　驚き
+Balloon:chirno,1,0,-200
+Really!?
+Then I'll find it real soon right?\
+
+Action:chirno,404
+I'll be the first one there!\
+
+Balloon:null,1,0,-200
+Action:chirno,304
+# チルノが飛び去っていく
+
+Sleep:120
+
+Action:marisa,404# 魔理沙は起き上がって
+Balloon:marisa,1,0,-200
+Well then\, that was a total lie.\
+
+# 魔理沙
+It's gonna be too hot for her in there.
+Serves her right.\
+
+Action:marisa,402# 魔理沙　疑問に思う
+But what was that about a Daidarabocchi...?
+Hey\, what's that? In the forest...\
+
+Balloon:null,1,0,-200
+
+Result:
+FadeBgm:2000,0
+Action:chirno,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

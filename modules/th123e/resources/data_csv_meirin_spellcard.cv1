@@ -1,0 +1,42 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Spiral-Light Steps",1,1,"Gathers chi into her arms and       punches and stomps the enemy. At    high levels\, the stomps also do     damage.",0,1,104,1,108,1,0,0,17,120
+101,"Red Cannon",1,2,"A chi bomb that directly attacks theupper diagonal. Connecting with the fist also causes damage\, so it's a  great anti-air and melee move.",0,1,105,1,109,1,204,2,17,110
+102,"Yellow Quake Kick",1,4,"Directs chi towards the earth\, and  it spreads throughout the ground andattacks. The release and cycling of chi through the earth is of         fundamental importance.",0,1,106,1,110,1,0,0,17,140
+103,"Fragrant Wave",1,0,"A semicircle of chi circles and is  released as a forward beam. Limited range\, but instantaneous. High      penetration.",0,1,107,1,111,1,0,0,17,100
+104,"Searing Red Fist",1,1,"First unleashes a high-speed punch  and then fires a few balls of chi atthe enemy to stop her. Finally\, she unleashes one last powerful         punch. A move created to suppress   and then pummel the enemy.",1,1,206,2,0,0,0,0,17,121
+105,"Red Energy Release",1,2,"Gathers chi into the arms and       unleashes a huge attack from her    entire body. The first time she     tried it\, she destroyed the wall of the Scarlet Devil Mansion\, so this  is an extremely intimidating attack.",1,1,209,5,0,0,0,0,17,111
+106,"Earth Dragon Wave",1,4,"Stomps the ground and deals damage  to the enemy with a wave. In        Gensokyo\, where most battles are    aerial\, this move sees very little  use.",1,1,208,4,0,0,0,0,17,141
+107,"Water Taichi Fist",1,0,"Creates a barrier of chi out of a   whirlpool-shaped chi flow\, which    absorbs all projectile attacks. Her way of caring for the environment.",1,1,202,2,0,0,0,0,17,101
+108,"Kick of Showering Brilliance",1,1,"Attacks overhead with this sweeping arc kick. A mid-level attack\, hard  to be bested even in mid-air.",1,1,0,0,0,0,0,0,17,122
+109,"Tiger Chi Release",1,2,"Activates all chi within Meiling andmakes her attacks stronger. The     first hit she lands in this         condition is extremely strong and   is a counterhit. Becomes more       powerful at high levels.",1,1,211,3,0,0,0,0,17,112
+110,"Sky Dragon Kick",1,4,"Using the counter-reaction from     stomping the ground\, she kicks      strongly into the air. With a dragonlike silhouette\, this move is one ofher favorites.",1,1,207,3,0,0,0,0,17,142
+111,"Colorful Rain",1,0,"Gathers chi from the surroundings   and disperses it around. It should  have been dispersed uniformly if    one's mind is calm\, but because     she's always thinking about dinner  and such\, the paths are random.",1,1,200,2,0,0,0,0,17,102
+200,"Color Sign \"Colorful Windchime\"",2,2,"Using all of her chi\, she creates a whirpool and attacks. A very handy  and easy invincible attack and a    staple of defense. ",0,2,201,4,0,0,0,0,17,210
+201,"Ultimate Color \"Mad Colorful Dance\"",2,4,"Whips up a storm using powerful chi from all over her body. Because the chi is strong\, she can fly into the sky. Great range\, very reliable.",0,4,0,0,0,0,0,0,17,230
+202,"Chi Sign \"Star Bullets\"",2,3,"Releases chi bullets forwards. A    fairly standard ranged attack\, and  the bullets are easy to use because they're large.",0,2,203,4,0,0,0,0,17,220
+203,"Star Chi \"Earth-moving Star Bullets\"",2,5,"Takes a while to create a huge\,     seven-colored bullet of chi. Even   while being created\, the bullet has a hitbox. On top of that\, it also   forms very quickly.",1,4,0,0,0,0,0,0,17,240
+204,"Attack Sign \"Roc Fist\"",2,3,"An all-out attack upwards. Only     invincible from the waist up\, but   has a large hitbox. The enemy falls down quickly\, so it's difficult to  time\, but it is possible to hit the enemy on their way down.",0,2,205,5,0,0,0,0,17,221
+205,"Fiery Attack \"Roc-Killing Fist\"",2,5,"A three-tiered powerful attack. She can power through enemy attacks and still use this move; extremely      powerful and able to be linked into\,this is one move that can turn the  tables completely in a match.",1,5,0,0,0,0,0,0,17,241
+206,"Rainbow Sign \"Intense Rainbow Fist\"",2,2,"A wild\, chi-infused attack forwards.The hitbox is fan-shaped and covers the front. If the distance is       correct\, she can move on the ground and still remain in range.",1,2,0,0,0,0,0,0,17,211
+207,"Chi Sign \"Earth Dragon Sky Dragon Kick\"",2,3,"A flying\, seven-colored\, chi-filled kick. The kick suspends the enemy inmid-air\, and Meiling can continue   to hit her. Because of this\, the    move is slow on startup if you use  it close to the enemy.",1,3,0,0,0,0,0,0,17,222
+208,"Colorful Brilliance \"Rainbow Taichi\"",2,4,"A special ranged attack that createswaves of chi that undulate like     waves. They are really slow\, but    spread and limit the enemy's        movement.",0,4,0,0,0,0,0,0,17,231
+209,"Brilliance \"Rainbow Brilliance Palm\"",2,5,"Moves a large amount of chi directlyinto the enemy\, then sparks the chi within them with a huge attack.     Super effective against demons and  undead... not.",0,5,0,0,0,0,0,0,17,242
+211,"Chi Sign \"Fierce Tiger Energy Release\"",2,4,"Explosively raises the level of chi in the body. During this time\, all  first hits on all combos are treatedas counterhits and gain an extremelylarge attack bonus.",1,3,0,0,0,0,0,0,17,232

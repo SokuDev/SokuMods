@@ -1,0 +1,168 @@
+# ----------------------------------------------------
+# Ending
+# Stage:Ending
+#
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Character.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Action.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*Stage.*$"              (0 '((t (:foreground "sky blue"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Object.*$"            (0 '((t (:foreground "dim gray"))) t))) 
+# Hi-lock: (("^[ \t]*Sleep.*$"            (0 '((t (:foreground "dim gray"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"            (0 '((t (:foreground "medium spring green"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+
+Font:‚l‚rƒSƒVƒbƒN,16,3,6
+WindowColor:0,0,0,0
+Color:FFFFFF
+Background:data/scenario/effect/EdBack000.bmp,999,0,0
+CG:data/scenario/chirno/effect/ED000.bmp,96,16,50
+WindowPos:8,372
+Label:Start
+
+
+Bgm:data/bgm/ta06.ogg
+
+# ˆê–‡–Ú
+# ”—í_Ğ@’‹
+# 
+# @ˆê–‡–Ú‚ÍêŠ‚ğ¦‚·ŠÈ’P‚ÈƒCƒ‰ƒXƒg‚ª“ü‚é—\’è‚Å‚·
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+---Hakurei Shrine\, the eastern border of Gensokyo.@
+There was something there more annoying
+than the incessant chatter of cicadas.@
+This annoyance\, however\, is integral to this story.\
+
+
+
+# “ñ–‡–Ú
+# ------------------------------------------------
+# ‹«“àAƒ`ƒ‹ƒm‚ª‰½‚©‚ğà–¾‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚éB
+# —ì–²‚ªÀ‚Á‚Ä‚»‚Ì˜b‚ğ•·‚¢‚Ä‚¢‚é
+
+CG:data/scenario/chirno/effect/ED001.bmp,96,16,50
+
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Reimu  "So? What about Daidarabocchi?"@
+Cirno  "Daidarabocchi's this giant youkai!"@
+Reimu  "I... I see..."\
+Cirno  "Um\, it looks like a giant doll..."@
+Marisa "Huh..."\
+Cirno  "Anyways\, it's huge and it can move around on its own!@
+        If that thing goes out of control\, Gensokyo's in danger!"@
+Reimu  "A large doll... are you talking about this\, perhaps?"\
+
+
+
+# O–‡–Ú
+# ------------------------------------------------
+# —ì–²‚ªV•·‚ğƒ`ƒ‹ƒm‚ÉŒ©‚¹‚Ä‚¢‚é
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+CG:data/scenario/chirno/effect/ED002.bmp,96,16,50
+
+Reimu  "Hisou Tensoku\, a giant automated youkai-type doll."@
+Cirno  "Hisou Tensoku?"\
+Reimu  "It's a large doll designed by the Kappa."@
+Cirno  "Kappa?"\
+Reimu  "Everyone's seen this.@
+        If you go to the foothills right now\, you can see it."@
+Cirno  "What? Everyone's seen this? Boring."\
+
+# ------------------------------------------------
+# ƒ`ƒ‹ƒm‚ÍV•·‚ğ’D‚Á‚ÄŒ©‚Ä‚¢‚é
+# ‰½‚©©•ª‚ªŒ©‚½•¨‚ÆˆÙ‚È‚Á‚ÄA‹^–â‚Év‚Á‚Ä‚¢‚é
+
+Cirno  "Hisou Tensoku...@
+        Huh?"\
+Reimu  "Its movements are really realistic.@
+        I heard it's operated by steam power."\
+Cirno  "What... is this?"\
+Reimu  "You mistook this for Daidarabocchi\, didn't you?"\
+Cirno  "Huh? Is that what happened?"\
+Reimu  "Well in any case\, it's just a giant doll.@
+        No need to be afraid."\
+Cirno  "Huh? No\, this isn't what I saw!@
+        This is totally different!\
+Reimu  "Eh?"\
+Cirno  "It was more realistic\, and it looked more threatening!@
+        Anyways\, this is wrong! Totally different!"\
+Reimu  "I see...@
+        Walk me through your story."\
+
+Background:BLACK,0,0
+CG:BLACK,0,0,50
+WindowPos:0,640
+
+Sleep:60
+
+CG:data/scenario/chirno/effect/ec01_0.bmp,64,352,15
+
+#@ƒ`ƒ‹ƒm‚Í•K€‚Év‚¢o‚µ‚ÄÚ×‚ğ“`‚¦‚½B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_1.bmp,64,352,15
+#@‚¾‚¢‚¾‚ç‚Ú‚Á‚¿‚ğ’Ç‚Á‚ÄŠÔŒ‡ò’n‰ºƒZƒ“ƒ^[‚Ü‚Ås‚Á‚½–B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_2.bmp,64,352,15
+#@‚»‚±‚Å‹‚³‚©‚ç“¦‚°‚Ä‚«‚½–B@
+#@‚»‚µ‚ÄAX‚É‘å‚«‚È—d‰ö‚ğŒ©‚½–B\
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_3.bmp,64,352,15
+#@‚µ‚©‚µAƒ`ƒ‹ƒm‚Ì˜b‚É‚Íˆê”Ôd—v‚È—v‘f‚ª”²‚¯‚Ä‚¢‚½‚Ì‚¾B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_4.bmp,64,352,15
+#@o‰ï‚Á‚½lŠÔA—d‰ö‚ÌŠç‚ğŠo‚¦‚Ä‚¢‚È‚©‚Á‚½‚Ì‚Å‚ ‚éB@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_5.bmp,64,352,15
+#@‚Â‚Ü‚èA’N‚Æo‰ï‚Á‚½‚Ì‚©A‚ª”²‚¯‚Ä‚¢‚½‚Ì‚¾B\
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_6.bmp,64,352,15
+#@‚»‚ê‚É‚æ‚èAƒ`ƒ‹ƒm‚Ì˜b‚Íˆêí‚Ì“ss“`à‚Æ‰»‚µ‚½B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_7.bmp,64,352,15
+#@ƒvƒƒbƒg‚¾‚¯o—ˆ‚Ä‚¢‚é‚Ì‚Éd—v‚È—v‘f‚ªŒ‡‚¯‚Ä‚¢‚½ˆ×A@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_8.bmp,64,352,15
+#@˜b‚Í“`‚í‚é“x‚É•Ï‰»‚µA‚¢‚Â‚µ‚©—§”h‚È‰ö’k‚Æ‚È‚Á‚½B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/chirno/effect/ec01_9.bmp,64,352,15
+#@^‰Ä‚Ì‹‘å—d‰ö“`àA‚»‚¤ŒÄ‚Î‚ê‚é‚æ‚¤‚É‚È‚Á‚Ä‚¢‚½B\
+@\
+FadeBgm:20000,0
+CG:BLACK,0,0,15
+StaffRoll:
+
+#@‚»‚Ì˜b‚ªƒAƒŠƒX‚Ì¨‚É“ü‚Á‚½‚É‚ÍŠù‚ÉA©•ª‚ªŒ¤‹†‚µ‚Ä‚¢‚é@
+#@ulŒ`‹‘å‰»Œv‰æv‚Ì–‚¾‚Æv‚¦‚È‚¢’ö•Ï‰»‚µ‚Ä‚¢‚½B\
+
+#@ƒAƒŠƒX‚ÍŠmM‚µ‚½B@
+#@‘‚­lŒ`‚Ì‹‘å‰»‚Ì–‚–@‚ğ©•ª‚Ì•¨‚É‚µ‚ÄA@
+#@–¢’m‚Ì‹‘å—d‰ö‚Æí‚í‚Ë‚Î‚È‚ç‚È‚¢A‚ÆB@
+
+End:

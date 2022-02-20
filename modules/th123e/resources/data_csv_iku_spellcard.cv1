@@ -1,0 +1,41 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Dragon Fish's Strike",1,0,"A piercing attack that uses her     robes wrapped around her arm. A     wide-ranging attack with few gaps   that focuses mostly on midrange     coverage.",0,1,104,1,108,1,201,2,13,100
+101,"Veils like Water",1,2,"Poses\, then performs a flowing      attack using her robes while        guarding. Can nullify projectiles   and melee attacks.",0,1,105,1,109,1,208,3,13,110
+102,"Dragon Fish's Wrath",1,4,"Calls thunder from above her and    generates lightning\, which          generates a barrier of electric     current and burns nearby enemies. Noinvincibility\, but useful for       countering.",0,1,106,1,110,1,202,3,13,140
+103,"Electrostatic Guided Missile",1,1,"Calls lightning to her hand and     fires it an the enemy. The          lightning is straight\, but the      smaller bolts can be bent and guidedtowards the enemy.",0,1,107,1,111,1,200,2,13,130
+104,"Dragon God's Strike",1,0,"Charges surrounding static          electricity into her robes and      releases it straight forward.       Limited range\, but hard-to-dodge    vertical bolts add to its           effectiveness.",1,1,0,0,0,0,0,0,13,101
+105,"Veils like Wind",1,2,"Creates a special turbulence barrierwith no attack power\, but can       deflect bullets. She can use them asoffensive weapons depending on how  they're deployed. A power of hers\,  as she can read the winds after all.",1,1,207,4,0,0,0,0,13,111
+106,"Dragon God's Wrath",1,4,"Attacks with a thunderbolt that can be aimed at the enemy's position or your own. You can control the       thunderbolt's timing by holding the button down.",1,1,203,3,0,0,0,0,13,141
+107,"Dragon God's Lightning Flash",1,1,"Bends lightning released to the     rear towards the enemy. If you're   mindful of its limited attack power before it bends\, this technique can even shine as a feint or in         exchanges.",1,1,0,0,0,0,0,0,13,131
+108,"Dragonfish\, the Able Swimmer",1,0,"Synchronizes body movements with thewind. Allows her to move at         unthinkably fast speeds.",1,1,0,0,0,0,0,0,13,102
+109,"The Smite of the Goddess",1,2,"Catches the opponent with her shawl in the air and shocks them. She's   practiced for a very long time in   order to get her shawl to behave theway she wants it to.",0,1,209,3,0,0,0,0,13,112
+110,"Whiskers of the Dragon God",1,4,"A ranged attack that spreads balls  of lightning around. You can        somewhat control the movement of thelightning with the up and down keys.This lightning can communicate with others like it in dark clouds.",0,1,210,5,0,0,0,0,13,142
+111,"Dragon's Eye",1,1,"A projectile consisting of two      glowing orbs with lightning         coursing between them. The orbs     follow curved paths\, so it has a    rather complex attack pattern.",1,1,211,4,0,0,0,0,13,132
+200,"Electric Sign \"Thunder Drum Shot\"",2,1,"Gathers up a sphere of electrical   energy. After advancing for a       moment\, it bursts out in all        directions.",0,2,206,3,0,0,0,0,13,200
+201,"Fish Sign \"Dragonfish Drill\"",2,3,"Coating the arm in a spiral of      electricity\, a spell that pierces   the enemy with a huge discharge.    The reach above and below is very   high.",0,2,0,0,0,0,0,0,13,220
+202,"Lightning Sign \"Elekiter Dragon Palace\"",2,3,"Summons a thunderbolt from directly above. Can be used as a protective  barrier.",0,3,0,0,0,0,0,0,13,221
+203,"Star Light \"Light Dragon's Sigh\"",2,3,"Accumulates thunder directly        overhead. An anti-air technique     that delivers a powerful shock to   anyone up above.",1,3,0,0,0,0,0,0,13,222
+206,"Lightning Fish \"Swimming Thunder Shot\"",2,2,"Fires a lightning bolt that         repeatedly changes direction. While the effect continues\, the enemy's   movement is restricted. You can use it by itself\, but the power is low.",1,3,0,0,0,0,0,0,13,210
+207,"Angel's Raiment \"Veils like Sky\"",2,4,"A technique that wards off enemy    attacks. Grants the power to evade  attacks while dashing or high       jumping\, making her very hard to    catch. The perfect time to seize    the initiative.",1,4,0,0,0,0,0,0,13,230
+208,"Angel's Raiment \"Veils like Time\"",2,1,"Uses her veil to delay the attack ofthe opponent. If she presses the    guard button\, she can expend one    card in her hand to counter the     attack. If she has enough cards\, shecan enter defense mode.",1,3,0,0,0,0,0,0,13,201
+209,"Thorn Sign \"Thundercloud Stickleback\"",2,3,"A technique that combines attack    and defense by surrounding her in   an electrical field that shocks any enemy who touches it. The wisdom of living as a thundercloud.",1,3,0,0,0,0,0,0,13,223
+210,"Dragonfish \"Swimming Oarfish Shot\"",2,5,"Shoots electricity out in the shape of a spiral. Your actual body is    defenseless\, but the electricity    takes a defensive role\, inhibiting  enemy action.",1,5,0,0,0,0,0,0,13,240
+211,"Orb Sign \"Orb of the Five-Clawed Dragon\"",2,4,"Five bolts of lightning trace the   shape of a star\, and advance in the shape of a claw. This is a very highlevel skill for Dragon's Messengers\,the spokespeople of the dragons.",1,4,0,0,0,0,0,0,13,231

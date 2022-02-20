@@ -163,6 +163,27 @@ add_library(MemoryModule
         MemoryModule/MemoryModule.c)
 target_include_directories(MemoryModule PUBLIC MemoryModule)
 
+# png
+
+add_library(png
+        png/png.c
+        png/pngerror.c
+        png/pngget.c
+        png/pngmem.c
+        png/pngpread.c
+        png/pngread.c
+        png/pngrio.c
+        png/pngrtran.c
+        png/pngrutil.c
+        png/pngset.c
+        png/pngtrans.c
+        png/pngwio.c
+        png/pngwrite.c
+        png/pngwtran.c
+        png/pngwutil.c)
+target_link_libraries(png PUBLIC zlib)
+target_include_directories(png PUBLIC png/)
+
 # SokuLib
 add_subdirectory(SokuLib)
 
@@ -173,6 +194,28 @@ set_target_properties(SokuEngineLib PROPERTIES
         IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/SokuEngineLib.lib)
 set_target_properties(SokuEngineLib PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+
+# zlib
+
+configure_file(zlib/zconf.h.cmakein
+        ${CMAKE_CURRENT_BINARY_DIR}/zlib/zconf.h @ONLY)
+add_library(zlib
+        zlib/adler32.c
+        zlib/compress.c
+        zlib/crc32.c
+        zlib/deflate.c
+        zlib/gzclose.c
+        zlib/gzlib.c
+        zlib/gzread.c
+        zlib/gzwrite.c
+        zlib/inflate.c
+        zlib/infback.c
+        zlib/inftrees.c
+        zlib/inffast.c
+        zlib/trees.c
+        zlib/uncompr.c
+        zlib/zutil.c)
+target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/zlib/ zlib/)
 
 # modules
 
@@ -471,6 +514,27 @@ file(WRITE "${CMAKE_BINARY_DIR}/SokuRoll.inl" "const unsigned char sokuroll_data
 target_include_directories(SWRSokuRoll PRIVATE "${CMAKE_BINARY_DIR}")
 target_link_libraries(SWRSokuRoll MemoryModule)
 
+module(th123e)
+target_sources(th123e PRIVATE
+        modules/th123e/th123edll.cpp
+        modules/th123e/unzip.c
+        modules/th123e/ioapi.c)
+if(MSVC)
+    # th123e does some black magic that calls functions that break ESP.
+    # this makes msvc debug checks fail and makes th123 crash when in debug.
+    # -> force these checks to be disabled by activating a dumb optimization.
+    # /RTC- doesnt work, neither does #pragma runtime_checks, so this is the best we can do.
+    target_compile_options(th123e PRIVATE $<$<CONFIG:Debug>:/Os>)
+endif()
+target_link_libraries(th123e png zlib shlwapi gdi32)
+
+add_custom_target(th123e_zip COMMAND
+        ${CMAKE_COMMAND} -E tar cf "${CMAKE_CURRENT_BINARY_DIR}/th123e.zip" --format=zip -- .
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/th123e/resources)
+add_dependencies(th123e th123e_zip)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/th123e.zip DESTINATION "SWRSToys/modules/th123e")
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/th123e.zip DESTINATION "SokuEngine/modules/th123e")
+
 module(TrialMode)
 target_sources(TrialMode PRIVATE
         modules/TrialMode/TrialMode.rc
@@ -547,12 +611,14 @@ install(FILES README.md DESTINATION "SokuEngine"
         RENAME "SokuMods.txt")
 
 # th123e loader
-
-add_executable(th123eloader)
-target_sources(th123eloader PRIVATE
-        th123eloader/th123eloader.c
-        th123eloader/th123e.rc)
-target_link_libraries(th123eloader shlwapi user32)
-set_target_properties(th123eloader PROPERTIES
-        OUTPUT_NAME th123e)
-install(TARGETS th123eloader RUNTIME DESTINATION ".")
+set(BUILD_TH123E_LOADER false CACHE BOOL "Whether to build the th123e loader executable")
+if(BUILD_TH123E_LOADER)
+    add_executable(th123eloader)
+    target_sources(th123eloader PRIVATE
+            th123eloader/th123eloader.c
+            th123eloader/th123e.rc)
+    target_link_libraries(th123eloader shlwapi user32)
+    set_target_properties(th123eloader PROPERTIES
+            OUTPUT_NAME th123e)
+    install(TARGETS th123eloader RUNTIME DESTINATION ".")
+endif()

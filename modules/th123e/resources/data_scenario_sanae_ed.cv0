@@ -1,0 +1,212 @@
+# ----------------------------------------------------
+# Ending
+# Stage:Ending
+#
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Character.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Action.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*Stage.*$"              (0 '((t (:foreground "sky blue"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Object.*$"            (0 '((t (:foreground "dim gray"))) t))) 
+# Hi-lock: (("^[ \t]*Sleep.*$"            (0 '((t (:foreground "dim gray"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"            (0 '((t (:foreground "medium spring green"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+
+Font:‚l‚rƒSƒVƒbƒN,16,3,6
+WindowColor:0,0,0,0
+Color:FFFFFF
+Background:data/scenario/effect/EdBack000.bmp,999,0,0
+CG:data/scenario/sanae/effect/ED000.bmp,96,16,50
+WindowPos:8,372
+Label:Start
+
+
+Bgm:data/bgm/ta06.ogg
+
+# ˆê–‡–Ú
+# ”—í_Ğ@’‹
+# 
+# @ˆê–‡–Ú‚ÍêŠ‚ğ¦‚·ŠÈ’P‚ÈƒCƒ‰ƒXƒg‚ª“ü‚é—\’è‚Å‚·
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+---Hakurei Shrine\, the border of Gensokyo.@
+The heat of summer heightened the contrast
+between the blacks and greens of the shrine.\
+Were the cicadas to stop chirping\,
+one would perhaps stop thinking and lose sight of reality.@
+To be\, and not think--- a simple task for an object\,
+but a difficult one for humans.\
+
+
+
+# “ñ–‡–Ú
+#
+# ‹«“àA‚¨æÎ‘K” ‚Ì‘O
+# —ì–²‚ªV•·‚ğ“Ç‚ñ‚Å‚¢‚é
+# –‚—¹‚ªV•·‚ğè‚É‚Á‚Ä‚â‚Á‚Ä‚­‚é
+
+CG:data/scenario/sanae/effect/ED001.bmp,96,16,50
+
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Marisa "Hey\, seen this news article?"@
+Reimu  "Looking at that now.@
+        The 47th day of the Sankuu Shogi Contest\, right?"\
+Marisa "Ah\, guess you can't help but look at a game like that
+        with no winners or losers. Went into the thousands one time
+        and no one ever noticed. Kept on repeating over and over.@
+        No\, I'm not talking about that. Look at this!"\
+Reimu  "Futuristic Water Youkai Bazaar...@
+        massive sale of all sorts of rare items\,
+        from inventions by the Kappa to Shirikodama..."\
+Marisa "Looks interesting. Wanna go?@
+        We might find something nice."@
+Reimu  "I dunno... the Kappa's inventions are kinda shady."@
+Marisa "No way."\
+Reimu  "Besides\, who is she trying to appeal to\,
+        starting a shop out of the blue?"\
+Marisa "Isn't it because she doesn't have enough money
+        to maintain her fusion reactor?"\
+Reimu  "That'd be reasonable. Oh\, it talks about giant dolls here."\
+
+CG:data/scenario/sanae/effect/ED002.bmp,96,16,50
+# O–‡–Ú
+# V•·‚ğL‚°‚Ä’­‚ß‚Ä‚¢‚éA‹L–‚ª“Ç‚İæ‚ê‚é
+# ‘åŒ^‚ÌlŒ^ƒƒ{H@‚ª—¼è‚ğ‹“‚°‚Ä—Í©–‚ğ‚µ‚Ä‚¢‚é
+# Ì‚Ìƒvƒ‰ƒ‚ƒfƒ‹•\†“I‚ÈƒfƒUƒCƒ“‚Å
+# 
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+
+Marisa "Lemme see.@
+        "Giant Youkai Automated Doll Hisou Tensoku Unveiled to Public."@
+        "You can see it from far away\, so come and take a look.""\
+#w”ñ‘z“V‘¥‚Í‰“‚­‚©‚ç‚Å‚àŒ©‚¦‚é‚Ì‚ÅA‚»‚ê‚ğ–Úw‚µ‚Ä—ˆê‚·‚é‚Æ—Ç‚¢‚¾‚ë‚¤xv\
+Reimu  "It's not being sold?"@
+Marisa "I don't know\, are they trying to?@
+        I feel like it's just something to see\,
+        judging from what this article says."\
+Reimu  "I saw it when it was still being tested.@
+        It moves pretty realistically.@
+        I wonder how they control it?"\
+Marisa "I dunno. It's too big for strings..."@
+Reimu  "How nice..."\
+
+# l–‡–Ú
+# ç–î_Ğ
+# 
+# 
+CG:data/scenario/sanae/effect/ED003.bmp,96,16,50
+Color:FFFFFF
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+---A newcomer to the Mountain\, Moriya Shrine.@
+The alpine summer was cool\, mocking the sweltering heat of the foothills.@
+Here lived two gods... no\, three.\
+
+
+
+# ‡D–‡–Ú
+# ------------------------------------------------
+# _“Şq‚Æz–KqA‘•c‚ª•À‚ñ‚Å‰‘¤‚ÉÀ‚Á‚Ä‚¢‚é
+# _“Şq‚Í‚µ‚ß“ê‚ğ”w•‰‚Á‚Ä‚¢‚é•K—v‚Í‚È‚¢‚Ì‚Å”w•‰‚í‚È‚¢‚Å
+#
+
+CG:data/scenario/sanae/effect/ED004.bmp,96,16,50
+
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Suwako "Hisou Tensoku's just an ad for the Kappa.
+        It moves pretty realistically though\, doesn't it?"
+Sanae  "It's uselessly realistic. I wanted a huge robot."\
+Kanako "Huh. She made something like that?
+        If I had designed it\, it would have been more practical."\
+Suwako "Forget practicality. I think it moves more realistically
+        if it doesn't think about anything.@
+        The Kappa's design is wonderful.@
+        The doll is completely empty on the inside."\
+Sanae  "Doesn't think? What do you mean...?"@
+Kanako "I see. We'd have problems if it suddenly developed cognition."\
+Suwako "Precisely. We can't have something that large becoming sentient.@
+        If this doll acts in a meaningful manner and
+        repeats those actions\, it will eventually develop sentience.@
+        That's why she needed to create a doll that can't think."\
+Sanae  "I see. But how does she recreate those realistic movements\, then?"\
+
+CG:data/scenario/sanae/effect/ED005.bmp,96,16,50
+
+# ‡E–‡–Ú
+# z–Kq‚ª—§‚¿ã‚ª‚Á‚Ä“ñl‚Ì‘O‚Åà–¾‚ğn‚ß‚é
+# ‘•c‚Æ_“Şq‚ª•·‚¢‚Ä‚¢‚é
+# 
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+
+Suwako "Nuclear power\, naturally."@
+Sanae  "Can nuclear power do everything?@
+        I have no idea what it is."\
+Kanako "It's just light\, infinitely expanded.@
+        They need to convert it into something else
+        for that huge doll to move.@
+        You know\, like heat or light..."\
+Suwako "Ah\, that.@
+        She's just using the water vapor from the underground geysers.@
+        Increase the vapor\, and the doll's arm raises\, and vice versa."\
+Sanae  "So that's just..."@
+Kanako "Like a giant balloon\, right?"@
+Suwako "Hisou Tensoku really is remarkably empty\, isn't it?"\
+Sanae  "I really wanted to have a giant robot battle or something."@
+Suwako "You don't want to battle\, you just want to ride it\, don't you?"@
+Sanae  "What... what's wrong with that?@
+        It's always been humanity's dream to make a giant robot."\
+Kanako "A doll that gathers humans together.@
+        I'm sure the youkai of Gensokyo are interested in this too.@
+        That Kappa has got some sharp marketing skills."@
+Suwako "That's because I advised her."\
+
+Background:BLACK,0,0
+CG:BLACK,0,0,50
+WindowPos:0,640
+
+Sleep:60
+
+CG:data/scenario/sanae/effect/ec00_0.bmp,64,352,15
+
+#@‚±‚Ì‰ÄAR‚Ì˜[‚Ås‚í‚ê‚½–¢—ˆ…—dƒoƒU[‚Í‘å¬Œ÷‚µ‚½B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/sanae/effect/ec00_1.bmp,64,352,15
+#@‰Í“¶‚ªì‚Á‚½”­–¾•i‚Ì”X‚âAƒsƒJƒsƒJ‚É–‚©‚ê‚½Kq‹Ê‚ÍA
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/sanae/effect/ec00_2.bmp,64,352,15
+#@‹»–¡‚Ì‚ ‚él‚Ìè‚É“n‚Á‚Ä‚¢‚Á‚½‚æ‚¤‚Å‚ ‚éB\
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/sanae/effect/ec00_3.bmp,64,352,15
+#@‚Å‚à‚â‚Í‚èAˆê”Ô‚Ì–Ú‹Ê‚Í”ñ‘z“V‘¥‚Å‚ ‚Á‚½B\
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/sanae/effect/ec00_4.bmp,64,352,15
+#@‚±‚Ì“®‚«‚¾‚¯‚ÍƒŠƒAƒ‹‚È‹‘ålŒ`‚ğˆê–ÚŒ©‚æ‚¤‚ÆA”‘½‚­‚ÌlŠÔA—d‰ö‚ª–K‚ê‚½B\
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/sanae/effect/ec00_5.bmp,64,352,15
+#@—ì–²‚à–‚—¹‚àA‚±‚Ì‹‘ålŒ`‚ğŒ©‚Ä–‘«‚µ‚½‚æ‚¤‚Å‚ ‚éB@
+@\
+FadeBgm:20000,0
+CG:BLACK,0,0,15
+StaffRoll:
+
+#@lŠÔ‚Í‰½‚àl‚¦‚È‚¢–‚Í“ï‚µ‚¢B‚¾‚©‚ç‚±‚»AŒå‚è‚ğŠJ‚­‚Ì‚É–³‘z‚Ì‹«’n‚ğ‹‚ß‚éB@
+#@‚µ‚©‚µlŒ`‚È‚çAÅ‰‚©‚ç‰½‚àl‚¦‚È‚¢“®‚«‚ªo—ˆ‚é‚Ì‚¾B@
+#@lŒ`‚ÍŒå‚Á‚Ä‚¢‚é‚Ì‚©H@–³‘z‚Ì‹«’n‚ÍlŠÔ‚ğÌ‚Ä‚é‚±‚Æ‚È‚Ì‚©H\
+
+#@‚»‚Ì“š‚¦‚ÍA”ñ‘z“V‘¥‚ğŒ©‚½Ò‚É‚Í‘S‚Ä”»‚Á‚Ä‚¢‚½B
+#@’·‚­¶‚«‚½—d‰ö‚É‚Æ‚Á‚Ä‚»‚±‚©‚çŠw‚Ô•¨‚ÍAŠm‚©‚É‚ ‚Á‚½‚Ì‚¾B\
+
+End:

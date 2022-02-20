@@ -1,0 +1,40 @@
+#スペカナンバー,スペカ名,"タイプ
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Gust Fan",1,0,"Creates a gust of wind to attack.   The wind heads downwards when cast  in air.",0,1,104,1,108,1,0,0,11,100
+101,"Domination Dash",1,1,"A high-velocity forward dash        shrouded by the wind. When you're   sheltered by the wind\, you graze.",0,1,105,1,109,1,212,3,11,120
+102,"Wind Standing of the Tengu",1,4,"Creates a whirlwind in mid-air to   stand on so you can jump again.     Usable in air only.",0,1,106,1,110,1,0,0,11,140
+103,"Pelting in the Night",1,3,"Calls upon a murder of crows to     attack. The attack delay is lengthy\,allowing easy coordination. Since   they are just normal crows\, they    flee when attacked.",0,1,107,1,111,1,208,2,11,130
+104,"Gale Fan",1,0,"Scatter cutter-shaped gusts over a  wide area. The projectile speed is  slower\, but the spread is wider.    The angle of spread is adjustable.",1,1,205,2,0,0,0,0,11,101
+105,"Graceful Dash",1,1,"A variant of Domination Dash. Loses the graze and speed\, but can freely control movement direction.",1,1,0,0,0,0,0,0,11,121
+106,"Tengu's Downburst",1,4,"Rapidly-descending kick attack      shrouded in wind. Gusts are created upon touchdown\, blowing away all in the vicinity. The type of wind is   adjustable. Can be used in mid-air  only.",1,1,203,3,0,0,0,0,11,141
+107,"Wind Sickle Veiling",1,3,"Wears a veil of wind\, which follows Aya and attacks enemies upon        contact. Disappears when moving     between the ground and air.",1,1,211,2,0,0,0,0,11,131
+108,"Wind from the Maple Fan",1,0,"A small tornado projectile is shot  forwards\, and sweeps the opponent   into the air. Though it's considereda small attack\, it sweeps the       opponent fairly high in the air\, so it's useful for suppression.",0,1,200,3,0,0,0,0,11,102
+109,"Tengu Felling",1,1,"Fly diagonally upwards while        flinging a cluster of wind behind.  Can attack the opponent's rear if   within an appropriate distance\,     utilizing the element of surprise.",1,1,206,5,0,0,0,0,11,122
+110,"Tengu Drum",1,4,"Make a leap and stomp on the enemy. If connected\, she makes a hop       backwards. The arc of the descent   can be controlled\, allowing         follow-up attacks.",1,1,207,3,0,0,0,0,11,142
+111,"Tengu's Pebbles",1,3,"Throws pebbles up into the air usingthe power of wind. Can be recalled  anytime to rain down upon the enemy.The more rocks that are thrown      upwards\, the more rocks come down.",0,1,202,4,0,0,0,0,11,132
+200,"Whirl Sign \"Maple Leaf Fan\"",2,3,"Creates a tornado reaching to the   skies. The distance is short\, but   the caught enemy will be helplessly drawn into the sky.",0,3,201,4,0,0,0,0,11,220
+201,"Tornado \"Indication to the Divine\"",2,5,"Wrap yourself up in a huge tornado. The power is huge and you're        invincible\, so it's a strong        counterattack or attack against     enemies in the air.",0,4,0,0,0,0,0,0,11,240
+202,"Headwind \"Route Forbidden to Man\"",2,4,"For a while\, wind fills the field   and flying objects will strike the  enemy. Because it pushes the enemy\, they can get herded into one corner of the screen.",1,4,0,0,0,0,0,0,11,230
+203,"Thrust Sign \"Tengu's Macroburst\"",2,3,"A card that can only be used in the air\, this card shoots a pressure    wave downards. The wave becomes a   tornado close to the ground\, and    traps the opponent within for a longtime.",1,3,0,0,0,0,0,0,11,221
+205,"Wind Sign \"Wind of the Tengu Path\"",2,2,"With one horizontal flash of a fan\, fires a simple cyclone.",0,2,0,0,0,0,0,0,11,210
+206,"Illusionary Dominance",2,5,"Knock the enemy upwards\, then       attack them repeatedly with the     ultimate speed. Fly left and right  to match the enemy's altitude.",1,5,0,0,0,0,0,0,11,241
+207,"Wind Sign \"Tengu Limited Special\"",2,2,"Uses the power of the wind to       greatly increase your speed. The    secret to the tengu's speed.",1,3,0,0,0,0,0,0,11,211
+208,"Crow Sign \"Dark Daymare\"",2,4,"A swarm of crows mobs the enemy. Thecrows obey the crow tengu\, but the  actual degree of control fluctuates according to her own power and      popularity with the birds--- we'll  leave that to your imagination.",1,2,0,0,0,0,0,0,11,231
+211,"Demonic Beast \"Sickle Weasel Veiling\"",2,1,"A unique spell that surrounds Aya   with a veil of wind\, allowing her   to attack simply by touching the    enemy. Ends when moving between the ground and the sky.",1,2,0,0,0,0,0,0,11,200
+212,"Squall \"Sarutahiko's Guidance\"",2,3,"A stronger and purer version of     Domination Dash. Using wind to      achieve the maximum accerelation\,   charge at the enemy with a graze of increased speed and power. ",1,3,0,0,0,0,0,0,11,222

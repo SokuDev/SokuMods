@@ -1,0 +1,149 @@
+# ----------------------------------------------------
+# Ending
+# Stage:Ending
+#
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Character.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Action.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*Stage.*$"              (0 '((t (:foreground "sky blue"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Object.*$"            (0 '((t (:foreground "dim gray"))) t))) 
+# Hi-lock: (("^[ \t]*Sleep.*$"            (0 '((t (:foreground "dim gray"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"            (0 '((t (:foreground "medium spring green"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+
+Font:‚l‚rƒSƒVƒbƒN,16,3,6
+WindowColor:0,0,0,0
+Color:FFFFFF
+Background:data/scenario/effect/EdBack000.bmp,999,0,0
+CG:data/scenario/meirin/effect/ED000.bmp,96,16,50
+WindowPos:8,372
+Label:Start
+
+
+Bgm:data/bgm/ta06.ogg
+
+# ˆê–‡–Ú
+CG:data/scenario/meirin/effect/ED000.bmp,96,16,50
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+# }‘ŠÙ
+---The underground library of the Scarlet Devil Mansion.\
+The place was cool in the summer and warm in the winters\,
+so it was always comfortable.@
+In addition\, since there was no light\,
+it was the prime location for preserving books.\
+
+# “ñ–‡–Ú
+CG:data/scenario/meirin/effect/ED001.bmp,96,16,50
+# ------------------------------------------------
+# Q‚Ä‚¢‚é”ü—é‚Æ–À˜f‚»‚¤‚É‚µ‚Ä‚¢‚éƒpƒ`ƒ…ƒŠ[
+# Œã‚Íç–é‚ª˜e‚É—§‚Á‚Ä‚¢‚éB
+Meiling "...I won't let earthquakes happen.@
+        I will protect Gensokyo!"\
+Patchy "So? How long is this idiot going to snooze?"\
+Sakuya "She was asleep outside when I found her.@
+        I thought we were being attacked."\
+Patchy "Huh. If you leave her outside like that\,
+        she's going to get heatstroke."\
+Sakuya "So should I bring her some cold wet towels?"@
+Patchy "She doesn't need that. She's a youkai\, after all."\
+
+
+CG:data/scenario/meirin/effect/ED002.bmp,96,16,50
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+# O–‡–Ú
+# ------------------------------------------------
+# ‚È‚ñ‚©Q‚È‚ª‚ç”ü—é‚ª·‚èã‚ª‚Á‚Ä‚¢‚é
+# ‚È‚É‚©‚ÆŠi“¬‚µ‚Ä‚¢‚é‚æ‚¤‚¾
+# ‚»‚ê‚ğŒ©‚Äƒpƒ`ƒ…ƒŠ[‚Í‚¤‚ñ‚´‚èBç–é‚Í‚¿‚å‚Á‚ÆÎ‚Á‚Ä‚¢‚é
+# 
+Meiling "...what?@
+         You're the last boss? Taisui Xingjun?!"\
+Sakuya  "...what the hell is that?"\
+Patchy  "Taisui Xingjun? Hmm...@
+         I think I've heard that from someone else\, too."\
+Meiling "Alright\, I accept your challenge!@
+         There's no one left to fight me anyways!"\
+Patchy  "Oh\, that's right\, I heard that name from her.@
+         She told me she saw Taisui Xingjun outside or something."\
+Sakuya  "Maybe she got attacked by him...
+         which is why she won't wake up?"\
+
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+
+CG:data/scenario/meirin/effect/ED003.bmp,96,16,50
+# l–‡–Ú
+# ------------------------------------------------
+# ƒpƒ`ƒ…ƒŠ[‚Í‰½‚©‚Ì–{‚ğŒ©‚¹‚éB‚Ç‚¤‚â‚ç“V‹ç‚ª‘‚¢‚½–Ÿ‰æ‚Ì‚æ‚¤‚¾
+# 
+# 
+Patchy "Huh. Who knows.@
+        I think she's just tired because she exerted herself too much.@
+        Besides\, she dropped this while she was working."\
+Sakuya "Ah\, is this the Tengu's action manga?"\
+Patchy "It's some dumb story about how evil youkai
+        possessed the friends and families of everyone in Gensokyo
+        and started attacking."\
+Meiling "Shit! You're too strong!"\
+Patchy "I'm sure she read this and she's having a blast
+        fighting all the youkai in her dreams."\
+Sakuya "Hmm. Lucky her\, she can still dream.@
+        Oh\, speaking of tengu...@
+        did you read about the Kappa's Bazaar in the paper?"\
+Patchy "Oh yeah\, I saw that.@
+        Giant doll named Hisou Tensoku or something."\
+Sakuya "I believe the Lady wants to go see this doll.@
+        What about you\, Lady Patchouli?"\
+Patchy "Naturally I plan to go as well.@
+        I must go before important items
+        fall into other people's hands..."\
+Sakuya "Well then\, we'll need a gatekeeper..."\
+
+Background:BLACK,0,0
+CG:BLACK,0,0,50
+WindowPos:0,640
+
+Sleep:60
+
+CG:data/scenario/meirin/effect/ec02_0.bmp,64,352,15
+
+#@”ü—é‚Í’@‚«‹N‚±‚³‚êA‘å•Ï’p‚¸‚©‚µ‚¢v‚¢‚ğ‚µ‚½B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/meirin/effect/ec02_1.bmp,64,352,15
+#@‚»‚µ‚Ä‚¢‚Â‚à’Ê‚è—¯ç”Ô‚ğ”C‚³‚ê‚é‚Æ@
+#@‰É‚Â‚Ô‚µ‚ÉŠˆŒ€–Ÿ‰æ‚ğ“Ç‚Ş–‚É‚µ‚½B\
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/meirin/effect/ec02_2.bmp,64,352,15
+#@Œ‹‹ÇA–²‚Ì’†‚Å‚Í‘¾Î¯ŒN‚ÉŸ‚Â‘O‚É‹N‚±‚³‚ê‚Ä‚µ‚Ü‚Á‚½‚ªA@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/meirin/effect/ec02_3.bmp,64,352,15
+#@”ü—é‚Ì’†‚Å­‚µ•sˆÀ‚Év‚¤–‚ª‚ ‚Á‚½B@
+@\
+CG:BLACK,0,0,15
+Sleep:15
+
+CG:data/scenario/meirin/effect/ec02_4.bmp,64,352,15
+#@‘¾Î¯ŒN‚ç‚µ‚«•¨‚ğŒ©‚½‚Ì‚ÍŠm‚©‚È‚Ì‚¾B‚»‚ê‚Í–²‚Å‚Í‚È‚¢B\
+@\
+FadeBgm:20000,0
+CG:BLACK,0,0,15
+StaffRoll:
+
+#@–²‚Ì’†‚Å‚àŸ‚Ä‚È‚©‚Á‚½Å‹¥Åˆ«‚Ì—d‰öB@
+#@‹­§“I‚Éíü—£’E‚³‚¹‚ç‚ê‚½”ü—é‚ÍA‚»‚Ì–²‚Ì’†‚Å‚Ìp‚ª@
+#@v‚¢o‚¹‚È‚¢‚Å‚¢‚½B\
+
+#@‚¢‚Â‚©A‚»‚ñ‚È‹°•|‚Ì“G‚ªŒ»‚ê‚é‚Ì‚¾‚ë‚¤‚©B@
+#@Œ»‚ê‚½‚Æ‚«AŒ¶‘z‹½‚Ì—d‰ö‚ªˆê’c‚Æ‚È‚Á‚Äí‚¦‚é‚Ì‚¾‚ë‚¤‚©B@
+#@„‚Í‚İ‚ñ‚È‚Ìˆ×‚ÉÅ‘Oü‚Åí‚¦‚éA‚ÆA”ü—é‚Í‚»‚¤ÄŠm”F‚µ‚½B\
+
+End:

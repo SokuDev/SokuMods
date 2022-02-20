@@ -1,0 +1,275 @@
+## =======================================================================
+#Stage:3
+#Title:「地下に眠る巨神」
+#Place:間欠泉地下センター通路
+
+Character:sanae,160,0,0,8888FF
+Character:reimu,160,0,1,FF8888
+
+#背景　間欠泉地下センター通路
+Stage:33,0
+
+#自分初期配置
+Action:sanae,1　#画面外待機
+
+#敵初期配置
+Action:reimu,100　#画面外で待機
+
+#カメラ中央固定
+Action:sanae,2
+Action:sanae,153　#天候解除
+Action:sanae,315　#会話用暗幕設置
+
+#画面表示前処理終了============================
+
+Label:Start
+PlayBgm:data/bgm/ta20.ogg
+Sleep:60;
+
+#画面黒からフェードイン
+Action:sanae,161
+Sleep:30
+
+Face:null,普
+WindowColor:0,255,255,255
+WindowPos:8,192
+
+#幕間口上
+
+Color:8F8F8F
+The reappearing human-like giant seems to be
+rampaging near the Geyser Underground Center
+at the base of the mountain.\
+
+Just as she thought that\, both it 
+and the mist disappear again.\
+
+Sanae thought that the grounds under the geyser
+were strange\, so she descended underground
+to where the sun resides.\
+
+Face:null,無
+Hide:1
+
+Sleep:60
+
+#画面黒からフェードイン
+Action:sanae,316　
+
+Sleep:60;
+
+#ステージタイトル表示
+Object:data/scenario/sanae/effect/StageTitle003.bmp,0,176,-32
+Sleep:30;
+Object:data/scenario/effect/Stage3.bmp,1,256,352
+Sleep:300;
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+Action:sanae,52
+Action:sanae,53
+
+Balloon:sanae,1,0,-200
+#0１２３４５６７８９０１２３４５６７８９０１２３
+
+Color:8888FF
+The Geyser Underground Center.\
+
+This was created for the Goddess Kanako's plans\,
+the site for the mountain's
+technological breakthrough.\
+
+Action:sanae,326　#早苗ポーズ
+
+It's certainly possible with a place like this!
+This must be the giant robot's docking bay!\
+
+Action:sanae,203　#ニュートラル状態へ
+
+#外の世界では巨大ロボはただのアニメでしかないけど、
+In the outside world\, giant robots
+don't exist outside of anime\,
+but since this is Gensokyo\, then maybe...!\
+Balloon:null,1,0,-200
+
+Action:sanae,301　#早苗臨戦態勢ポーズ
+Action:sanae,302　#301終了検知
+
+Balloon:sanae,1,0,-200
+In Gensokyo\, where the fairies dance
+and the tengu whirl about\, surely...!\
+
+Sleep:60
+Balloon:null,1,0,-200
+
+Action:sanae,305　#早苗驚く
+Action:reimu,400　#画面が揺れて霊夢が落ちてくる
+Action:reimu,401　#100終了検知
+
+Sleep:60
+
+Action:sanae,203　#早苗素立ち
+Color:FF8888
+Balloon:reimu,1,0,-200
+What's with this lousy pitfall trap!?\
+
+Balloon:null,1,0,-200
+
+Balloon:reimu,1,0,-200
+Huh?
+What the heck is this place?\
+
+Color:8888FF
+Balloon:sanae,1,0,-200
+Oh Reimu.
+What happened?\
+
+Balloon:null,1,0,-200
+
+Action:reimu,402　#霊夢起き上がる
+Action:reimu,403　#104終了検知
+Action:reimu,404　#霊夢困惑ポーズ
+
+Color:FF8888
+Balloon:reimu,1,0,-200
+I thought I'd go to the hot spring\,
+when all of a sudden\, the ground crumbled...\
+
+Action:sanae,305　#早苗驚く
+
+Color:8888FF
+Balloon:sanae,1,0,-200
+My goodness. I wonder if I forgot to
+take care of the cover-hatch.\
+
+Action:reimu,203　#霊夢素立ち
+
+Color:FF8888
+Balloon:reimu,1,0,-200
+Where is this?\
+
+Action:sanae,203　#早苗素立ち
+
+Color:8888FF
+Balloon:sanae,1,0,-200
+This is the Geyser Underground Center.
+A facility used for researching nuclear fusion.\
+
+Balloon:null,1,0,-200
+Action:reimu,405　#霊夢威嚇ポーズ
+Action:reimu,406　#405終了
+
+Color:FF8888
+Balloon:reimu,1,0,-200
+You're planning something
+naughty again\, aren't you?!\
+
+Color:8888FF
+Balloon:sanae,1,0,-200
+I would never think of doing anything naughty.\
+
+Action:reimu,407　#威嚇動作終了
+
+Color:FF8888
+Balloon:reimu,1,0,-200
+Talk is cheap!
+Making such a huge pitfall trap is unforgivable!\
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st40.ogg
+Action:sanae,203#　ニュートラル状態へ
+Action:reimu,203#　ニュートラル状態へ
+Action:sanae,167#　フラッシュ
+Action:sanae,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:reimu,200
+#攻撃側ニュートラル移行検知
+Action:sanae,202
+
+Action:sanae,164
+Sleep:15
+
+Action:sanae,204
+Action:reimu,205
+
+#カメラ中央固定
+Action:sanae,2　
+
+Sleep:30
+Action:sanae,165
+
+Sleep:30
+
+Balloon:sanae,1,0,-200
+I'm not the one responsible for
+these circumstances\, nor am I
+the one in control of them.\
+
+Balloon:null,1,0,-200
+Action:reimu,408　#霊夢起き上がり座り込んで頭をさする
+Sleep:60
+
+Balloon:reimu,1,0,-200
+Oww. Now I'm starting to feel
+the pain from the fall.\
+
+Balloon:sanae,1,0,-200
+This is where the kappa come
+to research and build. I was...
+interested in something\, so I came here\, but...\
+#私は……ちょっとした興味がありましてただ来ただけで\
+
+Action:reimu,402　#霊夢起き上がる
+Action:reimu,403　#402終了検知
+
+Balloon:reimu,1,0,-200
+Oh\, is that right?
+Well\, whatever.\
+
+If anything weird happens\,
+it'll just be your fault.\
+
+Balloon:null,1,0,-200
+Action:reimu,151　#霊夢画面上部へ退避
+
+Sleep:120
+
+Action:sanae,311　#早苗余裕のポーズ
+
+Balloon:sanae,1,0,-200
+Now then.
+I'll be arriving at the deepest level soon.\
+
+Balloon:null,1,0,-200
+
+Result:
+FadeBgm:2000,0
+Action:sanae,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

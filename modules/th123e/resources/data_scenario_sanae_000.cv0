@@ -1,0 +1,184 @@
+## =======================================================================
+#Stage:1
+#Title:「ブロッケンの妖怪」
+#Place:霧の湖の辺
+
+Character:sanae,160,0,0,8888FF
+Character:chirno,160,0,1,FF8888
+
+#背景　霧の湖の辺
+Stage:30,0
+
+#自分初期配置
+Action:sanae,1　#画面外待機
+
+#敵初期配置
+Action:chirno,400　#チルノ左右へうろうろ状態開始
+
+#カメラ中央固定
+Action:sanae,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+
+
+PlayBgm:data/bgm/ta01.ogg
+Sleep:60;
+
+#ステージタイトル表示
+Object:data/scenario/sanae/effect/StageTitle001.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/Stage1.bmp,1,256,352
+Sleep:216;
+
+Action:chirno,401　#チルノ後ろを向いて驚く
+Sleep:60;
+
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+Balloon:chirno,1,0,-200
+#0１２３４５６７８９０１２３４５６７８９０１２３
+That thing just now...\
+
+Action:chirno,402　#チルノ驚く
+It had to be that
+legendary giant youkai\, Daidarabocchi!\
+
+Action:chirno,404　#チルノ喜びのポーズ
+If I can tame it\, I'm not gonna be
+scared of anything ever again!\
+
+Balloon:null,0,0,-200
+Sleep:30
+
+#
+# 早苗登場
+Action:sanae,50
+Action:sanae,51 #登場動作終了検知
+
+Sleep:30
+
+Balloon:sanae,1,0,-200
+It seems that it was somewhere around here
+before it disappeared.\
+
+Action:chirno,405　#チルノこちらを向いて驚く
+
+Balloon:chirno,1,0,-200
+Oh? As soon as the big thing disappears\,
+this small thing appears.\
+
+Balloon:sanae,1,0,-200
+Hey\, over there\, Miss Fairy.
+Have you seen a giant ro...\
+
+I mean... I wonder if you've seen
+a huge moving human shape around here?\
+
+Action:chirno,406　#チルノしらばっくれる
+
+Balloon:chirno,1,0,-200
+I haven't seen a Daidarabocchi!\
+
+Action:sanae,300　#早苗疑問動作
+
+Balloon:sanae,1,0,-200
+Daidarabocchi?
+I wonder\, did I really say anything like that...?\
+
+Action:chirno,407　#チルノごまかし動作高速化
+
+Balloon:chirno,1,0,-200
+Ah\, no\, never mind.
+I haven't seen anything at all!\
+
+Balloon:chirno,0,0,-200
+Action:sanae,301　#早苗臨戦態勢ポーズ
+
+Balloon:sanae,1,0,-200
+I wonder if you could be plotting something?
+Playing the Brocken spectre in this deep fog?\
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st31.ogg
+#　戦闘開始処理
+
+Action:sanae,203
+Action:chirno,203
+Action:sanae,167#　フラッシュ
+Action:sanae,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:chirno,200
+#攻撃側ニュートラル移行検知
+Action:sanae,202
+
+Action:sanae,164
+Sleep:15
+
+Action:sanae,204
+Action:chirno,205
+
+#カメラ中央固定
+Action:sanae,2　
+
+Sleep:30
+Action:sanae,165
+
+Sleep:30
+
+Balloon:chirno,1,0,-200
+Brocken spectre?
+What's that?\
+
+Balloon:sanae,1,0,-200
+An illusion that looks like
+a giant stretched-out moving youkai.\
+
+Speaking of which\, you saw
+a huge human shape\, right?\
+
+Balloon:chirno,1,0,-200
+I saw it\, I saw it.
+I saw it over there.\
+
+Balloon:null,0,0,-200
+Action:sanae,303　#早苗うなずく
+Sleep:60
+
+Action:sanae,304　#早苗画面前方へ退避
+Sleep:90
+
+Result:
+FadeBgm:2000,0
+Action:sanae,160　#画面黒にフェードアウト
+
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

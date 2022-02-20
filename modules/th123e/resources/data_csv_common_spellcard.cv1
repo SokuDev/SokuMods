@@ -1,0 +1,39 @@
+#スペカナンバー,スペカ名,"タイプ
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+0,"Spiritual Strike Talisman",0,1,"Instantly encloses the surrounding  space with a magic barrier. A       defensive card that sends nearby    enemies flying. Has a long          invincibility period.",0,5,0,0,0,0,0,0,0,1000
+1,"Magic Potion",0,1,"A magic power restoration drug drawnout of mushrooms from the Forest of Magic. Causes spiritual power to    regenerate very quickly and restoresmax spirit power.",0,5,0,0,0,0,0,0,1,1001
+2,"Stopwatch",0,1,"A strange pocket timepiece that     stops time. During use\, attack is   not possible. A card for movement.",1,5,0,0,0,0,0,0,2,1002
+3,"Hakurouken",0,1,"A youkai forged sword that cuts awayhesitation. Interrupts the current  action with a dash. An excellent    card for covering large amounts of  distance quickly.",1,5,0,0,0,0,0,0,5,1003
+4,"Sacrificial Doll",0,1,"The damage taken by the possessor   will be partially taken by this     gratitude evoking doll. The effects are small\, but permanent. Multiple  uses further increase the effects.",1,5,0,0,0,0,0,0,3,1004
+5,"Grimoire",0,1,"A precious book that fills you up   with magic power. Permanently       increases the rate of spirit orb    recovery. Multiple uses further     increase the effects.",1,5,0,0,0,0,0,0,4,1005
+6,"Custom Parasol",0,1,"A white custom parasol that blocks  out the sun. It also acts as a      danmaku repelling shield. Forms a   defensive barrier to protect againstprojectile attacks. Actually there  is an additional effect but... ?",0,5,0,0,0,0,0,0,6,1006
+7,"Soul Torch",0,1,"A tool from the realms of the dead  that summons spirits. Materializes  spirits to pursue the enemy. A      bullet good for slow pursuit. Even  if the original body is hit\, they   will not disappear.",1,5,0,0,0,0,0,0,7,1007
+8,"Left-handed Folding Fan",0,1,"A mysterious folding fan which fillsyou with the power of the youkai of boundaries. Crashes through all     obligations to deliver a strike. If blocked\, it causes a guard crush\,   otherwise it does no damage.",1,5,0,0,0,0,0,0,8,1008
+9,"Ibuki Gourd",0,1,"The treasure of the Oni from which  an infinite quantity of sake flows. Causes card power to swell up\,      drawing an additional 2 cards. A    useful item for drawing attention.",1,5,0,0,0,0,0,0,9,1009
+10,"Tengu Fan",0,1,"A Tengu fan that can manipulate the wind. With this\, the wind will make the body lighter and more agile.    Speed is permanently increased with each use. Multiple uses further     increase the effects.",1,5,0,0,0,0,0,0,11,1010
+11,"Spell-Breaking Drug",0,1,"A strong poison that inflicts damageupon the soul. Destroys the         opponent's top card if it hits.",0,5,0,0,0,0,0,0,10,1011
+12,"A Penny Saved",0,0,"Pennies that carry the distance     manipulating power of the Shinigami.Causes space to be freed up. The    effect is meager\, but the card can  be used any number of times.",1,5,0,0,0,0,0,0,12,1012
+13,"Divine Raiment of the Dragon Fish",0,1,"A dragon fish's wind and lightning  repelling divine raiment. Creates aninvincible strike that interrupts   attacks. Use this when defense      becomes difficult.",1,5,0,0,0,0,0,0,13,1013
+14,"Sword of Scarlet Perception",0,1,"A celestial maiden's weapon capable of manipulating the weather. Invokesthe laws of weather and ends the    current weather.",1,5,0,0,0,0,0,0,14,1014
+15,"Illness Recovery Charm",0,1,"A charm from the Moriya Shrine that can heal wounds. Heals the body by afixed amount.",1,5,0,0,0,0,0,0,15,1015
+16,"Frozen Frog",0,1,"A frog infused with a potent chill. Freezes the nearby ground. Anyone   who steps in it will lose their     advantageous position and will slip and fall.",0,5,0,0,0,0,0,0,16,1016
+17,"Dragon Star",0,1,"A star-shaped hat decoration that   fills you with the power of the     (so-called) Dragon. Causes your chi energy to swell up. For a short     amount of time\, receiving a blow    will not cause you to falter.",1,5,0,0,0,0,0,0,17,1017
+18,"Control Rod",0,1,"Control rods which regulate the     energy of nuclear fusion. A double  edged sword that permanently        increases your attack power but     lowers your defense. Plan your use  of nuclear power carefully.",1,5,0,0,0,0,0,0,18,1018
+19,"Three Heavenly Drops",0,1,"On the first day of each month\, onlythree drops of this (so-called)     mysterious water will fall. On the  first and second use\, nothing will  happen\, but on the third?",1,5,0,0,0,0,0,0,19,1019
+20,"Catfish's Great Earthquake",0,1,"The Great Catfish will cause an     earthquake to happen in the         vicinity. The earthquake is a       calamity which hits everything\, so  caution is advised.",1,0,0,0,0,0,0,0,21,1020

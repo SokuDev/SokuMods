@@ -1,0 +1,193 @@
+## =======================================================================
+#Stage:2
+#Title:「大陸の赤い凶星」
+#Place:紅魔館庭園
+
+Character:sanae,160,0,0,8888FF
+Character:meirin,160,0,1,FF8888
+
+#背景　紅魔館時計塔
+Stage:12,0
+
+#自分初期配置
+Action:sanae,1　#画面外待機
+
+#敵初期配置
+Action:meirin,400　#2P定位置で待機
+Action:meirin,401　#遠くを見ている
+
+#カメラ中央固定
+Action:sanae,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+Sleep:60;
+
+#画面黒からフェードイン
+Action:sanae,161
+
+PlayBgm:data/bgm/ta04.ogg
+Sleep:60;
+
+#ステージタイトル表示
+Object:data/scenario/sanae/effect/StageTitle002.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/Stage2.bmp,1,256,352
+Sleep:216;
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+Balloon:meirin,1,0,-200
+#0１２３４５６７８９０１２３４５６７８９０１２３
+That giant just now... I wonder what it was.\
+
+Just when I thought it had lurched its way
+to the mountains\, it and the
+lukewarm mist both disappear.\
+
+Action:meirin,402　#背中を向けて腕組
+I'm sure that must have been an evil omen.
+The shadow of Taisui Xingjun!\
+
+Balloon:null,1,0,-200
+Sleep:30
+
+# 早苗登場
+Action:sanae,50
+Action:sanae,51 #登場動作終了検知
+
+Sleep:30
+
+Balloon:sanae,1,0,-200
+Excuse me.\
+
+Action:meirin,403　#美鈴驚いて振り向く
+Action:meirin,404　#103終了検知
+
+Balloon:meirin,1,0,-200
+Wh-What is it?
+We never accept guests here...\
+
+Balloon:sanae,1,0,-200
+I was wondering if you'd perhaps seen
+a huge human-like figure around here?\
+
+Balloon:meirin,1,0,-200
+If you're talking about a huge human-like figure\,
+then I saw one head towards the mountain...\
+
+Action:sanae,300　#早苗疑問動作
+
+Balloon:sanae,1,0,-200
+Towards the mountain...?
+I just came from the mountain.
+I wonder if I passed it at some point...\
+
+Action:meirin,405　#美鈴臨戦態勢
+
+Balloon:meirin,1,0,-200
+So\, who do you think you are\,
+just coming in as you please?\
+
+Action:sanae,305　#早苗驚く
+
+Balloon:sanae,1,0,-200
+Eh? Is this a place where
+I can't come in as I please?\
+
+Balloon:null,1,0,-200
+Action:meirin,406　#美鈴威嚇ポーズ
+Action:meirin,407　#406終了
+
+Balloon:meirin,1,0,-200
+Of course you can't.
+These are the estate grounds of a demon.
+I won't let an exorcist pass!\
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st32.ogg
+Action:sanae,203　#ニュートラル状態へ
+Action:meirin,203　#ニュートラル状態へ
+Action:sanae,167#　フラッシュ
+Action:sanae,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:meirin,200
+#攻撃側ニュートラル移行検知
+Action:sanae,202
+
+Action:sanae,164
+Sleep:15
+
+Action:sanae,204
+Action:meirin,205
+
+#カメラ中央固定
+Action:sanae,2　
+
+Sleep:30
+Action:sanae,165
+
+Sleep:30
+
+Balloon:sanae,1,0,-200
+I really don't have any interest in this mansion.
+In any case\, that giant robo...
+figure can't exactly hide.\
+
+Balloon:meirin,1,0,-200
+Eh? A giant robot?\
+
+Hide:1
+Action:sanae,306　#画面が蒸気で包まれる
+Sleep:60
+
+Balloon:sanae,1,0,-200
+What's this lukewarm mist?\
+
+Action:sanae,307　#早苗遠くを探す
+Action:sanae,308　#308終了検知
+
+Action:sanae,309　#早苗何かに気が付く
+Action:sanae,310　#309終了検知
+
+Balloon:sanae,1,0,-200
+The base of the mountain!
+It appeared! The giant human-like figure!\
+
+Balloon:null,1,0,-200
+Action:sanae,304　#早苗画面前方へ退避
+Sleep:90
+
+Result:
+FadeBgm:2000,0
+#Action:sanae,159　#カメラ上方向にパン開始
+Action:sanae,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

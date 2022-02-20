@@ -1,0 +1,171 @@
+## =======================================================================
+#Stage:3
+#Title:「人の眼をした魔物」
+#Place:夢の中の時計台２
+
+Character:meirin,160,0,0,8888FF
+Character:marisa,160,0,1,FF8888
+
+#背景　夢の中の時計台２
+Stage:36,0
+
+#自分初期配置
+Action:meirin,20　#1P定位置待機
+Action:meirin,402　#美鈴考え事ポーズ
+
+#敵初期配置
+Action:marisa,100　#画面外で待機
+
+#カメラ中央固定
+Action:meirin,2
+
+#画面表示前処理終了============================
+
+Label:Start
+
+#画面黒からフェードイン
+Action:meirin,161
+
+PlayBgm:data/bgm/ta05.ogg
+Sleep:60;
+
+
+#ステージタイトル表示
+Object:data/scenario/meirin/effect/StageTitle003.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/Stage3.bmp,1,256,352
+Sleep:300;
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+#0１２３４５６７８９０１２３４５６７８９０１２３
+
+# 美鈴が待っている
+
+Action:marisa,101# 魔理沙が入ってくる
+Action:marisa,102
+
+Balloon:marisa,1,0,-200
+Now then\, today I'll be
+going to the library again!
+I'm a young lady of literature.\
+
+# 美鈴
+Balloon:meirin,1,0,-200
+....\
+
+Action:marisa,401# 魔理沙　驚き
+Balloon:marisa,1,0,-200
+Oh?! For some reason I'm not being stopped.
+I'm seriously going in? I'm really going in\, okay?\
+
+Action:meirin,405# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+You\, too\, are a fake!
+I can see through everything!\
+
+Action:marisa,203# 魔理沙　通常
+Balloon:marisa,1,0,-200
+A fake?\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+For you\, who always comes through
+the main gate proudly and boldly\,
+Coming in from the sky is ridiculous!\
+
+# 魔理沙　通常
+Balloon:marisa,1,0,-200
+Heh heh. Very impressive.
+As expected of the Great Wall
+of the Scarlet Devil Mansion\, Meiling.\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+Just about anyone could
+see through that disguise!\
+
+Action:marisa,403# 魔理沙　決めポーズ
+Balloon:marisa,1,0,-200
+However\, simply seeing through to my true form
+won't be enough to win against me!\
+#戦闘開始処理
+
+PlayBgm:data/bgm/st41.ogg
+Action:meirin,203#　ニュートラル状態へ
+Action:marisa,203#　ニュートラル状態へ
+Action:meirin,167#　フラッシュ
+Action:meirin,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:marisa,200
+#攻撃側ニュートラル移行検知
+Action:meirin,202
+
+Action:meirin,164
+Sleep:15
+
+Action:meirin,204
+Action:marisa,205
+
+#カメラ中央固定
+Action:meirin,2　
+
+Sleep:30
+Action:meirin,165
+
+Sleep:30
+
+# 魔理沙、倒れた状態
+# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+Hmph. Your power wasn't that different
+from the original human.\
+
+# 魔理沙　倒れた状態
+Balloon:marisa,1,0,-200
+....\
+
+# 美鈴　驚き
+Balloon:meirin,1,0,-200
+What a fiendishly evil youkai\,
+the Taisui Xingjun.\
+
+# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+If it wasn't for me\,
+the Scarlet Devil Mansion would've surely
+been taken over right about now...\
+
+
+Balloon:null,1,0,-200
+
+Result:
+FadeBgm:2000,0
+Action:meirin,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

@@ -1,0 +1,279 @@
+## =======================================================================
+#Stage:4
+#Title:「巨大ギニョルの火」
+#Place:核融合炉心部
+
+Character:sanae,160,0,0,8888FF
+Character:utsuho,160,0,1,FF8888
+
+#背景　核融合炉心部
+Stage:34,0
+
+#自分初期配置
+Action:sanae,20　#1P定位置待機
+
+#敵初期配置
+Action:utsuho,100　#画面外で待機
+
+#カメラ上固定
+Action:utsuho,130
+
+#画面表示前処理終了============================
+
+Label:Start
+PlayBgm:data/bgm/room.ogg
+Sleep:60
+
+#画面黒からフェードイン
+Action:sanae,161
+#カメラ画面上部から下へパン
+Action:utsuho,131
+
+Sleep:60
+#ステージタイトル表示
+Object:data/scenario/sanae/effect/StageTitle004.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/Stage4.bmp,1,256,352
+Sleep:30;
+
+#PlayBgm:data/bgm/ta03.ogg
+Sleep:300;
+
+
+
+# 普、嬉、余、汗、驚、怒、決、惑、負
+
+Balloon:sanae,1,0,-200
+#0１２３４５６７８９０１２３４５６７８９０１２３
+It's so hot...\
+
+Staying here too long could be dangerous
+with such high temperatures.\
+Balloon:null,1,0,-200
+
+Action:utsuho,400　#空画面外から早苗の位置めがけて火の玉を発射しつつ乱入
+Action:sanae,305　#早苗驚く
+Sleep:10
+Action:sanae,313　#早苗火の玉を避ける
+Action:sanae,314　#313終了検知
+
+Action:utsuho,401　#100終了タイミング検知
+
+Sleep:30
+
+Balloon:utsuho,1,0,-200
+Foreign substance sighted!\
+
+Upon contamination of the nuclear reactor core\,
+reactor operations are to be halted
+and the foreign substance eradicated immediately!\
+
+Balloon:sanae,1,0,-200
+!\
+
+Balloon:null,1,0,-200
+
+#戦闘開始処理
+
+PlayBgm:data/bgm/st33.ogg
+Action:sanae,203#　ニュートラル状態へ
+Action:utsuho,203#　ニュートラル状態へ
+Action:sanae,3
+
+End:
+
+# --------------------------------
+#中間デモ
+Label:Intermission10
+
+Action:utsuho,154
+
+#やられキャラ完全ダウン検知
+Action:utsuho,200
+#攻撃側ニュートラル移行検知
+Action:sanae,202
+
+Action:sanae,305　#早苗驚く
+
+Balloon:sanae,1,0,-200
+Wait\, wait!\
+
+Action:utsuho,402　#空起き上がる
+
+I'm a shrine maiden of Lady Kanako!\
+
+Action:utsuho,403　#空　疑問　というか何かを思い出そうとしているポーズ
+
+Balloon:utsuho,1,0,-200
+Um.
+Who's Lady Kanako?\
+
+Action:sanae,203　#早苗素立ちポーズ
+
+Balloon:sanae,1,0,-200
+Crows are really birdbrained after all.
+Simply put\, I serve a higher power than yourself.\
+
+Balloon:utsuho,1,0,-200
+A servant of a higher power?\
+
+A servant can't be that great\, can it?
+Then a human that's not great is...\
+
+Action:utsuho,404　#空　驚きのポーズ
+
+Ah\, which reminds me\, I came because of
+the notification that a foreign substance
+had contaminated the reactor core!\
+
+Balloon:sanae,1,0,-200
+No\, I mean...\
+
+Balloon:null,1,0,-200
+Action:utsuho,405　#威嚇ポーズ
+Action:utsuho,406　#406終了
+
+Balloon:utsuho,1,0,-200
+And... foreign substance detected!
+Must eradicate that higher power's
+lowly foreign substance!\
+
+
+Balloon:null,1,0,-200
+Action:sanae,301　#早苗臨戦態勢ポーズ
+Action:sanae,302　#301終了検知
+
+Balloon:sanae,1,0,-200
+Unless I can completely exhaust that
+lively energy of yours\, it looks like
+we won't be able to talk any further.\
+
+#戦闘開始処理
+
+Action:sanae,203#　ニュートラル状態へ
+Action:utsuho,203#　ニュートラル状態へ
+
+戦闘再開処理
+Action:utsuho,210#　死亡フラグ類初期化
+
+End:
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:utsuho,200
+#攻撃側ニュートラル移行検知
+Action:sanae,202
+
+#中央移動処理----
+Action:sanae,164
+Sleep:15
+
+Action:sanae,204
+Action:utsuho,205
+
+#カメラ中央固定
+Action:sanae,2　
+
+Sleep:30
+Action:sanae,165
+
+Sleep:30
+#---------
+
+Action:sanae,301　#早苗臨戦態勢ポーズ
+Action:sanae,302　#301終了検知
+Balloon:sanae,1,0,-200
+That's as far as you go!\
+
+Action:utsuho,402　#空起き上がる
+#空ニュートラル移行検知
+Action:utsuho,202
+Action:utsuho,403　#空　疑問　というか何かを思い出そうとしているポーズ
+
+Balloon:utsuho,1,0,-200
+Wait\, what were we doing again?\
+
+Action:sanae,317
+# 早苗　一息ついて
+Balloon:sanae,1,0,-200
+Er... You were listening to my orders and
+helping me with my investigation of this reactor.\
+
+Action:utsuho,203#　ニュートラル状態へ
+Balloon:utsuho,1,0,-200
+Ah\, is that right??\
+
+Action:sanae,318
+# 早苗　通常（苦笑いが出来れば苦笑いの表情）
+Balloon:sanae,1,0,-200
+Yes\, that's right.
+Please proceed as planned.\
+
+Balloon:utsuho,1,0,-200
+Then what should I be doing?\
+
+Action:sanae,203　#早苗素立ちポーズ
+Balloon:sanae,1,0,-200
+Investigate whether or not
+a gigantic thing has been hiding here.\
+
+Balloon:utsuho,1,0,-200
+What's the gigantic thing?
+About how gigantic?\
+
+Action:sanae,300　#早苗疑問動作
+Balloon:sanae,1,0,-200
+It's humanoid...
+and about 100 meters?\
+
+Balloon:utsuho,1,0,-200
+100 meters?\
+
+Balloon:sanae,1,0,-200
+Hm. About the length of this
+reactor's diameter from end to end?\
+
+Balloon:utsuho,1,0,-200
+Action:utsuho,404　#空　驚きのポーズ
+A human that big?!
+There's no way such a thing exists\, right?\
+
+If there were something like that\,
+there's no way I wouldn't have noticed.\
+
+Action:sanae,203　#早苗素立ちポーズ
+Balloon:sanae,1,0,-200
+I suppose that's true.\
+
+Action:sanae,300　#早苗疑問動作
+Balloon:sanae,1,0,-200
+But there's no doubt that it
+disappeared from the surface.\
+
+Balloon:null,1,0,-200
+
+Result:
+FadeBgm:2000,0
+Action:sanae,160　#画面黒にフェードアウト
+
+#次ステージ準備処理====================
+
+Sleep:120;
+
+End:
+
+## =======================================================================

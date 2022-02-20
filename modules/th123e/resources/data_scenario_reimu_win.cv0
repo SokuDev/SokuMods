@@ -1,0 +1,375 @@
+## =======================================================================
+#èüóòë‰éå
+## =======================================================================
+#VSóÏñ≤
+# Time-stamp: <2009/08/12 16:11:48 zun>
+#
+## ë‰éåA==================
+#Label:ÉLÉÉÉâñº+êîéöÇÃå`Ç≈ìoò^Å@òAî‘Ç≈ë±Ç¢ÇƒÇ¢ÇÈå¿ÇËÇÃç≈å„Ç‹Ç≈Ç™ìoò^Ç≥ÇÍÅAÉâÉìÉ_ÉÄÇ≈ëIëÇ≥ÇÍÇ‹Ç∑
+#âÔòbèëéÆÇÕÉVÉiÉäÉIÇ≈åæÇ§ÉLÉÉÉâñºÇÃèÍèäÇ…win(èüóòÉLÉÉÉâ)lose(îsñkÉLÉÉÉâ)ÇÃî≠åæÇ…Ç»ÇËÇ‹Ç∑
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   ïpî…
+
+Label:reimuU0
+Face:lose,ïâ
+Face:win,äæ
+Who're you?\
+End:
+
+## =======================================================================
+#VSñÇóùçπ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:marisaU0
+Face:lose,ïâ
+Face:win,ïÅ
+Sure is hot and boring.
+Wanna go to the kappa's place afterwards?\
+End:
+
+Label:marisaU1
+Face:lose,ïâ
+Face:win,äæ
+It's hot whether I move or not.
+I wonder what I should do at a time like this?\
+End:
+
+Label:marisaR0
+Face:lose,ïâ
+Face:win,ïÅ
+Speaking of which\, that unidentified flying youkai\
+...
+
+Face:win,òf
+... got converted to Buddhism
+and is now living at the temple.\
+
+Face:win,ó]
+I guess the normal youkai
+really hate the underground.\
+End:
+
+## =======================================================================
+#VSçÁñÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sakuyaU0
+Face:lose,ïâ
+Face:win,ó]
+It bothers me that the Scarlet Devil Mansion
+is always cool. Is there a secret to that?\
+End:
+
+Label:sakuyaU1
+Face:lose,ïâ
+Face:win,ä
+Tonight is a summer party at the mansion!
+Can't get enough of those in the summer.\
+End:
+
+## =======================================================================
+#VSódñ≤
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:youmuU0
+Face:lose,ïâ
+Face:win,òf
+It's so hot....
+Mind lending me a ghost or two?\
+End:
+
+Label:youmuU1
+Face:lose,ïâ
+Face:win,åà
+Would you mind cutting the grass over there?\
+End:
+
+Label:youmuU2
+Face:lose,ïâ
+Face:win,ó]
+Next time\, you should come have
+a test of courage at my place.
+You'll be frightened by the monsters there.\
+End:
+
+
+## =======================================================================
+#VSÉAÉäÉX
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:aliceU0
+Face:lose,ïâ
+Face:win,ïÅ
+Are you holding proper funerals for your dolls?
+Lots of things can possess something
+that looks like a human\, you know?\
+End:
+
+Label:aliceR0
+Face:lose,ïâ
+Face:win,ó]
+I've heard lots about hair-growing dolls.\
+
+Face:win,òf
+Are those controlled by strings as well?
+Hair by hair.\
+End:
+
+## =======================================================================
+#VSÉpÉ`ÉÖÉäÅ[
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:patchouliU0
+Face:lose,ïâ
+Face:win,ïÅ
+It's so hot\, I've thought about not moving at all...\
+End:
+
+## =======================================================================
+#VSÉåÉ~ÉäÉA
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:remiliaU0
+Face:lose,ïâ
+Face:win,ã¡
+I've heard that bats aren't birds
+but actually mammals!\
+End:
+
+
+## =======================================================================
+#VSóHÅXéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yuyukoU0
+Face:lose,ïâ
+Face:win,ïÅ
+Usually ghosts collect easily
+in dark and damp places.\
+End:
+
+## =======================================================================
+#VSéá
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:yukariU0
+Face:lose,ïâ
+Face:win,ïÅ
+I'm feeling a bit bored\, but...\
+End:
+
+Label:yukariR0
+Face:lose,ïâ
+Face:win,ïÅ
+Don't you think it's peaceful lately?\
+
+Face:win,ïÅ
+Feels like the calm before the storm.\
+
+End:
+
+
+## =======================================================================
+#VS‰¬çÅ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suikaU0
+Face:lose,ïâ
+Face:win,äæ
+I don't know any decent people
+who like to live underground.\
+End:
+
+
+
+## =======================================================================
+#VSï∂
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ayaU0
+Face:lose,ïâ
+Face:win,äæ
+Why do you show up in the newspaper photos?\
+End:
+
+Label:ayaR0
+Face:lose,ïâ
+Face:win,äæ
+Why do you show up in the newspaper photos?\
+
+Face:win,ã¡
+Can it be that you moved at ultra high speeds
+after you pressed the shutter?\
+
+Face:win,äæ
+...and so you managed to photograph yourself?\
+
+End:
+
+## =======================================================================
+#VSóÈêÂ
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:udongeU0
+Face:lose,ïâ
+Face:win,ïÅ
+Tonight is rabbit stew!\
+End:
+
+Label:udongeU1
+Face:lose,ïâ
+Face:win,ó]
+There seem to be trees called eye drop trees up on
+the mountain. If your eyes get so horribly red\,
+why don't you try finding them?\
+End:
+
+
+
+## =======================================================================
+#VSè¨í¨
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:komachiU0
+Face:lose,ïâ
+Face:win,ó]
+Hello slacker\, is it alright
+for you to loiter around here?\
+End:
+
+
+## =======================================================================
+#VSàﬂãË
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:ikuU0
+Face:lose,ïâ
+Face:win,ïÅ
+It's really been coming down in the evening lately.
+I bet the lightning wouldn't be as bad
+if you all would settle down.\
+End:
+
+
+## =======================================================================
+#VSìVéq
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+Label:tenshiU0
+Face:lose,ïâ
+Face:win,äæ
+Heaven seems hot.
+There's no shade to hide from the sun.\
+End:
+
+
+Label:tenshiR0
+Face:lose,ïâ
+Face:win,äæ
+Heaven seems hot.
+There's no shade to hide from the sun.\
+
+Face:win,ã¡
+Ah\, but the higher you climb the colder it gets.\
+
+Face:win,ó]
+Would Heaven above the mountain be hot?
+Or would it be cold?\
+
+End:
+
+
+
+
+## =======================================================================
+#VSëÅïc
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:sanaeU0
+Face:lose,ïâ
+Face:win,ä
+Let's see whose color is
+more suitable as a shrine maiden!
+It's a contest of the clothes!\
+End:
+
+Label:sanaeR0
+Face:lose,ïâ
+Face:win,äæ
+Even if you get enough people
+to open a branch shrine\,\
+
+Face:win,ïÅ
+everyone needs to donate.
+Profit is an indication of faith\,\
+
+Face:win,ó]
+so you want more situations where
+you can exterminate youkai.
+I guess I need to get some more people too...\
+
+End:
+
+
+## =======================================================================
+#VSÉ`ÉãÉm
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:chirnoU0
+Face:lose,ïâ
+Face:win,ïÅ
+How stupid.
+There's no way you can win against me.\
+End:
+
+
+## =======================================================================
+#VSî¸óÈ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:meirinU0
+Face:lose,ïâ
+Face:win,äæ
+Isn't Tai chi quan just a form of exercise?\
+End:
+
+
+
+## =======================================================================
+#VSãÛ
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:utsuhoU0
+Face:lose,ïâ
+Face:win,äæ
+I still don't understand this nuclear fusion.
+Why does it become hot after fusion?\
+End:
+
+Label:utsuhoU1
+Face:lose,ïâ
+Face:win,ïÅ
+Why does a crow live in the sun?\
+End:
+
+
+## =======================================================================
+#VSêzñKéq
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:suwakoU0
+Face:lose,ïâ
+Face:win,ïÅ
+Frogs hibernating to live sure is amazing.\
+End:
+
+
+
+
+
+## =======================================================================
+#VSã§í 
+#ÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇX\
+## ë‰éåA==================
+#0ÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇRÇSÇTÇUÇVÇWÇXÇOÇPÇQÇR
+Label:common0
+
+Face:win,ïÅ
+This year's summer sure is peaceful.
+It's good to be bored\, probably.\
+End:
+
+Label:common1
+
+Face:win,òf
+Something usually happens during the summer\, though.\
+End:
+
+## =======================================================================
+

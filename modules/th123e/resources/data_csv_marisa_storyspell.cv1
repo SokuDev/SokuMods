@@ -1,0 +1,39 @@
+"#スペカナンバー","スペカ名","タイプ
+0 スペルカード
+1 スキルカード
+2 システムカード
+255　敵専用","消費","カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％"
+0,"<story>Star Sign \"Eccentric Asteroid\"",255,3500,,3600,
+1,"<story>Star Sign \"Eccentric Asteroid\"",255,4000,,3600,
+2,"<story>Star Sign \"Eccentric Asteroid\"",255,4500,,3600,
+3,"<story>Star Sign \"Eccentric Asteroid\"",255,5000,,3600,
+4,"<story>Light Flow \"Shooting Echo\"",255,3500,,3600,
+5,"<story>Light Flow \"Shooting Echo\"",255,4000,,3600,
+6,"<story>Light Flow \"Shooting Echo\"",255,4500,,3600,
+7,"<story>Light Flow \"Shooting Echo\"",255,5000,,3600,
+8,"<story>Magic Sign \"Magical R360\"",255,3500,,3600,
+9,"<story>Magic Sign \"Magical R360\"",255,4000,,3600,
+10,"<story>Magic Sign \"Magical R360\"",255,4500,,3600,
+11,"<story>Magic Sign \"Magical R360\"",255,5000,,3600,
+248,"EASY",255,5000,,3600,
+249,"NORMAL",255,5500,,3600,
+250,"HARD",255,6000,,3600,
+251,"LUNATIC",255,6500,,3600,
+252,"EASY",255,7000,,3600,
+253,"NORMAL",255,8000,,3600,
+254,"HARD",255,9000,,3600,
+255,"LUNATIC",255,10000,,3600,

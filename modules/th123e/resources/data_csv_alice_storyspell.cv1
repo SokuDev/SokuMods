@@ -1,0 +1,47 @@
+"#スペカナンバー","スペカ名","タイプ
+0 スペルカード
+1 スキルカード
+2 システムカード
+255　敵専用","消費","カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％"
+0,"<story>Doll \"Semi-automaton\"",255,3500,,3600,
+1,"<story>Doll \"Semi-automaton\"",255,4000,,3600,
+2,"<story>Doll \"Semi-automaton\"",255,4500,,3600,
+3,"<story>Doll \"Semi-automaton\"",255,5000,,3600,
+4,"<story>Knight \"Doll of Round Table\"",255,3500,,3600,
+5,"<story>Knight \"Doll of Round Table\"",255,4000,,3600,
+6,"<story>Knight \"Doll of Round Table\"",255,4500,,3600,
+7,"<story>Knight \"Doll of Round Table\"",255,5000,,3600,
+8,"<story>Sacrifice \"Suicide Pact\"",255,3500,,3600,
+9,"<story>Sacrifice \"Suicide Pact\"",255,4000,,3600,
+10,"<story>Sacrifice \"Suicide Pact\"",255,4500,,3600,
+11,"<story>Sacrifice \"Suicide Pact\"",255,5000,,3600,
+12,"<story>Testing \"Level Titania\"",255,3500,,3600,
+13,"<story>Testing \"Level Titania\"",255,4000,,3600,
+14,"<story>Testing \"Level Titania\"",255,4500,,3600,
+15,"<story>Testing \"Level Titania\"",255,5000,,3600,
+16,"<story>Testing \"Goliath Doll\"",255,3500,,0,
+17,"<story>Testing \"Goliath Doll\"",255,4000,,0,
+18,"<story>Testing \"Goliath Doll\"",255,4500,,0,
+19,"<story>Testing \"Goliath Doll\"",255,5000,,0,
+248,"EASY",255,5000,,3600,
+249,"NORMAL",255,5500,,3600,
+250,"HARD",255,6000,,3600,
+251,"LUNATIC",255,6500,,3600,
+252,"EASY",255,7000,,3600,
+253,"NORMAL",255,8000,,3600,
+254,"HARD",255,9000,,3600,
+255,"LUNATIC",255,10000,,3600,

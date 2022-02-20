@@ -22,3 +22,9 @@
 [submodule "lua"]
 	path = lua
 	url = https://github.com/lua/lua.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git
+[submodule "libpng"]
+	path = png
+	url = https://github.com/glennrp/libpng.git

@@ -1,0 +1,433 @@
+## =======================================================================
+#Stage:5
+#Title:「ああ、これかも知れないロボ」
+#Place:核融合炉心部
+
+Character:sanae,160,0,0,8888FF
+Character:suwako,160,0,1,FF8888
+
+#背景　核融合炉心部
+Stage:34,0
+
+#自分初期配置
+Action:sanae,1　#画面左端外で待機
+
+Action:suwako,101　#画面中央はるか上空で待機
+
+#カメラ中央固定
+Action:sanae,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+
+#画面黒からフェードイン
+Action:sanae,161
+PlayBgm:data/bgm/ta20.ogg
+Sleep:60;
+
+#ステージタイトル表示
+Object:data/scenario/sanae/effect/StageTitle005.bmp,0,176,-32
+Sleep:30;
+#Object:data/scenario/effect/StageFinal.bmp,1,256,352
+Object:data/scenario/effect/StageFinal.bmp,1,256,382
+Sleep:240;
+
+Action:sanae,319　#早苗右に移動
+Action:sanae,320　#終了検知
+
+Balloon:sanae,1,0,-200
+This is certainly no place to seek refuge.\
+
+Balloon:null,1,0,-200
+Action:sanae,321　#早苗中央に移動
+Action:sanae,322　#終了検知
+
+Balloon:sanae,1,0,-200
+This reactor core is far simpler than
+I thought it would be.
+Except for the heat...\
+
+Action:sanae,323　#早苗上を向く
+
+We're really far underground.
+But even here\, you can see the sky.\
+
+The sky appears so tiny from here that
+you can barely sense its presence.\
+
+Action:sanae,203　#早苗素立ち
+
+I wonder if it would have been better
+if the vampires lived here.\
+
+In any case\, the reactor core is blazing hot.
+It seems the rising vapors originated here.\
+
+#Action:sanae,323　#早苗上を向く
+Action:sanae,305　#早苗驚く
+
+Aha! Perhaps that figure I saw earlier...!\
+
+Was it just the vapors rising from here
+projecting someone's shape...?\
+
+Action:sanae,300　#早苗疑問動作
+
+No\, it couldn't be anything like that.
+It looked so much more real...\
+
+FadeBgm:500,0
+Balloon:null,1,0,-200
+Action:sanae,324
+# 何か、ドスン、という音が聞こえ、画面が揺れる
+Sleep:60
+Balloon:sanae,1,0,-200
+What?\
+
+Balloon:null,1,0,-200
+Sleep:60
+
+Action:sanae,324
+#再び、何か、ドスン、という音が聞こえ、画面が揺れる
+Sleep:90
+Balloon:sanae,1,0,-200
+That sounds like footsteps...
+And this vibration...\
+
+So something that was merely fantasy
+in the outside world has
+made its way into Gensokyo...\
+
+Balloon:null,1,0,-200
+Action:sanae,325
+#三度、何か、ドスン、という音が聞こえ、画面が揺れる
+Sleep:90
+
+PlayBgm:data/bgm/ta21.ogg
+# 早苗　決めポーズ（各セリフ、攻撃ポーズの流用で良いんで違うポーズだといいな）
+Balloon:sanae,1,0,-200
+Yes\, this is surely that thing!\
+Action:sanae,326
+That thing that was never implemented
+because of its impracticality!\
+Action:sanae,327
+The bipedal giant robot I've
+longed to see is in Gensokyo!\
+
+Balloon:null,1,0,-200
+
+#カメラ上移動
+#移動終了検知
+Action:sanae,328
+Action:sanae,329
+
+Balloon:suwako,3,0,0
+Look out belooow!\
+Balloon:null,1,0,-200
+
+# 高速に何かが落ちてくる
+Action:sanae,305　#早苗驚く
+Action:sanae,330
+Action:sanae,332#フェードアウト
+
+# 一瞬画面が光り、振動する。
+# 画面は一瞬で定位置に移動し、諏訪子が早苗の真上に落ちてくる
+# 早苗は倒れている（画面真ん中）
+
+Action:sanae,333#早苗ダウン
+Sleep:120
+
+Action:sanae,331#画面揺らし
+Action:sanae,163#フェードイン
+
+Sleep:120
+Action:suwako,400#諏訪子落下
+Balloon:suwako,1,0,-200
+Action:suwako,202#ニュートラル検知
+
+Sleep:30
+
+Oops! It seems I landed on something.\
+Balloon:null,1,0,-200
+
+# 諏訪子はひょいひょいと右側に移動する
+Action:suwako,401#諏訪子一歩後退
+Action:suwako,202#ニュートラル検知
+Balloon:suwako,1,0,-200
+Oh my\, it's Sanae.
+What are you doing here?\
+
+
+Action:sanae,334# 早苗が起き上がり
+Balloon:sanae,1,0,-200
+Oww...
+What in the name of...\
+
+Action:sanae,305　#早苗驚く
+Oh! Lady Suwako?
+What are you doing here?!\
+
+Balloon:suwako,1,0,-200
+I had some small things to take care of.
+Anyway\, it's amazing that you're down here\, Sanae.\
+
+Action:sanae,203　#早苗素立ち
+Balloon:sanae,1,0,-200
+Oh\, yes! I've discovered something fantastic!\
+
+Balloon:suwako,1,0,-200
+Ohhh? Tell me\, tell me!\
+
+Balloon:null,1,0,-200
+Action:sanae,301　#早苗臨戦態勢ポーズ
+Action:sanae,302　#301終了検知
+Balloon:sanae,1,0,-200
+I came here in pursuit of a giant shadow\, but...\
+
+There was actually a giant robot!
+Right here in Gensokyo!\
+
+Action:suwako,402# 諏訪子　疑問
+Balloon:suwako,1,0,-200
+Giant robot?\
+
+Action:sanae,203　#早苗素立ち
+Balloon:sanae,1,0,-200
+Yes\, well\, I don't have definite proof yet\,
+but its existence is truly a wonder.\
+
+# 諏訪子　驚き
+Balloon:suwako,1,0,-200
+Well\, that's surprising!
+So\, where did you see it?\
+
+# 早苗　上を向いて
+Balloon:sanae,1,0,-200
+Just above this place.
+But it disappeared in a poof when I arrived.\
+
+Action:suwako,402# 諏訪子　疑問
+Balloon:suwako,1,0,-200
+Above this place?
+Disappeared in a poof?\
+
+Action:sanae,203　#早苗素立ち
+Balloon:sanae,1,0,-200
+Speaking of which\, what were those small things
+you came to take care of\, Lady Suwako?\
+
+Balloon:suwako,1,0,-200
+Hisou Tensoku's being bad.
+I came underground to restart it.\
+
+Balloon:sanae,1,0,-200
+Hisou Tensoku...?
+What might that be?\
+
+Balloon:suwako,1,0,-200
+Hisou Tensoku is... wait\, what?
+Sanae\, you say you saw a giant robot?\
+
+Balloon:sanae,1,0,-200
+Huh? Is there some connection
+to the giant robot or something?\
+
+Action:suwako,404# 諏訪子　笑う
+Balloon:suwako,1,0,-200
+Ahaha! Can it be that
+the robot Sanae caught a glimpse of...\
+
+Action:sanae,305　#早苗驚く
+Balloon:sanae,1,0,-200
+There's something you know\, isn't there?!\
+
+Action:suwako,203#諏訪子素立ち
+Balloon:suwako,1,0,-200
+Hm\, maybe.
+If it's a "giant robot\," then
+it's probably Hisou Tensoku\, right?\
+
+Oh\, that cracks me up!
+The phrase "giant robot" sure brings me back.\
+
+Action:sanae,203　#早苗素立ち
+Balloon:sanae,1,0,-200
+Well\, what's wrong with calling it that?
+And you say this giant robot
+is named Hisou Tensoku?\
+
+Balloon:suwako,1,0,-200
+I named it Tensoku 'cause by natural laws\,
+such a thing would be unimaginable.
+Or in other words\, it's a silly thing.\
+
+Balloon:sanae,1,0,-200
+Huh?\
+
+Balloon:suwako,1,0,-200
+Sanae\, you were also silly for chasing after it.\
+
+Action:sanae,335# 早苗　怒り
+Balloon:sanae,1,0,-200
+What did you say?\
+
+Balloon:suwako,1,0,-200
+Well\, you're calling it a giant robot.
+Hisou Tensoku is just...\
+
+Balloon:null,1,0,-200
+
+Action:suwako,405# 諏訪子が中央に移動する
+Action:suwako,202#ニュートラル検知
+
+Balloon:suwako,1,0,-200
+Well\, a dumb blockhead...\
+
+# 早苗も諏訪子の前まで移動する
+Balloon:sanae,1,0,-200
+Does Lady Kanako know anything about what
+you're calling Hisou Tensoku?\
+
+# 諏訪子　ちょっと後ろに下がる
+Action:suwako,410#諏訪子一歩後退
+Action:suwako,202#ニュートラル検知
+Balloon:suwako,1,0,-200
+She doesn't\, does she? Maaaybe?\
+
+Action:sanae,336# 早苗　さらに諏訪子の前まで移動して
+Action:sanae,337#336終了検知
+Balloon:sanae,1,0,-200
+The point is\, hasn't there been
+a lot of this lately? Doing all kinds of
+weird things without telling anyone?\
+
+# 諏訪子　さらにちょっと後ろに下がる
+Action:suwako,410#諏訪子一歩後退
+Action:suwako,202#ニュートラル検知
+Balloon:suwako,1,0,-200
+Oh\, it's no big deal. It's not as if...\
+
+Action:sanae,336# 早苗　さらに諏訪子の前まで移動して
+Action:sanae,337# 336終了検知
+Balloon:sanae,1,0,-200
+This isn't right! Doing this even though keeping
+the nuclear fusion reactor a secret in the past
+just made everyone angry!\
+
+# 諏訪子　さらにちょっと後ろに下がる
+Action:suwako,410#諏訪子一歩後退
+Action:suwako,202#ニュートラル検知
+Balloon:suwako,1,0,-200
+Right\, Hisou Tensoku is...\
+
+# 早苗　さらに諏訪子の前まで移動して決めポーズ
+Action:sanae,336# 早苗　さらに諏訪子の前まで移動して
+Action:sanae,337# 336終了検知
+Action:sanae,327#　早苗ポーズA
+Balloon:sanae,1,0,-200
+Today\, you won't be getting away!
+I may be only human\, but nevertheless\,
+I'll have you regard my convictions!\
+
+Balloon:suwako,1,0,-200
+But Sanaeee\, you're not a human\,
+you're a living god\, a miracle-worker...\
+
+Action:sanae,338# 早苗　ジャンプして定位置に戻る
+Action:sanae,202#ニュートラル検知
+Balloon:sanae,1,0,-200
+All the better\, then.
+I can stand equally with you!\
+
+Action:sanae,301　#早苗臨戦態勢ポーズ
+Action:sanae,302　#301終了検知
+Lady Suwako\, you've simply
+gone too far with your selfish deeds!\
+
+Right here and now\, I'll have you
+endure a bit of pain.\
+
+# 諏訪子　驚き
+Balloon:suwako,1,0,-200
+Action:suwako,406#諏訪子嬉しそうに驚く
+Uhyaa!
+Excellent\, it's a battle\, then!
+This should be fun...\
+
+Balloon:sanae,1,0,-200
+You won't hold back?\
+
+Action:suwako,203#諏訪子素立ち
+
+Bgm:data/bgm/st35.ogg
+
+Balloon:suwako,1,0,-200
+Since you dare to battle here in the underground
+where I hold a natural advantage\,
+you've grown up a little too\, haven't you\, Sanae?\
+
+Balloon:null,1,0,-200
+Action:suwako,407#諏訪子2P定位置へ
+Action:suwako,202#ニュートラル検知
+Balloon:suwako,1,0,-200
+
+If you beat me here\, maybe we won't have to
+worry about always helping you with your
+trouble-solving trips anymore!\
+
+Action:sanae,203　#早苗素立ち
+Balloon:sanae,1,0,-200
+Ah\, but I travelled alone today.\
+
+Balloon:suwako,1,0,-200
+I felt that Kanako was getting worried.
+Thinking "Would she know the way back home?"
+and such.\
+
+# 諏訪子　決めポーズ
+Action:suwako,408#諏訪子決め
+Balloon:suwako,1,0,-200
+Well\, then! Awe me\, creator of these lands\,
+with your marvelous\, god-like miracles!\
+
+Action:suwako,409#408終了検知
+
+Action:sanae,203#　ニュートラル状態へ
+Action:suwako,203#　ニュートラル状態へ
+Action:sanae,167#　フラッシュ
+Action:sanae,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+Action:suwako,499　#背景位置初期化
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+#Action:suwako,200
+#攻撃側ニュートラル移行検知
+Action:reimu,202
+
+Sleep:30
+Result:
+
+#イベント　勝利演出フェード
+
+End:
+
+## =======================================================================

@@ -1,0 +1,41 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Demon Lord Walk",1,0,"Uses her vampiric physical prowess  to rush by at blinding speed and    attack the enemy.",0,1,104,1,108,1,0,0,6,100
+101,"Servant Flier",1,1,"Uses magic circles to fire bat      bullets. The circles' positions are random\, but their wide spread and   successive firing makes them useful for feints and zoning.",0,1,105,1,109,1,0,0,6,120
+102,"Demon Lord Cradle",1,2,"An aura-wrapped attack to the sky.  Though there are many weaknesses\,   she is invincible for a while\, whichmakes this very useful in counters  and combos.",0,1,106,1,110,1,202,2,6,110
+103,"Demon Lord Arrow",1,4,"Rushes to the back wall and flies   back to attack. The angle of attack is always fixed\, but it grazes      bullets.",0,1,107,1,111,1,0,0,6,140
+104,"Vampire Claw",1,0,"You can perform this attack up to   three times by repeating the input. Very powerful if it hits three      times.",1,1,0,0,0,0,0,0,6,101
+105,"Chain Gang",1,1,"Shoots a chain-shaped red aura      towards the enemy. The chain tracks the enemy\, and if the button is     held\, it is possible for this attackto change into one that binds the   enemy instead.",1,1,207,3,0,0,0,0,6,121
+106,"Rocket Kick Upper",1,2,"Releases a high-speed wedge-shaped  bullet from a kick. Defenseless     against ground attacks\, but is very effective against airborne enemies.",1,1,200,2,0,0,0,0,6,111
+107,"Ceiling Fear",1,4,"Moves towards the ceiling\, feints   and swoops down for a diving attack onthe opponent.",1,1,206,4,0,0,0,0,6,141
+108,"Trickster Devil",1,0,"Blinks in behind the opponent and   slices the enemy. Because she has   to go behind the opponent\, the      attack is a bit slow\, but you can   mix up attack speeds for max effect.",0,1,209,4,0,0,0,0,6,102
+109,"Demon's Dinner Fork",1,1,"Throws magic bundled together in    spear form. Charging the attack     will increase the number of spears  thrown.",1,1,201,2,0,0,0,0,6,122
+110,"Vampire Kiss",1,2,"Hugs the opponent and sucks their   blood. Because she has to approach  from the front\, there's quite a gap.The move can not be blocked and     recovers life\, so this move can     definitely exert pressure.",0,1,208,4,0,0,0,0,6,112
+111,"Stigmanizer",1,4,"Gathers magic and forms a cross\,    then throws it at the enemy in a    jumping attack. Casually forming a  cross as if it were nothing is part of her appeal.",0,1,0,0,0,0,0,0,6,142
+200,"Scarlet Sign \"Red the Nightless Castle\"",2,3,"This technique which burns away the surroundings with a red aura can    easily be used to turn the tables   at a critical moment. It's a spell  with a scope that can easily hit    mid-air enemies.",0,2,203,5,0,0,0,0,6,220
+201,"Critical \"Heart Break\"",2,2,"Pierces the enemy in an instant     with a spearlike aura attack. Aura  can be used as a weapon in many     ways.",0,2,204,4,0,0,0,0,6,210
+202,"Midnight Sign \"Demon King Cradle\"",2,2,"Directly attack by activating       vampiric energies. She's not        invincible\, but she can move in the air afterwards\, so it's a card with great latitudes of freedom.",1,2,205,4,0,0,0,0,6,211
+203,"Scarlet Devil \"Scarlet Devil\"<a> ",2,5,"A superior version of Red the       Nightless Castle. The damage and    attack range are drastically        increased. It's definitely a card   for a Scarlet Devil.",0,5,0,0,0,0,0,0,6,240
+204,"Divine Spear \"Spear the Gungnir\"",2,4,"Upgraded Heart Break. The spear's   size and power are increased. Its   speed is like a laser; even at a    distance it can pierce the enemy    instantly.",1,4,0,0,0,0,0,0,6,230
+205,"Midnight King \"Dracula Cradle\"",2,5,"An attack surrounded by red magical auras. The best counter and combo   maker\, in terms of speed and range. The cradle of the demon is an       express train to hell.",1,4,0,0,0,0,0,0,6,241
+206,"Midnight Sign \"Bad Lady Scramble\"",2,3,"Quickly jumps up the wall\, then ramsthe enemy with a spinning body blow.It can easily pierce through a      barrage\, and the enemy can be       confused when you move behind them.",1,4,0,0,0,0,0,0,6,221
+207,"Destiny \"Miserable Fate\"",2,3,"Fire out many chains made from red  aura that chase the enemy.",1,3,0,0,0,0,0,0,6,222
+208,"\"Millenium Vampire\"",2,4,"Creates a magical aura that drains  life from the opponent on hit. It's very strong\, but while its active\,  her defense is lowered\, so it's a   double-edged sword.",1,4,0,0,0,0,0,0,6,231
+209,"Demon \"Remilia Stretch\"",2,4,"Mows down the enemy with all her    strength. The only way to avoid thismove is to move out of range. As shesays\, \"Isn't this an elegant move?\" Broken moves are also vampiric in   nature.",1,4,0,0,0,0,0,0,6,232

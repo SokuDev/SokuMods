@@ -1,0 +1,41 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Netherworld Reflection Slash",1,0,"Creates a projectile-reflecting     barrier with the Hakurouken. Has no offensive properties but reflects   over a wide area.",0,1,104,1,108,1,0,0,5,100
+101,"Crescent Moon Slash",1,2,"Counterattack with a slash of the   Roukanken. The invincible upward    slash is useful for anti-air or     interruption.",0,1,105,1,109,1,212,2,5,110
+102,"Slash of Life and Death",1,1,"A successive attack that develops   if you input it multiple times.",0,1,106,1,110,1,0,0,5,120
+103,"Medium's Bind",1,4,"Sends her ghost-half flying at the  enemy. If it hits\, it will stay     close to the enemy.",0,1,107,1,111,1,202,2,5,140
+104,"Lotus Stance Cut",1,0,"A standard sword-magic technique.   It has good range and power\,        offsetting Youmu's usual strength   in melee.",1,1,207,3,0,0,0,0,5,101
+105,"Intolerant Avici",1,2,"A rare throw move that breaks her   stance to grab the opponent. You    have to be close\, but it's          impossible to guard so it's easy to pull off.",1,1,0,0,0,0,0,0,5,111
+106,"Heart Carving Cut",1,1,"Covers great distance to strike at  the opponent. Since it aims for the feet\, it's a low attack.",1,1,200,3,0,0,0,0,5,121
+107,"Wicked Soul",1,4,"Her ghost half glows and attacks.   Since it attacks from wherever you  are\, you have to put thought into   making it hit.",1,1,0,0,0,0,0,0,5,141
+108,"Phosphoric Slash",1,0,"A short-range attack that unleashes a burst of energy from Youmu's      sword. Even when it returns it hits the enemy\, so it's a good skill for short-range attackers.",1,1,201,2,0,0,0,0,5,102
+109,"Insightful Sword",1,2,"Stops direct attacks with Hakuroukenand cuts down the opponent with     Roukanken. Perhaps Youmu's most     powerful attack.",1,1,208,5,0,0,0,0,5,112
+110,"Slashing a Flower Upon One's Head",1,1,"Jumps above the enemy and slashes   down with all her might. Even if theenemy guards\, it's a good move\, and Youmu can exert massive pressure on the opponent from above.",1,1,206,4,0,0,0,0,5,122
+111,"Strange Half-Body",1,4,"Fires projectiles from her ghost    half. The ghost has to recover for  a bit\, but it's easy enough to use  with other attacks.",1,1,0,0,0,0,0,0,5,142
+200,"Human Sign \"Slash of Present\"<a> ",2,2,"Step forward and cut the enemy.     It's hard to hit an enemy in the    air\, but it's very powerful in a    ground battle.",0,3,203,5,0,0,0,0,5,210
+201,"Life Ending Sword \"Meditation\"",2,3,"Using a sword as a medium for       destructive power\, cuts with a huge sword made of light. A spell based  on the power of the sword.",0,2,204,4,0,0,0,0,5,220
+202,"Soul Sign \"Ghostly Wheel of Pain\"",2,2,"The Half-body traces behind the     real body\, copying its attacks.     Power is reduced\, but the attack is slightly delayed\, allowing you to   reduce the gap between attacks.",1,2,205,4,0,0,0,0,5,211
+203,"Obsessor \"Slash of Eternity\"",2,5,"Rush in to cut the enemy\, suspend   them in midair and dance around     them\, attacking repeatedly. Power ishigh and you're temporarily         invincible\, attacking and defending perfectly at the same time.",0,5,0,0,0,0,0,0,5,240
+204,"Enlightened Sword \"Rise from Delusion\"",2,4,"Putting a huge amount of energy     into the sword\, create an immensely destructive blade and mow down      everything in front. Very hard to   dodge.",1,4,0,0,0,0,0,0,5,230
+205,"Spirit \"Secret of Life and Death\"",2,5,"The Half-body separates and traces  Youmu's attacks. Expenditure is     high\, so the usage time is long.",1,4,0,0,0,0,0,0,5,241
+206,"Sword Skill \"Thousand Cherry Blossoms\"",2,3,"Move forward at high speed\, cherry  blossoms flashing above your path.  A beautiful technique refined from  time spent pruning the gardens.",1,4,0,0,0,0,0,0,5,221
+207,"Soul Cutting \"Ascension to Nirvana\"",2,4,"Crossing both swords\, create a      pillar of energy reaching into the  sky. Has practical uses as an       anti-air\, counter\, or combo attack.",1,3,0,0,0,0,0,0,5,231
+208,"Empty Perception \"6-root Cleansing\"",2,5,"Cut the enemy with Hakurouken\, and  then use quick footwork to rush the enemy in this massive attack.",1,5,0,0,0,0,0,0,5,242
+212,"Reincarnation Sword \"Sword of Cycles\"",2,3,"Deals repeated high-speed hits usingRoukanken\, and overwhelms the enemy while remaining invincible. A strongattack with very fast activation.",2,0,0,0,0,0,0,0,5,222

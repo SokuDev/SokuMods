@@ -1,0 +1,44 @@
+#�X�y�J�i���o�[,�X�y�J��,"�^�C�v
+255 �G�J�[�h
+2 �X�y���J�[�h
+1 �X�L���J�[�h
+0 �V�X�e���J�[�h",����,"�J�[�h�����e�L�X�g
+�f�b�L�\�z��ʂŃJ�[�h��I������Əo�������","�o���X�e�[�W
+�����̃X�e�[�W�ȍ~����o������
+0�͏�������
+1�`6�@EASY
+11�`16�@NORMAL
+21�`26�@HARD
+31�`36�@LUNA","���A���e�B
+0�@�R����
+1�@�A���R����
+2�@���A
+�擾���I��
+�R����60��
+�A���R30��
+���A10��",,,,,,,,sort
+100,"Close-Up Magic",1,2,"Knives jump around and slash the    opponent if she touches them. They  fly high and the move grazes\, so    it's perfect for mid-air attacks.",0,1,104,1,108,1,0,0,2,110
+101,"Bounce No-Bounce",1,1,"Releases knives that bounce against the walls and ceiling. Not          particularly powerful\, but good for walling off opponents.",0,1,105,1,109,1,0,0,2,120
+102,"Magic Star Sword",1,0,"A knife under the influence of time acceleration. Since it flies        straight forward at high speed\,     it's good at dealing with head-on   attacks.",0,1,106,1,110,1,207,2,2,100
+103,"Vanishing Everything",1,4,"Stops time and teleports.           Since it's usually hard to tell whenshe's teleporting\, it's useful as a warp technique. She leaves a card   behind\, which is probably to make   it look like her own kind of magic.",0,1,107,1,111,1,0,0,2,140
+104,"Propelling Silver",1,2,"Irregularly throws knives in orbit  around her. Can naturally be used   as a shield. If the enemy hits the  upper edge of the orbit\, it's also ahigh-powered attack.",1,1,200,3,0,0,0,0,2,111
+105,"Square Ricochet",1,1,"A bouncing knife effect that focuseson quality over quantity. They have no attack power at first\, but they  do more damage and move faster the  more times they bounce off the      walls.",1,1,208,2,0,0,0,0,2,121
+106,"Sense of Thrown Edge",1,0,"Throws knives and then manipulates  time to stop them in midair. The    knives will resume motion after     time passes\, or after placing       another set.",1,1,212,3,0,0,0,0,2,101
+107,"Perfect Maid",1,4,"After being hit by the enemy\,       circle back around them and         surround them with knives. Since    she's concentrating in wait for a   physical attack\, projectiles will   just hit her directly.",1,1,201,3,0,0,0,0,2,141
+108,"Dancing Star Sword",1,2,"Knifes float around and attack in   sync\, turning into bullets. The     type\, speed and angle of attacks canchange\, so this move is a great     support during attacks.",0,1,202,2,0,0,0,0,2,112
+109,"Misdirection",1,1,"Throws knives\, which then multiply  and fly towards the opponent. The   knives will try to hit the opponent on the sides\, and will catch the    opponent off guard as she is        attempting to run.",0,1,206,3,0,0,0,0,2,122
+110,"Parallel Brane",1,0,"Throws phantom knives that manifest themselves physically in succession as they move towards the opponent.  They disappear if Sakuya performs   another attack\, but have quite a    large range of suppression.",0,1,211,3,0,0,0,0,2,102
+111,"Time Paradox",1,4,"Another Sakuya will appear right in front of the actual Sakuya. If you  can input the buttons before she    splits bodies\, the two bodies will  move indepdently. The reason behind this? Parallel universes\, etc\, etc.",0,1,0,0,0,0,0,0,2,142
+200,"Illusion Sign \"Killing Doll\"",2,2,"Knives scatter outwards\, then rush  in the direction of the enemy.",0,3,203,5,0,0,0,0,2,210
+201,"Time Sign \"Private Square\"",2,3,"Her specialty\, time manipulation.   It delays time around her\, slowing  down the enemy\, providing           overwhelming offensive and defensivesuperiority.",0,3,204,5,0,0,0,0,2,220
+202,"Wound Sign \"Inscribed Red Soul\"<a> ",2,3,"Hacks the enemy to pieces with      knives using both hands. It starts  at close range\, like a melee attack\,but beware its expanding scope.",1,2,205,4,0,0,0,0,2,221
+203,"Buriallusion \"Phantasmic Killer\"",2,4,"A stronger version of killing doll. Knives scatter outwards and bombard the enemy. A very powerful attack.",0,5,0,0,0,0,0,0,2,230
+204,"Sakuya's World",2,5,"One of the strongest time           manipulation spells. An unfair      spell that completely stops time    around her so she can attack\, but   it's expensive and slow to recover.",1,5,0,0,0,0,0,0,2,240
+205,"Scarred Soul \"Soul Sculpture\"<a> ",2,4,"A stronger version of her cutting   spell. Power and scope are greatly  magnified.",1,4,0,0,0,0,0,0,2,231
+206,"Silver Sign \"Silver Bound\"",2,2,"Simultaneously launches bouncing    knives in all directions.           Individually their power is weak\,   but it makes up for it in quantity  and range.",1,3,0,0,0,0,0,0,2,211
+207,"Conjuring \"Eternal Meek\"",2,2,"Sends rapid-fire knives forwards.   It's said that she's just           desperately throwing them\, but      nobody knows for sure.",1,2,0,0,0,0,0,0,2,212
+208,"Speed Sign \"Luminous Ricochet\"",2,3,"Knife that reflects back and forth  across the screen repeatedly. It    reflects at full power\, so it can   pin down enemies for a long time.",1,2,210,4,0,0,0,0,2,222
+209,"Time Sign \"Sakuya's Special Stopwatch\"",2,4,"A technique that throws out time    suspension fields. Enemies caught   in the field can't move until they  leave it.",1,4,0,0,0,0,0,0,2,232
+210,"Lightspeed \"C. Ricochet\"",2,4,"Throws knives at high speed and theyattack the enemy after a short time lag. Very hard to spot\, and the     knives go everywhere\, but the last  knife is the one that hits.",1,4,0,0,0,0,0,0,2,233
+211,"Time Sign \"Imaginary Vertical Time\"",2,3,"Stops time and throws knife. Knife  trails caused by time lag also      materialize\, and surround the enemy.",1,3,0,0,0,0,0,0,2,223
+212,"Watch \"Luna Dial\"",2,3,"Throws a watch that stops time at   the opponent. If it hits\, she will  be unable to defend Sakuya's attacksfor a while.",1,3,209,4,0,0,0,0,2,224

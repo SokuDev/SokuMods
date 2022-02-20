@@ -1,0 +1,374 @@
+## =======================================================================
+#Ÿ—˜‘äŒ
+## =======================================================================
+#VSç–é
+#‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X\
+## ‘äŒA==================
+#Label:ƒLƒƒƒ‰–¼+”š‚ÌŒ`‚Å“o˜^@˜A”Ô‚Å‘±‚¢‚Ä‚¢‚éŒÀ‚è‚ÌÅŒã‚Ü‚Å‚ª“o˜^‚³‚êAƒ‰ƒ“ƒ_ƒ€‚Å‘I‘ğ‚³‚ê‚Ü‚·
+#‰ï˜b‘®‚ÍƒVƒiƒŠƒI‚ÅŒ¾‚¤ƒLƒƒƒ‰–¼‚ÌêŠ‚Éwin(Ÿ—˜ƒLƒƒƒ‰)lose(”s–kƒLƒƒƒ‰)‚Ì”­Œ¾‚É‚È‚è‚Ü‚·
+# Hi-lock: (("\\#.*$"            (0 '((t (:foreground "dark slate gray"))) t))) 
+# Hi-lock: (("^[ \t]*Label.*$"              (0 '((t (:foreground "royal blue"))) t))) 
+# Hi-lock: (("^[ \t]*Face.*$"              (0 '((t (:foreground "cornflower blue"))) t))) 
+# Hi-lock: (("^[ \t]*End.*$"            (0 '((t (:foreground "royal blue"))) t))) 
+# reimuR0  rare
+# reimuU0  usual
+# reimu0   •p”É
+
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:reimuU0
+Face:lose,•‰
+Face:win,•
+The shrine really got fixed back
+to the way it was before.
+Even though that was a chance to renovate...\
+End:
+
+
+## =======================================================================
+#VS–‚—¹
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:marisaU0
+Face:lose,•‰
+Face:win,—]
+The strange looking mushrooms taste delicious.
+Appearance is very important to flavor.\
+End:
+
+
+## =======================================================================
+#VSç–é
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:sakuya0
+Face:lose,•‰
+Face:win,Šğ
+Since I won\, tonight's dinner
+will be Japanese-style.\
+End:
+
+Label:sakuyaR0
+Face:lose,•‰
+Face:win,Š¾
+Since I won...
+we'll have rice with forest mushrooms tonight.\
+End:
+
+
+## =======================================================================
+#VS—d–²
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:youmuU0
+Face:lose,•‰
+Face:win,•
+If you used that sword for cooking\, I'm sure
+it would make for a performance that
+would attract many customers.\
+End:
+
+
+
+## =======================================================================
+#VSƒAƒŠƒX
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:aliceU0
+Face:lose,•‰
+Face:win,Š¾
+Your dolls are filled with gunpowder?
+That's hardcore.\
+End:
+
+
+## =======================================================================
+#VSƒpƒ`ƒ…ƒŠ[
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:patchouliU0
+Face:lose,•‰
+Face:win,•
+The weather's fine today\,
+it's great whether you go out or not.\
+End:
+
+Label:patchouliR0
+Face:lose,•‰
+Face:win,•
+Can you tell what kind of stone
+I bought at the bazaar today?\
+
+Face:win,˜f
+It just looks like an ordinary stone
+that fell on the dry river bed to me.\
+
+End:
+
+## =======================================================================
+#VSƒŒƒ~ƒŠƒA
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:remiliaU0
+Face:lose,•‰
+Face:win,˜f
+Have you perhaps noticed
+anything strange at all lately?\
+End:
+
+Label:remiliaR0
+Face:lose,•‰
+Face:win,•
+You're up early lately.\
+
+Face:win,•
+Much preparation needs to be done in the afternoon\,
+so it's better if you'd graciously rest.\
+
+End:
+
+
+## =======================================================================
+#VS—HXq
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:yuyukoU0
+Face:lose,•‰
+Face:win,Š¾
+You're eating even though you're dead\,
+that must make the food chain go wild.\
+End:
+
+Label:yuyukoR0
+Face:lose,•‰
+Face:win,˜f
+What happens to the dead if
+they starve themselves in death?\
+
+Face:win,Š¾
+I don't think they'd come back to life.
+Just become a hungry ghost\, perhaps.\
+End:
+
+
+## =======================================================================
+#VS‡
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:yukariU0
+Face:lose,•‰
+Face:win,•
+Haven't your activities increased lately?
+That usually means that things
+are about to get crazy.\
+End:
+
+
+## =======================================================================
+#VSäÂ
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:suikaU0
+Face:lose,•‰
+Face:win,Šğ
+Ah\, perfect timing...
+Could I borrow some sake from you?\
+End:
+
+Label:suikaR0
+Face:lose,•‰
+Face:win,•
+That gourd of limitless sake.\
+
+Face:win,Šğ
+I think it's valuable for more than just drinking.\
+
+Face:win,•
+Why don't we compete with that
+nuclear energy with alcoholic fuel?\
+End:
+
+
+## =======================================================================
+#VS•¶
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:ayaU0
+Face:lose,•‰
+Face:win,Šğ
+Newsprint is very convenient to have.
+It wipes windows clean...\
+End:
+
+Label:ayaU1
+Face:lose,•‰
+Face:win,•
+Where do you do that movable type printing?
+That mountain isn't that big.\
+End:
+
+## =======================================================================
+#VS—éå
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:udongeU0
+Face:lose,•‰
+Face:win,—]
+Being stabbed just a hair deep
+wouldn't hurt... though\, being stabbed in the eye
+just a hair deep probably would hurt quite a bit.\
+End:
+
+
+## =======================================================================
+#VS¬’¬
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:komachiU0
+Face:lose,•‰
+Face:win,—]
+If your boat were in the form of a swan\,
+don't you think the River would look so much nicer?\
+End:
+
+Label:komachiU1
+Face:lose,•‰
+Face:win,—]
+There are fish I've never seen before
+living in the Sanzu River.
+That's right\, I should go fishing next time.\
+End:
+
+## =======================================================================
+#VSˆß‹è
+#‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X\
+Label:ikuU0
+Face:lose,•‰
+Face:win,•
+Maybe I should make eel for tonight's dinner...
+Or maybe I shouldn't.
+I wonder what made me think that.\
+End:
+
+Label:ikuR0
+Face:lose,•‰
+Face:win,Š¾
+Whenever I find an oarfish
+I usually find it looking dead.\
+
+Face:win,•
+I even thought they're actually
+fish from the Sanzu River.\
+End:
+
+
+## =======================================================================
+#VS“Vq
+#‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X\
+Label:tenshiU0
+Face:lose,•‰
+Face:win,•
+A peach isn't particularly suited to be anything
+but dessert... I actually think
+a ham would be much more appropriate.\
+End:
+
+Label:tenshiU1
+Face:lose,•‰
+Face:win,—]
+Heaven's cuisine isn't really that bad.
+It's only because your tastes
+have become more refined.\
+End:
+
+
+
+
+## =======================================================================
+#VS‘•c
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:sanaeU0
+Face:lose,•‰
+Face:win,Šğ
+How is it?
+Life in Gensokyo never gets tiring\, right?\
+End:
+
+Label:sanaeU1
+Face:lose,•‰
+Face:win,Š¾
+And I thought you might be
+a better shrine maiden than Reimu.
+Seems like that's not the case.\
+End:
+
+## =======================================================================
+#VSƒ`ƒ‹ƒm
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:chirnoU0
+Face:lose,•‰
+Face:win,“{
+You're the one who messed up
+our garden\, aren't you?\
+End:
+
+Label:chirnoR0
+Face:lose,•‰
+Face:win,•
+No matter how many times a fairy
+is defeated\, it won't die.\
+
+Face:win,—]
+That's why they charge in so recklessly.\
+
+Face:win,Œˆ
+I found their thoughtlessness and bravery strange\,
+but now that I've seen you fight\,
+I'm sure I understand.\
+End:
+
+## =======================================================================
+#VS”ü—é
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:meirinU0
+Face:lose,•‰
+Face:win,—]
+You can't be a gatekeeper if
+you're that weak\, you know?\
+End:
+
+Label:meirinU1
+Face:lose,•‰
+Face:win,—]
+Come now\, get back to work.\
+End:
+
+## =======================================================================
+#VS‹ó
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:utsuhoU0
+Face:lose,•‰
+Face:win,Š¾
+You're using such high energies just for fireballs.
+That's such a waste.\
+End:
+
+
+## =======================================================================
+#VSz–Kq
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:suwakoU0
+Face:lose,•‰
+Face:win,Œˆ
+Frogs... taste like chicken.
+But I think chickens are easier to catch.\
+End:
+
+
+## =======================================================================
+#VS‹¤’Ê
+#‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X\
+## ‘äŒA==================
+#0‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚O‚P‚Q‚R
+Label:common0
+Face:win,•
+It seemed so peaceful lately\,
+but there are a lot of people
+acting behind-the-scenes.\
+End:
+
+Label:common1
+Face:win,—]
+To deal with thieves\, we planted
+mandrakes in the garden at regular intervals.\
+End:
+
+## =======================================================================
+

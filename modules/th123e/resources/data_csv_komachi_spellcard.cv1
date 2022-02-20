@@ -1,0 +1,40 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Spirits of the Firm",1,0,"Sends a spurt of grudging spirits   from the ground with a scythe       strike. They lay low and float      upwards when they detect the enemy.",0,1,104,1,108,1,0,0,12,100
+101,"Bound Spirits of the Earth",1,2,"Excites underground spirits and     forces them to burst forth from the earth. After the spirits calm\, they float around in a large-area attack.",0,1,105,1,109,1,0,0,12,110
+102,"Ritual of Ecstacy",1,4,"Switches positions with the         opponent. Not only a movement or    illusion\, but can also create       chances for attack. No effect duringcertain moves or in story mode.",0,1,106,1,110,1,0,0,12,140
+103,"Floating Spirits of the Indolent Dead",1,1,"Shoots grudge spirit bullets across the screen. Though slow\, they home  in on the opponent with a unique    path.",0,1,107,1,111,1,202,2,12,120
+104,"Scythe of the Reaper",1,0,"A slash of the scythe sends a       crescent arc forward. Due to its    peculiar range\, it requires some    adjusting to.",1,1,206,4,0,0,0,0,12,101
+105,"Wind on the Last Journey",1,2,"Spins the scythe to slice           everything around her. Its wide     range makes it eminently useful     for hard-to-read counters to linked attacks.",1,1,0,0,0,0,0,0,12,111
+106,"The Endless Way",1,4,"This technique uses her ability to  manipulate distance\, so it limits   horizontal movement inside it.      Crossing over it and escaping it    once caught is difficult.",1,1,211,3,0,0,0,0,12,141
+107,"Lonely Bound Spirit",1,1,"What seems like a harmless spirit   follows the enemy\, and explodes whendown C is pressed.",1,1,205,2,0,0,0,0,12,121
+108,"A Human Spirit Passing By<a> ",1,0,"Strikes the earth with her scythe\,  creating a ground projectile that   travels the entire screen. You can  change its direction with different buttons. Good for surprise and      simultaneous attacks.",1,1,0,0,0,0,0,0,12,102
+109,"Boat on the Sanzu",1,2,"Charges the enemy with her boat. A  boat on land? She doesn't care too  much\, but since the boat was issued to her and she's wearing it down\,   her superior gets quite angry with  her over this.",0,1,200,2,0,0,0,0,12,112
+110,"Taste of Death",1,4,"It looks like a normal scythe swing\,but it can draw the opponent closer in while she's preparing. You can   prolong the wind-up by holding the  button\, which makes it harder to    escape the scythe's range.",1,1,201,5,0,0,0,0,12,142
+111,"Scythe of Exorcism",1,1,"Cuts the opponent with her spirit   filled scythe. If she touches the   spirits that emerge from her scythe after the attack\, she can regain    some health. She can also cause the spirits to explode.",0,1,207,3,0,0,0,0,12,122
+200,"Nautical Sign \"Flow of the River\"",2,1,"Calls forth a little bit of the     Sanzu River water and thrashes the  opponent with a boat. Basically a   simple charge attack.",0,2,203,3,0,0,0,0,12,200
+201,"Poor Fate \"Short Life Expectancy\"",2,5,"A fearsome skill that cuts the      opponent's life in half. Hitting    with this skill early in the match  is very advantageous\, but on the    flip side it is very costly so use  it carefully.",1,5,0,0,0,0,0,0,12,240
+202,"Spirit Sign \"Abundant Floating Spirits\"",2,1,"A shot that spreads ghosts over a   wide area. The attack range is wide and the ghosts stay floating on the screen for a long time.",0,2,0,0,0,0,0,0,12,201
+203,"Death Song \"Ferriage in the Deep Fog\"",2,3,"A skill that leads the ghosts to    form into a pack. The ghosts        following the lead will naturally   become damaging danmaku. It's       actually an abuse of power.",1,4,0,0,0,0,0,0,12,220
+204,"Exchange \"Unpitiable\, Pitiable Life\"",2,5,"The unprecedented psyche-switching  skill. It's possible to turn crisis into opportunity instantly\, but     this skill doesn't hit easily\, is   costly\, and has a long casting      delay.",5,0,0,0,0,0,0,0,12,241
+205,"Malice Sign \"Irresolute Bound Spirit\"",2,3,"Summons powerful\, homing spirits.   The spirits follow the opponent     around but they do not attack. Use  this with the explosion trigger     technique.",0,2,0,0,0,0,0,0,12,221
+206,"Death Sign \"Scythe of Final Judgement\"",2,4,"Striking the scythe on the ground\,  a shot will fall on opponents       from the sky. Catches the opponent  wherever she is but can be easily   grazed.",1,4,0,0,0,0,0,0,12,230
+207,"Soul Sign \"Scythe of Wandering Spirits\"",2,4,"Unleashes a blade filled with       spirits which steal life from the   enemy. The spirits fly back to      Komachi and allow her to regain     health. According to her\, she       doesn't use this skill too often.",1,3,204,5,0,0,0,0,12,231
+211,"Hell \"Narrow Confines of Avici\"<a> ",2,3,"Slashes at the enemy and prevents   horizontal movements at the same    time. She can completely control theinitiative as long as the effect    lasts.",1,3,0,0,0,0,0,0,12,222

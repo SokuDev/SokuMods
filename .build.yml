@@ -44,4 +44,3 @@ tasks:
       cd SokuMods
       scp -P 2222 -o StrictHostKeyChecking=no -q swrstoys.zip user@delthas.fr:/srv/http/sokuazote/swrstoys.zip
       scp -P 2222 -o StrictHostKeyChecking=no -q sokuengine.zip user@delthas.fr:/srv/http/sokuazote/sokuengine.zip
-      scp -P 2222 -o StrictHostKeyChecking=no -q install/th123e.exe user@delthas.fr:/srv/http/sokuazote/th123e.exe

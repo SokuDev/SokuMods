@@ -1,0 +1,41 @@
+#スペカナンバー,スペカ名,"タイプ
+255 敵カード
+2 スペルカード
+1 スキルカード
+0 システムカード",消費,"カード説明テキスト
+デッキ構築画面でカードを選択すると出る説明文","出現ステージ
+数字のステージ以降から出現する
+0は初期所持
+1～6　EASY
+11～16　NORMAL
+21～26　HARD
+31～36　LUNA","レアリティ
+0　コモン
+1　アンコモン
+2　レア
+取得抽選で
+コモン60％
+アンコ30％
+レア10％",,,,,,,,sort
+100,"Sword of the Earth",1,1,"Drives spirit into the earth\,       making it rise. Powerful and wide-  range\, but useless against airborne enemies.",0,1,104,1,108,1,200,2,14,120
+101,"Pillars of Divine Punishment",1,4,"Drops a keystone from the heavens.  After leveling-up\, the stone will   serve as a defensive wall\, and have strong defensive capabilities.",0,1,105,1,109,1,0,0,14,140
+102,"Beams of Non-Perception",1,0,"Fires successive laser-like streams of spirit from a keystone. Very     useful as an anti-projectile        piercing attack.",0,1,106,1,110,1,0,0,14,100
+103,"Sword of Non-Perception",1,2,"Rushes forward\, attacking with the  Sword of Scarlet Thought. The rush  grazes\, so you can force your way   through danmaku.",0,1,107,1,111,1,0,0,14,110
+104,"Six Earthquakes -Signs-",1,1,"Plunges the Sword of Scarlet        Thought into the earth to cause a   localized earthquake. Always        affects opponents on the ground\, butdoes nothing against airborne       enemies.",1,1,203,4,0,0,0,0,14,121
+105,"Guarding Keystones",1,4,"Uses keystones circling her to      protect her. If you input the       command again while they're         deployed\, the keystones fly towards the enemy.",1,1,206,3,0,0,0,0,14,141
+106,"Heaven and Earth Press",1,0,"Crushes the enemy between two       stones. You can adjust the distance they fly by holding the button.",1,1,205,4,0,0,0,0,14,101
+107,"Sword of Scarlet Perception",1,2,"Blindly swings the Sword of Scarlet Thought around. The range is small\, but the attacks are rapid\, so this  is a great move for close range.    Continuous pressing of the button   results in a continuous attack.",1,1,208,2,0,0,0,0,14,111
+108,"Sword of Fate",1,1,"Throw the Sword of Scarlet Thought  with a hearty flick\, and it returns like a boomerang or when she uses   another sword attack. If she catchesit normally\, there will be a moment of weakness\, so watch out.",0,1,201,2,0,0,0,0,14,122
+109,"Awakening of the Earth Spirits",1,4,"Pelt the enemy with small keystones.The stones grow over time\, and      release an earthquake if Tenshi     attacks it. The bigger the stones\,  the stronger the earthquake\, but    will shatter if they get too big.",0,1,0,0,0,0,0,0,14,142
+110,"Scarlet Sword Temperament",1,0,"Using the Sword of Scarlet Thought\, control the temperaments and attack twice: once with a ranged attack    that brings her closer to the enemy\,and another attack that propels her away from the enemy.",0,1,209,3,0,0,0,0,14,102
+111,"Sky Attack",1,2,"Launch upwards surrounded with      temperament\, fully utilizing the    tough\, hardened body of celestials. She is invincible from the start\,   and can use it in the air as well.",0,1,202,3,0,0,0,0,14,112
+200,"Earth Sign \"Sword of Unletting Soil\"",2,2,"Infuse temperaments into the        terrain and create big lumps that   attack left and right. As the lumps travel slowly\, the skill itself     offers few gaps to be attacked.",0,2,0,0,0,0,0,0,14,210
+201,"Non-perception \"Sword of Rapture\"",2,2,"A power of the Sword of Scarlet     Thought. Using a temperament seal   spell card\, make the afflicted      opponent unaffected by the weather  for some time\, creating moments of  meteorological advantage.",0,2,204,4,0,0,0,0,14,211
+202,"Heaven Sign \"Sword of Divine Justice\"",2,3,"Charge upwards with the Sword of    Scarlet Thought. Missing the target would leave you in a despairing gap\,but that's needed to balance the    otherwise invincible technique.",0,3,0,0,0,0,0,0,14,220
+203,"Earthquake \"Sword of Worry and Joy\"",2,5,"Stab the sword into the ground to   induce tectonic movements. A        delayed earthquake comes to damage  enemies on the ground. There's      nowhere to run on the ground\, but   there is time to escape to the sky.",1,4,0,0,0,0,0,0,14,240
+204,"Temperament \"Meteorological Revelation\"",2,4,"A power of the Sword of Scarlet     Thought. Manipulate the             temperaments\, gather them at the    sword\, then release them. A high-   power spell that disrupts the       climate\, ending the current weather.",1,4,0,0,0,0,0,0,14,230
+205,"Keystone \"World Creation Press\"<a> ",2,5,"Taking to great heights above the   screen\, Tenshi descends onto the    opponent with an enlarged keystone  in her arms. A wanton technique.",1,4,0,0,0,0,0,0,14,241
+206,"Temperament \"State of Enlightenment\"",2,4,"For a limited period of time\,       strengthen the body to withstand    hits without entering hitstun\, but  cannot guard while the effect lasts.She's actually just breathing in    to withstand the pain.",1,3,0,0,0,0,0,0,14,231
+207,"\"Scarlet Weather Rapture\"<a> ",2,5,"A grand technique that concentrates the surrounding temperaments at the Sword of Scarlet Thought and        unleashes them below. Beware that   this uses all of the surrounding    temperaments.",1,5,0,0,0,0,0,0,14,242
+208,"Swordplay \"Sword of Swagger\"",2,3,"Swing the Sword of Scarlet Thought  around blindly\, cutting the enemy   into pieces. There's a lot of       slicing and dicing in this attack\,  but not much else\, so it's a bit    weird to call it a \"skill\".",1,2,0,0,0,0,0,0,14,221
+209,"Weather \"Scarlet Weather Pressure\"",2,3,"Shoot temperaments at the enemy in  this ranged attack. If it hits the  enemy\, the temperament expands and  changes the current weather.",1,3,207,5,0,0,0,0,14,222

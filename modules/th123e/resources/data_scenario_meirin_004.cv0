@@ -1,0 +1,184 @@
+## =======================================================================
+#Stage:5
+#Title:「というお話ですか？」
+#Place:夢の中
+
+Character:meirin,160,0,0,8888FF
+Character:namazu,160,0,1,FF8888
+
+#背景　夢の中
+Stage:38,0
+
+#自分初期配置
+Action:meirin,20　#1P定位置で待機
+Action:meirin,401　#遠くを見る
+
+Action:namazu,100　#画面右で待機
+
+#カメラ中央固定
+Action:meirin,2　
+
+#画面表示前処理終了============================
+
+Label:Start
+
+#画面黒からフェードイン
+Action:meirin,161
+PlayBgm:data/bgm/ta21.ogg
+Sleep:60
+
+#ステージタイトル表示
+Object:data/scenario/meirin/effect/StageTitle005.bmp,0,192,-32
+Sleep:30;
+Object:data/scenario/effect/StageFinal.bmp,1,256,384
+Sleep:300;
+
+# 美鈴が立っている
+Balloon:meirin,1,0,-200
+Where are you?!
+Where could you be I said?!\
+
+You who tramples Gensokyo\,
+Taisui Xingjun's servant.
+It'd be good if you showed up!\
+
+Balloon:null,1,0,-200
+Sleep:90;
+
+Action:namazu,400# なまず君が落ちてくる
+Action:namazu,401# 落下検知
+Balloon:namazu,1,0,-200
+Sleep:30
+
+Ahahaha.
+Finally\, I've been revived.\
+
+# なまず君
+The battles with the assassins
+I sent to handle you\,
+you enjoyed them\, didn't you?\
+
+Action:meirin,300# 美鈴　疑問
+Balloon:meirin,1,0,-200
+?\
+
+# なまず君
+Balloon:namazu,1,0,-200
+I only sent those fools
+to drain your energy!\
+
+Action:meirin,307# 美鈴　驚き
+Balloon:meirin,1,0,-200
+!?\
+
+# なまず君
+Balloon:namazu,1,0,-200
+That's right\, the energy needed for my revival.
+For the sake of these powers that will
+cause the Earth itself to tremble!\
+
+# 美鈴　驚き
+Balloon:meirin,1,0,-200
+What did you say?!\
+
+# なまず君
+Balloon:namazu,1,0,-200
+Without you noticing\,
+they all worked hard for my sake.\
+
+# なまず君
+How does it feel?
+Are you so furious you can't even think?\
+
+# なまず君
+Or perhaps\,
+Have you been struck speechless with grief?\
+
+Action:meirin,203# 美鈴　通常
+Balloon:meirin,1,0,-200
+Heh heh heh.\
+
+# なまず君
+Balloon:namazu,1,0,-200
+Why are you laughing?\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+To think that you would go that far
+for the sake of preparing for me.\
+
+# なまず君
+Balloon:namazu,1,0,-200
+What did you say?!\
+
+# 美鈴　通常
+Balloon:meirin,1,0,-200
+For the sake of creating my legend!\
+
+# なまず君
+Balloon:namazu,1,0,-200
+Eh?\
+
+Action:meirin,305# 美鈴　決めポーズ
+Balloon:meirin,1,0,-200
+The one that this world couldn't do without.
+For the sake of the tale of the
+sole gatekeeper and protector of Gensokyo!\
+
+Bgm:data/bgm/st35.ogg
+
+# なまず君
+Balloon:namazu,1,0,-200
+It's strange that you're underestimating me.\
+
+# なまず君
+I am one who manifests the presence of the
+most unholy and cataclysmic
+of all youkai\, Taisui Xingjun.\
+
+# なまず君
+I am the legendary Supreme Catfish.
+I need but move and the earth itself will tremble\,
+the lands on the surface will disintegrate.\
+
+The likes of you cannot even
+begin to comprehend my power!\
+
+#戦闘開始処理
+
+Action:meirin,203#　ニュートラル状態へ
+Action:namazu,203#　ニュートラル状態へ
+Action:meirin,167#　フラッシュ
+Action:meirin,3
+
+End:
+
+# --------------------------------
+# 戦闘終了　負け
+Label:Lose
+
+End:
+
+# --------------------------------
+# 戦闘終了　コンテニュー処理
+Label:Continue
+
+End:
+
+# --------------------------------
+# 戦闘終了　勝ち
+Label:Win
+
+#やられキャラ完全ダウン検知
+Action:namazu,200
+#攻撃側ニュートラル移行検知
+Action:meirin,202
+
+Sleep:30
+Result:
+
+#イベント　勝利演出フェード
+
+End:
+
+## =======================================================================
