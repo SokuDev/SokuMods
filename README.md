@@ -14,8 +14,8 @@ The code in this repository comes from various contributors:
 - *FireSeal* made SokuRoll
 - *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming, InfiniteDecks, TrialMode, AdvancedPraticeMode, HostInBackground
-- *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll, EasyDecks
-- *[RhythmLunatic](https://github.com/RhythmLunatic)* made WindowedFullscreen
+- *Ichirin* made CharactersInForeground, NetGameScore, PracticeEx, SokuEngine, SWRSokuRoll, EasyDecks, *AltFullscreen*
+- *[RhythmLunatic](https://github.com/RhythmLunatic)* made *WindowedFullscreen*
 - *Shinki* and *[PC_volt](https://github.com/PCvolt)* made ReplayInputView+
 - *[PC_volt](https://github.com/PCvolt)* made LabTool
 - *[S-len](https://github.com/S-len)* made [SkipIntro](https://github.com/S-len/Soku-SkipIntro) and InGameHostlist
@@ -226,15 +226,15 @@ Available patches:
 
 *This mod uses the UPnP NAT technology, which lets applications automatically request a port forwarding without user intervention. This technology is known to be disabled by default on most routers and might therefore not work for everyone.*
 
-### WindowedFullscreen
-
-**Make the game window fullscreen, but without stretching, and with fast Alt+Tab.**
-
-*This module does not have a configuration file.*
-
 ### WindowResizer
 
-**Make the game window resizable.**
+**Make the game window resizable, and change the game fullscreen mode to windowed fullscreen for fast switching and no stretching.**
+
+<details>
+  <summary>Details</summary>
+
+This mod merges the previous functionality of WindowResizer, WindowedFullscreen, AltFullscreen in a single mod.
+</details>
 
 ## SokuEngine-exclusive mods
 

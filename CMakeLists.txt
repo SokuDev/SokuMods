@@ -575,12 +575,6 @@ module(UPnPNat)
 target_sources(UPnPNat PRIVATE modules/UPnPNat/UPnPNat.cpp)
 target_link_libraries(UPnPNat iphlpapi ole32 oleaut32)
 
-module(WindowedFullscreen)
-target_sources(WindowedFullscreen PRIVATE
-        modules/WindowedFullscreen/WindowedFullscreen.cpp)
-# passing "d3d9" conflicts with the generated d3d9 module somehow, pass an absolute path to the one in lib/
-target_link_libraries(WindowedFullscreen detours "${CMAKE_SOURCE_DIR}/lib/d3d9.lib")
-
 module(WindowResizer Default)
 target_sources(WindowResizer PRIVATE
         modules/WindowResizer/WindowResizer.cpp)
