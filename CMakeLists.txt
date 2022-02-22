@@ -444,6 +444,18 @@ target_link_libraries(NetBellChanger winmm)
 module(NetProfileView)
 target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
 
+module(PaletteTrueColors)
+target_sources(PaletteTrueColors PRIVATE modules/PaletteTrueColors/module.cpp)
+
+add_executable(
+        PaletteConverter
+        modules/PaletteTrueColors/converter.cpp
+)
+set_target_properties(PaletteConverter PROPERTIES
+        OUTPUT_NAME convpal)
+install(TARGETS PaletteConverter RUNTIME DESTINATION "SWRSToys/modules/PaletteTrueColors")
+install(TARGETS PaletteConverter RUNTIME DESTINATION "SokuEngine/modules/PaletteTrueColors")
+
 module(PunishDisplay)
 target_sources(PunishDisplay PRIVATE modules/PunishDisplay/main.cpp)
 target_link_libraries(

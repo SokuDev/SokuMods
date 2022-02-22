@@ -10,7 +10,7 @@ This repository was originally created from the original SWRSToys release by *An
 
 The code in this repository comes from various contributors:
 - this repository was originally forked off a source archive of SWRSToys, made by *Anonymous Coward*
-- *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader](https://github.com/enebe-nb/shady-packer), UPnPNat
+- *[DPhoenix](https://github.com/enebe-nb)* made [shady-loader](https://github.com/enebe-nb/shady-packer), UPnPNat, PaletteTrueColors
 - *FireSeal* made SokuRoll
 - *[fishshapedfish](https://github.com/fishshapedfish)* made DPadFix, ReplayReSync
 - *[PinkySmile](https://github.com/Gegel85)* made DiscordIntegraton, SokuStreaming, InfiniteDecks, TrialMode, AdvancedPraticeMode, HostInBackground
