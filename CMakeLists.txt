@@ -119,6 +119,25 @@ add_library(DiscordSDK
 target_include_directories(DiscordSDK INTERFACE DiscordSDK)
 target_link_libraries(DiscordSDK INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.dll.lib)
 
+# imgui
+
+add_library(imgui
+        imgui/imgui.cpp
+        imgui/imgui_draw.cpp
+        imgui/imgui_tables.cpp
+        imgui/imgui_widgets.cpp
+        imgui/backends/imgui_impl_dx9.cpp
+        imgui/backends/imgui_impl_win32.cpp)
+target_include_directories(imgui PUBLIC imgui/ imgui/backends/)
+
+# implot
+
+add_library(implot
+        implot/implot.cpp
+        implot/implot_items.cpp)
+target_include_directories(implot PUBLIC implot/)
+target_link_libraries(implot PUBLIC imgui)
+
 # lua
 
 set(LUA_SOURCES
@@ -440,6 +459,13 @@ target_link_libraries(NetBattleCounter winmm)
 module(NetBellChanger)
 target_sources(NetBellChanger PRIVATE modules/NetBellChanger/NetBellChanger.cpp)
 target_link_libraries(NetBellChanger winmm)
+
+module(NetInfo)
+target_sources(NetInfo PRIVATE
+        modules/NetInfo/NetInfo.cpp)
+target_compile_definitions(NetInfo PRIVATE DIRECTINPUT_VERSION=0x0800)
+target_include_directories(NetInfo PRIVATE include include/directx)
+target_link_libraries(NetInfo SokuLib imgui implot d3dx9 "${CMAKE_SOURCE_DIR}/lib/XInput.lib")
 
 module(NetProfileView)
 target_sources(NetProfileView PRIVATE modules/NetProfileView/NetProfileView.cpp)
