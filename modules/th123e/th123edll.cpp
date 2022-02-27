@@ -5,6 +5,7 @@
 //     (we're going to hack around this with <>'s)
 // - verify compatibility with swrloader
 // - build final version
+#pragma runtime_checks("", off)
 
 extern "C" {
 
