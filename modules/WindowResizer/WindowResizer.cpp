@@ -13,7 +13,6 @@ using namespace std;
 HMODULE module;
 char profilePath[1024 + MAX_PATH];
 
-bool injected;
 bool fullscreen;
 
 HWND windowBars;
@@ -43,8 +42,6 @@ static const int baseHeight = 480;
 
 RECT rect;
 
-HHOOK MessageHook = NULL;
-
 void(WINAPI *oldExitProcess)(UINT uExitCode) = ExitProcess;
 void __stdcall myExitProcess(UINT uExitCode) {
 	if (sizeEnabled && !fullscreen && (rect.left != 0 || rect.top != 0)) {
@@ -64,11 +61,9 @@ void __stdcall myExitProcess(UINT uExitCode) {
 	return oldExitProcess(uExitCode);
 }
 
-bool wantsFullscreen = false;
 void toggleFullscreen() {
 	if(!window) {
-		// window not loaded yet, store fullscreen request for when we inject it.
-		wantsFullscreen = true;
+		// window not loaded yet, should not happen, but lets not crash.
 		return;
 	}
 	fullscreen = !fullscreen;
@@ -236,28 +231,16 @@ void WINAPI hotkeyThread()
 	}
 }
 
-LRESULT CALLBACK injectHook(int nCode, WPARAM wParam, LPARAM lParam)
-{
-	if(injected) {
-		return CallNextHookEx(MessageHook, nCode, wParam, lParam);
+HWND (__stdcall *oldCreateWindowExA)(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) = CreateWindowExA;
+HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
+	if(strcmp(lpClassName, "th123_110a")) {
+		return oldCreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 	}
-	injected = true;
 
-	window = FindWindow("th123_110a", NULL);
-
-	windowed_lStyle = GetWindowLong(window, GWL_STYLE);
+	windowed_lStyle = dwStyle;
 	fullscreen_lStyle = windowed_lStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
-	windowed_lExStyle = GetWindowLong(window, GWL_EXSTYLE);
+	windowed_lExStyle = dwExStyle;
 	fullscreen_lExStyle = windowed_lExStyle & ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
-
-	LONG flags = SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED | SWP_SHOWWINDOW;
-	if(sizeEnabled) {
-		windowed_lStyle = windowed_lStyle | WS_SIZEBOX;
-		flags &= ~SWP_NOSIZE;
-	}
-	if(posEnabled) {
-		flags &= ~SWP_NOMOVE;
-	}
 	
 	{
 		RECT r;
@@ -270,25 +253,29 @@ LRESULT CALLBACK injectHook(int nCode, WPARAM wParam, LPARAM lParam)
 		borderY = r.bottom - r.top - baseHeight;
 	}
 	
+	if(sizeEnabled) {
+		nWidth = sizeWidth + borderX;
+		nHeight = sizeHeight + borderY;
+		windowed_lStyle = windowed_lStyle | WS_SIZEBOX;
+	}
+	if(posEnabled) {
+		X = posX;
+		Y = posY;
+	}
+	
+	window = oldCreateWindowExA(windowed_lExStyle, lpClassName, lpWindowName, windowed_lStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+	
 	oldWindowProc = SetWindowLong(window, GWL_WNDPROC, (long)myWindowProc);
-	SetWindowLong(window, GWL_STYLE, windowed_lStyle);
-	SetWindowLong(window, GWL_EXSTYLE, windowed_lExStyle);
-	SetWindowPos(window, 0, posX, posY, sizeWidth + borderX, sizeHeight + borderY, flags);
-	GetWindowRect(window, &rect);
-
 	SetWindowsHookEx(WH_KEYBOARD, keyboardHook, module, GetCurrentThreadId());
 	SetWindowsHookEx(WH_CBT, windowHook, module, GetCurrentThreadId());
 	HANDLE thread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)hotkeyThread, NULL, NULL, NULL);
 	CloseHandle(thread);
 	
-	if(wantsFullscreen) {
-		wantsFullscreen = false;
-		toggleFullscreen();
+	if(barsEnabled) {
+		createBars();
 	}
-
-	UnhookWindowsHookEx(MessageHook);
-
-	return CallNextHookEx(MessageHook, nCode, wParam, lParam);
+	
+	return window;
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
@@ -314,6 +301,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	barsEnabled = GetPrivateProfileIntA("Bars", "Enabled", 1, profilePath) != 0;
 	
 	DWORD _;
+	// disable resetting internal fullscreen/window state & setting to the current window state
 	VirtualProtect((void *)0x00445817, 3, PAGE_EXECUTE_READWRITE, &_);
 	*((char*)0x00445817) = 0x90;
 	*((char*)0x00445818) = 0x90;
@@ -325,16 +313,25 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	*((char*)0x004405BF) = 0x90;
 	*((char*)0x004405C0) = 0x90;
 	
+	// hardcode baseWidth & baseHeight values for directx viewport init instead of getting the window size
+	VirtualProtect((void *)0x00414F8C, 16, PAGE_EXECUTE_READWRITE, &_);
+	*((char*)0x00414F8C) = 0xBA;
+	*((int*)0x00414F8D) = baseWidth;
+	*((char*)0x00414F91) = 0x90;
+	*((char*)0x00414F92) = 0x90;
+	*((char*)0x00414F93) = 0x90;
+	*((char*)0x00414F94) = 0xB8;
+	*((int*)0x00414F95) = baseHeight;
+	*((char*)0x00414F99) = 0x90;
+	*((char*)0x00414F9A) = 0x90;
+	*((char*)0x00414F9B) = 0x90;
+	
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach((void **)&oldExitProcess, (void *)myExitProcess);
 	DetourAttach((void **)&oldSendMessageA, (void *)mySendMessageA);
+	DetourAttach((void **)&oldCreateWindowExA, (void *)myCreateWindowExA);
 	DetourTransactionCommit();
-
-	if(barsEnabled)
-		createBars();
-	MessageHook = SetWindowsHookEx(WH_GETMESSAGE, injectHook, hMyModule, GetCurrentThreadId());
-	
 	return TRUE;
 }
 
