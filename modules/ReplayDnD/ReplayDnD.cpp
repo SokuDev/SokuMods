@@ -1,6 +1,8 @@
 #include <windows.h>
 #include "swrs.h"
 #include <cstdio>
+#include <map>
+#include <string>
 #include <detours.h>
 #include <process.h>
 #include <shlobj.h>
@@ -37,6 +39,65 @@ void (CDetour::*CDetour::ActualSetVolume)(float) = union_cast<void (CDetour::*)(
 char replay_path_pointer_fake[MAX_PATH];
 wchar_t *replay_path_pointer_actual;
 
+// map of ANSI replay file paths to utf16 wchar_t paths
+HANDLE findHandleA;
+HANDLE findHandleW;
+std::map<std::string, std::wstring> replays;
+
+HANDLE (__stdcall *actual_FindFirstFileA)(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) = FindFirstFileA;
+
+HANDLE __stdcall my_FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData) {
+	if(lpFileName && !strcmp(lpFileName, "replay/*")) {
+		replays.clear();
+	}
+	if(!lpFileName || (strcmp(lpFileName, "replay/*") && strcmp(lpFileName, "replay/*.rep"))) {
+		return actual_FindFirstFileA(lpFileName, lpFindFileData);
+	}
+	findHandleA = actual_FindFirstFileA(lpFileName, lpFindFileData);
+	if(findHandleA != INVALID_HANDLE_VALUE) {
+		WIN32_FIND_DATAW findFileData;
+		wchar_t fileNameW[MAX_PATH];
+		MultiByteToWideChar(CP_UTF8, 0, lpFileName, -1, fileNameW, MAX_PATH);
+		HANDLE handleW = FindFirstFileW(fileNameW, &findFileData);
+		if(handleW != INVALID_HANDLE_VALUE) {
+			findHandleW = handleW;
+			if(strstr(lpFindFileData->cFileName, "?")) {
+				replays[std::string("replay/") + lpFindFileData->cFileName] = std::wstring(L"replay/") + findFileData.cFileName;
+			}
+		}
+	}
+	return findHandleA;
+}
+
+BOOL (__stdcall *actual_FindNextFileA)(HANDLE hFindFile, LPWIN32_FIND_DATAA lpFindFileData) = FindNextFileA;
+
+BOOL __stdcall my_FindNextFileA(HANDLE hFindFile, LPWIN32_FIND_DATAA lpFindFileData) {
+	if(findHandleA != hFindFile) {
+		return actual_FindNextFileA(hFindFile, lpFindFileData);
+	}
+	BOOL r = actual_FindNextFileA(findHandleA, lpFindFileData);
+	WIN32_FIND_DATAW findFileData;
+	if(r && findHandleW && FindNextFileW(findHandleW, &findFileData) && strstr(lpFindFileData->cFileName, "?")) {
+		replays[std::string("replay/") + lpFindFileData->cFileName] = std::wstring(L"replay/") + findFileData.cFileName;
+	}
+	return r;
+}
+
+BOOL (__stdcall *actual_FindClose)(HANDLE hFindFile) = FindClose;
+
+BOOL __stdcall my_FindClose(HANDLE hFindFile) {
+	if(findHandleA != hFindFile) {
+		return actual_FindClose(hFindFile);
+	}
+	BOOL r = actual_FindClose(findHandleA);
+	findHandleA = NULL;
+	if(findHandleW) {
+		actual_FindClose(findHandleW);
+		findHandleW = NULL;
+	}
+	return r;
+}
+
 HANDLE(__stdcall *actual_CreateFileA)
 (LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
 	DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
@@ -48,7 +109,14 @@ HANDLE __stdcall my_CreateFileA(char *lpFileName, DWORD dwDesiredAccess, DWORD d
 		return CreateFileW(
 			replay_path_pointer_actual, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 	}
-	return actual_CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+	HANDLE h = actual_CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+	if(lpFileName && h == INVALID_HANDLE_VALUE) {
+		auto it = replays.find(lpFileName);
+		if(it != replays.end()) {
+			h = CreateFileW(it->second.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+		}
+	}
+	return h;
 }
 
 wchar_t **wargv;
@@ -214,6 +282,14 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	_beginthread(load_thread, 0, NULL);
+	
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach((void **)&actual_CreateFileA, (void *)my_CreateFileA);
+	DetourAttach((void **)&actual_FindFirstFileA, (void *)my_FindFirstFileA);
+	DetourAttach((void **)&actual_FindNextFileA, (void *)my_FindNextFileA);
+	DetourAttach((void **)&actual_FindClose, (void *)my_FindClose);
+	DetourTransactionCommit();
 
 	if (__argc != 2) {
 		return true;
@@ -271,7 +347,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		DetourUpdateThread(GetCurrentThread());
 		void (CDetour::*setVolumeShim)(float) = &CDetour::SetVolume;
 		DetourAttach((void **)&CDetour::ActualSetVolume, *(PBYTE *)&setVolumeShim);
-		DetourAttach((void **)&actual_CreateFileA, my_CreateFileA);
 		DetourTransactionCommit();
 	}
 	return true;
