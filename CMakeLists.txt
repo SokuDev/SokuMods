@@ -432,7 +432,9 @@ target_sources(InGameHostlist PRIVATE
         modules/InGameHostlist/imgui/imgui_impl_win32.cpp
         modules/InGameHostlist/imgui/imgui_widgets.cpp)
 target_compile_definitions(InGameHostlist PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> _HAS_STD_BYTE=0)
-target_include_directories(InGameHostlist PRIVATE include include/directx modules/InGameHostlist/include)
+# force include curl includes first so that we use our own curl rather than the one bundled in InGameHostlist
+get_target_property(CURL_EXPORTED_INCLUDE_DIRECTORIES CURL::libcurl INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(InGameHostlist PRIVATE ${CURL_EXPORTED_INCLUDE_DIRECTORIES} modules/InGameHostlist/include include include/directx)
 target_link_libraries(InGameHostlist CURL::libcurl d3dx9 "${CMAKE_SOURCE_DIR}/lib/XInput.lib" winmm SokuEngineLib ws2_32 advapi32 shlwapi)
 
 install(FILES modules/InGameHostlist/hostlistBG.png DESTINATION "SWRSToys/modules/InGameHostlist")
