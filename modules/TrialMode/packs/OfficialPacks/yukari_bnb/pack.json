@@ -1,0 +1,144 @@
+{
+    "author": "Exioloz, PC_volt",
+    "category": "Yukari Yakumo",
+    "characters": [
+        "yukari",
+        "meirin"
+    ],
+    "description": "Yukari's combos<br><br>Combos taken from PC_Volt's BnB video.<br><color AAAAFF>https://www.youtube.com/watch?v=utSUriM0q3Y</color>",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/yukari/face/face000.bmp",
+        "rect": {
+            "height": 46,
+            "left": 0,
+            "top": 0,
+            "width": 113
+        },
+        "scale": 0.6000000238418579,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "5AAAA j.x j.5A j.6A j.2B/j.5B | <br>Midscreen to corner, against everyone. <br>j.7>...>j.5B (almost universal) <br>j.7>...>j.2B (Cirno, Komachi, Reisen) <br>j.9>...>j.2C (universal).",
+            "extra": false,
+            "file": "bnb1.json",
+            "may_be_locked": true,
+            "name": "Dial A Midscreen to Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb1.gif"
+        },
+        {
+            "description": "5AAAA j.x/hj.x j.5A j.6A j.5C | <br>Midscreen to corner, against everyone.<br>Do jump + j.5B from near corner.<br>From Midscreen, highjump is needed.<br>j.5A can be skipped.",
+            "extra": false,
+            "file": "bnb12.json",
+            "may_be_locked": true,
+            "name": "Dial A Midscreen to Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb2.gif"
+        },
+        {
+            "description": "6A 5C hjc.x j.5C | <br>Midscreen to corner, against everyone. <br>This combo can be started with (CH)f5A.",
+            "extra": false,
+            "file": "bnb3.json",
+            "may_be_locked": true,
+            "name": "6A Midscreen to Near Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb3.gif"
+        },
+        {
+            "description": "(CH)6A 5C(whiff) d236C | <br>Midscreen to corner, against everyone. <br>5C whiff allow you to confirm your combo.",
+            "extra": false,
+            "file": "bnb4.json",
+            "may_be_locked": true,
+            "name": "6A CH Midscreen",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb4.gif"
+        },
+        {
+            "description": "(CH)66C 5C hjc.x j.5C | <br>Near corner and farther, against everyone. ",
+            "extra": false,
+            "file": "bnb5.json",
+            "may_be_locked": true,
+            "name": "66C CH Midscreen to Near Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb5.gif"
+        },
+        {
+            "description": "3A 2C hjc.9 j.5A j.8A | <br>Anywhere, against everyone. <br>Works when 3A hits close or at mid range.",
+            "extra": false,
+            "file": "bnb6.json",
+            "may_be_locked": true,
+            "name": "3A 2C Anywhere",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb6.gif"
+        },
+        {
+            "description": "3A 2C(whiff) hjc.9 j.6A j.5C | <br>Anywhere, against everyone. <br>Variation for when 3A hits far.",
+            "extra": false,
+            "file": "bnb7.json",
+            "may_be_locked": true,
+            "name": "3A 2C Anywhere",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb7.gif"
+        },
+        {
+            "description": "(CH)3A 2C(whiff) d236B/C | <br>Anywhere but Corner, against everyone. <br>2C whiff allow you to confirm your combo. <br>2C automatically times d236.",
+            "extra": false,
+            "file": "bnb8.json",
+            "may_be_locked": true,
+            "name": "3A CH Anywhere but Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb8.gif"
+        },
+        {
+            "description": "(CH)f5A 3A d236B | <br>Anywhere but Corner, against everyone. <br>(CH)f5A makes 2C whiff after 3A.",
+            "extra": false,
+            "file": "bnb9.json",
+            "may_be_locked": true,
+            "name": "f5A CH Anywhere but Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb9.gif"
+        },
+        {
+            "description": "j.5A j.8A j.d236B | <br>Anywhere but Corner, against everyone. <br>Most basic air combo.",
+            "extra": false,
+            "file": "bnb10.json",
+            "may_be_locked": true,
+            "name": "j.5A Anywhere but Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb10.gif"
+        },
+        {
+            "description": "j.5A j.6A j.5C j44 j.5C | <br>Start of advanced air combos. <br>A lot of variations branch from j.5A <br>for specific characters and spacing.",
+            "extra": false,
+            "file": "bnb11.json",
+            "may_be_locked": true,
+            "name": "j.5A Midscreen to Corner",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb11.gif"
+        },
+        {
+            "description": "5AAA 5B 2C hjc.x 5B j.D6 j.5A 5AAAA | <br>Won't work on all characters. <br>Also works in the corner.<br>Don't hj9 standing Utsuho and crouching Suwako <br>as j5B will limit early. <br>The combo becomes hard in corner. <br>j.5B can be skipped if you lack the orbs.",
+            "extra": false,
+            "file": "bnb2.json",
+            "may_be_locked": true,
+            "name": "5AAA Anywhere",
+            "name_hidden_when_locked": false,
+            "preview": "yukari_bnb12.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/yukari.bmp"
+    }
+}

@@ -1,0 +1,181 @@
+{
+    "author": "Genki (Shi-Gen)",
+    "category": "Youmu Konpaku",
+    "characters": [
+        "youmu",
+        "yuyuko"
+    ],
+    "description": "The Konpaku-Ken Fighting Style is rather<br>simple on the surface but don't be fooled,<br>becoming a master takes a lot of practice.<br>Let's start with the basics!",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 4.0,
+            "y": 0.0
+        },
+        "path": "data/character/youmu/face/face000.bmp",
+        "rect": {
+            "height": 51,
+            "left": 0,
+            "top": 0,
+            "width": 125
+        },
+        "scale": 0.5400024056434631,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "min_version": "alpha 0.5.0",
+    "modes": [
+        "Combos"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "The very first combo you will have to learn<br>when practicing.<br><br>[Combo: 5AAAAA]",
+            "extra": false,
+            "file": "The First Step",
+            "may_be_locked": true,
+            "name": "The First Step",
+            "name_hidden_when_locked": false,
+            "preview": "The First Step.gif"
+        },
+        {
+            "description": "The most basic SpellCard conversion you need<br>to know.<br><br>[Combo: 5AAAAA - Human Sign \"Slash of<br> Present\"]",
+            "extra": false,
+            "file": "Using Meter 1",
+            "may_be_locked": false,
+            "name": "Using Meter 1",
+            "name_hidden_when_locked": false,
+            "preview": "Using Meter 1.gif"
+        },
+        {
+            "description": "This is a must learn combo with Youmu as it's<br>the core conversion when using SpellCards.<br><br>[Combo: 5AAA - (SpellCards)]<br>This combo also works with the 2Cost Slash<br>of Present but it's not great damage.",
+            "extra": false,
+            "file": "Using Meter 2",
+            "may_be_locked": true,
+            "name": "Using Meter 2",
+            "name_hidden_when_locked": true,
+            "preview": "Using Meter 2.gif"
+        },
+        {
+            "description": "The main conversion you need to know to combo<br>the 4Cost -Enlightened Sword Rise from<br>Delusion-<br><br>[Combo: 5AAAA - Rise from Delusion]<br>6A ender only works Near Corner but does<br>more damage.",
+            "extra": false,
+            "file": "Using Meter 3",
+            "may_be_locked": true,
+            "name": "Using Meter 3",
+            "name_hidden_when_locked": true,
+            "preview": "Using Meter 3.gif"
+        },
+        {
+            "description": "The most important meterless combo you need to<br>learn and perfect. This will be the one combo<br>that you'll end up using at every level<br>of play.<br>Burn it into your mind!<br><br>[Combo: 5AAAA - Slash of Life and Death C<br> - B - B]",
+            "extra": false,
+            "file": "Main MidScreen Combo",
+            "may_be_locked": false,
+            "name": "Main MidScreen Combo",
+            "name_hidden_when_locked": false,
+            "preview": "Main MidScreen Combo.gif"
+        },
+        {
+            "description": "Another important conversion that you'll<br>never stop using. Not easy to execute but<br>it gives high damage.<br><br>[Combo: 5AAA - 6A - 6C - 66A - Crescent Moon<br> Slash C]",
+            "extra": false,
+            "file": "Main NearCorner Combo",
+            "may_be_locked": true,
+            "name": "Main NearCorner Combo",
+            "name_hidden_when_locked": true,
+            "preview": "Main NearCorner Combo.gif"
+        },
+        {
+            "description": "This concludes the trilogy of Must Know Combos.<br>This is the corner combo you'll end up using<br>most often; there are stronger variations<br>but those are way more advanced and we aren't<br>here for those now are we?<br><br>[Combo: 5AAAAA (Full Dial-A) - 66A - Crescent<br> Moon Slash B]",
+            "extra": false,
+            "file": "Main Corner Combo",
+            "may_be_locked": true,
+            "name": "Main Corner Combo",
+            "name_hidden_when_locked": true,
+            "preview": "Main Corner Combo.gif"
+        },
+        {
+            "description": "This looks like a strange combo to have as a<br>basic one but if you are playing Youmu to her<br>fullest you'll stumble into this situation<br>more often than you think.<br><br>[Combo: 5B - 5AAA - 3A - Crescent Moon<br> Slash C]<br>J5B variant has to be done by Land Cancelling<br>the J5B.",
+            "extra": false,
+            "file": "B-Bullet Starter Combo",
+            "may_be_locked": false,
+            "name": "B-Bullet Starter Combo",
+            "name_hidden_when_locked": false,
+            "preview": "B-Bullet Starter Combo.gif"
+        },
+        {
+            "description": "A simple air combo that works from a MidScreen<br>position. All the air combos here are ones<br>that you need to memorize properly as you'll<br>end up using them constantly.<br><br>[Combo: J5A - J8A - J6C - J66 - J5A - J8A]",
+            "extra": false,
+            "file": "Air Combo MidScreen 1",
+            "may_be_locked": false,
+            "name": "Air Combo MidScreen 1",
+            "name_hidden_when_locked": false,
+            "preview": "Air Combo MidScreen 1.gif"
+        },
+        {
+            "description": "This combo can be done FullScreen but it works<br>the most consistent at MidScreen.<br><br>[Combo: J5A - J8A - J6C - J44 - J6C]",
+            "extra": false,
+            "file": "Air Combo MidScreen 2",
+            "may_be_locked": true,
+            "name": "Air Combo MidScreen 2",
+            "name_hidden_when_locked": true,
+            "preview": "Air Combo MidScreen 2.gif"
+        },
+        {
+            "description": "This is a Corner combo that is usually<br>executed when you hit the opponent around the<br>head. Recognizing the height of the hit is<br>quite important when executing Air Combos<br>with Youmu.<br><br>[Combo: J5A - J6A - J6C - J44 - J5A - J6A]",
+            "extra": false,
+            "file": "Air Combo Corner 1",
+            "may_be_locked": true,
+            "name": "Air Combo Corner 1",
+            "name_hidden_when_locked": true,
+            "preview": "Air Combo Corner 1.gif"
+        },
+        {
+            "description": "This is an optimal conversion that will happen<br>less than you may think, still, it's good to<br>know the best conversion possible when<br>learning a combo.<br><br>[Combo: J5A - J8A - J5B - J5C - J66 - J5A<br> - J8A",
+            "extra": false,
+            "file": "Air Combo Corner 2",
+            "may_be_locked": true,
+            "name": "Air Combo Corner 2",
+            "name_hidden_when_locked": true,
+            "preview": "Air Combo Corner 2.gif"
+        },
+        {
+            "description": "Weather is a fundamental aspect of converting<br>optimally, as certain Weathers will unlock<br>better combos with higher damage or allow<br>converting from unusual positions.<br>This is a pretty simple Monsoon extension for<br>your Main MidScreen combo.<br><br>[Combo: -Monsoon- 5AAA - 3A - Slash of Life<br> and Death C - B - B]",
+            "extra": true,
+            "file": "Using Weather 1",
+            "may_be_locked": true,
+            "name": "Using Weather 1",
+            "name_hidden_when_locked": true,
+            "preview": "Using Weather 1.gif"
+        },
+        {
+            "description": "This is a strong Monsoon Corner Combo that<br>really takes advantage of the bounce effect of<br>Monsoon.<br>This is nowhere close to being the most<br>powerful corner Monsoon combo but it's quite<br>close to it in terms of consistency and damage.<br><br>[Combo: -Monsoon- 5AAA - 3A - 66A - Slash of<br> Life and Death B - B - Crescent Moon Slash C]",
+            "extra": true,
+            "file": "Using Weather 2",
+            "may_be_locked": true,
+            "name": "Using Weather 2",
+            "name_hidden_when_locked": true,
+            "preview": "Using Weather 2.gif"
+        },
+        {
+            "description": "A pretty damaging FullScreen/MidScreen Combo<br>that takes advantage of the BlueSky Skill to<br>Skill cancel effect.<br>This is Youmu's Weather and it really shows as<br>Youmu has probably some of the most obvious<br>and powerful BlueSky combos or strings.<br><br>[Combo: -Blue Sky- 5AAA - Crescent Moon<br> Slash C - Slash of Life and Death C - B<br> - Medium's Bind B - J5A - J6A]",
+            "extra": true,
+            "file": "Using Weather 3",
+            "may_be_locked": true,
+            "name": "Using Weather 3",
+            "name_hidden_when_locked": true,
+            "preview": "Using Weather 3.gif"
+        },
+        {
+            "description": "The last combo you need to know to prove that<br>you mastered the basics of the Konpaku Style.<br>This is one of the most important conversions<br>that you need to learn when playing Youmu.<br><br>[Combo: 4A - 4A - 4A - 4A - Crescent Moon<br> Slash C]<br>|S-Rank Hint|: This combo can also be done<br>with 1A. Good luck and see you next pack!",
+            "extra": true,
+            "file": "The Last Step",
+            "may_be_locked": true,
+            "name": "The Last Step",
+            "name_hidden_when_locked": true,
+            "preview": "The Last Step.gif"
+        }
+    ],
+    "stand": {
+        "isPath": true,
+        "path": "PackPreview.png"
+    }
+}

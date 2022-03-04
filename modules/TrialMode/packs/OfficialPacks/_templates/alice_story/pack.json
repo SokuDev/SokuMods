@@ -1,0 +1,35 @@
+{
+    "author": "PinkySmile",
+    "category": "Alice Margatroid",
+    "characters": [
+        "alice"
+    ],
+    "description": "No description provided",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 3.500000476837158,
+            "y": 0.5000001788139343
+        },
+        "path": "data/character/alice/face/face000.cv2",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100044012069702,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Template Pack",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/alice.cv2"
+    }
+}

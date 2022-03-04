@@ -1,0 +1,55 @@
+{
+    "dummy": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 656.0,
+            "y": 162.0
+        }
+    },
+    "expected": "!9 j8a:14 ja1skill2c:18 j5aa:17 j2a:13",
+    "music": "data/bgm/st17.ogg",
+    "player": {
+        "character": "remilia",
+        "deck": [],
+        "palette": 0,
+        "pos": 534.0
+    },
+    "score": [
+        {
+            "min_damage": 1686,
+            "min_hits": 5,
+            "min_limit": 130
+        },
+        {
+            "max_attempts": 5
+        },
+        {
+            "max_attempts": 2
+        },
+        {
+            "max_attempts": 1
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            1,
+            1
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo"
+}

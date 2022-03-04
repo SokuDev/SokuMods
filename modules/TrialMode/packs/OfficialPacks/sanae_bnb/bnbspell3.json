@@ -1,0 +1,83 @@
+{
+    "dummy": {
+        "character": "reimu",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 540.0,
+            "y": 0.0
+        }
+    },
+    "expected": "2a/f5a 3a 5c sc205",
+    "hand": [
+        205,
+        205,
+        205,
+        205,
+        205
+    ],
+    "music": "data/bgm/st30.ogg",
+    "player": {
+        "character": "sanae",
+        "deck": [
+            207,
+            207,
+            207,
+            207,
+            205,
+            205,
+            204,
+            204,
+            204,
+            204,
+            201,
+            201,
+            201,
+            201,
+            108,
+            108,
+            111,
+            111,
+            100,
+            100
+        ],
+        "palette": 0,
+        "pos": 405.0
+    },
+    "score": [
+        {
+            "min_damage": 4127,
+            "min_hits": 6,
+            "min_limit": 170
+        },
+        {
+            "max_attempts": 5
+        },
+        {
+            "max_attempts": 2
+        },
+        {
+            "max_attempts": 1
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 31,
+    "type": "combo"
+}

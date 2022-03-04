@@ -1,0 +1,52 @@
+local sum = 0
+local score = getPackScores()
+
+for i = 1, 8 do
+	sum = sum + score[i]
+end
+sum = sum / 8
+if sum >= 2 then
+	loadBackground(packPath.."/outro2A.png")
+	loadBackground(packPath.."/outro2B.png")
+	addCommand('playBGM "data/bgm/st00.ogg"')
+	addCommand("text This is outro two")
+	addCommand("color FF0000 FFFFFF")
+	addCommand("text This is outro two [colored]")
+	addCommand("clear")
+	addCommand("text This is outro two [colored again]")
+	addCommand("color FF00FF FFFFFF")
+	addCommand("text This is outro two [colorised]")
+	addCommand("color FFFFFF FFFFFF")
+	addCommand("text This is outro two [colorised no more]")
+	addCommand("background 1")
+	addCommand("clear")
+	addCommand("text New background !!!??? :scream:")
+	addCommand("end")
+	addCommand("text This is the new feature everyone wanted.")
+	addCommand("text It is now a thing.")
+	addCommand("text I hope everyone will like it.")
+	addCommand("clear")
+	addCommand("text Ending A.")
+else
+	loadBackground(packPath.."/outro1A.png")
+	loadBackground(packPath.."/outro1B.png")
+	addCommand('playBGM "data/bgm/ta20.ogg"')
+	addCommand("text This is outro one")
+	addCommand("color FF0000 FFFFFF")
+	addCommand("text This is outro one [colored]")
+	addCommand("clear")
+	addCommand("text This is outro one [colored again]")
+	addCommand("color FF00FF FFFFFF")
+	addCommand("text This is outro one [colorised]")
+	addCommand("color FFFFFF FFFFFF")
+	addCommand("text This is outro one [colorised no more]")
+	addCommand("background 1")
+	addCommand("clear")
+	addCommand("text New background !!!??? :scream:")
+	addCommand("end")
+	addCommand("text This is the new feature everyone wanted.")
+	addCommand("text It is now a thing.")
+	addCommand("text I hope everyone will like it.")
+	addCommand("clear")
+	addCommand("text Ending B.")
+end

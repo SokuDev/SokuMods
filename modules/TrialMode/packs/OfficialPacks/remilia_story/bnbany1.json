@@ -1,0 +1,82 @@
+{
+    "dummy": {
+        "character": "suika",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 900.0,
+            "y": 0.0
+        }
+    },
+    "expected": "4a !4a !4a !4a sc205",
+    "hand": [
+        205
+    ],
+    "music": "data/bgm/st17.ogg",
+    "player": {
+        "character": "remilia",
+        "deck": [
+            205,
+            205,
+            205,
+            205,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2,
+            2,
+            2,
+            3,
+            3,
+            3,
+            3,
+            4,
+            4,
+            4,
+            4
+        ],
+        "palette": 0,
+        "pos": 850.0
+    },
+    "score": [
+        {
+            "min_damage": 4414,
+            "min_hits": 16,
+            "min_limit": 15
+        },
+        {
+            "max_attempts": 1
+        },
+        {
+            "min_damage": 4593,
+            "min_hits": 18
+        },
+        {
+            "min_damage": 4681,
+            "min_hits": 19
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

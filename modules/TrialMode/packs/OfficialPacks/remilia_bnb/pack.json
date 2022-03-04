@@ -1,0 +1,145 @@
+{
+    "author": "PinkySmile",
+    "category": "Remilia Scarlet",
+    "characters": [
+        "remilia",
+        "sakuya"
+    ],
+    "description": "Remilia bread and butter.<br>All you need to get started with Remilia!",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 2.0,
+            "y": 0.0
+        },
+        "path": "data/character/remilia/face/face000.cv2",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100007057189941,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "min_version": "alpha 0.4.30",
+    "modes": [
+        "Combo"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "2A 5C HJ9 j5C j66 j8A<br>Whiffs if the opponent is too far",
+            "extra": false,
+            "file": "bnb1.json",
+            "may_be_locked": true,
+            "name": "2a starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb1.gif"
+        },
+        {
+            "description": "2A 3A 2A<br>Combo route for further 2A hits.",
+            "extra": false,
+            "file": "bnb2.json",
+            "may_be_locked": true,
+            "name": "2a starter far",
+            "name_hidden_when_locked": false,
+            "preview": "bnb2.gif"
+        },
+        {
+            "description": "j2A CH 2C HJ9 j5C j66 j8A",
+            "extra": false,
+            "file": "bnb3.json",
+            "may_be_locked": true,
+            "name": "j2a CH starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb3.gif"
+        },
+        {
+            "description": "5AAAA 4SC hj9 j8A",
+            "extra": false,
+            "file": "bnb4.json",
+            "may_be_locked": true,
+            "name": "Midscreen 5A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb4.gif"
+        },
+        {
+            "description": "4A 4A 4A 4A 5SC (Dracula Cradle)",
+            "extra": false,
+            "file": "bnb9.json",
+            "may_be_locked": true,
+            "name": "Midscreen 5A starter 2",
+            "name_hidden_when_locked": false,
+            "preview": "bnb5.gif"
+        },
+        {
+            "description": "5aaaa 6a 5c",
+            "extra": false,
+            "file": "bnb8.json",
+            "may_be_locked": true,
+            "name": "Corner 5A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb6.gif"
+        },
+        {
+            "description": "5aaaa hj9 j5aa j2c",
+            "extra": false,
+            "file": "dialA.json",
+            "may_be_locked": true,
+            "name": "Near corner 5A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb7.gif"
+        },
+        {
+            "description": "j5AA d6 j5AA d6 j5A j8A",
+            "extra": false,
+            "file": "bnb5.json",
+            "may_be_locked": true,
+            "name": "j5a starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb8.gif"
+        },
+        {
+            "description": "j5AA j6A j5B",
+            "extra": false,
+            "file": "bnb6.json",
+            "may_be_locked": true,
+            "name": "Rising j5a starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb9.gif"
+        },
+        {
+            "description": "a214C j5A j2C j66 j5A j8A",
+            "extra": false,
+            "file": "bnb7.json",
+            "may_be_locked": true,
+            "name": "j8a starter Ceiling Fear",
+            "name_hidden_when_locked": false,
+            "preview": "bnb10.gif"
+        },
+        {
+            "description": "j8A a214C j5AA j2A",
+            "extra": false,
+            "file": "bnb11.json",
+            "may_be_locked": true,
+            "name": "j8a starter Chain",
+            "name_hidden_when_locked": false,
+            "preview": "bnb11.gif"
+        },
+        {
+            "description": "a214C j5A j8A a214C j5A j8A",
+            "extra": true,
+            "file": "bnb10.json",
+            "may_be_locked": true,
+            "name": "Chain Starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb12.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/remilia.cv2"
+    }
+}

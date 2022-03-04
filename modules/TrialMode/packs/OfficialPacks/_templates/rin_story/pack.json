@@ -1,0 +1,34 @@
+{
+    "author": "PinkySmile",
+    "category": "Rin Kaenbyou",
+    "characters": [
+        "orin"
+    ],
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/orin/face/face000.cv2",
+        "rect": {
+            "height": 55,
+            "left": 0,
+            "top": 0,
+            "width": 135
+        },
+        "scale": 0.5000001788139343,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Template Pack",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/orin.cv2"
+    }
+}

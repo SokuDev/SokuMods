@@ -1,0 +1,65 @@
+{
+    "dummy": {
+        "character": "aya",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 800.0,
+            "y": 0.0
+        }
+    },
+    "expected": "2a 5c hj9 j5c j66 j8a:20",
+    "intro": "bnbmid1intro.lua",
+    "music": "data/bgm/st21.ogg",
+    "outro": "bnbmid1outro.lua",
+    "player": {
+        "character": "remilia",
+        "deck": [],
+        "palette": 0,
+        "pos": 700.0
+    },
+    "score": [
+        {
+            "min_damage": 1800,
+            "min_hits": 12,
+            "min_limit": 100
+        },
+        {
+            "max_attempts": 20,
+            "min_hits": 15,
+            "min_limit": 114
+        },
+        {
+            "max_attempts": 10,
+            "min_hits": 16,
+            "min_limit": 116
+        },
+        {
+            "max_attempts": 5,
+            "min_damage": 2180,
+            "min_hits": 22,
+            "min_limit": 120
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

@@ -1,0 +1,57 @@
+{
+    "counter_hit": true,
+    "dummy": {
+        "character": "meirin",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 700.0,
+            "y": 0.0
+        }
+    },
+    "expected": "3a 2c d236c:15",
+    "music": "data/bgm/st18.ogg",
+    "player": {
+        "character": "yukari",
+        "deck": [],
+        "palette": 0,
+        "pos": 500.0
+    },
+    "score": [
+        {
+            "min_damage": 1800,
+            "min_hits": 2,
+            "min_limit": 80
+        },
+        {
+            "max_attempts": 5
+        },
+        {
+            "max_attempts": 2
+        },
+        {
+            "max_attempts": 1
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 32,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

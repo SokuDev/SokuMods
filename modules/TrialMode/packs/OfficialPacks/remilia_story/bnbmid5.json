@@ -1,0 +1,65 @@
+{
+    "dummy": {
+        "character": "marisa",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 800.0,
+            "y": 0.0
+        }
+    },
+    "expected": "3a:1 2a:51 5c:18 dskill1b:32",
+    "fail_timer": 60,
+    "intro": "bnbmid5intro.lua",
+    "music": "data/bgm/st41.ogg",
+    "outro": "bnbmid5outro.lua",
+    "player": {
+        "character": "remilia",
+        "deck": [],
+        "palette": 0,
+        "pos": 550.0
+    },
+    "score": [
+        {
+            "min_damage": 1959,
+            "min_hits": 5,
+            "min_limit": 124
+        },
+        {
+            "min_damage": 2101,
+            "min_hits": 9,
+            "min_limit": 132
+        },
+        {
+            "min_damage": 2176,
+            "min_hits": 10,
+            "min_limit": 134
+        },
+        {
+            "min_damage": 2215,
+            "min_hits": 12,
+            "min_limit": 138
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

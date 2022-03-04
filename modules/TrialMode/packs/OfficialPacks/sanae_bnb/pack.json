@@ -1,0 +1,153 @@
+{
+    "author": "Ejenix",
+    "category": "Sanae Kochiya",
+    "characters": [
+        "sanae",
+        "reimu"
+    ],
+    "description": "A collection of beginner combos for Sanae.<br>Not necessarily the most optimized in terms<br>of damage, but should be simple to pick up.<br><br>Some of Sanae's combo enders involve a choice <br>between 5b/6c/d623. Though d623 is the most<br>damaging, it will incur a heavy cooldown on<br>Kanako, so 5b/6c is recommended instead.",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/sanae/face/face000.bmp",
+        "rect": {
+            "height": 46,
+            "left": 0,
+            "top": 0,
+            "width": 113
+        },
+        "scale": 0.6000000238418579,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "5aaaa hj9 j5a j6a j5b/j6c/d623c <br>Midscreen<br><br>You can choose between 5b/6c/d623 for a lot<br>of Sanae's combo enders depending on if you<br>want more damage or to conserve Kanako CD.<br><br>Unable to combo if too far from wall.<br><br>",
+            "extra": false,
+            "file": "bnbmid3.json",
+            "may_be_locked": true,
+            "name": "5aaaa starter",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb1.gif"
+        },
+        {
+            "description": "5aaaa 6a 5b/6c/d623c <br>Corner<br><br>Easy way to limit in the corner.<br><br>",
+            "extra": false,
+            "file": "bnbcorner1.json",
+            "may_be_locked": true,
+            "name": "Corner 5aaaa starter 1",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb2.gif"
+        },
+        {
+            "description": "5aaaa (walkback) 2a 6a 5b/6c/d623c <br>Corner<br><br>A more optimized version of the previous combo.<br>A small walkback is needed before 2a in order <br>to prevent ending up on the wrong side.<br><br>",
+            "extra": false,
+            "file": "bnbcorner2.json",
+            "may_be_locked": true,
+            "name": "Corner 5aaaa starter 2",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb3.gif"
+        },
+        {
+            "description": "5aaaa 4card (Night of the Supernova Storm)<br>Midscreen<br><br>Basic 4card confirm.<br>Also works with 5card (Moses' Miracle),<br><br>",
+            "extra": false,
+            "file": "bnbspell2.json",
+            "may_be_locked": true,
+            "name": "5aaaa 4card",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb4.gif"
+        },
+        {
+            "description": "2a 3a 4c D9 j2c <br>Works everywhere except deep in corner<br><br>Your basic BnB.<br>Swap j2c for j8a if low on spirit.<br><br>",
+            "extra": false,
+            "file": "bnbmid1.json",
+            "may_be_locked": true,
+            "name": "2a starter 1",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb5.gif"
+        },
+        {
+            "description": "2a 3a 5c hj9 j5a j6a <br>Midscreen<br><br>Used when Suwako is on cooldown.<br>Most of the time you will be using <br>the previous combo instead.<br><br>",
+            "extra": false,
+            "file": "bnbmid2.json",
+            "may_be_locked": true,
+            "name": "2a starter 2",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb6.gif"
+        },
+        {
+            "description": "2a/f5a 3a 5c hj9 j5a j2a j5b j44 j6a<br>Corner<br><br>A way to convert off 2a in the deep corner,<br>which is the one place where your trusty 4c<br>BnB no longer works. Happens a decent bit<br>since you will often be using 2a for corner <br>pressure/staggers. Use j66 j2a over j44 j6a<br>for better oki but lower dmg.<br>",
+            "extra": false,
+            "file": "bnbcorner3.json",
+            "may_be_locked": true,
+            "name": "Corner 2a starter 1",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb7.gif"
+        },
+        {
+            "description": "2a 3a 5c 5card (Moses' Miracle)<br>Not too close to corner<br><br>Basic 5card confirm using 2a.<br>4card and 5card have roughly similar damage <br>and confirms but 5card has an advantage over <br>4card of being confirmable midscreen from 2a.<br><br>Damage varies slightly based on moves' timing.",
+            "extra": false,
+            "file": "bnbspell3.json",
+            "may_be_locked": true,
+            "name": "2a 5card confirm",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb8.gif"
+        },
+        {
+            "description": "66b(CH) hj9 j5a j6a j5b/j6c/d623c | Midscreen<br><br>Depending on the distance to the wall, walking <br>forward may be needed before jumping.<br><br>Note the similarity to the midscreen 5aaaa<br>combo. The hj9 j5a j6a j5b follow up is also<br>valid for other counterhits that causes<br>wallbounce, such as with 6c/d623.<br>",
+            "extra": false,
+            "file": "bnbmid4.json",
+            "may_be_locked": true,
+            "name": "Counterhit/66b starter",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb9.gif"
+        },
+        {
+            "description": "j5a j6a/j8a j5b 66 j5a j8a/j6a  <br>Corner/Near Corner<br><br>An example of a way to convert off j5a hitting <br>on an aerial opponent.<br><br>There are more optimized routes involving j2a, but<br>the general idea of airdash cancelling j5b<br>into a melee attack remains.<br><br>",
+            "extra": false,
+            "file": "bnbair1.json",
+            "may_be_locked": true,
+            "name": "j5a air to air",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb10.gif"
+        },
+        {
+            "description": "j2a j5c D9 j6a <br>Midscreen<br><br>Another aerial combo example.<br><br>This one works on both grounded opponents and<br>standing opponents, given j2a is hitting at<br>the right angle (i.e. not hitting backwards<br>or too high).",
+            "extra": false,
+            "file": "bnbair2.json",
+            "may_be_locked": true,
+            "name": "j2a starter",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb11.gif"
+        },
+        {
+            "description": "66c hj8 j5a j6a j5b/j6c/d623c <br>Corner<br><br>A reliable way to combo off 66c.<br><br>",
+            "extra": false,
+            "file": "bnbcorner4.json",
+            "may_be_locked": true,
+            "name": "Corner 66c starter",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb12.gif"
+        },
+        {
+            "description": "66c 4card (Night of the Supernova Storm)<br>Anywhere<br><br>Basic 4card confirm.<br>Also works with 5card (Moses' Miracle),<br><br>",
+            "extra": false,
+            "file": "bnbspell1.json",
+            "may_be_locked": true,
+            "name": "66c 4card",
+            "name_hidden_when_locked": false,
+            "preview": "sana_bnb13.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/sanae.bmp"
+    }
+}

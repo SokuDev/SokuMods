@@ -1,0 +1,59 @@
+{
+    "dummy": {
+        "character": "reimu",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 1240.0,
+            "y": 0.0
+        }
+    },
+    "expected": "f5a/2a 3a 5c hj9 j5a j2a j5b j44/j66 j6a/j2a",
+    "music": "data/bgm/st30.ogg",
+    "player": {
+        "character": "sanae",
+        "deck": [],
+        "palette": 0,
+        "pos": 1110.0
+    },
+    "score": [
+        {
+            "min_damage": 2265,
+            "min_hits": 13,
+            "min_limit": 138
+        },
+        {
+            "max_attempts": 5,
+            "min_damage": 2383
+        },
+        {
+            "max_attempts": 2,
+            "min_damage": 2434
+        },
+        {
+            "max_attempts": 1,
+            "min_damage": 2482
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 31,
+    "type": "combo",
+    "uniform_card_cost": 1
+}

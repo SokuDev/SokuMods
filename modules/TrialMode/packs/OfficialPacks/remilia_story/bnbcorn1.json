@@ -1,0 +1,55 @@
+{
+    "music": "data/bgm/st03.ogg",
+    "stage": 16,
+    "player": {
+        "character": "remilia",
+        "palette": 0,
+        "deck": [],
+        "pos": 1180
+    },
+    "dummy": {
+        "character": "flandre",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 1240,
+            "y": 0
+        }
+    },
+    "intro": "bnbcorn1intro.lua",
+    "outro": "bnbcorn1outro.lua",
+    "type": "combo",
+
+    "expected": "5aaaa 6a 5c",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": "clear",
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 16,
+            "min_damage": 2613,
+            "min_limit": 100,
+            "max_limit": 100
+        },
+        {
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "hint": [
+
+    ]
+}

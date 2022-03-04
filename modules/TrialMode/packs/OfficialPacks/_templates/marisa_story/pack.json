@@ -1,0 +1,37 @@
+{
+    "author": "PinkySmile",
+    "category": "Marisa Kirisame",
+    "characters": [
+        "marisa",
+        "reimu",
+        "tenshi"
+    ],
+    "description": "Marisa's bread and butters",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/marisa/face/face000.cv2",
+        "rect": {
+            "height": 55,
+            "left": 0,
+            "top": 0,
+            "width": 135
+        },
+        "scale": 0.5000001788139343,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Template Pack",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/marisa.cv2"
+    }
+}

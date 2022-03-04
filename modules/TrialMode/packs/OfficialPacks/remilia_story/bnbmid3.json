@@ -1,0 +1,86 @@
+{
+    "dummy": {
+        "character": "meirin",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 600.0,
+            "y": 0.0
+        }
+    },
+    "expected": "5aaaa sc204 hj9 j8a:30",
+    "hand": [
+        204,
+        204,
+        204,
+        204
+    ],
+    "intro": "bnbmid3intro.lua",
+    "music": "data/bgm/st32.ogg",
+    "outro": "bnbmid3outro.lua",
+    "player": {
+        "affected_by_weather": false,
+        "character": "remilia",
+        "deck": [
+            204,
+            204,
+            204,
+            204,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2,
+            2,
+            2,
+            3,
+            3,
+            3,
+            3,
+            4,
+            4,
+            4,
+            4
+        ],
+        "palette": 0,
+        "pos": 550.0
+    },
+    "score": [
+        {
+            "min_damage": 4267,
+            "min_hits": 11,
+            "min_limit": 130
+        },
+        {
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            1,
+            1
+        ]
+    ],
+    "stage": 12,
+    "type": "combo",
+    "weather": 6
+}

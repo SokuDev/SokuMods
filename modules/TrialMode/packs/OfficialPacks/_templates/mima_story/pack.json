@@ -1,0 +1,35 @@
+{
+    "author": "PinkySmile",
+    "category": "Mima",
+    "characters": [
+        "mima"
+    ],
+    "description": "No description provided",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 1.0,
+            "y": 0.0
+        },
+        "path": "data/character/mima/face/face000.cv2",
+        "rect": {
+            "height": 52,
+            "left": 0,
+            "top": 0,
+            "width": 128
+        },
+        "scale": 0.5300003290176392,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Template Pack",
+    "scenarios": [],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/mima.cv2"
+    }
+}

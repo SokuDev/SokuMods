@@ -1,0 +1,55 @@
+{
+    "music": 31,
+    "stage": 16,
+    "player": {
+        "character": "remilia",
+        "palette": 0,
+        "deck": [],
+        "pos": 680
+    },
+    "dummy": {
+        "character": "chirno",
+        "palette": 0,
+        "deck": [],
+        "pos": {
+            "x": 740,
+            "y": 100
+        }
+    },
+    "intro": "bnbcorn2intro.lua",
+    "outro": "bnbcorn2outro.lua",
+    "type": "combo",
+
+    "expected": "hj8 j5aa j6a:30 j5b",
+    "skills": [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0]
+    ],
+    "weather": "clear",
+    "disable_limit": false,
+    "uniform_card_cost": 1,
+    "hand": [],
+    "play_combo_after_intro": true,
+    "score": [
+        {
+            "min_hits": 7,
+            "min_damage": 1459,
+            "min_limit": 100,
+            "max_limit": 100
+        },
+        {
+            "max_attempts": 20
+        },
+        {
+            "max_attempts": 10
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "hint": [
+
+    ]
+}

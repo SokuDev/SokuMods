@@ -1,0 +1,60 @@
+{
+    "dummy": {
+        "character": "reimu",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 1240.0,
+            "y": 100.0
+        }
+    },
+    "expected": "d6/9/8 j5aa d6/9 j5aa 2c:20 hj9/hj8:35 j5aa",
+    "intro": "bnbcorn3intro.lua",
+    "music": "data/bgm/st99.ogg",
+    "outro": "bnbcorn3outro.lua",
+    "player": {
+        "character": "remilia",
+        "deck": [],
+        "palette": 0,
+        "pos": 1180.0
+    },
+    "score": [
+        {
+            "min_damage": 1866,
+            "min_hits": 14,
+            "min_limit": 136
+        },
+        {
+            "max_attempts": 15
+        },
+        {
+            "max_attempts": 10,
+            "min_damage": 1889,
+            "min_hits": 15
+        },
+        {
+            "max_attempts": 5
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 16,
+    "type": "combo",
+    "uniform_card_cost": 1
+}
