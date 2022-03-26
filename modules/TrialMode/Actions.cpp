@@ -242,7 +242,9 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "8",          SokuLib::ACTION_NEUTRAL_JUMP },
 	{ "7",          SokuLib::ACTION_BACKWARD_JUMP },
 	{ "6",          SokuLib::ACTION_WALK_FORWARD },
+	{ "5",          SokuLib::ACTION_IDLE },
 	{ "4",          SokuLib::ACTION_WALK_BACKWARD },
+	{ "2",          SokuLib::ACTION_CROUCHED },
 
 	{ "drug",       SokuLib::ACTION_SPELL_BREAKING_DRUG },
 	{ "hackoruken", SokuLib::ACTION_FORWARD_DASH },
@@ -261,8 +263,6 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "l5b",     FAKE_ACTION_LILYPAD_5B },
 	{ "l6b",     FAKE_ACTION_LILYPAD_6B },
 	{ "l2c",     FAKE_ACTION_LILYPAD_2C },
-	{ "2",       FAKE_ACTION_LILYPAD_SPAWN },
-	{ "5",       FAKE_ACTION_LILYPAD_DESPAWN },
 	{ "ld22b",   FAKE_ACTION_LILYPAD_DEFAULT_22B },
 	{ "ld22c",   FAKE_ACTION_LILYPAD_DEFAULT_22C },
 	{ "ua122b",  FAKE_ACTION_UNDERGROUND_ALT1_22B },
@@ -658,10 +658,6 @@ bool isStartOfMove(SokuLib::Action action, const SokuLib::CharacterManager &char
 	}
 
 	if (characterId == SokuLib::CHARACTER_SUWAKO) {
-		if (action == FAKE_ACTION_LILYPAD_SPAWN)
-			return character.objectBase.frameCount == 0 && character.objectBase.animationCounter == 3;
-		if (action == FAKE_ACTION_LILYPAD_DESPAWN)
-			return character.objectBase.frameCount == 0 && character.objectBase.animationCounter == 3;
 		if (action == FAKE_ACTION_UNDERGROUND_DEFAULT_623c || action == FAKE_ACTION_UNDERGROUND_DEFAULT_623b)
 			return character.objectBase.frameCount == 0 && character.objectBase.actionBlockId == 6;
 		if (action >= FAKE_ACTION_LILYPAD_NEUTRAL_HIGHJUMP && action <= FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP)
@@ -759,10 +755,6 @@ SokuLib::Action addCustomActions(const SokuLib::CharacterManager &character, Sok
 			return FAKE_ACTION_LILYPAD_6B;
 		case SokuLib::ACTION_2C:
 			return FAKE_ACTION_LILYPAD_2C;
-		case SokuLib::ACTION_CROUCHING:
-			return FAKE_ACTION_LILYPAD_SPAWN;
-		case SokuLib::ACTION_STANDING_UP:
-			return FAKE_ACTION_LILYPAD_DESPAWN;
 		case SokuLib::ACTION_DEFAULT_SKILL4_AIR_B:
 			return FAKE_ACTION_LILYPAD_DEFAULT_22B;
 		case SokuLib::ACTION_DEFAULT_SKILL4_AIR_C:

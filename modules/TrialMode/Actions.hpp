@@ -50,8 +50,6 @@
 #define FAKE_ACTION_LILYPAD_5B static_cast<SokuLib::Action>(1107)
 #define FAKE_ACTION_LILYPAD_6B static_cast<SokuLib::Action>(1108)
 #define FAKE_ACTION_LILYPAD_2C static_cast<SokuLib::Action>(1109)
-#define FAKE_ACTION_LILYPAD_SPAWN static_cast<SokuLib::Action>(1110)
-#define FAKE_ACTION_LILYPAD_DESPAWN static_cast<SokuLib::Action>(1111)
 #define FAKE_ACTION_LILYPAD_DEFAULT_22B static_cast<SokuLib::Action>(1112)
 #define FAKE_ACTION_LILYPAD_DEFAULT_22C static_cast<SokuLib::Action>(1113)
 #define FAKE_ACTION_UNDERGROUND_ALT1_22B static_cast<SokuLib::Action>(1114)
