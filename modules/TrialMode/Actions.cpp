@@ -258,7 +258,7 @@ const std::map<std::string, SokuLib::Action> actionsFromStr{
 	{ "lhj7",    FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP },
 	{ "l5a",     FAKE_ACTION_LILYPAD_A },
 	{ "l3a",     FAKE_ACTION_LILYPAD_3A },
-	{ "l2b",     FAKE_ACTION_LILYPAD_2B },
+	{ "l5b",     FAKE_ACTION_LILYPAD_5B },
 	{ "l6b",     FAKE_ACTION_LILYPAD_6B },
 	{ "l2c",     FAKE_ACTION_LILYPAD_2C },
 	{ "2",       FAKE_ACTION_LILYPAD_SPAWN },
@@ -549,7 +549,7 @@ const std::map<std::string, std::vector<SokuLib::KeyInput>> actionStrToInputs{
 	{ "lhj7",       {{-1, -1, 0, 0, 0, 1, 0, 0}} },
 	{ "l5a",        {{0, 0, 1, 0, 0, 0, 0, 0}} },
 	{ "l3a",        {{1, 1, 1, 0, 0, 0, 0, 0}} },
-	{ "l2b",        {{0, 1, 0, 1, 0, 0, 0, 0}} },
+	{ "l5b",        {{0, 1, 0, 1, 0, 0, 0, 0}} },
 	{ "l6b",        {{1, 0, 0, 1, 0, 0, 0, 0}} },
 	{ "l2c",        {{0, 1, 0, 0, 1, 0, 0, 0}} },
 	{ "ld22b",      {{0, 1, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}, {0, 1, 0, 1, 0, 0, 0, 0}} },
@@ -754,7 +754,7 @@ SokuLib::Action addCustomActions(const SokuLib::CharacterManager &character, Sok
 		case SokuLib::ACTION_3A:
 			return FAKE_ACTION_LILYPAD_3A;
 		case SokuLib::ACTION_2B:
-			return FAKE_ACTION_LILYPAD_2B;
+			return FAKE_ACTION_LILYPAD_5B;
 		case SokuLib::ACTION_3B:
 			return FAKE_ACTION_LILYPAD_6B;
 		case SokuLib::ACTION_2C:

@@ -47,7 +47,7 @@
 #define FAKE_ACTION_LILYPAD_BACKWARD_HIGHJUMP static_cast<SokuLib::Action>(1104)
 #define FAKE_ACTION_LILYPAD_A static_cast<SokuLib::Action>(1105)
 #define FAKE_ACTION_LILYPAD_3A static_cast<SokuLib::Action>(1106)
-#define FAKE_ACTION_LILYPAD_2B static_cast<SokuLib::Action>(1107)
+#define FAKE_ACTION_LILYPAD_5B static_cast<SokuLib::Action>(1107)
 #define FAKE_ACTION_LILYPAD_6B static_cast<SokuLib::Action>(1108)
 #define FAKE_ACTION_LILYPAD_2C static_cast<SokuLib::Action>(1109)
 #define FAKE_ACTION_LILYPAD_SPAWN static_cast<SokuLib::Action>(1110)
