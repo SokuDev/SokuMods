@@ -886,7 +886,13 @@ void start(void *ignored) {
 }
 
 void loop() {
-	updateThread.loop();
+	static int i = 0;
+
+	i++;
+	if (i >= config.refreshRate * 60 / 1000) {
+		updateThread.loop();
+		i = 0;
+	}
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
