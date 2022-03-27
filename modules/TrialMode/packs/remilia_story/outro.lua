@@ -56,7 +56,7 @@ addCommand('text Remi   "There is still a culprit I need to interrogate"')
 addCommand('playBGM ""')
 addCommand("end")
 addCommand("text After Remilia left, Patchouli continued her research.")
-addCommand("text But sadly for her, they were too few clues,")
+addCommand("text But sadly for her, there were too few clues,")
 addCommand("text and too many potential culprits in the land of Gensokyo.")
 
 addCommand('generateGameAnimation '..packPath..'staffroll.txt')
