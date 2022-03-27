@@ -1,5 +1,3 @@
-local score = getPackScores()
-
 loadBackground("data/scenario/remilia/effect/ED000.png")
 loadBackground(packPath.."/ED001.png")
 loadBackground(packPath.."/ED002.png")
@@ -61,12 +59,17 @@ addCommand("text After Remilia left, Patchouli continued her research.")
 addCommand("text But sadly for her, they were too few clues,")
 addCommand("text and too many potential culprits in the land of Gensokyo.")
 
+addCommand('generateGameAnimation '..packPath..'staffroll.txt')
+addCommand('playGameAnimation '..packPath..'staffroll_generated.txt')
 addCommand('playBGM "data/bgm/sr.ogg"')
 addCommand('clear')
 addCommand("text As for Remilia, she roamed the manor,")
 addCommand("text looking for the visitors and for one peculiar youkai,")
 addCommand("text that, she thought, should have the last pieces of the puzzle.")
-addCommand('playAnimation "'..packPath..'/outroAnimation.lua"')
+
+
+
+--addCommand('playAnimation '..packPath..'outroAnimation.lua')
 
 --addCommand('playBGM "data/bgm/st00.ogg"')
 --addCommand("text This is outro two")

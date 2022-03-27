@@ -10,12 +10,16 @@
 #include <map>
 #include <sol/forward.hpp>
 #include <SokuLib.hpp>
+#include <Animations/LuaBattleAnimation.hpp>
 
 class PackOutro {
 private:
+
+	bool _hasOpeningObject = false;
+	char _openingObject[0x98];
+	std::string _packPath;
 	unsigned _wait = 60;
 	unsigned _textWait = 0;
-	bool _nearFinished = false;
 	bool _finished = false;
 	bool _ended = false;
 	sol::state *_lua;
@@ -26,17 +30,22 @@ private:
 	unsigned _currentCommand = 0;
 	std::vector<std::string> _commands;
 	SokuLib::DrawUtils::Sprite _background;
+	std::unique_ptr<LuaBattleAnimation> _animation;
 	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _text;
 	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _sprites;
 
 	static const std::map<std::string, void (PackOutro::*)(const std::string &args)> _commandsCallbacks;
 
+	void _destroyOpeningObject();
 	void _endCmd(const std::string &args);
 	void _textCmd(const std::string &args);
 	void _clearCmd(const std::string &args);
 	void _colorCmd(const std::string &args);
 	void _setBGMCmd(const std::string &args);
+	void _playAnimCmd(const std::string &args);
 	void _backgroundCmd(const std::string &args);
+	void _generateAnimation(const std::string &args);
+	void _initOpeningObject(const std::string &file);
 	void _processNextCommand();
 
 public:

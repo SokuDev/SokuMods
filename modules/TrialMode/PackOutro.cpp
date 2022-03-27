@@ -2,9 +2,12 @@
 // Created by Gegel85 on 05/11/2021.
 //
 
+#include <memory>
 #include <sol/sol.hpp>
+#include <fstream>
 #include "PackOutro.hpp"
 #include "Menu.hpp"
+#include "Patches.hpp"
 
 static DWORD old;
 static double _loopStart, _loopEnd;
@@ -19,16 +22,25 @@ static void __stdcall editLoop(int ptr) {
 }
 
 const std::map<std::string, void (PackOutro::*)(const std::string &args)> PackOutro::_commandsCallbacks{
-	{ "end",        &PackOutro::_endCmd },
-	{ "text",       &PackOutro::_textCmd },
-	{ "clear",      &PackOutro::_clearCmd },
-	{ "color",      &PackOutro::_colorCmd },
-	{ "playBGM",    &PackOutro::_setBGMCmd},
-	{ "background", &PackOutro::_backgroundCmd }
+	{ "end",                   &PackOutro::_endCmd },
+	{ "text",                  &PackOutro::_textCmd },
+	{ "clear",                 &PackOutro::_clearCmd },
+	{ "color",                 &PackOutro::_colorCmd },
+	{ "playBGM",               &PackOutro::_setBGMCmd },
+	{ "background",            &PackOutro::_backgroundCmd },
+	{ "playAnimation",         &PackOutro::_playAnimCmd },
+	{ "playGameAnimation",     &PackOutro::_initOpeningObject },
+	{ "generateGameAnimation", &PackOutro::_generateAnimation }
 };
 
-PackOutro::PackOutro(const std::string &packPath, const std::string &file)
+PackOutro::PackOutro(const std::string &packPath, const std::string &file) :
+	_packPath(packPath)
 {
+	size_t pos;
+
+	while ((pos = this->_packPath.find('\\')) != std::string::npos)
+		this->_packPath[pos] = '/';
+
 	this->_background.texture.loadFromGame("data/scenario/effect/EdBack000.png");
 	this->_background.setSize({640, 480});
 	this->_background.rect.width = this->_background.texture.getSize().x;
@@ -76,6 +88,7 @@ PackOutro::PackOutro(const std::string &packPath, const std::string &file)
 PackOutro::~PackOutro()
 {
 	delete this->_lua;
+	this->_destroyOpeningObject();
 }
 
 void PackOutro::draw() const
@@ -86,12 +99,31 @@ void PackOutro::draw() const
 		sprite->draw();
 	for (auto &sprite : this->_text)
 		sprite->draw();
+	if (this->_hasOpeningObject) {
+		auto FUN_004571d0 = reinterpret_cast<int (__thiscall *)(const void *)>(0x4571d0);
+
+		FUN_004571d0(this->_openingObject);
+	}
+	if (this->_animation)
+		this->_animation->render();
 }
 
 bool PackOutro::update()
 {
 	bool anim = false;
+	auto FUN_00457890 = reinterpret_cast<int (__thiscall *)(void *)>(0x457890);
 
+	if (this->_hasOpeningObject)
+		FUN_00457890(this->_openingObject);
+	if (this->_animation) {
+		auto result = this->_animation->update();
+
+		if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
+			this->_animation->onKeyPressed();
+		if (!result)
+			this->_animation.reset();
+		return true;
+	}
 	if (this->_finished)
 		return false;
 	if (this->_wait) {
@@ -100,14 +132,14 @@ bool PackOutro::update()
 		this->_wait--;
 		return true;
 	}
-	if (!this->_nearFinished && this->_background.tint.a && this->_ended) {
+	if (this->_background.tint.a && this->_ended) {
 		this->_background.tint.a -= 0x5;
 		anim = true;
 	}
 	for (int i = 0; i < this->_sprites.size(); i++) {
 		auto &sprite = *this->_sprites[i];
 
-		if (i == this->_currentSprite && !this->_ended && !this->_nearFinished) {
+		if (i == this->_currentSprite && !this->_ended) {
 			if (sprite.tint.a < 0xFF) {
 				sprite.tint.a += 0x5;
 				anim = true;
@@ -121,40 +153,15 @@ bool PackOutro::update()
 	}
 	if (anim)
 		return true;
-	if (!this->_nearFinished && !this->_text.empty() && this->_text.back()->tint.a != 0xFF) {
+	if (!this->_text.empty() && this->_text.back()->tint.a != 0xFF) {
 		this->_text.back()->tint.a += 0x5;
 		return true;
 	}
 	if (this->_currentCommand == this->_commands.size()) {
-		if (!this->_nearFinished) {
-			if (SokuLib::inputMgrs.input.a == 1) {
-				this->_nearFinished = true;
-				SokuLib::playBGM("data/bgm/op2.ogg");
-			} else
-				return true;
-		}
-		if (this->_background.tint.a) {
-			this->_background.tint.a -= 0x5;
-			anim = true;
-		}
-		if (this->_rect.getFillColor().a) {
-			this->_rect.setFillColor(this->_rect.getFillColor().color - 0x3000000);
-			anim = true;
-		}
-		for (auto &sprite : this->_sprites) {
-			if (sprite->tint.a) {
-				sprite->tint.a -= 0x5;
-				anim = true;
-			}
-		}
-		for (auto &sprite : this->_text) {
-			if (sprite->tint.a) {
-				sprite->tint.a -= 0x5;
-				anim = true;
-			}
-		}
-		this->_finished = !anim;
-		return anim;
+		if (SokuLib::inputMgrs.input.a != 1)
+			return true;
+		this->_finished = true;
+		return false;
 	}
 	if (!this->_text.empty() && this->_text.back()->tint.a != 0xFF) {
 		this->_text.back()->tint.a += 0x5;
@@ -295,4 +302,85 @@ void PackOutro::_setBGMCmd(const std::string &args)
 	VirtualProtect((PVOID)0x418cc5, 5, PAGE_EXECUTE_WRITECOPY, &old);
 	og = SokuLib::TamperNearJmpOpr(0x418cc5, editLoop);
 	SokuLib::playBGM(path.c_str());
+}
+
+void PackOutro::_playAnimCmd(const std::string &args)
+{
+	this->_animation = std::make_unique<LuaBattleAnimation>(this->_packPath.c_str(), args.c_str());
+}
+
+void PackOutro::_initOpeningObject(const std::string &_file)
+{
+	size_t pos;
+	std::string file = _file;
+	auto FUN_0041f270 = reinterpret_cast<void (__thiscall *)(void *)>(0x41f270);
+	auto FUN_0045a110 = reinterpret_cast<void (__thiscall *)(void *)>(0x45a110);
+	auto FUN_0045a660 = reinterpret_cast<void (__thiscall *)(void *, const char *)>(0x45a660);
+
+	while ((pos = file.find('\\')) != std::string::npos)
+		file[pos] = '/';
+	this->_destroyOpeningObject();
+	FUN_0041f270(&this->_openingObject);
+	FUN_0045a110(&this->_openingObject);
+	applyFileSystemPatch();
+	printf("Loading opening animation %s\n", file.c_str());
+	FUN_0045a660(&this->_openingObject, file.c_str());
+	this->_hasOpeningObject = true;
+}
+
+void PackOutro::_destroyOpeningObject()
+{
+	if (!this->_hasOpeningObject)
+		return;
+
+	auto FUN_004593b0 = reinterpret_cast<void (__thiscall *)(void *)>(0x4593b0);
+	auto FUN_0041f340 = reinterpret_cast<void (__thiscall *)(void *)>(0x41f340);
+
+	FUN_004593b0(&this->_openingObject);
+	FUN_0041f340(&this->_openingObject);
+	removeFileSystemPatch();
+	this->_hasOpeningObject = false;
+}
+
+void PackOutro::_generateAnimation(const std::string &args)
+{
+	std::ifstream istream{args, std::fstream::binary};
+	std::ofstream ostream;
+	std::string other = args;
+	std::string line;
+	auto pos = other.find_last_of('.');
+	uint8_t a = 0x8b;
+	uint8_t b = 0x71;
+	struct stat s;
+
+	printf("Opening animation %s\n", args.c_str());
+	if (istream.fail())
+		throw std::invalid_argument("Cannot open " + args);
+	if (pos != std::string::npos)
+		other = other.substr(0, pos);
+	other += "_generated.cv0";
+	printf("Opening result file %s\n", other.c_str());
+	ostream.open(other, std::fstream::binary);
+	if (ostream.fail())
+		throw std::invalid_argument("Cannot open " + other);
+	while (std::getline(istream, line)) {
+		for (pos = line.find("{{pack_path}}"); pos != std::string::npos; pos = line.find("{{pack_path}}"))
+			line = line.substr(0, pos) + this->_packPath + line.substr(pos + 13);
+		printf("%s\n", line.c_str());
+		for (char c : line) {
+			c ^= a;
+			ostream.write(&c, 1);
+			a += b;
+			b -= 0x6b;
+		}
+
+		char c = '\n' ^ a;
+
+		ostream.write(&c, 1);
+		a += b;
+		b -= 0x6b;
+	}
+	puts("Closing files");
+	ostream.close();
+	istream.close();
 }

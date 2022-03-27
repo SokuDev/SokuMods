@@ -78,6 +78,7 @@ static SokuLib::DrawUtils::Sprite version;
 static SokuLib::DrawUtils::Sprite editSeat;
 static SokuLib::DrawUtils::Sprite editScenarioSeat;
 static SokuLib::DrawUtils::Sprite editSeatForeground;
+static SokuLib::DrawUtils::RectangleShape rect;
 static std::vector<std::unique_ptr<Guide>> noEditorGuides;
 static std::vector<std::unique_ptr<Guide>> editorGuides;
 
@@ -1787,6 +1788,9 @@ void menuLoadAssets()
 	hasEnglishPatch = (*(int *)0x411c64 == 1);
 	loadFont();
 
+	rect.setSize({640, 480});
+	rect.setFillColor({0x00, 0x00, 0x00, 0x00});
+	rect.setBorderColor({0x00, 0x00, 0x00, 0x00});
 	previewContainer.texture.loadFromGame("data/menu/profile_list_seat.bmp");
 	previewContainer.rect = {
 		0, 0,
@@ -3528,16 +3532,24 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	SokuLib::currentScene->to<SokuLib::Title>().menuInputHandler.posCopy = 8;
 
 	if (loadedOutro) {
-		try {
-			if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false))
-				SokuLib::playSEWaveBuffer(0x29);
-			else if (loadedOutro->update())
-				return true;
-		} catch (std::exception &e) {
-			MessageBox(SokuLib::window, ("Error when updating pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+		if (!rect.getFillColor().a)
+			try {
+				if (SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false))
+					SokuLib::playSEWaveBuffer(0x29);
+				else if (loadedOutro->update())
+					return true;
+			} catch (std::exception &e) {
+				MessageBox(SokuLib::window, ("Error when updating pack outro: " + std::string(e.what())).c_str(), "Pack outro loading error", MB_ICONERROR);
+			}
+		else
+			loadedOutro->update();
+		rect.setFillColor(static_cast<unsigned int>(rect.getFillColor()) + 0x0F000000);
+		if (rect.getFillColor().a == 0xFF) {
+			loadedOutro.reset();
+			SokuLib::playBGM("data/bgm/op2.ogg");
 		}
-		loadedOutro.reset();
-	}
+	} else if (rect.getFillColor().a)
+		rect.setFillColor(static_cast<unsigned int>(rect.getFillColor()) - 0x0F000000);
 	return true;
 }
 
@@ -3825,6 +3837,7 @@ displayOutro:
 		loadedOutro->draw();
 	if (editorMode)
 		editorRender();
+	rect.draw();
 }
 
 void Guide::_init()

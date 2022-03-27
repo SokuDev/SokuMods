@@ -4,6 +4,7 @@
 
 #include <SokuLib.hpp>
 #include <lua.hpp>
+#include <memory>
 #include <sol/sol.hpp>
 #include <map>
 #include "FakeChrMgr.hpp"
@@ -56,7 +57,7 @@ inline void addVector(sol::state &lua, const char *name) {
 
 LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 {
-	this->_lua.reset(new sol::state());
+	this->_lua = std::make_unique<sol::state>();
 	this->_lua->open_libraries(
 		sol::lib::base,
 		sol::lib::package,
@@ -585,7 +586,8 @@ bool LuaBattleAnimation::update()
 {
 	if (this->_hasError)
 		return false;
-	(*this->_lua)["battleMgr"] = (FakeBattleManager *)&SokuLib::getBattleMgr();
+	if (SokuLib::sceneId == SokuLib::SCENE_BATTLE)
+		(*this->_lua)["battleMgr"] = (FakeBattleManager *)&SokuLib::getBattleMgr();
 	try {
 		auto fct = this->_lua->get<sol::protected_function>("update");
 		auto result = fct();
@@ -609,7 +611,8 @@ bool LuaBattleAnimation::update()
 
 void LuaBattleAnimation::render() const
 {
-	(*this->_lua)["battleMgr"] = (FakeBattleManager *)&SokuLib::getBattleMgr();
+	if (SokuLib::sceneId == SokuLib::SCENE_BATTLE)
+		(*this->_lua)["battleMgr"] = (FakeBattleManager *)&SokuLib::getBattleMgr();
 	try {
 		auto fct = this->_lua->get<sol::protected_function>("render");
 		auto result = fct();
@@ -629,7 +632,8 @@ void LuaBattleAnimation::render() const
 
 void LuaBattleAnimation::onKeyPressed()
 {
-	(*this->_lua)["battleMgr"] = (FakeBattleManager *)&SokuLib::getBattleMgr();
+	if (SokuLib::sceneId == SokuLib::SCENE_BATTLE)
+		(*this->_lua)["battleMgr"] = (FakeBattleManager *)&SokuLib::getBattleMgr();
 	try {
 		auto fct = this->_lua->get<sol::function>("onKeyPressed");
 		auto result = fct();

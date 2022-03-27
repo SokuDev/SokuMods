@@ -29,7 +29,7 @@ flashRect.size = Vector2u.new(640, 480)
 function update()
 	local color = flashRect.fillColor
 
-	battleMgr.leftCharacterManager:updateAnimation()
+	--battleMgr.leftCharacterManager:updateAnimation()
 	if color.a and ctr == 0 and side then
 		dialog:update()
 		if pressed then
