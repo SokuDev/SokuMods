@@ -9,3 +9,4 @@ modules/TrialMode/packs/*/*.pdb
 modules/TrialMode/packs/*/*.ilk
 modules/TrialMode/packs/*/*.manifest
 modules/TrialMode/packs/*/*.backup
+modules/TrialMode/packs/*/*.cv0
