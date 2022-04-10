@@ -1,13 +1,19 @@
 //
-// Created by PinkySmile on 09/12/2020.
+// Created by Gegel85 on 05/04/2022.
 //
 
 #ifndef SWRSTOYS_INPUTBOX_HPP
 #define SWRSTOYS_INPUTBOX_HPP
 
-#include <string>
+#include <functional>
 
-std::string InputBox(const std::string &Prompt, const std::string &Title, const std::string &Default);
-std::string PasswordBox(const std::string &Prompt, const std::string &Title, const std::string &Default);
+void inputBoxRender();
+void inputBoxUpdate();
+void inputBoxLoadAssets();
+void inputBoxUnloadAssets();
+void openInputDialog(const char *title, const char *defaultValue);
+void setInputBoxCallbacks(const std::function<void (const std::string &value)> &onAccept);
 
-#endif // SWRSTOYS_INPUTBOX_HPP
+extern bool inputBoxShown;
+
+#endif //SWRSTOYS_INPUTBOX_HPP

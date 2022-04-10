@@ -185,43 +185,42 @@ static struct PackEditScenario {
 	void setName()
 	{
 		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
-		auto input = InputBox("Enter new name", "New name", scenario->nameStr);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		scenario->nameStr = input;
-		scenario->name.texture.createFromText(scenario->nameStr.c_str(), defaultFont10, {0x100, 30});
-		scenario->name.rect = {
-			0, 0,
-			static_cast<int>(scenario->name.texture.getSize().x),
-			static_cast<int>(scenario->name.texture.getSize().y),
-		};
-		scenario->name.setSize(scenario->name.texture.getSize());
-		this->name.texture.createFromText(scenario->nameStr.c_str(), defaultFont12, {153, 23});
-		SokuLib::playSEWaveBuffer(0x28);
-	}
-
-	void setFile()
-	{
-		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
-		auto input = InputBox("Enter new file path", "New file path", scenario->fileRel);
-
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-
-		scenario->fileRel = input;
-		scenario->file = scenario->folder + "/" + input;
-		if (scenario->nameStr.empty()) {
-			scenario->name.texture.createFromText(scenario->fileRel.c_str(), defaultFont10, {0x100, 30});
+		openInputDialog("Enter new name", scenario->nameStr.c_str());
+		setInputBoxCallbacks([&scenario, this](const std::string &input){
+			scenario->nameStr = input;
+			scenario->name.texture.createFromText(scenario->nameStr.c_str(), defaultFont10, {0x100, 30});
 			scenario->name.rect = {
 				0, 0,
 				static_cast<int>(scenario->name.texture.getSize().x),
 				static_cast<int>(scenario->name.texture.getSize().y),
 			};
 			scenario->name.setSize(scenario->name.texture.getSize());
-		}
-		this->filePath.texture.createFromText(scenario->fileRel.c_str(), defaultFont12, {153, 23});
-		SokuLib::playSEWaveBuffer(0x28);
+			this->name.texture.createFromText(scenario->nameStr.c_str(), defaultFont12, {153, 23});
+			SokuLib::playSEWaveBuffer(0x28);
+		});
+	}
+
+	void setFile()
+	{
+		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
+
+		openInputDialog("Enter new file path", scenario->fileRel.c_str());
+		setInputBoxCallbacks([&scenario, this](const std::string &input){
+			scenario->fileRel = input;
+			scenario->file = scenario->folder + "/" + input;
+			if (scenario->nameStr.empty()) {
+				scenario->name.texture.createFromText(scenario->fileRel.c_str(), defaultFont10, {0x100, 30});
+				scenario->name.rect = {
+					0, 0,
+					static_cast<int>(scenario->name.texture.getSize().x),
+					static_cast<int>(scenario->name.texture.getSize().y),
+				};
+				scenario->name.setSize(scenario->name.texture.getSize());
+			}
+			this->filePath.texture.createFromText(scenario->fileRel.c_str(), defaultFont12, {153, 23});
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void setPreviewPath()
@@ -330,21 +329,20 @@ static struct PackEditScenario {
 	void setDescription()
 	{
 		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
-		auto input = InputBox("Enter new description", "New description", scenario->descriptionStr);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-
-		scenario->descriptionStr = input;
-		scenario->description.texture.createFromText(scenario->descriptionStr.c_str(), defaultFont12, {300, 150});
-		scenario->description.rect = {
-			0, 0,
-			static_cast<int>(scenario->description.texture.getSize().x),
-			static_cast<int>(scenario->description.texture.getSize().y),
-		};
-		scenario->description.setPosition({356, 286});
-		scenario->description.setSize(scenario->description.texture.getSize());
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new description", scenario->descriptionStr.c_str());
+		setInputBoxCallbacks([&scenario](const std::string &input){
+			scenario->descriptionStr = input;
+			scenario->description.texture.createFromText(scenario->descriptionStr.c_str(), defaultFont12, {300, 150});
+			scenario->description.rect = {
+				0, 0,
+				static_cast<int>(scenario->description.texture.getSize().x),
+				static_cast<int>(scenario->description.texture.getSize().y),
+			};
+			scenario->description.setPosition({356, 286});
+			scenario->description.setSize(scenario->description.texture.getSize());
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	static constexpr void (PackEditScenario::*resetHandlers[])() = {
@@ -443,119 +441,125 @@ static struct PackEditPage {
 	void setName()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new name", "Name", pack->nameStr);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->nameStr = input;
-		pack->name.texture.createFromText(
-			(pack->category + ": " + pack->nameStr).c_str(),
-			defaultFont12, {0x100, 30}, &size
-		);
-		pack->name.rect = {0, 0, size.x, size.y};
-		pack->name.setSize((size - 1).to<unsigned>());
-		this->name.texture.createFromText(pack->nameStr.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new name", pack->nameStr.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &input){
+			SokuLib::Vector2i size;
+
+			pack->nameStr = input;
+			pack->name.texture.createFromText(
+				(pack->category + ": " + pack->nameStr).c_str(),
+				defaultFont12, {0x100, 30}, &size
+			);
+			pack->name.rect = {0, 0, size.x, size.y};
+			pack->name.setSize((size - 1).to<unsigned>());
+			this->name.texture.createFromText(pack->nameStr.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void setCategory()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new category", "category", pack->category);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->category = input;
-		pack->name.texture.createFromText(
-			(pack->category + ": " + pack->nameStr).c_str(),
-			defaultFont12, {0x100, 30}, &size
-		);
-		pack->name.rect = {0, 0, size.x, size.y};
-		pack->name.setSize((size - 1).to<unsigned>());
-		this->category.texture.createFromText(pack->category.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new category", pack->category.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &input){
+			SokuLib::Vector2i size;
+
+			pack->category = input;
+			pack->name.texture.createFromText(
+				(pack->category + ": " + pack->nameStr).c_str(),
+				defaultFont12, {0x100, 30}, &size
+			);
+			pack->name.rect = {0, 0, size.x, size.y};
+			pack->name.setSize((size - 1).to<unsigned>());
+			this->category.texture.createFromText(pack->category.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void setAuthor()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new author", "Author", pack->authorStr);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->authorStr = input;
-		if (pack->author.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER].b != 0xFF)
-			return;
-		pack->author.texture.createFromText(("By " + pack->authorStr).c_str(), defaultFont10, {0x100, 14}, &size);
-		pack->author.rect = {
-			0, 0,
-			static_cast<int>(size.x),
-			static_cast<int>(size.y),
-		};
-		pack->author.setSize((size - 1).to<unsigned>());
-		this->author.texture.createFromText(pack->authorStr.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new author", pack->authorStr.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &input){
+			SokuLib::Vector2i size;
+
+			pack->authorStr = input;
+			if (pack->author.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER].b != 0xFF)
+				return;
+			pack->author.texture.createFromText(("By " + pack->authorStr).c_str(), defaultFont10, {0x100, 14}, &size);
+			pack->author.rect = {
+				0, 0,
+				static_cast<int>(size.x),
+				static_cast<int>(size.y),
+			};
+			pack->author.setSize((size - 1).to<unsigned>());
+			this->author.texture.createFromText(pack->authorStr.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void setMinVersion()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new minimum mod version required", "Min mod version required", pack->minVersion);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (input.substr(0, strlen("beta ")) != "beta " && input.substr(0, strlen("alpha ")) != "alpha " && !std::isdigit(input[0]))
-			return SokuLib::playSEWaveBuffer(0x29);
-		try {
-			Pack::getVersionFromStr(input);
-		} catch (std::exception &e) {
-			printf("Invalid version: %s\n", e.what());
-			return SokuLib::playSEWaveBuffer(0x29);
-		}
-		pack->minVersion = input;
-		this->version.texture.createFromText(pack->minVersion.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new minimum mod version required", pack->minVersion.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &input){
+			SokuLib::Vector2i size;
+
+			if (input.substr(0, strlen("beta ")) != "beta " && input.substr(0, strlen("alpha ")) != "alpha " && !std::isdigit(input[0]))
+				return SokuLib::playSEWaveBuffer(0x29);
+			try {
+				Pack::getVersionFromStr(input);
+			} catch (std::exception &e) {
+				printf("Invalid version: %s\n", e.what());
+				return SokuLib::playSEWaveBuffer(0x29);
+			}
+			pack->minVersion = input;
+			this->version.texture.createFromText(pack->minVersion.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void setEnding()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new ending file", "Ending file", pack->outroRelPath);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		if (Pack::isInvalidPath(input))
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->outroRelPath = input;
-		pack->outroPath = pack->path + "/" + input;
-		this->endingPath.texture.createFromText(pack->outroRelPath.c_str(), defaultFont12, {153, 23}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new ending file", pack->outroRelPath.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &input){
+			SokuLib::Vector2i size;
+
+			if (Pack::isInvalidPath(input))
+				return SokuLib::playSEWaveBuffer(0x29);
+			pack->outroRelPath = input;
+			pack->outroPath = pack->path + "/" + input;
+			this->endingPath.texture.createFromText(pack->outroRelPath.c_str(), defaultFont12, {153, 23}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void setDescription()
 	{
 		auto &pack = loadedPacks[currentPack];
-		SokuLib::Vector2i size;
-		std::string input = InputBox("Enter new description", "Description", pack->descriptionStr);
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
-		pack->descriptionStr = input;
-		pack->description.texture.createFromText(pack->descriptionStr.c_str(),defaultFont12, {300, 150});
-		pack->description.rect = {
-			0, 0,
-			static_cast<int>(pack->description.texture.getSize().x),
-			static_cast<int>(pack->description.texture.getSize().y),
-		};
-		pack->description.setPosition({356, 286});
-		pack->description.setSize(pack->description.texture.getSize());
-		this->description.texture.createFromText(pack->descriptionStr.c_str(), defaultFont16, {381, 111}, &size);
-		SokuLib::playSEWaveBuffer(0x28);
+		openInputDialog("Enter new description", pack->descriptionStr.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &input){
+			SokuLib::Vector2i size;
+
+			pack->descriptionStr = input;
+			pack->description.texture.createFromText(pack->descriptionStr.c_str(),defaultFont12, {300, 150});
+			pack->description.rect = {
+				0, 0,
+				static_cast<int>(pack->description.texture.getSize().x),
+				static_cast<int>(pack->description.texture.getSize().y),
+			};
+			pack->description.setPosition({356, 286});
+			pack->description.setSize(pack->description.texture.getSize());
+			this->description.texture.createFromText(pack->descriptionStr.c_str(), defaultFont16, {381, 111}, &size);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void switchMirrorX()
@@ -843,52 +847,53 @@ static struct PackEditPage {
 	void setModes()
 	{
 		auto &pack = loadedPacks[currentPack];
-		std::string input = InputBox("Enter new modes separated by commas", "Modes", this->tmpModesStr);
-		unsigned allocSize = 0;
 
-		if (input.empty())
-			return SokuLib::playSEWaveBuffer(0x29);
+		openInputDialog("Enter new modes separated by commas", this->tmpModesStr.c_str());
+		setInputBoxCallbacks([&pack, this](const std::string &i){
+			unsigned allocSize = 0;
+			std::string input = i;
 
-		for (auto c : input)
-			allocSize += c == ',';
-		pack->modes.clear();
-		pack->modes.reserve(allocSize + 1);
-		for (auto pos = input.find(','); pos != std::string::npos; pos = input.find(',')) {
-			auto str = input.substr(0, pos);
+			for (auto c : input)
+				allocSize += c == ',';
+			pack->modes.clear();
+			pack->modes.reserve(allocSize + 1);
+			for (auto pos = input.find(','); pos != std::string::npos; pos = input.find(',')) {
+				auto str = input.substr(0, pos);
 
-			input = input.substr(pos + 1);
-			while (!str.empty() && std::isspace(str[0]))
-				str.erase(str.begin());
-			while (!str.empty() && std::isspace(str.back()))
-				str.pop_back();
-			if (str.empty())
-				continue;
-			str.front() ^= 32 * (std::islower(str.front()) != 0);
-			if (std::find(pack->modes.begin(), pack->modes.end(), str) == pack->modes.end())
-				pack->modes.push_back(str);
-		}
-		while (!input.empty() && std::isspace(input[0]))
-			input.erase(input.begin());
-		while (!input.empty() && std::isspace(input.back()))
-			input.pop_back();
-		if (!input.empty()) {
-			input.front() ^= 32 * (std::islower(input.front()) != 0);
-			if (std::find(pack->modes.begin(), pack->modes.end(), input) == pack->modes.end())
-				pack->modes.push_back(input);
-		}
+				input = input.substr(pos + 1);
+				while (!str.empty() && std::isspace(str[0]))
+					str.erase(str.begin());
+				while (!str.empty() && std::isspace(str.back()))
+					str.pop_back();
+				if (str.empty())
+					continue;
+				str.front() ^= 32 * (std::islower(str.front()) != 0);
+				if (std::find(pack->modes.begin(), pack->modes.end(), str) == pack->modes.end())
+					pack->modes.push_back(str);
+			}
+			while (!input.empty() && std::isspace(input[0]))
+				input.erase(input.begin());
+			while (!input.empty() && std::isspace(input.back()))
+				input.pop_back();
+			if (!input.empty()) {
+				input.front() ^= 32 * (std::islower(input.front()) != 0);
+				if (std::find(pack->modes.begin(), pack->modes.end(), input) == pack->modes.end())
+					pack->modes.push_back(input);
+			}
 
-		allocSize = 0;
-		for (int i = 0; i < pack->modes.size(); i++)
-			allocSize += pack->modes[i].size() + (i != 0);
-		this->tmpModesStr.clear();
-		this->tmpModesStr.reserve(allocSize);
-		for (int i = 0; i < pack->modes.size(); i++) {
-			if (i != 0)
-				this->tmpModesStr += ',';
-			this->tmpModesStr += pack->modes[i];
-		}
-		this->modes.texture.createFromText(this->tmpModesStr.c_str(), defaultFont12, {153, 23}, nullptr);
-		SokuLib::playSEWaveBuffer(0x28);
+			allocSize = 0;
+			for (int i = 0; i < pack->modes.size(); i++)
+				allocSize += pack->modes[i].size() + (i != 0);
+			this->tmpModesStr.clear();
+			this->tmpModesStr.reserve(allocSize);
+			for (int i = 0; i < pack->modes.size(); i++) {
+				if (i != 0)
+					this->tmpModesStr += ',';
+				this->tmpModesStr += pack->modes[i];
+			}
+			this->modes.texture.createFromText(this->tmpModesStr.c_str(), defaultFont12, {153, 23}, nullptr);
+			SokuLib::playSEWaveBuffer(0x28);
+		});
 	}
 
 	void resetName()
@@ -1927,6 +1932,7 @@ void menuLoadAssets()
 	editScenarioSeat.rect.height = editScenarioSeat.texture.getSize().y;
 
 	explorerLoadAssets();
+	inputBoxLoadAssets();
 
 	lockedText.setSize({300, 150});
 	lockedText.rect.width = 300;
@@ -2269,6 +2275,7 @@ void menuUnloadAssets()
 	editorGuides.clear();
 
 	explorerUnloadAssets();
+	inputBoxUnloadAssets();
 	editorMode = false;
 	packEditScenario.opened = false;
 	packEditPage.opened = false;
@@ -3187,23 +3194,23 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 	}
 	if (SokuLib::inputMgrs.input.c == 1 && !expended) {
 		std::string folder{packsLocation, packsLocation + strlen(packsLocation) - 1};
-		auto result = InputBox("Enter a folder name", "Folder name", "");
-		auto path = folder + result;
 
-		if (result.empty()) {
-			puts("Canceled");
-			goto afterCInput;
-		}
-		if (_mkdir(path.c_str()) != 0) {
-			MessageBox(
-				SokuLib::window,
-				(path + ": " + strerror(errno)).c_str(),
-				"Pack creation error",
-				MB_ICONERROR
-			);
-			goto afterCInput;
-		}
-		createBasicPack(path);
+		openInputDialog("Enter a folder name", nullptr);
+		setInputBoxCallbacks([folder](const std::string &result){
+			auto path = folder + result;
+
+			if (_mkdir(path.c_str()) != 0) {
+				MessageBox(
+					SokuLib::window,
+					(path + ": " + strerror(errno)).c_str(),
+					"Pack creation error",
+					MB_ICONERROR
+				);
+				return;
+			}
+			createBasicPack(path);
+		});
+		return true;
 	}
 afterCInput:
 	if (SokuLib::inputMgrs.input.horizontalAxis == 1 && currentPack >= 0) {
@@ -3213,49 +3220,50 @@ afterCInput:
 			openTrialEditPage();
 	}
 	if (SokuLib::inputMgrs.input.c == 1 && expended) {
-		auto &pack = loadedPacks[currentPack];
-		std::string jsonfile = InputBox("Enter file name.", "File name", "");
-		struct stat s;
-		std::ifstream from;
-		std::ofstream to;
-		char buffer[1024];
+		openInputDialog("Enter file name.", nullptr);
+		setInputBoxCallbacks([](const std::string &jsonfile){
+			auto &pack = loadedPacks[currentPack];
+			struct stat s;
+			std::ifstream from;
+			std::ofstream to;
+			char buffer[1024];
 
-		if (jsonfile.empty())
-			return SokuLib::playSEWaveBuffer(0x29), true;
-		if (stat((pack->path + "/" + jsonfile).c_str(), &s) == 0) {
-			MessageBox(SokuLib::window, (pack->path + "/" + jsonfile + " already exists.").c_str(), "Copy error", MB_ICONERROR);
-			return true;
-		}
-		stat(pack->scenarios[currentEntry]->file.c_str(), &s);
-		from.open(pack->scenarios[currentEntry]->file);
-		if (from.fail()) {
-			MessageBox(SokuLib::window, ("Cannot open file " + pack->scenarios[currentEntry]->file + " to read.").c_str(), "Copy error", MB_ICONERROR);
-			return true;
-		}
-		to.open(pack->path + "/" + jsonfile);
-		if (to.fail()) {
-			MessageBox(SokuLib::window, ("Cannot open file " + pack->path + "/" + jsonfile + " to write.").c_str(), "Copy error", MB_ICONERROR);
-			return true;
-		}
-		while (s.st_size) {
-			auto size = min(sizeof(buffer), s.st_size);
+			if (stat((pack->path + "/" + jsonfile).c_str(), &s) == 0) {
+				MessageBox(SokuLib::window, (pack->path + "/" + jsonfile + " already exists.").c_str(), "Copy error", MB_ICONERROR);
+				return;
+			}
+			stat(pack->scenarios[currentEntry]->file.c_str(), &s);
+			from.open(pack->scenarios[currentEntry]->file);
+			if (from.fail()) {
+				MessageBox(SokuLib::window, ("Cannot open file " + pack->scenarios[currentEntry]->file + " to read.").c_str(), "Copy error", MB_ICONERROR);
+				return;
+			}
+			to.open(pack->path + "/" + jsonfile);
+			if (to.fail()) {
+				MessageBox(SokuLib::window, ("Cannot open file " + pack->path + "/" + jsonfile + " to write.").c_str(), "Copy error", MB_ICONERROR);
+				return;
+			}
+			while (s.st_size) {
+				auto size = min(sizeof(buffer), s.st_size);
 
-			from.read(buffer, size);
-			to.write(buffer, size);
-			s.st_size -= size;
-		}
+				from.read(buffer, size);
+				to.write(buffer, size);
+				s.st_size -= size;
+			}
 
-		pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
-		currentEntry = pack->scenarios.size() - 1;
-		packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
-		if (currentEntry > 15)
-			entryStart = currentEntry - 15;
-		for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
-			guide->active = false;
-		(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
-		expended = true;
-		SokuLib::playSEWaveBuffer(0x28);
-		saveCurrentPack();
+			pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
+			currentEntry = pack->scenarios.size() - 1;
+			packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+			if (currentEntry > 15)
+				entryStart = currentEntry - 15;
+			for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+				guide->active = false;
+			(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
+			expended = true;
+			SokuLib::playSEWaveBuffer(0x28);
+			saveCurrentPack();
+		});
+		return true;
 	}
 	if (SokuLib::inputMgrs.input.d == 1 && currentPack >= 0) {
 		auto &pack = loadedPacks[currentPack];
@@ -3272,44 +3280,56 @@ afterCInput:
 			currentEntry -= currentEntry == pack->scenarios.size();
 			expended = !pack->scenarios.empty();
 		} else {
-			std::string jsonfile = InputBox("Enter file name. If the file doesn't exist, it will be created.", "File name", "");
-			struct stat s;
+			openInputDialog("Enter file name. If the file doesn't exist, it will be created.", nullptr);
+			setInputBoxCallbacks([&pack](const std::string &jsonfile){
+				struct stat s;
 
-			if (jsonfile.empty())
-				return SokuLib::playSEWaveBuffer(0x29), true;
-			if (stat((pack->path + "/" + jsonfile).c_str(), &s) != 0) {
-				std::string type = InputBox("Enter trial type\r\nValid types are \"combo\"", "Trial type", "");
+				if (stat((pack->path + "/" + jsonfile).c_str(), &s) != 0) {
+					openInputDialog("Enter trial type<br>Valid types are <color FFFFFF>combo</color>", nullptr);
+					setInputBoxCallbacks([&pack, &jsonfile](const std::string &type){
+						if (type.empty())
+							return SokuLib::playSEWaveBuffer(0x29);
+						if (!Trial::isTypeValid(type)) {
+							MessageBox(SokuLib::window, (type + " is not a valid trial type.").c_str(), "Error", MB_ICONERROR);
+							return SokuLib::playSEWaveBuffer(0x29);
+						}
 
-				if (type.empty())
-					return SokuLib::playSEWaveBuffer(0x29), true;
-				if (!Trial::isTypeValid(type)) {
-					MessageBox(SokuLib::window, (type + " is not a valid trial type.").c_str(), "Error", MB_ICONERROR);
-					return SokuLib::playSEWaveBuffer(0x29), true;
+						std::ofstream stream{pack->path + "/" + jsonfile};
+
+						if (stream.fail()) {
+							MessageBox(SokuLib::window, ("Cannot open " + pack->path + "/" + jsonfile + " for writing: " + strerror(errno)).c_str(), "Error", MB_ICONERROR);
+							return SokuLib::playSEWaveBuffer(0x29);
+						}
+						stream << "{" << std::endl;
+						stream << R"(    "type": ")" << type << "\"" << std::endl;
+						stream << "}" << std::endl;
+						if (stream.fail()) {
+							MessageBox(SokuLib::window, ("Cannot write to " + pack->path + "/" + jsonfile + ": " + strerror(errno)).c_str(), "Error", MB_ICONERROR);
+							return SokuLib::playSEWaveBuffer(0x29);
+						}
+						pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
+						currentEntry = pack->scenarios.size() - 1;
+						packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+						if (currentEntry > 15)
+							entryStart = currentEntry - 15;
+						for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+							guide->active = false;
+						(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
+						expended = true;
+					});
+					return;
 				}
-
-				std::ofstream stream{pack->path + "/" + jsonfile};
-
-				if (stream.fail()) {
-					MessageBox(SokuLib::window, ("Cannot open " + pack->path + "/" + jsonfile + " for writing: " + strerror(errno)).c_str(), "Error", MB_ICONERROR);
-					return SokuLib::playSEWaveBuffer(0x29), true;
-				}
-				stream << "{" << std::endl;
-				stream << R"(    "type": ")" << type << "\"" << std::endl;
-				stream << "}" << std::endl;
-				if (stream.fail()) {
-					MessageBox(SokuLib::window, ("Cannot write to " + pack->path + "/" + jsonfile + ": " + strerror(errno)).c_str(), "Error", MB_ICONERROR);
-					return SokuLib::playSEWaveBuffer(0x29), true;
-				}
-			}
-			pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
-			currentEntry = pack->scenarios.size() - 1;
-			packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
-			if (currentEntry > 15)
-				entryStart = currentEntry - 15;
-			for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
-				guide->active = false;
-			(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
-			expended = true;
+				pack->scenarios.emplace_back(new Scenario(-1, pack->scenarios.size(), pack->path, {{"file", jsonfile}}));
+				currentEntry = pack->scenarios.size() - 1;
+				packStart = max(0, min(currentPack, 1.f * currentPack - static_cast<int>(264 - (currentPack == loadedPacks.size() - 1 ? 0 : 20) - 35 - 15.f * loadedPacks[currentPack]->scenarios.size()) / 35));
+				if (currentEntry > 15)
+					entryStart = currentEntry - 15;
+				for (auto &guide : (editorMode ? editorGuides : noEditorGuides))
+					guide->active = false;
+				(editorMode ? editorGuides : noEditorGuides)[2]->active = true;
+				expended = true;
+			});
+			return true;
 		}
 		SokuLib::playSEWaveBuffer(0x28);
 		saveCurrentPack();
@@ -3319,6 +3339,8 @@ afterCInput:
 
 bool editorUpdate()
 {
+	if (inputBoxShown)
+		return inputBoxUpdate(), false;
 	if (explorerShown)
 		return explorerUpdate(), false;
 	if (!checkEditorKeys(SokuLib::inputMgrs.input))
@@ -3340,7 +3362,9 @@ bool editorUpdate()
 
 void editorRender()
 {
-	if (explorerShown)
+	if (inputBoxShown)
+		inputBoxRender();
+	else if (explorerShown)
 		explorerRender();
 	else if (packEditScenario.opened) {
 		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
