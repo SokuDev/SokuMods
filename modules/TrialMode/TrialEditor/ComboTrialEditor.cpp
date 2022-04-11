@@ -3450,7 +3450,6 @@ bool ComboTrialEditor::_selectScoreMenuItem()
 		SokuLib::playSEWaveBuffer(0x28);
 		return false;
 	case 4:
-
 		openInputDialog("Input new minimum damage requirement.", std::to_string(this->_scores[this->_scoreEdited].damage).c_str());
 		setInputBoxCallbacks([this](const std::string &str) {
 			try {

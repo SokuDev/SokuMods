@@ -75,11 +75,11 @@ static std::string sanitizeInput()
 
 void inputBoxUpdate()
 {
-	if (!inputBoxShown || GetForegroundWindow() != SokuLib::window)
+	if (!inputBoxShown)
 		return;
 
 	for (size_t i = 0; i < sizeof(current); i++) {
-		int j = GetKeyState(i);
+		int j = GetAsyncKeyState(i);
 
 		current[i] = j >> 8 | j & 1;
 		if (current[i] & 0x80)
@@ -106,9 +106,12 @@ void inputBoxUpdate()
 		updateCursor(buffer.size() - 1);
 	}
 	if (timers[VK_RETURN] == 1) {
-		onAcceptFct(buffer.data());
 		inputBoxShown = false;
-		return mutex.unlock();
+		mutex.unlock();
+		try {
+			onAcceptFct(buffer.data());
+		} catch (...) {}
+		return;
 	}
 	if (timers[VK_BACK] == 1 || (timers[VK_BACK] > 36 && timers[VK_BACK] % 6 == 0)) {
 		if (cursorPos != 0) {
@@ -240,6 +243,8 @@ void openInputDialog(const char *title, const char *defaultValue)
 
 	memset(current, 0, sizeof(current));
 	memset(timers, 0, sizeof(timers));
+	lastPressed = 0;
+	t = 0;
 	buffer.clear();
 	if (defaultValue) {
 		buffer.reserve(strlen(defaultValue));
