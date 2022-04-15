@@ -19,18 +19,42 @@ Socket::HttpResponse connect(const Socket::HttpRequest &requ) {
 	std::string ip;
 	unsigned short hport;
 	bool isSpec;
+	nlohmann::json json;
+	std::map<std::string, std::string> errors;
 
 	try {
-		auto json = nlohmann::json::parse(requ.body);
-
-		ip = json["ip"];
-		hport = json["port"];
-		isSpec = json["spec"];
-		if (inet_addr(ip.c_str()) == -1)
-			throw std::exception();
-	} catch (...) {
-		throw AbortConnectionException(400);
+		json = nlohmann::json::parse(requ.body);
+	} catch (std::exception &e) {
+		throw AbortConnectionException(400, nlohmann::json{
+			{"error", "JSON parsing error"},
+			{"details", e.what()},
+			{"body", requ.body}
+		}.dump(), "application/json");
 	}
+	if (!json.contains("ip"))
+		errors["ip"] = "This field is required";
+	if (!json.contains("port"))
+		errors["port"] = "This field is required";
+	if (!json.contains("spec"))
+		errors["spec"] = "This field is required";
+
+	if (errors.begin() != errors.end())
+		throw AbortConnectionException(400, nlohmann::json{errors}.dump(), "application/json");
+
+	if (!json["ip"].is_string())
+		errors["ip"] = "String expected but got " + std::string(json["ip"].type_name());
+	if (!json["port"].is_string())
+		errors["port"] = "Number expected but got " + std::string(json["port"].type_name());
+	if (!json["spec"].is_string())
+		errors["spec"] = "Boolean expected but got " + std::string(json["spec"].type_name());
+	if (errors.begin() != errors.end())
+		throw AbortConnectionException(400, nlohmann::json{errors}.dump(), "application/json");
+
+	ip = json["ip"];
+	hport = json["port"];
+	isSpec = json["spec"];
+	if (inet_addr(ip.c_str()) == -1)
+		throw AbortConnectionException(400, nlohmann::json{{{"ip", "This field is invalid"}}}.dump(), "application/json");
 
 	if (!SokuLib::MenuConnect::isInNetworkMenu())
 		menuObj = &SokuLib::MenuConnect::moveToConnectMenu();
@@ -90,8 +114,12 @@ static void setState(const Socket::HttpRequest &requ) {
 		}
 		if (result.contains("round"))
 			_cache.round = result["round"];
-	} catch (nlohmann::detail::exception &) {
-		throw AbortConnectionException(400);
+	} catch (nlohmann::detail::exception &e) {
+		throw AbortConnectionException(400, nlohmann::json{
+			{"error", "JSON error"},
+			{"details", e.what()},
+			{"body", requ.body}
+		}.dump(), "application/json");
 	}
 	broadcastOpcode(STATE_UPDATE, cacheToJson(_cache));
 	_cache.noReset = true;

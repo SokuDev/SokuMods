@@ -171,14 +171,15 @@ void updateCache(bool isMultiplayer) {
 	auto &battleMgr = SokuLib::getBattleMgr();
 
 	if (needReset) {
-		if (_cache.noReset)
-			;
+		if (_cache.noReset);
 		else if (isMultiplayer) {
 			auto &netObj = SokuLib::getNetObject();
 
 			if (_cache.realLeftName != netObj.profile1name || _cache.realRightName != netObj.profile2name) {
-				_cache.leftScore = 0;
-				_cache.rightScore = 0;
+				if (!_cache.recvScores) {
+					_cache.leftScore = 0;
+					_cache.rightScore = 0;
+				}
 				_cache.leftName = netObj.profile1name;
 				_cache.rightName = netObj.profile2name;
 				_cache.realLeftName = netObj.profile1name;

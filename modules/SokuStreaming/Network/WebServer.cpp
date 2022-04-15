@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <process.h>
+#include <nlohmann/json.hpp>
 
 const std::map<std::string, std::string> WebServer::types{
 	{"txt", "text/plain"},
@@ -174,11 +175,23 @@ void WebServer::_serverLoop() {
 					response = this->_checkFolders(requ);
 			}
 		} catch (InvalidHTTPAnswerException &) {
-			response = WebServer::_makeGenericPage(400);
+			response.returnCode = 400;
+			response.codeName = WebServer::codes.at(400);
+			response.header["content-type"] = "application/json";
+			response.body = nlohmann::json({
+				{"error", "Invalid HTTP request"},
+				{"request", s}
+			}).dump();
 		} catch (NotImplementedException &) {
 			response = WebServer::_makeGenericPage(501);
 		} catch (AbortConnectionException &e) {
-			response = WebServer::_makeGenericPage(e.getCode());
+			if (*e.getBody()) {
+				response.returnCode = e.getCode();
+				response.codeName = WebServer::codes.at(response.returnCode);
+				response.header["content-type"] = e.getType();
+				response.body = e.getBody();
+			} else
+				response = WebServer::_makeGenericPage(e.getCode());
 		}
 		response.codeName = WebServer::codes.at(response.returnCode);
 	} catch (std::exception &e) {
@@ -211,17 +224,13 @@ Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code) {
 	response.codeName = WebServer::codes.at(response.returnCode);
 	response.header["content-type"] = "text/html";
 	response.body = "<html>"
-									"<head>"
-									"<title>"
-		+ response.codeName
-		+ "</title>"
-			"</head>"
-			"<body>"
-			"<h1>"
-		+ std::to_string(response.returnCode) + ": " + response.codeName
-		+ "</h1>"
-			"</body>"
-			"</html>";
+		"<head>"
+			"<title>" + response.codeName + "</title>"
+		"</head>"
+		"<body>"
+			"<h1>" + std::to_string(response.returnCode) + ": " + response.codeName + "</h1>"
+		"</body>"
+	"</html>";
 	return response;
 }
 
@@ -232,18 +241,13 @@ Socket::HttpResponse WebServer::_makeGenericPage(unsigned short code, const std:
 	response.codeName = WebServer::codes.at(response.returnCode);
 	response.header["content-type"] = "text/html";
 	response.body = "<html>"
-									"<head>"
-									"<title>"
-		+ response.codeName
-		+ "</title>"
-			"</head>"
-			"<body>"
-			"<h1>"
-		+ std::to_string(response.returnCode) + ": " + response.codeName + " (" + extra
-		+ ")"
-			"</h1>"
-			"</body>"
-			"</html>";
+		"<head>"
+			"<title>" + response.codeName + "</title>"
+		"</head>"
+		"<body>"
+			"<h1>" + std::to_string(response.returnCode) + ": " + response.codeName + " (" + extra + ")</h1>"
+		"</body>"
+	"</html>";
 	return response;
 }
 

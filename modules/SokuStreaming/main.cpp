@@ -9,12 +9,25 @@
 #include "Utils/InputBox.hpp"
 #include <Shlwapi.h>
 #include <SokuLib.hpp>
-#include <DeprecatedElements.hpp>
 #include <algorithm>
 #include <dinput.h>
 
 static bool gameStarted = false;
 static bool sessionStarted = false;
+static int (__stdcall *s_origRecvFrom)(SOCKET s, char * buf, int len, int flags, sockaddr * from, int * fromlen);
+
+int __stdcall myRecvFrom(SOCKET s, char *buf, int len, int flags, sockaddr *from, int *fromlen)
+{
+	auto packet = reinterpret_cast<SokuLib::Packet *>(buf);
+	int result = s_origRecvFrom(s, buf, len, flags, from, fromlen);
+
+	if (packet->type == SokuLib::HOST_GAME && packet->game.event.type == SokuLib::GAME_MATCH && packet->game.event.match.host.deckId >= 5 && packet->game.event.match.client().deckId >= 5) {
+		_cache.leftScore = packet->game.event.match.host.deckId - 5;
+		_cache.rightScore = packet->game.event.match.client().deckId - 5;
+		_cache.recvScores = true;
+	}
+	return result;
+}
 
 int __fastcall CTitle_OnProcess(SokuLib::Title *This) {
 	// super
@@ -24,6 +37,7 @@ int __fastcall CTitle_OnProcess(SokuLib::Title *This) {
 		broadcastOpcode(GAME_ENDED, "null");
 	if (sessionStarted)
 		broadcastOpcode(SESSION_ENDED, "null");
+	_cache.recvScores = false;
 	gameStarted = false;
 	sessionStarted = false;
 	needReset = true;
@@ -148,10 +162,11 @@ void hookFunctions() {
 	s_origCTitle_Process        = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,          CTitle_OnProcess);
 	s_origCBattleWatch_Process  = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onProcess,    CBattleWatch_OnProcess);
 	s_origCLoadingWatch_Process = SokuLib::TamperDword(&SokuLib::VTable_LoadingWatch.onProcess,   CLoadingWatch_OnProcess);
-	s_origCBattle_Process       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,    CBattle_OnProcess);
+	s_origCBattle_Process       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,         CBattle_OnProcess);
 	s_origCLoading_Process      = SokuLib::TamperDword(&SokuLib::VTable_Loading.onProcess,        CLoading_OnProcess);
 	s_origCBattleManager_Start  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onSayStart, CBattleManager_Start);
 	s_origCBattleManager_KO     = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onKO,       CBattleManager_KO);
+	s_origRecvFrom              = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.recvfrom,            myRecvFrom);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 	::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 }

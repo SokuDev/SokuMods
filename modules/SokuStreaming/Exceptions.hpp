@@ -123,14 +123,25 @@ public:
 class AbortConnectionException: public NetworkException {
 private:
 	unsigned short _code;
+	std::string _body;
+	std::string _type;
 
 public:
 	//! @brief Create a EOFException with a message.
 	//! @param msg The error message.
 	explicit AbortConnectionException(unsigned short code): NetworkException(std::to_string(code)), _code(code){};
+	explicit AbortConnectionException(unsigned short code, const std::string &&body, const std::string &&type): NetworkException(std::to_string(code)), _code(code), _body(body), _type(type){};
 
 	unsigned short getCode() const {
-		return _code;
+		return this->_code;
+	};
+
+	const char *getBody() const {
+		return this->_body.c_str();
+	};
+
+	const char *getType() const {
+		return this->_type.c_str();
 	};
 };
 

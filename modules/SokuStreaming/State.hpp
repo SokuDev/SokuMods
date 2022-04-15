@@ -35,6 +35,7 @@ extern unsigned short port;
 extern std::vector<unsigned> keys;
 extern std::unique_ptr<WebServer> webServer;
 extern struct CachedMatchData {
+	bool recvScores;
 	SokuLib::Weather weather;
 	SokuLib::Character left;
 	SokuLib::Character right;
