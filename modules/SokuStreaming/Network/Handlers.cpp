@@ -43,9 +43,9 @@ Socket::HttpResponse connect(const Socket::HttpRequest &requ) {
 
 	if (!json["ip"].is_string())
 		errors["ip"] = "String expected but got " + std::string(json["ip"].type_name());
-	if (!json["port"].is_string())
+	if (!json["port"].is_number())
 		errors["port"] = "Number expected but got " + std::string(json["port"].type_name());
-	if (!json["spec"].is_string())
+	if (!json["spec"].is_boolean())
 		errors["spec"] = "Boolean expected but got " + std::string(json["spec"].type_name());
 	if (errors.begin() != errors.end())
 		throw AbortConnectionException(400, nlohmann::json{errors}.dump(), "application/json");

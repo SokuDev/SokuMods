@@ -471,7 +471,6 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 			auto &fake = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? fakeLeftDeck : fakeRightDeck);
 			auto &replace = (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT ? packet->game.event.match.host : packet->game.event.match.client());
 
-			replace.deckId = 0;
 			if (fake)
 				memcpy(replace.cards, fake->data(), fake->size() * sizeof(*fake->data()));
 			else //We just send an invalid deck over if we want no decks
