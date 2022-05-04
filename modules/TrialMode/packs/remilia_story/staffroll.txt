@@ -58,7 +58,7 @@ pic:77,data/scene/staffroll/moji/moji07.bmp,0,0,1
 pic:78,data/scene/staffroll/moji/moji08.bmp,0,0,1
 pic:79,data/scene/staffroll/moji/moji09.bmp,0,0,1
 pic:80,data/scene/staffroll/moji/moji10.bmp,0,0,1
-pic:81,data/scene/staffroll/moji/moji11.bmp,0,0,1
+pic:81,{{pack_path}}moji11.bmp,0,0,1
 
 pic:61,{{pack_path}}end.png,0,0,1
 
