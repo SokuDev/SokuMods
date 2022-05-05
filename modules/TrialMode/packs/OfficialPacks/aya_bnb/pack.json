@@ -1,0 +1,137 @@
+{
+    "author": "PinkySmile",
+    "category": "Aya Shameimaru",
+    "characters": [
+        "aya",
+        "meirin"
+    ],
+    "description": "No description provided",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 4.0,
+            "y": 0.0
+        },
+        "path": "data/character/aya/face/face000.cv2",
+        "rect": {
+            "height": 54,
+            "left": 0,
+            "top": 0,
+            "width": 133
+        },
+        "scale": 0.5100002884864807,
+        "xMirror": true,
+        "yMirror": false
+    },
+    "min_version": "alpha 0.5.16",
+    "modes": [
+        "Combo",
+        "Story"
+    ],
+    "name": "Basic Combos",
+    "scenarios": [
+        {
+            "description": "5AAAA (Dial A)<br>Everywhere<br><br>Autocombo when pressing A",
+            "extra": false,
+            "file": "bnb1.json",
+            "may_be_locked": true,
+            "name": "Dial A",
+            "name_hidden_when_locked": false,
+            "preview": "bnb1.gif"
+        },
+        {
+            "description": "(j5A lc) 5AAA 2B/5B 6C d236b<br>Full/Midscreen<br>2B 6C doesn't work if too far.<br>Doesn't knockdown if opponent wallslams and no<br>follow-up is available.<br>Without 6C opponent travels a shorter distance, so likely to wallslam.<br>Ommit 6C and/or 2B/5B if you want<br>your opponent closer to you.",
+            "extra": false,
+            "file": "bnb2.json",
+            "may_be_locked": true,
+            "name": "Dial A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb2.gif"
+        },
+        {
+            "description": "(j5A lc) j5A j5B j66 j5A j8A j5B j5C<br>Midscreen<br><br>Basic air to air combo.",
+            "extra": false,
+            "file": "bnb3.json",
+            "may_be_locked": true,
+            "name": "Air j5A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb3.gif"
+        },
+        {
+            "description": "(j5A lc) 5AAAA 6B hj9 j5A j6A j5B/j6C/jd236<br>Corner<br><br>j236 gives more damages.<br>j6C gives better oki but is character specific.<br>j5B isn't chara spe and has a better oki and<br>orb regen than j236",
+            "extra": false,
+            "file": "bnb4.json",
+            "may_be_locked": true,
+            "name": "Dial A starter corner",
+            "name_hidden_when_locked": false,
+            "preview": "bnb4.gif"
+        },
+        {
+            "description": "j5A j5B j66 j5A j8A/j6A (j5[B]/j2[B]) j6C/j236<br>Corner/Near corner<br>j6A works better for opponent above and<br>j8A below. j8A can be delayed to adjust height.<br>j6C gives more time to oki and orb regen but<br>needs a full 5[B] to limit. j5[B] can be<br>ommitted and knockdown with j236 if<br>unsure it can hit",
+            "extra": false,
+            "file": "bnb5.json",
+            "may_be_locked": true,
+            "name": "Air j5A starter (near)corner",
+            "name_hidden_when_locked": false,
+            "preview": "bnb5.gif"
+        },
+        {
+            "description": "6A 5B j5B j66 j5A j8A<br>Near corner<br><br>Basic 6A conversion.",
+            "extra": false,
+            "file": "bnb6.json",
+            "may_be_locked": true,
+            "name": "6A starter near corner",
+            "name_hidden_when_locked": false,
+            "preview": "bnb6.gif"
+        },
+        {
+            "description": "66A d236 j5B j66 j5A j8A/j6A j6C/j5B/j236<br>Near corner<br><br>j6C is chara spe.",
+            "extra": false,
+            "file": "bnb7.json",
+            "may_be_locked": true,
+            "name": "66A starter near corner",
+            "name_hidden_when_locked": false,
+            "preview": "bnb7.gif"
+        },
+        {
+            "description": "CH j2A 6[B] hj9 j5A j6A<br>Anywhere<br><br>Standard counter hit j2A conversion.",
+            "extra": false,
+            "file": "bnb8.json",
+            "may_be_locked": true,
+            "name": "CH j2A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb8.gif"
+        },
+        {
+            "description": "j5A j2B j66 j5A j2B jd236<br>Anywhere<br><br>Standard air to ground combo.",
+            "extra": false,
+            "file": "bnb9.json",
+            "may_be_locked": true,
+            "name": "Air to ground j5A starter",
+            "name_hidden_when_locked": false,
+            "preview": "bnb9.gif"
+        },
+        {
+            "description": "(j5A lc) 5AAA 2B 3SC 2B hj9 j2[B] j2C<br>Midscreen only<br><br>Need slight delay on j2[B].",
+            "extra": false,
+            "file": "bnb10.json",
+            "may_be_locked": true,
+            "name": "Dial A starter 3SC",
+            "name_hidden_when_locked": false,
+            "preview": "bnb10.gif"
+        },
+        {
+            "description": "5AAAA/CH66B/CH66C/CHj2a 5SC<br>Anywhere<br><br>Don't forget to do left right during the<br>spellcard to adjust Aya's height",
+            "extra": false,
+            "file": "bnb11.json",
+            "may_be_locked": true,
+            "name": "5SC Illusionary Dominance",
+            "name_hidden_when_locked": false,
+            "preview": "bnb11.gif"
+        }
+    ],
+    "stand": {
+        "isPath": false,
+        "path": "data/stand/aya.cv2"
+    }
+}

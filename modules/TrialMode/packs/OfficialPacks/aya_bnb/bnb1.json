@@ -1,0 +1,55 @@
+{
+    "dummy": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 650.0,
+            "y": 0.0
+        }
+    },
+    "expected": "5aaaa",
+    "music": "data/bgm/st21.ogg",
+    "player": {
+        "character": "aya",
+        "deck": [],
+        "palette": 0,
+        "pos": 582.0
+    },
+    "score": [
+        {
+            "min_damage": 1277,
+            "min_hits": 4,
+            "min_limit": 40
+        },
+        {
+            "max_attempts": 3
+        },
+        {
+            "max_attempts": 2
+        },
+        {
+            "max_attempts": 1
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 3,
+    "type": "combo"
+}
