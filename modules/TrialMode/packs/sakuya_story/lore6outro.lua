@@ -46,6 +46,9 @@ local function init()
 	yukari.action = enums.actions.ACTION_ALT2_SKILL4_C
 	yukari:initAnimation()
 	yukari.renderInfos.color = enums.colors.Black
+
+	battleMgr.leftChr.direction = enums.directions.RIGHT;
+	battleMgr.rightChr.direction = enums.directions.LEFT;
 end
 
 local function stage0()

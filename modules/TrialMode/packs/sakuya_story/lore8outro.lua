@@ -39,6 +39,9 @@ local function init()
 	battleMgr.rightChr.position.y = 0
 	battleMgr.rightChr.action = enums.actions.ACTION_KNOCKED_DOWN_STATIC
 	battleMgr.rightChr:initAnimation()
+
+	battleMgr.leftChr.direction = enums.directions.RIGHT;
+	battleMgr.rightChr.direction = enums.directions.LEFT;
 end
 
 local function stage0()
