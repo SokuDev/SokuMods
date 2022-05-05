@@ -22,6 +22,7 @@ static int cursorPos = 0;
 static bool started = false;
 static bool loaded = false;
 static bool escPressed = false;
+static bool returnPressed = false;
 static bool changes = false;
 static SokuLib::DrawUtils::RectangleShape whiteBox;
 static SokuLib::DrawUtils::RectangleShape cursor;
@@ -91,6 +92,16 @@ void inputBoxUpdate()
 		inputBoxShown = (current[VK_ESCAPE] & 0x80) != 0;
 		return;
 	}
+	if (returnPressed) {
+		if ((current[VK_RETURN] & 0x80) == 0) {
+			inputBoxShown = false;
+			mutex.unlock();
+			try {
+				onAcceptFct(buffer.data());
+			} catch (...) {}
+		}
+		return;
+	}
 	if (timers[VK_ESCAPE] == 1) {
 		SokuLib::playSEWaveBuffer(0x29);
 		escPressed = true;
@@ -106,11 +117,7 @@ void inputBoxUpdate()
 		updateCursor(buffer.size() - 1);
 	}
 	if (timers[VK_RETURN] == 1) {
-		inputBoxShown = false;
-		mutex.unlock();
-		try {
-			onAcceptFct(buffer.data());
-		} catch (...) {}
+		returnPressed = true;
 		return;
 	}
 	if (timers[VK_BACK] == 1 || (timers[VK_BACK] > 36 && timers[VK_BACK] % 6 == 0)) {
@@ -261,6 +268,7 @@ void openInputDialog(const char *title, const char *defaultValue)
 	updateCursor(buffer.size() - 1);
 
 	inputBoxShown = true;
+	returnPressed = false;
 	escPressed = false;
 }
 
