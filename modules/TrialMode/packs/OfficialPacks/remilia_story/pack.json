@@ -1,4 +1,5 @@
 {
+    "author": "PinkySmile",
     "category": "Remilia Scarlet",
     "characters": [
         "remilia",
@@ -36,6 +37,7 @@
         "Story"
     ],
     "name": "Babylone's Aurora",
+    "outro": "outro.lua",
     "scenarios": [
         {
             "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>",
@@ -108,6 +110,15 @@
             "name": "The Curtain Fall?",
             "name_hidden_when_locked": true,
             "preview": "bnbcorn3.gif"
+        },
+        {
+            "description": "4a 4a 4a 4a 5SC | Works everywhere<br><br>",
+            "extra": true,
+            "file": "bnbany1.json",
+            "may_be_locked": true,
+            "name": "Extra1",
+            "name_hidden_when_locked": false,
+            "preview": "extra.gif"
         }
     ],
     "stand": {
