@@ -6,16 +6,18 @@ local dialogs = {
 	--Sakuya walking to Meiling on the ground
 	"lc Here you are...",
 	--Meiling moving in her sleep?
-	"lW It seems you at least tried to fulfill your role<br>this time.",
-	"rWSAh Sakuya?",
-	"rWDSo it was just a dream...",
-	"lADIt's no time to stay unconscious.",
-	"lhDSo, who beat you?",
-	"rhEI'm not sure...",
-	"rhSIn any case, I was put unconscious so<br>suddenly that it can't be anyone!",
-	"lASIt could have been anyone since they attacked<br>you in your sleep, didn't they?",
-	"lCSYou truly are useless, so just accept your punishment.",
-	"rCcI swear I wasn't sleeping this time!",
+	"rcSAh Miss... Sakuya?",
+	"rcDSo it was just a dream.",
+	"lcDHaving a hard time Meiling?",
+	"rchMiss Sakuya, did you come for help?",
+	"lEhSort of.",
+	"rEHReally?",
+	"lhHI'm collecting information on the matter.",
+	"rhEOh... Well it would certainly help in the long run.",
+	"lHEBefore that, I have to praise you.<br>You still tried despite your odds, you would deserve<br>a raise... If we were paid that is.",
+	"rHSReally?",
+	"rHhThank you miss Sakuya!",
+	"lChHowever, your failure still deserves punishment.",
 	--Battle here
 }
 

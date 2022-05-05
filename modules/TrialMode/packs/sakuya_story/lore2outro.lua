@@ -3,16 +3,13 @@
 --
 
 local dialogs = {
-	"r DStop! I swear I wasn't sleeping today.",
-	"lcDOh? And why weren't you sleeping?",
-	"rcWI'm just a normal...",
-	"lAWDo you wish for another round?",
-	"rAEIt was because someone was watching.<br>I didn't manage to know who it was but I could feel it!",
-	"lSEI see... Whatever I can say about you, you still<br>have really keen senses...",
-	"lhEI'm surprised you couldn't find this person.<br>But, did you really try?",
-	"rhHOf course! I wanted to sl... do my work diligently so<br>I couldn't ignore it!",
-	"rhDBut then so many came here...",
-	"lHDWell thanks for the precious information.",
+	"rWDIs it over?",
+	"lWDYes it is.",
+	"lcDSo, did you notice anything?",
+	"rcEI could feel someone before the rumor spread!<br>But I never manage to catch a glimpse of her appearance.",
+	"lSEI see... Whatever I can say about your work ethics,<br>you still have really keen senses...",
+	"rSDBut then so many came here, maybe the Taisui Xingjun...",
+	"lHDThank you for your precious information.<br>Oh, and try to remain awake this time.<br>There is still much to do...",
 	--Sakuya gets away and meiling and falls to the ground, sleeping.
 }
 
