@@ -111,6 +111,15 @@
             "name": "Amidst the Mist",
             "name_hidden_when_locked": false,
             "preview": "lore8.gif"
+        },
+        {
+            "description": "",
+            "extra": true,
+            "file": "loreextra.json",
+            "may_be_locked": true,
+            "name": "Extra",
+            "name_hidden_when_locked": false,
+            "preview": "extra.gif"
         }
     ],
     "stand": {

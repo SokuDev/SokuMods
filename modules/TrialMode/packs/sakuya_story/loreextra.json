@@ -1,0 +1,85 @@
+{
+    "dummy": {
+        "character": "yukari",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 1240.0,
+            "y": 0.0
+        }
+    },
+    "expected": "!9 j5a:6 j2a:18 sc212:52 d236b:104 d236b:53 d236b:53 hj9 !j5a j2a:25",
+    "hand": [
+        212,
+        212,
+        212
+    ],
+    "music": "{{pack_path}}/yukari.ogg",
+    "music_loop_end": 166.019,
+    "music_loop_start": 0.658,
+    "player": {
+        "character": "sakuya",
+        "deck": [
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2,
+            2,
+            2,
+            3,
+            3,
+            3,
+            3,
+            212,
+            212,
+            212,
+            212
+        ],
+        "palette": 0,
+        "pos": 1180.0
+    },
+    "score": [
+        {
+            "min_damage": 3450,
+            "min_hits": 28,
+            "min_limit": 80
+        },
+        {
+            "min_damage": 3480,
+            "min_limit": 100
+        },
+        {
+            "min_damage": 3500,
+            "min_hits": 29
+        },
+        {
+            "max_attempts": 10
+        }
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 12,
+    "type": "combo"
+}
