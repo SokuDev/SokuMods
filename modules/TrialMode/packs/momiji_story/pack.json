@@ -4,6 +4,7 @@
     "characters": [
         "momiji"
     ],
+    "description": "No description provided",
     "icon": {
         "isPath": false,
         "offset": {
@@ -17,7 +18,7 @@
             "top": 0,
             "width": 133
         },
-        "scale": 0.5100001692771912,
+        "scale": 0.5100002288818359,
         "xMirror": true,
         "yMirror": false
     },

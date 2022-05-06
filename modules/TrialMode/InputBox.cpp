@@ -14,6 +14,7 @@
 #define CURSOR_STEP 6
 
 bool inputBoxShown = false;
+static bool hasEnglishPatch;
 static bool changed = false;
 static char lastPressed = 0;
 static unsigned t = 0;
@@ -207,6 +208,7 @@ void inputBoxLoadAssets()
 	if (!Original_WndProc)
 		Original_WndProc = (WNDPROC)SetWindowLongPtr(SokuLib::window, GWL_WNDPROC, (LONG_PTR)Hooked_WndProc);
 	loaded = true;
+	hasEnglishPatch = (*(int *)0x411c64 == 1);
 	boxSprite.texture.loadFromGame("data/menu/21_Base.bmp");
 	boxSprite.rect.width = boxSprite.texture.getSize().x;
 	boxSprite.rect.height = boxSprite.texture.getSize().y;
@@ -228,7 +230,7 @@ void inputBoxLoadAssets()
 	textSprite.rect.width = 292;
 	textSprite.rect.height = 18;
 	textSprite.setSize({291, 18});
-	textSprite.setPosition({174, CURSOR_STARTY});
+	textSprite.setPosition({174 - hasEnglishPatch * 2, CURSOR_STARTY});
 
 	titleSprite.rect.width = 292;
 	titleSprite.rect.height = 32;
