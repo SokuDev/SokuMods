@@ -3286,7 +3286,7 @@ afterCInput:
 
 				if (stat((pack->path + "/" + jsonfile).c_str(), &s) != 0) {
 					openInputDialog("Enter trial type<br>Valid types are <color FFFFFF>combo</color>", nullptr);
-					setInputBoxCallbacks([&pack, &jsonfile](const std::string &type){
+					setInputBoxCallbacks([&pack, jsonfile](const std::string &type){
 						if (type.empty())
 							return SokuLib::playSEWaveBuffer(0x29);
 						if (!Trial::isTypeValid(type)) {
