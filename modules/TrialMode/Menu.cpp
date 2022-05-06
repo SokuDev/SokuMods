@@ -3212,7 +3212,6 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 		});
 		return true;
 	}
-afterCInput:
 	if (SokuLib::inputMgrs.input.horizontalAxis == 1 && currentPack >= 0) {
 		if (currentEntry == -1)
 			openPackEditPage();
@@ -3280,12 +3279,12 @@ afterCInput:
 			currentEntry -= currentEntry == pack->scenarios.size();
 			expended = !pack->scenarios.empty();
 		} else {
-			openInputDialog("Enter file name. If the file doesn't exist, it will be created.", nullptr);
+			openInputDialog("Enter file name. If the file doesn't<br>exist, it will be created.", nullptr);
 			setInputBoxCallbacks([&pack](const std::string &jsonfile){
 				struct stat s;
 
 				if (stat((pack->path + "/" + jsonfile).c_str(), &s) != 0) {
-					openInputDialog("Enter trial type<br>Valid types are <color FFFFFF>combo</color>", nullptr);
+					openInputDialog("Enter trial type<br>Valid types are <color A0FFA0>combo</color>", nullptr);
 					setInputBoxCallbacks([&pack, jsonfile](const std::string &type){
 						if (type.empty())
 							return SokuLib::playSEWaveBuffer(0x29);

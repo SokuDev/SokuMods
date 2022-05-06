@@ -117,11 +117,11 @@ static void generateErrorMsg(Pack &pack, bool swrNeeded, const std::vector<std::
 		msg = "SWR is missing";
 
 	pack.error.texture.createFromText(msg.c_str(), defaultFont10, {0x100, 30});
-	pack.error.setSize(pack.error.texture.getSize());
+	pack.error.setSize(pack.error.texture.getSize() + SokuLib::Vector2u{1, 1});
 	pack.error.rect = {
 		0, 0,
-		static_cast<int>(pack.error.texture.getSize().x),
-		static_cast<int>(pack.error.texture.getSize().y),
+		static_cast<int>(pack.error.texture.getSize().x + 1),
+		static_cast<int>(pack.error.texture.getSize().y + 1),
 	};
 	pack.error.tint = SokuLib::DrawUtils::DxSokuColor::Red;
 	pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER]  = RED_COLOR;
@@ -138,7 +138,7 @@ static void makeAuthorStr(Pack &pack, const std::string &str)
 		static_cast<int>(size.x),
 		static_cast<int>(size.y),
 	};
-	pack.author.setSize((size - 1).to<unsigned>());
+	pack.author.setSize(size.to<unsigned>());
 }
 
 int Pack::getVersionFromStr(const std::string &str)
@@ -223,7 +223,7 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 		defaultFont12, {0x100, 30}, &size
 	);
 	this->name.rect = {0, 0, size.x, size.y};
-	this->name.setSize((size - 1).to<unsigned>());
+	this->name.setSize(size.to<unsigned>());
 
 	if (object.contains("outro") && object["outro"].is_string()) {
 		std::string relative = object["outro"];

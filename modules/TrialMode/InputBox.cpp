@@ -10,7 +10,7 @@
 
 #define CURSOR_ENDX 465
 #define CURSOR_STARTX 174
-#define CURSOR_STARTY 228
+#define CURSOR_STARTY 233
 #define CURSOR_STEP 6
 
 bool inputBoxShown = false;
@@ -213,8 +213,8 @@ void inputBoxLoadAssets()
 	boxSprite.setSize(boxSprite.texture.getSize());
 	boxSprite.setPosition({160, 192});
 
-	whiteBox.setSize({292, 18});
-	whiteBox.setPosition({174, 226});
+	whiteBox.setSize({300, 18});
+	whiteBox.setPosition({170, 231});
 	whiteBox.setFillColor(SokuLib::Color::White);
 	whiteBox.setBorderColor(SokuLib::Color::Transparent);
 
@@ -231,8 +231,8 @@ void inputBoxLoadAssets()
 	textSprite.setPosition({174, CURSOR_STARTY});
 
 	titleSprite.rect.width = 292;
-	titleSprite.rect.height = 24;
-	titleSprite.setSize({292, 24});
+	titleSprite.rect.height = 32;
+	titleSprite.setSize({292, 32});
 	titleSprite.setPosition({174, 202});
 }
 
@@ -259,7 +259,7 @@ void openInputDialog(const char *title, const char *defaultValue)
 	}
 	buffer.push_back(0);
 
-	titleSprite.texture.createFromText(title, defaultFont12, {292, 24});
+	titleSprite.texture.createFromText(title, defaultFont12, {292, 32});
 	textSprite.texture.createFromText(sanitizeInput().c_str(), defaultFont12, {max(292, 8 * buffer.size()), 20});
 	textSprite.rect.left = 0;
 
