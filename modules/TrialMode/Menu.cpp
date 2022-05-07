@@ -1811,7 +1811,7 @@ void menuLoadAssets()
 		static_cast<int>(packContainer.texture.getSize().x),
 		static_cast<int>(packContainer.texture.getSize().y),
 	};
-	packContainer.setSize(packContainer.texture.getSize() - 1);
+	packContainer.setSize(packContainer.texture.getSize());
 
 	missingIcon.texture.loadFromResource(myModule, MAKEINTRESOURCE(8));
 	missingIcon.rect = {
@@ -3866,9 +3866,9 @@ displayOutro:
 void Guide::_init()
 {
 	this->_sprite.setPosition({0, static_cast<int>(480 - this->_sprite.texture.getSize().y)});
-	this->_sprite.setSize({639, this->_sprite.texture.getSize().y - 1});
-	this->_sprite.rect.width = this->_sprite.getSize().x + 1;
-	this->_sprite.rect.height = this->_sprite.getSize().y + 1;
+	this->_sprite.setSize({640, this->_sprite.texture.getSize().y});
+	this->_sprite.rect.width = this->_sprite.getSize().x;
+	this->_sprite.rect.height = this->_sprite.getSize().y;
 	this->_sprite.tint.a = 0;
 }
 

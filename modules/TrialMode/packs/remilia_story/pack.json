@@ -112,12 +112,12 @@
             "preview": "bnbcorn3.gif"
         },
         {
-            "description": "4a 4a 4a 4a 5SC | Works everywhere<br><br>",
+            "description": "4a 4a 4a 4a 5SC(Cradle) 2a 2c hj8 j2c j66 j8a<br>Monsoon only combo<br>",
             "extra": true,
             "file": "bnbany1.json",
             "may_be_locked": true,
-            "name": "Extra1",
-            "name_hidden_when_locked": false,
+            "name": "Curtain Rise On Mr.Norton",
+            "name_hidden_when_locked": true,
             "preview": "extra.gif"
         }
     ],

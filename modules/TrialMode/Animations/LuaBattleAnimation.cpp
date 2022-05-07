@@ -8,6 +8,7 @@
 #include <sol/sol.hpp>
 #include <map>
 #include "FakeChrMgr.hpp"
+#include "Menu.hpp"
 #include "LuaBattleAnimation.hpp"
 
 #ifndef _DEBUG
@@ -102,7 +103,9 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		"releaseHandle", &SokuLib::DrawUtils::Texture::releaseHandle,
 		"loadFromFile", &SokuLib::DrawUtils::Texture::loadFromFile,
 		"loadFromGame", &SokuLib::DrawUtils::Texture::loadFromGame,
-		"loadFromResource", &SokuLib::DrawUtils::Texture::loadFromResource,
+		"loadFromResource", [](SokuLib::DrawUtils::Texture &texture, int res){
+			return texture.loadFromResource(myModule, MAKEINTRESOURCE(res));
+		},
 		"createFromText", &SokuLib::DrawUtils::Texture::createFromText
 	);
 

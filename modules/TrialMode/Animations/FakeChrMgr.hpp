@@ -24,10 +24,7 @@ struct FakeCharacterManager {
 	SokuLib::Vector2f speed;
 
 	// 0x0FC
-	char offset_0x0FC[0x4];
-
-	// 0x100
-	float gravity;
+	SokuLib::Vector2f gravity;
 
 	//  ADDR_DIRECTIONOFS       enum Direction    (1) 0x104
 	int8_t direction;
@@ -443,6 +440,6 @@ struct FakeCharacterManager {
 	void playSE(int id) { reinterpret_cast<SokuLib::CharacterManager *>(this)->playSE(id); };
 };
 
-void pushFakeChrMgrLuaTable(sol::state &, std::vector<FakeCharacterManager *> &);
+void pushFakeChrMgrLuaTable(sol::state &state, std::vector<FakeCharacterManager *> &_created);
 
 #endif //SWRSTOYS_FAKECHRMGR_HPP

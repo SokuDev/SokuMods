@@ -1,0 +1,51 @@
+{
+    "dummy": {
+        "character": "marisa",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 40.0,
+            "y": 0.0
+        }
+    },
+    "expected": "5a 5aa:15 5aaa:16 jd236b/jd236c:46 ud214b:54 j44:47 j8a:8",
+    "music": "data/bgm/ta00.ogg",
+    "player": {
+        "character": "suwako",
+        "deck": [],
+        "palette": 0,
+        "pos": 94.0
+    },
+    "score": [
+        {
+            "min_damage": 0,
+            "min_hits": 0,
+            "min_limit": 100
+        },
+        {
+            "min_limit": 0
+        },
+        {},
+        {}
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 11,
+    "type": "combo"
+}

@@ -1,0 +1,194 @@
+{
+    "author": "Steak de Burger",
+    "category": "Suwako Moriya",
+    "characters": [
+        "suwako",
+        "aya",
+        "reimu",
+        "sakuya",
+        "patchouli",
+        "youmu",
+        "remilia",
+        "yuyuko",
+        "yukari",
+        "meirin",
+        "chirno",
+        "sanae",
+        "tenshi",
+        "iku",
+        "komachi",
+        "alice",
+        "marisa",
+        "suika",
+        "udonge",
+        "utsuho"
+    ],
+    "description": "wow",
+    "icon": {
+        "isPath": false,
+        "offset": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "path": "data/character/suwako/face/face000.bmp",
+        "rect": {
+            "height": 34,
+            "left": 0,
+            "top": 0,
+            "width": 83
+        },
+        "scale": 0.8100062012672424,
+        "xMirror": false,
+        "yMirror": false
+    },
+    "min_version": "alpha 0.4.0",
+    "modes": [],
+    "name": " Getting started",
+    "outro": "lsls",
+    "scenarios": [
+        {
+            "description": "the most consistent conversion from f5a <br> f5a 5b HJc9 J6b J6c",
+            "extra": false,
+            "file": "BnB1",
+            "may_be_locked": true,
+            "name": "f5a midscreen",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "BnB2",
+            "may_be_locked": true,
+            "name": "6a midscreen",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "5A MIDSCREEN",
+            "may_be_locked": true,
+            "name": "5A MIDSCREEN",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "Air J5a",
+            "may_be_locked": true,
+            "name": "Air J5a",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "J8a",
+            "may_be_locked": true,
+            "name": "J8a",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "J8a CH ",
+            "may_be_locked": true,
+            "name": "J8a CH ",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "l5a conversion",
+            "may_be_locked": true,
+            "name": "l5a conversion",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "BnB3",
+            "may_be_locked": true,
+            "name": "l3a stater J6b j6c ender",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "BnB 4",
+            "may_be_locked": true,
+            "name": "5aaa d236 j8a ender",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "66c starter",
+            "may_be_locked": true,
+            "name": "66c starter",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "red frog corner",
+            "may_be_locked": true,
+            "name": "red frog corner",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "red frog f5a",
+            "may_be_locked": true,
+            "name": "red frog f5a",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "red frog j8a",
+            "may_be_locked": true,
+            "name": "red frog j8a",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "LOOOPPP",
+            "may_be_locked": true,
+            "name": "LOOOPPP",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "LOOOOP RESET",
+            "may_be_locked": true,
+            "name": "LOOOOP RESET",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        },
+        {
+            "description": "",
+            "extra": false,
+            "file": "66666666666666666666666666666666666666666666666666666666666666666666",
+            "may_be_locked": true,
+            "name": "66666666666666666666666666666666666666666666666666666666666666666666",
+            "name_hidden_when_locked": false,
+            "preview": ""
+        }
+    ]
+}

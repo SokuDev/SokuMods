@@ -125,7 +125,7 @@ local function stage5()
 	---battleMgr.rightChr:updateAnimation()
 	battleMgr.rightChr:updateMove()
 	battleMgr.rightChr.objects:update()
-	if battleMgr.leftChr.frameCount == 8 then
+	if battleMgr.leftChr.frameCount == 8 and battleMgr.leftChr.action ~= enums.actions.ACTION_IDLE then
 		playSfx(enums.sfxs.longMelee)
 	elseif battleMgr.leftChr.frameCount > 16 then
 		if battleMgr.leftChr.frameCount == 51 then

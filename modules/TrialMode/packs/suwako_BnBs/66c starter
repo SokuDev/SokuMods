@@ -1,0 +1,51 @@
+{
+    "dummy": {
+        "character": "reimu",
+        "deck": [],
+        "palette": 0,
+        "pos": {
+            "x": 554.0,
+            "y": 0.0
+        }
+    },
+    "expected": "d6[28] 66c hj9:45 j6a:5 j6b:46",
+    "music": "data/bgm/ta00.ogg",
+    "player": {
+        "character": "suwako",
+        "deck": [],
+        "palette": 0,
+        "pos": 966.0
+    },
+    "score": [
+        {
+            "min_damage": 0,
+            "min_hits": 0,
+            "min_limit": 100
+        },
+        {
+            "min_limit": 0
+        },
+        {},
+        {}
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 10,
+    "type": "combo"
+}
