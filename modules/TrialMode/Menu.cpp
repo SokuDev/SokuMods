@@ -366,7 +366,7 @@ static struct PackEditScenario {
 	static constexpr std::pair<SokuLib::Vector2i, SokuLib::Vector2u> cursorLocations[] = {
 		{{182 + 7, 240}, {133, 23}},
 		{{182 + 7, 270}, {133, 23}},
-		{{182 + 7, 298}, {133, 24}},
+		{{182 + 7, 298}, {133, 23}},
 		{{179 + 7, 334}, { 14, 14}},
 		{{302 + 7, 333}, { 14, 14}},
 		{{287 + 7, 363}, { 14, 14}},
@@ -1085,7 +1085,7 @@ static struct PackEditPage {
 	};
 	static constexpr std::pair<SokuLib::Vector2i, SokuLib::Vector2u> cursorLocations[] = {
 		{{167 + 7,  62}, {133, 23}},
-		{{396 + 7,  63}, {133, 23}},
+		{{395 + 7,  63}, {133, 23}},
 		{{167 + 7,  99}, {133, 23}},
 		{{316 + 7,  92}, { 95, 17}},
 		{{316 + 7, 108}, { 95, 17}},
@@ -1097,11 +1097,11 @@ static struct PackEditPage {
 		{{316 + 7, 166}, { 95, 17}},
 		{{316 + 7, 182}, { 95, 17}},
 		{{167 + 7, 208}, {361, 23}},
-		{{167 + 7, 246}, {133, 23}},
-		{{396 + 7, 246}, {133, 23}},
-		{{167 + 7, 282}, {361, 91}},
-		{{167 + 7, 387}, {133, 23}},
-		{{396 + 7, 387}, {133, 23}},
+		{{167 + 7, 245}, {133, 23}},
+		{{395 + 7, 245}, {133, 23}},
+		{{167 + 7, 281}, {361, 91}},
+		{{167 + 7, 386}, {133, 23}},
+		{{395 + 7, 386}, {133, 23}},
 	};
 	static constexpr unsigned int leftTable[] = {
 		1, 0,
@@ -1741,7 +1741,7 @@ int ResultMenu::onRender()
 	this->_score.draw();
 	//Display the green gradiant cursor bar
 	displaySokuCursor(
-		{128, 184 + this->_selected * 24},
+		{128, 183 + this->_selected * 24},
 		{300, 16}
 	);
 	for (auto &sprite : this->_text)
@@ -1953,8 +1953,8 @@ void menuLoadAssets()
 
 	arrowSprite.texture.loadFromGame("data/profile/deck2/sayuu.bmp");
 	arrowSprite.setSize({
-		arrowSprite.texture.getSize().x / 2 + 1,
-		arrowSprite.texture.getSize().y + 1
+		arrowSprite.texture.getSize().x / 2,
+		arrowSprite.texture.getSize().y
 	});
 	arrowSprite.rect.width = arrowSprite.texture.getSize().x / 2;
 	arrowSprite.rect.height = arrowSprite.texture.getSize().y;

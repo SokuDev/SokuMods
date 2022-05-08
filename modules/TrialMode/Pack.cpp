@@ -572,8 +572,8 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 	this->rect.width = min(68 / this->scale, this->untransformedRect.x);
 	this->rect.height = min(28 / this->scale, this->untransformedRect.y);
 	this->sprite.setSize({
-		static_cast<unsigned int>(this->rect.width * this->scale),
-		static_cast<unsigned int>(this->rect.height * this->scale)
+		static_cast<unsigned int>(this->rect.width * this->scale + 1),
+		static_cast<unsigned int>(this->rect.height * this->scale + 1)
 	});
 	this->sprite.rect = this->rect;
 	this->sprite.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::DrawUtils::DxSokuColor::White * 0.25;
