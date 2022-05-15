@@ -58,6 +58,8 @@ function update()
 			battleMgr.rightCharacterManager.animationSubFrame = 0
 			battleMgr.rightCharacterManager.action = enums.actions.ACTION_IDLE
 			battleMgr.rightCharacterManager:initAnimation()
+			battleMgr.leftCharacterManager.direction = enums.directions.RIGHT
+			battleMgr.rightCharacterManager.direction = enums.directions.LEFT
 		end
 	elseif flashRect.fillColor.a ~= 0 then
 		color.a = color.a - 0x11;
