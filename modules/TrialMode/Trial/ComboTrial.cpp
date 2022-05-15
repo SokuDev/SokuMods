@@ -13,6 +13,11 @@
 #define printf(...)
 #endif
 
+#define BOTTOM_POS_PAUSE 320
+#define BOTTOM_POS 332
+#define SIZE 29
+#define PAUSE_NB_BUTTONS 6
+
 #define dxLockRect(texture, ...) (*((int (__stdcall**)(void*, int, D3DLOCKED_RECT*, int, int))(*(int*)texture + 0x4c)))(texture, __VA_ARGS__)
 #define dxUnlockRect(texture, ...) (*((int (__stdcall**)(void*, int))(*(int*)texture + 0x50)))(texture, __VA_ARGS__)
 
@@ -244,6 +249,61 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 			} catch (std::exception &e) {
 				throw std::invalid_argument("Score element #" + std::to_string(this->_scores.size()) + " is invalid : " + e.what());
 			}
+
+	for (int i = 0; i < 4; i++) {
+		auto &prerequ = this->_scores[i];
+
+		this->_parts[i]._score.texture.loadFromGame("data/infoeffect/result/rankFont.bmp");
+		this->_parts[i]._score.setPosition({92 + 141 * i, BOTTOM_POS_PAUSE});
+		this->_parts[i]._score.setSize({32, 32});
+		this->_parts[i]._score.rect.left = i * this->_parts[i]._score.texture.getSize().x / 4;
+		this->_parts[i]._score.rect.width = this->_parts[i]._score.texture.getSize().x / 4;
+		this->_parts[i]._score.rect.height = this->_parts[i]._score.texture.getSize().y;
+
+		this->_parts[i]._attempts.texture.createFromText(
+			prerequ.attempts == -1 ? "" : ("At most " + std::to_string(prerequ.attempts) + " attempt" + (prerequ.attempts == 1 ? "" : "s")).c_str(),
+			defaultFont12,
+			{130, 20},
+			&realSize
+		);
+		this->_parts[i]._attempts.setPosition({76 + 141 * i - realSize.x / 2 + 32, BOTTOM_POS_PAUSE + SIZE + 14 * 3});
+		this->_parts[i]._attempts.setSize(this->_parts[i]._attempts.texture.getSize());
+		this->_parts[i]._attempts.rect.width = this->_parts[i]._attempts.texture.getSize().x;
+		this->_parts[i]._attempts.rect.height = this->_parts[i]._attempts.texture.getSize().y;
+
+		this->_parts[i]._hits.texture.createFromText(
+			("At least " + std::to_string(prerequ.hits) + " hit" + (prerequ.hits == 1 ? "" : "s")).c_str(),
+			defaultFont12,
+			{130, 20},
+			&realSize
+		);
+		this->_parts[i]._hits.setPosition({76 + 141 * i - realSize.x / 2 + 32, BOTTOM_POS_PAUSE + SIZE + 14 * 0});
+		this->_parts[i]._hits.setSize(this->_parts[i]._hits.texture.getSize());
+		this->_parts[i]._hits.rect.width = this->_parts[i]._hits.texture.getSize().x;
+		this->_parts[i]._hits.rect.height = this->_parts[i]._hits.texture.getSize().y;
+
+		this->_parts[i]._damages.texture.createFromText(
+			("At least " + std::to_string(prerequ.damage) + " damage" + (prerequ.damage <= 1 ? "" : "s")).c_str(),
+			defaultFont12,
+			{130, 20},
+			&realSize
+		);
+		this->_parts[i]._damages.setPosition({76 + 141 * i - realSize.x / 2 + 32, BOTTOM_POS_PAUSE + SIZE + 14 * 1});
+		this->_parts[i]._damages.setSize(this->_parts[i]._damages.texture.getSize());
+		this->_parts[i]._damages.rect.width = this->_parts[i]._damages.texture.getSize().x;
+		this->_parts[i]._damages.rect.height = this->_parts[i]._damages.texture.getSize().y;
+
+		this->_parts[i]._limit.texture.createFromText(
+			("At least " + std::to_string(prerequ.minLimit) + "% limit").c_str(),
+			defaultFont12,
+			{130, 20},
+			&realSize
+		);
+		this->_parts[i]._limit.setPosition({76 + 141 * i - realSize.x / 2 + 32, BOTTOM_POS_PAUSE + SIZE + 14 * 2});
+		this->_parts[i]._limit.setSize(this->_parts[i]._limit.texture.getSize());
+		this->_parts[i]._limit.rect.width = this->_parts[i]._limit.texture.getSize().x;
+		this->_parts[i]._limit.rect.height = this->_parts[i]._limit.texture.getSize().y;
+	}
 	if (this->_crouching && this->_dummyStartPos.y)
 		MessageBox(
 			SokuLib::window,
@@ -904,10 +964,10 @@ int ComboTrial::pauseOnUpdate()
 	updateNoiseTexture();
 	updateBandTexture();
 	if (c || SokuLib::inputMgrs.input.b == 1)
-		return SokuLib::playSEWaveBuffer(0x29), false;
+		return SokuLib::playSEWaveBuffer(0x29), this->_scoreShown = this->_cursorPos = 0;
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
-		this->_cursorPos += 5 + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
-		this->_cursorPos %= 5;
+		this->_cursorPos += PAUSE_NB_BUTTONS + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis);
+		this->_cursorPos %= PAUSE_NB_BUTTONS;
 		SokuLib::playSEWaveBuffer(0x27);
 	}
 	if (SokuLib::inputMgrs.input.a == 1)
@@ -932,23 +992,25 @@ int ComboTrial::pauseOnRender() const
 		this->_tick.setPosition({42, 191});
 		this->_tick.draw();
 	}
-	loadedPacks[currentPack]->scenarios[currentEntry]->description.draw();
-	if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading) {
-		if (loadedPacks[currentPack]->scenarios[currentEntry]->preview && loadedPacks[currentPack]->scenarios[currentEntry]->preview->isValid())
-			loadedPacks[currentPack]->scenarios[currentEntry]->preview->render();
-		else
-			lockedNoise.draw();
-	} else {
-		lockedNoise.draw();
-		loadingGear.setRotation(-loadingGear.getRotation());
-		loadingGear.setPosition({540, 243});
-		loadingGear.draw();
-		loadingGear.setRotation(-loadingGear.getRotation());
-		loadingGear.setPosition({563, 225});
-		loadingGear.draw();
-	}
+	lockedNoise.draw();
+	if (
+		!loadedPacks[currentPack]->scenarios[currentEntry]->loading &&
+		loadedPacks[currentPack]->scenarios[currentEntry]->preview &&
+		loadedPacks[currentPack]->scenarios[currentEntry]->preview->isValid()
+	)
+		loadedPacks[currentPack]->scenarios[currentEntry]->preview->render();
 	CRTBands.draw();
 	frame.draw();
+	if (!this->_scoreShown)
+		loadedPacks[currentPack]->scenarios[currentEntry]->description.draw();
+	else
+		for (int i = 0; i < 4; i++) {
+			this->_parts[i]._score.draw();
+			this->_parts[i]._attempts.draw();
+			this->_parts[i]._damages.draw();
+			this->_parts[i]._hits.draw();
+			this->_parts[i]._limit.draw();
+		}
 	this->_name.draw();
 	return true;
 }
@@ -957,6 +1019,7 @@ bool ComboTrial::_pauseOnKeyPressed()
 {
 	switch (this->_cursorPos) {
 	case 0:
+		this->_scoreShown = false;
 		SokuLib::playSEWaveBuffer(0x28);
 		return false;
 	case 1:
@@ -975,10 +1038,14 @@ bool ComboTrial::_pauseOnKeyPressed()
 		return true;
 	case 3:
 		SokuLib::playSEWaveBuffer(0x28);
+		this->_scoreShown = !this->_scoreShown;
+		return true;
+	case 4:
+		SokuLib::playSEWaveBuffer(0x28);
 		this->_quit = true;
 		this->_next = SokuLib::SCENE_SELECT;
 		return false;
-	case 4:
+	case 5:
 		SokuLib::playSEWaveBuffer(0x28);
 		this->_quit = true;
 		this->_next = SokuLib::SCENE_TITLE;
@@ -1167,9 +1234,6 @@ int ComboTrialResult::onRender()
 		part.draw(1);
 	return ret;
 }
-
-#define BOTTOM_POS 332
-#define SIZE 29
 
 void ComboTrialResult::ScorePart::load(int ttlattempts, const ComboTrial::ScorePrerequisites &prerequ, int index)
 {

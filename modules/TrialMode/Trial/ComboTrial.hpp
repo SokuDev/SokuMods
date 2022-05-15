@@ -14,7 +14,6 @@
 class ComboTrial : public Trial {
 private:
 	struct ScorePart {
-	private:
 		SokuLib::DrawUtils::Sprite _score;
 		SokuLib::DrawUtils::Sprite _hits;
 		SokuLib::DrawUtils::Sprite _damages;
@@ -113,6 +112,7 @@ private:
 	mutable SokuLib::DrawUtils::RectangleShape _rect;
 
 	//Pause
+	bool _scoreShown = false;
 	bool _quit = false;
 	bool _mirror = false;
 	unsigned _cursorPos = 0;
