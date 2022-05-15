@@ -2763,6 +2763,24 @@ void openTrialEditPage()
 	packEditScenario.previewPath.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
 }
 
+static std::string removeShiftJISChars(const char *str)
+{
+	std::string result;
+
+	result.reserve(strlen(str));
+	for (int i = 0; str[i]; i++) {
+		if (!(str[i] & 0x80)) {
+			result += str[i];
+			continue;
+		}
+		i += 2;
+		result += '?';
+		if (!str[i - 1])
+			return result;
+	}
+	return result;
+}
+
 void createBasicPack(const std::string &path)
 {
 	printf("Creating pack at location %s\n", path.c_str());
@@ -2780,7 +2798,7 @@ void createBasicPack(const std::string &path)
 		return;
 	}
 	json["min_version"] = VERSION_STR;
-	json["author"] = SokuLib::profile1.name;
+	json["author"] = removeShiftJISChars(SokuLib::profile1.name);
 	json["characters"] = nlohmann::json::array();
 	json["scenarios"] = nlohmann::json::array();
 	stream << json.dump(4);
