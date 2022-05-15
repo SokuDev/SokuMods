@@ -3546,7 +3546,7 @@ void ComboTrialEditor::_refreshScoreSprites(int i)
 	this->_hits[i].rect.height = this->_hits[i].getSize().y;
 
 	this->_damages[i].texture.createFromText(
-		("At least " + std::to_string(this->_scores[i].damage) + " damage" + (this->_scores[i].damage <= 1 ? "" : "s")).c_str(),
+		("At least " + std::to_string(this->_scores[i].damage) + " damage").c_str(),
 		defaultFont12,
 		{230, 20},
 		&size

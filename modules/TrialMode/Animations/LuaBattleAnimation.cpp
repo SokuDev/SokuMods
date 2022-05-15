@@ -164,7 +164,8 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		"Camera",
 		"backgroundTranslate", &SokuLib::Camera::backgroundTranslate,
 		"translate", &SokuLib::Camera::translate,
-		"scale", &SokuLib::Camera::scale
+		"scale", &SokuLib::Camera::scale,
+		"update", &SokuLib::Camera::update
 	);
 	this->_lua->new_usertype<FakeBattleManager>(
 		"BattleManager",
@@ -575,6 +576,20 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 			SokuLib::playBGM(path.c_str());
 		}
 	);
+	(*this->_lua)["getLocal"] = []{
+		char local[LOCALE_NAME_MAX_LENGTH];
+		wchar_t localw[LOCALE_NAME_MAX_LENGTH];
+		int i = 0;
+		int t[WINVER];
+
+		GetUserDefaultLocaleName(localw, sizeof(localw));
+		for (i = 0; localw[i]; i++)
+			local[i] = localw[i];
+		local[i] = 0;
+		if (strchr(local, '-') != nullptr)
+			*strchr(local, '-') = 0;
+		return std::string(local);
+	};
 	(*this->_lua)["playBgm"] = (*this->_lua)["playBGM"];
 	(*this->_lua)["camera"] = std::ref(SokuLib::camera);
 	(*this->_lua)["packPath"] = packPath;

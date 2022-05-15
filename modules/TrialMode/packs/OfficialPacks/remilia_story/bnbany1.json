@@ -1,18 +1,26 @@
 {
     "dummy": {
-        "character": "suika",
+        "character": "yukari",
         "deck": [],
         "palette": 0,
         "pos": {
-            "x": 900.0,
+            "x": 268.0,
             "y": 0.0
         }
     },
-    "expected": "4a !4a !4a !4a sc205",
+    "expected": "4a !4a !4a !4a sc205:15 2a:228 2c hj8 j2c:13 j66 j8a",
     "hand": [
+        205,
+        205,
+        205,
+        205,
         205
     ],
-    "music": "data/bgm/st17.ogg",
+    "intro": "extraintro.lua",
+    "music": "{{pack_path}}/yukari.ogg",
+    "music_loop_end": 166.019,
+    "music_loop_start": 0.658,
+    "outro": "extraoutro.lua",
     "player": {
         "character": "remilia",
         "deck": [
@@ -38,24 +46,23 @@
             4
         ],
         "palette": 0,
-        "pos": 850.0
+        "pos": 232.0
     },
     "score": [
         {
-            "min_damage": 4414,
-            "min_hits": 16,
-            "min_limit": 15
+            "min_damage": 5440,
+            "min_hits": 38,
+            "min_limit": 130
+        },
+        {},
+        {
+            "max_attempts": 10,
+            "min_damage": 5640,
+            "min_hits": 41,
+            "min_limit": 135
         },
         {
-            "max_attempts": 1
-        },
-        {
-            "min_damage": 4593,
-            "min_hits": 18
-        },
-        {
-            "min_damage": 4681,
-            "min_hits": 19
+            "max_attempts": 3
         }
     ],
     "skills": [
@@ -72,11 +79,11 @@
             0
         ],
         [
-            0,
-            0
+            1,
+            1
         ]
     ],
     "stage": 16,
     "type": "combo",
-    "uniform_card_cost": 1
+    "weather": 18
 }

@@ -2,25 +2,6 @@
 -- Created by PinkySmile on 12/08/2021.
 --
 
-local dialogs = {
-	"lc Another boring day. Should I go to her shrine?",
-	--Clic
-	"r h*That should make a good cover. As for the title...*",
-	"lhhOh my, an intruder. You are right on time!",
-	"rhHDon't mind me, I'm simply here to take a<br>few pictures in secret...",
-	"rhEWell, so long for it to be secret...",
-	"lWEPatchouli told me she needs a new tengu feather,<br>might as well help her out!",
-	--one screaming crow and a feather later
-	"lHDI'm sure even the vegetative Patchouli<br>shall be grateful.",
-	"rHDMy beautiful feather...",
-	"lCDAnyway what were you doing here?",
-	"rChI was investigating a rumor that..",
-	"lAhToo tough to talk, aren't you?",
-	"rAANo it's not a se...",
-	"lhARoughing you up shall make you talk.",
-	--Battle here
-}
-
 local flashRect = RectangleShape.new()
 local stageBg = Sprite.new()
 local stageBottom = Sprite.new()
@@ -29,6 +10,18 @@ local currentStage = 0
 local dialog
 local keyPressed = false
 local stop = false
+local loc = getLocal()
+local dialogs, err = pcall(dofile, packPath.."/bnbmid1intro_"..loc..".dialogs")
+
+if not dialogs then
+	if err == "cannot open "..packPath.."/bnbmid1intro_"..loc..".dialogs: No such file or directory" then
+		dialogs = dofile(packPath.."/bnbmid1intro.dialogs")
+	else
+		error(err)
+	end
+else
+	dialogs = err
+end
 
 -- CHR 26 -> 1
 
@@ -271,7 +264,9 @@ local anims = {
 
 print("Init intro.")
 
-stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro.png")
+if not stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro_"..loc..".png") then
+	stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro.png")
+end
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),

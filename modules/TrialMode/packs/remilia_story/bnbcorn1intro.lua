@@ -352,6 +352,7 @@ local function updateFight()
 	reisen.objects:update()
 	reisen:updateMove()
 	battleMgr.rightChr:updateMove()
+	battleMgr.rightChr.objects:update()
 	fightStages[fightStage + 1]()
 	return fightStage < #fightStages
 end

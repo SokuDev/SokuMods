@@ -29,6 +29,18 @@ local currentStage = 0
 local dialog
 local keyPressed = false
 local stop = false
+--local loc = getLocal()
+--local dialogs, err = pcall(dofile, packPath.."/bnbmid1intro_"..loc..".dialogs")
+--
+--if not dialogs then
+--	if err == "cannot open "..packPath.."/bnbmid1intro_"..loc..".dialogs: No such file or directory" then
+--		dialogs = dofile(packPath.."/bnbmid1intro.dialogs")
+--	else
+--		error(err)
+--	end
+--else
+--	dialogs = err
+--end
 
 -- CHR 26 -> 1
 
@@ -271,6 +283,9 @@ local anims = {
 
 print("Init intro.")
 
+--if not stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro_"..loc..".png") then
+--	stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro.png")
+--end
 stageBg.texture:loadFromFile(packPath.."\\bnbmid1intro.png")
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(

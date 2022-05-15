@@ -3,7 +3,7 @@
 --
 
 local dialogs = {
-	"rWDI'm just trying to write a journal.<br>Why everyone makes it so hard?",
+	"rWDI'm just trying to write a journal.<br>Why does everyone make it so hard?",
 	"lWDI was still pretty soft you know?",
 	"lCDNow talk!",
 	"rCDI was just investigating the rumor that someone<br>had infiltrated the Scarlet Mansion.",

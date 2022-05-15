@@ -106,6 +106,7 @@ void Trial::_introOnUpdate()
 
 	auto result = this->_intro->update();
 
+	(SokuLib::getBattleMgr().*SokuLib::VTable_BattleManager.updateEffects)();
 	if (!result && !this->_introPlayed)
 		this->_playBGM();
 	this->_introPlayed |= !result;
@@ -125,6 +126,7 @@ void Trial::_outroOnUpdate()
 		return;
 	}
 	this->_outroPlayed |= !this->_outro->update();
+	(SokuLib::getBattleMgr().*SokuLib::VTable_BattleManager.updateEffects)();
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_outro->onKeyPressed();
 	if (SokuLib::inputMgrs.pause == 1) {
