@@ -43,6 +43,11 @@ bool SimpleImage::isValid() const
 	return this->texture.hasTexture();
 }
 
+void SimpleImage::setPosition(SokuLib::Vector2i pos)
+{
+	SokuLib::DrawUtils::Sprite::setPosition(pos);
+}
+
 static void callback(void *data, struct GIF_WHDR *chunk)
 {
 	auto This = (AnimatedImage *)data;
@@ -68,7 +73,6 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 		return;
 	}
 
-	this->_pos = pos;
 	if (!stream) {
 		fprintf(stderr, "Could not open %s\n", path.c_str());
 		return;
@@ -105,7 +109,7 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 		static_cast<int>(this->_sprite.texture.getSize().x),
 		static_cast<int>(this->_sprite.texture.getSize().y),
 		};
-	this->_sprite.setPosition(this->_pos);
+	this->_sprite.setPosition(pos);
 	this->_sprite.setSize({200, 150});
 	this->_updateTexture();
 }
@@ -241,4 +245,9 @@ void AnimatedImage::_processFrame(AnimatedImage::Frame *frameObj)
 bool AnimatedImage::isValid() const
 {
 	return this->_sprite.texture.hasTexture();
+}
+
+void AnimatedImage::setPosition(SokuLib::Vector2i pos)
+{
+	this->_sprite.setPosition(pos);
 }

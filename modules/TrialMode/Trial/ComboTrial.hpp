@@ -9,9 +9,19 @@
 #include <SokuLib.hpp>
 #include "Trial.hpp"
 #include "Menu.hpp"
+#include "Images.hpp"
 
 class ComboTrial : public Trial {
 private:
+	struct ScorePart {
+	private:
+		SokuLib::DrawUtils::Sprite _score;
+		SokuLib::DrawUtils::Sprite _hits;
+		SokuLib::DrawUtils::Sprite _damages;
+		SokuLib::DrawUtils::Sprite _attempts;
+		SokuLib::DrawUtils::Sprite _limit;
+	};
+
 	struct SpecialAction {
 		bool optional;
 		std::vector<SokuLib::Action> actions;
@@ -92,6 +102,10 @@ private:
 	SokuLib::Scene _next = SokuLib::SCENE_BATTLE;
 
 	//Render
+	mutable SokuLib::DrawUtils::Sprite _name;
+	mutable SokuLib::DrawUtils::Sprite _score;
+	mutable std::array<ScorePart, 4> _parts;
+
 	mutable SokuLib::DrawUtils::Sprite _doll;
 	mutable SokuLib::DrawUtils::Sprite _gear;
 	mutable SokuLib::DrawUtils::Sprite _gearShadow;
@@ -116,7 +130,6 @@ private:
 
 public:
 	ComboTrial(const char *folder, SokuLib::Character player, const nlohmann::json &json);
-
 	void editPlayerInputs(SokuLib::KeyInput &originalInputs) override;
 	SokuLib::KeyInput getDummyInputs() override;
 	bool update(bool &canHaveNextFrame) override;

@@ -35,8 +35,6 @@ static SokuLib::Vector2i offsetTable[9] = {
 	{8, -8}
 };
 static int baseCursor = 0;
-static int currentPack = -3;
-static int currentEntry = -1;
 static bool expended = false;
 static bool loaded = false;
 static bool loadNextTrial = false;
@@ -56,7 +54,6 @@ static SokuLib::Vector2i topicFilterSize;
 static SokuLib::DrawUtils::Sprite lock;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
-static SokuLib::DrawUtils::Sprite frame;
 static SokuLib::DrawUtils::Sprite wrench;
 static SokuLib::DrawUtils::Sprite arrowSprite;
 static SokuLib::DrawUtils::Sprite missingIcon;
@@ -67,13 +64,10 @@ static SokuLib::DrawUtils::Sprite modeFilterText;
 static SokuLib::DrawUtils::Sprite topicFilterText;
 static SokuLib::DrawUtils::Sprite previewContainer;
 static SokuLib::DrawUtils::Sprite blackSilouettes;
-static SokuLib::DrawUtils::Sprite lockedNoise;
 static SokuLib::DrawUtils::Sprite lockedText;
 static SokuLib::DrawUtils::Sprite lockedImg;
 static SokuLib::DrawUtils::Sprite extraText;
 static SokuLib::DrawUtils::Sprite extraImg;
-static SokuLib::DrawUtils::Sprite CRTBands;
-static SokuLib::DrawUtils::Sprite loadingGear;
 static SokuLib::DrawUtils::Sprite version;
 static SokuLib::DrawUtils::Sprite editSeat;
 static SokuLib::DrawUtils::Sprite editScenarioSeat;
@@ -89,6 +83,12 @@ static unsigned entryStart = 0;
 static unsigned band1Start = 0;
 static unsigned band2Start = 0;
 
+int currentPack = -3;
+int currentEntry = -1;
+SokuLib::DrawUtils::Sprite loadingGear;
+SokuLib::DrawUtils::Sprite frame;
+SokuLib::DrawUtils::Sprite lockedNoise;
+SokuLib::DrawUtils::Sprite CRTBands;
 SokuLib::DrawUtils::Sprite editSeatEmpty;
 SokuLib::DrawUtils::Sprite stickTop;
 SokuLib::DrawUtils::Sprite tickSprite;
@@ -2180,7 +2180,7 @@ static void updateBandTexture(SokuLib::DrawUtils::DxSokuColor *array)
 	}
 }
 
-static void updateNoiseTexture()
+void updateNoiseTexture()
 {
 	HRESULT ret;
 	D3DLOCKED_RECT r;
@@ -2196,7 +2196,7 @@ static void updateNoiseTexture()
 		fprintf(stderr, "(*pphandle)->UnlockRect(0) failed with code %li\n", ret);
 }
 
-static void updateBandTexture()
+void updateBandTexture()
 {
 	HRESULT ret;
 	D3DLOCKED_RECT r;
@@ -3498,7 +3498,12 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	}
 	if (loadNextTrial) {
 		loadNextTrial = false;
+		loadedPacks[currentPack]->scenarios[currentEntry]->loaded = false;
+		if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+			loadedPacks[currentPack]->scenarios[currentEntry]->preview.reset();
 		++currentEntry;
+		loadedPacks[currentPack]->scenarios[currentEntry]->loaded = true;
+		loadedPacks[currentPack]->scenarios[currentEntry]->loadPreview();
 		prepareGameLoading(
 			loadedPacks[currentPack]->scenarios[currentEntry]->folder.c_str(),
 			loadedPacks[currentPack]->scenarios[currentEntry]->file

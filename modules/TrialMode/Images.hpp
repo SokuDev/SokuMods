@@ -14,6 +14,7 @@ public:
 	virtual void update() = 0;
 	virtual void render() const = 0;
 	virtual bool isValid() const = 0;
+	virtual void setPosition(SokuLib::Vector2i pos) = 0;
 };
 
 class SimpleImage : public Image, public SokuLib::DrawUtils::Sprite {
@@ -23,6 +24,7 @@ public:
 	void update() override;
 	void render() const override;
 	bool isValid() const override;
+	void setPosition(SokuLib::Vector2i pos) override;
 };
 
 class AnimatedImage : public Image {
@@ -37,7 +39,6 @@ private:
 	bool _antiAlias;
 	IDirect3DTexture9 **_pphandle;
 	SokuLib::DrawUtils::Sprite _sprite;
-	SokuLib::Vector2i _pos;
 	SokuLib::DrawUtils::DxSokuColor *_frame = nullptr;
 	SokuLib::DrawUtils::DxSokuColor *_lastFrame = nullptr;
 	std::vector<std::unique_ptr<Frame>> _frames;
@@ -58,6 +59,7 @@ public:
 	void processChunk(struct GIF_WHDR *chunk);
 	void render() const override;
 	bool isValid() const override;
+	void setPosition(SokuLib::Vector2i pos) override;
 };
 
 #endif //SWRSTOYS_IMAGES_HPP

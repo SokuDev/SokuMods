@@ -219,6 +219,16 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	this->_attemptText.rect.width = this->_attemptText.texture.getSize().x;
 	this->_attemptText.rect.height = this->_attemptText.texture.getSize().y;
 
+	SokuLib::Vector2i realSize;
+
+	this->_name.texture.createFromText(loadedPacks[currentPack]->scenarios[currentEntry]->nameStr.c_str(), defaultFont16, {412, 27}, &realSize);
+	this->_name.setPosition({static_cast<int>(392 + 212 / 2 - realSize.x / 2), 100});
+	this->_name.setSize(realSize.to<unsigned>());
+	this->_name.rect.left = 0;
+	this->_name.rect.top = 0;
+	this->_name.rect.width = realSize.x;
+	this->_name.rect.height = realSize.y;
+
 	ScorePrerequisites *old = nullptr;
 
 	if (!json.contains("score") || !json["score"].is_array() || json["score"].size() != 4)
@@ -889,6 +899,10 @@ int ComboTrial::pauseOnUpdate()
 
 	auto c = SokuLib::checkKeyOneshot(DIK_ESCAPE, false, false, false);
 
+	if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading && loadedPacks[currentPack]->scenarios[currentEntry]->preview)
+		loadedPacks[currentPack]->scenarios[currentEntry]->preview->update();
+	updateNoiseTexture();
+	updateBandTexture();
 	if (c || SokuLib::inputMgrs.input.b == 1)
 		return SokuLib::playSEWaveBuffer(0x29), false;
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && SokuLib::inputMgrs.input.verticalAxis % 6 == 0)) {
@@ -903,6 +917,11 @@ int ComboTrial::pauseOnUpdate()
 
 int ComboTrial::pauseOnRender() const
 {
+	if (this->_finished)
+		return true;
+	if (this->_playingIntro)
+		return true;
+
 	displaySokuCursor({
 		61,
 		static_cast<int>(129 + 32 * this->_cursorPos)
@@ -913,6 +932,24 @@ int ComboTrial::pauseOnRender() const
 		this->_tick.setPosition({42, 191});
 		this->_tick.draw();
 	}
+	loadedPacks[currentPack]->scenarios[currentEntry]->description.draw();
+	if (!loadedPacks[currentPack]->scenarios[currentEntry]->loading) {
+		if (loadedPacks[currentPack]->scenarios[currentEntry]->preview && loadedPacks[currentPack]->scenarios[currentEntry]->preview->isValid())
+			loadedPacks[currentPack]->scenarios[currentEntry]->preview->render();
+		else
+			lockedNoise.draw();
+	} else {
+		lockedNoise.draw();
+		loadingGear.setRotation(-loadingGear.getRotation());
+		loadingGear.setPosition({540, 243});
+		loadingGear.draw();
+		loadingGear.setRotation(-loadingGear.getRotation());
+		loadingGear.setPosition({563, 225});
+		loadingGear.draw();
+	}
+	CRTBands.draw();
+	frame.draw();
+	this->_name.draw();
 	return true;
 }
 

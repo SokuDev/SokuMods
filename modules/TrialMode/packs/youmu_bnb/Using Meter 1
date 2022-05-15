@@ -10,6 +10,7 @@
     },
     "expected": "5a 5aa:15 5aaa:15 5aaaa:18 5aaaaa sc200:25",
     "hand": [
+        200,
         200
     ],
     "music": "data/bgm/st14.ogg",
@@ -75,6 +76,5 @@
         ]
     ],
     "stage": 15,
-    "type": "combo",
-    "uniform_card_cost": 1
+    "type": "combo"
 }

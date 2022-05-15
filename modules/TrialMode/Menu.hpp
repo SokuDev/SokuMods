@@ -69,6 +69,12 @@ extern std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> charactersFaces;
 extern SokuLib::DrawUtils::Sprite editSeatEmpty;
 extern SokuLib::DrawUtils::Sprite upArrow;
 extern SokuLib::DrawUtils::Sprite downArrow;
+extern SokuLib::DrawUtils::Sprite lockedNoise;
+extern SokuLib::DrawUtils::Sprite CRTBands;
+extern SokuLib::DrawUtils::Sprite frame;
+extern SokuLib::DrawUtils::Sprite loadingGear;
+extern int currentPack;
+extern int currentEntry;
 extern bool hasEnglishPatch;
 
 void menuLoadAssets();
@@ -77,6 +83,8 @@ void menuOnRender(SokuLib::MenuResult *This);
 void menuUnloadAssets();
 std::vector<unsigned> getCurrentPackScores();
 void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
+void updateNoiseTexture();
+void updateBandTexture();
 
 template<typename T, typename ...Args>
 T getField(nlohmann::json json, T defaultValue, bool (nlohmann::json::*checker)() const, std::string field, Args... fields)
