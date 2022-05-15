@@ -1737,9 +1737,6 @@ void ComboTrialEditor::_initVanillaGame()
 	SokuLib::camera.translate = {-320, 420};
 	SokuLib::camera.backgroundTranslate = {640, 0};
 	SokuLib::camera.scale = 1;
-
-	SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
-	SokuLib::weatherCounter = 0;
 }
 
 int ComboTrialEditor::pauseOnUpdate()

@@ -244,10 +244,12 @@ ComboTrial::ComboTrial(const char *folder, SokuLib::Character player, const nloh
 	this->_loadPauseAssets();
 }
 
+void ____(int) {}
+
 bool ComboTrial::update(bool &canHaveNextFrame)
 {
 	auto &battleMgr = SokuLib::getBattleMgr();
-
+	//00439770
 	if (this->_quit) {
 		canHaveNextFrame = false;
 		return true;
@@ -256,12 +258,19 @@ bool ComboTrial::update(bool &canHaveNextFrame)
 		return true;
 	battleMgr.rightCharacterManager.nameHidden = true;
 	if (!this->_introPlayed) {
-		SokuLib::displayedWeather = this->_weather;
-		SokuLib::activeWeather = this->_weather;
-		canHaveNextFrame = this->_firstFirst == 1;
-		if (this->_firstFirst)
+		//SokuLib::displayedWeather = this->_weather;
+		//SokuLib::activeWeather = this->_weather;
+		canHaveNextFrame = false;//this->_firstFirst == 1;
+		if (this->_firstFirst) {
+			DWORD dwOldProtect;
+			::VirtualProtect((void*)0x439789, 5, PAGE_EXECUTE_READWRITE, &dwOldProtect);
+			auto oldFct = SokuLib::TamperNearJmpOpr(0x439789, ____);
+
+			SokuLib::activateWeather(this->_weather, 1);
+			SokuLib::TamperNearJmpOpr(0x439789, oldFct);
+			::VirtualProtect((void*)0x439789, 5, dwOldProtect, &dwOldProtect);
 			this->_firstFirst--;
-		else
+		} else
 			this->_introOnUpdate();
 		if (this->_introPlayed)
 			SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
@@ -392,13 +401,14 @@ disableLimit:
 		(SokuLib::activeWeather != this->_weather && this->_weather != SokuLib::WEATHER_AURORA) ||
 		(this->_weather == SokuLib::WEATHER_AURORA && (SokuLib::displayedWeather != this->_weather || SokuLib::activeWeather == SokuLib::WEATHER_CLEAR))
 	) {
-		if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR) {
-			SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
-			SokuLib::displayedWeather = this->_weather;
-		} else
-			SokuLib::weatherCounter = 0;
+		//if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR) {
+		//	SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 999;
+		//	SokuLib::displayedWeather = this->_weather;
+		//} else
+		//	SokuLib::weatherCounter = 0;
+		SokuLib::activateWeather(this->_weather, 1);
 	} else
-		SokuLib::weatherCounter = this->_weather == SokuLib::WEATHER_CLEAR ? 0 : 750;
+		SokuLib::weatherCounter = weatherTimes[this->_weather];
 	if (this->_dummyHit && !hit && (!this->_finished || this->_playingIntro))
 		this->_isStart = true;
 	else if (this->_dummyHit && !hit)

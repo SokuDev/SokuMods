@@ -118,8 +118,9 @@ void TrialEditor::_introOnUpdate()
 	}
 
 	auto result = this->_intro->update();
+	auto &battleMgr = SokuLib::getBattleMgr();
 
-	(SokuLib::getBattleMgr().*SokuLib::VTable_BattleManager.updateEffects)();
+	(battleMgr.*battleMgr.vtable->updateEffects)();
 	if (!result && !this->_introPlayed)
 		this->_playBGM();
 	this->_introPlayed |= !result;
@@ -139,7 +140,10 @@ void TrialEditor::_outroOnUpdate()
 		return;
 	}
 	this->_outroPlayed |= !this->_outro->update();
-	(SokuLib::getBattleMgr().*SokuLib::VTable_BattleManager.updateEffects)();
+
+	auto &battleMgr = SokuLib::getBattleMgr();
+
+	(battleMgr.*battleMgr.vtable->updateEffects)();
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_outro->onKeyPressed();
 	if (SokuLib::inputMgrs.pause == 1) {
