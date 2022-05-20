@@ -6,6 +6,7 @@
 #define SWRSTOYS_IMAGES_HPP
 
 #include <SokuLib.hpp>
+#include <mutex>
 
 class Image {
 public:
@@ -39,27 +40,39 @@ private:
 	bool _antiAlias;
 	IDirect3DTexture9 **_pphandle;
 	SokuLib::DrawUtils::Sprite _sprite;
-	SokuLib::DrawUtils::DxSokuColor *_frame = nullptr;
-	SokuLib::DrawUtils::DxSokuColor *_lastFrame = nullptr;
 	std::vector<std::unique_ptr<Frame>> _frames;
 	unsigned int _currentFrame = 0;
 	float _internalCtr = 0;
 	int _last = 0;
-	SokuLib::Vector2u _size{0, 0};
+	std::mutex mutex;
+	std::mutex destroymutex;
 
 	void _updateTexture();
 	void _copyDecodedFrame(struct GIF_WHDR *chunk, SokuLib::DrawUtils::DxSokuColor *pict, Frame *frameObj);
 	void _processFrame(Frame *frameObj);
+	void _init();
 
 public:
 	AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing);
-	~AnimatedImage() override = default;
+	~AnimatedImage() override;
 	void reset() override;
 	void update() override;
 	void processChunk(struct GIF_WHDR *chunk);
 	void render() const override;
 	bool isValid() const override;
 	void setPosition(SokuLib::Vector2i pos) override;
+
+	size_t size;
+	std::string path;
+	bool _loading = false;
+	unsigned char *buf;
+	SokuLib::Vector2u _size{0, 0};
+	WIN32_FILE_ATTRIBUTE_DATA fad;
+	SokuLib::DrawUtils::DxSokuColor *_frame = nullptr;
+	SokuLib::DrawUtils::DxSokuColor *_lastFrame = nullptr;
+	HANDLE thread = INVALID_HANDLE_VALUE;
+	bool _needExit = false;
+	std::mutex dmutex;
 };
 
 #endif //SWRSTOYS_IMAGES_HPP

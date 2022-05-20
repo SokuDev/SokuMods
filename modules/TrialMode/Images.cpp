@@ -5,6 +5,7 @@
 #undef _D3D9_H_
 #include <d3d9.h>
 #include <fstream>
+#include <process.h>
 #include "gif_load.h"
 #include "Images.hpp"
 
@@ -55,15 +56,34 @@ static void callback(void *data, struct GIF_WHDR *chunk)
 	This->processChunk(chunk);
 }
 
-AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &pos, bool antiAliasing)
+static DWORD __stdcall loader(void *data)
 {
+	auto This = (AnimatedImage *)data;
+
+	This->dmutex.lock();
+	printf("Loading GIF file %s\n", This->path.c_str());
+	if (GIF_Load((void *)This->buf, This->fad.nFileSizeLow, callback, nullptr, This, 0) < 0) {
+		fprintf(stderr, "Could not load GIF %s\n", This->path.c_str());
+		delete[] This->buf;
+		This->dmutex.unlock();
+		return 0;
+	}
+	This->dmutex.unlock();
+	This->_loading = false;
+
+	printf("GIF %dx%d\n", This->_size.x, This->_size.y);
+	This->thread = INVALID_HANDLE_VALUE;
+	return 0;
+}
+
+AnimatedImage::AnimatedImage(const std::string &p, const SokuLib::Vector2i &pos, bool antiAliasing)
+{
+	puts("AnimatedImage() <-");
+	this->path = p;
+
 	std::ifstream stream{path, std::ifstream::binary};
-	int id;
-	HRESULT ret;
 
-	WIN32_FILE_ATTRIBUTE_DATA fad;
-
-	if (!GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &fad)) {
+	if (!GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &this->fad)) {
 		fprintf(stderr, "GetFileAttributesEx(%s) failed with code %lX\n", path.c_str(), GetLastError());
 		return;
 	}
@@ -77,27 +97,42 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 		fprintf(stderr, "Could not open %s\n", path.c_str());
 		return;
 	}
-
-	auto buf = new unsigned char[fad.nFileSizeLow];
+	this->buf = new unsigned char[fad.nFileSizeLow];
 
 	printf("Reading file %s\n", path.c_str());
 	stream.read(reinterpret_cast<char *>(buf), fad.nFileSizeLow);
+	this->_sprite.setPosition(pos);
+	this->_loading = true;
+	this->thread = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(loader), this, 0, nullptr);
+	puts("AnimatedImage() ->");
+}
 
-	this->_pphandle = SokuLib::textureMgr.allocate(&id);
-
-	printf("Loading GIF file %s\n", path.c_str());
-	if (GIF_Load((void *)buf, fad.nFileSizeLow, callback, nullptr, this, 0) < 0) {
-		fprintf(stderr, "Could not load GIF %s\n", path.c_str());
-		delete[] buf;
-		return;
-	}
-
-	printf("GIF %dx%d\n", this->_size.x, this->_size.y);
-
-	delete[] buf;
+AnimatedImage::~AnimatedImage()
+{
+	puts("~AnimatedImage() <-");
+	this->_needExit = true;
+	this->destroymutex.lock();
 	delete[] this->_frame;
 	delete[] this->_lastFrame;
+	this->destroymutex.unlock();
+	this->dmutex.lock();
+	delete[] this->buf;
+	this->dmutex.unlock();
+	puts("~AnimatedImage() ->");
+}
 
+void AnimatedImage::_init()
+{
+	HRESULT ret;
+	int id;
+	auto ddst = (uint32_t)(this->_size.x * this->_size.y);
+
+	this->_frame = new(std::nothrow) SokuLib::DrawUtils::DxSokuColor[ddst];
+	this->_lastFrame = new(std::nothrow) SokuLib::DrawUtils::DxSokuColor[ddst];
+	if (!this->_frame || !this->_lastFrame)
+		fprintf(stderr, "Memory allocation error\n");
+
+	this->_pphandle = SokuLib::textureMgr.allocate(&id);
 	if (FAILED(ret = D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, this->_pphandle))) {
 		SokuLib::textureMgr.deallocate(id);
 		fprintf(stderr, "D3DXCreateTexture(SokuLib::pd3dDev, 200, 150, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, %p) failed with code %i\n", this->_pphandle, ret);
@@ -108,8 +143,7 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 		0, 0,
 		static_cast<int>(this->_sprite.texture.getSize().x),
 		static_cast<int>(this->_sprite.texture.getSize().y),
-		};
-	this->_sprite.setPosition(pos);
+	};
 	this->_sprite.setSize({200, 150});
 	this->_updateTexture();
 }
@@ -117,14 +151,19 @@ AnimatedImage::AnimatedImage(const std::string &path, const SokuLib::Vector2i &p
 void AnimatedImage::update()
 {
 	this->_internalCtr += 1000 / 60.f;
+	this->mutex.lock();
 	if (this->_frames.empty())
-		return;
+		return this->mutex.unlock();
 	while (this->_internalCtr >= this->_frames[this->_currentFrame]->delay) {
-		this->_internalCtr -= this->_frames[this->_currentFrame]->delay;
-		this->_currentFrame++;
-		this->_currentFrame %= this->_frames.size();
-		this->_updateTexture();
+		if (!this->_loading || this->_currentFrame < this->_frames.size()) {
+			this->_internalCtr -= this->_frames[this->_currentFrame]->delay;
+			this->_currentFrame++;
+			this->_currentFrame %= this->_frames.size();
+			this->_updateTexture();
+		} else
+			this->_internalCtr = this->_frames[this->_currentFrame]->delay;
 	}
+	this->mutex.unlock();
 }
 
 void AnimatedImage::render() const
@@ -140,19 +179,18 @@ void AnimatedImage::reset()
 
 void AnimatedImage::processChunk(struct GIF_WHDR *chunk)
 {
+	this->dmutex.unlock();
 	this->_size.x = chunk->xdim;
 	this->_size.y = chunk->ydim;
+	if (this->_needExit)
+		ExitThread(0);
 
+	this->destroymutex.lock();
 	uint32_t x, y, yoff, iter, ifin, dsrc, ddst;
 	SokuLib::DrawUtils::DxSokuColor *pict, *prev;
 
-	if (!chunk->ifrm) {
-		ddst = (uint32_t)(chunk->xdim * chunk->ydim);
-		this->_frame = new(std::nothrow) SokuLib::DrawUtils::DxSokuColor[ddst];
-		this->_lastFrame = new(std::nothrow) SokuLib::DrawUtils::DxSokuColor[ddst];
-		if (!this->_frame || !this->_lastFrame)
-			fprintf(stderr, "Memory allocation error\n");
-	}
+	if (!chunk->ifrm)
+		this->_init();
 	if (!this->_frame || !this->_lastFrame)
 		return;
 	/** [TODO:] the frame is assumed to be inside global bounds,
@@ -204,7 +242,16 @@ void AnimatedImage::processChunk(struct GIF_WHDR *chunk)
 				pict[chunk->xdim * y + x + ddst].b = color.B;
 				pict[chunk->xdim * y + x + ddst].a = 0xFF;
 			}
+	this->mutex.lock();
 	this->_frames.emplace_back(frameObj);
+	this->mutex.unlock();
+	this->dmutex.lock();
+	if (this->_needExit) {
+		this->destroymutex.unlock();
+		this->dmutex.unlock();
+		ExitThread(0);
+	}
+	this->destroymutex.unlock();
 }
 
 void AnimatedImage::_updateTexture()
