@@ -39,6 +39,7 @@
         "Story"
     ],
     "name": "Babylone's Aurora",
+    "outro": "outro.lua",
     "scenarios": [
         {
             "description": "2A 3A 66B<br>Basic combo conversion for far melee pokes. <br>3A only combo into 66B on ground",

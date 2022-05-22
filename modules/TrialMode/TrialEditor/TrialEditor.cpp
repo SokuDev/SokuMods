@@ -143,6 +143,7 @@ void TrialEditor::_outroOnUpdate()
 
 	auto &battleMgr = SokuLib::getBattleMgr();
 
+	SokuLib::weatherCounter = weatherTimes[SokuLib::activeWeather];
 	(battleMgr.*battleMgr.vtable->updateEffects)();
 	if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 		this->_outro->onKeyPressed();

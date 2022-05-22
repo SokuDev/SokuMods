@@ -11,10 +11,13 @@ local dialogs = {
 	"lHhIt is you that I have business with.",
 	"rHSMe? How curious?<br>And what do you have to do with me?",
 	"lWSIllusion is your thing, isn't it?",
-	"lcSIt must be quite easy to hide yourself...",
+	"lcSIt must be quite easy to hide yourself<br>from your enemies and allies...",
 	"rcCAnd what are you implying!?",
-	"lCCThat you are a suspect!"
-	--Battle here
+	"lCCThat you are a suspect!",
+	"rCSAnd why would I possibly cause trouble alone?",
+	"lhSWho knows? A Tewi prank perhaps? Or maybe<br>you had some schemes in mind? After all<br>you're still a moon rabbit at your core, isn't it?",
+	"rhADon't underestimate my loyalty!",
+--Battle here
 }
 
 local flashRect = RectangleShape.new()

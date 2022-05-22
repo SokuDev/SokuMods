@@ -5,13 +5,15 @@
 local dialogs = {
 	"lcDAs a rabbit, shouldn't running be<br>a more effective strategy?",
 	"rcAMy purpose is to protect the princess!",
-	"lHAThen you should get stronger.",
-	"rHDWhy did you attack me anyway?!",
-	"lSDIt seems that I got carried away...",
-	"lhDDid you go to our manor by any chance?",
-	"rhANo I did not!<br>I wouldn't leave here without good reasons.",
-	"lHAI see. You're a serious servant.",
-	"lcAWell then it seems it was not you.<br>But here is one other suspect I can think about..."
+	"lcABut isn't that strange?",
+	"lcAI understand that they're helping you,<br>but why go this far for them?",
+	"lSAAt that time, when we stormed in,<br>wouldn't it have been smarter to hide or run away?<br>It should have been the easier solution.",
+	"rSDIt seems you misunderstand,<br>I follow them by choice.",
+	"rSEBesides I'm not much of a moon rabbit anymore.<br>Even though I might not be ready to consider myself an<br>earth rabbit yet, considering their leader...",
+	"rSWBut aren't you in a much more singular situation than<br>mine? A human who is the personal maid of a vampire...<br>That is quite difficult to believe.",
+	"lHWSeen in that way, it is a bit strange.",
+	"lEWWell it seems I got carried away but now I know for<br>sure that it isn't you.",
+	"lHWOn to the next suspect then.",
 }
 
 local dialog  = StandDialog.new(dialogs)
