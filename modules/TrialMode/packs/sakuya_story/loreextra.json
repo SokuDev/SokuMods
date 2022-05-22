@@ -14,9 +14,11 @@
         212,
         212
     ],
+    "intro": "loreextraintro.lua",
     "music": "{{pack_path}}/yukari.ogg",
     "music_loop_end": 166.019,
     "music_loop_start": 0.658,
+    "outro": "loreextraoutro.lua",
     "player": {
         "character": "sakuya",
         "deck": [
@@ -80,6 +82,6 @@
             0
         ]
     ],
-    "stage": 12,
+    "stage": 16,
     "type": "combo"
 }
