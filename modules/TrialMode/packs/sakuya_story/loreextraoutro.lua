@@ -3,14 +3,14 @@
 --
 
 local dialogs = {
-	"rhhAre you happy now?",
-	"lhhYes, very much. Maybe I should make it a habit.",
-	"rhhI would rather avoid that. Besides, your master<br>should be waiting for you I believe.",
-	"lhhYou are right there is still much to be done.",
-	"lhhWould you like to join us for a tea break by the way?",
+	"r DAre you happy now?",
+	"lWDYes, very much. Maybe I should do that more often.",
+	"rWEI would rather avoid that. Besides, your master<br>should be waiting for you I believe.",
+	"lcEYou are right there is still much to be done.",
+	"lhEBy the way, would you like to join us for a tea break?",
 	--"rhh...",
 	--Yukari is still face down, getting slowly absorbed by her portal.
-	"lh That's a no I guess.",
+	"lc I guess it's a no then.",
 	--Battle here
 }
 

@@ -15,7 +15,7 @@ local dialogs = {
 	"rcCAnd what are you implying!?",
 	"lCCThat you are a suspect!",
 	"rCSAnd why would I possibly cause trouble alone?",
-	"lhSWho knows? A Tewi prank perhaps? Or maybe<br>you had some schemes in mind? After all<br>you're still a moon rabbit at your core, isn't it?",
+	"lhSWho knows? A Tewi prank perhaps? Or maybe<br>you had some schemes in mind? After all<br>you're still a moon rabbit at your core, aren't you?",
 	"rhADon't underestimate my loyalty!",
 --Battle here
 }

@@ -37,7 +37,7 @@
             "min_limit": 110
         },
         {
-            "max_attempts": 10
+            "max_attempts": 25
         }
     ],
     "skills": [
