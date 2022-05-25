@@ -118,7 +118,7 @@
             "extra": true,
             "file": "loreextra.json",
             "may_be_locked": true,
-            "name": "Extra",
+            "name": "Neither Spring Or River",
             "name_hidden_when_locked": false,
             "preview": "extra.gif"
         }

@@ -4,16 +4,16 @@
 
 local dialogs = {
 	--Sakuya stumbling across Yukari on the ground
-	"lhhSo you're the one behind it all, isn't it?",
-	"rhhOh, so Remilia told you I guess...",
-	"rhhI'm not exactly behind everything but whatever.",
-	"lhhI thought that the Oni behavior was strange so<br>you're the one behind it I imagine.",
-	"rhhWell after so much searching I guess you would<br>want the truth.",
-	"lhhNo, not at all. The mistress seems to be pleased<br>with what she learnt from, and that's all I care about.",
-	"rhhThen why are you even here?",
-	"lhhI don't like to be sent around like an errand girl.",
-	"rhhIsn't it most of your job?",
-	"lhhNot when you're the one making it more difficult.",
+	"lh So you're the one behind it all, isn't it?",
+	"rhhOh, I guess Remilia told you...",
+	"rhcI'm not exactly behind everything but whatever.",
+	"lccI thought that the Oni behavior was strange so<br>you're the one behind it I imagine.",
+	"rcHWell after so much searching I guess you would<br>want the truth.",
+	"lHHNo, not at all. The mistress seems to be pleased<br>with what she learnt from, and that's all I care about.",
+	"rhSThen why are you even here?",
+	"lASI don't like to be sent around like an errand girl.",
+	"rAEIsn't it most of your job?",
+	"lCENot when you're the one making it more difficult.",
 	--Battle here
 }
 
@@ -35,7 +35,7 @@ local function stage0()
 		battleMgr.leftChr.position.x = -200
 		battleMgr.rightChr.position.x = 1000
 
-		playBGM("data/bgm/ta01.ogg")
+		playBGM("data/bgm/ta07.ogg")
 	end
 	if ctr < 60 then
 		if stageBg.tint.a ~= 0 then
@@ -127,7 +127,7 @@ local anims = {
 
 print("Init intro.")
 
-stageBg.texture:loadFromFile(packPath.."\\lore2intro.png")
+stageBg.texture:loadFromFile(packPath.."\\loreextraintro.png")
 stageBg.size = stageBg.texture.size
 stageBg.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),
