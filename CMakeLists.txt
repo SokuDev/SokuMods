@@ -610,7 +610,7 @@ add_library(
 )
 target_compile_options(InfiniteSubsun PRIVATE /Zi)
 target_compile_definitions("InfiniteSubsun" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_include_directories("InfiniteSubsun" PRIVATE include include/directx "modules/PunishDisplay/")
+target_include_directories("InfiniteSubsun" PRIVATE include include/directx "modules/InfiniteSubsun/")
 target_link_directories("InfiniteSubsun" PRIVATE lib)
 target_link_libraries(
         InfiniteSubsun
@@ -623,6 +623,115 @@ target_link_libraries(
 )
 install(TARGETS "InfiniteSubsun" LIBRARY DESTINATION "SWRSToys/modules/InfiniteSubsun/")
 install(TARGETS "InfiniteSubsun" LIBRARY DESTINATION "SokuEngine/modules/InfiniteSubsun/")
+
+add_library(
+        "TimerSoku"
+        MODULE
+        modules/TimerSoku/main.cpp
+)
+target_compile_options(TimerSoku PRIVATE /Zi)
+target_compile_definitions("TimerSoku" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("TimerSoku" PRIVATE include include/directx "modules/TimerSoku/")
+target_link_directories("TimerSoku" PRIVATE lib)
+target_link_libraries(
+        TimerSoku
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "TimerSoku" LIBRARY DESTINATION "SWRSToys/modules/TimerSoku/")
+install(TARGETS "TimerSoku" LIBRARY DESTINATION "SokuEngine/modules/TimerSoku/")
+
+
+add_library(
+        "SuddenDeath"
+        MODULE
+        modules/SuddenDeath/main.cpp
+)
+target_compile_options(SuddenDeath PRIVATE /Zi)
+target_compile_definitions("SuddenDeath" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("SuddenDeath" PRIVATE include include/directx "modules/SuddenDeath/")
+target_link_directories("SuddenDeath" PRIVATE lib)
+target_link_libraries(
+        SuddenDeath
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "SuddenDeath" LIBRARY DESTINATION "SWRSToys/modules/SuddenDeath/")
+install(TARGETS "SuddenDeath" LIBRARY DESTINATION "SokuEngine/modules/SuddenDeath/")
+
+
+add_library(
+        "DamagingCards"
+        MODULE
+        modules/DamagingCards/main.cpp
+)
+target_compile_options(DamagingCards PRIVATE /Zi)
+target_compile_definitions("DamagingCards" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("DamagingCards" PRIVATE include include/directx "modules/DamagingCards/")
+target_link_directories("DamagingCards" PRIVATE lib)
+target_link_libraries(
+        DamagingCards
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "DamagingCards" LIBRARY DESTINATION "SWRSToys/modules/DamagingCards/")
+install(TARGETS "DamagingCards" LIBRARY DESTINATION "SokuEngine/modules/DamagingCards/")
+
+
+add_library(
+        "CardChaos"
+        MODULE
+        modules/CardChaos/main.cpp
+)
+target_compile_options(CardChaos PRIVATE /Zi)
+target_compile_definitions("CardChaos" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("CardChaos" PRIVATE include include/directx "modules/CardChaos/")
+target_link_directories("CardChaos" PRIVATE lib)
+target_link_libraries(
+        CardChaos
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "SuddenDeath" LIBRARY DESTINATION "SWRSToys/modules/CardChaos/")
+install(TARGETS "SuddenDeath" LIBRARY DESTINATION "SokuEngine/modules/CardChaos/")
+
+
+add_library(
+        "BurningCards"
+        MODULE
+        modules/BurningCards/main.cpp
+)
+target_compile_options(BurningCards PRIVATE /Zi)
+target_compile_definitions("BurningCards" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("BurningCards" PRIVATE include include/directx "modules/BurningCards/")
+target_link_directories("BurningCards" PRIVATE lib)
+target_link_libraries(
+        BurningCards
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "BurningCards" LIBRARY DESTINATION "SWRSToys/modules/BurningCards/")
+install(TARGETS "BurningCards" LIBRARY DESTINATION "SokuEngine/modules/BurningCards/")
 
 add_library(
         "HostInBackground"
