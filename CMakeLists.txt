@@ -503,7 +503,11 @@ add_library(
         modules/TrialMode/InputBox.hpp
 	modules/TrialMode/Explorer.cpp
         modules/TrialMode/Explorer.hpp
-	modules/TrialMode/InputBox.cpp modules/TrialMode/InputBox.hpp)
+	modules/TrialMode/InputBox.cpp
+        modules/TrialMode/InputBox.hpp
+        modules/TrialMode/ExplorerMenu.cpp
+        modules/TrialMode/ExplorerMenu.hpp
+)
 target_compile_options(TrialMode PRIVATE /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> WINVER=0x0601 _WIN32_WINNT=0x0601)
 target_include_directories("TrialMode" PRIVATE include include/directx "modules/TrialMode/")

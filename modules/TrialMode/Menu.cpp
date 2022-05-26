@@ -7,7 +7,6 @@
 #include <direct.h>
 #include <dinput.h>
 #include <process.h>
-#include <thread>
 #include "Menu.hpp"
 #include "Pack.hpp"
 #include "Explorer.hpp"
@@ -15,6 +14,7 @@
 #include "Trial/Trial.hpp"
 #include "TrialEditor/TrialEditor.hpp"
 #include "InputBox.hpp"
+#include "ExplorerMenu.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -62,11 +62,7 @@ static SokuLib::DrawUtils::Sprite questionMarks;
 static SokuLib::DrawUtils::Sprite nameFilterText;
 static SokuLib::DrawUtils::Sprite modeFilterText;
 static SokuLib::DrawUtils::Sprite topicFilterText;
-static SokuLib::DrawUtils::Sprite previewContainer;
-static SokuLib::DrawUtils::Sprite blackSilouettes;
 static SokuLib::DrawUtils::Sprite lockedText;
-static SokuLib::DrawUtils::Sprite lockedImg;
-static SokuLib::DrawUtils::Sprite extraText;
 static SokuLib::DrawUtils::Sprite extraImg;
 static SokuLib::DrawUtils::Sprite version;
 static SokuLib::DrawUtils::Sprite editSeat;
@@ -85,6 +81,10 @@ static unsigned band2Start = 0;
 
 int currentPack = -3;
 int currentEntry = -1;
+SokuLib::DrawUtils::Sprite previewContainer;
+SokuLib::DrawUtils::Sprite blackSilouettes;
+SokuLib::DrawUtils::Sprite lockedImg;
+SokuLib::DrawUtils::Sprite extraText;
 SokuLib::DrawUtils::Sprite loadingGear;
 SokuLib::DrawUtils::Sprite frame;
 SokuLib::DrawUtils::Sprite lockedNoise;
@@ -1748,6 +1748,7 @@ int ResultMenu::onRender()
 		sprite.draw();
 	return 0;
 }
+
 
 void loadFont()
 {
@@ -3469,6 +3470,11 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
 	if (SokuLib::inputMgrs.input.spellcard == 1)
 		switchEditorMode();
+	if (input.horizontalAxis < 0) {
+		SokuLib::playSEWaveBuffer(0x28);
+		SokuLib::activateMenu(new ExplorerMenu());
+		return;
+	}
 	if (input.a == 1 && SokuLib::newSceneId == SokuLib::SCENE_TITLE && currentPack >= 0) {
 		if (loadedPacks[currentPack]->scenarios.empty())
 			SokuLib::playSEWaveBuffer(0x29);
