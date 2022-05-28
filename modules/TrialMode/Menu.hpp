@@ -77,6 +77,7 @@ extern SokuLib::DrawUtils::Sprite previewContainer;
 extern SokuLib::DrawUtils::Sprite blackSilouettes;
 extern SokuLib::DrawUtils::Sprite lockedImg;
 extern SokuLib::DrawUtils::Sprite extraText;
+extern SokuLib::DrawUtils::Sprite packContainer;
 extern int currentPack;
 extern int currentEntry;
 extern bool hasEnglishPatch;

@@ -6,64 +6,25 @@
 #include <shlwapi.h>
 
 static int (SokuLib::BattleManager::*ogBattleManagerOnProcess)();
-static int (SokuLib::Battle::*ogBattleOnProcess)();
-static int (SokuLib::BattleClient::*ogBattleCLOnProcess)();
-static int (SokuLib::BattleServer::*ogBattleSVOnProcess)();
-static std::pair<unsigned, unsigned> count;
 
-void saveCards(SokuLib::BattleManager &mgr)
+void __fastcall lowerHp(SokuLib::CharacterManager &mgr)
 {
-	count.first = mgr.leftCharacterManager.cardCount;
-	count.second = mgr.rightCharacterManager.cardCount;
+	mgr.objectBase.hp -= 1000;
 }
-
-void battleProcess(SokuLib::BattleManager &mgr)
-{
-	if (count.first > mgr.leftCharacterManager.cardCount)
-		mgr.leftCharacterManager.objectBase.hp -= 1000;
-	if (count.second > mgr.rightCharacterManager.cardCount)
-		mgr.rightCharacterManager.objectBase.hp -= 1000;
-}
-/*
-int __fastcall CBattleSV_OnProcess(SokuLib::BattleServer *This)
-{
-	saveCards();
-
-	int ret = (This->*ogBattleSVOnProcess)();
-
-	battleProcess();
-	return ret;
-}
-
-int __fastcall CBattleCL_OnProcess(SokuLib::BattleClient *This)
-{
-	saveCards();
-
-	int ret = (This->*ogBattleCLOnProcess)();
-
-	battleProcess();
-	return ret;
-}
-
-int __fastcall CBattle_OnProcess(SokuLib::Battle *This)
-{
-	saveCards();
-
-	int ret = (This->*ogBattleOnProcess)();
-
-	battleProcess();
-	return ret;
-}*/
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
-	saveCards(*This);
-
 	int ret = (This->*ogBattleManagerOnProcess)();
 
-	battleProcess(*This);
+	if (This->matchState == -1)
+		return ret;
+	for (int i = 0; i < This->leftCharacterManager.hand.size; i++)
+		This->leftCharacterManager.hand[i].cost = 1;
+	for (int i = 0; i < This->rightCharacterManager.hand.size; i++)
+		This->rightCharacterManager.hand[i].cost = 1;
 	return ret;
 }
+
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
@@ -97,6 +58,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+	new SokuLib::Trampoline(0x00483D68, (void (*)())lowerHp, 5);
 	return true;
 }
 

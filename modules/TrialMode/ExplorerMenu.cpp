@@ -22,6 +22,199 @@ ExplorerMenu::~ExplorerMenu()
 	this->_loadingThread.join();
 }
 
+void ExplorerMenu::_renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
+{
+	if (this->_nameFilter != -1 && pack.nameStr != uniqueNames[this->_nameFilter])
+		return;
+	if (this->_modeFilter != -1 && std::find(pack.modes.begin(), pack.modes.end(), uniqueModes[this->_modeFilter]) == pack.modes.end())
+		return;
+	if (this->_topicFilter != -1 && pack.category != uniqueCategories[this->_topicFilter])
+		return;
+
+	if (pos.y >= 100) {
+		packContainer.setPosition({
+			static_cast<int>(pos.x),
+			static_cast<int>(pos.y)
+		});
+		packContainer.draw();
+	}
+	pos.y += 35;
+	if (deployed && expended) {
+		for (int i = entryStart; i < pack.scenarios.size(); i++) {
+			pos.y += 15;
+			if (pos.y > 379)
+				break;
+		}
+	} else
+		pos.y += 5;
+}
+
+
+void ExplorerMenu::_renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
+{
+	int i;
+	auto p = pos;
+	auto &sprite = pack.error.texture.hasTexture() ? pack.error : pack.author;
+
+	if (nameFilter != -1 && pack.nameStr != uniqueNames[nameFilter])
+		return;
+	if (modeFilter != -1 && std::find(pack.modes.begin(), pack.modes.end(), uniqueModes[modeFilter]) == pack.modes.end())
+		return;
+	if (topicFilter != -1 && pack.category != uniqueCategories[topicFilter])
+		return;
+
+	//100 <= y <= 406
+	if (pos.y >= 100) {
+		auto sumScore = 0;
+		bool hasScore = false;
+
+		for (auto &scenario : pack.scenarios) {
+			hasScore |= scenario->score != -1;
+			sumScore += scenario->score;
+		}
+
+		if (pack.icon) {
+			pack.icon->sprite.setPosition(SokuLib::Vector2i{
+				static_cast<int>(pos.x + 4),
+				static_cast<int>(pos.y + 2)
+			} + pack.icon->translate);
+			pack.icon->sprite.draw();
+		} else {
+			missingIcon.setPosition({
+							static_cast<int>(pos.x + 34),
+							static_cast<int>(pos.y - 1)
+						});
+			missingIcon.draw();
+		}
+
+		sprite.setPosition({
+					   static_cast<int>(pos.x + 75),
+					   static_cast<int>(pos.y + 17)
+				   });
+		sprite.draw();
+
+		if (hasScore) {
+			int val = sumScore / static_cast<int>(pack.scenarios.size());
+
+			score.rect.left = max(0, val) * score.texture.getSize().x / 4;
+			score.setPosition({
+						  static_cast<int>(pos.x + 296),
+						  static_cast<int>(pos.y - 8)
+					  });
+			score.draw();
+		}
+	}
+
+	if (currentEntry != -1) {
+		p.x += 25;
+		p.y += (currentEntry - entryStart) * 15 + 33;
+	}
+	if (deployed)
+		displaySokuCursor(
+			{static_cast<int>(p.x + 70), static_cast<int>(p.y + 1)},
+			{300, 16}
+		);
+
+	if (pos.y >= 100 && pos.y <= 406) {
+		pack.name.setPosition({
+					      static_cast<int>(pos.x + 74),
+					      static_cast<int>(pos.y + 2)
+				      });
+		pack.name.draw();
+	}
+	pos.y += 35;
+
+	if (!deployed || !expended) {
+		pos.y += 5;
+		return;
+	}
+
+	for (i = entryStart; i < pack.scenarios.size(); i++) {
+		auto curr = i;
+
+		if (movingScenario) {
+			if (curr == currentEntry)
+				curr = baseCursor;
+			else if (curr <= baseCursor && curr > currentEntry)
+				curr--;
+			else if (curr >= baseCursor && curr < currentEntry)
+				curr++;
+		}
+
+		auto &scenario = pack.scenarios[curr];
+
+		if (pos.y >= 100) {
+			if (scenario->extra && scenario->score == -1) {
+				extraImg.setPosition({
+							     static_cast<int>(pos.x + 271),
+							     static_cast<int>(pos.y - 5)
+						     });
+				extraImg.draw();
+			}
+			if (isLocked(i)) {
+				lock.setPosition({
+							 static_cast<int>(pos.x + 271),
+							 static_cast<int>(pos.y - 10)
+						 });
+				lock.draw();
+				if (scenario->nameHiddenIfLocked && !editorMode) {
+					questionMarks.setPosition({
+									  static_cast<int>(pos.x + 100),
+									  static_cast<int>(pos.y)
+								  });
+					for (int j = 0; j < 4; j++)
+						questionMarks.fillColors[j] = scenario->name.fillColors[j];
+					questionMarks.draw();
+				} else {
+					scenario->name.setPosition({
+									   static_cast<int>(pos.x + 100),
+									   static_cast<int>(pos.y)
+								   });
+					if (!editorMode)
+						scenario->name.tint = SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0x80};
+					else
+						scenario->name.tint = SokuLib::DrawUtils::DxSokuColor::White;
+					scenario->name.draw();
+				}
+			} else {
+				scenario->name.setPosition({
+								   static_cast<int>(pos.x + 100),
+								   static_cast<int>(pos.y)
+							   });
+				scenario->name.tint = SokuLib::DrawUtils::DxSokuColor::White;
+				scenario->name.draw();
+				if (scenario->score != -1) {
+					scenario->scoreSprite.setPosition({
+										  static_cast<int>(pos.x + 271),
+										  static_cast<int>(pos.y - 10)
+									  });
+					scenario->scoreSprite.draw();
+				}
+			}
+			if (editorMode) {
+				wrench.setPosition({
+							   static_cast<int>(pos.x + 287),
+							   static_cast<int>(pos.y - 10)
+						   });
+				wrench.draw();
+			}
+		}
+		pos.y += 15;
+		if (pos.y > 379)
+			break;
+	};
+	if (entryStart) {
+		upArrow.setPosition({72, 148});
+		upArrow.setSize({16, 16});
+		upArrow.draw();
+	}
+	if (i < pack.scenarios.size() - 1) {
+		downArrow.setPosition({72, 372});
+		downArrow.setSize({16, 16});
+		downArrow.draw();
+	}
+}
+
 void ExplorerMenu::_()
 {
 	puts("_ !");
@@ -50,7 +243,7 @@ int ExplorerMenu::onRender()
 
 	for (unsigned i = this->_packStart; i < this->_loadedPacks.size(); i++) {
 		// 100 <= y <= 364
-	//	renderOnePackBack(*this->_loadedPacks[i], pos, i == this->_currentPack);
+		this->_renderOnePackBack(*this->_loadedPacks[i], pos, i == this->_currentPack);
 		if (pos.y > 394)
 			break;
 	}

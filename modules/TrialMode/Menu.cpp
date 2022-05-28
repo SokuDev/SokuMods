@@ -57,7 +57,6 @@ static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite wrench;
 static SokuLib::DrawUtils::Sprite arrowSprite;
 static SokuLib::DrawUtils::Sprite missingIcon;
-static SokuLib::DrawUtils::Sprite packContainer;
 static SokuLib::DrawUtils::Sprite questionMarks;
 static SokuLib::DrawUtils::Sprite nameFilterText;
 static SokuLib::DrawUtils::Sprite modeFilterText;
@@ -81,6 +80,7 @@ static unsigned band2Start = 0;
 
 int currentPack = -3;
 int currentEntry = -1;
+SokuLib::DrawUtils::Sprite packContainer;
 SokuLib::DrawUtils::Sprite previewContainer;
 SokuLib::DrawUtils::Sprite blackSilouettes;
 SokuLib::DrawUtils::Sprite lockedImg;

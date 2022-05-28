@@ -713,6 +713,72 @@ install(TARGETS "SuddenDeath" LIBRARY DESTINATION "SokuEngine/modules/CardChaos/
 
 
 add_library(
+        "InfiniteWeather"
+        MODULE
+        modules/InfiniteWeather/main.cpp
+)
+target_compile_options(InfiniteWeather PRIVATE /Zi)
+target_compile_definitions("InfiniteWeather" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("InfiniteWeather" PRIVATE include include/directx "modules/InfiniteWeather/")
+target_link_directories("InfiniteWeather" PRIVATE lib)
+target_link_libraries(
+        InfiniteWeather
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "InfiniteWeather" LIBRARY DESTINATION "SWRSToys/modules/InfiniteWeather/")
+install(TARGETS "InfiniteWeather" LIBRARY DESTINATION "SokuEngine/modules/InfiniteWeather/")
+
+
+add_library(
+        "TagSoku"
+        MODULE
+        modules/TagSoku/main.cpp
+)
+target_compile_options(TagSoku PRIVATE /Zi)
+target_compile_definitions("TagSoku" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("TagSoku" PRIVATE include include/directx "modules/TagSoku/")
+target_link_directories("TagSoku" PRIVATE lib)
+target_link_libraries(
+        TagSoku
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "TagSoku" LIBRARY DESTINATION "SWRSToys/modules/TagSoku/")
+install(TARGETS "TagSoku" LIBRARY DESTINATION "SokuEngine/modules/TagSoku/")
+
+
+add_library(
+        "ShuffledWeather"
+        MODULE
+        modules/ShuffledWeather/main.cpp
+)
+target_compile_options(ShuffledWeather PRIVATE /Zi)
+target_compile_definitions("ShuffledWeather" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("ShuffledWeather" PRIVATE include include/directx "modules/ShuffledWeather/")
+target_link_directories("ShuffledWeather" PRIVATE lib)
+target_link_libraries(
+        ShuffledWeather
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "ShuffledWeather" LIBRARY DESTINATION "SWRSToys/modules/ShuffledWeather/")
+install(TARGETS "ShuffledWeather" LIBRARY DESTINATION "SokuEngine/modules/ShuffledWeather/")
+
+
+add_library(
         "BurningCards"
         MODULE
         modules/BurningCards/main.cpp

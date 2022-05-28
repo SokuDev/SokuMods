@@ -20,6 +20,9 @@ private:
 	int _currentPack = -3;
 	int _currentEntry = -1;
 	bool _loading = true;
+	int _nameFilter = -1;
+	int _modeFilter = -1;
+	int _topicFilter = -1;
 	unsigned _packStart = 0;
 	std::vector<std::string> _uniqueNames;
 	std::vector<std::string> _uniqueModes;
@@ -32,6 +35,8 @@ private:
 
 	void _loadPacks();
 	bool _isLocked(int entry);
+	void _renderOnePackBack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed);
+	void _renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed);
 public:
 	ExplorerMenu();
 	~ExplorerMenu() override;

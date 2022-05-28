@@ -7,54 +7,65 @@
 
 static int (SokuLib::BattleManager::*ogBattleMgrOnProcess)();
 static void (SokuLib::BattleManager::*ogBattleMgrOnRender)();
-static SokuLib::DrawUtils::Sprite timerSprite;
-static unsigned timer = 99 * 37;
+static SokuLib::DrawUtils::Sprite digits;
 static SokuLib::SWRFont font;
 static bool init = false;
+static short displayed = 0;
 
-void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
+int __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 {
+	puts("Render");
 	(This->*ogBattleMgrOnRender)();
-	if (This->matchState < 6)
-		timerSprite.draw();
+	puts("Draw (maybe)");
+	if (This->matchState < 6 && This->matchState >= 1) {
+		auto timer = displayed;
+
+		if (timer >= 10) {
+			digits.setPosition({298, 80});
+			digits.rect.left = timer / 10 * 11;
+			digits.draw();
+			digits.setPosition({320, 80});
+			digits.rect.left = timer % 10 * 11;
+			digits.draw();
+		} else {
+			digits.setPosition({309, 80});
+			digits.rect.left = timer * 11;
+			digits.draw();
+		}
+	}
+	puts("Return");
+	return 0;
 }
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
 	if (!init) {
-		SokuLib::FontDescription desc;
-
-		desc.r1 = 255;
-		desc.r2 = 255;
-		desc.g1 = 20;
-		desc.g2 = 20;
-		desc.b1 = 20;
-		desc.b2 = 20;
-		desc.height = 30;
-		desc.weight = FW_NORMAL;
-		desc.italic = 0;
-		desc.shadow = 1;
-		desc.bufferSize = 1000000;
-		desc.charSpaceX = 0;
-		desc.charSpaceY = 0;
-		desc.offsetX = 0;
-		desc.offsetY = 0;
-		desc.useOffset = 0;
-		strcpy(desc.faceName, "MonoSpatialModSWR");
-		desc.weight = FW_REGULAR;
-		font.create();
-		font.setIndirect(desc);
+		puts("Init");
+		digits.texture.loadFromGame("data/battle/weatherFont000.cv0");
+		digits.setSize({22, 36});
+		digits.rect.width = 11;
+		digits.rect.height = 18;
 		init = true;
 	}
 
+	puts("Mgr");
 	int ret = (This->*ogBattleMgrOnProcess)();
-	SokuLib::Vector2i size;
+
+	puts("Check");
+	if (This->matchState == -1)
+		return ret;
+
+	puts("Get timer");
+	auto &timer = *(short *)&This->leftCharacterManager.objectBase.offset_0x14E;
 
 	if (This->matchState != 2) {
+		puts("Init timer");
 		timer = 99 * 37;
 	} else if (timer != 0) {
+		puts("Tick timer");
 		timer--;
 		if (timer == 0) {
+			puts("Timer end!");
 			if (This->leftCharacterManager.objectBase.hp < This->rightCharacterManager.objectBase.hp)
 				This->leftCharacterManager.objectBase.hp = 1;
 			else if (This->leftCharacterManager.objectBase.hp > This->rightCharacterManager.objectBase.hp)
@@ -65,13 +76,8 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 			}
 		}
 	}
-	if (This->matchState <= 2 && timer % 37 == 0) {
-		timerSprite.texture.createFromText(std::to_string((timer + 36) / 37).c_str(), font, {100, 60}, &size);
-		timerSprite.setPosition({640 / 2 - size.x / 2, 80});
-		timerSprite.setSize(size.to<unsigned>());
-		timerSprite.rect.width = size.x;
-		timerSprite.rect.height = size.y;
-	}
+	if (This->matchState <= 2 && timer % 37 == 0)
+		displayed = (timer + 36) / 37;
 	return ret;
 }
 

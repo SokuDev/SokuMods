@@ -6,19 +6,22 @@
 #include <shlwapi.h>
 
 static int (SokuLib::BattleManager::*ogBattleMgrOnProcess)();
+static bool shuffled = false;
+static unsigned offset = 0;
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
 	int ret = (This->*ogBattleMgrOnProcess)();
 
-	SokuLib::displayedWeather = SokuLib::WEATHER_MOUNTAIN_VAPOR;
-	SokuLib::weatherCounter = 999;
-	if (SokuLib::activeWeather != SokuLib::WEATHER_MOUNTAIN_VAPOR)
-		SokuLib::activeWeather = SokuLib::WEATHER_CLEAR;
-	for (unsigned int i = 0; i < This->leftCharacterManager.hand.size; i++)
-		This->leftCharacterManager.hand[i].cost = 1;
-	for (unsigned int i = 0; i < This->rightCharacterManager.hand.size; i++)
-		This->rightCharacterManager.hand[i].cost = 1;
+	if (SokuLib::displayedWeather == SokuLib::WEATHER_CLEAR)
+		shuffled = false;
+	else if (!shuffled) {
+		offset = SokuLib::displayedWeather;
+		printf("Shuffle with offset %u\n", offset);
+		shuffled = true;
+	}
+	if (SokuLib::activeWeather != SokuLib::WEATHER_CLEAR && SokuLib::displayedWeather != SokuLib::WEATHER_AURORA)
+		SokuLib::activeWeather = SokuLib::Weather((offset + SokuLib::displayedWeather) % 20);
 	return ret;
 }
 
@@ -48,7 +51,6 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	// s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	memset((void *)0x483d6f, 0x90, 6);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
