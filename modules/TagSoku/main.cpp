@@ -43,6 +43,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 		init = true;
 		puts("Init okuus");
 
+		printf("%p %p %p %p\n", ((SokuLib::CharacterManager **)This)[3], ((SokuLib::CharacterManager **)This)[4], &This->leftCharacterManager, &This->rightCharacterManager);
 		leftBench.first  = ((SokuLib::CharacterManager **)This)[3];
 		leftBench.second = SokuLib::leftChar;
 		rightBench.first = ((SokuLib::CharacterManager **)This)[4];
