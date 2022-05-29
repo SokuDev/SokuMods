@@ -19,6 +19,7 @@
 #define printf(...)
 #endif
 
+
 static bool goToTitle = false;
 static int (SokuLib::Battle::* ogBattleOnProcess)();
 static int (SokuLib::Battle::* ogBattleOnRender)();

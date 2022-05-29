@@ -1,0 +1,15 @@
+{
+    "22": {
+        "cd": 90,
+        "nb": 4,
+        "action": 330,
+        "cond": "basic"
+    },
+    "236": {
+        "cd": 360,
+        "nb": 1,
+	"hitCount": 2,
+        "action": 551,
+        "cond": "end"
+    }
+}

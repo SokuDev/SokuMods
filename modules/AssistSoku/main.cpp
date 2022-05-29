@@ -2,12 +2,68 @@
 // Created by Gegel85 on 31/10/2020
 //
 
+#include <fstream>
+#include <sstream>
+#include <nlohmann/json.hpp>
 #include <SokuLib.hpp>
 #include <shlwapi.h>
 #include <thread>
 
 #define BOXES_ALPHA 0.25
+#define ASSIST_BOX_Y 429
+#define LEFT_ASSIST_BOX_X 57
+#define RIGHT_ASSIST_BOX_X 475
+#define LEFT_BAR SokuLib::Vector2i{82, 422}
+#define RIGHT_BAR SokuLib::Vector2i{479, 422}
+#define LEFT_CROSS SokuLib::Vector2i{108, 417}
+#define RIGHT_CROSS SokuLib::Vector2i{505, 417}
 
+struct Coord { float x, y, z; };
+struct SpriteEx {
+	void *vtable;
+	int dxHandle = 0;
+	SokuLib::DxVertex vertices[4];
+	SokuLib::Vector2f size;
+	Coord baseCoords[4];
+	Coord transfCoords[4];
+	SokuLib::Vector2f size2;
+
+	void setTexture(int texture, int texOffsetX, int texOffsetY, int width, int height, int anchorX, int anchorY);
+	void setTexture(int texture, int texOffsetX, int texOffsetY, int width, int height);
+	void clearTransform();
+	void render();
+	void render(float r, float g, float b);
+	void render(float a, float r, float g, float b);
+};
+void SpriteEx::setTexture(int texture, int texOffsetX, int texOffsetY, int width, int height, int anchorX, int anchorY) {
+	(this->*SokuLib::union_cast<void(SpriteEx::*)(int, int, int, int, int, int, int)>(0x406c60))(texture, texOffsetX, texOffsetY, width, height, anchorX, anchorY);
+}
+void SpriteEx::setTexture(int texture, int texOffsetX, int texOffsetY, int width, int height) {
+	(this->*SokuLib::union_cast<void(SpriteEx::*)(int, int, int, int, int)>(0x41f7f0))(texture, texOffsetX, texOffsetY, width, height);
+}
+void SpriteEx::clearTransform() { (this->*SokuLib::union_cast<void(SpriteEx::*)()>(0x406ea0))(); }
+void SpriteEx::render() { (this->*SokuLib::union_cast<void(SpriteEx::*)()>(0x4075d0))(); }
+void SpriteEx::render(float r, float g, float b) { (this->*SokuLib::union_cast<void(SpriteEx::*)(float, float, float)>(0x7fb080))(r, g, b); }
+void SpriteEx::render(float a, float r, float g, float b) { (this->*SokuLib::union_cast<void(SpriteEx::*)(float, float, float, float)>(0x7fb150))(a, r, g, b); }
+
+struct ChrInfo {
+	unsigned nb = 0;
+	unsigned cd = 0;
+	unsigned maxCd = 0;
+	unsigned ctr = 0;
+	SokuLib::Action action;
+	SokuLib::Character chr;
+	bool (*cond)(SokuLib::CharacterManager *mgr, ChrInfo &This) = nullptr;
+};
+
+struct ChrData {
+	std::map<std::string, ChrInfo> elems;
+	SokuLib::Vector2i size;
+	SpriteEx sprite;
+};
+
+static char modFolder[1024];
+static char soku2Dir[MAX_PATH];
 static SokuLib::DrawUtils::RectangleShape rectangle;
 static int (SokuLib::Select::*ogSelectOnProcess)();
 static int (SokuLib::SelectClient::*ogSelectCLOnProcess)();
@@ -16,26 +72,13 @@ static int (SokuLib::BattleManager::*ogBattleMgrOnProcess)();
 static void (SokuLib::BattleManager::*ogBattleMgrOnRender)();
 static void (__stdcall *s_origLoadDeckData)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &);
 static SokuLib::CharacterManager *obj[0xC] = {nullptr};
-static SokuLib::DrawUtils::Sprite sprites[35];
 static SokuLib::DrawUtils::Sprite gagesEffects[3];
 static bool spawned = false;
 static bool init = false;
 static HMODULE myModule;
-
-#define ASSIST_BOX_Y 428
-#define LEFT_ASSIST_BOX_X 57
-#define RIGHT_ASSIST_BOX_X 475
-
-struct ChrInfo {
-	unsigned nb = 0;
-	unsigned cd = 0;
-	unsigned maxCd = 0;
-	SokuLib::Action action;
-	SokuLib::Character chr;
-	bool (*cond)(SokuLib::CharacterManager *mgr, ChrInfo &This) = nullptr;
-};
-
 static std::pair<ChrInfo, ChrInfo> chr;
+static std::vector<ChrData> data{22};
+static std::pair<SokuLib::Character, SokuLib::Character> assists;
 
 bool condBasic(SokuLib::CharacterManager *mgr, ChrInfo &This)
 {
@@ -160,10 +203,8 @@ static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, bool playe
 
 void updateObject(SokuLib::CharacterManager *mgr, ChrInfo &chr)
 {
-	if (chr.cd)
-		chr.cd--;
 	if (mgr->objectBase.renderInfos.yRotation == 90)
-		return;
+		return (void)(chr.cd -= !!chr.cd);
 	if (chr.nb != 0 && mgr->objectBase.renderInfos.yRotation != 0) {
 		mgr->objectBase.renderInfos.yRotation -= 10;
 		return;
@@ -186,41 +227,87 @@ void updateObject(SokuLib::CharacterManager *mgr, ChrInfo &chr)
 	mgr->objectBase.position += mgr->objectBase.speed;
 }
 
-void remiliaAttacks(SokuLib::CharacterManager *main, SokuLib::CharacterManager *obj, ChrInfo &chr)
-{
-	if (main->keyCombination._22a) {
-		chr.cd = 90;
-		chr.nb = 4;
-		chr.maxCd = 90;
-		chr.action = SokuLib::ACTION_4A;
-		chr.cond = condBasic;
-		obj->objectBase.direction = main->objectBase.direction;
-		obj->objectBase.speed = {0, 0};
-		obj->objectBase.position.x = main->objectBase.position.x;
-		obj->objectBase.position.y = 0;
-		obj->objectBase.renderInfos.yRotation -= 10;
-		return;
-	}
-	if (main->keyCombination._236a) {
-		chr.cd = 360;
-		chr.nb = 1;
-		chr.maxCd = 360;
-		chr.action = SokuLib::ACTION_ALT2_SKILL3_C;
-		chr.cond = waitEnd;
-		obj->objectBase.direction = main->objectBase.direction;
-		obj->objectBase.speed = {0, 0};
-		obj->objectBase.position.x = main->objectBase.position.x;
-		obj->objectBase.position.y = 0;
-		obj->objectBase.renderInfos.yRotation -= 10;
-		return;
-	}
-}
-
-void assisterAttacks(SokuLib::CharacterManager *main, SokuLib::CharacterManager *obj, ChrInfo &chr)
+void assisterAttacks(SokuLib::CharacterManager *main, SokuLib::CharacterManager *obj, ChrInfo &chr, ChrData &data)
 {
 	if (chr.cd || obj->objectBase.renderInfos.yRotation != 90)
 		return;
-	remiliaAttacks(main, obj, chr);
+	if (main->keyCombination._6314a && data.elems.find("624") != data.elems.end()) {
+		chr = data.elems["624"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
+	if (main->keyCombination._4136a && data.elems.find("426") != data.elems.end()) {
+		chr = data.elems["426"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
+	if (main->keyCombination._623a && data.elems.find("623") != data.elems.end()) {
+		chr = data.elems["623"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
+	if (main->keyCombination._421a && data.elems.find("421") != data.elems.end()) {
+		chr = data.elems["421"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
+	if (main->keyCombination._236a && data.elems.find("236") != data.elems.end()) {
+		chr = data.elems["236"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
+	if (main->keyCombination._214a && data.elems.find("214") != data.elems.end()) {
+		chr = data.elems["214"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
+	if (main->keyCombination._22a && data.elems.find("22") != data.elems.end()) {
+		chr = data.elems["22"];
+		obj->objectBase.direction = main->objectBase.direction;
+		obj->objectBase.speed = {0, 0};
+		obj->objectBase.position.x = main->objectBase.position.x;
+		obj->objectBase.position.y = 0;
+		obj->objectBase.renderInfos.yRotation -= 10;
+		obj->objectBase.action = SokuLib::ACTION_IDLE;
+		obj->objectBase.animate();
+		return;
+	}
 }
 
 int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
@@ -229,10 +316,6 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 		return (This->*ogBattleMgrOnProcess)();
 	if (!init) {
 		puts("Init assisters");
-		chr.first = ChrInfo();
-		chr.first.chr = SokuLib::CHARACTER_REMILIA;
-		chr.second = ChrInfo();
-		chr.second.chr = SokuLib::CHARACTER_REMILIA;
 		obj[0xA]->objectBase.owner = &This->leftCharacterManager;
 		obj[0xA]->objectBase.owner2 = &This->leftCharacterManager;
 		obj[0xB]->objectBase.owner = &This->rightCharacterManager;
@@ -255,8 +338,8 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	auto left  = ((SokuLib::CharacterManager **)This)[3];
 	auto right = ((SokuLib::CharacterManager **)This)[4];
 
-	assisterAttacks(left,  obj[0xA], chr.first);
-	assisterAttacks(right, obj[0xB], chr.second);
+	assisterAttacks(left,  obj[0xA], chr.first,  data[chr.first.chr]);
+	assisterAttacks(right, obj[0xB], chr.second, data[chr.second.chr]);
 
 	if (This->matchState == 2) {
 		((SokuLib::CharacterManager **)This)[3] = obj[0xA];
@@ -278,6 +361,8 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 
 void selectCommon()
 {
+	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
+
 	if (spawned) {
 		spawned = false;
 		init = false;
@@ -286,6 +371,28 @@ void selectCommon()
 		(*(void (__thiscall **)(SokuLib::CharacterManager *, char))obj[0xB]->objectBase.vtable)(obj[0xB], 0);
 		SokuLib::Delete(obj[0xB]);
 	}
+
+	if (scene.leftSelect.keys && scene.leftSelect.keys != scene.rightSelect.keys && scene.leftSelect.keys->spellcard == 1) {
+		assists.first = SokuLib::leftChar;
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+	if (scene.rightSelect.keys && scene.rightSelect.keys->spellcard == 1) {
+		assists.second = SokuLib::rightChar;
+		SokuLib::playSEWaveBuffer(0x28);
+	}
+
+	//if (scene.leftSelectionStage != 0 && SokuLib::leftChar == assists.first) {
+	//	assists.first = static_cast<SokuLib::Character>(assists.first + 1);
+	//	assists.first = static_cast<SokuLib::Character>(assists.first + (assists.first == SokuLib::CHARACTER_RANDOM));
+	//	assists.first = static_cast<SokuLib::Character>(assists.first + (assists.first == SokuLib::CHARACTER_NAMAZU));
+	//	assists.first = static_cast<SokuLib::Character>(assists.first % data.size());
+	//}
+	//if (scene.rightSelectionStage != 0 && SokuLib::rightChar == assists.second) {
+	//	assists.second = static_cast<SokuLib::Character>(assists.second + 1);
+	//	assists.second = static_cast<SokuLib::Character>(assists.second + (assists.second == SokuLib::CHARACTER_RANDOM));
+	//	assists.second = static_cast<SokuLib::Character>(assists.second + (assists.second == SokuLib::CHARACTER_NAMAZU));
+	//	assists.second = static_cast<SokuLib::Character>(assists.second % data.size());
+	//}
 }
 
 int __fastcall CSelect_OnProcess(SokuLib::Select *This)
@@ -312,13 +419,44 @@ int __fastcall CSelectCL_OnProcess(SokuLib::SelectClient *This)
 	return ret;
 }
 
-void displayAssistGage(ChrInfo &chr, int x, bool mirror)
+void displayAssistGage(ChrInfo &chr, int x, SokuLib::Vector2i bar, SokuLib::Vector2i cross, bool mirror)
 {
-	auto &sprite = sprites[chr.chr];
+	auto &sprite = data[chr.chr];
+	auto &s = sprite.sprite;
 
-	sprite.setPosition({x, static_cast<int>(ASSIST_BOX_Y - sprite.getSize().y)});
-	sprite.setMirroring(mirror, false);
-	sprite.draw();
+	s.clearTransform();
+	for (auto &c : s.transfCoords) {
+		c.x += x;
+		c.y += ASSIST_BOX_Y - sprite.size.y;
+	}
+	if (mirror) {
+		auto tmp1 = s.transfCoords[0];
+		auto tmp2 = s.transfCoords[2];
+
+		s.transfCoords[0] = s.transfCoords[1];
+		s.transfCoords[1] = tmp1;
+		s.transfCoords[2] = s.transfCoords[3];
+		s.transfCoords[3] = tmp2;
+	}
+	if (chr.cd) {
+		(s.*SokuLib::union_cast<void(SpriteEx::*)(float, float, float)>(0x7fb200))(0.3f,0.587f,0.114f);
+		if (chr.maxCd != chr.cd) {
+			if (mirror)
+				bar.x += 78 - 79 * (chr.maxCd - chr.cd) / chr.maxCd;
+			gagesEffects[1].setPosition(bar);
+			gagesEffects[1].setSize({79 * (chr.maxCd - chr.cd) / chr.maxCd, 4});
+			gagesEffects[1].draw();
+		}
+		if (chr.ctr / 30 % 2 == 0) {
+			gagesEffects[2].setPosition(cross);
+			gagesEffects[2].draw();
+		}
+		chr.ctr++;
+	} else {
+		s.render();
+		gagesEffects[0].setPosition(bar);
+		gagesEffects[0].draw();
+	}
 }
 
 void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
@@ -340,8 +478,8 @@ void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 		drawPlayerBoxes(This->rightCharacterManager);
 		drawPlayerBoxes(*obj[0xA], chr.first.nb != 0 || obj[0xA]->objectBase.renderInfos.yRotation == 0);
 		drawPlayerBoxes(*obj[0xB], chr.second.nb != 0 || obj[0xB]->objectBase.renderInfos.yRotation == 0);
-		displayAssistGage(chr.first,  LEFT_ASSIST_BOX_X, false);
-		displayAssistGage(chr.second, RIGHT_ASSIST_BOX_X, true);
+		displayAssistGage(chr.first,  LEFT_ASSIST_BOX_X,  LEFT_BAR,  LEFT_CROSS,  false);
+		displayAssistGage(chr.second, RIGHT_ASSIST_BOX_X, RIGHT_BAR, RIGHT_CROSS, true);
 	}
 }
 
@@ -350,43 +488,207 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 	if (!spawned) {
 		spawned = true;
 		SokuLib::PlayerInfo p;
+		const char *c[] = {
+			"22",
+			"236",
+			"214",
+			"623",
+			"421",
+			"624",
+			"426"
+		};
 
 		puts("Not spawned. Loading both assisters");
 		memset(&p, 0, sizeof(p));
-		p.character = SokuLib::CHARACTER_REMILIA;
-		p.palette = 0;
+		chr.first = ChrInfo();
+		chr.first.chr = assists.first;
+		p.character = assists.first;
+		p.palette = SokuLib::leftPlayerInfo.palette;
+		p.palette += SokuLib::leftChar == assists.first;
+		p.palette += p.palette == SokuLib::rightPlayerInfo.palette;
 		p.isRight = false;
 		puts("Loading character 1");
 		((void (__thiscall *)(SokuLib::CharacterManager **, bool, SokuLib::PlayerInfo &))0x46da40)(obj, false, p);
 		(*(void (__thiscall **)(SokuLib::CharacterManager *))(*(int *)obj[0xA] + 0x44))(obj[0xA]);
+
+		int oldPal = p.palette;
+
+		chr.second = ChrInfo();
+		chr.second.chr = assists.second;
+		p.character = assists.second;
+		p.palette = SokuLib::rightPlayerInfo.palette;
+		p.palette += SokuLib::rightChar == assists.second;
+		p.palette += p.palette == oldPal && assists.second == assists.first;
 		p.isRight = true;
 		puts("Loading character 2");
 		((void (__thiscall *)(SokuLib::CharacterManager **, bool, SokuLib::PlayerInfo &))0x46da40)(obj, true, p);
 		(*(void (__thiscall **)(SokuLib::CharacterManager *))(*(int *)obj[0xB] + 0x44))(obj[0xB]);
+
 		init = false;
 		printf("%p %p\n", obj[0xA], obj[0xB]);
-		for (int i = 0; i < sizeof(sprites) / sizeof(*sprites); i++) {
-			sprites[i].texture.loadFromResource(myModule, MAKEINTRESOURCE((i + 1) * 4));
-			sprites[i].setSize(sprites[i].texture.getSize());
-			sprites[i].rect.width = sprites[i].getSize().x;
-			sprites[i].rect.height = sprites[i].getSize().y;
+		for (unsigned i = 0; i < data.size(); i++) {
+			std::string basePath = i > SokuLib::CHARACTER_NAMAZU ? (std::string(soku2Dir) + "/config/tag/") : (std::string(modFolder) + "/assets/");
+			const char *chrName = (i == SokuLib::CHARACTER_RANDOM || i == SokuLib::CHARACTER_NAMAZU) ? "Empty" : reinterpret_cast<char *(*)(int)>(0x43f3f0)(i);
+			SokuLib::DrawUtils::Texture texture;
+			nlohmann::json j;
+			std::string path = basePath + chrName + ".json";
+			std::ifstream stream;
+
+			if (texture.loadFromFile((basePath + "gage" + chrName + ".png").c_str())) {
+				data[i].sprite.setTexture(texture.releaseHandle(), 0, 0, texture.getSize().x, texture.getSize().y);
+				data[i].size = texture.getSize().to<int>();
+			}
+			data[i].elems.clear();
+			stream.open(path);
+			printf("Loading %s\n", path.c_str());
+			if (stream.fail()) {
+				printf("%s: %s\n", path.c_str(), strerror(errno));
+				continue;
+			}
+			try {
+				stream >> j;
+				for (auto &a : j.items()) {
+					bool b = false;
+
+					for (auto s : c)
+						if (strcmp(s, a.key().c_str()) == 0) {
+							b = true;
+							break;
+						}
+					if (!b) {
+						printf("Ignored %s\n", a.key().c_str());
+						continue;
+					}
+
+					auto &elem = data[i].elems[a.key()];
+
+					elem.cd = a.value()["cd"];
+					elem.ctr = 0;
+					elem.maxCd = elem.cd;
+					elem.nb = a.value()["nb"];
+					elem.action = a.value()["action"];
+					elem.chr = static_cast<SokuLib::Character>(i);
+					elem.cond = a.value()["cond"] == "end" ? waitEnd : condBasic;
+				}
+			} catch (std::exception &e) {
+				puts(e.what());
+				MessageBox(SokuLib::window, e.what(), "Loading error", MB_ICONERROR);
+			}
+			puts("Loading completed");
 		}
 		gagesEffects[0].texture.loadFromGame("data/character/sanae/gageBa000.cv0");
 		gagesEffects[0].setSize(gagesEffects[0].texture.getSize());
-		gagesEffects[0].rect.width = gagesEffects[0].getSize().x;
-		gagesEffects[0].rect.height = gagesEffects[0].getSize().y;
+		gagesEffects[0].rect.width = gagesEffects[0].texture.getSize().x;
+		gagesEffects[0].rect.height = gagesEffects[0].texture.getSize().y;
 
 		gagesEffects[1].texture.loadFromGame("data/character/sanae/gageBb000.cv0");
-		gagesEffects[1].setSize(gagesEffects[1].texture.getSize());
-		gagesEffects[1].rect.width = gagesEffects[1].getSize().x;
-		gagesEffects[1].rect.height = gagesEffects[1].getSize().y;
+		gagesEffects[1].rect.width = gagesEffects[1].texture.getSize().x;
+		gagesEffects[1].rect.height = gagesEffects[1].texture.getSize().y;
 
 		gagesEffects[2].texture.loadFromGame("data/character/sanae/gageCa000.cv0");
 		gagesEffects[2].setSize(gagesEffects[2].texture.getSize());
-		gagesEffects[2].rect.width = gagesEffects[2].getSize().x;
-		gagesEffects[2].rect.height = gagesEffects[2].getSize().y;
+		gagesEffects[2].rect.width = gagesEffects[2].texture.getSize().x;
+		gagesEffects[2].rect.height = gagesEffects[2].texture.getSize().y;
 	}
 	s_origLoadDeckData(charName, csvFile, deck, param4, newDeck);
+}
+
+void loadSoku2CSV(LPWSTR path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	if (stream.fail()) {
+		printf("%S: %s\n", path, strerror(errno));
+		return;
+	}
+	while (std::getline(stream, line)) {
+		std::stringstream str{line};
+		unsigned id;
+		std::string idStr;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+		std::string skillInputs;
+
+		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		std::getline(str, skillInputs, ';');
+		if (str.fail()) {
+			printf("Skipping line %s: Stream failed\n", line.c_str());
+			continue;
+		}
+		try {
+			id = std::stoi(idStr);
+		} catch (...) {
+			printf("Skipping line %s: Invalid id\n", line.c_str());
+			continue;
+		}
+		while (id > data.size())
+			data.emplace_back();
+	}
+}
+
+void loadSoku2Config()
+{
+	puts("Looking for Soku2 config...");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	printf("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		printf("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		printf("Found Soku2 module folder at %S\n", module_path);
+		memset(soku2Dir, 0, sizeof(soku2Dir));
+		for (int i = 0; module_path[i]; i++)
+			soku2Dir[i] = module_path[i];
+		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		loadSoku2CSV(module_path);
+		return;
+	}
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
@@ -408,6 +710,9 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 #endif
 
 	myModule = hMyModule;
+	GetModuleFileName(hMyModule, modFolder, 1024);
+	PathRemoveFileSpec(modFolder);
+	loadSoku2Config();
 	puts("Hello");
 	// DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);

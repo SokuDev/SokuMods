@@ -733,33 +733,9 @@ target_link_libraries(
 install(TARGETS "InfiniteWeather" LIBRARY DESTINATION "SWRSToys/modules/InfiniteWeather/")
 install(TARGETS "InfiniteWeather" LIBRARY DESTINATION "SokuEngine/modules/InfiniteWeather/")
 
-
-add_library(
-        "TagSoku"
-        MODULE
-        modules/TagSoku/main.cpp
-)
-target_compile_options(TagSoku PRIVATE /Zi)
-target_compile_definitions("TagSoku" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
-target_include_directories("TagSoku" PRIVATE include include/directx "modules/TagSoku/")
-target_link_directories("TagSoku" PRIVATE lib)
-target_link_libraries(
-        TagSoku
-        SokuLib
-        shlwapi
-        ws2_32
-        user32
-        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
-        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
-)
-install(TARGETS "TagSoku" LIBRARY DESTINATION "SWRSToys/modules/TagSoku/")
-install(TARGETS "TagSoku" LIBRARY DESTINATION "SokuEngine/modules/TagSoku/")
-
-
 add_library(
         "AssistSoku"
         MODULE
-        modules/AssistSoku/TrialMode.rc
         modules/AssistSoku/main.cpp
 )
 target_compile_options(AssistSoku PRIVATE /Zi)
