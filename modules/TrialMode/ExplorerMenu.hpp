@@ -23,6 +23,8 @@ private:
 	int _nameFilter = -1;
 	int _modeFilter = -1;
 	int _topicFilter = -1;
+	bool _expended = false;
+	unsigned _entryStart = 0;
 	unsigned _packStart = 0;
 	std::vector<std::string> _uniqueNames;
 	std::vector<std::string> _uniqueModes;
