@@ -2,20 +2,16 @@
     "22": {
         "ground": {
             "cd": 180,
-            "nb": 4,
-            "action": 330,
+            "nb": 3,
+            "action": 303,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "offsetY": 0,
             "cond": "basic"
         },
         "air": {
             "cd": 180,
             "nb": 1,
-            "action": 325,
-            "offsetX": 0,
-            "offsetY": 0,
+            "action": 306,
             "cond": "basic"
         }
     },
@@ -23,19 +19,15 @@
         "ground": {
             "cd": 360,
             "nb": 1,
-            "hitCount": 2,
             "action": 560,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "posY": 0,
             "cond": "end"
         },
         "air": {
             "cd": 360,
             "nb": 1,
-            "hitCount": 2,
-            "action": 560,
+            "action": 562,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
@@ -43,23 +35,20 @@
     },
     "236": {
         "ground": {
-            "cd": 640,
+            "cd": 720,
             "nb": 1,
-            "hitCount": 2,
-            "action": 551,
+            "action": 520,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "posY": 0,
             "cond": "end"
         },
         "air": {
             "cd": 720,
             "nb": 1,
-            "hitCount": 2,
-            "action": 551,
-            "offsetX": 0,
-            "posY": 0,
+            "action": 520,
+            "speedX": 0,
+            "speedY": 0,
+	    "posY": 0,
             "cond": "end"
         }
     },
@@ -70,15 +59,14 @@
             "action": 601,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "posY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 3600,
+            "cd": 3900,
             "nb": 1,
             "action": 601,
-            "offsetX": 0,
+            "speedX": 0,
+            "speedY": 0,
             "posY": 0,
             "cond": "end"
         }

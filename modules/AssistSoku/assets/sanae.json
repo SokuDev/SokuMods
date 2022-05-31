@@ -1,21 +1,17 @@
 {
     "22": {
         "ground": {
-            "cd": 180,
-            "nb": 4,
-            "action": 330,
+            "cd": 240,
+            "nb": 1,
+            "action": 418,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "offsetY": 0,
-            "cond": "basic"
+            "cond": "end"
         },
         "air": {
             "cd": 180,
             "nb": 1,
-            "action": 325,
-            "offsetX": 0,
-            "offsetY": 0,
+            "action": 307,
             "cond": "basic"
         }
     },
@@ -23,43 +19,39 @@
         "ground": {
             "cd": 360,
             "nb": 1,
-            "hitCount": 2,
-            "action": 560,
+            "action": 416,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "posY": 0,
-            "cond": "end"
+	    "posX": 640,
+	    "posY": 500,
+            "cond": "basic"
         },
         "air": {
             "cd": 360,
             "nb": 1,
-            "hitCount": 2,
-            "action": 560,
+            "action": 416,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end"
+	    "posX": 640,
+	    "posY": 500,
+            "cond": "basic"
         }
     },
     "236": {
         "ground": {
             "cd": 640,
             "nb": 1,
-            "hitCount": 2,
-            "action": 551,
+            "action": 541,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "posY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 720,
+            "cd": 640,
             "nb": 1,
-            "hitCount": 2,
-            "action": 551,
-            "offsetX": 0,
-            "posY": 0,
+            "action": 543,
+            "speedX": 0,
+            "speedY": 0,
             "cond": "end"
         }
     },
@@ -67,18 +59,17 @@
         "ground": {
             "cd": 3600,
             "nb": 1,
-            "action": 601,
+            "action": 603,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
-            "posY": 0,
             "cond": "end"
         },
         "air": {
             "cd": 3600,
             "nb": 1,
-            "action": 601,
-            "offsetX": 0,
+            "action": 603,
+            "speedX": 0,
+            "speedY": 0,
             "posY": 0,
             "cond": "end"
         }
