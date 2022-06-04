@@ -40,7 +40,7 @@
     "outro": "outro.lua",
     "scenarios": [
         {
-            "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>",
+            "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>It is but another day, the weather is even,the<br>tea is good, and no disturbance is to be seen.<br>Basically a normal, boring, tedious day for<br>Remilia Scarlet.<br>Yet, without her knowing, it would be a day<br>that she would remember for a while.",
             "extra": false,
             "file": "bnbmid1.json",
             "may_be_locked": true,
@@ -49,7 +49,7 @@
             "preview": "bnbmid1.gif"
         },
         {
-            "description": "d6 j5aa d6 j5aa d6 j5aa    | Works everywhere<br>d6 j5aa d6 j5aa d6 j5a j8a | Optimized version<br><br>",
+            "description": "d6 j5aa d6 j5aa d6 j5aa    | Works everywhere<br>d6 j5aa d6 j5aa d6 j5a j8a | Optimized version<br><br>Something broke the monotony, and that is all<br>Remilia Scarlet needs to dive into the mystery.<br>But if the rumors are true, how come she<br>doesn't know about it?<br>She is the mistress of this mansion after all<br>and her servants are numerous...<br>Why wasn't she informed!?",
             "extra": false,
             "file": "bnbmid2.json",
             "may_be_locked": true,
@@ -58,7 +58,7 @@
             "preview": "bnbmid2.gif"
         },
         {
-            "description": "5aaaa 4SC(Gungnir) hj9 j8a<br>Ender only midscreen, near corner and corner<br><br>",
+            "description": "5aaaa 4SC(Gungnir) hj9 j8a<br>Ender only midscreen, near corner and corner<br><br>Well it seems like the chief maid fell short<br>to give an answer.<br>However the guard might have an inkling on<br>what is going on...<br>Even if she does't bet on it.",
             "extra": false,
             "file": "bnbmid3.json",
             "may_be_locked": true,
@@ -67,7 +67,7 @@
             "preview": "bnbmid3.gif"
         },
         {
-            "description": "j2a CH 2c hj9 j5c j66 j8a | Works everywhere<br><br>",
+            "description": "j2a CH 2c hj9 j5c j66 j8a | Works everywhere<br><br>And now that clues were found it is time to do<br>in-depth research.<br>Fortunatly for Remilia Scarlet, she has quite<br>the sizable library which is, unsurprisingly,<br>her next stop.<br>After all, she has a bookworm friend there<br>that should be of help. What? You didn't think<br>she would do the research by herself, did you?",
             "extra": false,
             "file": "bnbmid4.json",
             "may_be_locked": true,
@@ -76,7 +76,7 @@
             "preview": "bnbmid4.gif"
         },
         {
-            "description": "3a 2a 5c d236b | Tip of 3a only<br><br>",
+            "description": "3a 2a 5c d236b | Tip of 3a only<br><br>It seems by searching for the intruder she<br>found another uninvited, yet unsurprising<br>guest but it seems all this situation has<br>brought many strange visitors to her place.<br>Maybe she would have been annoyed if she<br>wasn't so bored.",
             "extra": false,
             "file": "bnbmid5.json",
             "may_be_locked": true,
@@ -85,7 +85,7 @@
             "preview": "bnbmid5.gif"
         },
         {
-            "description": "5aaaa 6a 5c | Corner only<br><br>",
+            "description": "5aaaa 6a 5c | Corner only<br><br>After the uninvited but the unsurprising,<br>comes one that is expected to be here,<br>yet, surprising to see nonetheless.",
             "extra": false,
             "file": "bnbcorn1.json",
             "may_be_locked": true,
@@ -94,7 +94,7 @@
             "preview": "bnbcorn1.gif"
         },
         {
-            "description": "Rising j5aa j6a j5b | Works everywhere<br><br>",
+            "description": "Rising j5aa j6a j5b | Works everywhere<br><br>There are actually many maids in this manor of<br>hers: a lot of fairies who were influenced by<br>Remilia Scarlet's powerful charisma, probably<br>inherited from her noble lineage...<br>Though it seems the quality of those maids<br>are not what it used to be.",
             "extra": false,
             "file": "bnbcorn2.json",
             "may_be_locked": true,
@@ -103,7 +103,7 @@
             "preview": "bnbcorn2.gif"
         },
         {
-            "description": "d6 j5aa d6 j5aa 2c hj9 j5aa | Corner only<br><br>",
+            "description": "d6 j5aa d6 j5aa 2c hj9 j5aa | Corner only<br><br>The greatest enemy of Remilia Scarlet enters<br>the fray.<br>It is time for payback and also to shed<br>some light onto this case.",
             "extra": false,
             "file": "bnbcorn3.json",
             "may_be_locked": true,
@@ -112,7 +112,7 @@
             "preview": "bnbcorn3.gif"
         },
         {
-            "description": "4a 4a 4a 4a 5SC(Cradle) 2a 2c hj8 j2c j66 j8a<br>Monsoon only combo<br>",
+            "description": "4a 4a 4a 4a 5SC(Cradle) 2a 2c hj8 j2c j66 j8a<br>Monsoon only combo<br><br>Perhaps have you noticed the rather strange<br>individual that is Remilia Scarlet. She might<br>be the mistress of this manor and of all its<br>inhabitants, but what she likes the most is not<br>really to be the shining star on the scene. The<br>role she plays is only secondary. No,what truly<br>matters to her, is to never remain a spectator.",
             "extra": true,
             "file": "bnbany1.json",
             "may_be_locked": true,

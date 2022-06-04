@@ -137,8 +137,7 @@ local function stage6()
 
 	if battleMgr.leftChr.actionBlockId == 1 and battleMgr.leftChr.animationCounter == 0 and battleMgr.leftChr.animationSubFrame == 0 and battleMgr.leftChr.frameCount == 0 then
 		local start = #battleMgr.leftChr.objects + 1
-		
-		
+
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x - 8, 115)
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x - 8, 115)
 		battleMgr.leftChr:createSubObject(0x32D, battleMgr.leftChr.position.x - 8, 115)

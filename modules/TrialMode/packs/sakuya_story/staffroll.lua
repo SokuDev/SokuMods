@@ -71,10 +71,10 @@ local objsOffsets = {
 	yuyuko =    { offset = { -16, -40 },  size = Vector2u.new(32, 32), rotation = 0, total = 0},
 }
 local forcedOrder = {
-	"remilia",
 	"sakuya",
-	"patchouli",
+	"remilia",
 	"meirin",
+	"patchouli",
 	"reimu",
 	"marisa",
 }

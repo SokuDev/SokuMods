@@ -15,7 +15,7 @@
         "yukari",
         "chirno"
     ],
-    "description": "Incident at the Scarlet Devil Mansion",
+    "description": "The story of the mysterious intruder is still going strong.<br>And it is a mystery that has brought more than enough attention to the scarlet manor.<br>Something that was quite troublesome for the chief maid.<br>Nevertheless, it was now her duty to inspect the matter.<br>Especially considering the shortcomings of her master.",
     "icon": {
         "isPath": false,
         "offset": {
@@ -124,7 +124,7 @@
         }
     ],
     "stand": {
-        "isPath": false,
-        "path": "data/stand/sakuya.cv2"
+        "isPath": true,
+        "path": "ayajJournalSakuya.png"
     }
 }

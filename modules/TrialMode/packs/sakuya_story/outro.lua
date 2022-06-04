@@ -1,6 +1,7 @@
 loadBackground("data/scenario/remilia/effect/ED000.png")
 loadBackground(packPath.."/ED001.png")
 loadBackground(packPath.."/ED002.png")
+loadAnimation(packPath.."/staffroll.lua")
 
 addCommand('playBGM "data/bgm/ta06.ogg"')
 addCommand("text Autumn at the Scarlet Devil Manor.")
@@ -54,12 +55,11 @@ addCommand('text Now the chase had finally begun.')
 
 addCommand('clear')
 addCommand('text As for Remilia and Patchouli,')
-addCommand('generateGameAnimation '..packPath..'staffroll.txt')
-addCommand('playGameAnimation '..packPath..'staffroll_generated.txt')
 addCommand('playBGM "data/bgm/sr.ogg"')
 addCommand('text they were simply talking and thinking')
 addCommand('text on how to make this simple party')
 addCommand('text slightly more fun, and quite confusing.')
+addCommand('playAnimation')
 
 
 
