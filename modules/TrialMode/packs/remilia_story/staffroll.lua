@@ -133,7 +133,7 @@ end
 for i, k in pairs(chrs.animations) do
 	local scores = getTrialScores("Babylon's Aurora", chrs.names[i])
 
-	--if #scores >= 2 and scores[#scores - 1] ~= -1 then
+	if #scores >= 2 and scores[#scores - 1] ~= -1 then
 		characters[#characters + 1] = {
 			animArray = loadSprites(i, k),
 			currentAnim = "walk",
@@ -143,7 +143,7 @@ for i, k in pairs(chrs.animations) do
 			total = 0,
 			extra = loadObjectSprite(i)--scores[#scores] == 3 and loadObjectSprite(i) or nil
 		}
-	--end
+	end
 end
 
 for _, chr in pairs(characters) do
@@ -216,7 +216,7 @@ function update()
 
 		repeat
 			selectedBg = math.random(1, #backgrounds)
-		until old ~= selectedBg
+		until backgrounds[old] ~= backgrounds[selectedBg]
 		for _, chr in pairs(characters) do
 			chr.position = {
 				x = index * 60 - #characters * 60 - 40,
