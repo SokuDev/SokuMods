@@ -141,7 +141,7 @@ for i, k in pairs(chrs.animations) do
 			animCtr = 0,
 			character = i,
 			total = 0,
-			extra = loadObjectSprite(i)--scores[#scores] == 3 and loadObjectSprite(i) or nil
+			extra = scores[#scores] == 3 and loadObjectSprite(i) or nil
 		}
 	end
 end
