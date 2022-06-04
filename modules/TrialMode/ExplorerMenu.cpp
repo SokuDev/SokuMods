@@ -8,7 +8,7 @@
 
 ExplorerMenu::ExplorerMenu()
 {
-	this->_title.texture.loadFromResource(myModule, MAKEINTRESOURCE(456));
+	this->_title.texture.loadFromResource(myModule, MAKEINTRESOURCE(488));
 	this->_title.setSize(this->_title.texture.getSize());
 	this->_title.rect.width = this->_title.texture.getSize().x;
 	this->_title.rect.height = this->_title.texture.getSize().y;
@@ -302,7 +302,7 @@ void ExplorerMenu::_loadPacks()
 	"Combo",
 		"Story"
 	],
-	"name": "Babylone's Aurora",
+	"name": "Babylon's Aurora",
 		"outro": "outro.lua",
 		"scenarios": [
 	{

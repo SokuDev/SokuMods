@@ -19,7 +19,7 @@
         "ground": {
             "cd": 360,
             "nb": 1,
-                "action": 410,
+                "action": 500,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
@@ -27,7 +27,7 @@
         "air": {
             "cd": 360,
             "nb": 1,
-            "action": 414,
+            "action": 502,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
@@ -37,7 +37,7 @@
         "ground": {
             "cd": 720,
             "nb": 1,
-            "action": 570,
+            "action": 566,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
@@ -45,10 +45,9 @@
         "air": {
             "cd": 720,
             "nb": 1,
-            "action": 570,
+            "action": 568,
             "speedX": 0,
             "speedY": 0,
-            "posY": 0,
             "cond": "end"
         }
     },

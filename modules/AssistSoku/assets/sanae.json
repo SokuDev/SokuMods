@@ -22,8 +22,8 @@
             "action": 416,
             "speedX": 0,
             "speedY": 0,
-	    "posX": 640,
-	    "posY": 500,
+                "posX": 0,
+                "posY": 1200,
             "cond": "basic"
         },
         "air": {
@@ -32,8 +32,8 @@
             "action": 416,
             "speedX": 0,
             "speedY": 0,
-	    "posX": 640,
-	    "posY": 500,
+                "posX": 0,
+                "posY": 1200,
             "cond": "basic"
         }
     },

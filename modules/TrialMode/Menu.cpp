@@ -610,7 +610,7 @@ static struct PackEditPage {
 				0, 0,
 				static_cast<int>(pack->preview.texture.getSize().x),
 				static_cast<int>(pack->preview.texture.getSize().y),
-				};
+			};
 			pack->preview.setPosition({398, 128});
 			pack->preview.setSize({200, 150});
 			this->previewPath.texture.createFromText(pack->previewPath.c_str(), defaultFont12, {153, 23}, &size);
@@ -3209,7 +3209,7 @@ bool checkEditorKeys(const SokuLib::KeyInput &input)
 			editorGuides[2]->active = false;
 			baseCursor = currentEntry;
 		}
-		return true;
+		return false;
 	}
 	if (SokuLib::inputMgrs.input.c == 1 && !expended) {
 		std::string folder{packsLocation, packsLocation + strlen(packsLocation) - 1};
@@ -3380,11 +3380,7 @@ bool editorUpdate()
 
 void editorRender()
 {
-	if (inputBoxShown)
-		inputBoxRender();
-	else if (explorerShown)
-		explorerRender();
-	else if (packEditScenario.opened) {
+	if (packEditScenario.opened) {
 		auto &scenario = loadedPacks[currentPack]->scenarios[currentEntry];
 
 		editScenarioSeat.draw();
@@ -3468,6 +3464,12 @@ void editorRender()
 
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
+	if (SokuLib::inputMgrs.input.changeCard == 1) {
+		loadExplorerRoot("All files");
+		setExplorerDefaultMusic(nullptr);
+		setExplorerCallback([](std::string){});
+		return;
+	}
 	if (SokuLib::inputMgrs.input.spellcard == 1)
 		switchEditorMode();
 	if (input.horizontalAxis < 0) {
@@ -3559,6 +3561,10 @@ int menuOnProcess(SokuLib::MenuResult *This)
 	if (!loadedOutro) {
 		if (editorMode && !editorUpdate())
 			return true;
+		else if (inputBoxShown)
+			inputBoxUpdate();
+		else if (explorerShown)
+			explorerUpdate();
 		else {
 			if (SokuLib::inputMgrs.input.b == 1) {
 				SokuLib::playSEWaveBuffer(0x29);
@@ -3887,6 +3893,10 @@ void menuOnRender(SokuLib::MenuResult *This)
 displayOutro:
 	if (loadedOutro)
 		loadedOutro->draw();
+	if (inputBoxShown)
+		return inputBoxRender();
+	else if (explorerShown)
+		return explorerRender();
 	if (editorMode)
 		editorRender();
 	rect.draw();

@@ -1,70 +1,76 @@
 {
     "22": {
         "ground": {
-            "cd": 180,
-            "nb": 3,
-            "action": 303,
+            "cd": 60,
+            "nb": 1,
+            "action": 505,
             "speedX": 0,
             "speedY": 0,
-            "cond": "basic"
+            "offsetX": -100,
+            "cond": "end"
         },
         "air": {
-            "cd": 180,
+            "cd": 60,
             "nb": 1,
-            "action": 306,
-            "cond": "basic"
+            "action": 505,
+            "posY": 0,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetX": -100,
+            "cond": "end"
         }
     },
     "214": {
         "ground": {
-            "cd": 360,
+            "cd": 60,
             "nb": 1,
-            "action": 560,
+            "action": 525,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 360,
+            "cd": 60,
             "nb": 1,
-            "action": 562,
+            "action": 525,
             "speedX": 0,
             "speedY": 0,
+            "posY": 0,
             "cond": "end"
         }
     },
     "236": {
         "ground": {
-            "cd": 720,
+            "cd": 60,
             "nb": 1,
-            "action": 520,
+            "action": 551,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 720,
+            "cd": 60,
             "nb": 1,
-            "action": 520,
+            "action": 550,
             "speedX": 0,
             "speedY": 0,
-	    "posY": 0,
+            "posY": 0,
             "cond": "end"
         }
     },
     "624": {
         "ground": {
-            "cd": 3600,
+            "cd": 500,
             "nb": 1,
-            "action": 601,
+            "action": 546,
             "speedX": 0,
             "speedY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 3900,
+            "cd": 500,
             "nb": 1,
-            "action": 601,
+            "action": 545,
             "speedX": 0,
             "speedY": 0,
             "posY": 0,

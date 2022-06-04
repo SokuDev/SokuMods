@@ -14,14 +14,14 @@
 
 class PackOutro {
 private:
-
+	bool _finished = false;
+	bool _ended = false;
 	bool _hasOpeningObject = false;
+	bool _playingAnimation = false;
 	char _openingObject[0x98];
 	std::string _packPath;
 	unsigned _wait = 60;
 	unsigned _textWait = 0;
-	bool _finished = false;
-	bool _ended = false;
 	sol::state *_lua;
 	SokuLib::Color _colorUp = SokuLib::Color::White;
 	SokuLib::Color _colorDown = SokuLib::Color::White;

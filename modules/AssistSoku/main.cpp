@@ -104,10 +104,7 @@ int __stdcall mySendTo(SOCKET s, char * buf, int len, int flags, sockaddr * to, 
 	if (packet.type != SokuLib::HOST_GAME && packet.type != SokuLib::CLIENT_GAME && packet.game.event.type != SokuLib::GAME_MATCH_REQUEST && packet.game.event.type != SokuLib::GAME_MATCH)
 		return realSendTo(s, buf, len, flags, to, tolen);
 
-	if (packet.game.event.type == SokuLib::GAME_MATCH_REQUEST) {
-		packet.game.event.match.host.skinId |= (packet.type == SokuLib::HOST_GAME ? assists.first : assists.second) << 3;
-		printf("Send assist %i (%i)\n", packet.game.event.match.host.skinId >> 3, packet.game.event.match.host.skinId);
-	} else if (packet.game.event.type == SokuLib::GAME_MATCH) {
+	if (packet.game.event.type == SokuLib::GAME_MATCH) {
 		packet.game.event.match.host.skinId |= assists.first << 3;
 		packet.game.event.match.client().skinId |= assists.second << 3;
 		printf("Send assists %i %i\n", packet.game.event.match.host.skinId >> 3, packet.game.event.match.client().skinId >> 3);
@@ -123,13 +120,9 @@ int __stdcall myRecvFrom(SOCKET s, char * buf, int len, int flags, sockaddr * fr
 	if (packet.type != SokuLib::HOST_GAME && packet.type != SokuLib::CLIENT_GAME && packet.game.event.type != SokuLib::GAME_MATCH_REQUEST && packet.game.event.type != SokuLib::GAME_MATCH)
 		return result;
 
-	if (packet.game.event.type == SokuLib::GAME_MATCH_REQUEST) {
-		auto &truc = (packet.type == SokuLib::CLIENT_GAME ? assists.second : assists.first);
-
-		truc = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
-		printf("Recv %i %x assist %i (%i, %i)\n", *fromlen, packet.game.event.match.host.skinId, truc, assists.first, assists.second);
-	} else if (packet.game.event.type == SokuLib::GAME_MATCH) {
-		assists.first = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
+	if (packet.game.event.type == SokuLib::GAME_MATCH && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER) {
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+			assists.first = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
 		assists.second = static_cast<SokuLib::Character>(packet.game.event.match.client().skinId >> 3);
 		printf("Recv assists %i %i\n", assists.first, assists.second);
 	}
@@ -280,8 +273,8 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 	}
 	if (mgr->objectBase.hitstop)
 		mgr->objectBase.hitstop--;
-	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x28))(mgr);
 update:
+	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x28))(mgr);
 	for (auto o : mgr->objects.list.vector())
 		o->owner = o->owner2 = mgr->objectBase.owner;
 	mgr->objectBase.position += SokuLib::Vector2f{mgr->objectBase.speed.x * mgr->objectBase.direction, mgr->objectBase.speed.y};
@@ -314,7 +307,7 @@ bool initAttack(SokuLib::CharacterManager *main, SokuLib::CharacterManager *obj,
 			obj->objectBase.speed.y = *chr.speed.y;
 		obj->objectBase.position = main->objectBase.position;
 		if (chr.offset.x)
-			obj->objectBase.position.x += *chr.offset.x;
+			obj->objectBase.position.x += *chr.offset.x * obj->objectBase.direction;
 		if (chr.offset.y)
 			obj->objectBase.position.y += *chr.offset.y;
 		if (chr.pos.x)
@@ -368,7 +361,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 
 	int ret = (This->*ogBattleMgrOnProcess)();
 
-	if (SokuLib::menuManager.isInMenu)
+	if (!SokuLib::menuManager.empty())
 		return ret;
 
 	auto left  = ((SokuLib::CharacterManager **)This)[3];
@@ -410,12 +403,12 @@ void selectCommon()
 		SokuLib::Delete(obj[0xB]);
 	}
 
-	if (scene.leftSelect.keys && scene.leftSelect.keys != scene.rightSelect.keys && SokuLib::checkKeyOneshot(DIK_F8, false, false, false)) {
+	if (scene.leftSelect.keys && scene.leftSelect.keys != scene.rightSelect.keys && SokuLib::checkKeyOneshot(DIK_F8, false, false, false) && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) {
 		printf("Changing assist for P1 to %i\n", SokuLib::leftChar);
 		assists.first = SokuLib::leftChar;
 		SokuLib::playSEWaveBuffer(0x28);
 	}
-	if (scene.rightSelect.keys && SokuLib::checkKeyOneshot(DIK_F8, false, false, false)) {
+	if (scene.rightSelect.keys && SokuLib::checkKeyOneshot(DIK_F8, false, false, false) && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
 		printf("Changing assist for P2 to %i\n", SokuLib::rightChar);
 		assists.second = SokuLib::rightChar;
 		SokuLib::playSEWaveBuffer(0x28);

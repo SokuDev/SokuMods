@@ -64,6 +64,9 @@ PackOutro::PackOutro(const std::string &packPath, const std::string &file) :
 	);
 	(*this->_lua)["getPackScores"] = getCurrentPackScores;
 	(*this->_lua)["packPath"] = packPath;
+	(*this->_lua)["loadAnimation"] = [this](const std::string &path) {
+		this->_animation = std::make_unique<LuaBattleAnimation>(this->_packPath.c_str(), path.c_str());
+	};
 	(*this->_lua)["loadBackground"] = [this](const std::string &path){
 		auto sprite = new SokuLib::DrawUtils::Sprite{};
 		bool result = path.find(':') == std::string::npos ?
@@ -104,7 +107,7 @@ void PackOutro::draw() const
 
 		FUN_004571d0(this->_openingObject);
 	}
-	if (this->_animation)
+	if (this->_animation && this->_playingAnimation)
 		this->_animation->render();
 }
 
@@ -115,14 +118,13 @@ bool PackOutro::update()
 
 	if (this->_hasOpeningObject)
 		FUN_00457890(this->_openingObject);
-	if (this->_animation) {
+	if (this->_animation && this->_playingAnimation) {
 		auto result = this->_animation->update();
 
 		if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b)
 			this->_animation->onKeyPressed();
 		if (!result)
 			this->_animation.reset();
-		return true;
 	}
 	if (this->_finished)
 		return false;
@@ -306,7 +308,8 @@ void PackOutro::_setBGMCmd(const std::string &args)
 
 void PackOutro::_playAnimCmd(const std::string &args)
 {
-	this->_animation = std::make_unique<LuaBattleAnimation>(this->_packPath.c_str(), args.c_str());
+	this->_playingAnimation = true;
+	//this->_animation = std::make_unique<LuaBattleAnimation>(this->_packPath.c_str(), args.c_str());
 }
 
 void PackOutro::_initOpeningObject(const std::string &_file)
@@ -351,7 +354,6 @@ void PackOutro::_generateAnimation(const std::string &args)
 	auto pos = other.find_last_of('.');
 	uint8_t a = 0x8b;
 	uint8_t b = 0x71;
-	struct stat s;
 
 	printf("Opening animation %s\n", args.c_str());
 	if (istream.fail())

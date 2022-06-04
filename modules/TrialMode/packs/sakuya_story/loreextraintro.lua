@@ -137,7 +137,7 @@ stageBg.rect.width  = stageBg.texture.size.x
 stageBg.rect.height = stageBg.texture.size.y
 stageBg.tint.a = 0
 
-stageBottom.texture:loadFromResource(452)
+stageBottom.texture:loadFromResource(484)
 stageBottom.size = stageBottom.texture.size
 stageBottom.position = Vector2i.new(
 	math.floor(320 - stageBg.texture.size.x / 2),

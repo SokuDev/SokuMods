@@ -11,6 +11,19 @@
 
 #define EXPLORER_SCREEN_SIZE 17
 
+const void *_loadPaletteAddr = (void*)0x00419f90;
+
+void loadPalette(const char *name) {
+	printf("Loading palette %s\n", name);
+	__asm {
+		push edi
+		mov edi, ds:[SokuLib::Palette::currentPalette]
+		push name
+		call _loadPaletteAddr
+		pop edi
+	}
+}
+
 struct Data {
 	const char *resourceName;
 	int packageIndex;
@@ -53,12 +66,13 @@ static std::string explorerPath;
 static std::function<void()> defaultMusic;
 static unsigned explorerCursor;
 static unsigned explorerTop;
+static std::string musicPlaying;
 static std::vector<std::unique_ptr<ExplorerFileEntry>> explorerEntries;
 static std::vector<ExplorerReturnEntry> explorerReturnEntries;
 static std::map<std::string, DataTree> *currentFolder;
 static std::function<void (std::string)> explorerLoader;
-static SokuLib::DrawUtils::Sprite extSprites[10];
-static SokuLib::DrawUtils::Sprite extType[10];
+static SokuLib::DrawUtils::Sprite extSprites[11];
+static SokuLib::DrawUtils::Sprite extType[11];
 static SokuLib::DrawUtils::RectangleShape explorerImageRect;
 static bool explorerPlayingMusic = false;
 static const std::map<std::string, int> exts = {
@@ -70,6 +84,7 @@ static const std::map<std::string, int> exts = {
 	{"pal", 5}, // Palette
 	{"pat", 7}, // Player framedata
 	{"dat", 8}, // Menu layout
+	{"sfl", 9}, // Music loop info
 };
 static const char *extTypeStrs[] = {
 	"Type: Csv",
@@ -81,7 +96,8 @@ static const char *extTypeStrs[] = {
 	"Type: Sfx",
 	"Type: Character Data",
 	"Type: Menu Layout",
-	"Type: Unknown"
+	"Type: Music Loop Info",
+	"Type: Unknown",
 };
 
 
@@ -177,9 +193,20 @@ static void renderExplorerPreview()
 
 	explorerImage.texture.destroy();
 	explorerFileSize.texture.destroy();
-	if (explorerEntries[explorerCursor]->extension == 4) {
+	if (explorerEntries[explorerCursor]->extension == 9) {
+		std::string music = explorerEntries[explorerCursor]->fullPath;
+
+		music = music.substr(0, music.size() - 4) + ".ogg";
+		if (musicPlaying != music || !explorerPlayingMusic)
+			SokuLib::playBGM(music.c_str());
 		explorerPlayingMusic = true;
-		SokuLib::playBGM(explorerEntries[explorerCursor]->fullPath.c_str());
+		musicPlaying = music;
+		return;
+	} else if (explorerEntries[explorerCursor]->extension == 4) {
+		if (musicPlaying != explorerEntries[explorerCursor]->fullPath || !explorerPlayingMusic)
+			SokuLib::playBGM(explorerEntries[explorerCursor]->fullPath.c_str());
+		explorerPlayingMusic = true;
+		musicPlaying = explorerEntries[explorerCursor]->fullPath;
 		return;
 	} else
 		playDefaultMusic();
@@ -209,6 +236,48 @@ static void renderExplorerPreview()
 		explorerImage.rect.height = explorerImage.texture.getSize().y;
 		explorerImageRect.setSize(explorerImage.getSize());
 		explorerImageRect.setPosition(explorerImage.getPosition());
+		return;
+	}
+
+	if (explorerEntries[explorerCursor]->extension != 5)
+		return;
+
+	std::string parent = explorerEntries[explorerCursor]->fullPath;
+
+	loadPalette(parent.c_str());
+	while (parent.back() == '/')
+		parent.pop_back();
+	parent = parent.substr(0, parent.find_last_of('/'));
+	if (
+		explorerImage.texture.loadFromGame((parent + "/stand000.cv2").c_str()) ||
+		explorerImage.texture.loadFromGame((parent + "/stand000 .cv2").c_str())
+	) {
+		explorerFileSize.texture.createFromText(
+			(std::to_string(explorerImage.texture.getSize().x) + "x" + std::to_string(explorerImage.texture.getSize().y)).c_str(),
+			defaultFont12, {400, 16}, &size
+		);
+		explorerFileSize.setPosition({447 - size.x / 2, 236});
+		explorerFileSize.setSize(explorerFileSize.texture.getSize());
+		explorerFileSize.rect.width = explorerFileSize.getSize().x;
+		explorerFileSize.rect.height = explorerFileSize.getSize().y;
+
+		SokuLib::Vector2f optimalSize{188, 128};
+		SokuLib::Vector2f scale{
+			optimalSize.x / explorerImage.texture.getSize().x,
+			optimalSize.y / explorerImage.texture.getSize().y
+		};
+		float best = min(scale.x, scale.y);
+
+		explorerImage.setSize((explorerImage.texture.getSize() * best).to<unsigned>());
+		explorerImage.setPosition({
+			static_cast<int>(354 + optimalSize.x / 2 - explorerImage.getSize().x / 2),
+			static_cast<int>(106 + optimalSize.y / 2 - explorerImage.getSize().y / 2)
+		});
+		explorerImage.rect.width = explorerImage.texture.getSize().x;
+		explorerImage.rect.height = explorerImage.texture.getSize().y;
+		explorerImageRect.setSize(explorerImage.getSize());
+		explorerImageRect.setPosition(explorerImage.getPosition());
+		return;
 	}
 }
 
@@ -233,7 +302,7 @@ void loadExplorerEntries()
 			c = tolower(c);
 		entry->fullPath = explorerPath + pair.first;
 		if (pair.second.subfiles.empty())
-			entry->extension = exts.find(pair.second.ext) == exts.end() ? 9 : exts.at(pair.second.ext);
+			entry->extension = exts.find(pair.second.ext) == exts.end() ? 10 : exts.at(pair.second.ext);
 		else
 			entry->extension = 2;
 		entry->pathSprite.texture.createFromText(pair.first.c_str(), defaultFont12, {300, 16});
@@ -266,6 +335,13 @@ void loadExplorerFile(const std::string &path, const std::string &root)
 	std::string str = path;
 
 	loadExplorerRoot(root);
+	if (path.substr(0, strlen("data/character/")) == "data/character/") {
+		std::string base = path.substr(strlen("data/character/"));
+		std::string chr = base.substr(0, base.find('/'));
+		std::string pal = "data/character/" + chr + "/palette000.pal";
+
+		loadPalette(pal.c_str());
+	}
 	while (!str.empty()) {
 		auto pos = str.find('/');
 		std::string token;
@@ -356,6 +432,8 @@ void explorerUpdate()
 			SokuLib::playSEWaveBuffer(0x28);
 			if (explorerEntries[explorerCursor]->extension == 2) {
 				explorerReturnEntries.push_back({explorerPath, explorerCursor, explorerTop, currentFolder});
+				if (explorerPath == "data/character/")
+					loadPalette((explorerEntries[explorerCursor]->fullPath + "/palette000.pal").c_str());
 				explorerPath = explorerEntries[explorerCursor]->fullPath + "/";
 				currentFolder = explorerEntries[explorerCursor]->entry;
 				loadExplorerEntries();

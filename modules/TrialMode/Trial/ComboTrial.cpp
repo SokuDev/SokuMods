@@ -939,7 +939,7 @@ void ComboTrial::_loadPauseAssets()
 	this->_title.rect.width = this->_title.texture.getSize().x;
 	this->_title.rect.height = this->_title.texture.getSize().y;
 
-	this->_pause.texture.loadFromResource(myModule, MAKEINTRESOURCE(448));
+	this->_pause.texture.loadFromResource(myModule, MAKEINTRESOURCE(480));
 	this->_pause.setSize(this->_pause.texture.getSize());
 	this->_pause.rect.width = this->_pause.getSize().x;
 	this->_pause.rect.height = this->_pause.getSize().y;

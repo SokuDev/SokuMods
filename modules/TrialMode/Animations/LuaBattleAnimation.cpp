@@ -7,6 +7,7 @@
 #include <memory>
 #include <sol/sol.hpp>
 #include <map>
+#include "Pack.hpp"
 #include "FakeChrMgr.hpp"
 #include "Menu.hpp"
 #include "LuaBattleAnimation.hpp"
@@ -56,6 +57,8 @@ inline void addVector(sol::state &lua, const char *name) {
 	type[sol::meta_function::equal_to] = [](const SokuLib::Vector2<T> &a, const SokuLib::Vector2<T> &b){ return a == b; };
 }
 
+void loadPalette(const char *name);
+
 LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 {
 	this->_lua = std::make_unique<sol::state>();
@@ -89,6 +92,7 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		"draw", &SokuLib::DrawUtils::Sprite::draw,
 		"size", sol::property(&SokuLib::DrawUtils::Sprite::getSize, &SokuLib::DrawUtils::Sprite::setSize),
 		"position", sol::property(&SokuLib::DrawUtils::Sprite::getPosition, &SokuLib::DrawUtils::Sprite::setPosition),
+		"rotation", sol::property(&SokuLib::DrawUtils::Sprite::getRotation, &SokuLib::DrawUtils::Sprite::setRotation),
 		"setRect", &SokuLib::DrawUtils::Sprite::setRect,
 		"rawSetRect", &SokuLib::DrawUtils::Sprite::rawSetRect
 	);
@@ -566,16 +570,6 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 		{ "ACTION_SPELL_BREAKING_DRUG", SokuLib::ACTION_SPELL_BREAKING_DRUG },
 	};
 
-	(*this->_lua)["playBGM"] = sol::overload(
-		SokuLib::playBGM,
-		[](const std::string &path, double loopStart, double loopEnd){
-			_loopStart = loopStart;
-			_loopEnd = loopEnd;
-			VirtualProtect((PVOID)0x418cc5, 5, PAGE_EXECUTE_WRITECOPY, &old);
-			og = SokuLib::TamperNearJmpOpr(0x418cc5, editLoop);
-			SokuLib::playBGM(path.c_str());
-		}
-	);
 	(*this->_lua)["getLocal"] = []{
 		char local[LOCALE_NAME_MAX_LENGTH];
 		wchar_t localw[LOCALE_NAME_MAX_LENGTH];
@@ -590,7 +584,32 @@ LuaBattleAnimation::LuaBattleAnimation(const char *packPath, const char *script)
 			*strchr(local, '-') = 0;
 		return std::string(local);
 	};
+	(*this->_lua)["playBGM"] = sol::overload(
+		SokuLib::playBGM,
+		[](const std::string &path, double loopStart, double loopEnd){
+			_loopStart = loopStart;
+			_loopEnd = loopEnd;
+			VirtualProtect((PVOID)0x418cc5, 5, PAGE_EXECUTE_WRITECOPY, &old);
+			og = SokuLib::TamperNearJmpOpr(0x418cc5, editLoop);
+			SokuLib::playBGM(path.c_str());
+		}
+	);
 	(*this->_lua)["playBgm"] = (*this->_lua)["playBGM"];
+	(*this->_lua)["loadPalette"] = loadPalette;
+	(*this->_lua)["getTrialScores"] = [](const std::string &name, const std::string &category){
+		std::vector<int> scores;
+		auto byName = packsByName.find(name);
+
+		if (byName == packsByName.end())
+			return scores;
+		for (auto &val : byName->second)
+			if (val->category == category) {
+				for (auto &trial : val->scenarios)
+					scores.push_back(trial->score);
+				break;
+			}
+		return scores;
+	};
 	(*this->_lua)["camera"] = std::ref(SokuLib::camera);
 	(*this->_lua)["packPath"] = packPath;
 	(*this->_lua)["playSFX"] = SokuLib::playSEWaveBuffer;
