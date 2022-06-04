@@ -15,7 +15,7 @@
         "yukari",
         "chirno"
     ],
-    "description": "The story of the mysterious intruder is still going strong.<br>And it is a mystery that has brought more than enough attention to the scarlet manor.<br>Something that was quite troublesome for the chief maid.<br>Nevertheless, it was now her duty to inspect the matter.<br>Especially considering the shortcomings of her master.",
+    "description": "The story of the mysterious intruder is still<br>going strong. And it is a mystery that has<br>brought more than enough attention to the<br>scarlet manor. Something that was quite<br>troublesome for the chief maid.<br>Nevertheless, it was now her duty to inspect<br>the matter. Especially considering the<br>shortcomings of her master.",
     "icon": {
         "isPath": false,
         "offset": {
@@ -42,7 +42,7 @@
     "outro": "outro.lua",
     "scenarios": [
         {
-            "description": "2A 3A 66B<br>Basic combo conversion for far melee pokes. <br>3A only combo into 66B on ground",
+            "description": "2A 3A 66B<br>Basic combo conversion for far melee pokes. <br><br>Here we are again, in this place called the<br>Scarlet Mansion. However it is not the<br>Mistress we will be following this time<br>but a humble maid. A space warping, time<br>stopping maid that is. But what about the<br>strange intruder who created a wave of<br>uninvited guests into the place? Let's see...",
             "extra": false,
             "file": "lore1.json",
             "may_be_locked": true,
@@ -51,7 +51,7 @@
             "preview": "lore1.gif"
         },
         {
-            "description": "5AAA 2B 5C d.236B<br>The best corner carry ! <br>It is better to start 5AAA with dash momentum <br>and let more B and C knives hit. <br>This also will allow you to limit.",
+            "description": "5AAA 2B 5C d.236B<br>The best corner carry !<br><br>Sakuya, now launched on her quest, needs<br>a bit more information. Where<br>can she find anything about trespassers?<br>The answer is the guard, it's always the guard.",
             "extra": false,
             "file": "lore3.json",
             "may_be_locked": true,
@@ -60,7 +60,7 @@
             "preview": "lore2.gif"
         },
         {
-            "description": "66B SC205<br>Best (only) way to follow-up 66B. <br>Also works with Luminous Ricochet.",
+            "description": "66B SC205<br>Best (only) way to follow-up 66B.<br><br>The visit to Meiling proved to be somewhat<br>useful. Yet, there is still someone else to<br>visit in the manor. After all, if<br>one wants information in this place,<br>it is rather common to ask the help of<br>the residential bookworm.",
             "extra": false,
             "file": "lore4.json",
             "may_be_locked": true,
@@ -69,7 +69,7 @@
             "preview": "lore3.gif"
         },
         {
-            "description": "3A hj.9 j.5A j.6A j.6C<br>You can combo from 3A, <br>if you hit it high enough. <br>The opposing character can not air tech <br>after 3A.",
+            "description": "3A hj.9 j.5A j.6A j.6C<br>You can combo from 3A if you hit it high enough.<br><br>Now that the preparation has been made, the<br>hunt can finally start and the timing<br>is on point as rabbit season starts right now.",
             "extra": false,
             "file": "lore6.json",
             "may_be_locked": true,
@@ -78,7 +78,7 @@
             "preview": "lore4.gif"
         },
         {
-            "description": "66C hj.9/D9/D6 j.2A 66C<br>Basic 66C CH combo, <br>works everywhere.<br>You have to do some adjustment <br>depending on how you hit 66C.",
+            "description": "66C hj.9/D9/D6 j.2A 66C<br>Basic 66C CH combo, works everywhere.<br><br>With one suspect down, it is time to try<br>another kind of suspect. If the intruder<br>who started everything was some ghostly<br>figure, perhaps it was a literal ghost<br>that is behind the scenes?",
             "extra": false,
             "file": "lore7.json",
             "may_be_locked": true,
@@ -87,7 +87,7 @@
             "preview": "lore5.gif"
         },
         {
-            "description": "6A 2B hjc.9 j.6A<br>6A Basic combo.",
+            "description": "6A 2B hjc.9 j.6A<br>6A Basic combo.<br><br>It seems the gardener has nothing to do<br>with the situation. But perhaps her master<br>has fooled everyone? After all, she might<br>be lazy but she can be quite mischievous<br>at times. And so Sakuya braced herself for<br>the headache that would ensue.",
             "extra": false,
             "file": "lore2.json",
             "may_be_locked": true,
@@ -96,7 +96,7 @@
             "preview": "lore6.gif"
         },
         {
-            "description": "j8A j5B j9D/j66 j6A/j8A<br>j8A combo near-corner/corner.",
+            "description": "j8A j5B j9D/j66 j6A/j8A<br>j8A combo near-corner/corner.<br><br>Sakuya, now having a better lead, and a slight<br>headache, knew for sure her next target.<br>She shouldn't be the culprit, but she should<br>have better knowledge than anyone on this<br>matter. It's supposed to be her job in the<br>end, and Sakuya knew she was taking her<br>job to heart from experience.",
             "extra": false,
             "file": "lore5.json",
             "may_be_locked": true,
@@ -105,7 +105,7 @@
             "preview": "lore7.gif"
         },
         {
-            "description": "5AAA 2B hjc.9 j.2B j.66/D6/D3 j.5A 5AAAA<br>Common Midscreen BnB. <br>Doesn't work on midgets <br>and most crouching characters.",
+            "description": "5AAA 2B hjc.9 j.2B j.66/D6/D3 j.5A 5AAAA<br>Common Midscreen BnB.<br><br>This is it, Sakuya has, at last, found who<br>should be the core of the problem. It was<br>only logical at the end. Someone who was<br>stealthy, intelligent yet very, very<br>unpredictable.",
             "extra": false,
             "file": "lore8.json",
             "may_be_locked": true,
@@ -114,7 +114,7 @@
             "preview": "lore8.gif"
         },
         {
-            "description": "j5A j2A LD d236Bx3 hj9 j5A dl.j2A<br><br>Luna Dial Combo if you combo from j2A<br>or if you hit the opponent airborne with LD<br>You need to delay j2A so it limits.<br>This combo can be used for other LD combos but<br>will not be optimal.<br>Other common LD starter are:<br>5AAA 2B(1), 66B close and 3A(1).",
+            "description": "j5A j2A LD d236Bx3 hj9 j5A dl.j2A<br>Luna Dial Combo if you combo from j2A<br>(delay j2a for limit)<br><br>It seems like not everything was over.<br>Sakuya will finally be able to meet the<br>one who was behind her troubles.<br>Will we finally have an answer to the mystery?<br>No, you wouldn't think it is so easy?",
             "extra": true,
             "file": "loreextra.json",
             "may_be_locked": true,
