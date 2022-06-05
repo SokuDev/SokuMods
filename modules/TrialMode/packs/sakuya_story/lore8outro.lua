@@ -103,8 +103,9 @@ local function stage3()
 end
 
 local function stage4()
-    battleMgr.leftChr:updateAnimation()
     battleMgr.rightChr:updateAnimation()
+    battleMgr.leftChr:updateMove()
+    battleMgr.leftChr.objects:update()
    	if keyPressed and #dialog == 5 then
    		keyPressed = false
    		dialog.hidden = true
@@ -118,7 +119,7 @@ local function stage5()
     battleMgr.rightChr:updateAnimation()
     battleMgr.leftChr:updateMove()
     battleMgr.leftChr.objects:update()
-    if battleMgr.leftChr.actionBlockId == 1 and battleMgr.leftChr.animationCounter == 1 and battleMgr.leftChr.animationSubFrame == 1 and battleMgr.leftChr.frameCount == 10 then
+    if battleMgr.leftChr.actionBlockId == 2 and battleMgr.leftChr.animationCounter == 0 and battleMgr.leftChr.animationSubFrame == 0 and battleMgr.leftChr.frameCount == 0 then
         battleMgr.leftChr.position.x = -500
         ctr = 0
         currentStage = currentStage + 1
@@ -139,7 +140,7 @@ end
 
 local function stage7()
     battleMgr.leftChr:updateAnimation()
-    battleMgr.rightChr:updateAnimation()
+    battleMgr.rightChr:updateMove()
   	if keyPressed and #dialog == 4 then
    		keyPressed = false
    		dialog.hidden = true
@@ -181,12 +182,13 @@ local function stage9()
 end
 
 local function stage10()
-    battleMgr.leftChr:updateAnimation()
+    battleMgr.leftChr:updateMove()
     battleMgr.leftChr.objects:update()
     battleMgr.rightChr:updateAnimation()
   	if keyPressed and #dialog == 0 then
     	dialog:update()
-    	battleMgr.leftChr.action = enums.actions.ACTION_BACKWARD_HIGH_JUMP
+    	battleMgr.leftChr.action = enums.actions.ACTION_FORWARD_HIGH_JUMP
+    	battleMgr.leftChr.direction = enums.directions.LEFT
     	battleMgr.leftChr:initAnimation()
     	currentStage = currentStage + 1
     end
