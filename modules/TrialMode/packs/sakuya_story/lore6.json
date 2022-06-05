@@ -1,58 +1,61 @@
 {
-    "music": 20,
-    "stage": 18,
-    "player": {
-        "character": "sakuya",
-        "palette": 0,
-        "deck": [],
-        "pos": 550
-    },
     "dummy": {
         "character": "udonge",
-        "palette": 0,
         "deck": [],
+        "palette": 0,
         "pos": {
-            "x": 600,
-            "y": 100
+            "x": 600.0,
+            "y": 100.0
         }
     },
-    "intro": "lore4intro.lua",
-    "outro": "lore4outro.lua",
-    "type": "combo",
-
     "expected": "3a hj9 !j5a:8 j6a:5 j6c",
-    "skills": [
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0]
-    ],
-    "weather": 21,
-    "disable_limit": false,
-    "uniform_card_cost": 1,
-    "hand": [],
-    "play_combo_after_intro": true,
-    "hint": [
-
-    ],
+    "intro": "lore4intro.lua",
+    "music": "data/bgm/st20.ogg",
+    "outro": "lore4outro.lua",
+    "player": {
+        "character": "sakuya",
+        "deck": [],
+        "palette": 0,
+        "pos": 550.0
+    },
     "score": [
         {
-            "min_hits": 6,
             "min_damage": 1587,
+            "min_hits": 6,
             "min_limit": 98
         },
         {
-            "min_hits": 7,
             "min_damage": 1780,
-            "min_limit": 98
+            "min_hits": 7
         },
         {
+            "min_damage": 1850,
             "min_hits": 8,
-            "min_damage" : 1850,
             "min_limit": 100
         },
         {
             "max_attempts": 5
         }
-    ]
+    ],
+    "skills": [
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ],
+    "stage": 18,
+    "type": "combo",
+    "uniform_card_cost": 1
 }

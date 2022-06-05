@@ -10,8 +10,9 @@ local dialogs = {
 	"lEHAre you hiding something by any chance...",
 	"rEAOf course not!",
 	"lhAI guess it is time to come back home for me then.",
-	"rhhIndeed you should come back, there is much<br>to come after all.",
-	"lchYou were saying something?",
+	"r hIndeed you should come back, there is much<br>to come after all.",
+	"lcSYou were saying something?",
+	"rcS...",
 	"rchI want to prepare another party! Want to help me?",
 	"lEhNo, I have better things to do.",
 	--Battle here
@@ -69,13 +70,160 @@ end
 
 local function stage1()
 	battleMgr.leftChr:updateAnimation()
+	battleMgr.rightChr:updateAnimation()
+	if keyPressed and #dialog == 10 then
+	    keyPressed = false
+        dialog.hidden = true
+        battleMgr.rightChr.action = enums.actions.ACTION_NEUTRAL_TECH
+        battleMgr.rightChr:initAnimation()
+        currentStage = currentStage + 1
+	end
+end
+
+local function stage2()
+	battleMgr.leftChr:updateAnimation()
+	battleMgr.rightChr:updateAnimation()
+    if battleMgr.rightChr.actionBlockId == 0 and battleMgr.rightChr.animationCounter == 0 and battleMgr.rightChr.animationSubFrame == 0 and battleMgr.rightChr.frameCount == 0 then
+        battleMgr.rightChr.action = enums.actions.ACTION_CROUCHING
+        battleMgr.rightChr:initAnimation()
+        currentStage = currentStage + 1
+	end
+end
+
+local function stage3()
+    battleMgr.leftChr:updateAnimation()
+    battleMgr.rightChr:updateAnimation()
+        if battleMgr.rightChr.actionBlockId == 0 and battleMgr.rightChr.animationCounter == 0 and battleMgr.rightChr.animationSubFrame == 0 and battleMgr.rightChr.frameCount == 0 then
+            battleMgr.rightChr.action = enums.actions.ACTION_CROUCHED
+            battleMgr.rightChr:initAnimation()
+            keyPressed = true
+            dialog.hidden = false
+            currentStage = currentStage + 1
+    	end
+end
+
+local function stage4()
+    battleMgr.leftChr:updateAnimation()
+    battleMgr.rightChr:updateAnimation()
+   	if keyPressed and #dialog == 5 then
+   		keyPressed = false
+   		dialog.hidden = true
+   		battleMgr.leftChr.action = enums.actions.ACTION_DEFAULT_SKILL4_B
+   		battleMgr.leftChr:initAnimation()
+   		currentStage = currentStage + 1
+   	end
+end
+
+local function stage5()
+    battleMgr.rightChr:updateAnimation()
+    battleMgr.leftChr:updateMove()
+    battleMgr.leftChr.objects:update()
+    if battleMgr.leftChr.actionBlockId == 1 and battleMgr.leftChr.animationCounter == 1 and battleMgr.leftChr.animationSubFrame == 1 and battleMgr.leftChr.frameCount == 10 then
+        battleMgr.leftChr.position.x = -500
+        ctr = 0
+        currentStage = currentStage + 1
+    	end
+end
+
+local function stage6()
+    battleMgr.rightChr:updateAnimation()
+    battleMgr.leftChr:updateMove()
+    battleMgr.leftChr.objects:update()
+    ctr = ctr + 1
+    if ctr == 35 then
+        keyPressed = true
+        dialog.hidden = false
+        currentStage = currentStage + 1
+    end
+end
+
+local function stage7()
+    battleMgr.leftChr:updateAnimation()
+    battleMgr.rightChr:updateAnimation()
+  	if keyPressed and #dialog == 4 then
+   		keyPressed = false
+   		dialog.hidden = true
+   		battleMgr.leftChr.action = enums.actions.ACTION_DEFAULT_SKILL4_B
+   		battleMgr.leftChr:initAnimation()
+   		currentStage = currentStage + 1
+   	end
+end
+
+local function stage8()
+    battleMgr.rightChr:updateAnimation()
+    battleMgr.leftChr:updateMove()
+    battleMgr.leftChr.objects:update()
+    if battleMgr.leftChr.actionBlockId == 1 and battleMgr.leftChr.animationCounter == 1 and battleMgr.leftChr.animationSubFrame == 1 and battleMgr.leftChr.frameCount == 10 then
+        battleMgr.leftChr.position.x = 500
+        battleMgr.rightChr.action = enums.actions.ACTION_GROUND_CRUSHED
+        battleMgr.rightChr:initAnimation()
+        ctr = 0
+        currentStage = currentStage + 1
+    end
+end
+
+local function stage9()
+    battleMgr.rightChr:updateAnimation()
+    battleMgr.leftChr:updateMove()
+    battleMgr.leftChr.objects:update()
+    ctr = ctr + 1
+    if battleMgr.leftChr.actionBlockId == 4 and battleMgr.leftChr.animationCounter == 3 and battleMgr.leftChr.animationSubFrame == 1 and battleMgr.leftChr.frameCount == 7 then
+        battleMgr.leftChr.action = enums.actions.ACTION_IDLE
+        battleMgr.leftChr:initAnimation()
+    end
+    if ctr == 25 then
+        battleMgr.rightChr.action = enums.actions.ACTION_IDLE
+        battleMgr.rightChr:initAnimation()
+       	keyPressed = true
+       	dialog.hidden = false
+       	currentStage = currentStage + 1
+    end
+end
+
+local function stage10()
+    battleMgr.leftChr:updateAnimation()
+    battleMgr.leftChr.objects:update()
+    battleMgr.rightChr:updateAnimation()
+  	if keyPressed and #dialog == 0 then
+    	dialog:update()
+    	battleMgr.leftChr.action = enums.actions.ACTION_BACKWARD_HIGH_JUMP
+    	battleMgr.leftChr:initAnimation()
+    	currentStage = currentStage + 1
+    end
+end
+
+local function stage11()
+    battleMgr.leftChr:updateAnimation()
+    battleMgr.rightChr:updateAnimation()
+	if battleMgr.leftChr.actionBlockId >= 1 then
+		playSfx(enums.sfxs.highJump)
+		battleMgr.leftChr.speed.x = -13
+		battleMgr.leftChr.speed.y = 17
+		currentStage = currentStage + 1
+	end
+end
+
+local function stage12()
+    battleMgr.leftChr:updateAnimation()
+    battleMgr.rightChr:updateAnimation()
+    battleMgr.leftChr.position = battleMgr.leftChr.position + battleMgr.leftChr.speed
+    battleMgr.leftChr.speed.y = battleMgr.leftChr.speed.y - 0.8
 end
 
 local anims = {
 	stage0,
 	stage1,
+	stage2,
+	stage3,
 	stage4,
-	stage5
+	stage5,
+	stage6,
+	stage7,
+	stage8,
+	stage9,
+	stage10,
+	stage11,
+	stage12
 }
 
 

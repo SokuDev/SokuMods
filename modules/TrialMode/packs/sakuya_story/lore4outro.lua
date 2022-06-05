@@ -7,7 +7,7 @@ local dialogs = {
 	"rcAMy purpose is to protect the princess!",
 	"lcABut isn't that strange?",
 	"lcAI understand that they're helping you,<br>but why go this far for them?",
-	"lSAAt that time, when we stormed in,<br>wouldn't it have been smarter to hide or run away?<br>It should have been the easier solution.",
+	"lSADo you remember? When we stormed in,<br>wouldn't it have been smarter to hide or run away?<br>It should have been the easier solution.",
 	"rShIt seems you misunderstand,<br>I follow them by choice.",
 	"rSEBesides I'm not much of a moon rabbit anymore.<br>Even though I might not be ready to consider myself an<br>earth rabbit yet, considering their leader...",
 	"rSWBut aren't you in a much more singular situation than<br>mine? A human who is the personal maid of a vampire...<br>That is quite difficult to believe.",
