@@ -12,7 +12,7 @@ local function loadBackgroundType1(id)
 				sprite.size = Vector2u.new(math.floor(size.x), math.floor(size.y))
 				sprite.rect.width  = sprite.texture.size.x
 				sprite.rect.height = sprite.texture.size.y
-				sprite.position = Vector2i.new(-130 + i % 6 * 128, -60 + math.floor(i / 6) * 128)
+				sprite.position = Vector2i.new(math.floor(-30 + i % 6 * 128 - offset / 2), -60 + math.floor(i / 6) * 128)
 			end
 			sprites[#sprites + 1] = sprite
 			i = i + 1
@@ -34,7 +34,7 @@ local function loadBackgroundType2(id)
 				sprite.size = Vector2u.new(math.floor(size.x), math.floor(size.y))
 				sprite.rect.width  = sprite.texture.size.x
 				sprite.rect.height = sprite.texture.size.y
-				sprite.position = Vector2i.new(-130 + (x - 1) * 128, -60 + (y - 1) * 128)
+				sprite.position = Vector2i.new(math.floor(-30 + (x - 1) * 128 - offset / 2), -60 + (y - 1) * 128)
 			end
 			sprites[#sprites + 1] = sprite
 		end
@@ -52,7 +52,7 @@ local function loadSprite(path)
 	sprite.size = Vector2u.new(math.floor(size.x), math.floor(size.y))
 	sprite.rect.width  = sprite.texture.size.x
 	sprite.rect.height = sprite.texture.size.y
-	sprite.position = Vector2i.new(-100, 0)
+	sprite.position = Vector2i.new(math.floor(-offset / 2), 0)
 	return sprite
 end
 
