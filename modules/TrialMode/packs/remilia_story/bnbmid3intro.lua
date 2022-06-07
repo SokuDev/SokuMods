@@ -3,11 +3,11 @@
 --
 
 local dialogs = {
-	"lH What a perfect weather to go outside.",
+	"lH What perfect weather to go outside.",
 	"lA Still sleeping aren't you?",
 	"rADI wish...",
-	"lcDMany uninvited guests have come it seems.",
-	"lIDAny unusual one?",
+	"lcDIt seems that many uninvited guests have come.",
+	"lIDAny unusual ones?",
 	"rISUnusual ones?",
 	"rIcThere were too many to count!",
 	"lccJudging by your state, it seems you are<br>telling the truth...",
@@ -16,7 +16,7 @@ local dialogs = {
 	"rEDI'm sorry...",
 	"lhDDon't worry, I didn't expect the answer<br>to be so simple, so it is fine.",
 	"rhHReally?",
-	"lHHOf course!<br>It is nothing a little punishment can't forgive!",
+	"lHHOf course!<br>It is nothing a little punishment can't absolve!",
 	"rHE..."
 	--Battle here
 }

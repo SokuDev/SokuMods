@@ -4,11 +4,11 @@
 
 local dialogs = {
         "r DI didn't like this game that much...",
-        "r WWhy not playing something else?",
-        "lSWYou still want to play!",
-        "lAWJust go to your room, I'm done playing with you!",
+        "r WWhy not play something else?",
+        "lSWYou still want to play?",
+        "lAWJust go back to your room, I'm done playing with you!",
         --Remilia leaves
-        "r DBut I don't want to go to my room..."
+        "r DBut I don't want to go back to my room..."
 }
 
 local side = false

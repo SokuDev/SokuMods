@@ -10,15 +10,15 @@ local dialogs = {
 	"rWSWeren't you the one looking for me?",
 	"lHSSo tell me...",
 	"lcSWhat are you doing?",
-	"rccWell there is a bunch of unusual youkai<br>here wrecking havoc...",
+	"rccWell there is a bunch of unusual youkai<br>here wreaking havoc...",
 	"rchIs there anything strange with me being here?",
-	"lChYes, I've seen many youkai here and rare were<br>the one to have been beaten specifically by you!",
+	"lChYes, I've seen many youkai here and few are<br>the ones who have been beaten by you.",
 	"rCSYou can recognize the ones that fought against me?",
-	"lESWell you know, I fought you many times now...",
+	"lESWell you know, I did fight you many times now...",
 	"lASAnyway you are hiding something, I can feel it.<br>Now tell me everything.",
-	"rAEWill you not harass me if I tell you?",
+	"rAEWill you leave me alone if I tell you?",
 	"lhEHere I come Reimu!",
-	"rhEAs I thought"
+	"rhEAs expected."
 	--Battle here
 }
 

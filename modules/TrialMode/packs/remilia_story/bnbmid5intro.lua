@@ -18,7 +18,7 @@ local dialogs = {
         "rchYes of course, why else would I be there?!",
         --Remilia taking two step forward,
         --Marisa scared?
-        "lAhYou won't be able to evade any attack<br>if you're carrying too much stuff, you know?"
+        "lAhYou won't be able to evade any of my attacks<br>if you are carrying too much stuff, you know?"
 	--Battle here
 }
 

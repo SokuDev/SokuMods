@@ -13,7 +13,7 @@
         "reimu",
         "udonge"
     ],
-    "description": "Another boring day for Remilia...<br>Or so she thought, until half of Gensokyo get<br>into her own mansion after hearing a strange<br>rumor. But who is this mysterious intruder<br>everyone is talking about?",
+    "description": "Another boring day for Remilia...<br>Or so she thought, until half of Gensokyo invaded<br>her mansion after hearing a strange rumor.<br>But who is this mysterious intruder<br>everyone is talking about?",
     "icon": {
         "isPath": false,
         "offset": {
@@ -40,7 +40,7 @@
     "outro": "outro.lua",
     "scenarios": [
         {
-            "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>It is but another day, the weather is even,the<br>tea is good, and no disturbance is to be seen.<br>Basically a normal, boring, tedious day for<br>Remilia Scarlet.<br>Yet, without her knowing, it would be a day<br>that she would remember for a while.",
+            "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>It is but another day, the weather is even, the<br>tea is good, and no disturbances are to be seen.<br>Basically a normal, boring, tedious day for<br>Remilia Scarlet.<br>Yet, without her knowing, it would be a day<br>that she would remember for a while.",
             "extra": false,
             "file": "bnbmid1.json",
             "may_be_locked": true,
@@ -49,7 +49,7 @@
             "preview": "bnbmid1.gif"
         },
         {
-            "description": "d6 j5aa d6 j5aa d6 j5aa    | Works everywhere<br>d6 j5aa d6 j5aa d6 j5a j8a | Optimized version<br><br>Something broke the monotony, and that is all<br>Remilia Scarlet needs to dive into the mystery.<br>But if the rumors are true, how come she<br>doesn't know about it?<br>She is the mistress of this mansion after all<br>and her servants are numerous...<br>Why wasn't she informed!?",
+            "description": "d6 j5aa d6 j5aa d6 j5aa    | Works everywhere<br>d6 j5aa d6 j5aa d6 j5a j8a | Optimized version<br><br>Something broke the monotony, and that is all<br>Remilia Scarlet needs to dive into the mystery.<br>But if the rumors are true, why does she<br>not know about it?<br>She is the mistress of this mansion after all,<br>and her servants are numerous...<br>Why wasn't she informed!?",
             "extra": false,
             "file": "bnbmid2.json",
             "may_be_locked": true,
@@ -67,7 +67,7 @@
             "preview": "bnbmid3.gif"
         },
         {
-            "description": "j2a CH 2c hj9 j5c j66 j8a | Works everywhere<br><br>And now that clues were found it is time to do<br>in-depth research.<br>Fortunatly for Remilia Scarlet, she has quite<br>the sizable library which is, unsurprisingly,<br>her next stop.<br>After all, she has a bookworm friend there<br>that should be of help. What? You didn't think<br>she would do the research by herself, did you?",
+            "description": "j2a CH 2c hj9 j5c j66 j8a | Works everywhere<br><br>And now that clues were found it is time to do<br>in-depth research.<br>Fortunately for Remilia Scarlet, she has quite<br>the sizable library which is, unsurprisingly,<br>her next stop.<br>After all, she has a bookworm friend there<br>who should be of help. What? You didn't think<br>she would do the research by herself, did you?",
             "extra": false,
             "file": "bnbmid4.json",
             "may_be_locked": true,
@@ -76,7 +76,7 @@
             "preview": "bnbmid4.gif"
         },
         {
-            "description": "3a 2a 5c d236b | Tip of 3a only<br><br>It seems by searching for the intruder she<br>found another uninvited, yet unsurprising<br>guest but it seems all this situation has<br>brought many strange visitors to her place.<br>Maybe she would have been annoyed if she<br>wasn't so bored.",
+            "description": "3a 2a 5c d236b | Tip of 3a only<br><br>It seems by searching for the intruder she<br>found another uninvited, yet unsurprising<br>guest but it seems all this situation has done<br> is bring many strange visitors to her place.<br>Maybe she would have been annoyed if she<br>wasn't so bored.",
             "extra": false,
             "file": "bnbmid5.json",
             "may_be_locked": true,

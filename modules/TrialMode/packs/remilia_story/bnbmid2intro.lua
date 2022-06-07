@@ -7,7 +7,7 @@ local dialogs = {
 	"rhHYes, mistress?",
 	"lCHDo you know something about a mysterious intruder?<br>One that has been hidding in the mansion.",
 	"rCSMysterious? No not that I know...<br>Still, considering the state of our \"gate keeper\"<br>anyone could have come...",
-	"lASYou too are in charge of security you know?",
+	"lASYou, too, are in charge of security, you know?",
 	"lhSIt seems I need to teach you how to do it."
 	--Battle here
 }

@@ -4,7 +4,7 @@
 
 local dialogs = {
 	"r DAs a detective, shouldn't you find proof before<br>catching anyone?",
-	"lSDReally? That seems rather uneffective.",
+	"lSDReally? That seems rather ineffective.",
 	"rSEYou really aren't suited for detective work.<br>However you might make a rather convincing policewoman.",
 	"r cAnyway, do you wish to know more about the situation?",
 	"lhcNo, actually I don't really care about seeing through<br>your plans. I just want to participate.",

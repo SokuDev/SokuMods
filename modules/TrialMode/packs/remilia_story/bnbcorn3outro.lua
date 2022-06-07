@@ -6,13 +6,13 @@ local dialogs = {
 	"lcDIt's boring...",
 	"lADWhy aren't you fighting back?",
 	--Reimu getting back on her feet
-	"rADI won't retaliate so stop attacking.",
-	"lCDDoesn't it make the best opportunity to beat you?",
-	"rCWWell, if you have any fun in winning that way,<br>be my guest!",
+	"rADI won't retaliate, so stop attacking.",
+	"lCDDoesn't this make for best opportunity to defeat you?",
+	"rCWWell, if it pleases you in winning that way,<br>be my guest!",
 	"lSWDid you grow a brain when I wasn't looking?",
 	"lcWIt seems that Patchouli was on spot when she thought<br>you were acting weirdly...",
 	"rcHSo can I go now?",
-	"rcEBelieve me, I don't like settling things in that way<br>but I want it to be done quick.",
+	"rcEBelieve me, I don't like settling things in that way<br>but I want it to be done quickly.",
 	"lCEBefore you go, tell me.",
 	"lAEWhat is going on with this mysterious intruder that<br>everyone is talking about?",
 	"rAcWell...",
@@ -27,7 +27,7 @@ local dialogs = {
 	"rchI'm taking care of it, but won't you do anything about<br>the curious ones.",
 	"rcSThey should be ransacking your house as we speak.",
 	"lWSReimu, you really have no hospitality...",
-	"lHSWhat kind of host ends the party early!",
+	"lHSWhat kind of host ends the party this early!",
 }
 
 local side = false

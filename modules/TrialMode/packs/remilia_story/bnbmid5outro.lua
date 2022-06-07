@@ -7,7 +7,7 @@ local dialogs = {
 	"rCDNo, not really.",
 	"lcD*sigh* Well, at least Patchouli will be happy<br>that I retrieved her books..",
 	--Remilia walk away
-	"r ESo long for my books I guess...",
+	"r ESo much for my books I guess...",
 	"r CI'll head to the library again on my way back,<br>but for now I have more important things to do here."
 }
 

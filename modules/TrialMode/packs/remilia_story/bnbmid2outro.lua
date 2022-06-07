@@ -3,11 +3,11 @@
 --
 
 local dialogs = {
-	"lHDNow, you know how to deal with uninvited guests.",
+	"lHDNow you know how to deal with uninvited guests.",
 	"rHDI'll be sure to remember...",
 	"lhDOh, by the way could you give that to Patchouli?",
 	"rhDA feather? I will give it to her if I see her.",
-	"lhDGood, I'm sure she'll find some use to it."
+	"lhDGood, I'm sure she'll find some use for it."
 	--Battle here
 }
 

@@ -3,9 +3,9 @@
 --
 
 local dialogs = {
-	"lWDYou got monkey pawed here as they say.",
-        "lHDWell, I'm not sure if vampires have anything<br>to do with monkeys however.",
-        "rHDWhy is everybody cheating here..."
+	"lWDYou got monkey pawed here, as they say.",
+        "lHDWell, I'm not sure if vampires have anything<br>to do with monkeys, though.",
+        "rHDWhy is everybody here cheating..."
 }
 
 local dialog  = StandDialog.new(dialogs)

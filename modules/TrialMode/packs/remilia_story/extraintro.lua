@@ -4,12 +4,12 @@
 
 local dialogs = {
 	"lh It seems I have finally found you, Yukari!",
-	"lW Or should I call you the partner in crime?",
+	"lW Or should I call you, the partner in crime?",
 	"rWS... Hello Remilia.",
 	"lhSI can read the surprise on your face!<br>Perhaps you wonder how I found out?",
 	"lcSYou see, Remilia Scarlet had finally found the<br>culprit through her fight with the shrine maiden,<br>but this answer alone was insufficient.",
 	"lcSThe \"how\" and the \"why\" were still unanswered.",
-	"rcEOh I get it... You're doing the armchair detective<br>thing again.",
+	"rcEOh I get it... You're doing your armchair detective<br>thing again.",
 	"rcHWell, after all, I do have my fair share of secrets.",
 	"lAHBut I don't have the full truth yet. Before my final<br>revelation speech I still need to see through<br>your lies and secrets...",
 	"rAAHow exciting. Will you interrogate me then?",
