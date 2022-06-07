@@ -1308,6 +1308,26 @@ inline bool isCompleted(int entry)
 	return loadedPacks[currentPack]->scenarios[entry]->score != -1;
 }
 
+inline int isLocked(const Pack &pack)
+{
+	if (pack.requirement.empty())
+		return 0;
+
+	auto arr = packsByName[pack.nameStr];
+	auto it = std::find_if(arr.begin(), arr.end(), [&pack](const std::shared_ptr<Pack> &a){
+		return pack.requirement == a->category;
+	});
+
+	if (it == arr.end())
+		return -1;
+	if ((*it)->scenarios.empty())
+		return -1;
+	for (size_t i = (*it)->scenarios.size(); i; i--)
+		if (!(*it)->scenarios[i - 1]->extra)
+			return (*it)->scenarios[i - 1]->score < 0;
+	return -1;
+}
+
 inline bool isLocked(int entry)
 {
 	if (entry <= 0)
@@ -2364,8 +2384,13 @@ static void switchEditorMode()
 
 	for (auto &pack : loadedPacks) {
 		if (!pack->error.texture.hasTexture()) {
-			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = color;
-			pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER]= color;
+			if (!editorMode && isLocked(*pack)) {
+				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::Color{0x40, 0x40, 0x40};
+				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = SokuLib::Color{0x40, 0x40, 0x40};
+			} else {
+				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = color;
+				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = color;
+			}
 		}
 	}
 	SokuLib::playSEWaveBuffer(sound);
@@ -2861,6 +2886,8 @@ bool saveCurrentPack()
 		json["name"] = pack->nameStr;
 	if (!pack->category.empty())
 		json["category"] = pack->category;
+	if (!pack->category.empty())
+		json["requirement"] = pack->requirement;
 	if (!pack->minVersion.empty())
 		json["min_version"] = pack->minVersion;
 	if (!pack->outroRelPath.empty())
@@ -3661,7 +3688,14 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 			sumScore += scenario->score;
 		}
 
-		if (pack.icon) {
+		if (isLocked(pack)) {
+			lock.setPosition({
+				static_cast<int>(pos.x + 18),
+				static_cast<int>(pos.y - 14)
+			});
+			lock.setSize({64, 64});
+			lock.draw();
+		} else if (pack.icon) {
 			pack.icon->sprite.setPosition(SokuLib::Vector2i{
 				static_cast<int>(pos.x + 4),
 				static_cast<int>(pos.y + 2)
@@ -3744,6 +3778,7 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 					static_cast<int>(pos.x + 271),
 					static_cast<int>(pos.y - 10)
 				});
+				lock.setSize({32, 32});
 				lock.draw();
 				if (scenario->nameHiddenIfLocked && !editorMode) {
 					questionMarks.setPosition({

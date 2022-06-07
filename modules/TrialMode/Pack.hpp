@@ -57,6 +57,7 @@ public:
 class Pack {
 public:
 	bool previewFSAsset = false;
+	nlohmann::json json;
 	std::string path;
 	std::string nameStr;
 	std::string category;
@@ -64,6 +65,7 @@ public:
 	std::string scorePath;
 	std::string outroPath;
 	std::string minVersion;
+	std::string requirement;
 	std::string previewPath;
 	std::string outroRelPath;
 	std::string descriptionStr;

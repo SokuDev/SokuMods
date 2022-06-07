@@ -40,6 +40,7 @@
     ],
     "name": "Babylon's Aurora",
     "outro": "outro.lua",
+    "requirement": "Remilia Scarlet",
     "scenarios": [
         {
             "description": "2A 3A 66B<br>Basic combo conversion for far melee pokes. <br><br>Here we are again, in this place called the<br>Scarlet Mansion. However it is not the<br>Mistress we will be following this time<br>but a humble maid. A space warping, time<br>stopping maid that is. But what about the<br>strange intruder who created a wave of<br>uninvited guests into the place? Let's see...",

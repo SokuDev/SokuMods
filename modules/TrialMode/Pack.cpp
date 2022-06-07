@@ -214,8 +214,10 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 	}
 
 	this->path = path;
+	this->json = object;
 	this->scorePath = path + "/score.dat";
 	this->category = object.contains("category") && object["category"].is_string() ? object["category"] : "no category";
+	this->requirement =  object.contains("requirement") && object["requirement"].is_string() ? object["requirement"] : "";
 
 	this->nameStr = object.contains("name") && object["name"].is_string() ? object["name"].get<std::string>() : path;
 	this->name.texture.createFromText(

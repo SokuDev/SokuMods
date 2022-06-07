@@ -301,10 +301,10 @@ function update()
 		flashRect.fillColor = color
 		return true
 	elseif color.a == 0xFF then
+		local old = selectedBg
+
 		index = 0
 		selectedSky = math.random(1, 20)
-
-		local old = selectedBg
 
 		repeat
 			selectedBg = math.random(1, #backgrounds)
