@@ -2116,7 +2116,8 @@ failed2:
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
 		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
-	}
+	} else if (currentEntry == -1 && isLocked(*loadedPacks[shownPack]))
+		lockedText.texture.createFromText(("Unlocked by completing " + loadedPacks[shownPack]->requirement + "'s<br>episode").c_str(), defaultFont12, {300, 150});
 
 	if (chrs.empty()) {
 		if (!SokuLib::SWRUnlinked)
@@ -2379,19 +2380,11 @@ static void switchEditorMode()
 		return;
 	editorMode = !editorMode;
 
-	auto color = editorMode ? SokuLib::DrawUtils::DxSokuColor{0x80, 0xFF, 0x80} : SokuLib::DrawUtils::DxSokuColor{0x80, 0x80, 0xFF};
 	auto sound = editorMode ? 48 : 41;
 
-	for (auto &pack : loadedPacks) {
-		if (!pack->error.texture.hasTexture()) {
-			if (!editorMode && isLocked(*pack)) {
-				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::Color{0x40, 0x40, 0x40};
-				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = SokuLib::Color{0x40, 0x40, 0x40};
-			} else {
-				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = color;
-				pack->name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = color;
-			}
-		}
+	if (currentPack >= 0 && isLocked(*loadedPacks[currentPack])) {
+		expended = false;
+		currentEntry = -1;
 	}
 	SokuLib::playSEWaveBuffer(sound);
 	packEditScenario.opened = false;
@@ -2415,7 +2408,8 @@ static void switchEditorMode()
 			auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
 			lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
-		}
+		} else if (currentEntry == -1 && isLocked(*loadedPacks[shownPack]))
+			lockedText.texture.createFromText(("Unlocked by completing " + loadedPacks[shownPack]->requirement + "'s<br>episode").c_str(), defaultFont12, {300, 150});
 	}
 }
 
@@ -2574,7 +2568,8 @@ static void handleGoUp()
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
 		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
-	}
+	} else if (currentEntry == -1 && isLocked(*loadedPacks[shownPack]) && !editorMode)
+		lockedText.texture.createFromText(("Unlocked by completing " + loadedPacks[shownPack]->requirement + "'s<br>episode").c_str(), defaultFont12, {300, 150});
 }
 
 static void handleGoDown()
@@ -2631,7 +2626,8 @@ static void handleGoDown()
 		auto &other = loadedPacks[currentPack]->scenarios[currentEntry - 1];
 
 		lockedText.texture.createFromText(("Unlocked by completing " + (isLocked(currentEntry - 1) && other->nameHiddenIfLocked ? std::string("????????????????") : other->nameStr)).c_str(), defaultFont12, {300, 150});
-	}
+	} else if (currentEntry == -1 && isLocked(*loadedPacks[shownPack]))
+		lockedText.texture.createFromText(("Unlocked by completing " + loadedPacks[shownPack]->requirement + "'s<br>episode").c_str(), defaultFont12, {300, 150});
 }
 
 void openPackEditPage()
@@ -3508,6 +3504,8 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 		if (loadedPacks[currentPack]->scenarios.empty())
 			SokuLib::playSEWaveBuffer(0x29);
 		else if (currentEntry == -1) {
+			if (isLocked(*loadedPacks[currentPack]) && !editorMode)
+				return SokuLib::playSEWaveBuffer(0x29);
 			SokuLib::playSEWaveBuffer(0x28);
 			expended = true;
 			currentEntry = 0;
@@ -3603,11 +3601,13 @@ int menuOnProcess(SokuLib::MenuResult *This)
 					(editorMode ? editorGuides : noEditorGuides)[currentPack < 0]->active = true;
 				} else {
 					puts("Quit");
+					printf("Still loading %i images\n", loading);
 					return loading;
 				}
 			}
 			if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 				SokuLib::playSEWaveBuffer(0x29);
+				printf("Still loading %i images\n", loading);
 				return loading;
 			}
 			handlePlayerInputs(SokuLib::inputMgrs.input);
@@ -3688,14 +3688,8 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 			sumScore += scenario->score;
 		}
 
-		if (isLocked(pack)) {
-			lock.setPosition({
-				static_cast<int>(pos.x + 18),
-				static_cast<int>(pos.y - 14)
-			});
-			lock.setSize({64, 64});
-			lock.draw();
-		} else if (pack.icon) {
+		if (!editorMode && isLocked(pack));
+		else if (pack.icon) {
 			pack.icon->sprite.setPosition(SokuLib::Vector2i{
 				static_cast<int>(pos.x + 4),
 				static_cast<int>(pos.y + 2)
@@ -3707,6 +3701,14 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 				static_cast<int>(pos.y - 1)
 			});
 			missingIcon.draw();
+		}
+		if (isLocked(pack)) {
+			lock.setPosition({
+				static_cast<int>(pos.x + 18),
+				static_cast<int>(pos.y - 14)
+			});
+			lock.setSize({64, 64});
+			lock.draw();
 		}
 
 		sprite.setPosition({
@@ -3738,6 +3740,19 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		);
 
 	if (pos.y >= 100 && pos.y <= 406) {
+		if (pack.error.texture.hasTexture()) {
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::Color{0xFF, 0xA0, 0xA0};
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = SokuLib::Color{0xFF, 0xA0, 0xA0};
+		} else if (editorMode) {
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::Color{0x80, 0xFF, 0x80};
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = SokuLib::Color{0x80, 0xFF, 0x80};
+		} else if (isLocked(pack)) {
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::Color{0x40, 0x40, 0x40};
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = SokuLib::Color{0x40, 0x40, 0x40};
+		} else {
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_LEFT_CORNER] = SokuLib::Color{0xA0, 0xA0, 0xFF};
+			pack.name.fillColors[SokuLib::DrawUtils::GradiantRect::RECT_BOTTOM_RIGHT_CORNER] = SokuLib::Color{0xA0, 0xA0, 0xFF};
+		}
 		pack.name.setPosition({
 			static_cast<int>(pos.x + 74),
 			static_cast<int>(pos.y + 2)
@@ -3889,7 +3904,10 @@ void menuOnRender(SokuLib::MenuResult *This)
 	if (currentEntry < 0) {
 		if (loadedPacks[shownPack]->preview.texture.hasTexture())
 			loadedPacks[shownPack]->preview.draw();
-		if (loadedPacks[shownPack]->description.texture.hasTexture())
+		if (isLocked(*loadedPacks[shownPack]) && !editorMode) {
+			lockedText.draw();
+			lockedImg.draw();
+		} else if (loadedPacks[shownPack]->description.texture.hasTexture())
 			loadedPacks[shownPack]->description.draw();
 		goto displayOutro;
 	}
