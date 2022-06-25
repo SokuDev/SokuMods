@@ -370,7 +370,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 
 	int ret = (This->*ogBattleMgrOnProcess)();
 
-	if (!SokuLib::menuManager.empty())
+	if (!SokuLib::menuManager.empty() && SokuLib::sceneId == SokuLib::SCENE_BATTLE)
 		return ret;
 
 	auto left  = ((SokuLib::CharacterManager **)This)[3];
