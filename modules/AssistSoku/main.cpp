@@ -48,6 +48,12 @@ void SpriteEx::render() { (this->*SokuLib::union_cast<void(SpriteEx::*)()>(0x407
 void SpriteEx::render(float r, float g, float b) { (this->*SokuLib::union_cast<void(SpriteEx::*)(float, float, float)>(0x7fb080))(r, g, b); }
 void SpriteEx::render(float a, float r, float g, float b) { (this->*SokuLib::union_cast<void(SpriteEx::*)(float, float, float, float)>(0x7fb150))(a, r, g, b); }
 
+struct ResetValue {
+	unsigned int offset;
+	unsigned char value;
+	unsigned int size;
+};
+
 struct ChrInfo {
 	unsigned nb = 0;
 	unsigned cd = 0;
@@ -55,6 +61,7 @@ struct ChrInfo {
 	unsigned ctr = 0;
 	SokuLib::Action action;
 	SokuLib::Character chr;
+	std::vector<ResetValue> resetValues;
 	SokuLib::Vector2<std::optional<int>> pos;
 	SokuLib::Vector2<std::optional<int>> speed;
 	SokuLib::Vector2<std::optional<int>> offset;
@@ -263,6 +270,8 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 	if (chr.cond(mgr, chr)) {
 		if (chr.nb == 0) {
 			mgr->objectBase.renderInfos.yRotation += 10;
+			for (auto &r : chr.resetValues)
+				memset(&((char *)mgr)[r.offset], r.value, r.size);
 			goto update;
 		}
 		chr.nb--;
@@ -619,6 +628,13 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 						e.nb = gr["nb"];
 						e.action = gr["action"];
 						e.chr = static_cast<SokuLib::Character>(i);
+						for (auto &v : gr["reset"]) {
+							e.resetValues.push_back({
+								v["offset"].is_number() ? v["offset"].get<unsigned>() : std::stoul(v["offset"].get<std::string>(), nullptr, 16),
+								static_cast<unsigned char>(v.contains("value") && v["value"].is_number() ? v["value"].get<unsigned>() : 0),
+								v.contains("size") && v["size"].is_number() ? v["size"].get<unsigned>() : 1
+							});
+						}
 						e.cond = gr["cond"] == "end" ? waitEnd : condBasic;
 						if (gr.contains("posX") && gr["posX"].is_number())
 							e.pos.x = gr["posX"];

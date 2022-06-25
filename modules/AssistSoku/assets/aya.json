@@ -29,7 +29,12 @@
             "speedY": 0,
             "offsetX": 0,
             "posY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D2"
+                }
+            ]
         },
         "air": {
             "cd": 360,
@@ -39,7 +44,14 @@
             "speedY": 0,
             "offsetX": 0,
             "offsetY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D2",
+                    "value": 0,
+                    "size": 1
+                }
+            ]
         }
     },
     "236": {
