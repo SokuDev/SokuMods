@@ -31,13 +31,17 @@
         "xMirror": true,
         "yMirror": false
     },
+    "link": "remilia_story",
     "min_version": "alpha 0.4.0",
     "modes": [
         "Combo",
         "Story"
     ],
     "name": "Babylon's Aurora",
+    "official": true,
     "outro": "outro.lua",
+    "publisher": "PinkySmile",
+    "revision": 1,
     "scenarios": [
         {
             "description": "2a 5c hj9 j5c j66 j8a | Works everywhere<br><br>It is but another day, the weather is even, the<br>tea is good, and no disturbances are to be seen.<br>Basically a normal, boring, tedious day for<br>Remilia Scarlet.<br>Yet, without her knowing, it would be a day<br>that she would remember for a while.",

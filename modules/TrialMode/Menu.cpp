@@ -54,7 +54,6 @@ static SokuLib::Vector2i topicFilterSize;
 static SokuLib::DrawUtils::Sprite title;
 static SokuLib::DrawUtils::Sprite score;
 static SokuLib::DrawUtils::Sprite wrench;
-static SokuLib::DrawUtils::Sprite arrowSprite;
 static SokuLib::DrawUtils::Sprite nameFilterText;
 static SokuLib::DrawUtils::Sprite modeFilterText;
 static SokuLib::DrawUtils::Sprite topicFilterText;
@@ -76,6 +75,7 @@ static unsigned band2Start = 0;
 
 int currentPack = -3;
 int currentEntry = -1;
+SokuLib::DrawUtils::Sprite arrowSprite;
 SokuLib::DrawUtils::Sprite lock;
 SokuLib::DrawUtils::Sprite extraImg;
 SokuLib::DrawUtils::Sprite missingIcon;
@@ -2003,7 +2003,7 @@ void menuLoadAssets()
 	version.rect.width = versionStrSize.x;
 	version.rect.height = versionStrSize.y;
 
-	nameFilterText.texture.createFromText( "Any name",  defaultFont12, {300, 20}, &nameFilterSize);
+	nameFilterText.texture.createFromText("Any name",  defaultFont12, {300, 20}, &nameFilterSize);
 	nameFilterText.setSize({
 		nameFilterText.texture.getSize().x,
 		nameFilterText.texture.getSize().y
@@ -2011,7 +2011,7 @@ void menuLoadAssets()
 	nameFilterText.rect.width = nameFilterText.texture.getSize().x;
 	nameFilterText.rect.height = nameFilterText.texture.getSize().y;
 
-	modeFilterText.texture.createFromText( "Any mode",  defaultFont12, {300, 20}, &modeFilterSize);
+	modeFilterText.texture.createFromText("Any mode",  defaultFont12, {300, 20}, &modeFilterSize);
 	modeFilterText.setSize({
 		modeFilterText.texture.getSize().x,
 		modeFilterText.texture.getSize().y
@@ -2291,6 +2291,7 @@ void menuUnloadAssets()
 	loadedPacks.clear();
 	uniqueNames.clear();
 	uniqueCategories.clear();
+	uniqueModes.clear();
 	packsByName.clear();
 	packsByCategory.clear();
 	noEditorGuides.clear();
@@ -3840,7 +3841,7 @@ void renderOnePack(Pack &pack, SokuLib::Vector2<float> &pos, bool deployed)
 		pos.y += 15;
 		if (pos.y > 379)
 			break;
-	};
+	}
 	if (entryStart) {
 		upArrow.setPosition({72, 148});
 		upArrow.setSize({16, 16});

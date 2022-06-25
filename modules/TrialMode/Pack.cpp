@@ -265,7 +265,10 @@ Pack::Pack(const std::string &path, const nlohmann::json &object)
 				);
 				goto invalidPreview;
 			}
-			this->preview.texture.loadFromFile((path + "/" + (this->previewPath = relative)).c_str());
+			if (path.substr(0, 7) == "http://")
+				loadFromLink(this->preview.texture, path + (this->previewPath = relative));
+			else
+				this->preview.texture.loadFromFile((path + "/" + (this->previewPath = relative)).c_str());
 			this->previewFSAsset = true;
 		} else
 			this->preview.texture.loadFromGame((this->previewPath = obj["path"]).c_str());
@@ -549,7 +552,10 @@ Icon::Icon(const std::string &path, const nlohmann::json &object)
 			return;
 		}
 		this->path = relative;
-		this->sprite.texture.loadFromFile((path + "/" + this->path).c_str());
+		if (path.substr(0, 7) == "http://")
+			loadFromLink(this->sprite.texture, (path + this->path));
+		else
+			this->sprite.texture.loadFromFile((path + "/" + this->path).c_str());
 		this->fsPath = true;
 	} else {
 		this->path = object["path"];
@@ -652,6 +658,8 @@ void loadPacks()
 	std::sort(loadedPacks.begin(), loadedPacks.end(), [](std::shared_ptr<Pack> pack1, std::shared_ptr<Pack> pack2){
 		if (pack1->error.texture.hasTexture() != pack2->error.texture.hasTexture())
 			return pack2->error.texture.hasTexture();
+		if (pack1->nameStr != pack2->nameStr)
+			return pack1->nameStr < pack2->nameStr;
 		return pack1->category < pack2->category;
 	});
 	std::sort(uniqueCategories.begin(), uniqueCategories.end());

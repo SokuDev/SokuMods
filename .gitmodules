@@ -19,3 +19,9 @@
 [submodule "mbedtls"]
 	path = mbedtls
 	url = https://github.com/ARMmbed/mbedtls.git
+[submodule "libzip"]
+	path = libzip
+	url = https://github.com/nih-at/libzip
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git

@@ -83,6 +83,24 @@ option(CURL_CA_PATH "" none)
 option(CURL_WINDOWS_SSPI "" OFF)
 add_subdirectory(curl EXCLUDE_FROM_ALL)
 
+add_subdirectory(zlib)
+add_library(ZLIB::ZLIB ALIAS zlibstatic)
+
+SET(BUILD_SHARED_LIBS OFF)
+SET(LIBZIP_DO_INSTALL OFF)
+SET(ENABLE_COMMONCRYPTO OFF)
+SET(ENABLE_GNUTLS OFF)
+SET(ENABLE_OPENSSL OFF)
+SET(ENABLE_WINDOWS_CRYPTO OFF)
+SET(ENABLE_BZIP2 OFF)
+SET(ENABLE_LZMA OFF)
+SET(ENABLE_ZSTD OFF)
+SET(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
+SET(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/zlib")
+add_subdirectory(libzip)
+add_dependencies(zip zlibstatic)
+target_include_directories(zip PRIVATE ${ZLIB_INCLUDE_DIR})
+
 # detours
 
 add_library(detours
@@ -503,10 +521,12 @@ add_library(
         modules/TrialMode/InputBox.hpp
 	modules/TrialMode/Explorer.cpp
         modules/TrialMode/Explorer.hpp
-	modules/TrialMode/InputBox.cpp
-        modules/TrialMode/InputBox.hpp
+	modules/TrialMode/Socket.cpp
+        modules/TrialMode/Socket.hpp
         modules/TrialMode/ExplorerMenu.cpp
         modules/TrialMode/ExplorerMenu.hpp
+        modules/TrialMode/Crc32.cpp
+        modules/TrialMode/Crc32.h
 )
 target_compile_options(TrialMode PRIVATE /bigobj)
 target_compile_definitions("TrialMode" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> WINVER=0x0601 _WIN32_WINNT=0x0601)
@@ -519,6 +539,8 @@ target_link_libraries(
         ws2_32
         user32
         lua54
+        zip
+	#stdc++fs
         "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
         "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
 )

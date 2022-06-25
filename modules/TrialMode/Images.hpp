@@ -62,10 +62,10 @@ public:
 	bool isValid() const override;
 	void setPosition(SokuLib::Vector2i pos) override;
 
-	size_t size;
+	size_t size = 0;
 	std::string path;
 	bool _loading = false;
-	unsigned char *buf;
+	unsigned char *buf = nullptr;
 	SokuLib::Vector2u _size{0, 0};
 	WIN32_FILE_ATTRIBUTE_DATA fad;
 	SokuLib::DrawUtils::DxSokuColor *_frame = nullptr;
@@ -74,5 +74,7 @@ public:
 	bool _needExit = false;
 	std::mutex dmutex;
 };
+
+void loadFromLink(SokuLib::DrawUtils::Texture &texture, const std::string &link);
 
 #endif //SWRSTOYS_IMAGES_HPP

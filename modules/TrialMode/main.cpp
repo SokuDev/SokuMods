@@ -19,6 +19,8 @@
 #define printf(...)
 #endif
 
+char serverHost[1024];
+unsigned short serverPort;
 
 static bool goToTitle = false;
 static int (SokuLib::Battle::* ogBattleOnProcess)();
@@ -152,6 +154,8 @@ void LoadSettings()
 	GetPrivateProfileString("TrialMode", "PackLocation", "packs", buffer, sizeof(buffer), profilePath);
 	strcat(packsLocation, buffer);
 	strcat(packsLocation, "\\*");
+	GetPrivateProfileString("TrialMode", "Server", "trialmode.pinkysmile.eu", serverHost, sizeof(serverHost), profilePath);
+	serverPort = GetPrivateProfileInt("TrialMode", "ServerPort", 80, profilePath);
 
 	loadSoku2Config();
 }

@@ -5,9 +5,10 @@
 #undef _D3D9_H_
 #include <d3d9.h>
 #include <fstream>
-#include <process.h>
 #include "gif_load.h"
 #include "Images.hpp"
+#include "Socket.hpp"
+#include "Exceptions.hpp"
 
 #ifndef _DEBUG
 #define puts(...)
@@ -15,9 +16,47 @@
 #define fprintf(...)
 #endif
 
+Socket::HttpResponse makeRequest(const std::string &link)
+{
+	Socket socket;
+	std::string url = link.substr(7);
+	auto pos = url.find_first_of('/');
+	std::string host = pos == std::string::npos ? url : url.substr(0, pos);
+	unsigned short port = 80;
+	auto colon = host.find(':');
+	auto path = url.substr(host.size());
+
+	printf("%s -> ", link.c_str());
+	if (colon != std::string::npos) {
+		port = std::stoul(host.substr(colon + 1));
+		host = host.substr(0, colon);
+	}
+
+	Socket::HttpRequest request;
+
+	request.httpVer = "HTTP/1.1";
+	request.method = "GET";
+	request.host = host;
+	request.portno = port;
+	request.header["Accept"] = "image/png";
+	request.path = pos == std::string::npos ? "/" : path;
+	try {
+		auto res = socket.makeHttpRequest(request);
+
+		printf("%i (%s)\n", res.returnCode, res.codeName.c_str());
+		return res;
+	} catch (HTTPErrorException &e) {
+		printf("%i (%s)\n", e.getResponse().returnCode, e.getResponse().codeName.c_str());
+		throw;
+	}
+}
+
 SimpleImage::SimpleImage(const std::string &path, const SokuLib::Vector2i &pos)
 {
-	this->texture.loadFromFile(path.c_str());
+	if (path.substr(0, 7) == "http://")
+		loadFromLink(this->texture, path);
+	else
+		this->texture.loadFromFile(path.c_str());
 	this->rect = {
 		0, 0,
 		static_cast<int>(this->texture.getSize().x),
@@ -28,7 +67,8 @@ SimpleImage::SimpleImage(const std::string &path, const SokuLib::Vector2i &pos)
 }
 
 void SimpleImage::update()
-{}
+{
+}
 
 void SimpleImage::render() const
 {
@@ -37,7 +77,8 @@ void SimpleImage::render() const
 }
 
 void SimpleImage::reset()
-{}
+{
+}
 
 bool SimpleImage::isValid() const
 {
@@ -47,6 +88,52 @@ bool SimpleImage::isValid() const
 void SimpleImage::setPosition(SokuLib::Vector2i pos)
 {
 	SokuLib::DrawUtils::Sprite::setPosition(pos);
+}
+
+void loadFromLink(SokuLib::DrawUtils::Texture &texture, const std::string &link)
+{
+	HRESULT result;
+	int handle;
+	D3DXIMAGE_INFO info;
+	Socket::HttpResponse res;
+
+	try {
+		res = makeRequest(link);
+	} catch (std::exception &e) {
+		puts(e.what());
+	}
+	printf("Loading texture %s\n", link.c_str());
+	if (FAILED(result = D3DXGetImageInfoFromFileInMemory(res.body.c_str(), res.body.size(), &info))) {
+		fprintf(stderr, "D3DXGetImageInfoFromFileInMemory(%p, %u, %p) failed with code %li.\n", res.body.c_str(), res.body.size(), &info, result);
+		return;
+	}
+
+	LPDIRECT3DTEXTURE9 *pphandle = SokuLib::textureMgr.allocate(&handle);
+
+	*pphandle = nullptr;
+	if (FAILED(result = D3DXCreateTextureFromFileInMemoryEx(
+		SokuLib::pd3dDev,
+		res.body.c_str(),
+		res.body.size(),
+		info.Width,
+		info.Height,
+		info.MipLevels,
+		D3DUSAGE_RENDERTARGET,
+		info.Format,
+		D3DPOOL_DEFAULT,
+		D3DX_DEFAULT,
+		D3DX_DEFAULT,
+		0,
+		&info,
+		nullptr,
+		pphandle
+	))) {
+		fprintf(stderr, "D3DXCreateTextureFromFileInMemoryEx(%p, %p, %u, %p) failed with code %li.\n", SokuLib::pd3dDev, res.body.c_str(), res.body.size(), pphandle, result);
+		SokuLib::textureMgr.deallocate(handle);
+		return;
+	}
+	printf("Texture handle: %x, Size: %ux%u\n", handle, info.Width, info.Height);
+	texture.setHandle(handle, {info.Width, info.Height});
 }
 
 static void callback(void *data, struct GIF_WHDR *chunk)
@@ -65,6 +152,7 @@ static DWORD __stdcall loader(void *data)
 	if (GIF_Load((void *)This->buf, This->fad.nFileSizeLow, callback, nullptr, This, 0) < 0) {
 		fprintf(stderr, "Could not load GIF %s\n", This->path.c_str());
 		delete[] This->buf;
+		This->buf = nullptr;
 		This->dmutex.unlock();
 		return 0;
 	}
@@ -81,26 +169,34 @@ AnimatedImage::AnimatedImage(const std::string &p, const SokuLib::Vector2i &pos,
 	puts("AnimatedImage() <-");
 	this->path = p;
 
-	std::ifstream stream{path, std::ifstream::binary};
+	if (this->path.substr(0, 7) == "http://") {
+		auto res = makeRequest(this->path);
 
-	if (!GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &this->fad)) {
-		fprintf(stderr, "GetFileAttributesEx(%s) failed with code %lX\n", path.c_str(), GetLastError());
-		return;
+		this->fad.nFileSizeLow = res.body.size();
+		this->buf = new unsigned char[this->fad.nFileSizeLow];
+		memcpy(this->buf, res.body.c_str(), this->fad.nFileSizeLow);
+	} else {
+		std::ifstream stream{this->path, std::ifstream::binary};
+
+		if (!GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &this->fad)) {
+			fprintf(stderr, "GetFileAttributesEx(%s) failed with code %lX\n", this->path.c_str(), GetLastError());
+			return;
+		}
+
+		if (this->fad.nFileSizeHigh) {
+			fprintf(stderr, "%s is too big\n", this->path.c_str());
+			return;
+		}
+
+		if (!stream) {
+			fprintf(stderr, "Could not open %s\n", this->path.c_str());
+			return;
+		}
+		this->buf = new unsigned char[this->fad.nFileSizeLow];
+
+		printf("Reading file %s\n", this->path.c_str());
+		stream.read(reinterpret_cast<char *>(this->buf), this->fad.nFileSizeLow);
 	}
-
-	if (fad.nFileSizeHigh) {
-		fprintf(stderr, "%s is too big\n", path.c_str());
-		return;
-	}
-
-	if (!stream) {
-		fprintf(stderr, "Could not open %s\n", path.c_str());
-		return;
-	}
-	this->buf = new unsigned char[fad.nFileSizeLow];
-
-	printf("Reading file %s\n", path.c_str());
-	stream.read(reinterpret_cast<char *>(buf), fad.nFileSizeLow);
 	this->_sprite.setPosition(pos);
 	this->_loading = true;
 	this->thread = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(loader), this, 0, nullptr);
