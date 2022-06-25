@@ -10,6 +10,7 @@
 #include <SokuLib.hpp>
 #include <shlwapi.h>
 #include <thread>
+#include <iostream>
 
 #define BOXES_ALPHA 0.25
 #define ASSIST_BOX_Y 429
@@ -112,9 +113,11 @@ int __stdcall mySendTo(SOCKET s, char * buf, int len, int flags, sockaddr * to, 
 		return realSendTo(s, buf, len, flags, to, tolen);
 
 	if (packet.game.event.type == SokuLib::GAME_MATCH) {
-		packet.game.event.match.host.skinId |= assists.first << 3;
-		packet.game.event.match.client().skinId |= assists.second << 3;
-		printf("Send assists %i %i\n", packet.game.event.match.host.skinId >> 3, packet.game.event.match.client().skinId >> 3);
+		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+			packet.game.event.match.host.skinId = assists.second << 3;
+		else
+			packet.game.event.match.host.skinId |= assists.first << 3;
+		printf("Send assists %i (%i) | %i %i\n", packet.game.event.match.host.skinId >> 3, packet.game.event.match.host.skinId, assists.first, assists.second);
 	}
 	return realSendTo(s, buf, len, flags, to, tolen);
 }
@@ -127,11 +130,13 @@ int __stdcall myRecvFrom(SOCKET s, char * buf, int len, int flags, sockaddr * fr
 	if (packet.type != SokuLib::HOST_GAME && packet.type != SokuLib::CLIENT_GAME && packet.game.event.type != SokuLib::GAME_MATCH_REQUEST && packet.game.event.type != SokuLib::GAME_MATCH)
 		return result;
 
-	if (packet.game.event.type == SokuLib::GAME_MATCH && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER) {
+	if (packet.game.event.type == SokuLib::GAME_MATCH) {
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
 			assists.first = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
-		assists.second = static_cast<SokuLib::Character>(packet.game.event.match.client().skinId >> 3);
-		printf("Recv assists %i %i\n", assists.first, assists.second);
+		else
+			assists.second = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
+		printf("Recv assists %i %i (%i)\n", assists.first, assists.second, packet.game.event.match.host.skinId);
+		packet.game.event.match.host.skinId &= 7;
 	}
 	return result;
 }
