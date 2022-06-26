@@ -316,8 +316,10 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 	if (mgr->objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN && mgr->objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH) {
 		chr.nb = 0;
 		mgr->objectBase.renderInfos.yRotation += 10;
-		chr.cd *= 2;
-		chr.maxCd *= 2;
+		chr.cd += 1800;
+		chr.maxCd += 1800;
+		mgr->objectBase.action = SokuLib::ACTION_IDLE;
+		mgr->objectBase.animate();
 		goto update;
 	}
 	if (chr.cond(mgr, chr)) {
