@@ -23,7 +23,12 @@
             "action": 411,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D2"
+                }
+            ]
         },
         "air": {
             "cd": 360,
@@ -32,7 +37,12 @@
             "action": 415,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D2"
+                }
+            ]
         }
     },
     "236": {
@@ -42,7 +52,13 @@
             "action": 580,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7E6",
+                    "size": 2
+                }
+            ]
         },
         "air": {
             "cd": 640,
@@ -51,7 +67,13 @@
             "speedX": 0,
             "speedY": 0,
             "posY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7E6",
+                    "size": 2
+                }
+            ]
         }
     },
     "624": {

@@ -30,6 +30,8 @@
             "action": 500,
             "speedX": 0,
             "speedY": 0,
+            "gravityX": 0,
+            "gravityY": 0,
             "cond": "basic"
         }
     },
@@ -40,6 +42,8 @@
             "action": 565,
             "speedX": 0,
             "speedY": 0,
+            "gravityX": 0,
+            "gravityY": 0,
             "cond": "end"
         },
         "air": {
@@ -48,6 +52,8 @@
             "action": 567,
             "speedX": 0,
             "speedY": 0,
+            "gravityX": 0,
+            "gravityY": 0,
             "cond": "end"
         }
     },

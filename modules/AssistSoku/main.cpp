@@ -66,6 +66,7 @@ struct ChrInfo {
 	SokuLib::Vector2<std::optional<int>> pos;
 	SokuLib::Vector2<std::optional<int>> speed;
 	SokuLib::Vector2<std::optional<int>> offset;
+	SokuLib::Vector2<std::optional<int>> gravity;
 	bool (*cond)(SokuLib::CharacterManager *mgr, ChrInfo &This) = nullptr;
 };
 
@@ -73,6 +74,34 @@ struct ChrData {
 	std::map<std::string, std::pair<std::optional<ChrInfo>, std::optional<ChrInfo>>> elems;
 	SokuLib::Vector2i size;
 	SpriteEx sprite;
+};
+
+
+struct SWRCMDINFO {
+	bool enabled;
+	int prev; // number representing the previously pressed buttons (masks are applied)
+	int now; // number representing the current pressed buttons (masks are applied)
+
+	struct {
+		bool enabled;
+		int id[10];
+		int base; // once len reaches 10 (first cycle), is incremented modulo 10
+		int len; // starts at 0, caps at 10
+	} record;
+};
+
+struct RivControl {
+	bool enabled;
+	int texID;
+	int forwardCount;
+	int forwardStep;
+	int forwardIndex;
+	SWRCMDINFO cmdp1;
+	SWRCMDINFO cmdp2;
+	bool hitboxes;
+	bool untech;
+	bool show_debug;
+	bool paused;
 };
 
 static int (__stdcall *realRecvFrom)(SOCKET s, char * buf, int len, int flags, sockaddr * from, int * fromlen);
@@ -90,10 +119,28 @@ static SokuLib::CharacterManager *obj[0xC] = {nullptr};
 static SokuLib::DrawUtils::Sprite gagesEffects[3];
 static bool spawned = false;
 static bool init = false;
+static bool disp = false;
 static HMODULE myModule;
 static std::pair<ChrInfo, ChrInfo> chr;
 static std::vector<ChrData> data{22};
 static std::pair<SokuLib::Character, SokuLib::Character> assists;
+
+static const std::pair<size_t, size_t> objectOffsets[] = {
+	{0x0EC, 0x150}
+};
+static const std::pair<size_t, size_t> characterObjectOffsets[] = {
+	{0x0184, 0x03A0}
+};
+static const std::pair<size_t, size_t> characterOffsets[] = {
+	{0x0184, 0x0358},
+	{0x0488, 0x057C},
+	{0x05C4, 0x05E8},
+	{0x06A4, 0x06F8},
+	{0x0710, 0x0714},
+	{0x0720, 0x072C},
+	{0x0740, 0x0750},
+	{0x07D0, sizeof(SokuLib::CharacterManager)},
+};
 
 bool condBasic(SokuLib::CharacterManager *mgr, ChrInfo &This)
 {
@@ -258,14 +305,15 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 			chr.cd = 0;
 		chr.cd -= !!chr.cd;
-		mgr->objectBase.position = main->objectBase.position;
+		if (mgr->objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN)
+			mgr->objectBase.position = main->objectBase.position;
 		goto update;
 	}
 	if (chr.nb != 0 && mgr->objectBase.renderInfos.yRotation != 0) {
 		mgr->objectBase.renderInfos.yRotation -= 10;
 		goto update;
 	}
-	if (mgr->objectBase.action >= SokuLib::ACTION_GRABBED && mgr->objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH) {
+	if (mgr->objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN && mgr->objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH) {
 		chr.nb = 0;
 		mgr->objectBase.renderInfos.yRotation += 10;
 		chr.cd *= 2;
@@ -275,8 +323,6 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 	if (chr.cond(mgr, chr)) {
 		if (chr.nb == 0) {
 			mgr->objectBase.renderInfos.yRotation += 10;
-			for (auto &r : chr.resetValues)
-				memset(&((char *)mgr)[r.offset], r.value, r.size);
 			goto update;
 		}
 		chr.nb--;
@@ -285,13 +331,26 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		mgr->objectBase.offset_0x18C[4] = 0;
 		mgr->objectBase.animate();
 	}
+update:
 	if (mgr->objectBase.hitstop)
 		mgr->objectBase.hitstop--;
-update:
+
+	if (chr.gravity.x) {
+		mgr->objectBase.gravity.x = *chr.gravity.x;
+		if (chr.speed.x)
+			mgr->objectBase.speed.x = *chr.speed.x;
+	}
+	if (chr.gravity.y) {
+		mgr->objectBase.gravity.y = *chr.gravity.y;
+		if (chr.speed.y)
+			mgr->objectBase.speed.y = *chr.speed.y;
+	}
 	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x28))(mgr);
 	for (auto o : mgr->objects.list.vector())
-		o->owner = o->owner2 = mgr->objectBase.owner;
-	mgr->objectBase.position += SokuLib::Vector2f{mgr->objectBase.speed.x * mgr->objectBase.direction, mgr->objectBase.speed.y};
+		if (o)
+			o->owner = o->owner2 = mgr->objectBase.owner;
+	if (!mgr->objectBase.hitstop)
+		mgr->objectBase.position += SokuLib::Vector2f{mgr->objectBase.speed.x * mgr->objectBase.direction, mgr->objectBase.speed.y};
 	//if (mgr->objectBase.position.y <= 0) {
 	//	mgr->objectBase.gravity = 0;
 	//	mgr->objectBase.speed.y = 0;
@@ -328,7 +387,8 @@ bool initAttack(SokuLib::CharacterManager *main, SokuLib::CharacterManager *obj,
 			obj->objectBase.position.x = *chr.pos.x;
 		if (chr.pos.y)
 			obj->objectBase.position.y = *chr.pos.y;
-		obj->objectBase.gravity = 0;
+		for (auto &r : chr.resetValues)
+			memset(&((char *)obj)[r.offset], r.value, r.size);
 		obj->objectBase.renderInfos.yRotation -= 10;
 		obj->objectBase.action = SokuLib::ACTION_IDLE;
 		obj->objectBase.animate();
@@ -340,19 +400,19 @@ void assisterAttacks(SokuLib::CharacterManager *main, SokuLib::CharacterManager 
 {
 	if (chr.cd || obj->objectBase.renderInfos.yRotation != 90)
 		return;
-	if (main->keyCombination._6314a && data.elems.find("624") != data.elems.end() && initAttack(main, obj, chr, data.elems["624"]))
+	if ((main->keyCombination._6314a || main->keyCombination._6314d) && data.elems.find("624") != data.elems.end() && initAttack(main, obj, chr, data.elems["624"]))
 		return;
-	if (main->keyCombination._4136a && data.elems.find("426") != data.elems.end() && initAttack(main, obj, chr, data.elems["426"]))
+	if ((main->keyCombination._4136a || main->keyCombination._4136d) && data.elems.find("426") != data.elems.end() && initAttack(main, obj, chr, data.elems["426"]))
 		return;
-	if (main->keyCombination._623a && data.elems.find("623") != data.elems.end() && initAttack(main, obj, chr, data.elems["623"]))
+	if ((main->keyCombination._623a  || main->keyCombination._623d)  && data.elems.find("623") != data.elems.end() && initAttack(main, obj, chr, data.elems["623"]))
 		return;
-	if (main->keyCombination._421a && data.elems.find("421") != data.elems.end() && initAttack(main, obj, chr, data.elems["421"]))
+	if ((main->keyCombination._421a  || main->keyCombination._421d)  && data.elems.find("421") != data.elems.end() && initAttack(main, obj, chr, data.elems["421"]))
 		return;
-	if (main->keyCombination._236a && data.elems.find("236") != data.elems.end() && initAttack(main, obj, chr, data.elems["236"]))
+	if ((main->keyCombination._236a  || main->keyCombination._236d)  && data.elems.find("236") != data.elems.end() && initAttack(main, obj, chr, data.elems["236"]))
 		return;
-	if (main->keyCombination._214a && data.elems.find("214") != data.elems.end() && initAttack(main, obj, chr, data.elems["214"]))
+	if ((main->keyCombination._214a  || main->keyCombination._214d)  && data.elems.find("214") != data.elems.end() && initAttack(main, obj, chr, data.elems["214"]))
 		return;
-	if (main->keyCombination._22a && data.elems.find("22") != data.elems.end() && initAttack(main, obj, chr, data.elems["22"]))
+	if ((main->keyCombination._22a   || main->keyCombination._22d)   && data.elems.find("22")  != data.elems.end() && initAttack(main, obj, chr, data.elems["22"]))
 		return;
 }
 
@@ -360,6 +420,8 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
 	if (This->matchState == -1)
 		return (This->*ogBattleMgrOnProcess)();
+	if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false))
+		disp = !disp;
 	if (!init) {
 		puts("Init assisters");
 		obj[0xA]->objectBase.owner = &This->leftCharacterManager;
@@ -508,6 +570,9 @@ void displayAssistGage(ChrInfo &chr, int x, SokuLib::Vector2i bar, SokuLib::Vect
 
 void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 {
+	bool hasRIV = LoadLibraryA("ReplayInputView+") != nullptr;
+	bool show = hasRIV ? ((RivControl *)((char *)This + sizeof(*This)))->hitboxes : disp;
+
 	(This->*ogBattleMgrOnRender)();
 	if (init) {
 		//TODO: Add these in SokuLib
@@ -535,10 +600,14 @@ void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 		This->leftCharacterManager.objectBase.position.y = 15000;
 		(This->leftCharacterManager.*SokuLib::union_cast<void (SokuLib::CharacterManager::*)()>(0x438d20))();
 		This->leftCharacterManager.objectBase.position.y = old;
-		drawPlayerBoxes(This->leftCharacterManager);
-		drawPlayerBoxes(This->rightCharacterManager);
-		drawPlayerBoxes(*obj[0xA], chr.first.nb != 0 || obj[0xA]->objectBase.renderInfos.yRotation == 0);
-		drawPlayerBoxes(*obj[0xB], chr.second.nb != 0 || obj[0xB]->objectBase.renderInfos.yRotation == 0);
+		if (show && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
+			if (!hasRIV) {
+				drawPlayerBoxes(This->leftCharacterManager);
+				drawPlayerBoxes(This->rightCharacterManager);
+			}
+			drawPlayerBoxes(*obj[0xA], chr.first.nb != 0 || obj[0xA]->objectBase.renderInfos.yRotation == 0);
+			drawPlayerBoxes(*obj[0xB], chr.second.nb != 0 || obj[0xB]->objectBase.renderInfos.yRotation == 0);
+		}
 	}
 }
 
@@ -649,6 +718,10 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 							e.speed.x = gr["speedX"];
 						if (gr.contains("speedY") && gr["speedY"].is_number())
 							e.speed.y = gr["speedY"];
+						if (gr.contains("gravityX") && gr["gravityX"].is_number())
+							e.gravity.x = gr["gravityX"];
+						if (gr.contains("gravityY") && gr["gravityY"].is_number())
+							e.gravity.y = gr["gravityY"];
 						if (gr.contains("offsetX") && gr["offsetX"].is_number())
 							e.offset.x = gr["offsetX"];
 						if (gr.contains("offsetY") && gr["offsetY"].is_number())
@@ -665,6 +738,13 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 						e.nb = air["nb"];
 						e.action = air["action"];
 						e.chr = static_cast<SokuLib::Character>(i);
+						for (auto &v : air["reset"]) {
+							e.resetValues.push_back({
+								v["offset"].is_number() ? v["offset"].get<unsigned>() : std::stoul(v["offset"].get<std::string>(), nullptr, 16),
+								static_cast<unsigned char>(v.contains("value") && v["value"].is_number() ? v["value"].get<unsigned>() : 0),
+								v.contains("size") && v["size"].is_number() ? v["size"].get<unsigned>() : 1
+							});
+						}
 						e.cond = air["cond"] == "end" ? waitEnd : condBasic;
 						if (air.contains("posX") && air["posX"].is_number())
 							e.pos.x = air["posX"];
@@ -674,6 +754,10 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 							e.speed.x = air["speedX"];
 						if (air.contains("speedY") && air["speedY"].is_number())
 							e.speed.y = air["speedY"];
+						if (air.contains("gravityX") && air["gravityX"].is_number())
+							e.gravity.x = air["gravityX"];
+						if (air.contains("gravityY") && air["gravityY"].is_number())
+							e.gravity.y = air["gravityY"];
 						if (air.contains("offsetX") && air["offsetX"].is_number())
 							e.offset.x = air["offsetX"];
 						if (air.contains("offsetY") && air["offsetY"].is_number())

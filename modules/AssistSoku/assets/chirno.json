@@ -74,7 +74,12 @@
             "speedY": 0,
             "offsetX": 0,
             "posY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D0"
+                }
+            ]
         },
         "air": {
             "cd": 3600,
@@ -82,7 +87,12 @@
             "action": 604,
             "offsetX": 0,
             "posY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D0"
+                }
+            ]
         }
     }
 }

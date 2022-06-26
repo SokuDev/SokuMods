@@ -68,7 +68,32 @@
             "speedY": 0,
             "offsetX": 0,
             "posY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D0"
+                },
+                {
+                    "offset": "7DE",
+                    "value": 150
+                },
+                {
+                    "offset": "7DF",
+                    "value": 67
+                },
+                {
+                    "offset": "7E0",
+                    "size": 2
+                },
+                {
+                    "offset": "7E2",
+                    "value": 175
+                },
+                {
+                    "offset": "7E3",
+                    "value": 195
+                }
+            ]
         },
         "air": {
             "cd": 3600,
@@ -76,7 +101,32 @@
             "action": 602,
             "offsetX": 0,
             "posY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D0"
+                },
+                {
+                    "offset": "7DE",
+                    "value": 150
+                },
+                {
+                    "offset": "7DF",
+                    "value": 67
+                },
+                {
+                    "offset": "7E0",
+                    "size": 2
+                },
+                {
+                    "offset": "7E2",
+                    "value":  175
+                },
+                {
+                    "offset": "7E3",
+                    "value": 195
+                }
+            ]
         }
     }
 }
