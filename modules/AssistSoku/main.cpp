@@ -10,7 +10,11 @@
 #include <SokuLib.hpp>
 #include <shlwapi.h>
 #include <thread>
-#include <iostream>
+
+#ifndef _DEBUG
+#define puts(...)
+#define printf(...)
+#endif
 
 #define BOXES_ALPHA 0.25
 #define ASSIST_BOX_Y 429
@@ -60,6 +64,7 @@ struct ChrInfo {
 	unsigned cd = 0;
 	unsigned maxCd = 0;
 	unsigned ctr = 0;
+	unsigned hitCount = 0;
 	SokuLib::Action action;
 	SokuLib::Character chr;
 	std::vector<ResetValue> resetValues;
@@ -305,6 +310,11 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 			chr.cd = 0;
 		chr.cd -= !!chr.cd;
+		if (SokuLib::activeWeather == SokuLib::WEATHER_TWILIGHT) {
+			chr.cd -= !!chr.cd;
+			chr.cd -= !!chr.cd;
+			chr.cd -= !!chr.cd;
+		}
 		if (mgr->objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN)
 			mgr->objectBase.position = main->objectBase.position;
 		goto update;
@@ -316,8 +326,8 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 	if (mgr->objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN && mgr->objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH) {
 		chr.nb = 0;
 		mgr->objectBase.renderInfos.yRotation += 10;
-		chr.cd += 1800;
-		chr.maxCd += 1800;
+		chr.cd += 900;
+		chr.maxCd += 900;
 		mgr->objectBase.action = SokuLib::ACTION_IDLE;
 		mgr->objectBase.animate();
 		goto update;
@@ -329,7 +339,7 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		}
 		chr.nb--;
 		mgr->objectBase.action = chr.action;
-		mgr->objectBase.hitCount = 1;
+		mgr->objectBase.hitCount = chr.hitCount;
 		mgr->objectBase.offset_0x18C[4] = 0;
 		mgr->objectBase.animate();
 	}
@@ -347,7 +357,11 @@ update:
 		if (chr.speed.y)
 			mgr->objectBase.speed.y = *chr.speed.y;
 	}
+	SokuLib::getBattleMgr().leftCharacterManager.timeStop = 0;
+	SokuLib::getBattleMgr().rightCharacterManager.timeStop = 0;
+	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x40))(mgr);
 	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x28))(mgr);
+	((int (__thiscall *)(SokuLib::CharacterManager *))0x46A240)(mgr);
 	for (auto o : mgr->objects.list.vector())
 		if (o)
 			o->owner = o->owner2 = mgr->objectBase.owner;
@@ -402,6 +416,8 @@ void assisterAttacks(SokuLib::CharacterManager *main, SokuLib::CharacterManager 
 {
 	if (chr.cd || obj->objectBase.renderInfos.yRotation != 90)
 		return;
+	if (main->objectBase.action >= SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN && main->objectBase.action <= SokuLib::ACTION_NEUTRAL_TECH)
+		return;
 	if ((main->keyCombination._6314a || main->keyCombination._6314d) && data.elems.find("624") != data.elems.end() && initAttack(main, obj, chr, data.elems["624"]))
 		return;
 	if ((main->keyCombination._4136a || main->keyCombination._4136d) && data.elems.find("426") != data.elems.end() && initAttack(main, obj, chr, data.elems["426"]))
@@ -445,11 +461,24 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	auto left  = ((SokuLib::CharacterManager **)This)[3];
 	auto right = ((SokuLib::CharacterManager **)This)[4];
 
-	updateObject(left,  obj[0xA], chr.first);
-	updateObject(right, obj[0xB], chr.second);
+	if (left->timeStop || right->timeStop) {
+		if (obj[0xA]->timeStop)
+			updateObject(left, obj[0xA], chr.first);
+		if (obj[0xB]->timeStop)
+			updateObject(right, obj[0xB], chr.second);
+	} else {
+		if (!obj[0xB]->timeStop)
+			updateObject(left, obj[0xA], chr.first);
+		if (!obj[0xA]->timeStop)
+			updateObject(right, obj[0xB], chr.second);
+	}
 	assisterAttacks(left,  obj[0xA], chr.first,  data[chr.first.chr]);
 	assisterAttacks(right, obj[0xB], chr.second, data[chr.second.chr]);
 
+	if (obj[0xA]->timeStop || obj[0xB]->timeStop) {
+		left->timeStop  = max(left->timeStop  + 1, 2);
+		right->timeStop = max(right->timeStop + 1, 2);
+	}
 	if (This->matchState == 2) {
 		((SokuLib::CharacterManager **)This)[3] = obj[0xA];
 		if (chr.first.nb || obj[0xA]->objectBase.renderInfos.yRotation == 0)
@@ -464,6 +493,9 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 		reinterpret_cast<void (__thiscall *)(SokuLib::BattleManager *)>(0x47d0d0)(This);
 		((SokuLib::CharacterManager **)This)[4] = right;
 		((SokuLib::CharacterManager **)This)[3]->objectBase.opponent = right;
+	} else if (This->matchState == 1) {
+		chr.first.cd = 0;
+		chr.second.cd = 0;
 	}
 	return ret;
 }
@@ -475,9 +507,13 @@ void selectCommon()
 	if (spawned) {
 		spawned = false;
 		init = false;
+		puts("Destroying assist 1");
 		(*(void (__thiscall **)(SokuLib::CharacterManager *, char))obj[0xA]->objectBase.vtable)(obj[0xA], 0);
+		puts("Deleting assist 1");
 		SokuLib::Delete(obj[0xA]);
+		puts("Destroying assist 2");
 		(*(void (__thiscall **)(SokuLib::CharacterManager *, char))obj[0xB]->objectBase.vtable)(obj[0xB], 0);
+		puts("Deleting assist 2");
 		SokuLib::Delete(obj[0xB]);
 	}
 
@@ -582,18 +618,12 @@ void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 		(obj[0xB]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(-2);
 		(obj[0xA]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(-1);
 		(obj[0xB]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(-1);
-		//(This->leftCharacterManager.*SokuLib::union_cast<void (SokuLib::CharacterManager::*)()>(0x438d20))();
-		//(This->rightCharacterManager.*SokuLib::union_cast<void (SokuLib::CharacterManager::*)()>(0x438d20))();
 		(obj[0xA]->*SokuLib::union_cast<void (SokuLib::CharacterManager::*)()>(0x438d20))();
 		(obj[0xB]->*SokuLib::union_cast<void (SokuLib::CharacterManager::*)()>(0x438d20))();
 		displayAssistGage(chr.first,  LEFT_ASSIST_BOX_X,  LEFT_BAR,  LEFT_CROSS,  false);
 		displayAssistGage(chr.second, RIGHT_ASSIST_BOX_X, RIGHT_BAR, RIGHT_CROSS, true);
-		//(This->leftCharacterManager.objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(1);
-		//(This->rightCharacterManager.objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(1);
 		(obj[0xA]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(1);
 		(obj[0xB]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(1);
-		//(This->leftCharacterManager.objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(2);
-		//(This->rightCharacterManager.objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(2);
 		(obj[0xA]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(2);
 		(obj[0xB]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(2);
 
@@ -657,7 +687,11 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 
 		init = false;
 		printf("%p %p\n", obj[0xA], obj[0xB]);
-		for (unsigned i = 0; i < data.size(); i++) {
+		for (unsigned index = 0; index < 2; index++) {
+			if (index == 1 && assists.first == assists.second)
+				continue;
+
+			unsigned i = index == 0 ? assists.first : assists.second;
 			std::string basePath = i > SokuLib::CHARACTER_NAMAZU ? (std::string(soku2Dir) + "/config/tag/") : (std::string(modFolder) + "/assets/");
 			const char *chrName = (i == SokuLib::CHARACTER_RANDOM || i == SokuLib::CHARACTER_NAMAZU) ? "Empty" : reinterpret_cast<char *(*)(int)>(0x43f3f0)(i);
 			SokuLib::DrawUtils::Texture texture;
@@ -701,6 +735,7 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 						e.cd = gr["cd"];
 						e.ctr = 0;
 						e.maxCd = e.cd;
+						e.hitCount = gr.contains("hitCount") && gr["hitCount"].is_number() ? gr["hitCount"].get<unsigned>() : 1;
 						e.nb = gr["nb"];
 						e.action = gr["action"];
 						e.chr = static_cast<SokuLib::Character>(i);
@@ -737,6 +772,7 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 						e.cd = air["cd"];
 						e.ctr = 0;
 						e.maxCd = e.cd;
+						e.hitCount = air.contains("hitCount") && air["hitCount"].is_number() ? air["hitCount"].get<unsigned>() : 1;
 						e.nb = air["nb"];
 						e.action = air["action"];
 						e.chr = static_cast<SokuLib::Character>(i);
@@ -888,6 +924,18 @@ void loadSoku2Config()
 	}
 }
 
+const auto weatherFunction = (void (*)())0x4388e0;
+
+__declspec(naked) void weatherFct()
+{
+	__asm {
+		PUSH 0x14
+		ADD ECX, 0x130
+		CALL weatherFunction
+		RET
+	}
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
@@ -928,6 +976,10 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	// s_origCSelect_OnProcess = TamperDword(vtbl_CSelect + 4, (DWORD)CSelect_OnProcess);
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 	::VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+	// Enable twilight weather
+	*(int *)0x483F3C = *(int *)0x483F38;
+	*(void (**)())0x483F38 = weatherFct;
+	*(char *)0x483DC4 = 0x14;
 	int newOffset = reinterpret_cast<int>(loadDeckData) - PAYLOAD_NEXT_INSTR_DECK_INFOS;
 	s_origLoadDeckData = SokuLib::union_cast<void (__stdcall *)(char *, void *, SokuLib::DeckInfo &, int, SokuLib::Dequeue<short> &)>(*(int *)PAYLOAD_ADDRESS_DECK_INFOS + PAYLOAD_NEXT_INSTR_DECK_INFOS);
 	*(int *)PAYLOAD_ADDRESS_DECK_INFOS = newOffset;

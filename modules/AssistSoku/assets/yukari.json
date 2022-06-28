@@ -24,6 +24,7 @@
         "ground": {
             "cd": 360,
             "nb": 1,
+            "hitCount": 5,
             "action": 520,
             "speedX": 0,
             "speedY": 0,
@@ -34,6 +35,7 @@
         "air": {
             "cd": 360,
             "nb": 1,
+            "hitCount": 5,
             "action": 520,
             "speedX": 0,
             "speedY": 0,
