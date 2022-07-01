@@ -1,96 +1,111 @@
 {
     "22": {
         "ground": {
-            "cd": 180,
+            "cd": 200,
             "nb": 1,
-            "action": 320,
+            "action": 565,
             "speedX": 0,
             "speedY": 0,
-            "cond": "basic"
+            "offsetX": -100,
+            "cond": "end"
         },
         "air": {
-            "cd": 180,
+            "cd": 200,
             "nb": 1,
-            "action": 306,
+            "action": 567,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetY": 0,
+            "offsetX": -100,
+            "gravityX": 0,
+            "gravityY": 0,
             "cond": "end"
         }
     },
     "214": {
         "ground": {
-            "cd": 360,
+            "cd": 200,
             "nb": 1,
-            "HitCount": 5,
-            "action": 411,
+            "action": 511,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end",
-            "reset": [
-                {
-                    "offset": "7D2"
-                }
-            ]
+            "offsetX": -75,
+            "cond": "end"
         },
         "air": {
-            "cd": 360,
+            "cd": 200,
             "nb": 1,
-            "HitCount": 5,
-            "action": 415,
+            "action": 511,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end",
-            "reset": [
-                {
-                    "offset": "7D2"
-                }
-            ]
+            "offsetY": 0,
+            "offsetX": -75,
+            "posY": 0,
+            "cond": "end"
         }
     },
     "236": {
         "ground": {
-            "cd": 640,  
+            "cd": 200,
             "nb": 1,
-            "action": 580,
+            "action": 506,
             "speedX": 0,
             "speedY": 0,
-            "cond": "end",
-            "reset": [
-                {
-                    "offset": "7E6",
-                    "size": 2
-                }
-            ]
+            "offsetX": -50,
+            "cond": "end"
         },
         "air": {
-            "cd": 640,
+            "cd": 200,
             "nb": 1,
-            "action": 580,
+            "action": 508,
             "speedX": 0,
             "speedY": 0,
-            "posY": 0,
-            "cond": "end",
-            "reset": [
-                {
-                    "offset": "7E6",
-                    "size": 2
-                }
-            ]
+            "offsetX": -50,
+            "gravityX": 0,
+            "gravityY": 0,
+            "cond": "end"
+        }
+    },
+    "623": {
+        "ground": {
+            "cd": 200,
+            "nb": 1,
+            "action": 531,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetX": -50,
+            "cond": "end"
+        },
+        "air": {
+            "cd": 200,
+            "nb": 1,
+            "action": 533,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetX": -50,
+            "gravityX": 0,
+            "gravityY": 0,
+            "cond": "end"
         }
     },
     "624": {
         "ground": {
-            "cd": 3600,
+            "cd": 1200,
             "nb": 1,
             "action": 607,
             "speedX": 0,
             "speedY": 0,
+            "offsetX": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 3600,
+            "cd": 1200,
             "nb": 1,
             "action": 607,
             "speedX": 0,
             "speedY": 0,
+            "offsetX": 100,
+            "offsetX": 0,
             "posY": 0,
             "cond": "end"
         }

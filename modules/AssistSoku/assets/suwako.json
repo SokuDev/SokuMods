@@ -1,132 +1,115 @@
 {
     "22": {
         "ground": {
-            "cd": 180,
-            "nb": 1,
-            "action": 331,
-            "speedX": 0,
-            "speedY": 0,
-            "offsetX": 0,
-            "offsetY": 0,
-            "cond": "end"
-        },
-        "air": {
-            "cd": 180,
-            "nb": 1,
-            "action": 309,
-            "offsetX": 0,
-            "offsetY": 0,
-            "cond": "basic"
-        }
-    },
-    "214": {
-        "ground": {
-            "cd": 360,
+            "cd": 200,
             "nb": 1,
             "action": 505,
             "speedX": 0,
             "speedY": 0,
             "offsetX": 0,
-            "posY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 360,
+            "cd": 200,
             "nb": 1,
-            "action": 507,
+            "action": 505,
             "speedX": 0,
             "speedY": 0,
+            "offsetY": 0,
+            "offsetX": 0,
             "posY": 0,
+            "cond": "end"
+        }
+    },
+    "214": {
+        "ground": {
+            "cd": 200,
+            "nb": 1,
+            "action": 545,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetX": 0,
+            "cond": "end"
+        },
+        "air": {
+            "cd": 200,
+            "nb": 1,
+            "action": 548,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetY": 0,
+            "offsetX": 0,
+            "gravityX": 0,
+            "gravityY": 0,
             "cond": "end"
         }
     },
     "236": {
         "ground": {
-            "cd": 640,
+            "cd": 200,
             "nb": 1,
-            "action": 525,
-            "speedX": 0,
+            "action": 503,
             "speedY": 0,
             "offsetX": 0,
-            "posY": 0,
+            "offsetY": 200,
+            "gravityY": 0,
             "cond": "end"
         },
         "air": {
-            "cd": 720,
+            "cd": 200,
             "nb": 1,
-            "action": 525,
+            "action": 503,
+            "speedY": 0,
             "offsetX": 0,
+            "gravityX": 0,
+            "gravityY": 0,
+            "cond": "end"
+        }
+    },
+    "623": {
+        "ground": {
+            "cd": 200,
+            "nb": 1,
+            "hitCount": 20,
+            "action": 526,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetX": -50,
+            "cond": "end"
+        },
+        "air": {
+            "cd": 200,
+            "nb": 1,
+            "hitCount": 20,
+            "action": 528,
+            "speedX": 2,
+            "speedY": -1,
+            "offsetX": -50,
+            "offsetY": 10,
+            "gravityX": 0,
+            "gravityY": 0,
             "cond": "end"
         }
     },
     "624": {
         "ground": {
-            "cd": 3600,
+            "cd": 1200,
             "nb": 1,
-            "action": 602,
+            "action": 603,
+            "speedX": 0,
+            "speedY": 0,
+            "offsetX": 0,
+            "cond": "end"
+        },
+        "air": {
+            "cd": 1200,
+            "nb": 1,
+            "action": 603,
             "speedX": 0,
             "speedY": 0,
             "offsetX": 0,
             "posY": 0,
-            "cond": "end",
-            "reset": [
-                {
-                    "offset": "7D0"
-                },
-                {
-                    "offset": "7DE",
-                    "value": 150
-                },
-                {
-                    "offset": "7DF",
-                    "value": 67
-                },
-                {
-                    "offset": "7E0",
-                    "size": 2
-                },
-                {
-                    "offset": "7E2",
-                    "value": 175
-                },
-                {
-                    "offset": "7E3",
-                    "value": 195
-                }
-            ]
-        },
-        "air": {
-            "cd": 3600,
-            "nb": 1,
-            "action": 602,
-            "offsetX": 0,
-            "posY": 0,
-            "cond": "end",
-            "reset": [
-                {
-                    "offset": "7D0"
-                },
-                {
-                    "offset": "7DE",
-                    "value": 150
-                },
-                {
-                    "offset": "7DF",
-                    "value": 67
-                },
-                {
-                    "offset": "7E0",
-                    "size": 2
-                },
-                {
-                    "offset": "7E2",
-                    "value":  175
-                },
-                {
-                    "offset": "7E3",
-                    "value": 195
-                }
-            ]
+            "cond": "end"
         }
     }
 }

@@ -306,6 +306,8 @@ static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, bool playe
 
 void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mgr, ChrInfo &chr)
 {
+	auto &batlMgr = SokuLib::getBattleMgr();
+
 	if (mgr->objectBase.renderInfos.yRotation == 90) {
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 			chr.cd = 0;
@@ -354,11 +356,14 @@ update:
 		if (chr.speed.y)
 			mgr->objectBase.speed.y = *chr.speed.y;
 	}
-	SokuLib::getBattleMgr().leftCharacterManager.timeStop = 0;
-	SokuLib::getBattleMgr().rightCharacterManager.timeStop = 0;
-	memset(mgr->skillMap, 0, 4 + (chr.chr == SokuLib::CHARACTER_PATCHOULI));
-	memset(mgr->skillMap + 4 + (chr.chr == SokuLib::CHARACTER_PATCHOULI), 1, (4 + (chr.chr == SokuLib::CHARACTER_PATCHOULI)) * 2);
-	//memcpy(mgr->skillMap, main->skillMap, sizeof(mgr->skillMap));
+	batlMgr.leftCharacterManager.timeStop = 0;
+	batlMgr.rightCharacterManager.timeStop = 0;
+	if (batlMgr.currentRound >= 2)
+		memset(mgr->skillMap , 4, sizeof(mgr->skillMap));
+	else
+		memset(mgr->skillMap , batlMgr.currentRound + 1, sizeof(mgr->skillMap));
+	if (chr.chr == SokuLib::CHARACTER_SUWAKO)
+		mgr->skillMap[11].notUsed = true;
 	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x40))(mgr);
 	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x28))(mgr);
 	((int (__thiscall *)(SokuLib::CharacterManager *))0x46A240)(mgr);
@@ -458,6 +463,11 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 
 	if (!SokuLib::menuManager.empty() && SokuLib::sceneId == SokuLib::SCENE_BATTLE)
 		return ret;
+
+	if (SokuLib::checkKeyOneshot(DIK_F8, false, false, false) && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
+		This->currentRound = (This->currentRound + 1) % 3;
+		This->matchState = 0;
+	}
 
 	auto left  = &This->leftCharacterManager;
 	auto right = &This->rightCharacterManager;
@@ -616,6 +626,7 @@ void displayAssistGage(ChrInfo &chr, int x, SokuLib::Vector2i bar, SokuLib::Vect
 			gagesEffects[2].draw();
 		}
 		chr.ctr++;
+		chr.ctr += SokuLib::activeWeather == SokuLib::WEATHER_TWILIGHT;
 	} else {
 		s.render();
 		gagesEffects[0].setPosition(bar);
