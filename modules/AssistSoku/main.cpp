@@ -310,11 +310,8 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 			chr.cd = 0;
 		chr.cd -= !!chr.cd;
-		if (SokuLib::activeWeather == SokuLib::WEATHER_TWILIGHT) {
+		if (SokuLib::activeWeather == SokuLib::WEATHER_TWILIGHT)
 			chr.cd -= !!chr.cd;
-			chr.cd -= !!chr.cd;
-			chr.cd -= !!chr.cd;
-		}
 		if (mgr->objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN)
 			mgr->objectBase.position = main->objectBase.position;
 		goto update;
@@ -359,6 +356,9 @@ update:
 	}
 	SokuLib::getBattleMgr().leftCharacterManager.timeStop = 0;
 	SokuLib::getBattleMgr().rightCharacterManager.timeStop = 0;
+	memset(mgr->skillMap, 0, 4 + (chr.chr == SokuLib::CHARACTER_PATCHOULI));
+	memset(mgr->skillMap + 4 + (chr.chr == SokuLib::CHARACTER_PATCHOULI), 1, (4 + (chr.chr == SokuLib::CHARACTER_PATCHOULI)) * 2);
+	//memcpy(mgr->skillMap, main->skillMap, sizeof(mgr->skillMap));
 	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x40))(mgr);
 	(*(int (__thiscall **)(SokuLib::CharacterManager *))(*(int *)&mgr->objectBase.vtable + 0x28))(mgr);
 	((int (__thiscall *)(SokuLib::CharacterManager *))0x46A240)(mgr);
@@ -379,7 +379,8 @@ update:
 	if (mgr->objectBase.position.x >= 1240 && chr.chr == SokuLib::CHARACTER_REMILIA && chr.action == 560)
 		mgr->objectBase.position.x = 1240;
 	//mgr->objectBase.speed.y -= mgr->objectBase.gravity;
-	(mgr->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)()>(0x633ce0))();
+	if (!mgr->timeStop)
+		(mgr->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)()>(0x633ce0))();
 }
 
 bool initAttack(SokuLib::CharacterManager *main, SokuLib::CharacterManager *obj, ChrInfo &chr, std::pair<std::optional<ChrInfo>, std::optional<ChrInfo>> &data)
@@ -458,8 +459,8 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	if (!SokuLib::menuManager.empty() && SokuLib::sceneId == SokuLib::SCENE_BATTLE)
 		return ret;
 
-	auto left  = ((SokuLib::CharacterManager **)This)[3];
-	auto right = ((SokuLib::CharacterManager **)This)[4];
+	auto left  = &This->leftCharacterManager;
+	auto right = &This->rightCharacterManager;
 
 	if (left->timeStop || right->timeStop) {
 		if (obj[0xA]->timeStop)
@@ -480,19 +481,35 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 		right->timeStop = max(right->timeStop + 1, 2);
 	}
 	if (This->matchState == 2) {
+		// Collision between P1's assist and P2 {
 		((SokuLib::CharacterManager **)This)[3] = obj[0xA];
-		if (chr.first.nb || obj[0xA]->objectBase.renderInfos.yRotation == 0)
+		if (obj[0xA]->objectBase.renderInfos.yRotation != 90)
 			((SokuLib::CharacterManager **)This)[4]->objectBase.opponent = obj[0xA];
 		reinterpret_cast<void (__thiscall *)(SokuLib::BattleManager *)>(0x47d0d0)(This);
 		((SokuLib::CharacterManager **)This)[3] = left;
 		((SokuLib::CharacterManager **)This)[4]->objectBase.opponent = left;
 
 		((SokuLib::CharacterManager **)This)[4] = obj[0xB];
-		if (chr.second.nb || obj[0xB]->objectBase.renderInfos.yRotation == 0)
+		if (obj[0xB]->objectBase.renderInfos.yRotation != 90)
 			((SokuLib::CharacterManager **)This)[3]->objectBase.opponent = obj[0xB];
 		reinterpret_cast<void (__thiscall *)(SokuLib::BattleManager *)>(0x47d0d0)(This);
 		((SokuLib::CharacterManager **)This)[4] = right;
 		((SokuLib::CharacterManager **)This)[3]->objectBase.opponent = right;
+
+		// Collision between P1's assist and P2's assist
+		if (obj[0xA]->objectBase.renderInfos.yRotation != 90 || obj[0xB]->objectBase.renderInfos.yRotation != 90) {
+			((SokuLib::CharacterManager **)This)[3] = obj[0xA];
+			((SokuLib::CharacterManager **)This)[4] = obj[0xB];
+			if (obj[0xB]->objectBase.renderInfos.yRotation != 90)
+				obj[0xA]->objectBase.opponent = obj[0xB];
+			if (obj[0xA]->objectBase.renderInfos.yRotation != 90)
+				obj[0xB]->objectBase.opponent = obj[0xA];
+			reinterpret_cast<void (__thiscall *)(SokuLib::BattleManager *)>(0x47d0d0)(This);
+			((SokuLib::CharacterManager **)This)[3] = left;
+			((SokuLib::CharacterManager **)This)[4] = right;
+			obj[0xA]->objectBase.opponent = &This->rightCharacterManager;
+			obj[0xB]->objectBase.opponent = &This->leftCharacterManager;
+		}
 	} else if (This->matchState == 1) {
 		chr.first.cd = 0;
 		chr.second.cd = 0;
