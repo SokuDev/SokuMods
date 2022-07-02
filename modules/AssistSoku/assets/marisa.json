@@ -41,21 +41,21 @@
     },
     "236": {
         "ground": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 566,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -200,
+            "offsetX": -100,
             "cond": "end"
         },
         "air": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 568,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -200,
+            "offsetX": -100,
             "gravityX": 0,
             "gravityY": 0,
             "cond": "end"

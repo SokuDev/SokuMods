@@ -6,7 +6,7 @@
             "action": 566,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 400,
+            "offsetX": 200,
             "cond": "end"
         },
         "air": {
@@ -15,7 +15,7 @@
             "action": 566,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 400,
+            "offsetX": 200,
             "posY": 0,
             "cond": "end"
         }

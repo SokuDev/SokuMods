@@ -98,6 +98,7 @@
     "623": {
         "ground": {
             "cd": 200,
+            "hitCount": 6,
             "nb": 1,
             "action": 506,
             "speedX": 0,
@@ -108,6 +109,7 @@
         "air": {
             "cd": 200,
             "nb": 1,
+            "hitCount": 6,
             "action": 506,
             "speedX": 0,
             "speedY": 0,

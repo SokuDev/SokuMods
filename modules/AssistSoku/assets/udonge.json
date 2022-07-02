@@ -45,7 +45,7 @@
     },
     "236": {
         "ground": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 500,
             "speedX": 0,
@@ -54,7 +54,7 @@
             "cond": "end"
         },
         "air": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 500,
             "speedX": 0,

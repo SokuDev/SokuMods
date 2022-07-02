@@ -60,6 +60,7 @@ struct ResetValue {
 };
 
 struct ChrInfo {
+	unsigned cutscene = 0;
 	unsigned nb = 0;
 	unsigned cd = 0;
 	unsigned maxCd = 0;
@@ -125,6 +126,7 @@ static SokuLib::DrawUtils::Sprite gagesEffects[3];
 static bool spawned = false;
 static bool init = false;
 static bool disp = false;
+static bool anim = false;
 static HMODULE myModule;
 static std::pair<ChrInfo, ChrInfo> chr;
 static std::vector<ChrData> data{22};
@@ -225,6 +227,31 @@ static void drawBox(const SokuLib::Box &box, const SokuLib::RotationBox *rotatio
 	rectangle.draw();
 }
 
+static void initSkillUpgrade(ChrInfo &chr, SokuLib::Character character, SokuLib::CharacterManager &mgr, SokuLib::CharacterManager &main)
+{
+	chr.cutscene = 1;
+	chr.nb = 1;
+	chr.cd = 0;
+	chr.maxCd = 0;
+	chr.ctr = 0;
+	chr.hitCount = 0;
+	chr.action = SokuLib::ACTION_SKILL_CARD;
+	chr.chr = character;
+	chr.resetValues.clear();
+	chr.pos.x.reset();
+	chr.pos.y = 0;
+	chr.speed.x = 0;
+	chr.speed.y = 0;
+	chr.offset.x = 60;
+	chr.offset.y.reset();
+	chr.gravity.x.reset();
+	chr.gravity.y.reset();
+	chr.cond = waitEnd;
+	mgr.objectBase.position.x = main.objectBase.position.x + 60 * mgr.objectBase.direction;
+	mgr.objectBase.position.y = 0;
+	mgr.objectBase.renderInfos.yRotation = 80;
+}
+
 static void drawCollisionBox(const SokuLib::ObjectManager &manager)
 {
 	SokuLib::DrawUtils::FloatRect rect{};
@@ -304,6 +331,18 @@ static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, bool playe
 	}
 }
 
+void doTheThing(SokuLib::CharacterManager &mgr)
+{
+	auto &batlMgr = SokuLib::getBattleMgr();
+	auto FUN_00438ce0 = reinterpret_cast<void (__thiscall *)(SokuLib::CharacterManager &, unsigned, float, float, unsigned, unsigned)>(0x438ce0);
+
+	FUN_00438ce0(mgr, 0x47, mgr.objectBase.position.x, mgr.objectBase.position.y + 100.00000000f, mgr.objectBase.direction, 1);
+	if (batlMgr.currentRound >= 2)
+		memset(mgr.skillMap , 0x86, sizeof(mgr.skillMap));
+	else
+		FUN_00438ce0(mgr, 0x83 + batlMgr.currentRound, mgr.objectBase.position.x, mgr.objectBase.position.y, 1, 1);
+}
+
 void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mgr, ChrInfo &chr)
 {
 	auto &batlMgr = SokuLib::getBattleMgr();
@@ -341,6 +380,8 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		mgr->objectBase.hitCount = chr.hitCount;
 		mgr->objectBase.offset_0x18C[4] = 0;
 		mgr->objectBase.animate();
+		if (chr.cutscene == 1)
+			doTheThing(*mgr);
 	}
 update:
 	if (mgr->objectBase.hitstop)
@@ -467,6 +508,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 	if (SokuLib::checkKeyOneshot(DIK_F8, false, false, false) && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
 		This->currentRound = (This->currentRound + 1) % 3;
 		This->matchState = 0;
+		anim = false;
 	}
 
 	auto left  = &This->leftCharacterManager;
@@ -491,6 +533,10 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 		right->timeStop = max(right->timeStop + 1, 2);
 	}
 	if (This->matchState == 2) {
+		auto oldL = obj[0xA]->objectBase.renderInfos.yRotation;
+		auto oldR = obj[0xB]->objectBase.renderInfos.yRotation;
+
+		anim = false;
 		// Collision between P1's assist and P2 {
 		((SokuLib::CharacterManager **)This)[3] = obj[0xA];
 		if (obj[0xA]->objectBase.renderInfos.yRotation != 90)
@@ -520,9 +566,16 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 			obj[0xA]->objectBase.opponent = &This->rightCharacterManager;
 			obj[0xB]->objectBase.opponent = &This->leftCharacterManager;
 		}
+		obj[0xA]->objectBase.renderInfos.yRotation = oldL;
+		obj[0xB]->objectBase.renderInfos.yRotation = oldR;
 	} else if (This->matchState == 1) {
 		chr.first.cd = 0;
 		chr.second.cd = 0;
+		if (!anim) {
+			anim = true;
+			initSkillUpgrade(chr.first,  assists.first, *obj[0xA],  *left);
+			initSkillUpgrade(chr.second, assists.second, *obj[0xB], *right);
+		}
 	}
 	return ret;
 }
@@ -531,6 +584,7 @@ void selectCommon()
 {
 	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
+	anim = false;
 	if (spawned) {
 		spawned = false;
 		init = false;
@@ -640,7 +694,7 @@ void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 	bool show = hasRIV ? ((RivControl *)((char *)This + sizeof(*This)))->hitboxes : disp;
 
 	(This->*ogBattleMgrOnRender)();
-	if (init) {
+	if (init && This->matchState < 6) {
 		//TODO: Add these in SokuLib
 		(obj[0xA]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(-2);
 		(obj[0xB]->objects.*SokuLib::union_cast<void (SokuLib::ObjListManager::*)(int)>(0x59be00))(-2);

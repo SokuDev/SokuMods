@@ -90,7 +90,7 @@
             "action": 532,
             "speedX": 0,
             "speedY": -3,
-            "offsetX": 50,
+            "offsetX": 0,
             "offsetY": 500,
             "cond": "end",
             "reset": [

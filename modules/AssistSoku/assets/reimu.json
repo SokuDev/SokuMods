@@ -1,7 +1,7 @@
 {
     "22": {
         "ground": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 525,
             "speedX": 0,
@@ -10,7 +10,7 @@
             "cond": "end"
         },
         "air": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 527,
             "speedX": 0,
@@ -46,7 +46,7 @@
     },
     "236": {
         "ground": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 506,
             "speedX": 0,
@@ -55,7 +55,7 @@
             "cond": "end"
         },
         "air": {
-            "cd": 200,
+            "cd": 300,
             "nb": 1,
             "action": 508,
             "speedX": 0,

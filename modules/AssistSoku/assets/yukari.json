@@ -81,7 +81,7 @@
     },
     "623": {
         "ground": {
-            "cd": 200,
+            "cd": 400,
             "nb": 1,
             "hitCount": 7,
             "action": 566,
@@ -91,7 +91,7 @@
             "cond": "end"
         },
         "air": {
-            "cd": 200,
+            "cd": 400,
             "nb": 1,
             "hitCount": 7,
             "action": 566,
