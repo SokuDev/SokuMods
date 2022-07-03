@@ -27,7 +27,7 @@
             "action": 550,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -250,
+            "offsetX": -200,
             "cond": "end"
         },
         "air": {
@@ -36,7 +36,7 @@
             "action": 550,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -250,
+            "offsetX": -200,
             "posY": 0,
             "cond": "end"
         }
@@ -48,7 +48,7 @@
             "action": 506,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -100,
+            "offsetX": -75,
             "cond": "end"
         },
         "air": {
@@ -57,7 +57,7 @@
             "action": 506,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -100,
+            "offsetX": -75,
             "posY": 0,
             "cond": "end"
         }
@@ -83,10 +83,11 @@
             "cond": "end"
         }
     },
-        "624": {
+    "624": {
         "ground": {
             "cd": 1200,
             "nb": 1,
+            "wall": true,
             "action": 606,
             "speedX": 0,
             "speedY": 0,
@@ -96,6 +97,7 @@
         "air": {
             "cd": 1200,
             "nb": 1,
+            "wall": true,
             "action": 606,
             "speedX": 0,
             "speedY": 0,

@@ -60,6 +60,7 @@ struct ResetValue {
 };
 
 struct ChrInfo {
+	bool blockedByWall = false;
 	unsigned cutscene = 0;
 	unsigned nb = 0;
 	unsigned cd = 0;
@@ -163,15 +164,30 @@ int __stdcall mySendTo(SOCKET s, char * buf, int len, int flags, sockaddr * to, 
 {
 	auto &packet = *reinterpret_cast<SokuLib::Packet *>(buf);
 
-	if (packet.type != SokuLib::HOST_GAME && packet.type != SokuLib::CLIENT_GAME && packet.game.event.type != SokuLib::GAME_MATCH_REQUEST && packet.game.event.type != SokuLib::GAME_MATCH)
+	if (
+		packet.type != SokuLib::HOST_GAME &&
+		packet.type != SokuLib::CLIENT_GAME &&
+		packet.game.event.type != SokuLib::GAME_MATCH_REQUEST &&
+		packet.game.event.type != SokuLib::GAME_MATCH
+	)
 		return realSendTo(s, buf, len, flags, to, tolen);
 
 	if (packet.game.event.type == SokuLib::GAME_MATCH) {
-		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
-			packet.game.event.match.host.skinId = assists.second << 3;
-		else
-			packet.game.event.match.host.skinId |= assists.first << 3;
-		printf("Send assists %i (%i) | %i %i\n", packet.game.event.match.host.skinId >> 3, packet.game.event.match.host.skinId, assists.first, assists.second);
+		if (packet.game.event.match.host.skinId > 7)
+			packet.game.event.match.host.skinId = 0;
+		if (packet.game.event.match.client().skinId > 7)
+			packet.game.event.match.client().skinId = 0;
+		packet.game.event.match.host.skinId |= assists.first << 3;
+		packet.game.event.match.client().skinId |= assists.second << 3;
+		printf(
+			"Send assists %i (%i), %i (%i) | %i %i\n",
+			packet.game.event.match.host.skinId >> 3,
+			packet.game.event.match.host.skinId,
+			packet.game.event.match.client().skinId >> 3,
+			packet.game.event.match.client().skinId,
+			assists.first,
+			assists.second
+		);
 	}
 	return realSendTo(s, buf, len, flags, to, tolen);
 }
@@ -185,12 +201,13 @@ int __stdcall myRecvFrom(SOCKET s, char * buf, int len, int flags, sockaddr * fr
 		return result;
 
 	if (packet.game.event.type == SokuLib::GAME_MATCH) {
-		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
 			assists.first = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
-		else
-			assists.second = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
-		printf("Recv assists %i %i (%i)\n", assists.first, assists.second, packet.game.event.match.host.skinId);
+		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
+			assists.second = static_cast<SokuLib::Character>(packet.game.event.match.client().skinId >> 3);
+		printf("Recv assists %i %i (%i %i)\n", assists.first, assists.second, packet.game.event.match.host.skinId, packet.game.event.match.client().skinId);
 		packet.game.event.match.host.skinId &= 7;
+		packet.game.event.match.client().skinId &= 7;
 	}
 	return result;
 }
@@ -331,14 +348,14 @@ static void drawPlayerBoxes(const SokuLib::CharacterManager &manager, bool playe
 	}
 }
 
-void doTheThing(SokuLib::CharacterManager &mgr)
+void displaySkillLevelUpEffect(SokuLib::CharacterManager &mgr)
 {
 	auto &batlMgr = SokuLib::getBattleMgr();
 	auto FUN_00438ce0 = reinterpret_cast<void (__thiscall *)(SokuLib::CharacterManager &, unsigned, float, float, unsigned, unsigned)>(0x438ce0);
 
 	FUN_00438ce0(mgr, 0x47, mgr.objectBase.position.x, mgr.objectBase.position.y + 100.00000000f, mgr.objectBase.direction, 1);
 	if (batlMgr.currentRound >= 2)
-		memset(mgr.skillMap , 0x86, sizeof(mgr.skillMap));
+		FUN_00438ce0(mgr, 0x86, mgr.objectBase.position.x, mgr.objectBase.position.y, 1, 1);
 	else
 		FUN_00438ce0(mgr, 0x83 + batlMgr.currentRound, mgr.objectBase.position.x, mgr.objectBase.position.y, 1, 1);
 }
@@ -351,7 +368,7 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
 			chr.cd = 0;
 		chr.cd -= !!chr.cd;
-		if (SokuLib::activeWeather == SokuLib::WEATHER_TWILIGHT)
+		if (SokuLib::activeWeather == SokuLib::WEATHER_TWILIGHT && !main->swordOfRaptureDebuffTimeLeft)
 			chr.cd -= !!chr.cd;
 		if (mgr->objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN)
 			mgr->objectBase.position = main->objectBase.position;
@@ -381,7 +398,7 @@ void updateObject(SokuLib::CharacterManager *main, SokuLib::CharacterManager *mg
 		mgr->objectBase.offset_0x18C[4] = 0;
 		mgr->objectBase.animate();
 		if (chr.cutscene == 1)
-			doTheThing(*mgr);
+			displaySkillLevelUpEffect(*mgr);
 	}
 update:
 	if (mgr->objectBase.hitstop)
@@ -413,13 +430,12 @@ update:
 			o->owner = o->owner2 = mgr->objectBase.owner;
 	if (!mgr->objectBase.hitstop)
 		mgr->objectBase.position += SokuLib::Vector2f{mgr->objectBase.speed.x * mgr->objectBase.direction, mgr->objectBase.speed.y};
-	//if (mgr->objectBase.position.y <= 0) {
-	//	mgr->objectBase.gravity = 0;
-	//	mgr->objectBase.speed.y = 0;
-	//	mgr->objectBase.position.y = 0;
-	//}
-	//if (mgr->objectBase.position.y >= 1240)
-	//	mgr->objectBase.position.y = 1240;
+	if (chr.blockedByWall) {
+		if (mgr->objectBase.position.x <= 40)
+			mgr->objectBase.position.x = 40;
+		if (mgr->objectBase.position.x >= 1240)
+			mgr->objectBase.position.x = 1240;
+	}
 	if (mgr->objectBase.position.x <= 40 && chr.chr == SokuLib::CHARACTER_REMILIA && chr.action == 560)
 		mgr->objectBase.position.x = 40;
 	if (mgr->objectBase.position.x >= 1240 && chr.chr == SokuLib::CHARACTER_REMILIA && chr.action == 560)
@@ -819,6 +835,7 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 						e.maxCd = e.cd;
 						e.hitCount = gr.contains("hitCount") && gr["hitCount"].is_number() ? gr["hitCount"].get<unsigned>() : 1;
 						e.nb = gr["nb"];
+						e.blockedByWall = gr.contains("wall") && gr["wall"].is_boolean() && gr["wall"];
 						e.action = gr["action"];
 						e.chr = static_cast<SokuLib::Character>(i);
 						for (auto &v : gr["reset"]) {
@@ -857,6 +874,7 @@ void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &de
 						e.hitCount = air.contains("hitCount") && air["hitCount"].is_number() ? air["hitCount"].get<unsigned>() : 1;
 						e.nb = air["nb"];
 						e.action = air["action"];
+						e.blockedByWall = air.contains("wall") && air["wall"].is_boolean() && air["wall"];
 						e.chr = static_cast<SokuLib::Character>(i);
 						for (auto &v : air["reset"]) {
 							e.resetValues.push_back({

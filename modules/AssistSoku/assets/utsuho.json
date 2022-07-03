@@ -27,12 +27,16 @@
             "cd": 200,
             "nb": 1,
             "action": 510,
+            "wall": true,
+            "offsetX": -175,
             "cond": "end"
         },
         "air": {
             "cd": 200,
             "nb": 1,
             "action": 510,
+            "offsetX": -175,
+            "wall": true,
             "posY": 0,
             "cond": "end"
         }
@@ -42,18 +46,20 @@
             "cd": 200,
             "nb": 1,
             "action": 531,
+            "wall": true,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
+            "offsetX": -50,
             "cond": "end"
         },
         "air": {
             "cd": 200,
             "nb": 1,
             "action": 531,
+            "wall": true,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": 0,
+            "offsetX": -50,
             "posY": 0,
             "cond": "end"
         }

@@ -3,20 +3,20 @@
         "ground": {
             "cd": 200,
             "nb": 1,
-            "action": 511,
+            "action": 505,
             "speedX": 0,
             "speedY": 0,
-            "offsetX": -300,
+            "offsetX": -100,
             "cond": "end"
         },
         "air": {
             "cd": 200,
             "nb": 1,
-            "action": 511,
+            "action": 505,
             "speedX": 0,
             "speedY": 0,
             "offsetY": 0,
-            "offsetX": -300,
+            "offsetX": -100,
             "posY": 0,
             "cond": "end"
         }

@@ -68,7 +68,7 @@
         "ground": {
             "cd": 200,
             "nb": 1,
-            "action": 551,
+            "action": 565,
             "speedX": 0,
             "speedY": 0,
             "offsetX": 0,
@@ -77,7 +77,7 @@
         "air": {
             "cd": 200,
             "nb": 1,
-            "action": 551,
+            "action": 567,
             "speedX": 0,
             "speedY": 0,
             "offsetX": 0,
