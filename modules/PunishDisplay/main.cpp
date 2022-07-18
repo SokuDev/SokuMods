@@ -50,7 +50,7 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 			return nullptr;
 		if (!character.keyManager->keymapManager)
 			return nullptr;
-		if (std::copysign(1, character.keyManager->keymapManager->input.horizontalAxis) == character.objectBase.direction)
+		if (std::copysign(1, character.keyManager->keymapManager->input.horizontalAxis) != character.objectBase.direction)
 			return nullptr;
 		return &crossup;
 	}
