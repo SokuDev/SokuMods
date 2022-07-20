@@ -21,6 +21,8 @@ static bool loaded = false;
 static SokuLib::DrawUtils::Sprite bePunish;
 static SokuLib::DrawUtils::Sprite jumpPunish;
 static SokuLib::DrawUtils::Sprite dashPunish;
+static SokuLib::DrawUtils::Sprite flightPunish;
+static SokuLib::DrawUtils::Sprite hardlandPunish;
 static SokuLib::DrawUtils::Sprite attackPunish;
 static SokuLib::DrawUtils::Sprite punish;
 static SokuLib::DrawUtils::Sprite crossup;
@@ -52,6 +54,8 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 			return nullptr;
 		if (std::copysign(1, character.keyManager->keymapManager->input.horizontalAxis) != character.objectBase.direction)
 			return nullptr;
+		// if the character is holding the same direction as they are facing
+
 		return &crossup;
 	}
 	if (
@@ -61,6 +65,10 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 		return &jumpPunish;
 	else if (character.objectBase.action >= SokuLib::ACTION_FORWARD_DASH && character.objectBase.action <= SokuLib::ACTION_LILYPAD_BACKDASH)
 		return &dashPunish;
+	else if (character.objectBase.action == SokuLib::ACTION_HARDLAND)
+		return &hardlandPunish;
+	else if (character.objectBase.action >= SokuLib::ACTION_FLY && character.objectBase.action <= SokuLib::ACTION_SUWAKO_j1D_j3D)
+		return &flightPunish;
 	else if (character.objectBase.action >= SokuLib::ACTION_BE2 && character.objectBase.action <= SokuLib::ACTION_jBE6)
 		return &bePunish;
 	else if (character.objectBase.action >= SokuLib::ACTION_5A)
@@ -135,6 +143,8 @@ void createSprites()
 
 	createPunishTextSprite(jumpPunish, "Jump Punish!");
 	createPunishTextSprite(bePunish, "BE Punish!");
+	createPunishTextSprite(flightPunish, "Flight Punish!");
+	createPunishTextSprite(hardlandPunish, "Hardland Punish!");
 	createPunishTextSprite(dashPunish, "Dash Punish!");
 	createPunishTextSprite(attackPunish, "Attack Punish!");
 	createPunishTextSprite(crossup, "Crossup!");
@@ -151,6 +161,8 @@ void unloadSprites()
 	jumpPunish.texture.destroy();
 	bePunish.texture.destroy();
 	dashPunish.texture.destroy();
+	flightPunish.texture.destroy();
+	hardlandPunish.texture.destroy();
 	attackPunish.texture.destroy();
 	crossup.texture.destroy();
 	punish.texture.destroy();
@@ -173,7 +185,7 @@ void rollbackState(int count)
 {
 	if (count > 0)
 		return;
-	printf("Rolling back %i frames\n", count);
+	//printf("Rolling back %i frames\n", count);
 	while (count < 0) {
 		if (rollbackBuffer.empty())
 			break;
@@ -186,7 +198,7 @@ void rollbackState(int count)
 void advanceState(int newFrame, int oldFrame)
 {
 	int count = newFrame - oldFrame;
-	printf("Advancing %i frames (from frame %i to frame %i)\n", count, newFrame, oldFrame);
+	//printf("Advancing %i frames (from frame %i to frame %i)\n", count, newFrame, oldFrame);
 	if (!count)
 		return;
 	rollbackState(count);
@@ -248,7 +260,7 @@ void renderChrState(ChrState &s, int pos)
 	if (s.displayCounter >= 1000)
 		return;
 
-	s.punishText->setPosition({pos, 67});
+	s.punishText->setPosition({pos, 65});
 	s.punishText->tint.a = min(255, max(0, (240 - static_cast<int>(s.displayCounter * 4) + 255)));
 	s.punishText->draw();
 }
@@ -258,9 +270,10 @@ void __fastcall BattleOnRender(SokuLib::BattleManager *This)
 	(This->*og_BattleManagerOnRender)();
 	//if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
 	//	return;
-	renderChrState(state.P1, 17);
-	if (state.P2.punishText)
-		renderChrState(state.P2, 640 - 17 - state.P2.punishText->rect.width);
+	if (state.P1.punishText)
+		renderChrState(state.P1, 640 - 13 - state.P1.punishText->rect.width);
+
+	renderChrState(state.P2, 13);
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {

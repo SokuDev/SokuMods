@@ -83,6 +83,7 @@ option(CURL_CA_PATH "" none)
 option(CURL_WINDOWS_SSPI "" OFF)
 add_subdirectory(curl EXCLUDE_FROM_ALL)
 
+#[[
 add_subdirectory(zlib)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 
@@ -100,7 +101,7 @@ SET(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/zlib")
 add_subdirectory(libzip)
 add_dependencies(zip zlibstatic)
 target_include_directories(zip PRIVATE ${ZLIB_INCLUDE_DIR})
-
+]]
 # detours
 
 add_library(detours
