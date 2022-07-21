@@ -142,6 +142,7 @@
             "speedX": 0,
             "speedY": 0,
             "offsetX": 0,
+            "posY": 0,
             "cond": "end"
         }
     }

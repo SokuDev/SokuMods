@@ -56,7 +56,7 @@
                 {
                     "offset": "7D0",
                     "value": 0,
-                    "size": 2
+                    "size": 3
                 }
             ]
             
@@ -74,7 +74,7 @@
                 {
                     "offset": "7D0",
                     "value": 0,
-                    "size": 2
+                    "size": 3
                 }
             ]
         }
@@ -87,7 +87,14 @@
             "speedX": 0,
             "speedY": 0,
             "offsetX": -50,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D0",
+                    "value": 0,
+                    "size": 3
+                }
+            ]
         },
         "air": {
             "cd": 200,
@@ -99,7 +106,14 @@
             "offsetY": 0,
             "gravityX": 0,
             "gravityY": 0,
-            "cond": "end"
+            "cond": "end",
+            "reset": [
+                {
+                    "offset": "7D0",
+                    "value": 0,
+                    "size": 3
+                }
+            ]
         }
     },
     "624": {
@@ -115,7 +129,7 @@
                 {
                     "offset": "7D0",
                     "value": 0,
-                    "size": 1
+                    "size": 3
                 }
             ]
         },
@@ -132,7 +146,7 @@
                 {
                     "offset": "7D0",
                     "value": 0,
-                    "size": 1
+                    "size": 3
                 }
             ]
         }

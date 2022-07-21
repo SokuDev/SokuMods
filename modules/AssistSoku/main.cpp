@@ -116,6 +116,7 @@ static int (__stdcall *realSendTo)(SOCKET s, char * buf, int len, int flags, soc
 static char modFolder[1024];
 static char soku2Dir[MAX_PATH];
 static SokuLib::DrawUtils::RectangleShape rectangle;
+static int (SokuLib::BattleWatch::*ogBattleWatchOnProcess)();
 static int (SokuLib::Select::*ogSelectOnProcess)();
 static int (SokuLib::SelectClient::*ogSelectCLOnProcess)();
 static int (SokuLib::SelectServer::*ogSelectSVOnProcess)();
@@ -129,6 +130,7 @@ static bool init = false;
 static bool disp = false;
 static bool anim = false;
 static HMODULE myModule;
+static sockaddr_in serverAddr;
 static std::pair<ChrInfo, ChrInfo> chr;
 static std::vector<ChrData> data{22};
 static std::pair<SokuLib::Character, SokuLib::Character> assists;
@@ -164,15 +166,17 @@ int __stdcall mySendTo(SOCKET s, char * buf, int len, int flags, sockaddr * to, 
 {
 	auto &packet = *reinterpret_cast<SokuLib::Packet *>(buf);
 
-	if (
+	if (packet.type == SokuLib::HELLO)
+		memcpy(&serverAddr, to, min(sizeof(serverAddr), tolen));
+	if ((
 		packet.type != SokuLib::HOST_GAME &&
 		packet.type != SokuLib::CLIENT_GAME &&
 		packet.game.event.type != SokuLib::GAME_MATCH_REQUEST &&
 		packet.game.event.type != SokuLib::GAME_MATCH
-	)
+	) || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSWATCH)
 		return realSendTo(s, buf, len, flags, to, tolen);
 
-	if (packet.game.event.type == SokuLib::GAME_MATCH) {
+	if (packet.game.event.type == SokuLib::GAME_MATCH && tolen > 7) {
 		if (packet.game.event.match.host.skinId > 7)
 			packet.game.event.match.host.skinId = 0;
 		if (packet.game.event.match.client().skinId > 7)
@@ -200,7 +204,7 @@ int __stdcall myRecvFrom(SOCKET s, char * buf, int len, int flags, sockaddr * fr
 	if (packet.type != SokuLib::HOST_GAME && packet.type != SokuLib::CLIENT_GAME && packet.game.event.type != SokuLib::GAME_MATCH_REQUEST && packet.game.event.type != SokuLib::GAME_MATCH)
 		return result;
 
-	if (packet.game.event.type == SokuLib::GAME_MATCH) {
+	if (packet.game.event.type == SokuLib::GAME_MATCH && result && result > 7) {
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
 			assists.first = static_cast<SokuLib::Character>(packet.game.event.match.host.skinId >> 3);
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
@@ -501,6 +505,7 @@ int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *This)
 {
 	if (This->matchState == -1)
 		return (This->*ogBattleMgrOnProcess)();
+	SokuLib::weatherCounter = 0;
 	if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false))
 		disp = !disp;
 	if (!init) {
@@ -743,7 +748,20 @@ void __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 
 void __stdcall loadDeckData(char *charName, void *csvFile, SokuLib::DeckInfo &deck, int param4, SokuLib::Dequeue<short> &newDeck)
 {
-	if (!spawned) {
+	if (!spawned || init) {
+		if (spawned) {
+			spawned = false;
+			init = false;
+			puts("Destroying assist 1");
+			(*(void (__thiscall **)(SokuLib::CharacterManager *, char))obj[0xA]->objectBase.vtable)(obj[0xA], 0);
+			puts("Deleting assist 1");
+			SokuLib::Delete(obj[0xA]);
+			puts("Destroying assist 2");
+			(*(void (__thiscall **)(SokuLib::CharacterManager *, char))obj[0xB]->objectBase.vtable)(obj[0xB], 0);
+			puts("Deleting assist 2");
+			SokuLib::Delete(obj[0xB]);
+		}
+
 		spawned = true;
 		SokuLib::PlayerInfo p;
 		const char *c[] = {
