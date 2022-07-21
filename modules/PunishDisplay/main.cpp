@@ -6,17 +6,23 @@
 #include <SokuLib.hpp>
 #include <dinput.h>
 #include <fstream>
-static void (SokuLib::BattleManager::*og_BattleManagerOnRender)();
-static int (SokuLib::BattleManager::*og_BattleManagerOnProcess)();
-static int (SokuLib::Loading::*og_LoadingOnProcess)();
-static int (SokuLib::LoadingClient::*og_LoadingCLOnProcess)();
-static int (SokuLib::LoadingServer::*og_LoadingSVOnProcess)();
-static int (SokuLib::CharacterManager::*original_onHit)(int param);
+#include <Shlwapi.h>
+
 #ifndef _DEBUG
 #define puts(...)
 #define printf(...)
 #endif
 
+static void (SokuLib::BattleManager::*og_BattleManagerOnRender)();
+static int (SokuLib::BattleManager::*og_BattleManagerOnProcess)();
+static int (SokuLib::Loading::*og_LoadingOnProcess)();
+static int (SokuLib::LoadingClient::*og_LoadingCLOnProcess)();
+static int (SokuLib::LoadingServer::*og_LoadingSVOnProcess)();
+static int (SokuLib::LoadingWatch::*og_LoadingWatchOnProcess)();
+static int (SokuLib::CharacterManager::*original_onHit)(int param);
+
+static bool enableLocal = true;
+static bool enableOnline = true;
 static bool loaded = false;
 static SokuLib::DrawUtils::Sprite bePunish;
 static SokuLib::DrawUtils::Sprite jumpPunish;
@@ -55,15 +61,9 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 		if (std::copysign(1, character.keyManager->keymapManager->input.horizontalAxis) != character.objectBase.direction)
 			return nullptr;
 		// if the character is holding the same direction as they are facing
-
 		return &crossup;
 	}
-	if (
-		(character.objectBase.action >= SokuLib::ACTION_NEUTRAL_HIGH_JUMP && character.objectBase.action <= SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH) ||
-		(character.objectBase.action >= SokuLib::ACTION_NEUTRAL_JUMP && character.objectBase.action <= SokuLib::ACTION_BACKWARD_JUMP)
-	)
-		return &jumpPunish;
-	else if (character.objectBase.action >= SokuLib::ACTION_FORWARD_DASH && character.objectBase.action <= SokuLib::ACTION_LILYPAD_BACKDASH)
+	if (character.objectBase.action >= SokuLib::ACTION_FORWARD_DASH && character.objectBase.action <= SokuLib::ACTION_LILYPAD_BACKDASH)
 		return &dashPunish;
 	else if (character.objectBase.action == SokuLib::ACTION_HARDLAND)
 		return &hardlandPunish;
@@ -71,10 +71,19 @@ SokuLib::DrawUtils::Sprite* associatePunishSprite(SokuLib::CharacterManager &cha
 		return &flightPunish;
 	else if (character.objectBase.action >= SokuLib::ACTION_BE2 && character.objectBase.action <= SokuLib::ACTION_jBE6)
 		return &bePunish;
+	else if (
+		(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSPLAYER && SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY) ||
+		(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
+	)
+		return &punish;
+	else if (
+		(character.objectBase.action >= SokuLib::ACTION_NEUTRAL_HIGH_JUMP && character.objectBase.action <= SokuLib::ACTION_FORWARD_HIGH_JUMP_FROM_GROUND_DASH) ||
+		(character.objectBase.action >= SokuLib::ACTION_NEUTRAL_JUMP && character.objectBase.action <= SokuLib::ACTION_BACKWARD_JUMP)
+	)
+		return &jumpPunish;
 	else if (character.objectBase.action >= SokuLib::ACTION_5A)
 		return &attackPunish;
-	else
-		return &punish;
+	return &punish;
 }
 
 void handleHit(SokuLib::CharacterManager &chr, ChrState &s)
@@ -89,7 +98,11 @@ void handleHit(SokuLib::CharacterManager &chr, ChrState &s)
 
 int __fastcall isHit(SokuLib::CharacterManager &character, int, int param)
 {
-	if (character.objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN || character.objectBase.action > SokuLib::ACTION_NEUTRAL_TECH)
+	if (
+		character.noSuperArmor != 0 &&
+		!character.objectBase.frameData->frameFlags.superArmor &&
+		(character.objectBase.action < SokuLib::ACTION_STAND_GROUND_HIT_SMALL_HITSTUN || character.objectBase.action > SokuLib::ACTION_NEUTRAL_TECH)
+	)
 	{
 		if (&character == &SokuLib::getBattleMgr().leftCharacterManager)
 			handleHit(character, state.P1);
@@ -185,7 +198,7 @@ void rollbackState(int count)
 {
 	if (count > 0)
 		return;
-	//printf("Rolling back %i frames\n", count);
+	printf("Rolling back %i frames\n", count);
 	while (count < 0) {
 		if (rollbackBuffer.empty())
 			break;
@@ -198,7 +211,7 @@ void rollbackState(int count)
 void advanceState(int newFrame, int oldFrame)
 {
 	int count = newFrame - oldFrame;
-	//printf("Advancing %i frames (from frame %i to frame %i)\n", count, newFrame, oldFrame);
+	printf("Advancing %i frames (from frame %i to frame %i)\n", count, newFrame, oldFrame);
 	if (!count)
 		return;
 	rollbackState(count);
@@ -255,6 +268,16 @@ int __fastcall LoadingSVOnProcess(SokuLib::LoadingServer *This)
 	return ret;
 }
 
+int __fastcall LoadingWatchOnProcess(SokuLib::LoadingWatch *This)
+{
+	int ret = (This->*og_LoadingWatchOnProcess)();
+
+	if (state.lastFrame)
+		unloadSprites();
+	createSprites();
+	return ret;
+}
+
 void renderChrState(ChrState &s, int pos)
 {
 	if (s.displayCounter >= 1000)
@@ -268,11 +291,12 @@ void renderChrState(ChrState &s, int pos)
 void __fastcall BattleOnRender(SokuLib::BattleManager *This)
 {
 	(This->*og_BattleManagerOnRender)();
-	//if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
-	//	return;
+	if (!enableLocal && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSPLAYER && SokuLib::subMode != SokuLib::BATTLE_SUBMODE_REPLAY)
+		return;
+	if (!enableOnline && (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER))
+		return;
 	if (state.P1.punishText)
 		renderChrState(state.P1, 640 - 13 - state.P1.punishText->rect.width);
-
 	renderChrState(state.P2, 13);
 }
 
@@ -283,6 +307,7 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 {
 	DWORD old;
+	char profilePath[1024 + MAX_PATH];
 
 #ifdef _DEBUG
 	FILE *_;
@@ -292,12 +317,20 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen_s(&_, "CONOUT$", "w", stderr);
 #endif
 
+	GetModuleFileName(hMyModule, profilePath, 1024);
+	PathRemoveFileSpec(profilePath);
+	PathAppend(profilePath, "PunishDisplay.ini");
+	enableLocal  = GetPrivateProfileInt("Enable", "VSPlayer",  1, profilePath);
+	enableOnline = GetPrivateProfileInt("Enable", "VSNetwork", 1, profilePath);
+	printf("PunishDisplay: Local: %sabled, Online: %sabled\n", enableLocal ? "en" : "dis", enableOnline ? "en" : "dis");
+
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	og_BattleManagerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, BattleOnProcess);
 	og_BattleManagerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  BattleOnRender);
 	og_LoadingOnProcess       = SokuLib::TamperDword(&SokuLib::VTable_Loading.onProcess,       LoadingOnProcess);
 	og_LoadingCLOnProcess     = SokuLib::TamperDword(&SokuLib::VTable_LoadingClient.onProcess, LoadingCLOnProcess);
 	og_LoadingSVOnProcess     = SokuLib::TamperDword(&SokuLib::VTable_LoadingServer.onProcess, LoadingSVOnProcess);
+	og_LoadingWatchOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_LoadingWatch.onProcess,  LoadingWatchOnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
