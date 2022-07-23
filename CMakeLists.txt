@@ -838,3 +838,23 @@ target_link_libraries(
 )
 install(TARGETS "HostInBackground" LIBRARY DESTINATION "SWRSToys/modules/HostInBackground/")
 install(TARGETS "HostInBackground" LIBRARY DESTINATION "SokuEngine/modules/HostInBackground/")
+
+
+add_library(
+        "FramedataExporter"
+        MODULE
+        modules/FramedataExporter/main.cpp
+)
+target_compile_options(FramedataExporter PRIVATE /Zi)
+target_compile_definitions("FramedataExporter" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG> ${NET})
+target_include_directories("FramedataExporter" PRIVATE include include/directx "modules/FramedataExporter/")
+target_link_directories("FramedataExporter" PRIVATE lib)
+target_link_libraries(
+        FramedataExporter
+        SokuLib
+        shlwapi
+        ws2_32
+        d3dx9
+)
+install(TARGETS "FramedataExporter" LIBRARY DESTINATION "SWRSToys/modules/FramedataExporter/")
+install(TARGETS "FramedataExporter" LIBRARY DESTINATION "SokuEngine/modules/FramedataExporter/")
