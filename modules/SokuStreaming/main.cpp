@@ -145,6 +145,7 @@ void LoadSettings(LPCSTR profilePath, LPCSTR parentPath) {
 	keys[KEY_INCREASE_R_SCORE] = GetPrivateProfileInt("Keys", "IncreaseRightScore", '9', profilePath);
 	keys[KEY_CHANGE_R_NAME] = GetPrivateProfileInt("Keys", "ChangeRightName", '0', profilePath);
 
+	puts("Create webserver");
 	webServer = std::make_unique<WebServer>();
 	webServer->addRoute("/", root);
 	webServer->addRoute("/state", state);
@@ -186,6 +187,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		PathAppend(profilePath, "SokuStreaming.ini");
 		LoadSettings(profilePath, profileParent);
 
+		puts("Hook functions");
 		hookFunctions();
 	} catch (std::exception &e) {
 		MessageBoxA(nullptr, e.what(), "Cannot init SokuStreaming", MB_OK | MB_ICONERROR);
@@ -194,6 +196,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		MessageBoxA(nullptr, "Wtf ?", "Huh... ok", MB_OK | MB_ICONERROR);
 		abort();
 	}
+	puts("Initialize ended");
 	return true;
 }
 

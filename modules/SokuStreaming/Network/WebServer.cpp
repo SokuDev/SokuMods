@@ -98,6 +98,7 @@ const std::map<unsigned short, std::string> WebServer::codes{
 };
 
 void WebServer::addRoute(const std::string &&route, std::function<Socket::HttpResponse(const Socket::HttpRequest &)> &&fct) {
+	printf("Adding route %s\n", route.c_str());
 	this->_routes[route] = fct;
 }
 
