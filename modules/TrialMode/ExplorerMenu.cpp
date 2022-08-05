@@ -19,8 +19,13 @@
 extern char serverHost[1024];
 extern unsigned short serverPort;
 
-ExplorerMenu::ExplorerMenu()
+ExplorerMenu::ExplorerMenu() :
+	_guides{
+		{myModule, MAKEINTRESOURCE(292)},
+		{myModule, MAKEINTRESOURCE(296)}
+	}
 {
+	this->_guides[0].active = true;
 	this->_title.texture.loadFromResource(myModule, MAKEINTRESOURCE(488));
 	this->_title.setSize(this->_title.texture.getSize());
 	this->_title.rect.width = this->_title.texture.getSize().x;
@@ -441,7 +446,7 @@ void ExplorerMenu::_handleGoDown()
 
 void ExplorerMenu::_handlePlayerInputs(const SokuLib::KeyInput &input)
 {
-	if (input.spellcard == 1 && this->_currentPack >= 0) {
+	if (input.changeCard == 1 && this->_currentPack >= 0) {
 		auto &pack = this->_loadedPacks[this->_currentPack];
 		auto start = 7 + strlen(serverHost) + (serverPort != 80) * (2 + (serverPort / 10000 != 0) + (serverPort / 1000 != 0) + (serverPort / 100 != 0) + (serverPort / 10 % 10 != 0));
 		auto link = pack->path.substr(start, pack->path.size() - 1 - start) + ".zip";
@@ -559,6 +564,10 @@ void ExplorerMenu::_displayFilters()
 int ExplorerMenu::onProcess()
 {
 	if (this->_message) {
+		this->_guides[0].active = !this->_expended;
+		this->_guides[1].active = this->_expended;
+		this->_guides[0].update();
+		this->_guides[1].update();
 		this->_message = SokuLib::inputMgrs.input.a != 1;
 		if (!this->_message)
 			SokuLib::playSEWaveBuffer(0x28);
@@ -572,6 +581,10 @@ int ExplorerMenu::onProcess()
 		loadingGear.setRotation(loadingGear.getRotation() + 0.1);
 		return true;
 	}
+	this->_guides[0].active = !this->_expended;
+	this->_guides[1].active = this->_expended;
+	this->_guides[0].update();
+	this->_guides[1].update();
 	updateNoiseTexture();
 	updateBandTexture();
 	if (this->_currentEntry >= 0) {
@@ -606,10 +619,15 @@ int ExplorerMenu::onRender()
 	if (this->_message) {
 		this->_messageBox.draw();
 		this->_loadingText[this->_loadingStep].draw();
+		this->_guides[0].render();
+		this->_guides[1].render();
 		return 0;
 	}
-	if (this->_error)
+	if (this->_error) {
+		this->_guides[0].render();
+		this->_guides[1].render();
 		return 0;
+	}
 	if (this->_loading) {
 		this->_messageBox.draw();
 		this->_downloadMutex.lock();
@@ -655,8 +673,11 @@ int ExplorerMenu::onRender()
 	//	}
 
 	previewContainer.draw();
-	if (this->_loadedPacks.empty())
+	if (this->_loadedPacks.empty()) {
+		this->_guides[0].render();
+		this->_guides[1].render();
 		return 0;
+	}
 
 	if (this->_currentEntry < 0) {
 		if (this->_loadedPacks[this->_shownPack]->preview.texture.hasTexture())
@@ -666,6 +687,8 @@ int ExplorerMenu::onRender()
 			lockedImg.draw();
 		} else if (this->_loadedPacks[this->_shownPack]->description.texture.hasTexture())
 			this->_loadedPacks[this->_shownPack]->description.draw();
+		this->_guides[0].render();
+		this->_guides[1].render();
 		return 0;
 	}
 	if (!this->_isLocked(this->_currentEntry)) {
@@ -700,6 +723,8 @@ int ExplorerMenu::onRender()
 		lockedImg.draw();
 	}
 	frame.draw();
+	this->_guides[0].render();
+	this->_guides[1].render();
 	return 0;
 }
 

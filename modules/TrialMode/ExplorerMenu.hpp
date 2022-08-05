@@ -10,6 +10,7 @@
 #include <memory>
 #include <SokuLib.hpp>
 #include "Pack.hpp"
+#include "Menu.hpp"
 
 #define MAX_STEP 4
 #define str2(x) #x
@@ -50,6 +51,7 @@ private:
 	std::map<std::string, std::vector<std::shared_ptr<Pack>>> _packsByCategory;
 	std::thread _loadingThread;
 	std::string _linkDownload;
+	Guide _guides[2];
 
 	void _loadPacks();
 	bool _isLocked(int entry);

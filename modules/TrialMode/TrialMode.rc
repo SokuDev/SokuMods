@@ -65,6 +65,8 @@
 ;256 RCDATA "assets/installsSatori.png"
 ;260 RCDATA "assets/installsShinki.png"
 
+292 RCDATA "assets/guides/explorerMenu.png"
+296 RCDATA "assets/guides/explorerMenuExpanded.png"
 300 RCDATA "assets/guides/noEditorMenu.png"
 304 RCDATA "assets/guides/noEditorMenuFilter.png"
 308 RCDATA "assets/guides/noEditorMenuPackExpanded.png"

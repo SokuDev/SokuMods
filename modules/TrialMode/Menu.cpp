@@ -3488,7 +3488,7 @@ void editorRender()
 
 void handlePlayerInputs(const SokuLib::KeyInput &input)
 {
-	if (SokuLib::inputMgrs.input.changeCard == 1) {
+	if (SokuLib::inputMgrs.input.d == 1) {
 		loadExplorerRoot("All files");
 		setExplorerDefaultMusic(nullptr);
 		setExplorerCallback([](std::string){});
@@ -3496,7 +3496,7 @@ void handlePlayerInputs(const SokuLib::KeyInput &input)
 	}
 	if (SokuLib::inputMgrs.input.spellcard == 1)
 		switchEditorMode();
-	if (input.horizontalAxis < 0) {
+	if (SokuLib::inputMgrs.input.changeCard == 1) {
 		SokuLib::playSEWaveBuffer(0x28);
 		SokuLib::activateMenu(new ExplorerMenu());
 		return;
