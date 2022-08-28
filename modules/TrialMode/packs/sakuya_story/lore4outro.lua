@@ -3,17 +3,21 @@
 --
 
 local dialogs = {
-	"lcDAs a rabbit, shouldn't running be<br>a more effective strategy?",
-	"rcAMy purpose is to protect the princess!",
-	"lcABut isn't that strange?",
-	"lcAI understand that they're helping you,<br>but why go this far for them?",
-	"lSADo you remember? When we stormed in,<br>wouldn't it have been smarter to hide or run away?<br>It should have been the easier solution.",
-	"rShIt seems you misunderstand,<br>I follow them by choice.",
-	"rSEBesides I'm not much of a moon rabbit anymore.<br>Even though I might not be ready to consider myself an<br>earth rabbit yet, considering their leader...",
-	"rSWBut aren't you in a much more singular situation than<br>mine? A human who is the personal maid of a vampire...<br>That is quite difficult to believe.",
-	"lHWSeen in that way, it is a bit strange.",
-	"lEWWell it seems I got carried away but now I know for<br>sure that it isn't you.",
-	"lHWOn to the next suspect then.",
+    "lH So, moon rabbit, what are you all hiding?",
+    "rHAI'm no moon rabbit anymore!",
+    "rHEBut when I see their leaders<br>I don't think I'm an earth rabbit either...",
+    "rHANonetheless I won't say anything!",
+    "lcAQuite uptight aren't you?<br>How strange, a moon rabbit this loyal to Eientei.",
+    "rcHWell, this place is one that I can call home now.",
+    "rcWBut what about you who is human<br>yet still serves a vampire?",
+    "lSWI guess it must seem strange without context huh?<br>Fine, I won't ask further questions.<br>I shouldn't have doubted you it seems.",
+    "rShThank you.",
+    "lHhAs an apology let me give you this piece of advice.<br>You should learn to let go. If you call this place your home,<br>you shouldn't be too on edge yet to be earth rabbit?",
+    "rHEI appreciate your concern,<br>but I already have one superior that is far too relaxed.",
+    "lcEYou shouldn't say that, it's important<br>to appreciate your superiors for who they are.",
+    "lhEBesides, I wonder if Lady Patchouly has recovered?",
+    "rhS?",
+    "lWSWell I have to go, farewell future earth rabbit.",
 }
 
 local dialog  = StandDialog.new(dialogs)

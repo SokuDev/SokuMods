@@ -5,18 +5,16 @@
 local dialogs = {
 	"lc Where could she be...",
 	--Reisen appears
-	"r WHere you are again?",
-	"r hIf you wish to meet our princess I<br>fear you'll need her approval.",
-	"lhhDo not bother your master.",
-	"lHhIt is you that I have business with.",
-	"rHSMe? How curious?<br>And what do you have to do with me?",
-	"lWSIllusion is your thing, isn't it?",
-	"lcSIt must be quite easy to hide yourself<br>from your enemies and allies...",
-	"rcCAnd what are you implying!?",
-	"lCCThat you are a suspect!",
-	"rCSAnd why would I possibly cause trouble alone?",
-	"lhSWho knows? A Tewi prank perhaps? Or maybe<br>you had some schemes in mind? After all<br>you're still a moon rabbit at your core, aren't you?",
-	"rhADon't underestimate my loyalty!",
+    "rcWHow surprising to see you here.<br>Do you have some business with us?",
+    "lWWWith you, moon rabbit.<br>I have something to ask you actually.",
+    "rWEWell, I'm not much of a moon rabbit anymore.",
+    "rWWBut, what is it that you want to know?",
+    "lhWDid one of you invade our mansion by any chance?",
+    "rWhWell I'm sorry but I can't say.",
+    "lchWhy is that?",
+    "rccI can't say to someone as suspicious as you...",
+    "lAcYou are quite suspicious yourself, you know?",
+    "lCcBut It's fine, You'll answer my questions in due time!",
 --Battle here
 }
 

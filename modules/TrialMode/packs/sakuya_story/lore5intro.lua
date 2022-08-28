@@ -13,16 +13,13 @@ local dialogs = {
 	"RWWWhat is going on in the Scarlet Mansion?",
 	"LSWHmmm",
 	"LEWI hoped you would be the one to answer this question...",
-	"REEAren't you the one supposed to guard the place?",
-	"LSEWell actually I'm not a guard, I'm a maid but...",
-	"LcEI don't think you're lying to me,<br>and you're not the sneaky type,<br>but why are you interested in our business?",
-	"RcHLady Yuyuko told me to investigate.<br>She said it was important.",
-	"RccI think...",
-	"LhcWell then, may I speak with her.",
-	"RhAI won't let you pass!",
-	"LCAToo bad!",
-	"RCCWhatever this incident is, you must be the culprit!",
-	"LECYou really are terrible at investigating aren't you?"
+	"REcWhy should I? I'm the investigator not the suspect.",
+	"LccPretending to be a detective now?<br>Could it be that you're bored?",
+	"RcAOf course not.",
+	"RcHI have a good reason to be here...",
+	"RcEI have a good reason to be here... surely.",
+	"RcCNow I need you to tell me everything<br>you know about this!",
+	"LCCMy time is quite precious, you know?<br>As a senior I'll give you a lesson.",
 	--Battle here
 }
 

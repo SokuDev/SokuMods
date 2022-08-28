@@ -3,19 +3,26 @@
 --
 
 local dialogs = {
-	"LcDWhat happened, you seemed quite troubled?",
-	"RcDWhy does lady Yuyuko give me a mission like this,<br>she implies that it is important,<br>yet she gives no clue and simply goes away.",
-	"LSDShe is quite lazy after all,<br>and she does seem to enjoy seeing you try.",
-	"RSAHow am I supposed to serve her,<br>when she never says what she truly wants?",
-	"LWAThough your master is quite lazy, she's not dumb,<br>I'm sure she has a good reason<br>for sending you on those missions.",
-	"LHAAs a servant you should always support your master. Even<br>if she is not perfect and her orders are not the best,<br>be confident that she will better herself in failure. ",
-	"LHAAnd if she continues,<br>it may simply be how she is and what she wants.",
-	"RHh...",
-	"LhhWhat I'm trying to say is:<br>you should believe in Yuyuko's decisions.",
-	"RhWI see, it seems it is my mind that<br>needs some sharpening.",
-	"RhH I'll go investigate then.",
+	"Lc Something on your mind?<br>You're less fierce than I remember.",
+	"RcDI don't know...",
+	"RcAWhy am I still investigating?",
+	"LSAWhat do you mean, Isn't it on lady Yuyuko's suggestion?",
+	"RSDNo not really, but she did let me go easily this time.",
+	"LEDSo isn't it fine then.",
+	"REhIf she doesn't care then it shouldn't be a big deal,<br>yet I'm still here.",
+	"REcThe whole thing might already be resolved<br>for all I know.",
+	"LccThen why are you back again?",
+	"RcEWell, to see if this incident could mean trouble...<br>why am I even here?",
+	"LhEFor the same reason she does let you go I believe.",
+	"RhhReally? I don't think she cares that much.",
+	"LHhI do think she cares but you simply can’t notice.<br>It takes time to know your master enough<br>to see those kinds of things.",
+	"RHAThen how am I supposed to know now?",
+	"LCAIt's simple really,<br>you just have to continue until you find out.",
+	"RChI Don't think that will change anything.",
+	"RCHBut now that I'm here, I'll see it to the end.",
+	--Youmu getting out.
 	"LH They sure are complementary.",
-	"LW I should get going too."
+	"LW I should get going too.",
 }
 
 local counter = 0
@@ -31,14 +38,14 @@ flashRect.fillColor = enums.colors.Transparent
 flashRect.size = Vector2u.new(640, 480)
 
 function update()
-	if #dialog == #dialogs - 9 and counter <= 20 and pressed then
+	if #dialog == #dialogs - 16 and counter <= 20 and pressed then
 		dialog.hidden = true 
 		if counter == 0 then
 			battleMgr.rightChr.action = enums.actions.ACTION_NEUTRAL_TECH
 			battleMgr.rightChr:initAnimation()
 		end
 	end
-	if #dialog <= #dialogs - 9 and battleMgr.rightChr.action ~= enums.actions.ACTION_KNOCKED_DOWN_STATIC and counter <=41 then
+	if #dialog <= #dialogs - 16 and battleMgr.rightChr.action ~= enums.actions.ACTION_KNOCKED_DOWN_STATIC and counter <=41 then
 		counter = counter + 1
 	end
 	if battleMgr.rightChr.actionBlockId == 0 and battleMgr.rightChr.action == enums.actions.ACTION_NEUTRAL_TECH and counter > 20 then
@@ -49,7 +56,7 @@ function update()
 		dialog.hidden = false
 		onKeyPressed()
 	end
-	if pressed and #dialog == #dialogs - 11 and counter == 42 and battleMgr.rightChr.position.x < 1500 then
+	if pressed and #dialog == #dialogs - 17 and counter == 42 and battleMgr.rightChr.position.x < 1500 then
 		dialog:update()
 		battleMgr.rightCharacterManager:updateAnimation()
 		dialog.hidden = true
