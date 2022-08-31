@@ -24,10 +24,11 @@ add_library(swrstoys MODULE
         swrstoys/d3d9.def
         swrstoys/d3d9_dummy.cpp
         swrstoys/dummy.cpp
-        swrstoys/SWRSToys.cpp)
+        swrstoys/SWRSToys.cpp
+        swrstoys/swrstoys.rc)
 target_compile_definitions(swrstoys PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_include_directories(swrstoys PRIVATE include)
-target_link_libraries(swrstoys shlwapi user32 advapi32 shell32)
+target_link_libraries(swrstoys shlwapi user32 advapi32 shell32 SokuLib "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib")
 set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
 install(TARGETS swrstoys LIBRARY DESTINATION "SWRSToys/")
