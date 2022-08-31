@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 05/04/2022.
+// Created by PinkySmile on 05/04/2022.
 //
 
 #ifndef SWRSTOYS_INPUTBOX_HPP

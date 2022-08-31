@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 26/05/2022.
+// Created by PinkySmile on 26/05/2022.
 //
 
 #ifndef SWRSTOYS_EXPLORERMENU_HPP

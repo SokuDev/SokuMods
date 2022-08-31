@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 05/04/2019.
+// Created by PinkySmile on 05/04/2019.
 //
 
 #ifndef DISC_ORD_SOCKET_HPP

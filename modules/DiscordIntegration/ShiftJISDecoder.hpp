@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 11/11/2020.
+// Created by PinkySmile on 11/11/2020.
 //
 
 #ifndef HISOUTENSOKUDISCORDINTEGRATION_SHIFTJISDECODER_HPP

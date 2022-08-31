@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 31/10/2020
+// Created by PinkySmile on 31/10/2020
 //
 
 #include "CompiledString/CompiledStringFactory.hpp"
@@ -7,7 +7,8 @@
 #include "Exceptions.hpp"
 #include "Network/getPublicIp.hpp"
 #include "logger.hpp"
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
+#include <ModLoader.hpp>
 #include <SokuLib.hpp>
 #include <array>
 #include <ctime>
@@ -18,8 +19,10 @@
 #include <string>
 #include <thread>
 #include <sstream>
+#include <mutex>
 
 static bool hasSoku2 = false;
+static SokuLib::Trampoline *trampoline = nullptr;
 
 enum StringIndex {
 	STRING_INDEX_LOGO,
@@ -576,6 +579,8 @@ extern "C" __declspec(dllexport) long long DiscordId() {
 	return discord_id;
 }
 
+static std::mutex mutex;
+
 class MyThread {
 private:
 	bool _connected = false;
@@ -583,6 +588,7 @@ private:
 	int _connectTimeout = 1;
 
 public:
+
 	bool isDone() const {
 		return this->_done;
 	}
@@ -610,13 +616,20 @@ public:
 		logMessage("Connecting to discord client...\n");
 		discord::Result result;
 
+		mutex.lock();
 		do {
 			result = discord::Core::Create(atoll(ClientID), DiscordCreateFlags_NoRequireDiscord, &state.core);
 
+			if (trampoline == nullptr)
+				return mutex.unlock();
 			if (result != discord::Result::Ok) {
 				logMessagef("Error connecting to discord: %s\n", discordResultToString[static_cast<unsigned>(result)]);
 				logMessagef("Retrying in %i seconds\n", this->_connectTimeout);
-				std::this_thread::sleep_for(std::chrono::seconds(this->_connectTimeout));
+				for (int i = 0; i < this->_connectTimeout; i++) {
+					if (trampoline == nullptr)
+						return mutex.unlock();
+					std::this_thread::sleep_for(std::chrono::seconds(this->_connectTimeout));
+				}
 				if (this->_connectTimeout < 64)
 					this->_connectTimeout *= 2;
 			}
@@ -625,6 +638,7 @@ public:
 		state.core->UserManager().OnCurrentUserUpdate.Connect(MyThread::onCurrentUserUpdate);
 		state.core->ActivityManager().OnActivityJoin.Connect(MyThread::onActivityJoin);
 		this->_connected = true;
+		mutex.unlock();
 	}
 
 	void run() const {
@@ -895,13 +909,15 @@ void loop() {
 	}
 }
 
+
+//SWRSToys functions
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
 
-extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
-	char profilePath[1024 + MAX_PATH];
+char profilePath[1024 + MAX_PATH];
 
+extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	initLogger();
 	logMessage("Initializing...\n");
 
@@ -922,13 +938,55 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	//::FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 
+	trampoline = new SokuLib::Trampoline(0x407f43, loop, 5);
+
 	// can't use std::thread here because it deadlocks against DllMain DLL_THREAD_ATTACH in some circumstances
 	_beginthread(start, 0, nullptr);
-	new SokuLib::Trampoline(0x407f43, loop, 5);
 	logMessage("Done...\n");
 	return true;
 }
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 	return TRUE;
+}
+
+
+//New mod loader functions
+extern "C" __declspec(dllexport) int getPriority() {
+	return 0;
+}
+
+extern "C" __declspec(dllexport) bool hasChainedHooks() {
+	return false;
+}
+
+extern "C" __declspec(dllexport) void unHook() {
+	delete trampoline;
+	trampoline = nullptr;
+	mutex.lock();
+	mutex.unlock();
+}
+
+extern "C" __declspec(dllexport) SokuModLoader::IValue **getConfig() {
+	auto configs = new SokuModLoader::IValue *[4];
+
+	configs[0] = new SokuModLoader::IniIntValue("DiscordIntegration", "RefreshTime", 1000, profilePath);
+	configs[1] = new SokuModLoader::IniStringValue("DiscordIntegration", "InviteIp", "", 64, profilePath);
+	configs[2] = new SokuModLoader::IniStringValue("DiscordIntegration", "StringFile", "", MAX_PATH, profilePath);
+	configs[3] = nullptr;
+	return configs;
+}
+
+extern "C" __declspec(dllexport) void freeConfig(SokuModLoader::IValue **v) {
+	while (*v)
+		delete *v++;
+	delete[] v;
+}
+
+extern "C" __declspec(dllexport) bool commitConfig(SokuModLoader::IValue *) {
+	return false;
+}
+
+extern "C" __declspec(dllexport) const char *getFailureReason() {
+	return "Saving configs is not yet implemented";
 }

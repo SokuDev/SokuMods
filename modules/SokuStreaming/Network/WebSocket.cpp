@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 06/04/2019.
+// Created by PinkySmile on 06/04/2019.
 //
 
 #include "WebSocket.hpp"

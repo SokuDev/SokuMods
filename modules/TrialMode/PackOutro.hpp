@@ -1,5 +1,5 @@
 //
-// Created by Gegel85 on 05/11/2021.
+// Created by PinkySmile on 05/11/2021.
 //
 
 #ifndef SWRSTOYS_PACKOUTRO_HPP
