@@ -999,6 +999,11 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	return true;
 }
 
+extern "C" __declspec(dllexport) int getPriority()
+{
+	return -10000;
+}
+
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 	return TRUE;
 }

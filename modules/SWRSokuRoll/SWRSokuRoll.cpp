@@ -7,6 +7,7 @@
 const BYTE TARGET_HASH[16] = {0xdf, 0x35, 0xd1, 0xfb, 0xc7, 0xb5, 0x83, 0x31, 0x7a, 0xda, 0xbe, 0x8c, 0xd9, 0xf5, 0x3b, 0x2e};
 
 static char s_profilePath[1024 + MAX_PATH];
+static HMEMORYMODULE handle = nullptr;
 
 #pragma pack(push, 1)
 struct SokuRollParams {
@@ -26,7 +27,7 @@ unsigned __stdcall loadDelay(void *) {
 	// but wasting 1 second here is fine and mimicks the current manual behaviour anyways.
 	Sleep(1000);
 
-	HMEMORYMODULE handle = MemoryLoadLibrary(&sokuroll_data, sokuroll_size);
+	handle = MemoryLoadLibrary(&sokuroll_data, sokuroll_size);
 	if (handle == NULL) {
 		return 0;
 	}
@@ -36,6 +37,10 @@ unsigned __stdcall loadDelay(void *) {
 }
 
 extern "C" {
+__declspec(dllexport) HMODULE GetModuleBaseAddress() {
+	return (HMODULE)(static_cast<PMEMORYMODULE>(handle)->codeBase);
+}
+
 __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return ::memcmp(TARGET_HASH, hash, sizeof TARGET_HASH) == 0;
 }
@@ -55,5 +60,10 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) 
 	_beginthreadex(NULL, NULL, reinterpret_cast<_beginthreadex_proc_type>(loadDelay), NULL, NULL, NULL);
 
 	return true;
+}
+
+__declspec(dllexport) int getPriority()
+{
+	return -300;
 }
 }

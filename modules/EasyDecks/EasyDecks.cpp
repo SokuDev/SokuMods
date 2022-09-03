@@ -165,3 +165,8 @@ EXPORT bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 EXPORT void AtExit() {
 	patches.ClearPatches();
 }
+
+EXPORT int getPriority()
+{
+	return 1000000;
+}
