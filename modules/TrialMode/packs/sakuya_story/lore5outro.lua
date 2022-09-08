@@ -15,7 +15,7 @@ local dialogs = {
 	"RcEWell, to see if this incident could mean trouble...<br>why am I even here?",
 	"LhEFor the same reason she does let you go I believe.",
 	"RhhReally? I don't think she cares that much.",
-	"LHhI do think she cares but you simply can’t notice.<br>It takes time to know your master enough<br>to see those kinds of things.",
+	"LHhI do think she cares but you simply can't notice.<br>It takes time to know your master enough<br>to see those kinds of things.",
 	"RHAThen how am I supposed to know now?",
 	"LCAIt's simple really,<br>you just have to continue until you find out.",
 	"RChI Don't think that will change anything.",
