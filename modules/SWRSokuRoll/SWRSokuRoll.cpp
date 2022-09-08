@@ -61,9 +61,4 @@ __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) 
 
 	return true;
 }
-
-__declspec(dllexport) int getPriority()
-{
-	return -300;
-}
 }
