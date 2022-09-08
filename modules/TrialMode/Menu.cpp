@@ -1786,7 +1786,7 @@ void loadFont()
 	desc.shadow = 1;
 	desc.bufferSize = 1000000;
 	desc.charSpaceX = 0;
-	desc.charSpaceY = 0;
+	desc.charSpaceY = hasEnglishPatch * -2;
 	desc.offsetX = 0;
 	desc.offsetY = 0;
 	desc.useOffset = 0;
