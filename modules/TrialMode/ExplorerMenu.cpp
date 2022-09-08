@@ -378,8 +378,10 @@ void ExplorerMenu::_handleGoUp()
 		this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->loaded = false;
 		if (!this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->loading && this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->preview)
 			this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->preview.reset();
-		this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loaded = true;
-		this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loadPreview();
+		if (!this->_isLocked(this->_currentEntry)) {
+			this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loaded = true;
+			this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loadPreview();
+		}
 	}
 	this->_checkScrollUp();
 	printf("Pack: %i, Entry %i, Shown %i\n", this->_currentPack, this->_currentEntry, this->_shownPack);
@@ -431,8 +433,10 @@ void ExplorerMenu::_handleGoDown()
 		this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->loaded = false;
 		if (!this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->loading && this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->preview)
 			this->_loadedPacks[this->_currentPack]->scenarios[oldEntry]->preview.reset();
-		this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loaded = true;
-		this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loadPreview();
+		if (!this->_isLocked(this->_currentEntry)) {
+			this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loaded = true;
+			this->_loadedPacks[this->_currentPack]->scenarios[this->_currentEntry]->loadPreview();
+		}
 	}
 	this->_checkScrollDown();
 	printf("Pack: %i, Entry %i, Shown %i\n", this->_currentPack, this->_currentEntry, this->_shownPack);
@@ -592,7 +596,7 @@ int ExplorerMenu::onProcess()
 
 		if (!this->_loadedPacks[this->_currentPack]->scenarios[curr]->loading && this->_loadedPacks[this->_currentPack]->scenarios[curr]->preview)
 			this->_loadedPacks[this->_shownPack]->scenarios[curr]->preview->update();
-		else {
+		else if (!this->_isLocked(this->_currentEntry)) {
 			this->_loadedPacks[this->_currentPack]->scenarios[curr]->loaded = true;
 			if (!this->_loadedPacks[this->_currentPack]->scenarios[curr]->loading)
 				this->_loadedPacks[this->_currentPack]->scenarios[curr]->loadPreview();

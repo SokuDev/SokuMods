@@ -16,7 +16,7 @@ local dialogs = {
 	"LSHWhat do you mean?",
 	"RScI do not know who it is that infiltrated the manor...<br>But I do know that this mysterious individual<br>passed by the Hakurei shrine untouched.",
 	"LccDid he beat Reimu?",
-	"RcENot at all, he didn't fight her.",
+	"RcENot at all, she didn't fight her.",
 	"LSEHow strange, Reimu does have a sixth sense<br>when it comes to trouble.",
 	"LcEShe wouldn't let anyone suspicious go by,<br>however lazy she can be...",
 	"LHEI was right, it must be someone quite <color FFFFFF>stealthy</color>...<br>Or someone able to <color FFFFFF>manipulate</color> others...",

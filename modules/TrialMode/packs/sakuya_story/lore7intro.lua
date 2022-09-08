@@ -12,9 +12,9 @@ local dialogs = {
 	"LHHYou are wrong, I have all the time in the world.",
 	"LhHHowever, I do want to know<br>who infiltrated the lady's mansion first.",
 	"RhWIf you are so patient, then you<br>should just have to wait for the journal release.",
-	"LcWCouldn't I have some information in advance?<br>It wouldn’t do any harm.",
+	"LcWCouldn't I have some information in advance?<br>It wouldn't do any harm.",
 	"RcAIf you're here to make fun of me then I'll show you!",
-	"LEAGood grief, I’m not asking much…"
+	"LEAGood grief, I'm not asking much..."
 	--Battle here
 }
 

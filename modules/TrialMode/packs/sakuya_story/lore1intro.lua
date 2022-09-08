@@ -8,7 +8,7 @@ local dialogs = {
 	"lH The mistress is quite lively today.",
 	"lc If she likes visits that much, maybe I should<br>let them in?",
 	"lH Well that wouldn't be appropriate from a maid.",
-	"lS Now, I should begin my instigations. I fear that the<br>mystery of this intruder might not be solved without<br>confronting the sun...",
+	"lS Now, I should begin my investigations. I fear that the<br>mystery of this intruder might not be solved without<br>confronting the sun...",
 	--Marisa coming and seeing sakuya and try to sneak out
 	"lC Stop right here!",
 	"rCEShoot...",

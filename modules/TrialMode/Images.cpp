@@ -9,12 +9,39 @@
 #include "Images.hpp"
 #include "Socket.hpp"
 #include "Exceptions.hpp"
+#include "version.h"
 
 #ifndef _DEBUG
 #define puts(...)
 #define printf(...)
 #define fprintf(...)
 #endif
+
+void unchunkBody(Socket::HttpResponse &res)
+{
+	std::string body;
+
+	body.reserve(res.body.size());
+	while (true) {
+		auto pos = res.body.find_first_of("\r\n");
+
+		if (pos == std::string::npos)
+			return;
+
+		try {
+			auto chunkSize = std::stoul(res.body.substr(0, pos), nullptr, 16);
+
+			if (!chunkSize)
+				break;
+			res.body = res.body.substr(pos + 2);
+			body += res.body.substr(0, chunkSize);
+			res.body = res.body.substr(chunkSize + 2);
+		} catch (std::exception &e) {
+			MessageBox(SokuLib::window, res.body.substr(0, 1000).c_str(), e.what(), MB_ICONERROR);
+		}
+	}
+	res.body = body;
+}
 
 Socket::HttpResponse makeRequest(const std::string &link)
 {
@@ -39,11 +66,14 @@ Socket::HttpResponse makeRequest(const std::string &link)
 	request.host = host;
 	request.portno = port;
 	request.header["Accept"] = "image/png";
+	request.header["User-Agent"] = "TrialMode " VERSION_STR;
 	request.path = pos == std::string::npos ? "/" : path;
 	try {
 		auto res = socket.makeHttpRequest(request);
 
 		printf("%i (%s)\n", res.returnCode, res.codeName.c_str());
+		if (res.header["Transfer-Encoding"] == "chunked")
+			unchunkBody(res);
 		return res;
 	} catch (HTTPErrorException &e) {
 		printf("%i (%s)\n", e.getResponse().returnCode, e.getResponse().codeName.c_str());

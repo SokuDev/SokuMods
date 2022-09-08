@@ -44,7 +44,7 @@ addCommand('text         But be quick, we are waiting for the tea."')
 addCommand('clear')
 addCommand('text Patchy "Should I go too? I\'m rather curious."')
 addCommand('text Remi   "No, there is something I would like to tell you."')
-addCommand('text Patchy "You need me for one of your little plays, aren\'t you?"')
+addCommand('text Patchy "You need me for one of your little plays, don\'t you?"')
 
 addCommand('playBGM ""')
 addCommand("end")
