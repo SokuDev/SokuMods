@@ -8,7 +8,7 @@
 #include "Network/getPublicIp.hpp"
 #include "logger.hpp"
 #include <nlohmann/json.hpp>
-#include <ModLoader.hpp>
+//#include <ModLoader.hpp>
 #include <SokuLib.hpp>
 #include <array>
 #include <ctime>
@@ -141,6 +141,9 @@ static std::hash<std::string> hasher{};
 
 bool isHosting()
 {
+	if (SokuLib::menuManager.empty())
+		return false;
+
 	auto menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 	HMODULE handle = LoadLibraryA("HostInBackground");
 
@@ -483,13 +486,13 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 	default:
 		return;
 	case SokuLib::SCENE_TITLE:
-		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-
 		index = STRING_INDEX_TITLE;
 		if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 			logMessage("We are not in a proper submenu\n");
 			return;
 		}
+
+		auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
 		if ((menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 3) || (menuObj->choice >= SokuLib::MenuConnect::CHOICE_HOST && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 255)) {
 			if (state.host != 2)
@@ -503,12 +506,12 @@ void getActivityParams(StringIndex &index, unsigned &party) {
 }
 
 void titleScreenStateUpdate() {
-	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
-
 	if (!SokuLib::MenuConnect::isInNetworkMenu()) {
 		logMessage("We are not in a proper submenu\n");
 		return;
 	}
+
+	auto *menuObj = SokuLib::getMenuObj<SokuLib::MenuConnect>();
 
 	if (
 		(menuObj->choice >= SokuLib::MenuConnect::CHOICE_ASSIGN_IP_CONNECT && menuObj->choice < SokuLib::MenuConnect::CHOICE_SELECT_PROFILE && menuObj->subchoice == 3) ||
@@ -950,7 +953,7 @@ extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
 	return TRUE;
 }
 
-
+/*
 //New mod loader functions
 extern "C" __declspec(dllexport) int getPriority() {
 	return 0;
@@ -989,4 +992,4 @@ extern "C" __declspec(dllexport) bool commitConfig(SokuModLoader::IValue *) {
 
 extern "C" __declspec(dllexport) const char *getFailureReason() {
 	return "Saving configs is not yet implemented";
-}
+}*/
