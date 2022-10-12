@@ -35,7 +35,7 @@ add_library(swrstoys MODULE
 )
 target_compile_definitions(swrstoys PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_include_directories(swrstoys PRIVATE include)
-target_link_libraries(swrstoys shlwapi user32 advapi32 dbghelp shell32 SokuLib "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib")
+target_link_libraries(swrstoys shlwapi user32 advapi32 dbghelp shell32 SokuLib MemoryModule "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib")
 set_target_properties(swrstoys PROPERTIES
         OUTPUT_NAME d3d9)
 install(TARGETS swrstoys LIBRARY DESTINATION "SWRSToys/")
@@ -56,7 +56,7 @@ add_library(swrstoys_notex MODULE
 )
 target_compile_definitions(swrstoys_notex PRIVATE _CRT_SECURE_NO_WARNINGS _NOTEX)
 target_include_directories(swrstoys_notex PRIVATE include)
-target_link_libraries(swrstoys_notex shlwapi user32 advapi32 dbghelp shell32 SokuLib "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib")
+target_link_libraries(swrstoys_notex shlwapi user32 advapi32 dbghelp shell32 SokuLib MemoryModule "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib")
 set_target_properties(swrstoys_notex PROPERTIES
         OUTPUT_NAME d3d9_notex)
 install(TARGETS swrstoys_notex LIBRARY DESTINATION "SWRSToys/")

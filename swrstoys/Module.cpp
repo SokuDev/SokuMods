@@ -2,7 +2,9 @@
 // Created by PinkySmile on 02/09/2022.
 //
 
+#include <fstream>
 #include "Module.hpp"
+#include "../MemoryModule/MemoryModule.h"
 
 
 #define GET_MANDATORY_FUNCTION(name, path, module, modName) \
@@ -73,13 +75,60 @@ bool Module::load()
 	this->module = LoadLibraryW(this->path.c_str());
 	if (this->module == nullptr) {
 		auto err = GetLastError();
-		size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%x: %s", name.c_str(), err, GetLastErrorAsString(err));
-		auto buf = (wchar_t *)malloc((needed + 1) * sizeof(wchar_t));
 
-		// TODO: If the error is ERROR_MOD_NOT_FOUND
-		_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%x: %s", name.c_str(), err, GetLastErrorAsString(err));
-		this->lastError = buf;
-		free(buf);
+		if (err == ERROR_MOD_NOT_FOUND) {
+			HANDLE hFile = CreateFileW(this->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+			LARGE_INTEGER size;
+			char *buffer;
+			DWORD real;
+
+			if (hFile == INVALID_HANDLE_VALUE)
+				goto fallback;
+
+			if (!GetFileSizeEx(hFile, &size) || size.HighPart) {
+				CloseHandle(hFile);
+				goto fallback;
+			}
+			buffer = new(std::nothrow) char[size.LowPart];
+			if (!buffer) {
+				CloseHandle(hFile);
+				goto fallback;
+			}
+			ReadFile(hFile, buffer, size.LowPart, &real, nullptr);
+			CloseHandle(hFile);
+
+			auto result = MemoryLoadLibrary(buffer, real);
+
+			free(buffer);
+			if (result) {
+				// ?????
+				puts("WTF??");
+				MemoryFreeLibrary(result);
+				goto fallback;
+			}
+			err = GetLastError();
+			if (GetLastError() != ERROR_MOD_NOT_FOUND) {
+				printf("Failed memory loading %S: GetLastError() 0x%lx: %S", name.c_str(), err, GetLastErrorAsString(err));
+				MemoryFreeLibrary(result);
+				err = ERROR_MOD_NOT_FOUND;
+				goto fallback;
+			}
+
+			size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%lx: %sModule's dependency '%hs' was not found.", name.c_str(), err, GetLastErrorAsString(err), MemoryModuleMissingDependency());
+			auto buf = (wchar_t *)malloc((needed + 1) * sizeof(wchar_t));
+
+			_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%lx: %sModule's dependency '%hs' was not found.", name.c_str(), err, GetLastErrorAsString(err), MemoryModuleMissingDependency());
+			this->lastError = buf;
+			free(buf);
+		} else {
+		fallback:
+			size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%lx: %s", name.c_str(), err, GetLastErrorAsString(err));
+			auto buf = (wchar_t *)malloc((needed + 1) * sizeof(wchar_t));
+
+			_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%x: %s", name.c_str(), err, GetLastErrorAsString(err));
+			this->lastError = buf;
+			free(buf);
+		}
 		return false;
 	}
 
