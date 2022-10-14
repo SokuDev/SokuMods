@@ -9,11 +9,12 @@
 #include <windows.h>
 #include <ModLoader.hpp>
 #include <string>
+#include <filesystem>
 
 class Module {
 private:
 	HMODULE module = nullptr;
-	std::wstring path;
+	std::filesystem::path path;
 	byte hash[16];
 	HMODULE this_module;
 	bool _init = false;

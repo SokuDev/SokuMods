@@ -15,6 +15,8 @@
 #define GET_FUNCTION(name, module) this->name = (decltype(name))GetProcAddress(module, #name)
 
 
+extern wchar_t app_path[MAX_PATH];
+
 LPWSTR GetLastErrorAsString(DWORD errorMessageID)
 {
 	if (errorMessageID == 0) {
@@ -38,6 +40,8 @@ LPWSTR GetLastErrorAsString(DWORD errorMessageID)
 
 Module::Module(const wchar_t *path, byte hash[16], HMODULE this_module) : path(path), this_module(this_module)
 {
+	if (this->path.is_relative())
+		this->path = std::filesystem::path(app_path) / this->path;
 	memcpy(this->hash, hash, 16);
 }
 
@@ -71,13 +75,13 @@ bool Module::load()
 
 	auto name = this->getName();
 
-	printf("Loading module %S\n", this->path.c_str());
-	this->module = LoadLibraryW(this->path.c_str());
+	printf("Loading module %S\n", path.c_str());
+	this->module = LoadLibraryW(path.c_str());
 	if (this->module == nullptr) {
 		auto err = GetLastError();
 
 		if (err == ERROR_MOD_NOT_FOUND) {
-			HANDLE hFile = CreateFileW(this->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+			HANDLE hFile = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 			LARGE_INTEGER size;
 			char *buffer;
 			DWORD real;
@@ -132,8 +136,8 @@ bool Module::load()
 		return false;
 	}
 
-	GET_MANDATORY_FUNCTION(CheckVersion, this->path, this->module, name);
-	GET_MANDATORY_FUNCTION(Initialize,   this->path, this->module, name);
+	GET_MANDATORY_FUNCTION(CheckVersion, path, this->module, name);
+	GET_MANDATORY_FUNCTION(Initialize,   path, this->module, name);
 	GET_FUNCTION(getPriority,            this->module);
 	GET_FUNCTION(hasChainedHooks,        this->module);
 	GET_FUNCTION(unHook,                 this->module);
@@ -234,15 +238,23 @@ bool Module::unload(bool remove, bool freeLib, bool fromChain)
 
 std::wstring Module::getPath() const
 {
-	return this->path;
+	if (this->path.is_relative())
+		return std::filesystem::absolute(this->path);
+
+	auto result = std::filesystem::relative(this->path, app_path);
+
+	if (result.empty() || result.native()[0] == '.')
+		return std::filesystem::absolute(this->path);
+	return result;
 }
 
 std::wstring Module::getName() const
 {
-	auto pos1 = this->path.find_last_of('/');
-	auto pos2 = this->path.find_last_of('\\');
+	auto path = this->path.wstring();
+	auto pos1 = path.find_last_of('/');
+	auto pos2 = path.find_last_of('\\');
 	auto pos = pos1 == std::string::npos ? pos2 : pos2 == std::string::npos ? pos1 : max(pos1, pos2);
-	auto name = pos != std::string::npos ? this->path.substr(pos + 1) : this->path;
+	auto name = pos != std::string::npos ? path.substr(pos + 1) : path;
 
 	return name;
 }

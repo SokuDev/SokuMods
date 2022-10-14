@@ -786,7 +786,7 @@ void draw_char_bullets(void *char_addr, bool draw_all_objects = true) {
 	auto objects = get_char_objects((void *)char_addr);
 
 	for (auto e = objects; e; e = e->next) {
-		if (is_active(e->data) || is_melee_frame(e->data))
+		if (e->data && is_active(e->data) || is_melee_frame(e->data))
 			draw_char_boxes(e->data, false);
 	}
 
