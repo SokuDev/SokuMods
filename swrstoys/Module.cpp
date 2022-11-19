@@ -10,6 +10,7 @@
 #define GET_MANDATORY_FUNCTION(name, path, module, modName) \
 	do{if (!(this->name = (decltype(name))GetProcAddress(module, #name))) { \
 		this->lastError = L"Failed loading " + modName + L": " #name " not found"; \
+		printf("%S\n", this->lastError.c_str());\
 		return false; \
 	}}while(0)
 #define GET_FUNCTION(name, module) this->name = (decltype(name))GetProcAddress(module, #name)
@@ -17,15 +18,16 @@
 
 extern wchar_t app_path[MAX_PATH];
 
-LPWSTR GetLastErrorAsString(DWORD errorMessageID)
+std::wstring GetLastErrorAsString(DWORD errorMessageID)
 {
-	if (errorMessageID == 0) {
-		return nullptr;
-	}
+	if (errorMessageID == 0)
+		return L"No Error";
 
 	LPWSTR messageBuffer = nullptr;
+	std::wstring m;
 
-	FormatMessageW(
+	printf("Finding message for error %lx\n", errorMessageID);
+	if (FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		nullptr,
 		errorMessageID,
@@ -33,9 +35,28 @@ LPWSTR GetLastErrorAsString(DWORD errorMessageID)
 		(LPWSTR)&messageBuffer,
 		0,
 		nullptr
-	);
+	)) {
+		m = messageBuffer;
+		LocalFree(messageBuffer);
+		return m;
+	}
+	printf("Error %lx in FormatMessageW (EN)\n", GetLastError());
 
-	return messageBuffer;
+	if (!FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr,
+		errorMessageID,
+		0,
+		(LPWSTR)&messageBuffer,
+		0,
+		nullptr
+	)) {
+		printf("Error %lx in FormatMessageW (LOCAL)\n", GetLastError());
+		return L"(null)\n";
+	}
+	m = messageBuffer;
+	LocalFree(messageBuffer);
+	return m;
 }
 
 Module::Module(const wchar_t *path, byte hash[16], HMODULE this_module) : path(path), this_module(this_module)
@@ -73,6 +94,8 @@ bool Module::load()
 		return true;
 	}
 
+	printf("Loading module %S\n", this->path.c_str());
+
 	auto name = this->getName();
 
 	printf("Loading module %S\n", path.c_str());
@@ -91,11 +114,13 @@ bool Module::load()
 
 			if (!GetFileSizeEx(hFile, &size) || size.HighPart) {
 				CloseHandle(hFile);
+				puts("Invalid size.");
 				goto fallback;
 			}
 			buffer = new(std::nothrow) char[size.LowPart];
 			if (!buffer) {
 				CloseHandle(hFile);
+				puts("Allocation failure.");
 				goto fallback;
 			}
 			ReadFile(hFile, buffer, size.LowPart, &real, nullptr);
@@ -112,24 +137,26 @@ bool Module::load()
 			}
 			err = GetLastError();
 			if (GetLastError() != ERROR_MOD_NOT_FOUND) {
-				printf("Failed memory loading %S: GetLastError() 0x%lx: %S", name.c_str(), err, GetLastErrorAsString(err));
+				printf("Failed memory loading %S: GetLastError() 0x%lx: %S", name.c_str(), err, GetLastErrorAsString(err).c_str());
 				MemoryFreeLibrary(result);
 				err = ERROR_MOD_NOT_FOUND;
 				goto fallback;
 			}
 
-			size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%lx: %sModule's dependency '%hs' was not found.", name.c_str(), err, GetLastErrorAsString(err), MemoryModuleMissingDependency());
+			size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%lx: %sModule's dependency '%hs' was not found.", name.c_str(), err, GetLastErrorAsString(err).c_str(), MemoryModuleMissingDependency());
 			auto buf = (wchar_t *)malloc((needed + 1) * sizeof(wchar_t));
 
-			_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%lx: %sModule's dependency '%hs' was not found.", name.c_str(), err, GetLastErrorAsString(err), MemoryModuleMissingDependency());
+			_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%lx: %sModule's dependency '%hs' was not found.", name.c_str(), err, GetLastErrorAsString(err).c_str(), MemoryModuleMissingDependency());
+			printf("%S\n", buf);
 			this->lastError = buf;
 			free(buf);
 		} else {
 		fallback:
-			size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%lx: %s", name.c_str(), err, GetLastErrorAsString(err));
+			size_t needed = _snwprintf(nullptr, 0, L"Failed loading %s: GetLastError() 0x%lx: %s", name.c_str(), err, GetLastErrorAsString(err).c_str());
 			auto buf = (wchar_t *)malloc((needed + 1) * sizeof(wchar_t));
 
-			_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%x: %s", name.c_str(), err, GetLastErrorAsString(err));
+			_snwprintf(buf, (needed + 1), L"Failed loading %s: GetLastError() 0x%x: %s", name.c_str(), err, GetLastErrorAsString(err).c_str());
+			printf("%S\n", buf);
 			this->lastError = buf;
 			free(buf);
 		}
@@ -164,12 +191,14 @@ bool Module::init()
 
 	if (!this->CheckVersion(this->hash)) {
 		this->lastError = L"Failed loading " + name + L": CheckVersion failed";
+		printf("%S\n", this->lastError.c_str());
 		FreeLibrary(this->module);
 		this->module = nullptr;
 		return false;
 	}
-	if (!this->Initialize(this->module, this->this_module)) {
+	if (!this->Initialize(static_cast<HMODULE>(this->module), this->this_module)) {
 		this->lastError = L"Failed loading " + name + L": Initialize failed";
+		printf("%S\n", this->lastError.c_str());
 		FreeLibrary(this->module);
 		this->module = nullptr;
 		return false;

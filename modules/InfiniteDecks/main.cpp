@@ -1130,7 +1130,7 @@ int __fastcall CSelectSV_OnProcess(SokuLib::SelectServer *This) {
 }
 
 int __fastcall CSelect_OnProcess(SokuLib::Select *This) {
-	if (SokuLib::menuManager.isInMenu && *SokuLib::getMenuObj<int>() == 0x859820) {
+	if (!SokuLib::menuManager.empty() && *SokuLib::getMenuObj<int>() == 0x859820) {
 		auto obj = SokuLib::getMenuObj<int>();
 		auto selected = obj[0x1A];
 
@@ -1864,7 +1864,7 @@ int __fastcall CProfileDeckEdit_OnRender(SokuLib::ProfileDeckEdit *This)
 
 int __fastcall CTitle_OnProcess(SokuLib::Title *This)
 {
-	if (!SokuLib::menuManager.isInMenu || *SokuLib::getMenuObj<int>() != SokuLib::ADDR_VTBL_DECK_CONSTRUCTION_CHR_SELECT_MENU)
+	if (SokuLib::menuManager.empty() || *SokuLib::getMenuObj<int>() != SokuLib::ADDR_VTBL_DECK_CONSTRUCTION_CHR_SELECT_MENU)
 		editSelectedProfile = 2;
 	return (This->*s_originalTitleOnProcess)();
 }

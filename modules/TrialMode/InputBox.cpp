@@ -96,7 +96,6 @@ void inputBoxUpdate()
 	if (returnPressed) {
 		if ((current[VK_RETURN] & 0x80) == 0) {
 			inputBoxShown = false;
-			mutex.unlock();
 			try {
 				onAcceptFct(buffer.data());
 			} catch (...) {}

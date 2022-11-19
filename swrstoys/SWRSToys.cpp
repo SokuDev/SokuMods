@@ -14,7 +14,7 @@
 #include "SWRSToys.h"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
-#define REAL_VERSION_STR "alpha 0.3"
+#define REAL_VERSION_STR "alpha 0.3.1"
 #ifdef _NOTEX
 #define MOD_REAL_VERSION_STR REAL_VERSION_STR " no texture"
 #else
@@ -226,7 +226,13 @@ void generateFakeIni()
 	for (size_t i = 0; i < modules.size(); i++) {
 		if (!modules[i].enabled)
 			stream << ";";
-		stream << "Mod" << i << "=" << std::filesystem::path(modules[i].getPath()).string() << std::endl;
+
+		auto str = std::filesystem::path(modules[i].getPath()).string();
+
+		for (char & j : str)
+			if (j == '\\')
+				j = '/';
+		stream << "Mod" << i << "=" << str << std::endl;
 	}
 	stream.close();
 }
@@ -244,7 +250,7 @@ void reloadModules()
 			continue;
 
 		if (line == wstring_to_utf8(module.getPath())) {
-			MessageBoxW(nullptr, (module.getName() + L" has been disabled because it the game crashed while loading it last time.\nYou can enable it again in the mod config menu.").c_str(), L"Module disabled", MB_ICONWARNING);
+			MessageBoxW(nullptr, (module.getName() + L" has been disabled because the game crashed while loading it last time.\nYou can enable it again in the mod config menu.").c_str(), L"Module disabled", MB_ICONWARNING);
 			module.enabled = false;
 			saveSettings();
 			continue;
