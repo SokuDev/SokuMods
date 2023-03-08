@@ -844,8 +844,8 @@ static void onDeckSaved()
 
 	for (auto &card : *menu->editedDeck)
 		card.second = 0;
-	for (int i = 0; i < 5; i++)
-		menu->editedDeck->operator[](i) = 4;
+	for (int i = 0; i < 20; i++)
+		menu->editedDeck->operator[](i) = 1;
 }
 
 void renderDeck(SokuLib::Character chr, unsigned select, const std::vector<Deck> &decks, SokuLib::Vector2i pos, const char *overridingName = nullptr)
