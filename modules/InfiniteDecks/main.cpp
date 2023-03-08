@@ -115,7 +115,6 @@ static unsigned upSelectedDeck = 0;
 static unsigned downSelectedDeck = 0;
 static unsigned editSelectedDeck = 0;
 static unsigned editSelectedProfile = 0;
-static unsigned pickedRandomCounter = 0;
 static std::string lastLoadedProfile;
 static std::string leftLoadedProfile;
 static std::string rightLoadedProfile;
@@ -459,9 +458,10 @@ static bool saveProfile(const std::string &path, const std::map<unsigned char, s
 int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, int tolen)
 {
 	auto packet = reinterpret_cast<SokuLib::Packet *>(buf);
+	static bool a = false;
 
-	if (SokuLib::sceneId != SokuLib::SCENE_SELECTCL && SokuLib::sceneId != SokuLib::SCENE_SELECTSV && SokuLib::sceneId != SokuLib::SCENE_SELECT)
-		return realSendTo(s, buf, len, flags, to, tolen);
+	//if (SokuLib::sceneId != SokuLib::SCENE_SELECTCL && SokuLib::sceneId != SokuLib::SCENE_SELECTSV && SokuLib::sceneId != SokuLib::SCENE_SELECT)
+	//	return realSendTo(s, buf, len, flags, to, tolen);
 	if (packet->type == SokuLib::CLIENT_GAME || packet->type == SokuLib::HOST_GAME) {
 		bool needDelete = false;
 
@@ -476,30 +476,30 @@ int __stdcall mySendTo(SOCKET s, char *buf, int len, int flags, sockaddr *to, in
 			else //We just send an invalid deck over if we want no decks
 				memset(replace.cards, 0, 40);
 		}
+		if (!packet->game.event.input.inputs[0].charSelect.Z)
+			a = false;
 		if (packet->game.event.type == SokuLib::GAME_INPUT && packet->game.event.input.sceneId == SokuLib::SCENEID_CHARACTER_SELECT) {
 			auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
 
-			if (scene.leftSelectionStage  != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT)
-				return sendto(s, buf, len, flags, to, tolen);
-			if (scene.rightSelectionStage != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER)
-				return sendto(s, buf, len, flags, to, tolen);
+			if (scene.leftSelectionStage  != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) {
+				a = true;
+				return realSendTo(s, buf, len, flags, to, tolen);
+			}
+			if (scene.rightSelectionStage != 1 && SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER) {
+				a = true;
+				return realSendTo(s, buf, len, flags, to, tolen);
+			}
 
 			char *buffer = new char[len];
 
 			memcpy(buffer, buf, len);
 			packet = reinterpret_cast<SokuLib::Packet *>(buffer);
-			//Me changing deck ? I would never do that !
-
+			packet->game.event.input.inputs[0].charSelect.A |= packet->game.event.input.inputs[0].charSelect.Z && !a;
+			packet->game.event.input.inputs[0].charSelect.Z = false;
 			packet->game.event.input.inputs[0].charSelect.left = false;
-			if (pickedRandomCounter == 0)
-				packet->game.event.input.inputs[0].charSelect.right = false;
-			else {
-				packet->game.event.input.inputs[0].charSelect.right = pickedRandomCounter < 10;
-				packet->game.event.input.inputs[0].charSelect.Z = false;
-				pickedRandomCounter--;
-			}
+			packet->game.event.input.inputs[0].charSelect.right = false;
 
-			int bytes = sendto(s, buffer, len, flags, to, tolen);
+			int bytes = realSendTo(s, buffer, len, flags, to, tolen);
 
 			delete[] buffer;
 			return bytes;
@@ -759,7 +759,8 @@ static int weirdRand(int key, int delay)
 	return it->second.second;
 }
 
-static void initFont() {
+static void initFont()
+{
 	SokuLib::FontDescription desc;
 
 	desc.r1 = 255;
@@ -1109,8 +1110,6 @@ static int selectProcessCommon(int v)
 			scene.leftRandomDeck = false;
 		}
 		printf("Picked %srandom deck\n", pickedRandom ? "" : "not ");
-		if (pickedRandom)
-			pickedRandomCounter = 15;
 		generateFakeDecks();
 		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
 			fillSokuDeck(SokuLib::leftPlayerInfo.effectiveDeck, fakeLeftDeck);
@@ -1147,9 +1146,6 @@ static void handleInput(const SokuLib::KeyInput &inputs, int index)
 	bool isRight = index == 1;
 	auto &selectedDeck = (isRight ? downSelectedDeck : upSelectedDeck);
 	auto &decks = loadedDecks[index][isRight ? SokuLib::rightChar : SokuLib::leftChar];
-
-	if (pickedRandomCounter != 0 && (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT))
-		return;
 
 	if (inputs.horizontalAxis < 0) {
 		if (selectedDeck == 0)
