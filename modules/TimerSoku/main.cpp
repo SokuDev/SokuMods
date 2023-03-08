@@ -21,6 +21,8 @@ static unsigned short displayed = 0;
 int __fastcall CBattleManager_OnRender(SokuLib::BattleManager *This)
 {
 	(This->*ogBattleMgrOnRender)();
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
+		return 0;
 	if (This->matchState < 6 && This->matchState >= 1 && !(displayed & 0x4000)) {
 		auto timer = displayed & 0xFFF;
 
@@ -92,6 +94,8 @@ void __fastcall CBattleManager_OnProcess(void *obj)
 	}
 
 	ogBattleMgrUpdateCounters(obj);
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_PRACTICE)
+		return;
 
 	// We detect SokuRoll's hook and we extract an address from it so we can do the same checks
 	if (*(unsigned char *)0x490B29 == 0xE9) {
