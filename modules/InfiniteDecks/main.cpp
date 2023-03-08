@@ -581,7 +581,7 @@ bool allDecksDefault(unsigned short (*decks)[4][20], unsigned i)
 	return true;
 }
 
-static void convertProfile(const char *jsonPath)
+static bool convertProfile(const char *jsonPath)
 {
 	char path[MAX_PATH];
 	unsigned char length;
@@ -599,14 +599,14 @@ static void convertProfile(const char *jsonPath)
 	profile = fopen(path, "r");
 	if (!profile) {
 		printf("Can't open %s for reading %s\n", path, strerror(errno));
-		return;
+		return false;
 	}
 
 	json = fopen(jsonPath, "w");
 	if (!json) {
 		fclose(profile);
 		printf("Can't open %s for writing %s\n", jsonPath, strerror(errno));
-		return;
+		return false;
 	}
 
 	fseek(profile, 106, SEEK_SET);
@@ -668,6 +668,7 @@ static void convertProfile(const char *jsonPath)
 	fclose(json);
 	free(decks);
 	decks = nullptr;
+	return true;
 }
 
 static bool loadProfileFile(const std::string &path, std::ifstream &stream, std::map<unsigned char, std::vector<Deck>> &map, int index, bool hasBackup = false)
@@ -678,9 +679,11 @@ static bool loadProfileFile(const std::string &path, std::ifstream &stream, std:
 			throw std::exception();
 		if (errno == ENOENT) {
 			puts("Let's fix that");
-			convertProfile(path.c_str());
-			stream.open(path);
-			return loadProfileFile(path, stream, map, index);
+			if (convertProfile(path.c_str())) {
+				stream.open(path);
+				if (stream)
+					return loadProfileFile(path, stream, map, index);
+			}
 		}
 		for (auto &elem : names)
 			map[elem.first].clear();
