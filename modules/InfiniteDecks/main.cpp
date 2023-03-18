@@ -1092,18 +1092,16 @@ static int selectProcessCommon(int v)
 		}
 	}
 
-	if (scene.leftRandomDeck && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) {
-		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
-			scene.leftRandomDeck = false;
-		if (SokuLib::leftChar != SokuLib::CHARACTER_RANDOM)
-			upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 3;
-	}
-	if (scene.rightRandomDeck && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
-		if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER)
-			scene.rightRandomDeck = false;
-		if (SokuLib::rightChar != SokuLib::CHARACTER_RANDOM)
-			downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
-	}
+	//if (scene.leftRandomDeck && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER) {
+	//	scene.leftRandomDeck = false;
+	//	if (SokuLib::leftChar != SokuLib::CHARACTER_RANDOM)
+	//		upSelectedDeck = loadedDecks[0][SokuLib::leftChar].size() + 3;
+	//}
+	//if (scene.rightRandomDeck && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT) {
+	//	scene.rightRandomDeck = false;
+	//	if (SokuLib::rightChar != SokuLib::CHARACTER_RANDOM)
+	//		downSelectedDeck = loadedDecks[SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER][SokuLib::rightChar].size() + 3;
+	//}
 	if (scene.leftSelectionStage != 3 || scene.rightSelectionStage != 3 || counter < 30) {
 		if (lastLeft != SokuLib::leftChar)
 			upSelectedDeck = 0;
