@@ -701,6 +701,28 @@ install(TARGETS "TimerSoku" LIBRARY DESTINATION "SokuEngine/modules/TimerSoku/")
 
 
 add_library(
+        "BorderShock"
+        MODULE
+        modules/BorderShock/main.cpp
+)
+target_compile_options(BorderShock PRIVATE /Zi)
+target_compile_definitions("BorderShock" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("BorderShock" PRIVATE include include/directx "modules/BorderShock/")
+target_link_directories("BorderShock" PRIVATE lib)
+target_link_libraries(
+        BorderShock
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "BorderShock" LIBRARY DESTINATION "SWRSToys/modules/BorderShock/")
+install(TARGETS "BorderShock" LIBRARY DESTINATION "SokuEngine/modules/BorderShock/")
+
+
+add_library(
         "SuddenDeath"
         MODULE
         modules/SuddenDeath/main.cpp
@@ -791,7 +813,7 @@ add_library(
         "AssistSoku"
         MODULE
         modules/AssistSoku/main.cpp
-)
+	modules/BorderShock/main.cpp)
 target_compile_options(AssistSoku PRIVATE /Zi)
 target_compile_definitions("AssistSoku" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
 target_include_directories("AssistSoku" PRIVATE include include/directx "modules/AssistSoku/")
