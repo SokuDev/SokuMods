@@ -723,6 +723,28 @@ install(TARGETS "BorderShock" LIBRARY DESTINATION "SokuEngine/modules/BorderShoc
 
 
 add_library(
+        "FuckedWeather"
+        MODULE
+        modules/FuckedWeather/main.cpp
+)
+target_compile_options(FuckedWeather PRIVATE /Zi)
+target_compile_definitions("FuckedWeather" PRIVATE DIRECTINPUT_VERSION=0x0800 CURL_STATICLIB _CRT_SECURE_NO_WARNINGS $<$<CONFIG:Debug>:_DEBUG>)
+target_include_directories("FuckedWeather" PRIVATE include include/directx "modules/FuckedWeather/")
+target_link_directories("FuckedWeather" PRIVATE lib)
+target_link_libraries(
+        FuckedWeather
+        SokuLib
+        shlwapi
+        ws2_32
+        user32
+        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
+        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
+)
+install(TARGETS "FuckedWeather" LIBRARY DESTINATION "SWRSToys/modules/FuckedWeather/")
+install(TARGETS "FuckedWeather" LIBRARY DESTINATION "SokuEngine/modules/FuckedWeather/")
+
+
+add_library(
         "SuddenDeath"
         MODULE
         modules/SuddenDeath/main.cpp
