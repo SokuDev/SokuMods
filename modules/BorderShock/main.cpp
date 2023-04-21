@@ -42,8 +42,6 @@ void checkShock(SokuLib::CharacterManager &chr, SokuLib::CharacterManager &op)
 
 	if (op.timeStop)
 		return;
-	if (op.objectBase.action >= SokuLib::ACTION_GRABBED && op.objectBase.action < 120 && op.objectBase.position.y != 0)
-		return;
 	if (chr.objectBase.action < SokuLib::ACTION_5A)
 		return;
 	if (chr.objectBase.action == SokuLib::ACTION_SYSTEM_CARD && chr.timeStop)
@@ -93,6 +91,9 @@ void checkShock(SokuLib::CharacterManager &chr, SokuLib::CharacterManager &op)
 	chr.objectBase.renderInfos.zRotation = 0;
 	chr.correction |= 0x18;
 	chr.offset_0x7CD[3] = 0;
+	SokuLib::camera.offset_0x2C = false;
+	SokuLib::camera.offset_0x2D = false;
+	SokuLib::camera.scaleForced = false;
 	/*if (SokuLib::activeWeather == SokuLib::WEATHER_CLEAR && SokuLib::weatherCounter % 90 == 1)
 		chr.offset_0x7CD[3] = 14;
 	else if (SokuLib::activeWeather == SokuLib::WEATHER_AURORA)
@@ -100,12 +101,19 @@ void checkShock(SokuLib::CharacterManager &chr, SokuLib::CharacterManager &op)
 	else
 		chr.offset_0x7CD[3] = effectTable[SokuLib::activeWeather];*/
 	if (op.objectBase.action >= SokuLib::ACTION_GRABBED && op.objectBase.action < 120) {
-		op.objectBase.action = SokuLib::ACTION_STAND_GROUND_HIT_HUGE_HITSTUN;
-		if (op.objectBase.hitstop > 360)
-			op.objectBase.hitstop = 360;
+		op.objectBase.gravity = {0, 0};
+		if (op.objectBase.position.y != 0) {
+			op.objectBase.gravity.y = 0.5;
+			op.objectBase.action = SokuLib::ACTION_AIR_CRUSHED;
+		} else if (op.objectBase.hp == 0) {
+			op.objectBase.action = SokuLib::ACTION_KNOCKED_DOWN;
+			op.objectBase.hitstop = 0;
+		} else
+			op.objectBase.action = SokuLib::ACTION_GROUND_CRUSHED;
+		if (op.objectBase.hitstop > 60)
+			op.objectBase.hitstop = 60;
 		op.objectBase.animate();
 		op.objectBase.speed = {0, 0};
-		op.objectBase.gravity = {0, 0};
 		op.objectBase.renderInfos.scale = {1, 1};
 		op.objectBase.renderInfos.xRotation = 0;
 		op.objectBase.renderInfos.yRotation = 0;
