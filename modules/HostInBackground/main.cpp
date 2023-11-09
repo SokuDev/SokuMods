@@ -354,7 +354,7 @@ unsigned __stdcall hostLoop(void *)
 			//TODO: Replace with the gameid the game is currently using
 			if (memcmp(
 				packet.initRequest.gameId,
-				SokuLib::SWRUnlinked ? SokuLib::Soku110acNoSWRAllChars : SokuLib::Soku110acRollSWRAllChars,
+				(unsigned char *)0x858B80,
 				sizeof(packet.initRequest.gameId)
 			) != 0) {
 				printf("Invalid game version!\n");
