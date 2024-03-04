@@ -14,7 +14,7 @@
 #include "SWRSToys.h"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
-#define REAL_VERSION_STR "alpha 0.3.1"
+#define REAL_VERSION_STR "alpha 0.4.1"
 #ifdef _NOTEX
 #define MOD_REAL_VERSION_STR REAL_VERSION_STR " no texture"
 #else
@@ -101,7 +101,7 @@ LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
 	}
 	printf("%S\n", buf);
 	MessageBoxW(nullptr, buf, L"Fatal Error", MB_ICONERROR);
-	exit(ExPtr->ExceptionRecord->ExceptionCode);
+	return EXCEPTION_CONTINUE_SEARCH;
 }
 
 void loadAssets()
@@ -111,7 +111,6 @@ void loadAssets()
 	loaded = true;
 	SokuLib::FontDescription desc;
 
-	SetUnhandledExceptionFilter(UnhandledExFilter);
 	puts("Placed exception handler!");
 	desc.r1 = 255;
 	desc.r2 = 255;
@@ -545,6 +544,13 @@ int __fastcall myTitleOnRender(SokuLib::Title *This)
 	return ret;
 }
 
+void trapDebugger(bool b)
+{
+	if (!b)
+		return;
+	DebugBreak();
+}
+
 bool Hook(HMODULE this_module)
 {
 #ifdef _DEBUG
@@ -573,6 +579,13 @@ bool Hook(HMODULE this_module)
 		puts("Loading settings file");
 		loadSettings(gameHash, this_module);
 		puts("Placing hooks");
+		SetUnhandledExceptionFilter(UnhandledExFilter);
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+		*(char *)0x81FF00 = 0x90;
+		*(char *)0x81FF01 = 0x50;
+		*(char *)0x81FF04 = 0x90;
+		SokuLib::TamperNearCall(0x81FF05, trapDebugger);
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 		VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		ogTitleOnProcess = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess, myTitleOnProcess);
 		ogTitleOnRender  = SokuLib::TamperDword(&SokuLib::VTable_Title.onRender,  myTitleOnRender);

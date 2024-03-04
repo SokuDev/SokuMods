@@ -119,7 +119,6 @@ add_library(ZLIB::ZLIB ALIAS zlibstatic)
 SET(BUILD_SHARED_LIBS OFF)
 SET(LIBZIP_DO_INSTALL OFF)
 SET(ENABLE_COMMONCRYPTO OFF)
-SET(ENABLE_GNUTLS OFF)
 SET(ENABLE_OPENSSL OFF)
 SET(ENABLE_WINDOWS_CRYPTO OFF)
 SET(ENABLE_BZIP2 OFF)
@@ -130,8 +129,8 @@ SET(LIBZIP_DO_INSTALL OFF)
 SET(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
 SET(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/zlib")
 add_subdirectory(libzip)
-add_dependencies(zip zlibstatic)
-target_include_directories(zip PRIVATE ${ZLIB_INCLUDE_DIR})
+#add_dependencies(zip zlibstatic)
+#target_include_directories(zip PRIVATE ${ZLIB_INCLUDE_DIR})
 
 # detours
 

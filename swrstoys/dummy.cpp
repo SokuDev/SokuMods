@@ -1,6 +1,7 @@
 #include "dummy.h"
 
 #include <Windows.h>
+#include <SokuLib.hpp>
 #include "SWRSToys.h"
 
 FARPROC p_Direct3DShaderValidatorCreate9 = NULL;
@@ -19,11 +20,23 @@ FARPROC p_Direct3DCreate9 = NULL;
 FARPROC p_Direct3DCreate9Ex = NULL;
 
 HMODULE orig_module = NULL;
+HMODULE this_module = NULL;
 
-BOOL APIENTRY DllMain(HMODULE this_module, DWORD ul_reason_for_call, LPVOID) {
+int (*ogSokuMain)(int a, int b, int c, int d);
+
+int SokuMain(int a, int b, int c, int d)
+{
+	Hook(this_module);
+	return ogSokuMain(a, b, c, d);
+}
+
+BOOL APIENTRY DllMain(HMODULE this_module_, DWORD ul_reason_for_call, LPVOID) {
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH: {
 		wchar_t sys_dir[MAX_PATH];
+		DWORD old;
+
+		this_module = this_module_;
 		if (FALSE == ::GetSystemDirectoryW(sys_dir, MAX_PATH)) {
 			return FALSE;
 		}
@@ -48,9 +61,9 @@ BOOL APIENTRY DllMain(HMODULE this_module, DWORD ul_reason_for_call, LPVOID) {
 		p_Direct3DCreate9 = ::GetProcAddress(orig_module, "Direct3DCreate9");
 		p_Direct3DCreate9Ex = ::GetProcAddress(orig_module, "Direct3DCreate9Ex");
 
-		if (!Hook(this_module)) {
-			return FALSE;
-		}
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+		ogSokuMain = SokuLib::TamperNearJmpOpr(0x821844, SokuMain);
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 		break;
 	}
 	case DLL_THREAD_ATTACH:
