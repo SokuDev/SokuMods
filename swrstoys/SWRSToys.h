@@ -5,6 +5,7 @@
 bool Hook(HMODULE this_module);
 void saveSettings();
 void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
+std::wstring getLastError(int err = GetLastError());
 
 extern SokuLib::SWRFont font;
 extern HMODULE myModule;
