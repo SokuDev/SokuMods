@@ -104,7 +104,33 @@ BOOL APIENTRY DllMain(HMODULE this_module_, DWORD ul_reason_for_call, LPVOID) {
 		}
 		wcscat(sys_dir, L"\\D3D9.DLL");
 
-		orig_module = ::LoadLibraryW(sys_dir);
+		auto ucrtbase = GetModuleHandleA("ucrtbase.dll");
+		errno_t (*putenv_s)(const char*, const char*);
+		if (ucrtbase && (putenv_s = (errno_t (*)(const char*, const char*))GetProcAddress(ucrtbase, "_putenv_s"))) {
+			// `export WINEDEBUG="-d3d,$WINEDEBUG"`
+			// to prevent wined3d from keeping printing warnings.
+			char *oldWINEDEBUG = (char*) malloc(128);
+			DWORD ret = GetEnvironmentVariable("WINEDEBUG", oldWINEDEBUG, 128);
+			if (ret == 0)
+				strcpy(oldWINEDEBUG, "");
+			else if (128 < ret) {
+				oldWINEDEBUG = (char*) realloc(oldWINEDEBUG, ret);
+				if (GetEnvironmentVariable("WINEDEBUG", oldWINEDEBUG, ret) == 0)
+					strcpy(oldWINEDEBUG, "");
+			}
+			// place "-d3d" at the beginning of %WINEDEBUG% so it will not override user's settings.
+			char *newWINEDEBUG = (char*) malloc(ret + 6);
+			strcpy(newWINEDEBUG, "-d3d,");
+			strcat(newWINEDEBUG, oldWINEDEBUG);
+			free(oldWINEDEBUG);
+			SetEnvironmentVariable("WINEDEBUG", newWINEDEBUG);
+			putenv_s("WINEDEBUG", newWINEDEBUG);
+			free(newWINEDEBUG);
+		}
+
+		orig_module = ::LoadLibraryW(L".\\d3d9_custom.dll");
+		if (orig_module == NULL)
+			orig_module = ::LoadLibraryW(sys_dir);
 		if (orig_module == NULL) {
 			return FALSE;
 		}
