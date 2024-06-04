@@ -492,20 +492,36 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	int *delay = (int *)0x8A0FF8;
 
 	if (riv.enabled) {
-		if (check_key(toggle_keys.display_boxes, 0, 0, 0)) {
-			riv.hitboxes = !riv.hitboxes;
-			riv.untech = !riv.untech;
-		} else if (check_key(toggle_keys.display_info, 0, 0, 0)) {
-			riv.show_debug = !riv.show_debug;
-		} else if (check_key(toggle_keys.display_inputs, 0, 0, 0)) {
-			bool cmdEnabled = riv.cmdp1.enabled;
-			bool recordEnabled = riv.cmdp1.record.enabled;
-			riv.cmdp1.enabled = !recordEnabled;
-			riv.cmdp1.record.enabled = cmdEnabled;
-			riv.cmdp2.enabled = riv.cmdp1.enabled;
-			riv.cmdp2.record.enabled = riv.cmdp1.record.enabled;
-		} else if (check_key(toggle_keys.decelerate, 0, 0, 0)) {
-			if (s_slowdown_method) {
+		static bool old_display_boxes = false;
+		static bool old_display_info = false;
+		static bool old_display_inputs = false;
+		static bool old_decelerate = false;
+		static bool old_accelerate = false;
+		static bool old_framestop = false;
+		static bool old_stop = false;
+		if (check_key(toggle_keys.display_boxes, 0, 0, 0) || (old_display_boxes = false)) {
+			if (!old_display_boxes) {
+				riv.hitboxes = !riv.hitboxes;
+				riv.untech = !riv.untech;
+			}
+			old_display_boxes = true;
+		} else if (check_key(toggle_keys.display_info, 0, 0, 0) || (old_display_info = false)) {
+			if (!old_display_info)
+				riv.show_debug = !riv.show_debug;
+			old_display_info = true;
+		} else if (check_key(toggle_keys.display_inputs, 0, 0, 0) || (old_display_inputs = false)) {
+			if (!old_display_inputs) {
+				bool cmdEnabled = riv.cmdp1.enabled;
+				bool recordEnabled = riv.cmdp1.record.enabled;
+				riv.cmdp1.enabled = !recordEnabled;
+				riv.cmdp1.record.enabled = cmdEnabled;
+				riv.cmdp2.enabled = riv.cmdp1.enabled;
+				riv.cmdp2.record.enabled = riv.cmdp1.record.enabled;
+			}
+			old_display_inputs = true;
+		} else if (check_key(toggle_keys.decelerate, 0, 0, 0) || (old_decelerate = false)) {
+			if (old_decelerate) {}
+			else if (s_slowdown_method) {
 				if (riv.forwardStep > 1) {
 					riv.forwardCount = 1;
 					riv.forwardStep -= 1;
@@ -520,8 +536,10 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 					*delay = fps_steps[++fps_index];
 				}
 			}
-		} else if (check_key(toggle_keys.accelerate, 0, 0, 0)) {
-			if (s_slowdown_method) {
+			old_decelerate = true;
+		} else if (check_key(toggle_keys.accelerate, 0, 0, 0) || (old_accelerate = false)) {
+			if (old_accelerate) {}
+			else if (s_slowdown_method) {
 				if (riv.forwardCount > 1) {
 					riv.forwardCount -= 1;
 					riv.forwardStep = 1;
@@ -536,8 +554,10 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 					*delay = fps_steps[--fps_index];
 				}
 			}
-		} else if (check_key(toggle_keys.stop, 0, 0, 0)) {
-			if (!riv.paused) {
+			old_accelerate = true;
+		} else if (check_key(toggle_keys.stop, 0, 0, 0) || (old_stop = false)) {
+			if (old_stop) {}
+			else if (!riv.paused) {
 				riv.forwardCount = -1;
 				riv.forwardStep = 0;
 				riv.forwardIndex = 0;
@@ -548,10 +568,14 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 				riv.forwardIndex = 0;
 				riv.paused = false;
 			}
-		} else if (check_key(toggle_keys.framestep, 0, 0, 0)) {
-			if (riv.paused) {
+			old_stop = true;
+		} else if (check_key(toggle_keys.framestep, 0, 0, 0) || (old_framestop = false)) {
+			if (old_framestop) {}
+			else if (riv.paused) {
 				process_frame(This, riv);
+				old_framestop = true;
 			}
+			old_framestop = false;
 		}
 
 		riv.forwardIndex += riv.forwardStep;
