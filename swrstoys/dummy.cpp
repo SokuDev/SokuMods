@@ -25,7 +25,8 @@ FARPROC p_Direct3DCreate9Ex = NULL;
 HMODULE orig_module = NULL;
 HMODULE this_module = NULL;
 
-int (*ogSecurityInitCookie)();
+typedef int (*PIFV)(void);
+int (*ogInittermE)(PIFV* start, PIFV* end);
 int (*ogSokuMain)(int a, int b, int c, int d);
 
 LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
@@ -82,14 +83,18 @@ LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
 
 int SokuMain(int a, int b, int c, int d)
 {
-	SetUnhandledExceptionFilter(UnhandledExFilter);
 	return ogSokuMain(a, b, c, d);
 }
 
-int mySecurityInitCookie()
+int myInittermE(PIFV* start, PIFV* end)
 {
-	Hook(this_module);
-	return ogSecurityInitCookie();
+	int ret = ogInittermE(start, end);
+	if (ret == 0) {
+		// if initialize successfully
+		SetUnhandledExceptionFilter(UnhandledExFilter);
+		Hook(this_module);
+	}
+	return ret;
 }
 
 BOOL APIENTRY DllMain(HMODULE this_module_, DWORD ul_reason_for_call, LPVOID) {
@@ -125,7 +130,7 @@ BOOL APIENTRY DllMain(HMODULE this_module_, DWORD ul_reason_for_call, LPVOID) {
 
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 		ogSokuMain = SokuLib::TamperNearJmpOpr(0x821844, SokuMain);
-		ogSecurityInitCookie = SokuLib::TamperNearJmpOpr(0x8218b2, mySecurityInitCookie);
+		ogInittermE = SokuLib::TamperNearJmpOpr(0x8240b3, myInittermE);
 		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 		break;
 	}
