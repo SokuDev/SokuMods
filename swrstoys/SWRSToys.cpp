@@ -470,7 +470,7 @@ void importModulesFromFolder(byte hash[16], HMODULE this_module, const std::wstr
 				modules.emplace_back(module_path.c_str(), hash, this_module);
 		}
 	} while (FindNextFileW(ret, &findData));
-	FindClose(&findData);
+	FindClose(ret);
 }
 
 void loadModuleList(byte hash[16], HMODULE this_module)
