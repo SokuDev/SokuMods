@@ -1,14 +1,19 @@
 #include <windows.h>
-#include <detours.h>
 #include <string>
 #include <Shlwapi.h>
 
 #define SWRS_USES_HASH
 #include <swrs.h>
 
+#include <UnionCast.hpp>
+#include <Tamper.hpp>
+
 using namespace std;
 
 #define IS_KEY_DOWN(lParam) ((lParam & ((DWORD)1<<30)) == 0 && (lParam & ((DWORD)1<<31)) == 0)
+
+DWORD CreateWindowExACallLoc = 0x007fb713+2;
+DWORD SendMessagePtrLoc = 0x00857248;
 
 HMODULE module;
 char profilePath[1024 + MAX_PATH];
@@ -42,8 +47,7 @@ static const int baseHeight = 480;
 
 RECT rect;
 
-void(WINAPI *oldExitProcess)(UINT uExitCode) = ExitProcess;
-void __stdcall myExitProcess(UINT uExitCode) {
+void myExitProcess() {
 	if (sizeEnabled && !fullscreen && (rect.left != 0 || rect.top != 0)) {
 		char buff[16];
 		wsprintf(buff, "%d", (rect.right - rect.left - borderX));
@@ -58,7 +62,6 @@ void __stdcall myExitProcess(UINT uExitCode) {
 		wsprintf(buff, "%d", rect.top);
 		WritePrivateProfileString("Position", "Y", buff, profilePath);
 	}
-	return oldExitProcess(uExitCode);
 }
 
 void toggleFullscreen() {
@@ -233,10 +236,6 @@ void WINAPI hotkeyThread()
 
 HWND (__stdcall *oldCreateWindowExA)(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) = CreateWindowExA;
 HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
-	if(strcmp(lpClassName, "th123_110a")) {
-		return oldCreateWindowExA(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-	}
-
 	windowed_lStyle = dwStyle;
 	fullscreen_lStyle = windowed_lStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
 	windowed_lExStyle = dwExStyle;
@@ -277,15 +276,11 @@ HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpW
 	
 	return window;
 }
+// Location pointing to myCreateWindowExA
+HWND (__stdcall *myCreateWindowExAPtr)(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) = myCreateWindowExA;
 
-extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
-	return ::memcmp(TARGET_HASH, hash, sizeof TARGET_HASH) == 0;
-}
-
-extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
-	module = hMyModule;
-	
-	GetModuleFileName(hMyModule, profilePath, 1024);
+void loadConfig() {
+	GetModuleFileName(module, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
 	PathAppend(profilePath, "WindowResizer.ini");
 	sizeEnabled = GetPrivateProfileIntA("Size", "Enabled", 0, profilePath) != 0;
@@ -299,22 +294,26 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		posY = GetPrivateProfileIntA("Position", "Y", 0, profilePath);
 	}
 	barsEnabled = GetPrivateProfileIntA("Bars", "Enabled", 1, profilePath) != 0;
-	
-	DWORD _;
+}
+
+void setupHooks() {
+	DWORD dwOldProtect;
 	// disable resetting internal fullscreen/window state & setting to the current window state
-	VirtualProtect((void *)0x00445817, 3, PAGE_EXECUTE_READWRITE, &_);
+	VirtualProtect((void *)0x00445817, 3, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	*((char*)0x00445817) = 0x90;
 	*((char*)0x00445818) = 0x90;
 	*((char*)0x00445819) = 0x90;
-	VirtualProtect((void *)0x004405BC, 5, PAGE_EXECUTE_READWRITE, &_);
+	VirtualProtect((void *)0x00445817, 3, dwOldProtect, &dwOldProtect);
+	VirtualProtect((void *)0x004405BC, 5, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	*((char*)0x004405BC) = 0x90;
 	*((char*)0x004405BD) = 0x90;
 	*((char*)0x004405BE) = 0x90;
 	*((char*)0x004405BF) = 0x90;
 	*((char*)0x004405C0) = 0x90;
+	VirtualProtect((void *)0x004405BC, 5, dwOldProtect, &dwOldProtect);
 	
 	// hardcode baseWidth & baseHeight values for directx viewport init instead of getting the window size
-	VirtualProtect((void *)0x00414F8C, 16, PAGE_EXECUTE_READWRITE, &_);
+	VirtualProtect((void *)0x00414F8C, 16, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	*((char*)0x00414F8C) = 0xBA;
 	*((int*)0x00414F8D) = baseWidth;
 	*((char*)0x00414F91) = 0x90;
@@ -325,13 +324,33 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	*((char*)0x00414F99) = 0x90;
 	*((char*)0x00414F9A) = 0x90;
 	*((char*)0x00414F9B) = 0x90;
+	VirtualProtect((void *)0x00414F8C, 16, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach((void **)&oldExitProcess, (void *)myExitProcess);
-	DetourAttach((void **)&oldSendMessageA, (void *)mySendMessageA);
-	DetourAttach((void **)&oldCreateWindowExA, (void *)myCreateWindowExA);
-	DetourTransactionCommit();
+	// hook the one CreateWindowExA for the main window
+	// it's call [addr] so we have to make a new memory location to store the pointer to our version of the function
+	VirtualProtect((LPVOID)(CreateWindowExACallLoc), 4, PAGE_EXECUTE_READWRITE, &dwOldProtect);
+	oldCreateWindowExA = *SokuLib::TamperDword(CreateWindowExACallLoc, &myCreateWindowExAPtr);
+	VirtualProtect((LPVOID)(CreateWindowExACallLoc), 4, dwOldProtect, &dwOldProtect);
+	
+	// hook the SendMessageA, this is used in multiple places so we're hooking all of them
+	// it's also call [addr] but we just change the value at addr
+	VirtualProtect((LPVOID)(SendMessagePtrLoc), 4, PAGE_EXECUTE_READWRITE, &dwOldProtect);
+	oldSendMessageA = SokuLib::TamperDword(SendMessagePtrLoc, mySendMessageA);
+	VirtualProtect((LPVOID)(SendMessagePtrLoc), 4, dwOldProtect, &dwOldProtect);
+	
+	atexit(myExitProcess);
+}
+
+extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
+	return ::memcmp(TARGET_HASH, hash, sizeof TARGET_HASH) == 0;
+}
+
+extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
+	module = hMyModule;
+	
+	loadConfig();
+	setupHooks();
+	
 	return TRUE;
 }
 

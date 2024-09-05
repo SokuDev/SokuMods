@@ -620,7 +620,8 @@ target_link_libraries(UPnPNat iphlpapi ole32 oleaut32)
 module(WindowResizer Default)
 target_sources(WindowResizer PRIVATE
         modules/WindowResizer/WindowResizer.cpp)
-target_link_libraries(WindowResizer detours)
+# Added for Tamper.hpp
+target_include_directories(WindowResizer PRIVATE SokuLib/src)
 
 # binary modules
 
