@@ -19,6 +19,8 @@ HMODULE module;
 char profilePath[1024 + MAX_PATH];
 
 bool fullscreen;
+bool sticky = false;
+char stickyKey = 'P';
 
 HWND windowBars;
 HWND window;
@@ -78,7 +80,8 @@ void toggleFullscreen() {
 
 		SetWindowLong(window, GWL_STYLE, windowed_lStyle);
 		SetWindowLong(window, GWL_EXSTYLE, windowed_lExStyle);
-		SetWindowPos(window, HWND_NOTOPMOST, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_FRAMECHANGED|SWP_SHOWWINDOW);
+		HWND topmost = sticky? HWND_TOPMOST : HWND_NOTOPMOST;
+		SetWindowPos(window, topmost, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_FRAMECHANGED|SWP_SHOWWINDOW);
 	}
 	else
 	{
@@ -113,12 +116,61 @@ void toggleFullscreen() {
 	*((char*)0x8998B0) = fullscreen;
 }
 
+void toggleSticky() {
+	if(!window) {
+		// window not loaded yet, should not happen, but lets not crash.
+		return;
+	}
+	if(fullscreen) {
+		return;
+	}
+	
+	sticky = !sticky;
+	
+	if(sticky) {
+		windowed_lExStyle |= WS_EX_TOPMOST;
+		SetWindowPos(window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	}
+	else {
+		windowed_lExStyle &= ~WS_EX_TOPMOST;
+		SetWindowPos(window, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	}
+	SetWindowLongPtr(window, GWL_EXSTYLE, windowed_lExStyle);
+}
+
+void toggleSize(int multiplier) {
+	if(!window) {
+		// window not loaded yet, should not happen, but lets not crash.
+		return;
+	}
+	if(fullscreen) {
+		return;
+	}
+	
+	sizeWidth = baseWidth * multiplier;
+	sizeHeight = MulDiv(sizeWidth, 3, 4);
+	
+	int fullWidth = sizeWidth + borderX;
+	int fullHeight = sizeHeight + borderY;
+	SetWindowPos(window, 0, 0, 0, fullWidth, fullHeight, SWP_NOMOVE | SWP_NOZORDER);
+	GetWindowRect(window, &rect);
+}
+
 LRESULT CALLBACK keyboardHook(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	if (nCode == HC_ACTION)
 	{
 		if (wParam == VK_RETURN && IS_KEY_DOWN(lParam) && GetAsyncKeyState(VK_MENU)) {
 			toggleFullscreen();
+			return 1;
+		}
+		if (wParam == stickyKey && IS_KEY_DOWN(lParam) && GetAsyncKeyState(VK_MENU)) {
+			toggleSticky();
+			return 1;
+		}
+		if (wParam >= '1' && wParam <= '6' && IS_KEY_DOWN(lParam) && GetAsyncKeyState(VK_MENU)) {
+			int multiplier = wParam - '0';
+			toggleSize(multiplier);
 			return 1;
 		}
 	}
@@ -220,6 +272,11 @@ void createBars() {
 	SetWindowPos(windowBars, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	EnableWindow(windowBars, false);
 	ShowWindow(windowBars, SW_HIDE);
+	
+	// ugly fix for Soku going under the previous window despite having focus.
+	// seems to be related to the black bars.
+	// they get focus then transfer it to the previous window instead of to Soku?
+	SetForegroundWindow(window);
 }
 
 void WINAPI hotkeyThread()
@@ -236,7 +293,7 @@ void WINAPI hotkeyThread()
 
 HWND (__stdcall *oldCreateWindowExA)(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) = CreateWindowExA;
 HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
-	windowed_lStyle = dwStyle;
+	windowed_lStyle = dwStyle | WS_GROUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
 	fullscreen_lStyle = windowed_lStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
 	windowed_lExStyle = dwExStyle;
 	fullscreen_lExStyle = windowed_lExStyle & ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
@@ -270,6 +327,8 @@ HWND __stdcall myCreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpW
 	HANDLE thread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)hotkeyThread, NULL, NULL, NULL);
 	CloseHandle(thread);
 	
+	SetForegroundWindow(window);
+	
 	if(barsEnabled) {
 		createBars();
 	}
@@ -283,17 +342,21 @@ void loadConfig() {
 	GetModuleFileName(module, profilePath, 1024);
 	PathRemoveFileSpec(profilePath);
 	PathAppend(profilePath, "WindowResizer.ini");
+	
 	sizeEnabled = GetPrivateProfileIntA("Size", "Enabled", 0, profilePath) != 0;
 	if (sizeEnabled) {
 		sizeWidth = GetPrivateProfileIntA("Size", "Width", baseWidth, profilePath);
 		sizeHeight = ::MulDiv(sizeWidth, 3, 4);
 	}
+	
 	posEnabled = GetPrivateProfileIntA("Position", "Enabled", 0, profilePath) != 0;
 	if (posEnabled) {
 		posX = GetPrivateProfileIntA("Position", "X", 0, profilePath);
 		posY = GetPrivateProfileIntA("Position", "Y", 0, profilePath);
 	}
 	barsEnabled = GetPrivateProfileIntA("Bars", "Enabled", 1, profilePath) != 0;
+	
+	stickyKey = GetPrivateProfileIntA("Sticky", "Keybind", 'P', profilePath);
 }
 
 void setupHooks() {
@@ -350,6 +413,14 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	
 	loadConfig();
 	setupHooks();
+	
+	FILE *_;
+
+	#ifndef NDEBUG 
+	AllocConsole();
+	freopen_s(&_, "CONOUT$", "w", stdout);
+	freopen_s(&_, "CONOUT$", "w", stderr);
+	#endif
 	
 	return TRUE;
 }
