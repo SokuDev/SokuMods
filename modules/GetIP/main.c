@@ -62,6 +62,7 @@ void get_ip(wchar_t *url, wchar_t *buf, int size) {
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+	curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 	if (!curl_easy_perform(curl) && data.len && *data.ptr) {
 		MultiByteToWideChar(CP_UTF8, 0, data.ptr, -1, buf, size);
 	}
