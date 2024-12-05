@@ -380,6 +380,11 @@ module(DPadFix Default)
 target_sources(DPadFix PRIVATE modules/DPadFix/DPadFix.cpp)
 target_link_libraries(DPadFix dinput8 detours)
 
+module(ChordMacro Default)
+target_sources(ChordMacro PRIVATE modules/ChordMacro/ChordMacro.cpp)
+target_include_directories(ChordMacro PRIVATE include include/directx)
+target_link_libraries(ChordMacro dinput8 detours SokuLib shlwapi user32 ws2_32)
+
 module(EasyDecks Default)
 target_sources(EasyDecks PRIVATE
         modules/EasyDecks/EasyDecks.cpp)

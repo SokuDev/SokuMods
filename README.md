@@ -250,6 +250,11 @@ This mod merges the previous functionality of WindowResizer, WindowedFullscreen,
 
 *This module is configured in-game in Practice mode.*
 
+### ChordMacro
+
+Allows the player to perform sequence inputs (i.e. "haiduken"-style special moves that normally require special key stroke sequences such as 236B, 621C)
+by means of a simpler, more accessible input. This is intended for players who prefer Smash Bros. style gameplay, or for players with disabilities that make sequence inputs difficult.
+
 ## Making a module
 
 - Make a new folder in `modules/`. You can copy an existing module and adapt it.
