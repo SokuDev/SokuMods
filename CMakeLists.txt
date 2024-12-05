@@ -486,18 +486,6 @@ set_target_properties(PaletteConverter PROPERTIES
 install(TARGETS PaletteConverter RUNTIME DESTINATION "SWRSToys/modules/PaletteTrueColors")
 install(TARGETS PaletteConverter RUNTIME DESTINATION "SokuEngine/modules/PaletteTrueColors")
 
-module(PunishDisplay)
-target_sources(PunishDisplay PRIVATE modules/PunishDisplay/main.cpp)
-target_link_libraries(
-        PunishDisplay
-        SokuLib
-        shlwapi
-        ws2_32
-        user32
-        "${CMAKE_SOURCE_DIR}/lib/d3d9.lib"
-        "${CMAKE_SOURCE_DIR}/lib/d3dx9.lib"
-)
-
 module(ReDelay Default)
 target_sources(ReDelay PRIVATE
         modules/ReDelay/ReDelay.cpp)
