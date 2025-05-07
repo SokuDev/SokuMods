@@ -133,6 +133,7 @@ public:
 		for (auto e = _textures.head(); e; e = e->next) {
 			DrawSprite(e->data, _position.x + _offset.x, _position.y + _offset.y + font.Height * i++, 1024.0f, font.Height + 18.0f);
 		}
+		ClearTextures();
 	}
 
 	void LoadSettings(LPCSTR profilePath, LPCSTR sectionName, int defaultX, int defaultY, const SWRFONTDESC &font) {
