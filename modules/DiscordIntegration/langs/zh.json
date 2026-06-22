@@ -1,0 +1,445 @@
+{
+    "submenus": [
+        "标题界面",
+        "网络对战界面",
+        "选择 Replay 中",
+        "聆听音乐中",
+        "选择符卡挑战中",
+        "更改机签中",
+        "更改设置中",
+        "构筑卡组中",
+        "更改键位中",
+        "选择试炼中"
+    ],
+    "stages": [
+        "博丽神社",
+        "魔法森林",
+        "玄武涧",
+        "妖怪之山",
+        "玄云海",
+        "有顶天",
+        "博丽神社",
+        "雾雨魔法店",
+        "红魔馆钟楼",
+        "人偶森林",
+        "红魔馆大图书馆",
+        "冥界",
+        "红魔馆大厅",
+        "白玉楼的雪庭",
+        "迷途竹林",
+        "雾之湖的湖边",
+        "守矢神社",
+        "间歇泉地下中心入口",
+        "间歇泉地下中心通道",
+        "核聚变炉心"
+    ],
+    "characters": [
+        {
+            "short_name": "灵梦",
+            "full_name": "博丽灵梦"
+        },
+        {
+            "short_name": "魔理沙",
+            "full_name": "雾雨魔理沙"
+        },
+        {
+            "short_name": "咲夜",
+            "full_name": "十六夜咲夜"
+        },
+        {
+            "short_name": "爱丽丝",
+            "full_name": "爱丽丝·玛格特洛依德"
+        },
+        {
+            "short_name": "帕秋莉",
+            "full_name": "帕秋莉·诺蕾姬"
+        },
+        {
+            "short_name": "妖梦",
+            "full_name": "魂魄妖梦"
+        },
+        {
+            "short_name": "蕾米莉亚",
+            "full_name": "蕾米莉亚·斯卡蕾特"
+        },
+        {
+            "short_name": "幽幽子",
+            "full_name": "西行寺幽幽子"
+        },
+        {
+            "short_name": "紫",
+            "full_name": "八云紫"
+        },
+        {
+            "short_name": "萃香",
+            "full_name": "伊吹萃香"
+        },
+        {
+            "short_name": "铃仙",
+            "full_name": "铃仙·优昙华院·因幡"
+        },
+        {
+            "short_name": "文",
+            "full_name": "射命丸文"
+        },
+        {
+            "short_name": "小町",
+            "full_name": "小野塚小町"
+        },
+        {
+            "short_name": "衣玖",
+            "full_name": "永江衣玖"
+        },
+        {
+            "short_name": "天子",
+            "full_name": "比那名居天子"
+        },
+        {
+            "short_name": "早苗",
+            "full_name": "东风谷早苗"
+        },
+        {
+            "short_name": "琪露诺",
+            "full_name": "琪露诺"
+        },
+        {
+            "short_name": "美铃",
+            "full_name": "红美铃"
+        },
+        {
+            "short_name": "空",
+            "full_name": "灵乌路空"
+        },
+        {
+            "short_name": "诹访子",
+            "full_name": "洩矢诹访子"
+        },
+        {
+            "short_name": "随机",
+            "full_name": "随机选择"
+        }
+    ],
+    "logo": {
+        "title": "观看开场动画中",
+        "image": "cover",
+        "has_timer": false
+    },
+    "opening": {
+        "title": "观看开场动画中",
+        "image": "cover",
+        "has_timer": false
+    },
+    "title": {
+        "title": "主菜单",
+        "description": "{{submenu}}",
+        "image": "cover",
+        "has_timer": false
+    },
+    "select_vscomputer": {
+        "title": "与电脑对战中（{{myProfileName}}）",
+        "description": "选择角色……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_vscomputer": {
+        "title": "与电脑对战中（{{myProfileName}}）",
+        "description": "对战{{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_vscomputer": {
+        "title": "与电脑对战中（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_story": {
+        "title": "游玩故事模式中（{{myProfileName}}）",
+        "description": "选择路线中……",
+        "image": "{{myChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "battle_story": {
+        "title": "游玩故事模式中（{{myProfileName}}）",
+        "description": "对战{{opChrFullName}}中",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_story": {
+        "title": "游玩故事模式中（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_arcade": {
+        "title": "游玩街机模式中（{{myProfileName}}）",
+        "description": "选择路线中……",
+        "image": "{{myChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "battle_arcade": {
+        "title": "游玩街机模式中（{{myProfileName}}）",
+        "description": "对战{{opChrFullName}}中",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_arcade": {
+        "title": "游玩街机模式中（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_timetrial": {
+        "title": "游玩符卡挑战中（{{myProfileName}}）",
+        "description": "对战{{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_timetrial": {
+        "title": "游玩符卡挑战中（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_trialmode": {
+        "title": "游玩试炼中（{{myProfileName}}）｜对战{{opChrFullName}}",
+        "description": "{{trialPack}}｜{{trialName}}（第 {{trialAttempt}} 次尝试）",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "loading_trialmode": {
+        "title": "游玩试炼中（{{myProfileName}}）",
+        "description": "{{trialPack}}｜{{trialName}}（加载中……）",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": false
+    },
+    "battle_trialeditor": {
+        "title": "编辑试炼中（{{myProfileName}}）｜对战{{opChrFullName}}",
+        "description": "{{trialPack}}｜{{trialName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "loading_trialeditor": {
+        "title": "编辑试炼中（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_vsplayer": {
+        "title": "游玩对战模式中（离线）（{{myProfileName}}）",
+        "description": "选择角色……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_vsplayer": {
+        "title": "游玩对战模式中（离线）（{{myProfileName}}）",
+        "description": "对战 {{opProfileName}} 的{{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_vsplayer": {
+        "title": "游玩对战模式中（离线）（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_practice": {
+        "title": "练习模式（{{myProfileName}}）",
+        "description": "选择角色……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_practice": {
+        "title": "练习模式（{{myProfileName}}）",
+        "description": "对战{{opChrFullName}}",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_practice": {
+        "title": "练习模式（{{myProfileName}}）",
+        "description": "加载中……",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "select_vsnetwork": {
+        "title": "游玩对战模式中（在线）（{{myProfileName}}）",
+        "description": "选择角色……（{{myWins}}-{{opWins}}，胜率 {{myWr}}）",
+        "image": "{{myChrImg}}",
+        "small_image": "{{opChrImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{opChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_vsnetwork": {
+        "title": "游玩对战模式中（在线）（{{myProfileName}}）",
+        "description": "对战 {{opProfileName}} 的{{opChrFullName}}（{{myWins}}-{{opWins}}，胜率 {{myWr}}）",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_vsnetwork": {
+        "title": "游玩对战模式中（在线）（{{myProfileName}}）",
+        "description": "加载中……（{{myWins}}-{{opWins}}，胜率 {{myWr}}）",
+        "image": "{{myChrImg}}",
+        "small_image": "{{stageImg}}",
+        "image_text": "{{myChrFullName}}",
+        "small_image_text": "{{stageName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_spectator": {
+        "title": "观战中（{{lProfileName}} vs {{rProfileName}}）",
+        "description": "{{lChrFullName}} vs {{rChrFullName}}（{{lWins}}-{{rWins}}）",
+        "image": "{{stageImg}}",
+        "image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_spectator": {
+        "title": "观战中",
+        "description": "加载中……（{{lWins}}-{{rWins}}）",
+        "image": "{{lChrImg}}",
+        "small_image": "{{rChrImg}}",
+        "image_text": "{{lChrFullName}}",
+        "small_image_text": "{{rChrFullName}}",
+        "has_timer": false,
+        "has_set_length_timer": true
+    },
+    "battle_replay": {
+        "title": "观看 Replay 中",
+        "description": "{{lChrFullName}} vs {{rChrFullName}}",
+        "image": "{{stageImg}}",
+        "image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_replay": {
+        "title": "观看 Replay 中",
+        "description": "加载中……",
+        "image": "{{lChrImg}}",
+        "small_image": "{{rChrImg}}",
+        "image_text": "{{lChrFullName}}",
+        "small_image_text": "{{rChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "battle_story_replay": {
+        "title": "观看剧情模式 Replay 中",
+        "description": "{{lChrFullName}} vs {{rChrFullName}}",
+        "image": "{{stageImg}}",
+        "image_text": "{{stageName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "loading_story_replay": {
+        "title": "观看剧情模式 Replay 中",
+        "description": "加载中……",
+        "image": "{{lChrImg}}",
+        "small_image": "{{rChrImg}}",
+        "image_text": "{{lChrFullName}}",
+        "small_image_text": "{{rChrFullName}}",
+        "has_timer": true,
+        "has_set_length_timer": false
+    },
+    "ending": {
+        "title": "观看结束动画中……",
+        "image": "cover",
+        "has_timer": false
+    },
+    "hosting": {
+        "title": "主菜单",
+        "description": "主持中……",
+        "image": "cover",
+        "has_timer": true
+    },
+    "connecting": {
+        "title": "游玩对战模式中（在线）（{{myProfileName}}）",
+        "description": "加入房间中……",
+        "image": "cover",
+        "has_timer": true
+    }
+}
